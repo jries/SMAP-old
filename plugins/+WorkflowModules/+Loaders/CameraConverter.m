@@ -2,9 +2,9 @@ classdef CameraConverter<interfaces.WorkflowModule
     properties
         calfile='settings/CameraCalibration.xls';
         cameraSettings=struct('camId','default','port','Conventional','exposure',1,'emgain',1,'conversion',1,'offset',400,'pixsize',0.1,...
-            'roi',[],'temperature',0,'timediff',0);
+            'roi',[],'temperature',0,'timediff',0,'comments','');
         cameraSettingsStructure=struct('camId','default','port','Conventional','exposure',1,'emgain',1,'conversion',1,'offset',400,'pixsize',0.1,...
-            'roi',[],'temperature',0,'timediff',0);
+            'roi',[],'temperature',0,'timediff',0,'comments','');
         EMexcessNoise;
     end
     methods

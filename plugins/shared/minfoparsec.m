@@ -81,6 +81,7 @@ info.gain=info.preAmp;
 if isfield(info,'camId')
 info.chip=info.camId;
 end
+info.comments=getvald(minfo,'Comment','');
 % catch
 %     disp('metadata could not be parsed')
 % end
