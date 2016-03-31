@@ -41,6 +41,7 @@ end
 %make color bars
 if ~show
     imout=[];
+    sr_imagehandle=[];
     return
 end
 

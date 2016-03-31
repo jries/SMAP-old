@@ -214,6 +214,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
 %             tic
             locCopy=obj.locData; %maybe not needed
             lo=logical(obj.getPar('sr_layerson'));
+            if sum(lo)==0
+                return
+            end
             nl=obj.getPar('numberOfLayers');
             g=locCopy.isgrouped(1:nl);
             

@@ -88,7 +88,7 @@ if p.remout==0&&isfield(pos,'c')&&isfield(p,'colorfield_max')&&isfield(p,'colorf
 end     
 
 switch lower(p.rendermode.selection)
-    case 'gauss'
+    case {'gauss','other'}
         if isempty(locsh.sx)|| isempty(locsh.sy) 
             if ~isempty(locsh.s)
                 sd=locsh.s(indin);
