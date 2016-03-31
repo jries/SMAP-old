@@ -346,7 +346,8 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
            fileind=obj.indexFromID(obj.files,filenumber);
 %            p1=obj.locData.parameters;
            numlayers=obj.getPar('numberOfLayers');
-           allfields=[obj.processors.renderer.inputParameters obj.processors.drawer.inputParameters obj.processors.displayer.inputParameters];
+           allfields=[renderSMAP drawerSMAP displayerSMAP];
+%            allfields=[obj.processors.renderer.inputParameters obj.processors.drawer.inputParameters obj.processors.displayer.inputParameters];
            players=obj.getLayerParameters(1:numlayers,allfields);
            if ~iscell(players)
                players={players};
@@ -365,8 +366,8 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
                     pr.ch_filelist.Value=fileind;
                     pr.ch_filelist.selection=pr.ch_filelist.String{fileind};
 
-                    obj.processors.renderer.setParameters(pr)
-                    obj.processors.drawer.setParameters(pr);
+%                     obj.processors.renderer.setParameters(pr)
+%                     obj.processors.drawer.setParameters(pr);
                 
                 %filter filenumber
 %                     groupc=pr.groupcheck;
@@ -385,19 +386,20 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
 %                 filternew=myrmfield(filternew,'ynm');
 %                 obj.locData.setFilter(filternew,k)
                 
-                    rawimage=obj.processors.renderer.render(k);
+                    rawimage=renderSMAP(obj.locData,pr,k);
                     obj.locData.setFilter(filterold,k);
-                    layers(k).images.finalImages=obj.processors.drawer.drawImage(rawimage);
+                    layers(k).images.finalImages=drawerSMAP(rawimage,pr);
                     layers(k).images.rawimage=rawimage;
-                     obj.processors.displayer.setParameters(pr);
-                    layers(k).images.renderimages=obj.processors.displayer.displayImage(layers(k));
+%                      obj.processors.displayer.setParameters(pr);
+                    layers(k).images.renderimages=displayerSMAP(layers(k),pr);
                 end
            end
 %            pd=obj.getLayerParameters(k, obj.processors.displayer.inputParameters); 
 %            pd=copyfields(pd,p);
            
-           image=obj.processors.displayer.displayImage(layers);
+           image=displayerSMAP(layers,pr);
            image.parameters=pr;
+           image.parameters.layerparameters=players;
            image.layers=layers;
 %            axis equal
             

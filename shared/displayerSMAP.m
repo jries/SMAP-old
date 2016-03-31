@@ -92,8 +92,8 @@ end
     end
     imout.image=imfinal;
     imout.composite=compimage;
-    imout.rangex=rangexplot;
-    imout.rangey=rangeyplot;
+    imout.rangex=rangexplot/1000;
+    imout.rangey=rangeyplot/1000;
 
 end
 

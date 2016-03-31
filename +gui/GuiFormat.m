@@ -65,7 +65,7 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             %overview axes
             hrecg=obj.getPar('mainGuihandle');
             h.overviewimage=uipanel('Parent',hrecg,'Units','pixel','Position',[0 400 430 350],'Tag','OV');
-            h.ov_axes=axes('Parent',h.overviewimage,'Units','normalized','Position',[0 0 1 1]);
+            h.ov_axes=axes('Parent',h.overviewimage,'Units','normalized','Position',[0.05 0.05 .95 .95]);
             set(h.ov_axes,'NextPlot','replacechildren','PickableParts','all')
             set(h.ov_axes,'ButtonDownFcn',{@clickOnSrImage,obj})
             obj.setPar('ov_axes',h.ov_axes);
