@@ -81,6 +81,12 @@ end
 
 function camparbutton_callback(a,b,obj)
 fn=fieldnames(obj.cameraSettingsStructure);
+%remove later: only there because parameters saved with workflow don't
+%include comments
+if ~isfield(obj.cameraSettings,'comments')
+    obj.cameraSettings.comments='no ocmments';
+end
+%XXX
 for k=1:length(fn)
     fields{k}=fn{k};
     defAns{k}=num2str(obj.cameraSettings.(fn{k}));
