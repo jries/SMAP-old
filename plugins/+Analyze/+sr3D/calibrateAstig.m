@@ -1,0 +1,150 @@
+classdef calibrateAstig<interfaces.DialogProcessor
+    properties
+        zold
+    end
+    methods
+        function obj=calibrateAstig(varargin)   
+            obj@interfaces.DialogProcessor(varargin{:}) ;
+             obj.inputParameters={'cam_pixelsize_nm'};
+             obj.zold.changed=0;
+
+        end
+        function out=run(obj,p)
+            locs=obj.locData.getloc({'frame','PSFxnm','PSFynm'},'layer',1,'position','roi');
+            if ~isempty(locs.PSFynm)
+                p.fileout=obj.locData.files(1).file.name;
+                calibrateAstig3D(locs,p)         
+            else
+                error('no PSFy found')
+            end
+            out=0;
+        end
+        function pard=pardef(obj)
+            pard=pardef;
+        end
+        
+
+    end
+    methods(Static)
+    end
+end
+
+function calibrateAstig3D(locs,p)
+global zt sxf syf
+sxt=double(locs.PSFxnm)/p.cam_pixelsize_nm;syt=double(locs.PSFynm)/p.cam_pixelsize_nm;framet=double(locs.frame);
+zt=framet*p.dz/1000;
+
+B0=double(~p.B0);
+initaxis(p.resultstabgroup,'select range');
+plot(framet,sxt,'ro')
+hold on
+plot(framet,syt,'bo')
+hold off
+title('select range (two points)')
+[indi,y]=ginput(2);
+
+rangef=round(max(min(indi))):round(min(max(indi)));
+range=find(framet>=rangef(1),1,'first'):find(framet<=rangef(end),1,'last');
+
+sx=sxt(range);sy=syt(range);frame=framet(range);
+z=frame*p.dz/1000;
+
+[~,ix]=min(sx);
+[~,iy]=min(sy);
+
+midpreal=(z(ix)+z(iy))/2;
+
+indframez0=find(p.framez0<=framet,1,'first');
+midp=zt(indframez0);
+
+z=z-midp;zt=zt-midp;
+
+plot(zt,sxt,'r.')
+hold on
+plot(zt,syt,'b.')
+plot(z,sx,'ro')
+plot(z,sy,'bo')
+
+mpf=midpreal-midp;
+% parx= [d sx0 sy0 Ax Ay Bx By g mp]
+startp=[    0.3    1.0    1.0000  0   0        0         0  0.307   -mpf];
+
+fitp=lsqnonlin(@sbothfromsigmaerr,startp,[],[],[],[z z],[sx sy],B0);
+
+
+sxf=sigmafromz(fitp([1 2 4 6 8 9]),zt,B0);
+plot(zt,sxf,'k')
+fpy=fitp([1 3 5 7 8 9]);
+fpy(5)=-fpy(5);
+syf=sigmafromz(fpy,zt,B0);
+plot(zt,syf,'k')
+hold off
+axis tight
+
+
+%zpar=[sigma0x,Ax,Ay,Bx,By,gamma,d,sigma0y)
+outforfit=real(fitp([2 4 5 6 7 8 1 3]))
+button = questdlg('Is the fit good?','3D astigmatism bead calibration','Refit','Save','Cancel','Refit') ;
+switch button
+    case 'Refit'
+        calibrateAstig3D(locs,p)
+    case 'Save'
+        fn=[p.fileout(1:end-4) '_3DAcal.mat'];
+        [f,p]=uiputfile(fn);
+        if f
+            save([p f],'outforfit')
+        end
+end
+end
+function s=sigmafromz(par,z,B0)
+% global gamma
+% parx= [d sx0 Ax Bx g mp]
+s0=par(2);d=par(1);A=par(3);B=par(4)*B0;g=par(5);mp=par(6);
+
+s=s0*sqrt(1+(z-g+mp).^2/d^2+A*(z-g+mp).^3/d^3+B*(z-g+mp).^4/d^4);
+end
+
+
+function s=sbothfromsigma(par,z,B0)
+% parx= [d sx0 sy0 Ax Ay Bx By g mp]
+px=par([1 2 4 6 8 9]);
+py=par([1 3 5 7 8 9]);
+ py(5)=-py(5);
+zh=z(:,1);
+s=[sigmafromz(px,zh,B0) sigmafromz(py,zh,B0)];
+end
+
+function err=sbothfromsigmaerr(par,z,sx,B0)
+sf=sbothfromsigma(par,z,B0);
+err=sf-sx;
+
+% stderr=std(err);
+err=err./sqrt(abs(err));
+end
+
+function pard=pardef
+% pard.d3_color.object=struct('Style','checkbox','String','render in color');
+% pard.d3_color.position=[2,1];
+
+pard.text2.object=struct('String','calibrate 3D astigmatism','Style','text');
+pard.text2.position=[2,1];
+pard.text2.Width=3;
+pard.text3.object=struct('String','dz (nm)','Style','text');
+pard.text3.position=[3,2];
+% 
+pard.dz.object=struct('Style','edit','String','50'); 
+pard.dz.position=[3,3];
+
+
+pard.text4.object=struct('String','frame of Zero position','Style','text');
+pard.text4.position=[4,1];
+pard.text4.Width=3;
+
+pard.framez0.object=struct('Style','edit','String','21'); 
+pard.framez0.position=[4,3];
+
+pard.B0.object=struct('String','set B = 0','Style','checkbox','Value',0);
+pard.B0.position=[5,1];
+
+
+end

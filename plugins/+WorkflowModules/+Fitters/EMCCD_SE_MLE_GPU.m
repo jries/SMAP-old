@@ -1,0 +1,205 @@
+classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
+    properties
+        fitpar
+    end
+    methods
+        function obj=EMCCD_SE_MLE_GPU(varargin)
+            obj@interfaces.WorkflowFitter(varargin{:})
+            obj.inputChannels=1; 
+             obj.setInputChannels(1,'frame');
+        end
+        function pard=pardef(obj)
+            pard=pardef;
+        end
+        
+        function locs=fit(obj,imstack,stackinfo)
+             s=size(imstack);
+             if length(s)==2 
+                 s(3)=1;
+             end
+             if s(3)==0
+                 locs=[];
+                 return
+             end
+               
+             EMexcess=obj.fitpar.EMexcessNoise;
+           try %%for test set to 0: no fitting
+               if obj.fitpar.fitmode==3
+                    zpar=[obj.fitpar.zpar(:)];
+%                     (ii{1},data,PSFSigma,iterations,fittype,Ax,Ay,Bx,By,gamma,d,PSFy0);
+%                     [P CRLB LogL]=fitter.gaussmlev2_cuda70_newz(imstack,zpar(1),p.iterations,p.fitmode,zpar(2),zpar(3),zpar(4),zpar(5),zpar(6),zpar(7),zpar(8));
+%                     [P CRLB LogL]=fitter.GPU_MLE_Lidke_55(imstack,zpar(1),p.iterations,p.fitmode,zpar(2),zpar(3),zpar(4)*0,zpar(5)*0,zpar(6),zpar(7),zpar(8));
+%                      [P CRLB LogL]=fitter.GPUMLESINGEMITTER(imstack,zpar(1),p.iterations,p.fitmode,zpar(2),zpar(3),zpar(4)*0,zpar(5)*0,zpar(6),zpar(7),zpar(8));
+                    [P CRLB LogL]=gaussmlev2_cuda50(imstack/EMexcess,zpar(1),obj.fitpar.iterations,obj.fitpar.fitmode,zpar(2),zpar(3),zpar(4),zpar(5),zpar(6),zpar(7),zpar(8));
+               else
+                   [P CRLB LogL]=gaussmlev2_cuda50(imstack/EMexcess,obj.fitpar.PSFx0,obj.fitpar.iterations,obj.fitpar.fitmode); 
+%                     [P CRLB LogL]=fitter.gaussmlev2_cuda70_newz(imstack,p.PSFx0,p.iterations,p.fitmode);  
+%                      [P CRLB LogL]=fitter.GPU_MLE_Lidke_55(imstack,p.PSFx0,p.iterations,p.fitmode);  
+               end
+           catch
+               disp('gaussmlev2_cuda50 did not work')
+               P=zeros(s(3),15);LogL=zeros(s(3),1);CRLB=P;
+           end
+           
+           v1=ones(s(3),1,'single');
+           
+           dn=ceil((s(1)-1)/2)*v1;
+           
+            shiftx=0;%-0.5; %deviation from ground truth
+             shifty=0;%-0.5;
+             posx=stackinfo.x+shiftx;
+             posy=stackinfo.y+shifty;
+%            posx=stackinfo.x;
+%            posy=stackinfo.y;
+           frame=stackinfo.frame;
+           locs.xpix=P(:,2)-dn+posx;
+           locs.ypix=P(:,1)-dn+posy;
+           locs.phot=P(:,3)*EMexcess;
+           locs.bg=P(:,4)*EMexcess;
+           locs.frame=frame;
+           
+           locs.xerrpix=sqrt(CRLB(:,2));
+           locs.yerrpix=sqrt(CRLB(:,1));
+           locs.photerr=sqrt(CRLB(:,3))*EMexcess;
+           locs.bgerr=sqrt(CRLB(:,4))*EMexcess;
+           locs.logLikelihood=LogL;
+           
+           locs.peakfindx=posx;
+           locs.peakfindy=posy;
+
+            switch obj.fitpar.fitmode
+                case 1 %sx not fitted
+                    sx=obj.fitpar.PSFx0*v1;
+                    locs.PSFxpix=0*locs.xpix+sx;
+                    locs.PSFypix=locs.PSFxpix;
+                case 2 % sx free
+                    locs.PSFxpix=P(:,5);
+                    locs.PSFxerr=sqrt(CRLB(:,5));
+%                     sx=locs.PSFx;
+                    locs.PSFypix=locs.PSFxpix;
+                case 3
+                    locs.znm=(P(:,5)+obj.fitpar.objPos*v1)*1000*obj.fitpar.refractive_index_mismatch;
+                    locs.zerr=sqrt(CRLB(:,5))*1000*obj.fitpar.refractive_index_mismatch;
+                    [locs.PSFxpix,locs.PSFypix]=zpar2sigma(locs.znm/1000,zpar);
+                    
+
+                case 4  %sx,sy
+                    
+                    locs.PSFxpix=P(:,5);
+                    locs.PSFxerr=sqrt(CRLB(:,5));
+                    locs.PSFypix=P(:,6);
+                    locs.PSFyerr=sqrt(CRLB(:,6));  
+%                     sx=locs.PSFx;
+            end
+            locs.locpthompson=sqrt((locs.PSFxpix.*locs.PSFypix+1/12*v1)./( locs.phot/EMexcess)+8*pi*(locs.PSFxpix.*locs.PSFypix).^2.* locs.bg./( locs.phot/EMexcess).^2);
+            
+        end
+%         function makeGui(obj)
+%             makeGui@recgui.WorkflowModule(obj);
+%         end
+        function initGui(obj)
+            initGui@interfaces.WorkflowFitter(obj);
+            obj.guihandles.fitmode.Callback={@fitmode_callback,obj};
+            fitmode_callback(0,0,obj)
+            obj.guihandles.loadcal.Callback={@loadcall_callback,obj};
+
+        end
+        function prerun(obj,p)
+            prerun@interfaces.WorkflowFitter(obj);
+            obj.fitpar=getfitpar(obj);         
+        end
+        
+            
+    end
+end
+
+function loadcall_callback(a,b,obj)
+p=obj.getAllParameters;
+[f,p]=uigetfile(p.cal_3Dfile);
+if f
+    obj.setGuiParameters(struct('cal_3Dfile',[p f]));
+end
+end
+
+function fitpar=getfitpar(obj)
+p=obj.getAllParameters;
+fitpar.iterations=p.iterations;
+fitpar.fitmode=p.fitmode.Value;
+if fitpar.fitmode==3
+    calfile=p.cal_3Dfile;
+    cal=load(calfile);
+    if p.useObjPos
+        
+        disp('obj. position not implemented yet')
+    else
+        fitpar.objPos=p.objPos;
+        fitpar.zpar=cal.outforfit;
+        fitpar.refractive_index_mismatch=p.refractive_index_mismatch;
+    end
+    
+else
+    fitpar.PSFx0=p.PSFx0;
+end
+fitpar.EMexcessNoise=p.EMexcessNoise;
+end
+
+function fitmode_callback(a,b,obj)
+p=obj.getGuiParameters;
+fitmode=p.fitmode.Value;
+switch fitmode
+    case 3
+        ton={'loadcal','cal_3Dfile','useObjPos','objPos','trefractive_index_mismatch','refractive_index_mismatch'};
+        toff={'PSFx0','tPSFx0'};
+    otherwise
+        toff={'loadcal','cal_3Dfile','useObjPos','objPos','trefractive_index_mismatch','refractive_index_mismatch'};
+        ton={'PSFx0','tPSFx0'};
+end
+
+for k=1:length(ton)
+    obj.guihandles.(ton{k}).Visible='on';
+end
+for k=1:length(toff)
+    obj.guihandles.(toff{k}).Visible='off';
+end
+end
+
+function pard=pardef
+pard.fitmode.object=struct('Style','popupmenu','String','PSF fix|PSF free|3D z|ellipt: PSFx PSFy','Value',2);
+pard.fitmode.position=[1,1];
+pard.fitmode.Width=2;
+
+
+pard.text.object=struct('Style','text','String','Iterations');
+pard.text.position=[1,3];
+pard.iterations.object=struct('Style','edit','String','50');
+pard.iterations.position=[1,4];
+
+pard.tPSFx0.object=struct('Style','text','String','PSFx start (pix)');
+pard.tPSFx0.position=[2,1];
+pard.tPSFx0.Width=1.25;
+pard.PSFx0.object=struct('Style','edit','String','1');
+pard.PSFx0.position=[2,2.25];
+pard.PSFx0.Width=0.75;
+
+
+pard.loadcal.object=struct('Style','pushbutton','String','Load 3D cal');
+pard.loadcal.position=[3,1];
+pard.cal_3Dfile.object=struct('Style','edit','String','settings/cal_3DAcal.mat');
+pard.cal_3Dfile.position=[3,2];
+pard.cal_3Dfile.Width=3;
+
+pard.useObjPos.object=struct('Style','checkbox','String','Use objective position:');
+pard.useObjPos.position=[4,1];
+pard.useObjPos.Width=3;
+pard.objPos.object=struct('Style','edit','String','0');
+pard.objPos.position=[4,4];
+
+pard.trefractive_index_mismatch.object=struct('Style','text','String','Refractive Index mismatch factor:');
+pard.trefractive_index_mismatch.position=[5,1];
+pard.trefractive_index_mismatch.Width=3;
+pard.refractive_index_mismatch.object=struct('Style','edit','String','.8');
+pard.refractive_index_mismatch.position=[5,4];
+% pard.fitterPanel.object=struct('Style','uipanel','String','parameters');
+% pard.fitterPanel.position=[4,2];
+% pard.fitterPanel.Height=4;
+end

@@ -1,0 +1,389 @@
+classdef GuiParameterInterface<interfaces.ParameterInterface
+    %provides functionality for global parameter handling related to GUI
+    %parameters such as synchronization
+    properties
+       syncParameters %cell array of {field, handle of uicontrol, syncmode ='String|Value|otherproperty'}. Set in pardef.
+      
+    end
+    methods
+        function addSynchronization(obj,field,handle,syncmode,changecallback)
+            %add synchronization to global parameters
+            %addSynchronization(parametername,handle to synchronize to,syncmode,changecallback)
+            %syncmode='String|Value|otherproperty': what to synchronize
+            %changecallback: function handle to function which is called
+            %when parameter is changed. This is similar to events and
+            %listeners
+            if nargin<5
+                changecallback={};
+            end
+            if ~iscell(changecallback)
+                changecallback={changecallback};
+            end
+            hstruc.changecallback=changecallback;
+            if ~isempty(handle)
+                hstruc.isGuiPar=true;
+            else
+                hstruc.isGuiPar=false;
+            end
+            hstruc.synchronize=true;
+            hstruc.handle=handle;
+            hstruc.syncmode=syncmode;
+            hstruc.obj=obj;
+            if hstruc.isGuiPar
+                handle.Callback={@obj.field_callback,field,handle.Callback};
+            end
+            
+            hstruc.content=obj.handle2value(handle);
+            if ~isfield(obj.P.par,field)
+                obj.P.par.(field)=hstruc;
+            else
+                lf=length(obj.P.par.(field));
+                posnew=lf+1;
+                for k=1:length(obj.P.par.(field))
+                    if obj.P.par.(field)(k).obj==hstruc.obj
+                        posnew=k;
+                        break
+                    end
+                end
+                
+                obj.P.par.(field)(posnew)=hstruc;
+            end
+            guip=any([obj.P.par.(field).isGuiPar]);
+            for k=1:length(obj.P.par.(field))
+                obj.P.par.(field)(k).isGuiPar=guip;
+            end  
+            found=false;
+            for k=1:length(obj.syncParameters)
+                if strcmp(obj.syncParameters{k},field)
+                    found=true;
+                    break;
+                end
+            end
+            if ~found
+                obj.syncParameters{end+1}={field,handle,syncmode};
+            end
+            
+            %initialize: not neeede, done before?
+%             v=obj.getPar(field);
+%             if ~isempty(v)
+%                 hh=obj.value2handle(v,handle);
+%                 obj.setfields(field,hh);
+%             end
+        end
+        function setPar(obj,field,varargin)
+            %writes global parameter. If synchronized: update uicontrols
+            %and execute callbacks
+            %setPar(parameter,newvalue,'Property','Value')
+            %parameter: name of global parameter
+            %newvalue: string or numeric or handle structure or
+            %'Property','Value' pairs for handle.
+            %Properties:
+            %'layer',layer: access layer parameters. layerN_ used as prefix to
+            %parametername
+            %if  not GUI parameter: calls interfaces.ParameterInterface
+
+            ind=find(strcmp(varargin,'layer'));
+            if ~isempty(ind)
+                prefix=['layer' num2str(varargin{ind+1}) '_'];
+                varargin(ind:ind+1)=[];
+                field=[prefix field];
+            end
+            par=obj.P.par;
+            if isfield(par,field)
+                if par.(field)(1).isGuiPar
+                    if length(varargin)==1
+                        for k=1:length(par.(field))
+                            if ishandle(par.(field)(k).handle)
+                                break
+                            end
+                        end
+                        
+                        handle=obj.value2handle(varargin{1},par.(field)(k).handle);
+                    else
+                        for k=1:2:length(varargin)
+                            handle.(varargin{k+1})=varargin{k};
+                        end
+                    end
+                    obj.setfields(field,handle);
+                else
+                    obj.setfields(field,varargin{1});
+                end
+                if any([par.(field)(:).synchronize])
+                    obj.changecallback(field)
+                end
+            else
+                setPar@interfaces.ParameterInterface(obj,field,varargin{1})
+            end
+        end
+        function value=getPar(obj,field,varargin)
+            %returns global parameter. 
+            %value=getPar(parameter,'Property','Value')
+            %parameter: name of global parameter
+            %'Property','Value' pairs for handle.
+            %Properties:
+            %'layer',layer: access layer parameters. layerN_ used as prefix to
+            %parametername
+            %if  not GUI parameter: calls interfaces.ParameterInterface
+            ind=find(strcmp(varargin,'layer'));
+            if ~isempty(ind)
+                prefix=['layer' int2str(varargin{ind+1}) '_'];
+                varargin(ind:ind+1)=[];
+                field=[prefix field];
+            end
+            po=obj.P;
+            par=po.par;
+%             par=obj.P.par;
+            if isfield(par,field)
+%                 tested=true;
+                if par.(field)(1).isGuiPar
+                    if ~isempty(varargin)&&~isempty(varargin{1})
+                        for k=1:length(par.(field))
+                            value{k}=par.(field)(k).handle.(varargin{1});
+                        end
+                    else
+                        %find valid handle
+                        %notempty
+                        hhere=[];
+                        for k=1:length(par.(field))
+                            if ~isempty(par.(field)(k).handle)&&isvalid(par.(field)(k).handle)
+                                hhere=par.(field)(k);
+                                break
+                            end
+                        end
+                        if ~isempty(hhere)
+                        value=obj.handle2value(hhere.handle);
+                        else
+                            value=[];
+                        end
+                    end
+                else
+                    value=par.(field).content; %from parameterInterface
+%                     value=getPar@interfaces.ParameterInterface(obj,field,tested);
+                end
+            else
+                value=[];
+            end      
+        end
+        
+        function updateObjectParameters(obj)
+            %writes obj.outputParameters which are uicontrol objects in gui to global parameters
+            updateObjectParameters@interfaces.ParameterInterface(obj);
+            pgui=obj.getGuiParameters;
+            for k=1:length(obj.outputParameters)
+                if isfield(pgui,obj.outputParameters{k})
+                    obj.setPar(obj.outputParameters{k},pgui.(obj.outputParameters{k}));
+                end
+            end
+        end   
+        
+        function par=handle2value(obj,hfn)
+            %parses uicontrol handles. 
+            %TODO: remove from here, use as function
+            %par=handle2value(handle)
+            %'edit','text': String or str2num(String) if numeric
+            % binary controls: value
+            %popupmenu, listbox: structure with h.String,h.Value,
+            %.selection=h.String{h.Value}
+            %Table: Data    
+            par=[];
+            if (isa(hfn,'matlab.ui.control.UIControl')&&isvalid(hfn)) || (isstruct(hfn)&&(isfield(hfn,'String')||isfield(hfn,'Value'))&&isfield(hfn,'Style'))
+                style=hfn.Style;
+                switch style
+                    case {'edit','text','file','dir'}
+                        
+                        st=hfn.String;
+                        if isempty(st)
+                            par=[];
+                            return
+                        end
+%                         v=str2num(st);
+%                         testv=str2double(st(1));
+                        if ~((st(1)>='0'&&st(1)<='9') || st(1)=='-' || st(1)=='I' || st(1)=='i' || st(1)=='.')
+                            par=hfn.String;
+                        else
+                            v=str2double(st);
+                            if isnan(v)
+                                v=str2num(st); 
+                            end
+                            if isempty(v)
+                                 par=hfn.String;
+                            else     
+                                par=1*v;
+                            end
+                        end
+
+                    case {'togglebutton','checkbox','slider', 'pushbutton','radiobutton'}
+                        v=double(hfn.Value);
+                        par=1*v;
+                    case {'popupmenu','listbox'}               
+                            par.String=hfn.String; 
+                            par.Value=hfn.Value;
+                            sstring=hfn.String;
+                        if iscell(sstring)
+                            par.selection=sstring{hfn.Value};
+                        else
+                            s=size(sstring);
+                            if s(1)>1
+                                ss=sstring(min(hfn.Value,s(1)),:);
+                                par.selection=strtrim(ss);
+                            else
+                                par.selection=hfn.String;
+                            end
+                        end
+                end
+            elseif isa(hfn,'matlab.ui.control.Table')
+                par.Data=hfn.Data;
+            end
+        end
+        function handle=value2handle(obj,v,hin)
+             %convert value to handle structure. 
+            %TODO: remove from here, use as function
+            %handle=value2handle(value,hin)
+            %hin: sample handle structure used as template
+            %'edit','text': String or str2num(String) if numeric
+            % binary controls: value
+            %popupmenu, listbox: structure with h.String,h.Value,
+            %.selection=h.String{h.Value}
+            %Table: Data
+            handle=[];
+            if isa(hin,'matlab.ui.control.UIControl')|| (isstruct(hin)&&(isfield(hin,'String')||isfield(hin,'Value'))&&isfield(hin,'Style'))
+            switch hin.Style
+                case {'edit','file'} %file:own creation for global settings
+                    if isnumeric(v)
+                        if abs(v)>100
+                            fs='%6.0f';
+                        else
+                            fs=3;
+                        end
+                        handle.String=num2str(v,fs);
+                    else
+                        handle.String=v;
+                    end
+                case 'text'
+                    if ~iscell(v)
+                    handle.String=num2str(v);
+                    else
+                        handle.String=(v);
+                    end
+                case {'pushbutton','checkbox','togglebutton'}
+                    if isnumeric(v)
+                        handle.Value=v;
+                    end
+
+                case {'popupmenu','listbox'}
+                    if isfield(v,'String')
+                    handle.String=v.String;
+                    handle.Value=v.Value;
+                    else
+                        handle.String=v;
+                        handle.Value=1;
+                    end
+                case 'slider'
+                    handle.Value=max(min(v,hin.Max),hin.Min);
+            end
+            elseif isa(hin,'matlab.ui.control.Table')
+                handle.Data=v.Data;
+            end
+
+        end
+        function createGlobalSetting(obj,field,category,description,structure)
+            if ~isfield(obj.P.globalSettings,field) %don't overwrite current settings
+                obj.P.globalSettings.(field).object=structure;
+    %             obj.P.globalSettings.(field).name=name;
+                obj.P.globalSettings.(field).category=category;
+                obj.P.globalSettings.(field).description=description;
+                obj.saveGlobalSettings;
+            end
+            %save to global parameters
+        end
+        function setGlobalSetting(obj,field,value)
+            h=obj.value2handle(value,obj.P.globalSettings.(field).object);
+            obj.P.globalSettings.(field).object=copyfields(obj.P.globalSettings.(field).object,h);
+            obj.saveGlobalSettings;
+            %save to global parameters
+        end
+        function p=getGlobalSetting(obj,field)
+            p=obj.handle2value(obj.P.globalSettings.(field).object);
+        end
+        function saveGlobalSettings(obj)
+            file=obj.P.globalSettingsFile;
+            writestruct(file,obj.P.globalSettings);
+        end
+        function loadGlobalSettings(obj)
+            obj.P.loadGlobalSettings;
+        end
+
+    end
+    
+    methods (Access=private)      
+        function setfields(obj,field,handle)
+            hstruc=obj.P.par.(field);
+            if hstruc(1).isGuiPar
+                for k=1:length(hstruc)
+                    if ~isempty(hstruc(k).handle)&&isvalid(hstruc(k).handle)
+                        syncmode=hstruc(k).syncmode;
+                        if ~iscell(syncmode)
+                            syncmode={syncmode};
+                        end
+                        for l=1:length(syncmode)
+                            
+                            if ~isempty(handle) && (isprop(handle,syncmode{l})||isfield(handle,syncmode{l}))
+                                hstruc(k).handle.(syncmode{l})=handle.(syncmode{l});
+                            end
+                            switch hstruc(k).handle.Style
+                                case {'popupmenu','listbox'}
+                                    hstruc(k).handle.Value=min(hstruc(k).handle.Value,length(hstruc(k).handle.String));
+                            end
+                        end
+                    end
+                end
+            else
+                for k=1:length(hstruc)
+                    hstruc(k).content=handle;
+%                     obj.P.par.(field)(k).content=handle;
+                end
+                obj.P.par.(field)=hstruc;
+            end
+        end
+        
+        function changecallback(obj,field)
+            hstruc=obj.P.par.(field);
+            badstruc=false(length(hstruc));
+            for k=1:length(hstruc)
+                if ~isempty(hstruc(k).changecallback)
+                    cb=hstruc(k).changecallback;
+                    callobj=hstruc(k).obj;
+                    if ~isvalid(callobj) %object has been deleted
+                        badstruck(k)=true;
+                    else
+                        if ~isa(obj,class(hstruc(k).obj))&& isvalid(callobj.handle) %or ==? of identical object, in case of copy??
+                            feval(cb{:})
+                        end
+                    end
+                end
+            end
+            if any(badstruc)
+                hstruc(badstruc)=[];
+                obj.P.par.(field)=hstruc;
+            end
+        end
+
+        function field_callback(obj,handle,event,field,oldcallback)
+            obj.setfields(field,handle);
+            %determine callbacks
+            docallbacks=true;
+            sm=obj.P.par.(field)(1).syncmode;
+            if ~isempty(sm)   
+                if strcmp(handle.Style,'listbox')&&any(strcmp(sm,'String'))
+                    docallbacks=false;
+                end
+            end
+            if obj.P.par.(field)(1).synchronize&&docallbacks
+                obj.changecallback(field)
+            end
+            if ~isempty(oldcallback)
+                feval(oldcallback{1},handle,event,oldcallback{2:end})
+            end
+        end
+    end
+end
