@@ -72,6 +72,7 @@ classdef PlotRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
                     case 'rad_av.mat'
                         results.sumimage=obj.results.sumimage;
                         results.sumrdensity=obj.results.sumrdensity;
+                        results.numberofsites=obj.results.numsites;
                         save([path file],'results');
                 end
             end
