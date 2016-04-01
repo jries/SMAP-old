@@ -29,7 +29,7 @@ classdef AnalyzeRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
         function save_callback(obj,a,b)
             p=obj.getAllParameters;
             selection=p.savemenu.selection;
-            [~,~,ext]=fileparts(selection);
+%             [~,~,ext]=fileparts(selection);
             [file,path]=uiputfile(selection);
             if path
                 switch selection
@@ -46,6 +46,10 @@ classdef AnalyzeRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
                     case 'average.tif'
                         image=obj.results.sumimage/obj.results.numsites;
                         saveastiff(uint16(image/max(image(:))*2^16),[path file])
+                    case 'rad_av.mat'
+                        results.sumimage=obj.results.sumimage;
+                        results.sumrdensity=obj.results.sumrdensity;
+                        save([path file],'results');
                         
 
                 end
@@ -117,7 +121,7 @@ function pard=pardef(obj)
 pard.savebutton.object=struct('String','Save','Style','pushbutton','Callback',{{@obj.save_callback}});
 pard.savebutton.position=[1,1];
 
-pard.savemenu.object=struct('String',{{'results.pdf','average.tif','results.mat','sites.mat'}},'Style','popupmenu');
+pard.savemenu.object=struct('String',{{'results.pdf','average.tif','results.mat','sites.mat','rad_av.mat'}},'Style','popupmenu');
 pard.savemenu.position=[2,1];
 
 pard.t1.object=struct('String','max dr/ro','Style','text');
