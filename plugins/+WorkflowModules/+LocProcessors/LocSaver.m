@@ -9,7 +9,6 @@ classdef LocSaver<interfaces.WorkflowModule;
        function obj=LocSaver(varargin)
             obj@interfaces.WorkflowModule(varargin{:})
             obj.inputChannels=1; 
-%              obj.setInputChannels(1,'frame');
         end
         function pard=pardef(obj)
             pard=[];
@@ -23,11 +22,6 @@ classdef LocSaver<interfaces.WorkflowModule;
             end
             obj.locDatatemp=interfaces.LocalizationData;
             obj.filenumber=1;%obj.locData.files.filenumberEnd+1;
-%             obj.locData.files.filenumberEnd=1;%obj.filenumber;
-%             obj.locData.loc=struct('frame',1,'filenumber',1,'xnm',0,'ynm',0,'channel',-1);
-%             fn=fieldnames(obj.locData.loc);
-%             obj.setPar('locFields',fn);
-%             obj.locData.empty;
             tifs=struct('image',[],'info',[]);
             finfo=obj.getPar('loc_fileinfo');
             sfile=finfo.basefile;
@@ -37,20 +31,11 @@ classdef LocSaver<interfaces.WorkflowModule;
             filestruct=struct('info',infost,'average',[],'name',filename,...
                 'number',obj.filenumber,...
                 'numberOfTif',0,'tif',tifs);
-%             filestruct.info=copyfields(filestruct.info,finfo);^
              if ~isfield(filestruct.info,'roi')||isempty(filestruct.info.roi)
                  filestruct.info.roi=[0 0 filestruct.info.Width filestruct.info.Height];
              end
              obj.locDatatemp.files.file=filestruct;  
-                
-
-%             obj.localtimervalue=tic;  
-             obj.fileinfo=obj.getPar('cameraSettings');
-%             obj.setPar('currentfileinfo',obj.fileinfo);
-% 
-%             obj.setPar('filelist_long',filelist,'String')
-%             obj.setPar('filelist_short',filelists,'String')
-            
+             obj.fileinfo=obj.getPar('cameraSettings');          
         end
         function output=run(obj,data,p)
             output=[];
@@ -100,18 +85,6 @@ roi=obj.fileinfo.roi;
 else
     roi=zeros(2);
 end
-% pixelsize=obj.globpar.parameters.cameraSettings.pixsize*1000;
-% fields={'frame','phot','bg','bgerr','photerr'};
-% locdat=copyfields([],locs,fields);
-% locdat.frame=locs.frame(indin);
-% locdat.phot=locs.phot(indin);
-% locdat.bg=locs.bg(indin);
-% if isfield(locs,'photerr')
-% locdat.photerr=locs.photerr(indin);
-% end
-% if isfield(locs,'bgerr')
-% locdat.bgerr=locs.bgerr(indin);
-% end
 
 locdat.xnm=(locs.xpix(indin)+roi(1))*pixelsize;
 locdat.ynm=(locs.ypix(indin)+roi(2))*pixelsize;
@@ -137,11 +110,6 @@ if isfield(locs,'PSFypix')
 else
     locdat.PSFynm=locdat.PSFxnm;
 end
-
-% if isfield(locs,'gradient3Dellipticity')
-% locdat.gradient3Dellipticity=locs.gradient3Dellipticity(indin);
-% end
-
 
 locdat.locprecnm=sqrt((locdat.xerr.^2+locdat.yerr.^2)/2);
 locdat.filenumber=uint8(0*locdat.xnm+obj.filenumber);
