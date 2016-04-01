@@ -9,8 +9,8 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj@interfaces.GuiModuleInterface(varargin{:})      
         end
         function makeGui(obj)
-            widtht=103;
-            width=98;
+            widtht=105;
+            width=102;
             fontsize=obj.guiPar.fontsize;
             fieldheight=16;       
             h.hroi=uipanel('Parent',obj.handle,'Title','ROI','Units','pixel','Position',[1 2*fieldheight widtht 6.7*fieldheight]);

@@ -75,6 +75,7 @@ classdef PlotRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
                         save([path file],'results');
                 end
             end
+         end
     end
 end
 
