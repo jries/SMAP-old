@@ -34,7 +34,12 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             scrsz = get(groot,'ScreenSize');
             height=min(scrsz(4)-70,760);
             hpos=min(scrsz(4)-height,scrsz(4)/5);
-            set(handle,'Position',[0 hpos obj.guiPar.width height]);
+            if ispc
+                vpossmap=8;
+            else
+                vpossmap=3;
+            end
+            set(handle,'Position',[vpossmap hpos obj.guiPar.width height]);
             set(handle,'MenuBar','none','Toolbar','none','ButtonDownFcn',{@figure_selected,obj},...
                 'SizeChangedFcn',{@sizechanged_callback,obj},'NumberTitle','off')
             set(handle,'Units','Pixels', 'Name','SMAP')

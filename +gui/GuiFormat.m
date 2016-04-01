@@ -65,16 +65,20 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             
             %overview axes
             hrecg=obj.getPar('mainGuihandle');
-            h.overviewimage=uipanel('Parent',hrecg,'Units','pixel','Position',[0 400 430 350],'Tag','OV');
-            h.ov_axes=axes('Parent',h.overviewimage,'Units','normalized','Position',[0.05 0.05 .95 .95]);
+            h.overviewimage=uipanel('Parent',hrecg,'Units','pixel','Position',[0 400 435 350],'Tag','OV');
+            
+            h.ov_axes=axes('Parent',h.overviewimage,'Units','normalized','Position',[0.05 0.07 .95 .93]);
+            h.ov_axes.FontSize=obj.guiPar.fontsize-3;
             set(h.ov_axes,'NextPlot','replacechildren','PickableParts','all')
             set(h.ov_axes,'ButtonDownFcn',{@clickOnSrImage,obj})
             obj.setPar('ov_axes',h.ov_axes);
-            h.redrawov=uicontrol('Style','pushbutton','Parent',h.overviewimage,'Position',[ 2 1 40 18],'String','update','Callback',{@redrawov_callback,obj});
-            h.detachov=uicontrol('Style','pushbutton','Parent',h.overviewimage,'Position',[ 410 1 20 18],'String','~>','Callback',{@detach_callback,obj,h.overviewimage});
-            h.detach.TooltipString='detach overview image';
+            h.redrawov=uicontrol('Style','pushbutton','Parent',h.overviewimage,'Position',[ 2 1 45 18],'String','update','Callback',{@redrawov_callback,obj});
+            h.detachov=uicontrol('Style','pushbutton','Parent',h.overviewimage,'Position',[ 404 1 25 18],'String','~>','Callback',{@detach_callback,obj,h.overviewimage});
+            h.redrawov.Units='normalized';
+            h.detachov.Units='normalized';
+            h.detachov.TooltipString='detach overview image';
             %viewtogglebutton
-            h.overview_select=uicontrol('Style','togglebutton','Parent',obj.handle,'String','OV -> filter','Position',[1,1,width,fieldheight*1.8],...
+            h.overview_select=uicontrol('Style','togglebutton','Parent',obj.handle,'String','OV -> filter','Position',[1,1,widtht,fieldheight*1.8],...
                 'FontSize',fontsize*1.2,'Callback',{@viewselect_callback,obj});            
             obj.guihandles=h;
             callobj=obj;
@@ -148,7 +152,7 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
 
             pos=obj.getPar('mainGuihandle').Position;
             scrsz = get(groot,'ScreenSize');  
-            posim=abs([pos(3)+pos(1) pos(2) max(1,min(pos(4),scrsz(3)-pos(3)-pos(1)-30)), max(1,pos(4))]);
+            posim=abs([pos(3)+pos(1)+10 pos(2) max(1,min(pos(4),scrsz(3)-pos(3)-pos(1)-30)), max(1,pos(4))]);
             
             set(hg.hsr,'Units','pixels','Position', posim)
             hg.sr_axes=axes('Parent',hg.hsr);%,'Units','normalized','Position',[0.10 0.09,.7,.83]);
@@ -380,6 +384,7 @@ hax=obj.getPar('ov_axes');
 hax.Units='pixels';
 pos=hax.Position;
 hax.Units='normalized';
+
 fi=obj.getPar('currentfileinfo');
 pixrec=fi.pixsize*1000; 
 roi=fi.roi;
