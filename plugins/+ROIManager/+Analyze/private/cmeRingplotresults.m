@@ -127,6 +127,9 @@ function pout=fithist(data,binw,fitrange)
 if nargin<3
     fitrange=4;
 end
+mind=min(data);maxd=max(data);
+binw=min(binw,(maxd-mind)/10);
+
 range=floor(min(data)):binw:max(data);
 h=histogram(data,range);
 

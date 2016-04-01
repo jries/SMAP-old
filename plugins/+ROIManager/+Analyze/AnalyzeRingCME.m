@@ -11,7 +11,16 @@ classdef AnalyzeRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
         end
         
         function out=run(obj,p)  
-            obj.sites=obj.SE.sites;
+            if p.restrictcheck
+                if length(p.usesites)==1
+                    range=1:min(p.usesites,length(obj.SE.sites));
+                else
+                    range=p.usesites;
+                end
+            else 
+                range=1:length(obj.SE.sites);
+            end
+            obj.sites=obj.SE.sites(range);
                 
             if isempty(obj.sites)
                 disp('no sites loaded')
@@ -130,5 +139,9 @@ pard.t1.position=[1,3];
 pard.maxdrro.object=struct('String','1.5','Style','edit');
 pard.maxdrro.position=[1,4];
 
-    
+pard.restrictcheck.object=struct('String','only sites','Style','checkbox','Value',0);
+pard.restrictcheck.position=[2,3];
+pard.usesites.object=struct('String','150','Style','edit');
+pard.usesites.position=[2,4];
+pard.usesites.TooltipString='first N sites, or LIst of sites or s1:s2 notation';
 end
