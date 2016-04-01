@@ -3,14 +3,15 @@ classdef WorkflowBuffer<handle
         dat={};
         currenttag=1;
         bufferincrease=10;
-        complete=false;
+        complete=[];
     end
     methods
         function add(obj,data,tag)
             lod=length(obj.dat);
             if lod<tag
                     obj.dat{tag}=data;
-                obj.complete(lod+1:tag+obj.bufferincrease)=false;
+%                 obj.complete(lod+1:tag+obj.bufferincrease)=false;
+%                  obj.complete(lod+1:tag+obj.bufferincrease)=false;
             else
             
             ld=length(obj.dat{tag});
@@ -18,16 +19,19 @@ classdef WorkflowBuffer<handle
             obj.dat{tag}(ld+1)=data;
             end
             if data.numberInTag>0 && length(obj.dat{tag})>=data.numberInTag
-                obj.complete(tag)=true;
+                obj.complete(end+1)=tag;
+%                 obj.complete(tag)=true;
             end
             if tag>obj.currenttag
                 if data.numberInTag==0&&length(obj.dat{obj.currenttag})>=1
-                    obj.complete(obj.currenttag)=true;
+                    obj.complete(end+1)=obj.currenttag;
+%                     obj.complete(obj.currenttag)=true;
                 end
                 obj.currenttag=tag;    
             end
             if data.eof
-                 obj.complete(tag)=true;
+                 obj.complete(end+1)=tag;
+%                  obj.complete(tag)=true;
             end
   
         end
@@ -35,7 +39,8 @@ classdef WorkflowBuffer<handle
             if nargin<2
                 out=obj.complete;
             else
-                out=obj.complete(tag);
+%                 out=obj.complete(tag);
+                out=any(obj.complete==tag);
             end
         end
         function data=get(obj,tag)
@@ -43,7 +48,8 @@ classdef WorkflowBuffer<handle
 %             obj.dat{tag}.empty;
 %              obj.dat{tag}=interfaces.WorkflowData;
             obj.dat{tag}.data=[];
-            obj.complete(tag)=false;          
+%             obj.complete(tag)=false;  
+            obj.complete(obj.complete==tag)=[];
         end
     end
 end

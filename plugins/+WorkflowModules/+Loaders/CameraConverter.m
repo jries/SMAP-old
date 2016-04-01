@@ -21,30 +21,17 @@ classdef CameraConverter<interfaces.WorkflowModule
            obj.guihandles.camparbutton.Callback={@camparbutton_callback,obj};
            obj.outputParameters={'cameraSettings','EMexcessNoise'};
            obj.addSynchronization('loc_metadatafile',obj.guihandles.metadatafile,'String',@obj.readmetadata)
-%            str=obj.guihandles.metadatafile.String;
-%            if exist(str,'file')
-%                obj.readmetadata;
-%            end
         end
         function prerun(obj,p)
            
         end
         function datao=run(obj,data,p)
-%             outpu?t=[];
             pc=obj.cameraSettings;
             offset=pc.offset;
             adu2phot=(pc.conversion/pc.emgain);
             imphot=single((data.data-offset))*adu2phot;
-%             imphot=single((data.get-offset))*adu2phot;
-%             datao=data.copy;
                datao=data;
-               datao.data=imphot;
-%             figure(88);imagesc(imphot);
-%             datao.set(imphot);
-%             drawnow
-%             obj.output(dat?ao);
-            
-            
+               datao.data=imphot;  
         end
         
         function readmetadata(obj)

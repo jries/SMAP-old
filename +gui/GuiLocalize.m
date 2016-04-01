@@ -178,11 +178,13 @@ obj.setPar('loc_preview',false)
 % notify(obj.P,'loc_initialize')
 % startmodule.initialize;
 startmodule.run;
+if ~isempty(obj.locData.loc)
 obj.locData.regroup;
 obj.setPar('locFields',fieldnames(obj.locData.loc));
 obj.status('fitting done');
 maingui=obj.getPar('mainGui');
 maingui.setmaintab(3);
+end
 end
 
 function batch_callback(a,b,obj)

@@ -62,7 +62,7 @@ classdef Grouper< interfaces.LocDataInterface
 %             whos listsort
             if ~isempty(listsort)
             numbergroup=countlocs(double(listsort));
-            end
+            
            
 %             groupc=listsort(1);
 %             ng=0;
@@ -83,6 +83,7 @@ classdef Grouper< interfaces.LocDataInterface
             [~,indback2]=sort(indold2);
             obj.locData.setloc('numberInGroup',numbergroup(indback2));
             [~,obj.indsortlist]=sort(listback);
+            end
 %             obj.status('group localizations done')
 
             
