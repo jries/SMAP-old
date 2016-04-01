@@ -39,14 +39,14 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             else
                 lf=length(obj.P.par.(field));
                 posnew=lf+1;
-                for k=1:length(obj.P.par.(field))
+                for k=1:lf
                     if obj.P.par.(field)(k).obj==hstruc.obj
                         posnew=k;
                         break
                     end
                 end
-                
-                obj.P.par.(field)(posnew)=hstruc;
+                obj.P.par.(field)(posnew)=copyfields(obj.P.par.(field)(1),hstruc);
+%                 obj.P.par.(field)(posnew)=hstruc;
             end
             guip=any([obj.P.par.(field).isGuiPar]);
             for k=1:length(obj.P.par.(field))

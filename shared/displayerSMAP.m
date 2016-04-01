@@ -32,7 +32,7 @@ for k=1:length(layers)
          else
              imall=imall+fi.image;
              mask=mask+fi.mask;
-%              txtN=[txtN 'N'  num2str(k) '=' shortnumber(fi.numberOfLocs) ', '];
+              txtN=[txtN 'N'  num2str(k) '=' shortnumber(fi.numberOfLocs) ', '];
          end
 
         end

@@ -22,7 +22,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             h=obj.guihandles;
             
             h.ptranslation=makepanel(h.ttranslation,'translation','');
-            h.protation=makepanel(h.trot,'rot (command)','command');
+            h.protation=makepanel(h.trot,'rot (command/strg)','command');
             h.pzoom=makepanel(h.tzoom,'zoom (alt)','alt');
 %             h.protation=uipanel('Parent',obj.handle,'Units','pixels','Position',pos,'Title','translation');
 %             h.pzoom=uipanel('Parent',obj.handle,'Units','pixels','Position',pos,'Title','translation');
@@ -47,7 +47,12 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         function out=run(obj,p)
             out=[];
             obj.addSynchronization('sr_roiposition',[],[],{@obj.redraw});
-            obj.axis=initaxis(obj.resultstabgroup,'3Dimage');
+            
+            if isempty(obj.axis)||~isvalid(obj.axis)
+                figure;
+                obj.axis=gca;
+            end
+%             obj.axis=initaxis(obj.resultstabgroup,'3Dimage');
             obj.axis.Units='normalized';
             obj.axis.Position=[0.05 0.05 .95 .9];
             
@@ -84,7 +89,6 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             if (length(data.Key)<5 && ~strcmp(data.Key,'0'))||(length(data.Key)>5 && ~(strcmp(data.Key(end-4:end),'arrow')|| strcmp(data.Key,'period')|| strcmp(data.Key,'comma')))
                 return
             end
-%             data.Modi???fier
            
             roih=obj.getPar('sr_roihandle');
             pos=roih.getPosition;
@@ -101,7 +105,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 stepfac=1;
             end
 %             data.Modifier
-            if any(strcmp(data.Modifier,'command'))
+            if any(strcmp(data.Modifier,'command'))||any(strcmp(data.Modifier,'control'))
                 %rotate
                 phi=0;
                 switch data.Key
@@ -341,7 +345,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             
 %             [zim]=anyRender(locCopy,p,'x','xnmline','y','ynmrot','sx','locprecnm','sy','locprecznm','within',indin,'position','roi','groupstate',group);
             imagesc(ph.rangex,ph.rangey,srim.image,'Parent',ax);
-            title(obj.theta)
+            title(obj.theta,'Parent',ax)
             drawnow
 %             toc
 
