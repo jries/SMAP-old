@@ -76,7 +76,8 @@ classdef LocSaver<interfaces.WorkflowModule;
                     filename=[filenameold(1:end-7) num2str(ind) '_sml.mat'];
                     ind=ind+1;
                 end
-                obj.locDatatemp.savelocs(filename);
+                fitpar=obj.parent.getGuiParameters(true).children;
+                obj.locDatatemp.savelocs(filename,[],struct('fitparameters',fitpar));
             end
             
         end

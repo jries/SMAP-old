@@ -240,7 +240,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             
         end
         
-        function saveloc=savelocs(obj,filename,goodind)
+        function saveloc=savelocs(obj,filename,goodind,additionalsave)
             %saves localization data to specific filename. Only saves
             %ungroupd locs. Returns saved structure:
             %saveloc=savelocs(filename,goodind)
@@ -255,6 +255,9 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                 for k=1:length(fields)
                     saveloc.loc.(fields{k})=saveloc.loc.(fields{k})(goodind);
                 end
+            end
+            if nargin>3&&~isempty(additionalsave)
+                saveloc=copyfields(saveloc,additionalsave);
             end
             if nargin>1&&~isempty(filename)
                 save(filename,'saveloc','-v7.3')
