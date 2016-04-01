@@ -20,7 +20,15 @@ classdef SyncBuffer<handle
                 comp=obj.inputbuffers{1}.iscomplete;
                 for k=2:obj.inputchannels
                     comp2=obj.inputbuffers{k}.iscomplete;
-                    comp=intersect(comp,comp2);
+                    
+%                      compi=intersect(comp,comp2);
+                    if length(comp)>=length(comp2)
+                        comp=unique(comp(ismember(comp,comp2)));
+                    else
+                        comp=unique(comp2(ismember(comp2,comp)));
+                    end
+                    
+                    
 %                     lm=min(length(comp),length(comp2));
 %                     c1=comp(1:lm);c2=comp2(1:lm);
 %                     comp=c1&c2;

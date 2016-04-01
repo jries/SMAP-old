@@ -61,7 +61,7 @@ end
 
 function addroi_callback(a,b,obj)
 p=obj.getGuiParameters;
-obj.status('select roi...')
+obj.status('select roi and double clock on ROI when done...')
 mask=getroi(obj.getPar('loc_outputfig'),p.roistyle.selection);
 obj.status('ROI selected')
 if isempty(obj.mask)||any(size(mask)~=size(obj.mask));
