@@ -6,6 +6,7 @@ classdef ApplyTransform<interfaces.DialogProcessor
         end
         
         function out=run(obj,p) 
+            out=[];
             obj.setPar('undoModule','ApplyTransform');
             notify(obj.P,'backup4undo');
             load(p.Tfile)

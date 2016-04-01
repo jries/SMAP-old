@@ -15,6 +15,7 @@ classdef VoronoiRenderer<interfaces.Renderer
     end
 end
 function imageo=vrender(locs,px,pos)
+                warning('off','MATLAB:scatteredInterpolant:DupPtsAvValuesWarnId')
                 A=zeros(length(locs.xnm),9);
                 A(:,2)=locs.frame;
                 A(:,4)=locs.xnm-pos(1);

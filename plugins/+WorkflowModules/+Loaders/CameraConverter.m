@@ -2,9 +2,9 @@ classdef CameraConverter<interfaces.WorkflowModule
     properties
         calfile='settings/CameraCalibration.xls';
         cameraSettings=struct('camId','default','port','Conventional','exposure',1,'emgain',1,'conversion',1,'offset',400,'pixsize',0.1,...
-            'roi',[],'temperature',0,'timediff',0);
+            'roi',[],'temperature',0,'timediff',0,'comments','');
         cameraSettingsStructure=struct('camId','default','port','Conventional','exposure',1,'emgain',1,'conversion',1,'offset',400,'pixsize',0.1,...
-            'roi',[],'temperature',0,'timediff',0);
+            'roi',[],'temperature',0,'timediff',0,'comments','');
         EMexcessNoise;
     end
     methods
@@ -81,6 +81,12 @@ end
 
 function camparbutton_callback(a,b,obj)
 fn=fieldnames(obj.cameraSettingsStructure);
+%remove later: only there because parameters saved with workflow don't
+%include comments
+if ~isfield(obj.cameraSettings,'comments')
+    obj.cameraSettings.comments='no ocmments';
+end
+%XXX
 for k=1:length(fn)
     fields{k}=fn{k};
     defAns{k}=num2str(obj.cameraSettings.(fn{k}));

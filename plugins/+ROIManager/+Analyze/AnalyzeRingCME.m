@@ -40,7 +40,7 @@ classdef AnalyzeRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
                         sites=obj.sites;
                         save([path file],'sites');
                     case 'results.pdf'
-                        export_fig([path file],'-pdf',obj.resultsfigure)
+                        export_fig([path file],'-pdf','-nocrop',obj.resultsfigure)
 %                         saveas(obj.resultsfigure,[path file],'epsc')
 
                     case 'average.tif'

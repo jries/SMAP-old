@@ -16,6 +16,7 @@ classdef PlotRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
                 totalresults=addresults(totalresults,obj.results(k));
             end
             obj.resultsfigure=cmeRingplotresults(p,totalresults);
+            out=totalresults;
 %             out=obj.results;
 %           analyzeRingsCME(obj.SE,p)
         end
