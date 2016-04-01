@@ -34,11 +34,17 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
             
             %PC-Mac differences
             if ispc
-                 guiPar.fontsize=12;
-                 guiPar.FieldHeight=24;
+                 guiPar.fontsize=11;
+                 guiPar.FieldHeight=26;
+                 guiPar.tabsize1=[1    1  542 340];
+                 guiPar.tabsize2=[1    1  532 305];    
+                 guiPar.Vsep=3;
             else
                 guiPar.fontsize=15;
                 guiPar.FieldHeight=26;
+                guiPar.tabsize1=[1    1  525 330];
+                guiPar.tabsize2=[1    1  500 277];
+                guiPar.Vsep=1;
             end
             
             %initialze guiPar
@@ -48,8 +54,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
             guiPar.Xrim=0;
             guiPar.Xpos=1;
             guiPar.Vpos=1;
-            guiPar.tabsize1=[1    1  525 330];
-            guiPar.tabsize2=[1    1  500 277];
+
             if ishandle(obj.handle)
                 hpos=obj.handle.Position;
                 guiPar.FieldWidth=(hpos(3)-3*guiPar.Xsep-2*guiPar.Xrim)/4;

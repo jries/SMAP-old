@@ -49,10 +49,10 @@ classdef PlotRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
             end
             setresultslist(obj);
         end
-        function save_callback(obj,a,b)
+         function save_callback(obj,a,b)
             p=obj.getAllParameters;
             selection=p.savemenu.selection;
-            [~,~,ext]=fileparts(selection);
+%             [~,~,ext]=fileparts(selection);
             [file,path]=uiputfile(selection);
             if path
                 switch selection
@@ -63,17 +63,18 @@ classdef PlotRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
                         sites=obj.sites;
                         save([path file],'sites');
                     case 'results.pdf'
-                        export_fig([path file],'-pdf',obj.resultsfigure)
+                        export_fig([path file],'-pdf','-nocrop',obj.resultsfigure)
 %                         saveas(obj.resultsfigure,[path file],'epsc')
 
                     case 'average.tif'
                         image=obj.results.sumimage/obj.results.numsites;
                         saveastiff(uint16(image/max(image(:))*2^16),[path file])
-                        
-
+                    case 'rad_av.mat'
+                        results.sumimage=obj.results.sumimage;
+                        results.sumrdensity=obj.results.sumrdensity;
+                        save([path file],'results');
                 end
             end
-        end
     end
 end
 
@@ -130,7 +131,7 @@ pard.remove.position=[6,2];
 pard.savebutton.object=struct('String','Save','Style','pushbutton','Callback',{{@obj.save_callback}});
 pard.savebutton.position=[6,4];
 
-pard.savemenu.object=struct('String',{{'results.pdf','average.tif','results.mat','sites.mat'}},'Style','popupmenu');
+pard.savemenu.object=struct('String',{{'results.pdf','average.tif','results.mat','sites.mat','rad_av.mat'}},'Style','popupmenu');
 pard.savemenu.position=[7,4];
 
 pard.t1.object=struct('String','max dr/ro','Style','text');

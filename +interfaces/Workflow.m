@@ -235,6 +235,7 @@ classdef Workflow<interfaces.DialogProcessor
             posinput=pospanel;
             posinput(2)=pospanel(2)+pospanel(4);
             posinput(4)=2*fh+4;
+            pGUI=obj.guiPar;
             pGUI.Vpos=1;
             pGUI.fontsize=obj.guiPar.fontsize-2;
             pGUI.FieldHeight=fh;

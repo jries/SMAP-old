@@ -10,7 +10,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
         function makeGui(obj)
             global SMAP_stopnow
             if ispc
-            set(0,'DefaultUIControlFontSize',10);
+            set(0,'DefaultUIControlFontSize',9);
             else
                 set(0,'DefaultUIControlFontSize',12);
             end
@@ -39,7 +39,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 'SizeChangedFcn',{@sizechanged_callback,obj},'NumberTitle','off')
             set(handle,'Units','Pixels', 'Name','SMAP')
             set(handle, 'Name','SMAP');
-            tabpos=[2 20 obj.guiPar.width-4 380];
+            tabpos=[2 30 obj.guiPar.width-2 370];
             [pmenu,hmenu]=makePluginMenu(obj,handle);
 %             obj.setPar('SMAP_menu',hmenu);
             obj.setPar('menu_plugins',pmenu);
@@ -78,9 +78,11 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             h.stopnow=uicontrol('Style','togglebutton','Units','normalized',...
                 'Position',[0.9,0,.07,.03],'String','Stop','Callback',{@stopnow_callback,obj});
             h.stopnow.Units='pixels';
+            h.stopnow.Position(4)=28;
             h.status=uicontrol(handle,'Style','text','Units','normalized',...
-                           'String','status','Position',[0 0 .8 0.04]);
+                           'String','status','Position',[0 0 .8 0.035]);
             h.status.Units='pixels';
+            h.status.Position(4)=28;
             obj.addSynchronization('status',h.status,{'String'})             
 
             %Plugins

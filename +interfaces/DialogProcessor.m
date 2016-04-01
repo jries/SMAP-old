@@ -23,8 +23,8 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
                 pardef=obj.pardef;
             end
             if obj.processorgui
-            obj.guiPar.fontsize=obj.guiPar.fontsize-2;
-            obj.guiPar.FieldHeight=obj.guiPar.FieldHeight-4;
+            obj.guiPar.fontsize=obj.guiPar.fontsize-1;
+            obj.guiPar.FieldHeight=obj.guiPar.FieldHeight-2;
             end
      
             makeGui@interfaces.GuiModuleInterface(obj,pardef);

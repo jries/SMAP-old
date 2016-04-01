@@ -9,7 +9,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             obj@interfaces.GuiModuleInterface(varargin{:})
         end
         function makeGui(obj)
-            h.loctab=uitabgroup(obj.handle,'Position',[0 .08 1 .92]);
+            h.loctab=uitabgroup(obj.handle,'Position',[0 .1 1 .9]);
 
             h.frame=uitab(h.loctab,'Title','Input Image');
             h.filter=uitab(h.loctab,'Title','Peak Finder');
@@ -17,16 +17,16 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             h.locprocess=uitab(h.loctab,'Title','Localizations');
 %             h.workflow=uitab(h.loctab,'Title','Workflow');
             
-            h.previewbutton=uicontrol(obj.handle,'Style','pushbutton','String','Preview','Position',[10 2, 70 obj.guiPar.FieldHeight*1.3],...
+            h.previewbutton=uicontrol(obj.handle,'Style','pushbutton','String','Preview','Position',[10 2, 70 obj.guiPar.FieldHeight*1],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@preview_callback,obj});
              h.previewframe=uicontrol(obj.handle,'Style','edit','String','1','Position',[180 2, 60 obj.guiPar.FieldHeight*1],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@previewframe_callback,obj});
            h.previewframeslider=uicontrol(obj.handle,'Style','slider','Position',[80 2, 100 20],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@previewframeslider_callback,obj});
             
-            h.localizebutton=uicontrol(obj.handle,'Style','pushbutton','String','Localize','Position',[380 2, 100 obj.guiPar.FieldHeight*1.3],...
+            h.localizebutton=uicontrol(obj.handle,'Style','pushbutton','String','Localize','Position',[380 2, 100 obj.guiPar.FieldHeight*1],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@localize_callback,obj});
-            h.batchbutton=uicontrol(obj.handle,'Style','pushbutton','String','Batch','Position',[260 2, 70 obj.guiPar.FieldHeight*1.3],...
+            h.batchbutton=uicontrol(obj.handle,'Style','pushbutton','String','Batch','Position',[260 2, 70 obj.guiPar.FieldHeight*1],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@batch_callback,obj});
 
 
@@ -35,7 +35,8 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             obj.setPar('loc_outputfig',outputfig)
 
             tabsizeh=obj.guiPar.tabsize2;
-            tabsizeh(4)=250;
+            tabsizeh(4)=tabsizeh(4)-35;
+%             tabsizeh(2)=tabsizeh(2)+30;
             h.framepanel=uipanel(h.frame,'Unit','pixels','Position',tabsizeh); 
             h.filterpanel=uipanel(h.filter,'Unit','pixels','Position',tabsizeh);
             h.fitpanel=uipanel(h.fit,'Unit','pixels','Position',tabsizeh); 
@@ -56,6 +57,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
 
             mainworkflow=interfaces.Workflow([],obj.P);
             mainworkflow.attachLocData(obj.locData);
+            mainworkflow.setGuiAppearence(obj.guiPar)
             mainworkflow.setGuiAppearence(par.all)
             mainworkflow.processorgui=false;
             mainworkflow.makeGui;
@@ -216,23 +218,23 @@ function previewframeslider_callback(a,b,obj)
 obj.guihandles.previewframe.String=num2str(round(obj.guihandles.previewframeslider.Value));
 obj.setPar('loc_previewframe',round(obj.guihandles.previewframeslider.Value));
 end
-
-function plugino=makeplugin(obj,pluginpath,handle,pgui)
-% p=obj.guiPar;
-% p=copyfields(p,pgui);
-plugino=plugin(pluginpath{:});
-plugino.attachPar(obj.P);
-
-% plugin.addGuiParameters(p);
-plugino.attachLocData(obj.locData);
-
-plugino.setGuiAppearence(pgui);
-plugino.handle=handle;
-plugino.makeGui;
-
-pluginname=pluginpath{end};
-obj.children.(pluginname)=plugino;
-end
+% 
+% function plugino=makeplugin(obj,pluginpath,handle,pgui)
+% % p=obj.guiPar;
+% % p=copyfields(p,pgui);
+% plugino=plugin(pluginpath{:});
+% plugino.attachPar(obj.P);
+% 
+% % plugin.addGuiParameters(p);
+% plugino.attachLocData(obj.locData);
+% 
+% plugino.setGuiAppearence(pgui);
+% plugino.handle=handle;
+% plugino.makeGui;
+% 
+% pluginname=pluginpath{end};
+% obj.children.(pluginname)=plugino;
+% end
 
 function batchprocessor_callback(a,b,obj)
 batchprocessor=WorkflowModules.Batchprocessor([],obj.P);
