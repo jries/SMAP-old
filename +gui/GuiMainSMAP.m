@@ -81,7 +81,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             set(h.maintab,'SelectedTab',h.tab_file)
             
             h.stopnow=uicontrol('Style','togglebutton','Units','normalized',...
-                'Position',[0.9,0,.07,.03],'String','Stop','Callback',{@stopnow_callback,obj});
+                'Position',[0.9,0.005,.07,.03],'String','Stop','Callback',{@stopnow_callback,obj});
             h.stopnow.Units='pixels';
             h.stopnow.Position(4)=28;
             h.status=uicontrol(handle,'Style','text','Units','normalized',...

@@ -9,7 +9,7 @@ classdef Undo< interfaces.GuiModuleInterface & interfaces.LocDataInterface
         end
         function makeGui(obj)
             obj.guihandles.undobutton=uicontrol(obj.handle,'Style','pushbutton','String','Undo','Units','normalized',...
-                'Position',[0.8,0,.07,.03],'Callback',@obj.undo_callback);
+                'Position',[0.8,0.005,.07,.03],'Callback',@obj.undo_callback);
              obj.guihandles.undobutton.Units='pixels';
              obj.guihandles.undobutton.Position(4)=28;
             addlistener(obj.P,'backup4undo',@obj.backup);
