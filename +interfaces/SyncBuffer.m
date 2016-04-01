@@ -21,7 +21,8 @@ classdef SyncBuffer<handle
                 for k=2:obj.inputchannels
                     comp2=obj.inputbuffers{k}.iscomplete;
                     lm=min(length(comp),length(comp2));
-                    comp=comp(1:lm)&comp2(1:lm);
+                    c1=comp(1:lm);c2=comp2(1:lm);
+                    comp=c1&c2;
                 end
                 out=find(comp);
             else          

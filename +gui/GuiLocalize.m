@@ -233,7 +233,7 @@ obj.children.(pluginname)=plugino;
 end
 
 function batchprocessor_callback(a,b,obj)
-batchprocessor=localizers.Batchprocessor([],obj.P);
+batchprocessor=WorkflowModules.Batchprocessor([],obj.P);
 if ~isempty(obj.batchfile)
     batchprocessor.mainbatchfile=obj.batchfile;
 end

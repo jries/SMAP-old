@@ -382,7 +382,7 @@ hax.Units='normalized';
 fi=obj.getPar('currentfileinfo');
 pixrec=fi.pixsize*1000; 
 roi=fi.roi;
-
+axis(hax,'equal')
 xext=[roi(1) roi(1)+roi(3)]* pixrec;
 yext=[roi(2) roi(2)+roi(4)]* pixrec;
 p.sr_size=[roi(3) roi(4) ]/2* pixrec;

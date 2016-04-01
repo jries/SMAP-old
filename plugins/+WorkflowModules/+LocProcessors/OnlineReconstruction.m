@@ -65,15 +65,14 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
                 locdat.loc=fitloc2locdata(obj,locs,indin);
                 obj.locDatatemp.addLocData(locdat);
 
-                if toc(obj.localtimervalue)>obj.localupdatetime||data.eof 
+                if toc(obj.localtimervalue)>p.localupdatetime||data.eof 
                     obj.locData.addLocData(obj.locDatatemp); %Careful: does this add it many time? need to intialize obj.locDatatemp?
                    initGuiAfterLoad(obj);  
-%                     obj.locData.regroup;
-%                     obj.setPar('locFields',fieldnames(obj.locData.loc));
                     notify(obj.P,'sr_render')
                     drawnow
                     obj.localtimervalue=tic;
                     obj.locDatatemp.empty; %??? new
+                    
 
                 end   
             

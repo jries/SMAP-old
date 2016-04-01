@@ -5,6 +5,7 @@ classdef imageLoader<handle
         onlineAnalysis=0;
         waittime=1;
         separate
+        separatefiles
         currentImageNumber
         info
         stack
@@ -33,7 +34,8 @@ classdef imageLoader<handle
 %                     warning('off','MATLAB:imagesci:tiffmexutils:libtiffWarning');
                 case 'separateTif'
                     obj.imageMode=0;
-                    obj.separate.files=obj.info.files;
+                    obj.separatefiles=obj.info.files;
+                    obj.separate.numfiles=length(obj.info.files);
                     obj.separate.path=obj.info.path;
                     obj.currentImageNumber=0;
                     obj.separate.fmt_s=imformats('tif');
@@ -130,12 +132,13 @@ end
 
 function image=readseparate(obj,number)
 separate=obj.separate;
-lenfiles=length(separate.files);
+% lenfiles=length(separate.files);
+lenfiles=separate.numfiles;
 if lenfiles<number 
     if obj.onlineAnalysis %ask for image that is not in list
-        lastfile= separate.files{lenfiles};
+        lastfile= obj.separatefiles{lenfiles};
         thisname= generateFileName(lastfile,lenfiles,obj.info.numberNameRange,number);
-        thisfile=[obj.separate.path filesep thisname];
+        thisfile=[separate.path filesep thisname];
         if ~exist(thisfile,'file')
             disp('wait')
             pause(obj.waittime*2)
@@ -144,14 +147,19 @@ if lenfiles<number
             image=[];
             return
         else
-            obj.separate.files{number}=thisname;
+            if number>lenfiles
+                obj.separatefiles{number+1000}='';
+            end
+            obj.separatefiles{number}=thisname;
+            obj.separate.numfiles=max(lenfiles,number);
+            obj.info.numberOfFrames=max(lenfiles,number);
         end 
     else
         image=[];
         return
     end
 else
-    thisfile=[separate.path filesep separate.files{number}];
+    thisfile=[separate.path filesep obj.separatefiles{number}];
 end
 image=myimread(thisfile,separate.fmt_s);     
 end

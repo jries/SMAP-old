@@ -35,7 +35,11 @@ classdef TifLoader<interfaces.WorkflowModule
             obj.imloader.setImageNumber(p.framestart-1);
             obj.numberOfFrames=obj.imloader.info.numberOfFrames;
 %             obj.imloader.currentImageNumber=p.framestart-1;
-            obj.framestop=p.framestop;
+            if p.onlineanalysis
+                obj.framestop=inf;
+            else
+                obj.framestop=p.framestop;
+            end
             obj.framestart=p.framestart;
             if obj.getPar('loc_preview')
                 previewframe=obj.getPar('loc_previewframe');               
@@ -80,9 +84,16 @@ classdef TifLoader<interfaces.WorkflowModule
                 
                 %display
                 if mod(datout.frame,10)==0
-                    totalf=min(obj.numberOfFrames,obj.framestop)-obj.framestart;
-                    elapsed=toc(obj.timerfitstart);
-                    totaltime=elapsed/(datout.frame-obj.framestart+1)*totalf;
+                    if p.onlineanalysis
+                        
+                        totalf=imloader.info.numberOfFrames-obj.framestart;
+                        elapsed=toc(obj.timerfitstart);
+                        totaltime=elapsed/(datout.frame-obj.framestart+1)*totalf;
+                    else
+                        totalf=min(obj.numberOfFrames,obj.framestop)-obj.framestart;
+                        elapsed=toc(obj.timerfitstart);
+                        totaltime=elapsed/(datout.frame-obj.framestart+1)*totalf;
+                    end
                     statuss=['frame ' int2str(datout.frame-obj.framestart) ' of ' int2str(totalf) ...
                         '. Time: ' num2str(elapsed,'%4.0f') ' of ' num2str(totaltime,'%4.0f') 's'];
                     obj.status(statuss);

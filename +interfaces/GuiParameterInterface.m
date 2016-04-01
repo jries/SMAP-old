@@ -220,7 +220,10 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                             par.Value=hfn.Value;
                             sstring=hfn.String;
                         if iscell(sstring)
+                            if hfn.Value>0
                             par.selection=sstring{hfn.Value};
+                            else par.selection='';
+                            end
                         else
                             s=size(sstring);
                             if s(1)>1

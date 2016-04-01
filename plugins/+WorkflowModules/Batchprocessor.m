@@ -9,7 +9,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
         function obj=Batchprocessor(varargin)
             obj@interfaces.GuiModuleInterface(varargin{:})
             if isempty(obj.handle)||~isvalid(obj.handle)
-                obj.handle=figure('Units','normalized','Units','pixels','Position',[150,200,600,300]);
+                obj.handle=figure('Units','normalized','Units','pixels','Position',[150,200,900,300],'Name','Batch','NumberTitle','off');
                 delete(obj.handle.Children);
             end
         end
@@ -64,9 +64,12 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
             
             str=p.filelist.String;
             for k=1:length(path)
-                imf=findimageindir(path{k});
+                p.hstatus=obj.guihandles.status;
+                imf=findimageindir(path{k},p);
                 if ~isempty(imf)
-                    str{end+1}=[path{k} filesep imf];
+                    for l=1:length(imf)
+                        str{end+1}=imf{l};
+                    end
                 end
                     
             end
@@ -133,22 +136,41 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
 
 end
 
-function img=findimageindir(path)
-img=[];
+function img=findimageindir(path,p)
+img={};
 files=dir([path filesep '*.tif']);
 if ~isempty(files)
-    img=files(1).name;
-else
-    files=dir([path filesep 'Pos*']);
-    for k=1:length(files)
-        if files(k).isdir
-            files2=dir([path filesep files(k).name filesep '*.tif']);
-            if ~isempty(files2)
-                img=files2(1).name;
-                break
-            end
+    img={[path filesep files(1).name]};
+    return
+end
+files=dir([path filesep 'Pos*']);
+for k=1:length(files)
+    if files(k).isdir
+        path2=[path filesep files(k).name filesep];
+        files2=dir([path2 '*.tif']);
+        if ~isempty(files2)
+            img={[path2 files2(1).name]};
+            return
         end
     end
+end
+searchstr=p.adddir_mask;
+mintiffs=p.adddir_minimages;
+files=dir([path filesep searchstr]);
+for k=1:length(files)
+    if files(k).isdir 
+        tiffiles=(dir([path filesep files(k).name filesep '*.tif']));
+        addpathh='';
+        if isempty(tiffiles)
+            tiffiles=(dir([path filesep files(k).name filesep 'Pos0' filesep '*.tif']));
+            addpathh=['Pos0' filesep];
+        end
+        if length(tiffiles)>mintiffs
+            img{end+1}=[path filesep files(k).name filesep addpathh tiffiles(1).name];
+        end
+    end 
+    p.hstatus.String=['directory ' num2str(k) ' of ' num2str(length(files))];
+    drawnow;
 end
 end
 
@@ -174,8 +196,19 @@ pard.adddir_button.object=struct('Style','pushbutton','String','add directories'
 pard.adddir_button.position=[4,4];
 pard.adddir_button.Width=1;
 
+pard.adddir_mask.object=struct('Style','edit','String','*_time_*');
+pard.adddir_mask.position=[5,4];
+pard.adddir_mask.Width=1;
+
+pard.adddir_t.object=struct('Style','text','String','> #images');
+pard.adddir_t.position=[6,4];
+pard.adddir_t.Width=.5;
+pard.adddir_minimages.object=struct('Style','edit','String','10');
+pard.adddir_minimages.position=[6,4.5];
+pard.adddir_minimages.Width=.5;
+
 pard.remove_button.object=struct('Style','pushbutton','String','remove','Callback',@obj.removeb_callback);
-pard.remove_button.position=[6,4];
+pard.remove_button.position=[8,4];
 pard.remove_button.Width=1;
 
 pard.process_button.object=struct('Style','pushbutton','String','Batch process','Callback',@obj.processb_callback);
@@ -185,4 +218,8 @@ pard.process_button.Height=2;
 pard.useforall.object=struct('Style','checkbox','String','use for all','Value',0);
 pard.useforall.position=[2,4];
 pard.useforall.Height=1;
+
+pard.status.object=struct('Style','text','String','status','Value',0);
+pard.status.position=[12,1];
+pard.status.Width=4;
 end
