@@ -65,7 +65,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
                 locdat.loc=fitloc2locdata(obj,locs,indin);
                 obj.locDatatemp.addLocData(locdat);
 
-                if toc(obj.localtimervalue)>p.localupdatetime||data.eof 
+                if toc(obj.localtimervalue)>p.loc_updatetime||data.eof 
                     obj.locData.addLocData(obj.locDatatemp); %Careful: does this add it many time? need to intialize obj.locDatatemp?
                    initGuiAfterLoad(obj);  
                     notify(obj.P,'sr_render')
