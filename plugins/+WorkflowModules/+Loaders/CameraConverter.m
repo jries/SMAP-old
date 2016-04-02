@@ -130,8 +130,10 @@ pard.metadatafile.Width=4;
 
 pard.loadmetadata.object=struct('Style','pushbutton','String','Load metadata');
 pard.loadmetadata.position=[3,1];
+pard.loadmetadata.TooltipString=sprintf('Load micromanager Metadata.txt file.');
 
 pard.camparbutton.object=struct('Style','pushbutton','String','set Cam Parameters');
 pard.camparbutton.position=[3,3.5];
 pard.camparbutton.Width=1.5;
+pard.camparbutton.TooltipString=sprintf('Edit camera acquisition parameters.');
 end

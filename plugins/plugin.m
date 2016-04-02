@@ -84,8 +84,8 @@ case 'Process.Assign2C.Intensity2Channel'
    module=Process.Assign2C.Intensity2Channel(varargin{:}); 
 case 'Process.Assign2C.SALMInt2z' 
    module=Process.Assign2C.SALMInt2z(varargin{:}); 
-case 'Process.Drift.driftfeature' 
-   module=Process.Drift.driftfeature(varargin{:}); 
+case 'Process.Drift.driftcorrection' 
+   module=Process.Drift.driftcorrection(varargin{:}); 
 case 'Process.Drift.showdriftinfo' 
    module=Process.Drift.showdriftinfo(varargin{:}); 
 case 'Process.Modify.Connect2Unconnect' 
@@ -235,7 +235,7 @@ out.Process.Assign2C.Get2CIntImagesWF={'Process','Assign2C','Get2CIntImagesWF'};
 out.Process.Assign2C.Get2CIntLoc={'Process','Assign2C','Get2CIntLoc'}; 
 out.Process.Assign2C.Intensity2Channel={'Process','Assign2C','Intensity2Channel'}; 
 out.Process.Assign2C.SALMInt2z={'Process','Assign2C','SALMInt2z'}; 
-out.Process.Drift.driftfeature={'Process','Drift','driftfeature'}; 
+out.Process.Drift.driftcorrection={'Process','Drift','driftcorrection'}; 
 out.Process.Drift.showdriftinfo={'Process','Drift','showdriftinfo'}; 
 out.Process.Modify.Connect2Unconnect={'Process','Modify','Connect2Unconnect'}; 
 out.Process.Modify.MathParser={'Process','Modify','MathParser'}; 

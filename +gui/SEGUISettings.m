@@ -103,7 +103,7 @@ pard.se_drawboxes.object=struct('Style','checkbox','String','draw boxes','Value'
 pard.se_drawboxes.position=[6,2];
 
 pard.redrawall.object=struct('Style','pushbutton','String','redraw all','Value',0);
-pard.redrawall.position=[8.5,2];
+pard.redrawall.position=[8.5,3];
 
 pard.clearall.object=struct('Style','pushbutton','String','clear all','Value',0);
 pard.clearall.position=[10,4];
@@ -111,6 +111,7 @@ pard.clearall.position=[10,4];
 pard.showSE.object=struct('Style','togglebutton','String','show ROI manager','Value',0);
 pard.showSE.position=[9,1];
 pard.showSE.Height=2;
+pard.showSE.Width=1.5;
 
 pard.outputParameters={'se_sitefov','se_cellfov','se_sitepixelsize','se_cellpixelsize','se_siteroi','se_drawboxes','se_rotate','se_imax','se_imaxcheck'};
 end

@@ -41,11 +41,8 @@ classdef RadialSymmetry3D<interfaces.WorkflowFitter
              shifty=0;%-0.5;
              posx=stackinfo.x+shiftx;
              posy=stackinfo.y+shifty;             
-             
-
+            
              locs.frame=stackinfo.frame;
-%              locs.xpix=x-dn+posx-1;
-%              locs.ypix=y-dn+posy-1;
             locs.xpix=x+posx;
             locs.ypix=-y+posy; %really funny definition 
              locs.PSFxpix=wx;
@@ -65,11 +62,5 @@ end
 
 
 function pard=pardef
-
-pard.loadcal.object=struct('Style','pushbutton','String','Load 3D cal');
-pard.loadcal.position=[4,1];
-pard.cal_3Dfile.object=struct('Style','edit','String','settings/cal_3DAcal.mat');
-pard.cal_3Dfile.position=[4,2];
-pard.cal_3Dfile.Width=3;
-
+pard=[];
 end

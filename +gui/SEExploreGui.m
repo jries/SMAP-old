@@ -25,12 +25,12 @@ classdef SEExploreGui<interfaces.SEProcessor
                  'String',' empty','Units','normalized','FontSize',fontsize,...
                  'Callback',{@celllist_callback,obj});
              h.redrawsite=uicontrol(obj.handle,'Position',[30,925,100,40],'Style','pushbutton','String','redraw','Units','normalized','FontSize',fontsize,'Callback',{@redrawsite_callback,obj});
-             h.addsite=uicontrol(obj.handle,'Position',[300,925,60,40],'Style','pushbutton','String','+','Units','normalized','FontSize',3*fontsize,'Callback',{@addsite,obj});
-             h.removesite=uicontrol(obj.handle,'Position',[400,540,60,30],'Style','pushbutton','String','-','Units','normalized','FontSize',3*fontsize,'Callback',{@removesite_callback,obj});
+             h.addsite=uicontrol(obj.handle,'Position',[290,925,60,40],'Style','pushbutton','String','Add','Units','normalized','FontSize',fontsize,'Callback',{@addsite,obj});
+             h.removesite=uicontrol(obj.handle,'Position',[400,540,90,30],'Style','pushbutton','String','Remove','Units','normalized','FontSize',fontsize,'Callback',{@removesite_callback,obj});
              
              h.redrawcell=uicontrol(obj.handle,'Position',[430,925,100,40],'Style','pushbutton','String','redraw','Units','normalized','FontSize',fontsize,'Callback',{@redrawcell_callback,obj});
-             h.addcell=uicontrol(obj.handle,'Position',[650,925,60,40],'Style','pushbutton','String','+','Units','normalized','FontSize',3*fontsize,'Callback',{@addcell,obj});
-             h.removecell=uicontrol(obj.handle,'Position',[600,540,60,30],'Style','pushbutton','String','-','Units','normalized','FontSize',3*fontsize,'Callback',{@removecell_callback,obj});
+             h.addcell=uicontrol(obj.handle,'Position',[650,925,60,40],'Style','pushbutton','String','Add','Units','normalized','FontSize',fontsize,'Callback',{@addcell,obj});
+             h.removecell=uicontrol(obj.handle,'Position',[600,540,90,30],'Style','pushbutton','String','Remove','Units','normalized','FontSize',fontsize,'Callback',{@removecell_callback,obj});
              
              h.redrawfile=uicontrol(obj.handle,'Position',[30,525,100,40],'Style','pushbutton','String','redraw','Units','normalized','FontSize',fontsize,'Callback',{@redrawfile_callback,obj});
              h.fileax.ButtonDownFcn={@fileaxclick,obj};
@@ -164,7 +164,7 @@ classdef SEExploreGui<interfaces.SEProcessor
 %         obj.SE.plotsite(site,obj.guihandles.siteax,obj.guihandles.cellax);
         end
         function clearall(obj)
-            obj.SE.empty;
+            obj.SE.clear;
             
             lDfiles=obj.locData.files.file;
             filenames={obj.locData.files.file(:).name};

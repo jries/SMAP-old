@@ -9,16 +9,14 @@ classdef MedianBGcalculator<interfaces.WorkflowModule
         function obj=MedianBGcalculator(varargin)
             obj@interfaces.WorkflowModule(varargin{:});
             obj.outputChannels=2; %1: image-background. 2: background image
-            obj.outputParameters={'loc_bg_dx','loc_bg_dt','loc_subtractbg'};
+            obj.outputParameters={'loc_bg_dx','loc_blocksize_frames','loc_subtractbg'};
         end
         function pard=pardef(obj)
             pard=pardef;
         end
-        function initGui(obj)
-            initGui@interfaces.WorkflowModule(obj);
-%            obj.guihandles.loadmetadata.Callback={@loadmetadata_callback,obj};
-%            obj.guihandles.camparbutton.Callback={@camparbutton_callback,obj};
-        end
+%         function initGui(obj)
+%             initGui@interfaces.WorkflowModule(obj);
+%         end
         function prerun(obj,p)
             obj.blockIndex=[];
            obj.runparameters=p;
@@ -42,7 +40,7 @@ classdef MedianBGcalculator<interfaces.WorkflowModule
             end
             img=data.data;
             blockIndexh=obj.blockIndex;
-            dt=par.loc_bg_dt;
+            dt=par.loc_blocksize_frames;
             dx=par.loc_bg_dx;
 
             %initialization
@@ -96,8 +94,6 @@ classdef MedianBGcalculator<interfaces.WorkflowModule
                         for l=1:blockIndexh(k)
                             dato=datablock{k}(l);
                             dato.data=bgIm;  
-%                             dato.eof=false;
-%                             data.numberInTag=1;
                             obj.output(dato);
                         end
                         blockIndexh(k)=0;
@@ -106,51 +102,7 @@ classdef MedianBGcalculator<interfaces.WorkflowModule
                 obj.output(data,1);
             end
             obj.blockIndex=blockIndexh;
-
-                
-%                     
-%                 if obj.blockIndex==dt||(data.eof&&obj.blockIndex>0)
-%                     if dx<3
-%                         bgIm=mymedian(block(:,:,1:obj.blockIndex),3); %only temporal median along dimension 3   
-% 
-%                         
-%                         
-%                         %                     bgIm=mymedian(obj.blockOfFrames(:,:,1:obj.blockIndex),3); 
-%                     else
-%                         bgIm=mymedianfilter(block(:,:,1:obj.blockIndex),dx);
-% %                         bgIm=mymedianfilter(obj.blockOfFrames(:,:,1:obj.blockIndex),dx);
-%                     end
-%                     bgIm(isnan(bgIm))=0;
-% 
-%                     for k=1:obj.blockIndex
-%                         dato=obj.datablock(k);%.copy;
-%                         dato.data=bgIm;
-% %                         dato.set(bgIm);
-% %                         dato2=obj.datablock(k).copy;
-% %                         dato2.set(block(:,:,k)-bgIm);
-% %                         dato2.set(obj.blockOfFrames(:,:,k)-bgIm);
-%                         obj.output(dato,1);
-% %                         obj.output(dato2,2);       
-%                     end
-% 
-% %                      figure(89);imagesc(bgIm);drawnow;
-%                     obj.blockIndex=0;
-%                 else
-% %                     figure(88);imagesc(img);drawnow;
-%                 end
-%                 if data.eof
-%                     obj.output(data,1);
-%                     obj.output(data,2);
-%                 end
-%             else
-%                 obj.output(data,2)
-%                 dato2=data;
-%                 dato2.data=(0*data.data);
-%                 obj.output(dato2,1);
-%             end
-
-        end
-       
+        end       
     end
 end
 
@@ -159,10 +111,11 @@ function pard=pardef
 pard.loc_subtractbg.object=struct('Style','checkbox','String','Subtract background','Value',1);
 pard.loc_subtractbg.position=[1,1];
 pard.loc_subtractbg.Width=2;
+pard.loc_subtractbg.TooltipString=sprintf('If checked, the background is subtracted for Peak finding. \n This does NOT mean, that fitting is performed on the background corrected images.');
 
 pard.loc_interleavedexc.object=struct('Style','checkbox','String','Interleaved ','Value',0);
 pard.loc_interleavedexc.position=[2,2];
-
+pard.loc_interleavedexc.TooltipString=sprintf('Check for interleaved excitation with two lasers to calculate the BG only with corresponding frames.');
 
 pard.text1.object=struct('Style','text','String','Median filtering:');
 pard.text1.position=[2,1];
@@ -172,10 +125,14 @@ pard.text2.position=[3,1.3];
 pard.loc_bg_dx.object=struct('Style','edit','String','3');
 pard.loc_bg_dx.position=[3,2.3];
 pard.loc_bg_dx.Width=.7;
+pard.loc_bg_dx.TooltipString=sprintf('number of pixels over which the median is calculated.');
+
 pard.text3.object=struct('Style','text','String','dt (frames)');
 pard.text3.position=[4,1.3];
 
-pard.loc_bg_dt.object=struct('Style','edit','String','100');
-pard.loc_bg_dt.position=[4,2.3];
-pard.loc_bg_dt.Width=.7;
+
+pard.loc_blocksize_frames.object=struct('Style','edit','String','100');
+pard.loc_blocksize_frames.position=[4,2.3];
+pard.loc_blocksize_frames.Width=.7;
+pard.loc_blocksize_frames.TooltipString=sprintf('Number of frames over which the median is calculated.');
 end

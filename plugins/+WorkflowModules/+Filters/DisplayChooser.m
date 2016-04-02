@@ -34,4 +34,5 @@ pard.text.Width=1.5;
 pard.loc_previewmode.object=struct('Style','popupmenu','String','image-bg|image|norm(image)|bg');
 pard.loc_previewmode.position=[2,1];
 pard.loc_previewmode.Width=1.5;
+pard.loc_previewmode.TooltipString=sprintf('Determine which image to display in Preview mode. Peak finding is performed on norm(image)');
 end

@@ -26,7 +26,7 @@ classdef Get2CIntImagesWF<interfaces.DialogProcessor
             wf.module('TifLoader').addFile(tiffile);
 
              
-            p.loc_bg_dt=p.filtert;
+            p.loc_blocksize_frames=p.filtert;
             p.loc_bg_dx=p.filterx;
             p.loc_subtractbg=true;
             wf.module('MedianBGcalculator').setGuiParameters(p);

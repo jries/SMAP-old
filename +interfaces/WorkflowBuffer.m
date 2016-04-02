@@ -45,7 +45,7 @@ classdef WorkflowBuffer<handle
         end
         function data=get(obj,tag)
             data=obj.dat{tag}(1:end);
-%             obj.dat{tag}.empty;
+%             obj.dat{tag};
 %              obj.dat{tag}=interfaces.WorkflowData;
             obj.dat{tag}.data=[];
 %             obj.complete(tag)=false;  

@@ -92,6 +92,8 @@ pard.fitterlist.object=struct('Style','listbox','String','EMCCD: Single Emitter|
 pard.fitterlist.position=[4,1];
 pard.fitterlist.Height=3;
 pard.fitterlist.Width=3;
+
+pard.fitterlist.TooltipString=sprintf('Select here which Fitter plugin is used.');
 % pard.loc_fitOnBackground.object=struct('Style','checkbox','String','fit on BG');
 % pard.loc_fitOnBackground.position=[4,4];
 

@@ -1,6 +1,6 @@
-classdef driftfeature<interfaces.DialogProcessor
+classdef driftcorrection<interfaces.DialogProcessor
     methods
-        function obj=driftfeature(varargin)        
+        function obj=driftcorrection(varargin)        
                 obj@interfaces.DialogProcessor(varargin{:}) ;
                 obj.inputParameters={'layer1_'};
         end

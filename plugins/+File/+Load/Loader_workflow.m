@@ -19,7 +19,7 @@ classdef Loader_workflow<interfaces.DialogProcessor
             obj.load(p,[p f]);
             initGuiAfterLoad(obj);
         end
-        function empty(file,isadd)
+        function clear(file,isadd)
         end
     end
 end

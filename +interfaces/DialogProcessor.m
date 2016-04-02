@@ -5,7 +5,7 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
     properties
         resultstabgroup;   %handle to results  
         processorgui=true; %switch. true if process button etc are to be rendered. false if called externally (for workflow)
-        showresults=false;
+        showresults=false; % defined state for results
 %         moduleinfo;
     end
     properties (SetAccess = private, GetAccess = private)

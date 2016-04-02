@@ -27,7 +27,7 @@ classdef LocFilter<interfaces.WorkflowModule;
                 return
             end
             indin=true(length(locs.frame),1);
-            if ~isempty(locs)
+%             if ~isempty(locs)
                 %locprec
                 if p.check_locprec && isfield(locs,'xerrpix')
                     phot=locs.xerrpix;
@@ -75,7 +75,7 @@ classdef LocFilter<interfaces.WorkflowModule;
                 end
                 output=data;
                 output.data=locsout;
-            end
+%             end
         end
 
     end
@@ -85,15 +85,33 @@ end
 function pard=pardef(obj)
 pard.check_locprec.object=struct('Style','checkbox','String','xy-locprec (nm)','Value',1);
 pard.check_locprec.position=[1,1];
-% pard.check1.Width=0.3;
+pard.check_locprec.Width=1.3;
+pard.check_locprec.TooltipString=sprintf('Filter localization precision before saving.');
+
 pard.val_locprec.object=struct('Style','edit','String','100');
-pard.val_locprec.position=[1,2];
+pard.val_locprec.position=[1,2.3];
+pard.val_locprec.Width=.7;
+pard.val_locprec.TooltipString=sprintf('maximum localization precision (nm)');
+
 pard.check_psf.object=struct('Style','checkbox','String','PSFxy (nm)','Value',1);
 pard.check_psf.position=[2,1];
+pard.check_psf.Width=1.3;
+pard.check_psf.TooltipString=sprintf('Filter size of fitted PSF before saving.');
+
 pard.val_psf.object=struct('Style','edit','String','300');
-pard.val_psf.position=[2,2];
+pard.val_psf.position=[2,2.3];
+pard.val_psf.Width=.7;
+pard.val_psf.TooltipString=sprintf('maximum size of PSF (nm)');
+
 pard.check_phot.object=struct('Style','checkbox','String','Photons','Value',0);
 pard.check_phot.position=[3,1];
+pard.check_phot.Width=1.3;
+pard.check_phot.TooltipString=sprintf('Filter photons before saving.');
+
+
 pard.val_phot.object=struct('Style','edit','String','[200 inf]');
-pard.val_phot.position=[3,2];
+pard.val_phot.position=[3,2.3];
+pard.val_phot.Width=.7;
+pard.val_phot.TooltipString=sprintf('minimum number of photons or vector with minimum and maximum number of photons.');
+
 end

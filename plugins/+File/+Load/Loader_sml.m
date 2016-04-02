@@ -19,11 +19,11 @@ classdef Loader_sml<interfaces.DialogProcessor;
         function pard=pardef(obj)
             pard=pardef;
         end
-        function empty(obj,file,isadd)
+        function clear(obj,file,isadd)
             if isadd 
-                obj.locData.empty('filter');
+                obj.locData.clear('filter');
             else
-                obj.locData.empty;
+                obj.locData.clear;
             end
         end        
     end

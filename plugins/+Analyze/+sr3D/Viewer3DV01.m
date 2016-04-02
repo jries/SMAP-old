@@ -2,7 +2,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
     properties
         axis
         timer
-        theta=0;
+%         theta=0;
 %         locCopy;
     end
     methods
@@ -14,7 +14,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             obj.inputParameters{end+1}='layers';
             obj.inputParameters{end+1}='numberOfLayers';
             
-             obj.showresults=true;
+             obj.showresults=false;
 
         end
         function makeGui(obj)
@@ -63,7 +63,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
              axis(obj.axis,'ij')
              
              set(fig,'WindowKeyPressFcn',{@obj.keypress,[]})
-             obj.theta=0;
+%              obj.theta=0;
              obj.timer=uint64(0);
              obj.redraw
              
@@ -97,7 +97,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             roivecp(1)=-roivec(2);
             step=0.1;
             stepl=0.3;
-            dphi=pi/32;
+            dphi=pi/16;
             dtheta=pi/8;
             if any(strcmp(data.Modifier,'shift'))
                 stepfac=0.2;
@@ -108,34 +108,35 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             if any(strcmp(data.Modifier,'command'))||any(strcmp(data.Modifier,'control'))
                 %rotate
                 phi=0;
+                theta=p.theta;
                 switch data.Key
                     
                     case 'uparrow'
                        %tilt up down
-                       obj.theta=obj.theta+dtheta*stepfac;
-                       if obj.theta>pi
-                           obj.theta=obj.theta-2*pi;
+                       theta=theta+dtheta*stepfac;
+                       if theta>pi
+                           theta=theta-2*pi;
                        end
-                       if obj.theta<-pi
-                           obj.theta=obj.theta+2*pi;
+                       if theta<-pi
+                           theta=theta+2*pi;
                        end
                        phi=0;
                     case 'downarrow'
                         phi=0;
-                       obj.theta=obj.theta-dtheta*stepfac;
-                       if obj.theta>pi
-                           obj.theta=obj.theta-2*pi;
+                       theta=theta-dtheta*stepfac;
+                       if theta>pi
+                           theta=theta-2*pi;
                        end
                        
-                       if obj.theta<-pi
-                           obj.theta=obj.theta+2*pi;
+                       if theta<-pi
+                           theta=theta+2*pi;
                        end
                     case 'leftarrow'
                        phi=dphi*stepfac;
                     case 'rightarrow'
                         phi=-dphi*stepfac;
                     case '0'
-                        obj.theta=0;
+                        theta=0;
                 end
                  mpos=mean(pos,1);
                 [dx,dy]=rotcoord(roivec(1)/2,roivec(2)/2,phi);
@@ -143,6 +144,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 pos(2,1)=mpos(1)+dx;
                 pos(1,2)=mpos(2)-dy;
                 pos(2,2)=mpos(2)+dy;
+                obj.setGuiParameters(struct('theta',theta));
             elseif any(strcmp(data.Modifier,'alt'))
                 %change size
                 switch data.Key
@@ -241,7 +243,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             if group(1)
                 [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:}},'position','roi','grouping','ungrouped');
                 
-                [yrot,depth]=rotcoord(loc.znm-zmean,loc.ynmline,obj.theta);
+                [yrot,depth]=rotcoord(loc.znm-zmean,loc.ynmline,p.theta);
 %                 [zmrot]=rotcoord(zmean,0,obj.theta);
                 depth=depth-min(depth);
 %                 md=max(depth);
@@ -266,7 +268,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             
             if group(2)
                 [locg,indg]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:}},'position','roi','grouping','grouped');
-                [yrot,depth]=rotcoord(locg.znm-zmean,locg.ynmline,obj.theta);
+                [yrot,depth]=rotcoord(locg.znm-zmean,locg.ynmline,p.theta);
     %             yline=zeros(length(indin),1);
     %             yline(indin)=yrot;
                 depth=depth-min(depth);
@@ -345,7 +347,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             
 %             [zim]=anyRender(locCopy,p,'x','xnmline','y','ynmrot','sx','locprecnm','sy','locprecznm','within',indin,'position','roi','groupstate',group);
             imagesc(ph.rangex,ph.rangey,srim.image,'Parent',ax);
-            title(obj.theta,'Parent',ax)
+%             title(obj.theta,'Parent',ax)
             drawnow
 %             toc
 
@@ -365,12 +367,14 @@ pard.text2.position=[2,1];
 pard.text3.object=struct('String','zmax','Style','text');
 pard.text3.position=[3,1];
 pard.setpixelsize.object=struct('String','set pixelsize (x z): ','Style','checkbox','Value',1);
-pard.setpixelsize.position=[4,1];
+pard.setpixelsize.position=[5,1];
 pard.setpixelsize.Width=1.5;
 pard.settransparency.object=struct('String','use transparency: ','Style','checkbox');
-pard.settransparency.position=[5,1];
+pard.settransparency.position=[6,1];
 pard.settransparency.Width=1.5;
-
+pard.thetat.object=struct('String','Azimuth angle theta ','Style','text');
+pard.thetat.position=[4,1];
+pard.thetat.Width=1.5;
 
 pard.zmin.object=struct('Style','edit','String','-400'); 
 pard.zmin.position=[2,2.1];
@@ -378,11 +382,14 @@ pard.zmin.Width=0.5;
 pard.zmax.object=struct('Style','edit','String','400'); 
 pard.zmax.position=[3,2.1];
 pard.zmax.Width=0.5;
+pard.theta.object=struct('Style','edit','String','0'); 
+pard.theta.position=[4,2.1];
+pard.theta.Width=0.5;
 pard.transparency.object=struct('Style','edit','String','1'); 
-pard.transparency.position=[5,2.1];
+pard.transparency.position=[6,2.1];
 pard.transparency.Width=0.5;
 pard.pixrecset.object=struct('Style','edit','String','5 5'); 
-pard.pixrecset.position=[4,2.1];
+pard.pixrecset.position=[5,2.1];
 pard.pixrecset.Width=0.5;
 
 

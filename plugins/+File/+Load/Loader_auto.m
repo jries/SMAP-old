@@ -19,10 +19,10 @@ classdef Loader_auto<interfaces.DialogProcessor
             obj.load(p,[p f]);
             initGuiAfterLoad(obj);
         end
-        function empty(obj,file,isadd)
+        function clear(obj,file,isadd)
             mode=getfilemode(file);
             loader=getloader(obj,mode);
-            loader.empty(file,isadd);
+            loader.clear(file,isadd);
         end
     end  
 end

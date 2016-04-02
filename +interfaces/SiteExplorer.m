@@ -30,7 +30,7 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
             obj.temp.siteincell=[];
             obj.temp.cellinfile=[];
         end
-        function empty(obj)
+        function clear(obj)
             obj.sites=interfaces.SEsites.empty;
             obj.cells=interfaces.SEsites.empty;
             obj.files=interfaces.SEsites.empty;

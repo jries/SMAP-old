@@ -119,5 +119,5 @@ pard.text.position=[1,1];
 
 pard.ROI_size.object=struct('Style','edit','String','7');
 pard.ROI_size.position=[2,1];
-
+pard.ROI_size.TooltipString=sprintf('Size (pixels) of regions around each peak candidate which are used for fitting. \n Depends on fitter. Use larger ROIs for 3D data.');
 end
