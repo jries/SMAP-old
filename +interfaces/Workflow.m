@@ -2,6 +2,7 @@ classdef Workflow<interfaces.DialogProcessor
     properties %(Access=private)
         modules={};
         graphfigure=[];
+        description='';
         %.module
         %.tag
         %.path:{'directory','.'
@@ -20,16 +21,22 @@ classdef Workflow<interfaces.DialogProcessor
                 obj.handle.Visible='off';
                 delete(obj.handle.Children);
             end
+            obj.outputParameters={'description'};
         end
         function initGui(obj)
             f=getParentFigure(obj.handle);
             c=uicontextmenu(f);
             obj.guihandles.modulelist.UIContextMenu=c;
             m0 = uimenu(c,'Label','info','Callback',{@listmenu_callback,obj});
+            m01 = uimenu(c,'Label','add','Callback',{@listmenu_callback,obj});
+            m4 = uimenu(c,'Label','add starter','Callback',{@listmenu_callback,obj});
+            m02 = uimenu(c,'Label','move up','Callback',{@listmenu_callback,obj});
+            m03 = uimenu(c,'Label','move down','Callback',{@listmenu_callback,obj});
             m1 = uimenu(c,'Label','remove','Callback',{@listmenu_callback,obj});
             m2 = uimenu(c,'Label','rename','Callback',{@listmenu_callback,obj});
             m3 = uimenu(c,'Label','replace','Callback',{@listmenu_callback,obj});
-            m4 = uimenu(c,'Label','add starter','Callback',{@listmenu_callback,obj});
+            m4 = uimenu(c,'Label','clear workflow','Callback',{@listmenu_callback,obj});
+            
         end
         function tag=addModule(obj,varargin)
             %module, (tag), 'handle',h,'input',i,'parameters',guiPar
@@ -114,7 +121,7 @@ classdef Workflow<interfaces.DialogProcessor
             if nargin<3
                 pGui=[];
             end
-            
+            obj.pluginpath=fn;
             obj.clear;
             obj.makeGui;
             loaded=load(fn);
@@ -144,7 +151,8 @@ classdef Workflow<interfaces.DialogProcessor
                     end 
                     p=pGui.(fn{k});
                     p=copyfields(p,pall);
-                    obj.module(fn{k}).setGuiAppearence(pGui.(fn{k}))
+%                     obj.module(fn{k}).setGuiAppearence(pGui.(fn{k}))
+                    obj.module(fn{k}).setGuiAppearence(p)
                 end
             end
             obj.addAllModulesToGui;
@@ -153,6 +161,9 @@ classdef Workflow<interfaces.DialogProcessor
             end
             if isfield(loaded,'startmodule')
                 obj.startmodule=loaded.startmodule;
+            end
+            if isfield(loaded,'description')
+                obj.description=loaded.descripiton;
             end
             
         end
@@ -166,7 +177,8 @@ classdef Workflow<interfaces.DialogProcessor
             parameters=obj.getGuiParameters(true);
             startmodule=obj.startmodule;
             fileformat.name='workflow';
-            save(fn,'modules','parameters','startmodule','fileformat');
+            description=obj.description;
+            save(fn,'modules','parameters','startmodule','fileformat','description');
             
         end
         function run(obj,tag)
@@ -181,6 +193,10 @@ classdef Workflow<interfaces.DialogProcessor
             p=obj.module(tag).getAllParameters;
             data=interfaces.WorkflowData;
             obj.module(tag).run(data,p);
+        end
+        function info=info(obj)
+            [~,info.name]=fileparts(obj.pluginpath);
+            info.description=obj.description;
         end
         
         function initialize(obj) %dummyfunction, initialize part of run
@@ -256,71 +272,44 @@ classdef Workflow<interfaces.DialogProcessor
             obj.children.(thistag)=module;
         end
         function pard=pardef(obj)
-            pard.visualizeconnectionsbutton.object=struct('Style','pushbutton','String','Graph','Callback',@obj.graph_callback);
-            pard.visualizeconnectionsbutton.position=[1,1.4];
+            pard.visualizeconnectionsbutton.object=struct('Style','pushbutton','String','Graph','Callback',@obj.graph);
+            pard.visualizeconnectionsbutton.position=[2,1.4];
             pard.visualizeconnectionsbutton.Width=0.4;
             
-            pard.addmodulebutton.object=struct('Style','pushbutton','String','Add','Callback',@obj.add_callback);
-            pard.addmodulebutton.position=[2,1];
-            pard.addmodulebutton.Width=0.4;
+            pard.wf_info.object=struct('Style','pushbutton','String','Info','Callback',@obj.info_callback);
+            pard.wf_info.position=[2,1];
+            pard.wf_info.Width=0.4;
+            
+%             pard.addmodulebutton.object=struct('Style','pushbutton','String','Add','Callback',@obj.add_callback);
+%             pard.addmodulebutton.position=[2,1];
+%             pard.addmodulebutton.Width=0.4;
 
-            pard.upbutton.object=struct('Style','pushbutton','String','^','Callback',{{@obj.move_callback,-1}});
-            pard.upbutton.position=[2,1.4];
-            pard.upbutton.Width=0.2;
-            pard.downbutton.object=struct('Style','pushbutton','String','v','Callback',{{@obj.move_callback,+1}});
-            pard.downbutton.position=[2,1.6];
-            pard.downbutton.Width=0.2;
+%             pard.upbutton.object=struct('Style','pushbutton','String','^','Callback',{{@obj.move_callback,-1}});
+%             pard.upbutton.position=[2,1.4];
+%             pard.upbutton.Width=0.2;
+%             pard.downbutton.object=struct('Style','pushbutton','String','v','Callback',{{@obj.move_callback,+1}});
+%             pard.downbutton.position=[2,1.6];
+%             pard.downbutton.Width=0.2;
             
             pard.loadbutton.object=struct('Style','pushbutton','String','Load','Callback',@obj.load_callback);
-            pard.loadbutton.position=[11,1.4];
+            pard.loadbutton.position=[1,1.];
             pard.loadbutton.Width=0.4;
             pard.loadbutton.object.TooltipString='press shift before clicking to load workflow without setting the saved parameters. Make sure SMAP is in focus before.';
             
             pard.savebutton.object=struct('Style','pushbutton','String','Save','Callback',@obj.save_callback);
-            pard.savebutton.position=[11,1];
+            pard.savebutton.position=[1,1.4];
             pard.savebutton.Width=0.4;
         
             pard.modulelist.object=struct('Style','listbox','Callback',@obj.moduleselect_callback);
-            pard.modulelist.position=[10,1];
-            pard.modulelist.Height=8;
+            pard.modulelist.position=[11,1];
+            pard.modulelist.Height=9;
             pard.modulelist.Width=0.8;
             
-            pard.clearbutton.object=struct('Style','togglebutton','String','Clear','Callback',@obj.clear_callback);
-            pard.clearbutton.position=[1,1];
-            pard.clearbutton.Width=0.4;
+%             pard.clearbutton.object=struct('Style','togglebutton','String','Clear','Callback',@obj.clear_callback);
+%             pard.clearbutton.position=[1,1];
+%             pard.clearbutton.Width=0.4;
         end
-    end
-    methods (Access=private)      
-        function load_callback(obj,a,b)
-            fh=getParentFigure(obj.handle);
-            modifiers = get(fh,'currentModifier');
-            writeParameters=~ismember('shift',modifiers);
-            if ~writeParameters
-                disp('shift pressed, gui parameters not loaded')
-            end
-            
-            [f,p]=uigetfile(['plugins' filesep 'workflows' filesep '*.mat']);
-            if f
-                obj.load([p f],[],writeParameters)
-            end
-        end
-        function save_callback(obj,a,b)
-            [f,p]=uiputfile(['plugins' filesep 'workflows' filesep '*.mat']);
-            if f
-                obj.save([p f])
-            end
-        end
-        function add_callback(obj,a,b)
-            plugins=plugin;
-            field=browsefields(plugins,'WorkflowModules');
-            if ~isempty(field)
-              tag=obj.addModule(field2cell(field));
-              obj.addModuleToGui(tag);
-              obj.setinputlist;
-              
-            end
-        end
-        function graph_callback(obj,object,b)
+        function graph(obj,object,b)
             modulenames=obj.guihandles.modulelist.String;
             nodebox=char(ones(1,length(modulenames))*'s');
             nodecolor=char(ones(1,length(modulenames))*'b');
@@ -357,6 +346,38 @@ classdef Workflow<interfaces.DialogProcessor
             plot_graph(modulenames,output,input,'-fontsize',obj.guiPar.fontsize,'-shape',nodebox,'-color',nodecolor,...
                 '-edgeColor',edgecolor);
         end
+    end
+    methods (Access=private)      
+        function load_callback(obj,a,b)
+            fh=getParentFigure(obj.handle);
+            modifiers = get(fh,'currentModifier');
+            writeParameters=~ismember('shift',modifiers);
+            if ~writeParameters
+                disp('shift pressed, gui parameters not loaded')
+            end
+            
+            [f,p]=uigetfile(['plugins' filesep 'workflows' filesep '*.mat']);
+            if f
+                obj.load([p f],[],writeParameters)
+            end
+        end
+        function save_callback(obj,a,b)
+            [f,p]=uiputfile(['plugins' filesep 'workflows' filesep '*.mat']);
+            if f
+                obj.save([p f])
+            end
+        end
+%         function add_callback(obj,a,b)
+%             plugins=plugin;
+%             field=browsefields(plugins,'WorkflowModules');
+%             if ~isempty(field)
+%               tag=obj.addModule(field2cell(field));
+%               obj.addModuleToGui(tag);
+%               obj.setinputlist;
+%               
+%             end
+%         end
+
         function idx=tag2index(obj,tag)
             idx=[];
             for k=1:length(obj.modules)
@@ -471,22 +492,29 @@ classdef Workflow<interfaces.DialogProcessor
                 end
             end
         end
-        function move_callback(obj,a,b,dir)
-            select=obj.guihandles.modulelist.Value;
-            lenlist=length(obj.guihandles.modulelist.String);
-            newpos=select+dir;
-            if newpos<=lenlist&&newpos>0
-                obj.modules([select,newpos])=obj.modules([newpos,select]);
-            end
-            obj.guihandles.modulelist.Value=newpos;
-            obj.updateModuleList;
-            
-            obj.setinputlist;
+        function info_callback(obj,a,b)
+            txt=obj.description;
+            answ=inputdlg('Edit WF description','WF description',20,{txt},'on');
+            if ~isempty(answ)
+                obj.description=answ{1};
+            end           
         end
-        function clear_callback(obj,a,b)
-            obj.clear;
-            obj.makeGui;
-        end
+%         function move_callback(obj,a,b,dir)
+%             select=obj.guihandles.modulelist.Value;
+%             lenlist=length(obj.guihandles.modulelist.String);
+%             newpos=select+dir;
+%             if newpos<=lenlist&&newpos>0
+%                 obj.modules([select,newpos])=obj.modules([newpos,select]);
+%             end
+%             obj.guihandles.modulelist.Value=newpos;
+%             obj.updateModuleList;
+%             
+%             obj.setinputlist;
+% %         end
+%         function clear_callback(obj,a,b)
+%             obj.clear;
+%             obj.makeGui;
+%         end
     end
 end
 
@@ -575,6 +603,42 @@ switch object.Label
          mymsgbox(desc,info.name);
 %         txth= findobj(hm,'Type','text','-depth',3);
 %         txth.FontSize=14;
+    case 'add'
+        plugins=plugin;
+        field=browsefields(plugins,'WorkflowModules');
+        if ~isempty(field)
+          tag=obj.addModule(field2cell(field));
+          obj.addModuleToGui(tag);
+          obj.setinputlist;
+
+        end
+    case 'move up'
+        dir=-1;
+            select=obj.guihandles.modulelist.Value;
+            lenlist=length(obj.guihandles.modulelist.String);
+            newpos=select+dir;
+            if newpos<=lenlist&&newpos>0
+                obj.modules([select,newpos])=obj.modules([newpos,select]);
+            end
+            obj.guihandles.modulelist.Value=newpos;
+            obj.updateModuleList;
+            
+            obj.setinputlist;
+    case 'move down'
+        dir =1;
+            select=obj.guihandles.modulelist.Value;
+            lenlist=length(obj.guihandles.modulelist.String);
+            newpos=select+dir;
+            if newpos<=lenlist&&newpos>0
+                obj.modules([select,newpos])=obj.modules([newpos,select]);
+            end
+            obj.guihandles.modulelist.Value=newpos;
+            obj.updateModuleList;
+            
+            obj.setinputlist;
+    case 'clear workflow'
+            obj.clear;
+            obj.makeGui;
         
 end
 end
