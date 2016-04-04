@@ -49,6 +49,11 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
 
             obj.setPar('filelist_long',filelist,'String')
             obj.setPar('filelist_short',filelists,'String')
+            pos=(obj.fileinfo.roi(1:2)+obj.fileinfo.roi(3:4)/2)*obj.fileinfo.pixsize*1000;
+            srs=obj.fileinfo.roi(3:4)*obj.fileinfo.pixsize*1000;
+            pixels=max(srs./obj.getPar('sr_sizeRecPix'));
+            obj.setPar('sr_pos',pos);
+             obj.setPar('sr_pixrec',pixels);
             obj.locDatatemp=interfaces.LocalizationData;
         end
         function output=run(obj,data,p)
@@ -67,7 +72,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
 
                 if toc(obj.localtimervalue)>p.loc_updatetime||data.eof 
                     obj.locData.addLocData(obj.locDatatemp); %Careful: does this add it many time? need to intialize obj.locDatatemp?
-                   initGuiAfterLoad(obj);  
+                   initGuiAfterLoad(obj);  %resets the view always! 
                     notify(obj.P,'sr_render')
                     drawnow
                     obj.localtimervalue=tic;

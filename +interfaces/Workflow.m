@@ -163,7 +163,7 @@ classdef Workflow<interfaces.DialogProcessor
                 obj.startmodule=loaded.startmodule;
             end
             if isfield(loaded,'description')
-                obj.description=loaded.descripiton;
+                obj.description=loaded.description;
             end
             
         end

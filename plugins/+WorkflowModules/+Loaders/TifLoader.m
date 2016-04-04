@@ -49,7 +49,7 @@ classdef TifLoader<interfaces.WorkflowModule
                 obj.framestart=frameload;
                 obj.imloader.setImageNumber(frameload-1);
 %                 obj.imloader.currentImageNumber=frameload-1;
-                obj.framestop=frameload+dt;
+                obj.framestop=frameload+dt-1;
                 else
                     obj.imloader.setImageNumber(previewframe-1);
 %                     obj.imloader.currentImageNumber=previewframe-1;
@@ -109,7 +109,9 @@ classdef TifLoader<interfaces.WorkflowModule
         function addFile(obj,file)
             
             obj.imloader=imageLoader(file);
-            obj.setPar('loc_metadatafile',obj.imloader.info.metafile);
+            if ~isempty(obj.imloader.info.metafile)
+             obj.setPar('loc_metadatafile',obj.imloader.info.metafile);
+            end
             obj.setPar('loc_fileinfo',obj.imloader.info);
 % 
             obj.guihandles.tiffile.String=obj.imloader.file;
@@ -157,7 +159,7 @@ pard.onlineanalysis.Width=1.25;
 pard.onlineanalysis.TooltipString='Fit during acquisition. If checked, max frames is ignored. Waits until no more images are written to file.';
 
 
-pard.textf.object=struct('Style','text','String','Frame range: ');
+pard.textf.object=struct('Style','text','String','Frame range');
 pard.textf.position=[4.2,1.25];
 pard.textf.Width=0.75;
 pard.framestart.object=struct('Style','edit','String','1');

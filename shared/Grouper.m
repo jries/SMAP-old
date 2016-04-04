@@ -89,10 +89,14 @@ classdef Grouper< interfaces.LocDataInterface
             
         end
         function combine(obj,field,combinemode,weights) %no field etc: group everythign for which we have combinemodes
+            
 %             obj.status('group: combine fields')
             if nargin==1 %do all
 %                 fn=fieldnames(obj.combinemodes);
                 fn2=fieldnames(obj.locData.loc);
+                if isempty(obj.locData.loc.(fn2{1}))  
+                   return
+                end
 %                 fnall=intersect(fn,fn2);
                 weights=1./(obj.locData.getloc('locprecnm').locprecnm);
                 if isempty(weights)
