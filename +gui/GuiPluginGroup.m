@@ -95,6 +95,7 @@ classdef GuiPluginGroup< interfaces.GuiModuleInterface & interfaces.LocDataInter
 %             obj.guiplugins.(name)
             if nargin<3
                 pluginpath=obj.guiplugins.(name).module;
+               
             end
             if nargin<4
                 isprocessor=true;
@@ -133,12 +134,17 @@ classdef GuiPluginGroup< interfaces.GuiModuleInterface & interfaces.LocDataInter
                 thisplugin.load(pluginpath)
             end
             
+            
+            if isfield(obj.guiplugins.(name),'name')
+                iname=obj.guiplugins.(name).name;
+            else
             info=thisplugin.info;
             
             if ~isempty(info)
                 iname=info.name;
             else
                 iname=name;
+            end
             end
             
             if isempty(obj.plugins)

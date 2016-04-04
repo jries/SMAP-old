@@ -17,18 +17,18 @@ classdef TifLoader<interfaces.WorkflowModule
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
-            obj.inputParameters={'loc_subtractbg','loc_bg_dt'};            
+            obj.inputParameters={'loc_subtractbg','loc_blocksize_frames'};            
             obj.guihandles.loadtifbutton.Callback={@loadtif_callback,obj};
             obj.addSynchronization('filelist_localize',obj.guihandles.tiffile,'String',{@loadtif_ext,obj});
         end
         function prerun(obj,p)
-            p=obj.getAllParameters;
+%             p=obj.getAllParameters;
             
             if ~exist(p.tiffile,'file')
                 obj.status('TifLoader: localization file not found')
                  error('TifLoader: localization file not found')
             elseif p.locdata_empty
-                obj.locData.empty;
+                obj.locData.clear;
             end
             obj.imloader=imageLoader(p.tiffile);     
             obj.imloader.onlineAnalysis=p.onlineanalysis;
@@ -44,7 +44,7 @@ classdef TifLoader<interfaces.WorkflowModule
             if obj.getPar('loc_preview')
                 previewframe=obj.getPar('loc_previewframe');               
                 if p.loc_subtractbg
-                dt=p.loc_bg_dt;
+                dt=p.loc_blocksize_frames;
                 frameload=max(1,previewframe-floor(dt/2));
                 obj.framestart=frameload;
                 obj.imloader.setImageNumber(frameload-1);
@@ -145,6 +145,8 @@ pard.text.Width=1.5;
 
 pard.loadtifbutton.object=struct('Style','pushbutton','String','load images','Visible','on');
 pard.loadtifbutton.position=[3,1];
+pard.loadtifbutton.TooltipString=sprintf('Open raw camera image tif files. \n Either single images in directory. \n Or multi-image Tiff stacks');
+
 pard.tiffile.object=struct('Style','edit','String',' ','HorizontalAlignment','right');
 pard.tiffile.position=[2,1];
 pard.tiffile.Width=4;
@@ -152,6 +154,8 @@ pard.tiffile.Width=4;
 pard.onlineanalysis.object=struct('Style','checkbox','String','Online analysis','Value',0);
 pard.onlineanalysis.position=[3,2.25];
 pard.onlineanalysis.Width=1.25;
+pard.onlineanalysis.TooltipString='Fit during acquisition. If checked, max frames is ignored. Waits until no more images are written to file.';
+
 
 pard.textf.object=struct('Style','text','String','Frame range: ');
 pard.textf.position=[4.2,1.25];
@@ -159,6 +163,7 @@ pard.textf.Width=0.75;
 pard.framestart.object=struct('Style','edit','String','1');
 pard.framestart.position=[4.2,2];
 pard.framestart.Width=0.7;
+
 pard.framestop.object=struct('Style','edit','String','1000000');
 pard.framestop.position=[4.2,2.7];
 pard.framestop.Width=0.7;
@@ -166,5 +171,5 @@ pard.framestop.Width=0.7;
 pard.locdata_empty.object=struct('Style','checkbox','String','Empty localizations','Value',1);
 pard.locdata_empty.position=[4.2,3.5];
 pard.locdata_empty.Width=1.5;
-pard.locdata_empty.TooltipString='empty localization data before fitting. Important if post-processing (eg drift correction) is perfromed as part of workflow';
+pard.locdata_empty.TooltipString=sprintf('Empty localization data before fitting. \n Important if post-processing (eg drift correction) is perfromed as part of workflow');
 end

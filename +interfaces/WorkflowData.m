@@ -24,7 +24,7 @@ classdef WorkflowData %<handle
 % %             out.eof=obj.eof;
 % %             out.data=[]; 
 %         end
-%         function empty(obj)
+%         function clear(obj)
 %             obj.data=[];
 %             obj.frame=[];
 %             obj.ID=[];

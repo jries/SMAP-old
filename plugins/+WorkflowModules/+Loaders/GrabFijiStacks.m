@@ -19,7 +19,7 @@ classdef GrabFijiStacks<interfaces.WorkflowModule
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
-             obj.inputParameters={'loc_subtractbg','loc_bg_dt'};            
+             obj.inputParameters={'loc_subtractbg','loc_blocksize_frames'};            
 %             obj.guihandles.loadtifbutton.Callback={@loadtif_callback,obj};
 %             obj.addSynchronization('filelist_localize',obj.guihandles.tiffile,'String',{@loadtif_ext,obj});
         end
@@ -27,7 +27,7 @@ classdef GrabFijiStacks<interfaces.WorkflowModule
             p=obj.getAllParameters;
             
             if p.locdata_empty
-                obj.locData.empty;
+                obj.locData.clear;
             end
             
 
@@ -36,7 +36,7 @@ classdef GrabFijiStacks<interfaces.WorkflowModule
             if obj.getPar('loc_preview')
                 previewframe=obj.getPar('loc_previewframe');               
                 if p.loc_subtractbg
-                    dt=p.loc_bg_dt;
+                    dt=p.loc_blocksize_frames;
                     frameload=max(1,previewframe-floor(dt/2));
                     obj.framestart=frameload;
 %                     obj.imloader.setImageNumber(frameload-1);

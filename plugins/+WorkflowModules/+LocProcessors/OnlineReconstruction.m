@@ -29,7 +29,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
             obj.locData.loc=struct('frame',1,'filenumber',1,'xnm',0,'ynm',0,'channel',-1);
             fn=fieldnames(obj.locData.loc);
             obj.setPar('locFields',fn);
-            obj.locData.empty;
+            obj.locData.clear;
             tifs=struct('image',[],'info',[]);
             finfo=obj.getPar('loc_fileinfo');
             sfile=finfo.basefile;
@@ -71,7 +71,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
                     notify(obj.P,'sr_render')
                     drawnow
                     obj.localtimervalue=tic;
-                    obj.locDatatemp.empty; %??? new
+                    obj.locDatatemp.clear; %??? new
                     
 
                 end   
@@ -151,10 +151,11 @@ function pard=pardef
 pard.loc_updatetime.object=struct('Style','edit','String','30');
 pard.loc_updatetime.position=[1,2.5];
 pard.loc_updatetime.Width=0.5;
+pard.loc_updatetime.TooltipString=sprintf('Render fitted data every XX seconds.');
 
 pard.update_check.object=struct('Style','checkbox','String','Render update (s):','Value',1);
 pard.update_check.position=[1,1];
 pard.update_check.Width=1.5;
-
+pard.update_check.TooltipString=sprintf('If checked, the fitted localizations are directly rendered and can be analyzed during the fit.');
       
 end

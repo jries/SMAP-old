@@ -38,7 +38,7 @@ if rem(m,2) > 0
 end
 m2 = fix(m/2);
 
-Y = zeros(r*2,c);
+Y = zeros(r*2,c,'like',X);
 if ~any(X(:)), return; end
 
 if rem(m2,2) == 0,

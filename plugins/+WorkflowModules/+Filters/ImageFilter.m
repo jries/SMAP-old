@@ -11,11 +11,11 @@ classdef ImageFilter<interfaces.WorkflowModule
         function pard=pardef(obj)
             pard=pardef;
         end
-        function initGui(obj)
-            initGui@interfaces.WorkflowModule(obj);
-%            obj.guihandles.loadmetadata.Callback={@loadmetadata_callback,obj};
-%            obj.guihandles.camparbutton.Callback={@camparbutton_callback,obj};
-        end
+%         function initGui(obj)
+%             initGui@interfaces.WorkflowModule(obj);
+% %            obj.guihandles.loadmetadata.Callback={@loadmetadata_callback,obj};
+% %            obj.guihandles.camparbutton.Callback={@camparbutton_callback,obj};
+%         end
         function prerun(obj,p)
             p=obj.getAllParameters;
             fs=p.loc_filter_sigma;
@@ -27,7 +27,6 @@ classdef ImageFilter<interfaces.WorkflowModule
             obj.preview=obj.getPar('loc_preview');
         end
         function dato=run(obj,data,p)
-%             output=[];
             dato=data;%.copy;
             imf=filter2(obj.filterkernel,data.data);
             if obj.preview&&obj.getPar('loc_previewmode').Value==3&&~isempty(imf)
@@ -39,17 +38,7 @@ classdef ImageFilter<interfaces.WorkflowModule
                 axis equal
             end
             dato.data=(imf);
-%             obj.output(dato);
- 
         end
-        
-%         function updateGui(obj)
-%             metadata=readmetadata(obj); 
-%             if ~isempty(metadata)
-%                 obj.cameraSettings=metadata;    
-%             end
-%             obj.globpar.parameters.cameraSettings=obj.cameraSettings;
-%         end
     end
 end
 
@@ -61,4 +50,5 @@ pard.text.Width=1.3;
 pard.loc_filter_sigma.object=struct('Style','edit','String','1.2');
 pard.loc_filter_sigma.position=[1,2.3];
 pard.loc_filter_sigma.Width=.7;
+pard.loc_filter_sigma.TooltipString=sprintf('Sigma (in camera pixels) for a Gaussian filter which is applied after \n background correction and before peak finding.');
 end

@@ -167,12 +167,14 @@ function pard=pardef
 pard.fitmode.object=struct('Style','popupmenu','String','PSF fix|PSF free|3D z|ellipt: PSFx PSFy','Value',2);
 pard.fitmode.position=[1,1];
 pard.fitmode.Width=2;
+pard.fitmode.TooltipString=sprintf('Fit mode. Fit with constant PSF, free PSF, 3D with astigmatism, asymmetric PSF (for calibrating astigmatic 3D)');
 
-
-pard.text.object=struct('Style','text','String','Iterations');
-pard.text.position=[1,3];
+pard.text.object=struct('Style','text','String','Iterations:');
+pard.text.position=[1,3.3];
+pard.text.Width=0.7;
 pard.iterations.object=struct('Style','edit','String','50');
 pard.iterations.position=[1,4];
+pard.iterations.TooltipString=sprintf('number of iterations for the GPU fitter');
 
 pard.tPSFx0.object=struct('Style','text','String','PSFx start (pix)');
 pard.tPSFx0.position=[2,1];
@@ -180,25 +182,28 @@ pard.tPSFx0.Width=1.25;
 pard.PSFx0.object=struct('Style','edit','String','1');
 pard.PSFx0.position=[2,2.25];
 pard.PSFx0.Width=0.75;
-
+pard.PSFx0.TooltipString=sprintf('start value for PSF, or size of PSF when PSF fixed (in camera pixels)');
 
 pard.loadcal.object=struct('Style','pushbutton','String','Load 3D cal');
 pard.loadcal.position=[3,1];
 pard.cal_3Dfile.object=struct('Style','edit','String','settings/cal_3DAcal.mat');
 pard.cal_3Dfile.position=[3,2];
 pard.cal_3Dfile.Width=3;
+pard.cal_3Dfile.TooltipString=sprintf('3D calibration file for astigmtic 3D. \n Generate from bead stacks with plugin: Analyze/sr3D/CalibrateAstig');
 
 pard.useObjPos.object=struct('Style','checkbox','String','Use objective position:');
 pard.useObjPos.position=[4,1];
 pard.useObjPos.Width=3;
 pard.objPos.object=struct('Style','edit','String','0');
 pard.objPos.position=[4,4];
+pard.objPos.TooltipString=sprintf('Position of the objective above the coverslip (nm, piezo position). \n Only used in combination with CalibrateAstigDeep.');
 
 pard.trefractive_index_mismatch.object=struct('Style','text','String','Refractive Index mismatch factor:');
 pard.trefractive_index_mismatch.position=[5,1];
 pard.trefractive_index_mismatch.Width=3;
 pard.refractive_index_mismatch.object=struct('Style','edit','String','.8');
 pard.refractive_index_mismatch.position=[5,4];
+pard.refractive_index_mismatch.TooltipString=sprintf('Correction factor to take into account the different refracrive indices of immersion oil and buffer. \n This leads to smaller distances inside the sample compared to bead calibration. \n Bead calibration: in piezo positions (nm). \n This factor transforms z positions to real-space z positions.');
 % pard.fitterPanel.object=struct('Style','uipanel','String','parameters');
 % pard.fitterPanel.position=[4,2];
 % pard.fitterPanel.Height=4;

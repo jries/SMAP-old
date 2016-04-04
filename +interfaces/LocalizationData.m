@@ -13,10 +13,10 @@ classdef LocalizationData<interfaces.GuiParameterInterface
     methods
 
         function obj=LocalizationData
-            %constructor. calls .empty to initialize 
-            obj.empty;
+            %constructor. calls .clear to initialize 
+            obj.clear;
         end
-        function empty(obj,part)
+        function clear(obj,part)
             %initializes properties to empty fields, sets files property to
             %no files
             if nargin<2||strcmpi(part,'all')
@@ -26,7 +26,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             obj.files.filenumberEnd=0;
             obj.files.file=[];    
             if ~isempty(obj.SE)
-                obj.SE.empty;
+                obj.SE.clear;
             end
             elseif strcmpi(part,'filter')
                 obj.layer=[];
@@ -240,7 +240,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             
         end
         
-        function saveloc=savelocs(obj,filename,goodind)
+        function saveloc=savelocs(obj,filename,goodind,additionalsave)
             %saves localization data to specific filename. Only saves
             %ungroupd locs. Returns saved structure:
             %saveloc=savelocs(filename,goodind)
@@ -256,6 +256,9 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                     saveloc.loc.(fields{k})=saveloc.loc.(fields{k})(goodind);
                 end
             end
+            if nargin>3&&~isempty(additionalsave)
+                saveloc=copyfields(saveloc,additionalsave);
+            end
             if nargin>1&&~isempty(filename)
                 save(filename,'saveloc','-v7.3')
             end
@@ -264,7 +267,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
         function setLocData(obj,locData)
             %sets localizations to those from interfaces.LocalizationData object
             %setLocData(locData:interfaces.LocalizationData)
-            obj.empty
+            obj.clear
             obj.loc=locData.loc;
             obj.files=locData.files;
             if isfield(locData,'SE')

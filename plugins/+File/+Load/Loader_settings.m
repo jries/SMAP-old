@@ -21,8 +21,8 @@ classdef Loader_settings<interfaces.DialogProcessor
             obj.load(p,[p f]);
             initGuiAfterLoad(obj);
         end
-        function empty(obj,file,isadd)
-            obj.locData.empty('filter');
+        function clear(obj,file,isadd)
+            obj.locData.clear('filter');
         end        
     end
 end

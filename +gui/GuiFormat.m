@@ -90,7 +90,24 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.handle.UIContextMenu=c2;
              m5 = uimenu(c2,'Label','detach','Callback',{@detach_callback,obj,obj.handle});
            
-             
+            h.hplus.TooltipString='zoom out, increase pixelsize';
+            h.hminus.TooltipString='zoom in, decrease pixelsize';
+            h.pixrec.TooltipString='pixel size for reconstruction (nm)';
+            h.pref1.TooltipString=sprintf('preset pixel size. To change this value:  \n 1. click on button and leave mouse over it \n 2. type pixelsize in nm, finishe with Enter');
+            h.pref2.TooltipString=h.pref1.TooltipString;
+            h.resetview.TooltipString='adjust pixelsize to fit all width or height';
+            h.parformat.TooltipString='additional global parameters for rendering';
+            h.redrawov.TooltipString='redraw overview image using the settings of the layer tab: ovim 6';
+            h.overview_select.TooltipString='toggels between overview image and histogram view';
+            h.linewidth_roi.TooltipString='width of the roi when using the line';
+            h.roi4.TooltipString='line roi, width set below';
+            h.roi5.TooltipString='point roi, rectangular roi around with width and height set below';
+            h.roi1.TooltipString='rectangular roi';
+            h.roi2.TooltipString='circular roi';
+            h.roi6.TooltipString='polynome roi';
+            h.roi3.TooltipString='free roi';
+            h.roishow.TooltipString='redraw roi after updating image. Untick if Roi is in the way.';
+
             obj.initGui;
         end
         

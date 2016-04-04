@@ -98,8 +98,8 @@ switch lower(p.rendermode.selection)
             pos.s=min(max(sd*p.gaussfac,max(p.mingaussnm,p.mingausspix*p.sr_pixrec(1))),400);
             frender=@gaussrender;
         else
-            pos.sx=(max(locsh.sx(indin)*p.gaussfac,max(p.mingaussnm,p.mingausspix*p.sr_pixrec(1))));
-            pos.sy=(max(locsh.sy(indin)*p.gaussfac,max(p.mingaussnm,p.mingausspix*p.sr_pixrec(2))));
+            pos.sx=max(locsh.sx(indin)*p.gaussfac,max(p.mingaussnm,p.mingausspix*p.sr_pixrec(1)));
+            pos.sy=max(locsh.sy(indin)*p.gaussfac,max(p.mingaussnm,p.mingausspix*p.sr_pixrec(2)));
             if isempty(transparency)
                 frender=@gaussrender_ellipt;
             else

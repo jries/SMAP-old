@@ -7,6 +7,7 @@ end
  info.filename=file;
 switch ext
     case '.tif' 
+        warning('off','MATLAB:imagesci:tiffmexutils:libtiffWarning');
         omeind=strfind(file,'.ome.');
         if ~isempty(omeind)
             basefile=file(1:omeind-1);

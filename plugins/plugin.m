@@ -84,8 +84,8 @@ case 'Process.Assign2C.Intensity2Channel'
    module=Process.Assign2C.Intensity2Channel(varargin{:}); 
 case 'Process.Assign2C.SALMInt2z' 
    module=Process.Assign2C.SALMInt2z(varargin{:}); 
-case 'Process.Drift.driftfeature' 
-   module=Process.Drift.driftfeature(varargin{:}); 
+case 'Process.Drift.driftcorrection' 
+   module=Process.Drift.driftcorrection(varargin{:}); 
 case 'Process.Drift.showdriftinfo' 
    module=Process.Drift.showdriftinfo(varargin{:}); 
 case 'Process.Modify.Connect2Unconnect' 
@@ -150,6 +150,8 @@ case 'WorkflowModules.Filters.fitOnBackground'
    module=WorkflowModules.Filters.fitOnBackground(varargin{:}); 
 case 'WorkflowModules.Fitters.EMCCD_SE_MLE_GPU' 
    module=WorkflowModules.Fitters.EMCCD_SE_MLE_GPU(varargin{:}); 
+case 'WorkflowModules.Fitters.FalconHD2D' 
+   module=WorkflowModules.Fitters.FalconHD2D(varargin{:}); 
 case 'WorkflowModules.Fitters.RadialSymmetry2D' 
    module=WorkflowModules.Fitters.RadialSymmetry2D(varargin{:}); 
 case 'WorkflowModules.Fitters.RadialSymmetry3D' 
@@ -235,7 +237,7 @@ out.Process.Assign2C.Get2CIntImagesWF={'Process','Assign2C','Get2CIntImagesWF'};
 out.Process.Assign2C.Get2CIntLoc={'Process','Assign2C','Get2CIntLoc'}; 
 out.Process.Assign2C.Intensity2Channel={'Process','Assign2C','Intensity2Channel'}; 
 out.Process.Assign2C.SALMInt2z={'Process','Assign2C','SALMInt2z'}; 
-out.Process.Drift.driftfeature={'Process','Drift','driftfeature'}; 
+out.Process.Drift.driftcorrection={'Process','Drift','driftcorrection'}; 
 out.Process.Drift.showdriftinfo={'Process','Drift','showdriftinfo'}; 
 out.Process.Modify.Connect2Unconnect={'Process','Modify','Connect2Unconnect'}; 
 out.Process.Modify.MathParser={'Process','Modify','MathParser'}; 
@@ -268,6 +270,7 @@ out.WorkflowModules.Filters.ImageNormalize={'WorkflowModules','Filters','ImageNo
 out.WorkflowModules.Filters.MedianBGcalculator={'WorkflowModules','Filters','MedianBGcalculator'}; 
 out.WorkflowModules.Filters.fitOnBackground={'WorkflowModules','Filters','fitOnBackground'}; 
 out.WorkflowModules.Fitters.EMCCD_SE_MLE_GPU={'WorkflowModules','Fitters','EMCCD_SE_MLE_GPU'}; 
+out.WorkflowModules.Fitters.FalconHD2D={'WorkflowModules','Fitters','FalconHD2D'}; 
 out.WorkflowModules.Fitters.RadialSymmetry2D={'WorkflowModules','Fitters','RadialSymmetry2D'}; 
 out.WorkflowModules.Fitters.RadialSymmetry3D={'WorkflowModules','Fitters','RadialSymmetry3D'}; 
 out.WorkflowModules.Fitters.fitterGUI={'WorkflowModules','Fitters','fitterGUI'}; 

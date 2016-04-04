@@ -52,7 +52,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             
             
             %global settings
-            obj.createGlobalSetting('guiPluginConfigFile','Directories','Configuration file for GUI plugin structure. Delete path and save to reset plugins.',struct('Style','file','String','settings/pluginconfig.txt'))
+            obj.createGlobalSetting('guiPluginConfigFile','Directories','Configuration file for GUI plugin structure. Delete path and save to reset plugins.',struct('Style','file','String','settings/SimpleGui.txt'))
             gfile=obj.getGlobalSetting('guiPluginConfigFile');
             if exist(gfile,'file')
                 guimodules=readstruct(gfile,[],true);
@@ -71,6 +71,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             ch=uicontextmenu(f);
             h.maintab.UIContextMenu=ch;
             m1 = uimenu(ch,'Label','detach','Callback',{@detach_callback,obj,h.maintab});
+      
 
             h.tab_file = uitab(h.maintab,'Title','File');
             h.tab_loc = uitab(h.maintab,'Title','Localize');
@@ -164,7 +165,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.children.guiSites=gsites;
             
             obj.guihandles=h;
-            gui.setTooltips(obj);
+%             gui.setTooltips(obj);
             
             
             %undo

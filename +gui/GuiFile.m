@@ -74,7 +74,7 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                     f={f};
                 end
                 
-                loader.empty([pfad f{1}],isadd)
+                loader.clear([pfad f{1}],isadd)
 %                 [~,~,ext]=fileparts(f{1});
 
 %                 [mode, emptylocs]=getfilemode([pfad f{1}]);
@@ -237,7 +237,7 @@ if strcmp(mode,'tif')
         obj.setPar('filelist_localize',[pfad f]) %communication with localizer
         maing=obj.getPar('mainGui');
         maing.setmaintab(2);
-        obj.locData.empty;
+        obj.locData.clear;
         return
     elseif si==0
 %         return
@@ -284,10 +284,13 @@ pard.add.Height=1.5;
 pard.loadmodule.object=struct('Style','popupmenu','String',{'auto'});
 pard.loadmodule.position=[5.5,1];
  pard.loadmodule.Width=1.5;
+ pard.loadmodule.object.TooltipString='select saver plugin';
  
 pard.updateGuiPar.object=struct('Style','checkbox','String','load Gui Parameters');
 pard.updateGuiPar.position=[6.5,1];
  pard.updateGuiPar.Width=1.5;
+pard.updateGuiPar.TooltipString='Restore Gui parameters saved with localization data';
+
 
 pard.remove.object=struct('Style','pushbutton','String','remove','Callback',{{@obj.remove_callback,1}});
 pard.remove.position=[4,4.5];
@@ -336,4 +339,14 @@ pard.group_dt.Width=0.5;
 pard.syncParameters={{'filelist_long','filelist_long',{'String'}}};
 pard.outputParameters= {'group_dx','group_dt'};
 pard.inputParameters={'mainfile'};
+
+
+pard.load.object.TooltipString='load localization data or image. Load at least one localization data before adding an image.';
+pard.add.object.TooltipString='add localization data or image';
+pard.remove.object.TooltipString='remove file';
+pard.savemodule.object.TooltipString='select what to save';
+pard.group_b.object.TooltipString='group localizations in consecutive frames';
+pard.group_dx.object.TooltipString=sprintf('distance in nm which two locs can be apart \n and still grouped together');
+pard.group_dt.object.TooltipString=sprintf('number of frames locs can be missing \n and still grouped together');
+
 end

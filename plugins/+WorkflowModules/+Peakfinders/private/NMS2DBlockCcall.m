@@ -1,7 +1,7 @@
 %NMS 2D block after  Neubeck and Gool, Algorithm 4
 
 %reprogram in c: much faster hopefully. Now 7ms for 100x100
-function maximaout=NMS2DBlock(imin,n)
+function maximaout=NMS2DBlockCcall(imin,n)
 %maxima=[x,y,intensity]
 
 simg=size(imin);
