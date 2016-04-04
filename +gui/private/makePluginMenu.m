@@ -135,4 +135,7 @@ answ=inputdlg('new name for SMAP window','Rename window',1,{title});
 if ~isempty(answ)
     obj.handle.Name=answ{1};
 end
+jDesktop = com.mathworks.mde.desk.MLDesktop.getInstance;
+jDesktop.getMainFrame.setTitle(answ{1});
+clear jDesktop;
 end

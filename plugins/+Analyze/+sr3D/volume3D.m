@@ -21,6 +21,7 @@ classdef volume3D<interfaces.DialogProcessor
 end
 
 function make3Dvolume(obj,p)
+global SMAP_stopnow
 lochere=obj.locData.copy;
 [locsout,indout,hroi]=lochere.getloc({'xnm','ynm','znm','xnmline','ynmline'},'position','roi');
 lochere.removelocs(~indout);
@@ -101,6 +102,9 @@ for k=1:length(z)
         title(z(k))
          drawnow
          showtic=tic;
+    end
+    if SMAP_stopnow
+        break
     end
 end
 imagesc(imall.composite/max(imall.composite(:)),'Parent',ax);

@@ -122,6 +122,7 @@ classdef SEExploreGui<interfaces.SEProcessor
         end
         
         function redrawall(obj)
+            global SMAP_stopnow
         files=obj.SE.files;
         for k=1:length(files)
             obj.guihandles.filelist.Value=k;
@@ -131,6 +132,9 @@ classdef SEExploreGui<interfaces.SEProcessor
             filenumber=files(k).ID;
             files(k).image=[];
             obj.SE.plotfile(filenumber,obj.guihandles.fileax);
+            if SMAP_stopnow
+                break
+            end
 
         end
         
