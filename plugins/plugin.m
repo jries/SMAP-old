@@ -150,6 +150,8 @@ case 'WorkflowModules.Filters.fitOnBackground'
    module=WorkflowModules.Filters.fitOnBackground(varargin{:}); 
 case 'WorkflowModules.Fitters.EMCCD_SE_MLE_GPU' 
    module=WorkflowModules.Fitters.EMCCD_SE_MLE_GPU(varargin{:}); 
+case 'WorkflowModules.Fitters.FalconHD2D' 
+   module=WorkflowModules.Fitters.FalconHD2D(varargin{:}); 
 case 'WorkflowModules.Fitters.RadialSymmetry2D' 
    module=WorkflowModules.Fitters.RadialSymmetry2D(varargin{:}); 
 case 'WorkflowModules.Fitters.RadialSymmetry3D' 
@@ -268,6 +270,7 @@ out.WorkflowModules.Filters.ImageNormalize={'WorkflowModules','Filters','ImageNo
 out.WorkflowModules.Filters.MedianBGcalculator={'WorkflowModules','Filters','MedianBGcalculator'}; 
 out.WorkflowModules.Filters.fitOnBackground={'WorkflowModules','Filters','fitOnBackground'}; 
 out.WorkflowModules.Fitters.EMCCD_SE_MLE_GPU={'WorkflowModules','Fitters','EMCCD_SE_MLE_GPU'}; 
+out.WorkflowModules.Fitters.FalconHD2D={'WorkflowModules','Fitters','FalconHD2D'}; 
 out.WorkflowModules.Fitters.RadialSymmetry2D={'WorkflowModules','Fitters','RadialSymmetry2D'}; 
 out.WorkflowModules.Fitters.RadialSymmetry3D={'WorkflowModules','Fitters','RadialSymmetry3D'}; 
 out.WorkflowModules.Fitters.fitterGUI={'WorkflowModules','Fitters','fitterGUI'}; 

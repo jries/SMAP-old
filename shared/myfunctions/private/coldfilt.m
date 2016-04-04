@@ -40,7 +40,7 @@ hbe = hb(2:2:m);
 t = [6:4:(r+2*m-2)];
 
 r2 = r/2;
-Y = zeros(r2,c);
+Y = zeros(r2,c,'like',X);
 if sum(ha.*hb) > 0,
    s1 = 1:2:r2; 
    s2 = s1 + 1;
