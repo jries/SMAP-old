@@ -4,6 +4,8 @@ hinfo=uimenu(hsmap,'Label','About SMAP...','Callback',@info_callback);
 hglobalSettings=uimenu(hsmap,'Label','Preferences...','Callback',{@globalsettings_callback,obj});
 hexit=uimenu(hsmap,'Label','Quit SMAP','Callback',{@exit_callback,obj});
 
+hrename=uimenu(hsmap,'Label','Rename window','Callback',{@renamewindow_callback,obj});
+
 hmainplugin=uimenu(handle,'Label','Plugins');
 % hwf=uimenu(handle,'Label','Workflows');
 mwf1=uimenu(hmainplugin,'Label','New workflow','Callback',{@makeplugin,obj,'Workflow'});
@@ -125,4 +127,12 @@ end
 
 function exit_callback(a,b,obj)
 delete(obj)
+end
+
+function renamewindow_callback(a,b,obj)
+title=obj.handle.Name;
+answ=inputdlg('new name for SMAP window','Rename window',1,{title});
+if ~isempty(answ)
+    obj.handle.Name=answ{1};
+end
 end

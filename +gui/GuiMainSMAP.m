@@ -71,6 +71,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             ch=uicontextmenu(f);
             h.maintab.UIContextMenu=ch;
             m1 = uimenu(ch,'Label','detach','Callback',{@detach_callback,obj,h.maintab});
+      
 
             h.tab_file = uitab(h.maintab,'Title','File');
             h.tab_loc = uitab(h.maintab,'Title','Localize');
