@@ -2,7 +2,7 @@ classdef GuiHistSlider< interfaces.LayerInterface
     properties
         field
         data
-        histogram
+        histogram={};
         backup
         
 
@@ -50,6 +50,7 @@ classdef GuiHistSlider< interfaces.LayerInterface
         function selectedField_callback(obj)
             
             sfield=obj.getPar('selectedField','layer',obj.layer);
+            filenumber=obj.getPar(['layer' num2str(obj.layer) '_']).ch_filelist.Value;
             fieldh=sfield{1};
             if isempty(obj.locData.loc)||~isfield(obj.locData.loc,fieldh)
                 return
@@ -61,7 +62,9 @@ classdef GuiHistSlider< interfaces.LayerInterface
                 obj.guihandles.filteron.Value=sfield{4};
             end
             
-            if isfield(obj.backup,fieldh)&&~strcmpi(fieldh,'colorfield')&&obj.backup.(fieldh).len==length(obj.locData.loc.(fieldh))
+            if isfield(obj.backup,fieldh)&&~strcmpi(fieldh,'colorfield')...
+                    &&obj.backup.(fieldh).len==length(obj.locData.loc.(fieldh))...
+                    &&obj.backup.(fieldh).histogram.filenumber == filenumber; 
                 restorestruc=obj.backup.(fieldh);
                 restore=true;
             else
@@ -70,7 +73,7 @@ classdef GuiHistSlider< interfaces.LayerInterface
              %backup
             if ~isempty(obj.field) %first tiem might be empty
                 obj.backup.(obj.field).lockrange=obj.guihandles.lockrange.Value;
-                obj.backup.(obj.field).quantile=obj.data.quantile;
+%                 obj.backup.(obj.field).quantile=obj.data.quantile;
                 obj.backup.(obj.field).range=obj.guihandles.range.String;
                 obj.backup.(obj.field).histogram=obj.histogram;
                 obj.backup.(obj.field).len=length(obj.locData.loc.(fieldh));
@@ -82,39 +85,28 @@ classdef GuiHistSlider< interfaces.LayerInterface
                 obj.guihandles.smin.Max=500;
                 obj.guihandles.smax.Min=-500;
                 obj.guihandles.smax.Max=500;
-            elseif restore
+            elseif restore  && ~isempty(restorestruc.histogram)
                 obj.guihandles.lockrange.Value=restorestruc.lockrange;
                 obj.guihandles.range.String=restorestruc.range;
-                obj.data.quantile=restorestruc.quantile;
-                obj.guihandles.smin.Min=obj.data.quantile(1);
-                obj.guihandles.smin.Max=obj.data.quantile(2);
-                obj.guihandles.smax.Min=obj.data.quantile(1);
-                obj.guihandles.smax.Max=obj.data.quantile(2);
+%                 obj.data.quantile=restorestruc.quantile;
+                q=restorestruc.histogram.x([1 end]);
+                obj.guihandles.smin.Min=q(1);
+                obj.guihandles.smin.Max=q(2);
+                obj.guihandles.smax.Min=q(1);
+                obj.guihandles.smax.Max=q(2);
                 obj.histogram=restorestruc.histogram;        
             else
                 if 1%~isempty(obj.locData.loc)&&isfield(obj.locData.loc,fieldh)
-                    v=double(obj.locData.loc.(fieldh));
-                    mv=max(v);
-                    if min(v)==mv
-                        q=[0.9 1.1 ]*double(mv);
-                    else
-                        try
-                             q=myquantilefast(v,[0.015,0.985],10000);
-                        catch
-                        end
-                        if isempty(q)||any(isnan(q))
-                            q=double([min(v) mv]);
-                            if isempty(q)
-                                q=[0 1];
-                            end
-                        end
-                    end
-                    obj.data.quantile=q;
+                    v=double(obj.locData.loc.(fieldh)(obj.locData.loc.filenumber==filenumber));
+                    q=getquantile(v);
+                    
+%                     obj.data.quantile=q;
                     obj.guihandles.lockrange.Value=0;
 %                     obj.guihandles.autoupdate.Value=0;
                     set(obj.guihandles.smin,'Min',q(1),'Max',q(2),'Value',q(1))
                     set(obj.guihandles.smax,'Min',q(1),'Max',q(2),'Value',q(2))
                     [obj.histogram.x,obj.histogram.hist]=makeHist(v,q);
+                    obj.histogram.filenumber=filenumber;
                     
                 end
             end
@@ -123,27 +115,34 @@ classdef GuiHistSlider< interfaces.LayerInterface
                 obj.data.values=double(obj.locData.loc.(fieldh));
             else
                 plot(0,0,'Parent',obj.guihandles.histax)
-                obj.data.quantile=[0 1];
+%                 obj.data.quantile=[0 1];
                 obj.data.values=0;
             end
             vchanged_callback([],0, obj,'minmax',false)
             
-            %update checkboxes
-%             if isfield(obj.autoupdate,field)
-%                 obj.guihandles.autoupdate.Value=obj.autoupdate.(field); 
-%             else
-%                 obj.guihandles.autoupdate.Value=0; 
-%             end
-%             if isfield(obj.lockrange,field)
-%                 obj.guihandles.lockrange.Value=obj.lockrange.(field); 
-%             else
-%                 obj.guihandles.lockrange.Value=0; 
-%             end
              
         end
     end
 end
     
+
+function q=getquantile(v)
+mv=max(v);
+if min(v)==mv
+    q=[0.9 1.1 ]*double(mv);
+else
+    try
+         q=myquantilefast(v,[0.015,0.985],10000);
+    catch
+    end
+    if isempty(q)||any(isnan(q))
+        q=double([min(v) mv]);
+        if isempty(q)
+            q=[0 1];
+        end
+    end
+end
+end
 
 function vchanged_callback(object,data, obj,minmax,direct)
 if isempty(obj.locData.loc)
@@ -151,6 +150,7 @@ if isempty(obj.locData.loc)
 end
 
 p=obj.getGuiParameters;
+filenumber=obj.getPar(['layer' num2str(obj.layer) '_']).ch_filelist.Value;
 if isnan(p.vmin)
     p.vmin=-inf;
 end
@@ -179,9 +179,15 @@ hsmax=obj.guihandles.smax;
 p.smax=min(max(p.vmax,hsmax.Min),hsmax.Max);
 
 obj.setGuiParameters(p);
-q=obj.data.quantile;
-if isempty(obj.histogram)
-[obj.histogram.x,obj.histogram.hist]=makeHist(obj.data.values,q);
+
+% q=obj.data.quantile;
+if isempty(obj.histogram)|| obj.histogram.filenumber ~=filenumber%check if filenumber has changed   
+    v=double(obj.data.values(obj.locData.loc.filenunber==filenumber));
+    q=getquantile(v);
+    [obj.histogram.x,obj.histogram.hist]=makeHist(v,q);
+    obj.histogram.filenumber=filenumber;
+else
+    q=obj.histogram.x([1 end]);
 end
 x=obj.histogram.x;his=obj.histogram.hist;
 
