@@ -30,7 +30,7 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             h.hformat=uipanel('Parent',obj.handle,'Title','format','Units','pixel','Position',[1 8.5*fieldheight+10 widtht 7.2*fieldheight]);
             h.hplus=uicontrol('Parent',h.hformat,'Style','togglebutton','String','+','FontSize',fontsize*1.5,'Position',[0,4.8*fieldheight,width/2,fieldheight*1.5],'Callback',{@format_callback,obj,1});
             h.hminus=uicontrol('Parent',h.hformat,'Style','togglebutton','String','-','FontSize',fontsize*1.5,'Position',[width/2,4.8*fieldheight,width/2,fieldheight*1.5],'Callback',{@format_callback,obj,2});
-            h.picrt=uicontrol('Parent',h.hformat,'Style','text','String','Pixrec','Position',[0 3.8*fieldheight,width,fieldheight]);
+            h.picrt=uicontrol('Parent',h.hformat,'Style','text','String','Pixrec (nm)','Position',[0 4*fieldheight,width,fieldheight]);
             h.pixrec=uicontrol('Style','edit','Parent',h.hformat,'String','20','Position',[0,2.8*fieldheight,width,fieldheight*1.2],'FontSize',fontsize,'Callback',{@format_callback,obj,3});         
             h.pref1=uicontrol('Style','pushbutton','Parent',h.hformat,'String','2','Position',[0,1.6*fieldheight,width/2,fieldheight*1.2],'FontSize',fontsize,'Callback',{@predef_callback,obj},'KeyPressFcn',{@predefkey_callback,obj});
             h.pref2=uicontrol('Style','pushbutton','Parent',h.hformat,'String','10','Position',[width/2,1.6*fieldheight,width/2,fieldheight*1.2],'FontSize',fontsize,'Callback',{@predef_callback,obj},'KeyPressFcn',{@predefkey_callback,obj});

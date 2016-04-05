@@ -67,7 +67,8 @@ templocData.removelocs(indout);
 nfiles=length(templocData.files.file);
 templocData.loc.filenumber=templocData.loc.filenumber+filenumber;
 obj.locData.addLocData(templocData);
-
+his=templocData.history;
+obj.locData.history(end+1:end+length(his))=his;
 for k=1:nfiles
 %     templocData.files.file(k).number=templocData.files.file(k).number+filenumber;
     templocData.files.file(k).number=k+filenumber;
@@ -107,4 +108,6 @@ if isempty(siteexplorer)||siteexplorer.numberOfFiles==0
 end
 se=obj.locData.SE;
    se.addSites(siteexplorer,newfilenumbers, templocData.files.file)
+   
+   
 end

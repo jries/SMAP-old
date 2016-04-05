@@ -6,6 +6,7 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
         resultstabgroup;   %handle to results  
         processorgui=true; %switch. true if process button etc are to be rendered. false if called externally (for workflow)
         showresults=false; % defined state for results
+        history=false;
 %         moduleinfo;
     end
     properties (SetAccess = private, GetAccess = private)
@@ -74,7 +75,11 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
             %button)
             processgo_callback(0,0,obj);
         end
-                
+        function addhistory(obj)
+            p.parameters=obj.getGuiParameters(true,true);
+            p.name=class(obj);
+            obj.locData.addhistory(p);
+        end      
 
     end
     methods (Access=private)
@@ -102,15 +107,7 @@ obj.resultshandle.Visible=onoff(p.showresults);
 if isempty(obj.locData.loc)
     warning('no localization data present')
 end
-%  try %in case no output is defined.
     results=obj.run(p);
-%  cartch err
-%      if ~strcmp(err.idrentifier,'MATLAB:unassignedOutputs')
-%      throw(err)
-%      else
-%      results=[];
-%      end
-%  end
 if ~isempty(results)
     obj.setAutoResults(obj.pluginpath,results);
     if isfield(results,'clipboard')
@@ -129,9 +126,13 @@ if ~isempty(results)
         
     end
 end
+if obj.history
+    obj.addhistory;
+end
 obj.resultshandle.Visible=onoff(p.showresults);
 obj.status([class(obj) ' finished'])
 end
+
 
 
 function showresults_callback(object,data,obj)

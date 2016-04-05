@@ -3,6 +3,7 @@ classdef driftcorrection<interfaces.DialogProcessor
         function obj=driftcorrection(varargin)        
                 obj@interfaces.DialogProcessor(varargin{:}) ;
                 obj.inputParameters={'layer1_'};
+                obj.history=true;
         end
         
         function out=run(obj,p)

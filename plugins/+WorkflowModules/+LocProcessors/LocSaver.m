@@ -35,6 +35,9 @@ classdef LocSaver<interfaces.WorkflowModule;
                  filestruct.info.roi=[0 0 filestruct.info.Width filestruct.info.Height];
              end
              obj.locDatatemp.files.file=filestruct;  
+             p=obj.parent.getGuiParameters(true,true);
+             p.name=obj.parent.pluginpath;
+             obj.locDatatemp.addhistory(p);
              obj.fileinfo=obj.getPar('cameraSettings');          
         end
         function output=run(obj,data,p)

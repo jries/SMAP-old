@@ -7,6 +7,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
         layer %stores layer-specific information = filters.
         files %localization files and file meta data
         SE %siteexplorer object, linked here why?
+        history={};
 %         iscopy=true;
     end
     
@@ -25,6 +26,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
              obj.layer=[];
             obj.files.filenumberEnd=0;
             obj.files.file=[];    
+            obj.history={};
             if ~isempty(obj.SE)
                 obj.SE.clear;
             end
@@ -116,6 +118,10 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             else
                 obj.layer(layer).filter=filter;
             end  
+        end
+        
+        function addhistory(obj,p)
+            obj.history{end+1}=p;
         end
         
         function removeFilter(obj,field,layer)
@@ -248,6 +254,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             %fields). Default: save all localizations.
             saveloc.loc=obj.loc;
             saveloc.file=obj.files.file;
+            saveloc.history=obj.history;
             fieldsremove={'original_channel','groupindex','numberInGroup','colorfield'};
             saveloc.loc=myrmfield(saveloc.loc,fieldsremove);
             if nargin>2&&~isempty(goodind)

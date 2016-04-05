@@ -22,6 +22,7 @@ classdef Workflow<interfaces.DialogProcessor
                 delete(obj.handle.Children);
             end
             obj.outputParameters={'description'};
+            
         end
         function initGui(obj)
             f=getParentFigure(obj.handle);

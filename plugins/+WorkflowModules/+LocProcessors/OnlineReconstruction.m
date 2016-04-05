@@ -43,7 +43,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
             for k=1:length(filelist)
                 [~,filelists{k}]=fileparts(filelist{k});
             end
-            obj.localtimervalue=tic;  
+            
             obj.fileinfo=obj.getPar('cameraSettings');
             obj.setPar('currentfileinfo',obj.fileinfo);
 
@@ -55,6 +55,10 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
             obj.setPar('sr_pos',pos);
              obj.setPar('sr_pixrec',pixels);
             obj.locDatatemp=interfaces.LocalizationData;
+             p=obj.parent.getGuiParameters(true,true);
+             p.name=obj.parent.pluginpath;
+             obj.locData.addhistory(p);
+              obj.localtimervalue=tic;
         end
         function output=run(obj,data,p)
             output=[];

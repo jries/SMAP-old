@@ -62,20 +62,27 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
             obj.guiPar=guiPar;
          end
         
-        function pout=getGuiParameters(obj,getchildren)
+        function pout=getGuiParameters(obj,getchildren,onlyedit)
             %gets all GUI parameters (editable parts of uicontrols etc) in
             %a parsed format. 
             %p=getGuiParameters(getchildren)
             %if getchildren=true (optional): get paraemters also from children
-            if nargin==1
+            %if onlyedit: only editable fields are returned.
+            if nargin<2
                 getchildren=false;
+            end
+            if nargin<3
+                onlyedit=false;
             end
             h=obj.guihandles;
             p=[];
             if ~isempty(h)
                 fn=fieldnames(h);
                 for k=1:length(fn)
-                   p.(fn{k})=obj.getSingleGuiParameter(fn{k});    
+                    vh=obj.getSingleGuiParameter(fn{k},onlyedit);  
+                    if ~isempty(vh)
+                            p.(fn{k})=vh;             
+                    end
                 end
             end
             psave=obj.propertiesToSave;
@@ -89,18 +96,33 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                 if isstruct(obj.children)
                     guichildren=fieldnames(obj.children);
                     for k=1:length(guichildren)
-                        pout.children.(guichildren{k})=obj.children.(guichildren{k}).getGuiParameters(true);
+                        ph=obj.children.(guichildren{k}).getGuiParameters(true,onlyedit);
+                        if ~isempty(ph)
+                            pout.children.(guichildren{k})=ph;
+                        end
                     end
                 end
             end        
         end
         
-        function par=getSingleGuiParameter(obj,field)
+        function par=getSingleGuiParameter(obj,field,onlyedit)
             %get parsed value of uicontrol
             % p=getSingleGuiParameter(guifield). 
             % uicontrol needs to be stored as obj.guihandles.(field)
+            if nargin <3
+                onlyedit=false;
+            end
             hfn=obj.guihandles.(field);
-            par=obj.handle2value(hfn);
+%             if onlyedit
+%                 switch hfn.Style
+%                     case {'edit','popupmenu','listbox','checkbox','togglebutton'}
+%                         par=obj.handle2value(hfn);
+%                     otherwise
+%                         par=[];
+%                 end
+%             else
+            par=obj.handle2value(hfn,onlyedit);
+%             end
         end
         
         function setGuiParameters(obj,p,setchildren)

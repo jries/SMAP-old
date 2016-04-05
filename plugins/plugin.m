@@ -30,6 +30,8 @@ case 'Analyze.other.CompareToGroundTruth'
    module=Analyze.other.CompareToGroundTruth(varargin{:}); 
 case 'Analyze.other.PushToFiji' 
    module=Analyze.other.PushToFiji(varargin{:}); 
+case 'Analyze.other.ShowHistory' 
+   module=Analyze.other.ShowHistory(varargin{:}); 
 case 'Analyze.other.VersatileRenderer' 
    module=Analyze.other.VersatileRenderer(varargin{:}); 
 case 'Analyze.other.density_calculator' 
@@ -210,6 +212,7 @@ out.Analyze.measure.lineprofile={'Analyze','measure','lineprofile'};
 out.Analyze.other.BlinkingMoviePresentation={'Analyze','other','BlinkingMoviePresentation'}; 
 out.Analyze.other.CompareToGroundTruth={'Analyze','other','CompareToGroundTruth'}; 
 out.Analyze.other.PushToFiji={'Analyze','other','PushToFiji'}; 
+out.Analyze.other.ShowHistory={'Analyze','other','ShowHistory'}; 
 out.Analyze.other.VersatileRenderer={'Analyze','other','VersatileRenderer'}; 
 out.Analyze.other.density_calculator={'Analyze','other','density_calculator'}; 
 out.Analyze.projects.Platelets_Band={'Analyze','projects','Platelets_Band'}; 

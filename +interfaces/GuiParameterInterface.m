@@ -176,7 +176,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             end
         end   
         
-        function par=handle2value(obj,hfn)
+        function par=handle2value(obj,hfn,onlyedit)
             %parses uicontrol handles. 
             %TODO: remove from here, use as function
             %par=handle2value(handle)
@@ -185,12 +185,18 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             %popupmenu, listbox: structure with h.String,h.Value,
             %.selection=h.String{h.Value}
             %Table: Data    
+            if nargin <3
+                onlyedit=false;
+            end
             par=[];
             if (isa(hfn,'matlab.ui.control.UIControl')&&isvalid(hfn)) || (isstruct(hfn)&&(isfield(hfn,'String')||isfield(hfn,'Value'))&&isfield(hfn,'Style'))
                 style=hfn.Style;
                 switch style
                     case {'edit','text','file','dir'}
-                        
+                        if onlyedit && ~strcmp(style,'edit')
+                            par=[];
+                            return
+                        end
                         st=hfn.String;
                         if isempty(st)
                             par=[];
@@ -211,11 +217,14 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                                 par=1*v;
                             end
                         end
-
                     case {'togglebutton','checkbox','slider', 'pushbutton','radiobutton'}
+                        if onlyedit && ~(strcmp(style,'checkbox') || strcmp(style,'togglebutton'))
+                            par=[];
+                            return
+                        end
                         v=double(hfn.Value);
                         par=1*v;
-                    case {'popupmenu','listbox'}               
+                    case {'popupmenu','listbox'}    
                             par.String=hfn.String; 
                             par.Value=hfn.Value;
                             sstring=hfn.String;
@@ -232,6 +241,9 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                             else
                                 par.selection=hfn.String;
                             end
+                        end
+                        if onlyedit
+                            par=par.selection;
                         end
                 end
             elseif isa(hfn,'matlab.ui.control.Table')
