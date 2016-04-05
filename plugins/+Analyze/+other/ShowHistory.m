@@ -5,11 +5,24 @@ classdef ShowHistory<interfaces.DialogProcessor
         end
         
         function out=run(obj,p)
-            phist.p=obj.locData.history{1};
-            txt=struct2txt(phist,'p');
-            listdlg('ListString',txt,'ListSize',[800,800]);
+            hist=obj.locData.history;
+            texta={};
+            for k=1:length(hist)
+                
+                phist=hist{k};
+                txt=struct2txt(phist,'');
+                if isfield(phist,'name')
+                    name=phist.name;
+                else 
+                    name='';
+                end
+                texta{end+1}=['Module' num2str(k) ': ' name];
+                texta(end+1:end+length(txt))=txt;
+                texta{end+1}='';
+            end
             
-            out=txt;
+            listdlg('ListString',texta,'ListSize',[800,800]);
+            out=texta;
            
         end
         function pard=pardef(obj)

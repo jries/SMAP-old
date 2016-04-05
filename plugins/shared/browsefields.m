@@ -11,7 +11,9 @@ if nargin<2||isempty(field)
     psub=prop;
 elseif strcmp(field,'..')
     fn=fieldnames(prop);
+     recursions=recursions+1;
     psub=prop;
+    field='';
 elseif isstruct(prop.(field))
     fn=fieldnames(prop.(field));
     fn={'..',fn{:}};
@@ -27,15 +29,15 @@ pos(3:4)=[100 100];
     answ=mylistdlg('ListString',fn,'SelectionMode','single','FontSize',14,'InitialValue',min(2,length(fn)),'Position',pos);
     if isempty(answ)
         str='abortbutton';
-    elseif recursions<=0
+    elseif recursions<=0 && ~strcmp(fn{answ},'..')
         str=[field '.' fn{answ}];
     else
 %         field
         field2=fn{answ};
         if strcmp(field2,'..')
-            str=browsefields(prop,field2);
-        elseif strcmp(field,'..')
-            str=browsefields(prop,field2);
+            str=browsefields(prop,field2,recursions,true);
+%         elseif strcmp(field,'..')
+%             str=browsefields(prop,field2,recursions,true);
         else
             str=[field '.' browsefields(psub,field2,recursions-1,1)];
         end

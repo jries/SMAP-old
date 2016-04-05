@@ -186,6 +186,7 @@ switch callobj.Label
     case 'add plugin'
         plugins=obj.getPar('menu_plugins');
         pg=browsefields(plugins,{},2);
+        
         if isempty(pg)
             return
         end
