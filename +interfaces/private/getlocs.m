@@ -3,6 +3,7 @@ function [locsout,indcombined,hroio]=getlocs(locData,fields,varargin)
 %[locs,handle to roi]=getloc(obj,{fields},'PropertyName','Property')
 %fields: any locData field, in addition: 'ingrouped',
 %'inungrouped','within'
+% inlayeru, inlayerg: cell array with indices for each layer
 
 %Properties:
 %'grouping': 'grouped', 'ungrouped' (second default),'layer'(default). If not set and combined with
@@ -23,7 +24,7 @@ if ischar(fields)
 else
     p.fields=fields;
 end
- 
+ indlayer={};
 if isempty(locData.loc)
     for k=1:length(p.fields)
         locsout.(p.fields{k})=[];
@@ -89,7 +90,8 @@ end
           else
                group=true;       
                  for k=1:length(p.layer)
-                    group=group&locData.getPar(['layer' num2str(p.layer(k)) '_groupcheck']);
+                     grouplayer(k)=locData.getPar(['layer' num2str(p.layer(k)) '_groupcheck']);
+                    group=group&grouplayer(k);
                  end
                  if group
                      p.grouping='grouped';
@@ -114,7 +116,7 @@ for k=1:length(p.layer)
         disp('getloc layer out of range')
         continue
     end
-     filterold=locData.getFilter(p.layer,grouping); %use localizations if in any of the layers
+     filterold=locData.getFilter(p.layer(k),grouping); %use localizations if in any of the layers
      if ~iscell(p.removeFilter)
          p.removeFilter={p.removeFilter};
      end
@@ -131,7 +133,9 @@ for k=1:length(p.layer)
          filter=myrmfield(filterold,p.removeFilter);
          locData.setFilter(filter,p.layer(k),grouping);
       end
-     indfilter=indfilter|locData.inFilter(p.layer(k),grouping);
+      indlayer{k}=locData.inFilter(p.layer(k),grouping);
+%      indfilter=indfilter|locData.inFilter(p.layer(k),grouping);
+     indfilter=indfilter|indlayer{k};
      locData.setFilter(filterold,p.layer(k),grouping);
 %      layerused=true;
 end 
@@ -206,11 +210,22 @@ end
             locsout.(p.fields{k})=getindices(locData,indcombined,1);
      elseif strcmp(p.fields{k},'inungrouped')
             locsout.(p.fields{k})=getindices(locData,indcombined,0);
+     elseif strcmp(p.fields{k},'inlayeru')
+            for l=1:length(indlayer)
+                indlayer{l}=getindices(locData,indcombined,0)&getindices(locData,indlayer{l} ,0);
+            end
+            locsout.(p.fields{k})=indlayer;
+     elseif strcmp(p.fields{k},'inlayerg')
+            for l=1:length(indlayer)
+                indlayer{l}=getindices(locData,indcombined,1)&getindices(locData,indlayer{l},1);
+            end
+            locsout.(p.fields{k})=indlayer;            
      else
          locsout.(field)=[];
      end
  end            
-       
+
+ 
 end
 function ind=getindices(obj,indcombined,isgrouped)
     if isgrouped

@@ -14,7 +14,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             obj.inputParameters{end+1}='linewidth_roi';
             obj.inputParameters{end+1}='layers';
             obj.inputParameters{end+1}='numberOfLayers';
-            
+            obj.inputParameters=uniuqe(obj.inputParameters);
              obj.showresults=false;
 
         end
@@ -78,14 +78,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             if isempty(data)
                 data=d2;
             end
-            
-%             tic
-            %no modifier:move
-            %commamd: rotate
-            %control: thickness
-            %shift: small step
-%             data.Key
-%  data.Key
+           
             p=obj.getGuiParameters;
             if (length(data.Key)<5 && ~strcmp(data.Key,'0'))||(length(data.Key)>5 && ~(strcmp(data.Key(end-4:end),'arrow')|| strcmp(data.Key,'period')|| strcmp(data.Key,'comma')))
                 return
@@ -221,6 +214,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
 %             tic
             locCopy=obj.locData; %maybe not needed
             lo=logical(obj.getPar('sr_layerson'));
+            layerson=find(lo);
             if sum(lo)==0
                 return
             end
@@ -242,7 +236,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             
             zmean=(p.zmin+p.zmax)/2;
             if group(1)
-                [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:}},'position','roi','grouping','ungrouped');
+                [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},'inlayeru'},'position','roi','grouping','ungrouped','layer',layerson);
                 
                 [yrot,depth]=rotcoord(loc.znm-zmean,loc.ynmline,p.theta);
 %                 [zmrot]=rotcoord(zmean,0,obj.theta);
@@ -268,7 +262,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             end
             
             if group(2)
-                [locg,indg]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:}},'position','roi','grouping','grouped');
+                [locg,indg]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},'inlayerg'},'position','roi','grouping','grouped','layer',layerson);
                 [yrot,depth]=rotcoord(locg.znm-zmean,locg.ynmline,p.theta);
     %             yline=zeros(length(indin),1);
     %             yline(indin)=yrot;
@@ -331,13 +325,15 @@ classdef Viewer3DV01<interfaces.DialogProcessor
 %                      pl.mingaussnm=0;%why????
                      pr=copyfields(copyfields(p,pl),ph);
                      if pl.groupcheck
-                         indroi=obj.locData.getloc('ingrouped','layer',k,'position','roi').ingrouped;  
-                          indh=(indroi(indg));
+%                          indroi=obj.locData.getloc('ingrouped','layer',k,'position','roi').ingrouped;  
+                           indroi=locg.inlayerg{layerson(k)};
+                            indh=(indroi(indg));
 %                         layer(k).images.srimage=renderSMAP(locg,pr,k,true(length(locg.x),1),transparency);
                         layer(k).images.srimage=renderSMAP(locg,pr,k,indh(sortindg),transparency);
 %                         sum(indh(sortind))
                      else
-                         indroi=obj.locData.getloc('inungrouped','layer',k,'position','roi').inungrouped;  
+%                          indroi=obj.locData.getloc('inungrouped','layer',k,'position','roi').inungrouped;  
+                         indroi=loc.inlayeru{layerson(k)};
                          indh=(indroi(indu));
 %                          layer(k).images.srimage=renderSMAP(loc,pr,k,indroi(indu),transparency);
                          layer(k).images.srimage=renderSMAP(loc,pr,k,indh(sortindu),transparency);

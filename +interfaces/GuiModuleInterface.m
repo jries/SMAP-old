@@ -195,7 +195,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                 end
             end
             p=getAllParameters@interfaces.ParameterInterface(obj,inputParameters);
-            p=copyfields(p,obj.getGuiParameters);
+            p=copyfields(p,obj.getGuiParameters(false,true));
             
         end
         
