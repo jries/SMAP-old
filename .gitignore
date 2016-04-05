@@ -1,3 +1,4 @@
 settings/temp
 .DS_Store
-~$
+~$*
+*.m~

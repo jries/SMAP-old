@@ -157,7 +157,7 @@ function cellEdit_callback(object,data,obj)
     s=obj.guihandles.table.Data;
     if ~isempty(ind)
         fn=s{data.Indices(1),1};
-        sf={fn,s{data.Indices(1),2},s{data.Indices(1),6},s{data.Indices(1),7},true};
+        sf={fn,s{data.Indices(1),2},s{data.Indices(1),6},s{data.Indices(1),7},true,true};
         obj.setPar('selectedField',sf,'layer',obj.layer)
         obj.selectedField_callback
     end

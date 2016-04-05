@@ -132,17 +132,17 @@ classdef GuiChannel< interfaces.LayerInterface
 %                 obj.setPar('selectedField',sframe,'layer',obj.layer)
 %             end
                 znm=obj.locData.getloc('znm');
-                if isfield(znm,'znm')&&any(znm.znm~=0)
-                     obj.updatefields_callback(0,0,'znm',[])
-                     obj.updatefields_callback(0,0,'locprecznm',[])
-                     obj.updatefields_callback(0,0,'PSFxnm',false)
+                if isfield(znm,'znm')&&any(znm.znm~=0) % loical: dont update hist slider
+                     obj.updatefields_callback(0,0,'znm',[],false)
+                     obj.updatefields_callback(0,0,'locprecznm',[],false)
+                     obj.updatefields_callback(0,0,'PSFxnm',false,false)
                 else
-                    obj.updatefields_callback(0,0,'PSFxnm',true)
-                    obj.updatefields_callback(0,0,'znm',false)
-                    obj.updatefields_callback(0,0,'locprecznm',false)
+                    obj.updatefields_callback(0,0,'PSFxnm',true,false)
+                    obj.updatefields_callback(0,0,'znm',false,false)
+                    obj.updatefields_callback(0,0,'locprecznm',false,false)
                 end                   
-                obj.updatefields_callback(0,0,'locprecnm',true)
-                obj.updatefields_callback(0,0,'frame',false)
+                obj.updatefields_callback(0,0,'locprecnm',true,true)
+                obj.updatefields_callback(0,0,'frame',false,false)
 
             obj.updateLayerField;
              setvisibility(0,0,obj)
@@ -229,8 +229,11 @@ classdef GuiChannel< interfaces.LayerInterface
             end
 
         end
-        function updatefields_callback(obj,f1, data, field,filteron)
-            
+        function updatefields_callback(obj,f1, data, field,filteron,updatehist)
+            if nargin <6
+                updatehist=true;
+            end
+              
             if nargin<4||isempty(field)
                 field=f1;
                 filteron=[];
@@ -243,7 +246,7 @@ classdef GuiChannel< interfaces.LayerInterface
             if strcmp(field,'colorfield');
                 filteron=false;
             end
-            sf={field,obj.getSingleGuiParameter([field '_min']),obj.getSingleGuiParameter([field '_max']),filteron};
+            sf={field,obj.getSingleGuiParameter([field '_min']),obj.getSingleGuiParameter([field '_max']),filteron,updatehist};
             obj.setPar('selectedField',sf,'layer',obj.layer)
             obj.selectedField_callback;
         end

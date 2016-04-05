@@ -45,11 +45,14 @@ classdef GuiHistSlider< interfaces.LayerInterface
             obj.addSynchronization('locFields',[],[],{@callobj.updateGui}) 
         end
         function updateGui(obj)
-            obj.field=[];
+%             obj.field=[];
         end
         function selectedField_callback(obj)
             
             sfield=obj.getPar('selectedField','layer',obj.layer);
+            if length(sfield)<5||~sfield{5}
+                return
+            end
             filenumber=obj.getPar(['layer' num2str(obj.layer) '_']).ch_filelist.Value;
             fieldh=sfield{1};
             if isempty(obj.locData.loc)||~isfield(obj.locData.loc,fieldh)
