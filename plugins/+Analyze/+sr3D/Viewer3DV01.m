@@ -2,6 +2,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
     properties
         axis
         timer
+        currentimage
 %         theta=0;
 %         locCopy;
     end
@@ -71,7 +72,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         end
 
         function pard=pardef(obj)
-            pard=pardef;
+            pard=pardef(obj);
         end
         function keypress(obj,a,d2,data)
             if isempty(data)
@@ -213,9 +214,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         end
         function redraw(obj)
             
-            if toc(obj.timer)<0.01
-                return
-            end
+%             if toc(obj.timer)<0.01
+%                 return
+%             end
              p=obj.getAllParameters;
 %             tic
             locCopy=obj.locData; %maybe not needed
@@ -247,18 +248,18 @@ classdef Viewer3DV01<interfaces.DialogProcessor
 %                 [zmrot]=rotcoord(zmean,0,obj.theta);
                 depth=depth-min(depth);
 %                 md=max(depth);
-                [~,sortind]=sort(depth);
-                loc.x=loc.xnmline(sortind);
+                [~,sortindu]=sort(depth);
+                loc.x=loc.xnmline(sortindu);
                 %change later:
-                sx=loc.locprecnm(sortind);
-                sy=loc.locprecznm(sortind);
-                loc.sx=sx(sortind);
-                loc.sy=sy(sortind);
-                loc.y=yrot(sortind)+zmean;
-                loc.znm=loc.znm(sortind);
+                sx=loc.locprecnm(sortindu);
+                sy=loc.locprecznm(sortindu);
+                loc.sx=sx;
+                loc.sy=sy;
+                loc.y=yrot(sortindu)+zmean;
+                loc.znm=loc.znm(sortindu);
                 for k=1:length(renderfield)
                     if ~isempty(loc.(renderfield{k}))
-                        loc.(renderfield{k})=loc.(renderfield{k})(sortind);
+                        loc.(renderfield{k})=loc.(renderfield{k})(sortindu);
                     end
                 end
     %             locCopy.loc.x=locCopy.loc.xnmline;
@@ -276,19 +277,19 @@ classdef Viewer3DV01<interfaces.DialogProcessor
     %             intd=zeros(length(indin),1);
                 intd=1./(1+4*depth/md);
                 
-                [~,sortind]=sort(depth);
+                [~,sortindg]=sort(depth);
 
-                locg.x=locg.xnmline(sortind);
+                locg.x=locg.xnmline(sortindg);
                 %change later:
-                sx=locg.locprecnm(sortind);
-                sy=locg.locprecznm(sortind);
-                locg.sx=sx(sortind);
-                locg.sy=sy(sortind);
-                locg.znm=locg.znm(sortind);
-                locg.y=yrot(sortind)+zmean;
+                sx=locg.locprecnm(sortindg);
+                sy=locg.locprecznm(sortindg);
+                locg.sx=sx;
+                locg.sy=sy;
+                locg.znm=locg.znm(sortindg);
+                locg.y=yrot(sortindg)+zmean;
                 for k=1:length(renderfield)
                     if ~isempty(locg.(renderfield{k}))
-                        locg.(renderfield{k})=locg.(renderfield{k})(sortind);
+                        locg.(renderfield{k})=locg.(renderfield{k})(sortindg);
                     end
                 end
             end
@@ -331,10 +332,15 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                      pr=copyfields(copyfields(p,pl),ph);
                      if pl.groupcheck
                          indroi=obj.locData.getloc('ingrouped','layer',k,'position','roi').ingrouped;  
-                        layer(k).images.srimage=renderSMAP(locg,pr,k,indroi(indg),transparency);
+                          indh=(indroi(indg));
+%                         layer(k).images.srimage=renderSMAP(locg,pr,k,true(length(locg.x),1),transparency);
+                        layer(k).images.srimage=renderSMAP(locg,pr,k,indh(sortindg),transparency);
+%                         sum(indh(sortind))
                      else
                          indroi=obj.locData.getloc('inungrouped','layer',k,'position','roi').inungrouped;  
-                         layer(k).images.srimage=renderSMAP(loc,pr,k,indroi(indu),transparency);
+                         indh=(indroi(indu));
+%                          layer(k).images.srimage=renderSMAP(loc,pr,k,indroi(indu),transparency);
+                         layer(k).images.srimage=renderSMAP(loc,pr,k,indh(sortindu),transparency);
                      end
 
 %                     layer(k).images.srimage.rangex=layer(k).images.srimage.rangex;
@@ -344,21 +350,127 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 end
             end
             srim=displayerSMAP(layer,pr);
-            
-%             [zim]=anyRender(locCopy,p,'x','xnmline','y','ynmrot','sx','locprecnm','sy','locprecznm','within',indin,'position','roi','groupstate',group);
-            imagesc(ph.rangex,ph.rangey,srim.image,'Parent',ax);
-%             title(obj.theta,'Parent',ax)
-            drawnow
-%             toc
+            obj.currentimage=srim.image;
+%             ax.Children.CData=srim.image;
+%            imagesc(ph.rangex,ph.rangey,layer(1).images.srimage.image,'Parent',ax);
+           imagesc(ph.rangex,ph.rangey,srim.image,'Parent',ax);
+            drawnow limitrate 
+%             refreshdata(ax.Parent)
 
-    %directly call renderSMAP, circumvent any_render
-%             toc(obj.timer)
         end
+        function rotate_callback(obj,button,b)
+            bh=obj.guihandles.rotateb;
+            
+             p=obj.getGuiParameters;
+            switch p.raxis.selection
+                case 'vertical'
+                    roih=obj.getPar('sr_roihandle');
+                    while bh.Value
+                        pos=roih.getPosition;
+                        posr=rotpos(pos,-obj.getSingleGuiParameter('dangle')*pi/180);
+                        roih.setPosition(posr);
+                        obj.redraw;
+%                         drawnow
+                        
+                    end           
+                case 'horizontal'
+                    while bh.Value
+                        theta=obj.getSingleGuiParameter('theta');
+                        theta=theta-obj.getSingleGuiParameter('dangle')*pi/180;
+                        theta=mod(theta,2*pi);
+                         
+                        obj.setGuiParameters(struct('theta',theta));
+                        obj.redraw;
+%                         drawnow
+                    end   
+            end
+
+            
+        end
+        function savemovie_callback(obj,a,b)
+            global SMAP_stop
+            [p, button] = settingsdlg(...
+                'Description', 'Save rotating movie',... 
+                'title'      , 'Save movie',... 
+                 {'rotation axis';'rotax'},{'vertical';'horizontal'},...
+                 {'start angle (deg)','startangle'},0,...
+                 {'stop angle (deg)','stopangle'},360,...
+                 {'step (deg)','stepangle'},2,...
+                 {'save movie','save'},false);
+            if strcmpi(button,'ok')
+                if p.save
+                    [path,fo]=fileparts(obj.locData.files.file(1).name);
+                    [file,path]=uiputfile([path filesep fo '.tif']);
+                    if ~file
+                        p.save=false;
+                    end
+                       
+                end
+                if p.stepangle<0
+                    angles=(p.stopangle:p.stepangle:p.startangle)*pi/180;
+                else
+                    angles=(p.startangle:p.stepangle:p.stopangle)*pi/180;
+                end
+                s=size(obj.currentimage);
+                if length(s)==2
+                    s(3)=1;
+                end
+                outim=zeros(s(1),s(2),s(3),length(angles));
+                switch p.rotax
+                    case 'vertical'
+                        roih=obj.getPar('sr_roihandle');
+                        pos=roih.getPosition;
+%                         posr=rotpos(pos,p.startangle);
+%                         roih.setPosition(posr);
+                        for k=1:length(angles) 
+                            posr=rotpos(pos,angles(k));
+                            roih.setPosition(posr);
+                            obj.redraw;
+                            outim(:,:,:,k)=obj.currentimage;
+                            drawnow
+                            
+                            if SMAP_stop
+                                break
+                            end
+                        end
+                        
+                    case 'horizontal'  
+                        for k=1:length(angles) 
+                            obj.setGuiParameters(struct('theta',angles(k)));
+                            obj.redraw;
+                            outim(:,:,:,k)=obj.currentimage;
+                            drawnow
+                            if SMAP_stop
+                                break
+                            end
+                        end    
+                end
+                if p.save
+                    options.color=true;
+                    options.message=true;
+                    options.comp='lzw';
+
+                    imout=uint8(outim/max(outim(:))*(2^8-1));
+                    saveastiff(imout,[path,file],options)
+%                     imwrite(outim,[path,file]);
+                end
+            end
+        end
+                   
     end
 end
 
+function pos=rotpos(pos,angle)
+roivec=pos(2,:)-pos(1,:);
+mpos=mean(pos,1);
+[dx,dy]=rotcoord(roivec(1)/2,roivec(2)/2,angle);
+pos(1,1)=mpos(1)-dx;
+pos(2,1)=mpos(1)+dx;
+pos(1,2)=mpos(2)-dy;
+pos(2,2)=mpos(2)+dy;
+end
 
-function pard=pardef
+function pard=pardef(obj)
 pard.text1.object=struct('String','parameters','Style','text');
 pard.text1.position=[1,1];
 
@@ -401,4 +513,22 @@ pard.trot.position=[4,4];
 
 pard.tzoom.object=struct('String','zoom (alt)','Style','text');
 pard.tzoom.position=[8,4];
+
+pard.rotateb.object=struct('String','Rotate','Style','togglebutton','Callback',@obj.rotate_callback);
+pard.rotateb.position=[6,3];
+pard.raxis.object=struct('String',{{'horizontal','vertical'}},'Style','popupmenu');
+pard.raxis.position=[7,3];
+pard.danglet.object=struct('String','step','Style','text');
+pard.danglet.position=[8,3];
+pard.danglet.Width=0.5;
+pard.dangle.object=struct('String','3','Style','edit');
+pard.dangle.position=[8,3.5];
+pard.dangle.Width=0.5;
+
+pard.savemovie.object=struct('String','save movie','Style','pushbutton','Callback',@obj.savemovie_callback);
+pard.savemovie.position=[7,1];
+pard.tx.object=struct('String','min max angle (deg)','Style','text');
+pard.tx.position=[8,1];
+pard.anglerange.object=struct('String','0 360','Style','edit');
+pard.anglerange.position=[8,2];
 end

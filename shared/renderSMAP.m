@@ -102,6 +102,7 @@ switch lower(p.rendermode.selection)
             pos.sy=max(locsh.sy(indin)*p.gaussfac,max(p.mingaussnm,p.mingausspix*p.sr_pixrec(2)));
             if isempty(transparency)
                 frender=@gaussrender_ellipt;
+             
             else
                 frender=@gaussrenderT_ellipt;
             end
