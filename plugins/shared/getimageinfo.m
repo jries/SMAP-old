@@ -108,7 +108,7 @@ switch ext
             info.metafile=metaname;
         end
         info.format='separateTif';
-
+        try
         if length(fall)>2
         %pattern
             n1=fall{2};n2=fall{3};
@@ -123,8 +123,12 @@ switch ext
         else
              inds1=strfind(fall{1},'_');
              info.numberNameRange=[inds1(end-1)+1,inds1(end)-1];
-        end       
+        end     
+        catch
+            info.numberNameRange=[];
+        end
         return
+        
 end
 
 end

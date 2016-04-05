@@ -33,7 +33,7 @@ positionc=position;
 positionc(1:2)=position(1:2)-roi(1);
 positionc(3:4)=position(3:4)-roi(2);
 
-coim=cutoutim(double(fileh.tif(tnum).image'),positionc);
+coim=cutoutim(permute(double(fileh.tif(tnum).image),[2 1 3]),positionc);
 
 magnification=pixsize/p.sr_pixrec*1000;
 srcoim=imresize(coim,magnification,'nearest');
@@ -43,6 +43,6 @@ psr(2)=psr(1)+srec(1)-1;
 psr(4)=psr(3)+srec(2)-1;
 srfinal=cutoutim(srcoim,psr);
 
-im.image=srfinal';
+im.image=permute(srfinal,[2,1,3]);
 im.rangex=rangex;
 im.rangey=rangey;

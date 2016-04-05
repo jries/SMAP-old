@@ -11,7 +11,6 @@ rim=0;
 show=0;
 tiffthere=0;
 txtN='';
-
 for k=1:length(layers)
 
     if p.sr_layerson(k)
