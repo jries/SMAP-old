@@ -218,7 +218,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                             end
                         end
                     case {'togglebutton','checkbox','slider', 'pushbutton','radiobutton'}
-                        if onlyedit && ~(strcmp(style,'checkbox') || strcmp(style,'togglebutton'))
+                        if onlyedit && strcmp(style,'pushbutton')
                             par=[];
                             return
                         end
