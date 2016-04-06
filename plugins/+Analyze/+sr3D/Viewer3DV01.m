@@ -3,6 +3,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         axis
         timer
         currentimage
+%         rotating=false;
 %         theta=0;
 %         locCopy;
     end
@@ -264,12 +265,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             if group(2)
                 [locg,indg]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},'inlayerg'},'position','roi','grouping','grouped','layer',layerson);
                 [yrot,depth]=rotcoord(locg.znm-zmean,locg.ynmline,p.theta);
-    %             yline=zeros(length(indin),1);
-    %             yline(indin)=yrot;
                 depth=depth-min(depth);
                 md=max(depth);
-    %             intd=zeros(length(indin),1);
-                intd=1./(1+4*depth/md);
+%                 intd=1./(1+4*depth/md);
                 
                 [~,sortindg]=sort(depth);
 
@@ -287,60 +285,40 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     end
                 end
             end
-%             [rz]=rotcoord([p.zmin p.zmax],[-p.linewidth_roi p.linewidth_roi]/2,obj.theta);
-            
+
             ph.rangey=[p.zmin p.zmax];
-%             ph.rangey(1)=min(rz);
-%             ph.rangey(2)=max(rz);
-            
             roih=obj.getPar('sr_roihandle');
             rpos=roih.getPosition;
-    %     mpos=mean(rpos,1);
+
             lr=sqrt(sum((rpos(2,:)-rpos(1,:)).^2));
             rx=[-lr/2 lr/2]*1000;
-%             ry=[-0.5 0.5]*p.linewidth_roi;
-        
             ax=obj.axis;
-%             disp('redraw callback')
             obj.timer=tic;
            
-            ph.sr_roihandle=obj.getPar('sr_roihandle');
-%             p.rangey=[-300 300];
-            
+            ph.sr_roihandle=obj.getPar('sr_roihandle');       
             ph.rangex=rx;
+            if p.setpixelsize
+                ph.sr_pixrec=p.pixrecset;
+            end            
             if p.settransparency
-            transparency=p.transparency;
+            transparency=p.transparency/ph.sr_pixrec^2*10;
             else
                 transparency=[];
             end
             ph.sr_axes=[];
-            if p.setpixelsize
-                ph.sr_pixrec=p.pixrecset;
-            end
             for k=1:p.numberOfLayers
                 pl=p.(['layer' num2str(k) '_']);
-
                 if pl.layercheck
-
-%                      pl.mingaussnm=0;%why????
                      pr=copyfields(copyfields(p,pl),ph);
                      if pl.groupcheck
-%                          indroi=obj.locData.getloc('ingrouped','layer',k,'position','roi').ingrouped;  
-                           indroi=locg.inlayerg{layerson(k)};
-                            indh=(indroi(indg));
-%                         layer(k).images.srimage=renderSMAP(locg,pr,k,true(length(locg.x),1),transparency);
+                        indroi=locg.inlayerg{layerson(k)};
+                        indh=(indroi(indg));
                         layer(k).images.srimage=renderSMAP(locg,pr,k,indh(sortindg),transparency);
-%                         sum(indh(sortind))
-                     else
-%                          indroi=obj.locData.getloc('inungrouped','layer',k,'position','roi').inungrouped;  
+                     else 
                          indroi=loc.inlayeru{layerson(k)};
                          indh=(indroi(indu));
-%                          layer(k).images.srimage=renderSMAP(loc,pr,k,indroi(indu),transparency);
                          layer(k).images.srimage=renderSMAP(loc,pr,k,indh(sortindu),transparency);
                      end
-
-%                     layer(k).images.srimage.rangex=layer(k).images.srimage.rangex;
-%                     layer(k).images.srimage.rangey=layer(k).images.srimage.rangey;
                     layer(k).images.finalImages=drawerSMAP(layer(k).images.srimage,pr);        
 
                 end
@@ -355,36 +333,47 @@ classdef Viewer3DV01<interfaces.DialogProcessor
 
         end
         function rotate_callback(obj,button,b)
+            global SMAP_stopnow
+%             SMAP_stopnow
+%             obj.rotating=true;
+%             obj.axis.Tag='busy';
             bh=obj.guihandles.rotateb;
-            
+            if bh.Value
+                bh.FontWeight='bold';
+            else
+                bh.FontWeight='normal';
+            end
              p=obj.getGuiParameters;
             switch p.raxis.selection
                 case 'vertical'
                     roih=obj.getPar('sr_roihandle');
-                    while bh.Value
+                    
+                    while bh.Value &&~SMAP_stopnow && strcmp(p.raxis.selection,obj.getSingleGuiParameter('raxis').selection)
                         pos=roih.getPosition;
-                        posr=rotpos(pos,-obj.getSingleGuiParameter('dangle')*pi/180);
+                        posr=rotpos(pos,obj.getSingleGuiParameter('dangle')*pi/180);
                         roih.setPosition(posr);
-                        obj.redraw;
-%                         drawnow
-                        
+
                     end           
                 case 'horizontal'
-                    while bh.Value
+                    while bh.Value &&~SMAP_stopnow && strcmp(p.raxis.selection,obj.getSingleGuiParameter('raxis').selection)
                         theta=obj.getSingleGuiParameter('theta');
                         theta=theta-obj.getSingleGuiParameter('dangle')*pi/180;
-                        theta=mod(theta,2*pi);
-                         
+                        theta=mod(theta,2*pi);                       
                         obj.setGuiParameters(struct('theta',theta));
                         obj.redraw;
-%                         drawnow
                     end   
             end
-
+            
+            if  ~ strcmp(p.raxis.selection,obj.getSingleGuiParameter('raxis').selection)
+                rotate_callback(obj,button,b)
+            end
+%             disp('done')
+%             obj.rotating=false;
+%             obj.axis.Tag='done';
             
         end
         function savemovie_callback(obj,a,b)
-            global SMAP_stop
+            global SMAP_stopnow
 
             [path,fo]=fileparts(obj.locData.files.file(1).name);
             [file,path]=uiputfile([path filesep fo '.tif']);
@@ -413,10 +402,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     for k=1:length(angles) 
                         posr=rotpos(pos,angles(k));
                         roih.setPosition(posr);
-                        obj.redraw;
                         outim(:,:,:,k)=obj.currentimage;
                         drawnow
-                        if SMAP_stop
+                        if SMAP_stopnow
                             break
                         end
                     end
@@ -427,7 +415,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                         obj.redraw;
                         outim(:,:,:,k)=obj.currentimage;
                         drawnow
-                        if SMAP_stop
+                        if SMAP_stopnow
                             break
                         end
                     end    
@@ -440,6 +428,29 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             saveastiff(imout,[path,file],options)
             
         end
+%         function axischange_callback(obj,a,b)
+% %             global SMAP_stopnow
+%             oldv=obj.guihandles.rotateb.Value;
+% %             obj.rotating
+%             if oldv==true
+% %                 SMAP_stopnow=true;
+%                  obj.guihandles.rotateb.Value=false;
+% %                  drawnow
+% %                 while obj.rotating
+% %                     obj.rotating
+% %                     pause(1)
+% %                     obj.rotating
+% %                 end
+% %                 waitfor(obj.axis,'Tag','done')
+% %                 pause(0.1)
+% %                  SMAP_stopnow=false;
+% %                 obj.guihandles.rotateb.Value=true;
+% %                 drawnow
+% %                  pause(1)
+% %                 obj.rotating
+% %                 obj.rotate_callback(obj.guihandles.rotateb,0)
+%             end
+%         end
                    
     end
 end
@@ -500,7 +511,7 @@ pard.tzoom.position=[8,4];
 
 pard.rotateb.object=struct('String','Rotate','Style','togglebutton','Callback',@obj.rotate_callback);
 pard.rotateb.position=[6,3];
-pard.raxis.object=struct('String',{{'horizontal','vertical'}},'Style','popupmenu');
+pard.raxis.object=struct('String',{{'horizontal','vertical'}},'Style','popupmenu');%,'Callback',@obj.axischange_callback);
 pard.raxis.position=[7,3];
 pard.danglet.object=struct('String','step','Style','text');
 pard.danglet.position=[8,3];
