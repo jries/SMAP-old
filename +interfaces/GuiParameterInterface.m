@@ -243,7 +243,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                             end
                         end
                         if onlyedit
-                            par=par.selection;
+                            par=myrmfield(par,'String');
                         end
                 end
             elseif isa(hfn,'matlab.ui.control.Table')

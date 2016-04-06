@@ -14,7 +14,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             obj.inputParameters{end+1}='linewidth_roi';
             obj.inputParameters{end+1}='layers';
             obj.inputParameters{end+1}='numberOfLayers';
-            obj.inputParameters=uniuqe(obj.inputParameters);
+            obj.inputParameters=unique(obj.inputParameters);
              obj.showresults=false;
 
         end
@@ -385,72 +385,60 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         end
         function savemovie_callback(obj,a,b)
             global SMAP_stop
-            [p, button] = settingsdlg(...
-                'Description', 'Save rotating movie',... 
-                'title'      , 'Save movie',... 
-                 {'rotation axis';'rotax'},{'vertical';'horizontal'},...
-                 {'start angle (deg)','startangle'},0,...
-                 {'stop angle (deg)','stopangle'},360,...
-                 {'step (deg)','stepangle'},2,...
-                 {'save movie','save'},false);
-            if strcmpi(button,'ok')
-                if p.save
-                    [path,fo]=fileparts(obj.locData.files.file(1).name);
-                    [file,path]=uiputfile([path filesep fo '.tif']);
-                    if ~file
-                        p.save=false;
-                    end
-                       
-                end
-                if p.stepangle<0
-                    angles=(p.stopangle:p.stepangle:p.startangle)*pi/180;
-                else
-                    angles=(p.startangle:p.stepangle:p.stopangle)*pi/180;
-                end
-                s=size(obj.currentimage);
-                if length(s)==2
-                    s(3)=1;
-                end
-                outim=zeros(s(1),s(2),s(3),length(angles));
-                switch p.rotax
-                    case 'vertical'
-                        roih=obj.getPar('sr_roihandle');
-                        pos=roih.getPosition;
-%                         posr=rotpos(pos,p.startangle);
-%                         roih.setPosition(posr);
-                        for k=1:length(angles) 
-                            posr=rotpos(pos,angles(k));
-                            roih.setPosition(posr);
-                            obj.redraw;
-                            outim(:,:,:,k)=obj.currentimage;
-                            drawnow
-                            
-                            if SMAP_stop
-                                break
-                            end
-                        end
-                        
-                    case 'horizontal'  
-                        for k=1:length(angles) 
-                            obj.setGuiParameters(struct('theta',angles(k)));
-                            obj.redraw;
-                            outim(:,:,:,k)=obj.currentimage;
-                            drawnow
-                            if SMAP_stop
-                                break
-                            end
-                        end    
-                end
-                if p.save
-                    options.color=true;
-                    options.message=true;
-                    options.comp='lzw';
 
-                    imout=uint8(outim/max(outim(:))*(2^8-1));
-                    saveastiff(imout,[path,file],options)
-%                     imwrite(outim,[path,file]);
-                end
+            [path,fo]=fileparts(obj.locData.files.file(1).name);
+            [file,path]=uiputfile([path filesep fo '.tif']);
+            if ~file
+                return
             end
+            p=obj.getGuiParameters(false,true);
+            if length(p.anglerange)==1
+                p.anglerange(2)=p.anglerange(1);
+                p.anglerange(1)=0;
+            end
+            if p.dangle<0
+                angles=(p.anglerange(2):p.dangle:p.anglerange(1))*pi/180;
+            else
+                angles=(p.anglerange(1):p.dangle:p.anglerange(2))*pi/180;
+            end
+            s=size(obj.currentimage);
+            if length(s)==2
+                s(3)=1;
+            end
+            outim=zeros(s(1),s(2),s(3),length(angles));
+            switch p.raxis.selection
+                case 'vertical'
+                    roih=obj.getPar('sr_roihandle');
+                    pos=roih.getPosition;
+                    for k=1:length(angles) 
+                        posr=rotpos(pos,angles(k));
+                        roih.setPosition(posr);
+                        obj.redraw;
+                        outim(:,:,:,k)=obj.currentimage;
+                        drawnow
+                        if SMAP_stop
+                            break
+                        end
+                    end
+
+                case 'horizontal'  
+                    for k=1:length(angles) 
+                        obj.setGuiParameters(struct('theta',angles(k)));
+                        obj.redraw;
+                        outim(:,:,:,k)=obj.currentimage;
+                        drawnow
+                        if SMAP_stop
+                            break
+                        end
+                    end    
+            end
+            options.color=true;
+            options.message=true;
+            options.comp='lzw';
+
+            imout=uint8(outim/max(outim(:))*(2^8-1));
+            saveastiff(imout,[path,file],options)
+            
         end
                    
     end
