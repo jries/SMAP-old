@@ -11,8 +11,8 @@ tnum=p.renderp1.Value;
  
  if length(fileh.tif)<tnum||isempty(fileh.tif(tnum).image)
      im.image=zeros(p.sr_sizeRecPix(1),p.sr_sizeRecPix(2));
-     im.rangex=rangex;
-     im.rangey=rangey;
+     im.rangex=rangex+p.shiftxy_min;
+     im.rangey=rangey+p.shiftxy_max;
      return
  end
  
@@ -44,5 +44,5 @@ psr(4)=psr(3)+srec(2)-1;
 srfinal=cutoutim(srcoim,psr);
 
 im.image=permute(srfinal,[2,1,3]);
-im.rangex=rangex;
-im.rangey=rangey;
+im.rangex=rangex+p.shiftxy_min;
+im.rangey=rangey+p.shiftxy_max;

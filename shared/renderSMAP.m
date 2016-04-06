@@ -141,8 +141,8 @@ end
 
 imageo.image=srimage;
 imageo.lut=lutall;
-imageo.rangex=rangex;
-imageo.rangey=rangey;
+imageo.rangex=rangex+p.shiftxy_min;
+imageo.rangey=rangey+p.shiftxy_max;
 imageo.numberOfLocs=nlocs;
 
 end
