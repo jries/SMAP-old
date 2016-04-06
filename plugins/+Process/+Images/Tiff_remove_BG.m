@@ -19,7 +19,7 @@ classdef Tiff_remove_BG<interfaces.DialogProcessor
             tiff.info.name=fullfile(path,fileh);
             tiff.image=imgc;
             
-            if p.savertiff
+            if ~p.previewcheck
                 if p.overwrite
                     obj.locData.files.file(file).tif(tiffn)=tiff;
                 else
@@ -68,10 +68,10 @@ pard.waveletlevelt.position=[3,1];
 pard.waveletlevel.object=struct('Style','edit','String','3');
 pard.waveletlevel.position=[3,2];
 pard.waveletlevel.object.TooltipString='Large value: large scale filtering. Typical 2-4';
-pard.savertiff.object=struct('Style','checkbox','String','save bg corrected tiff');
-pard.savertiff.position=[4,1];
-pard.savertiff.Width=2;
-pard.savertiff.object.TooltipString='Save the image to the localization data. If not checked, it is just previewed.';
+pard.previewcheck.object=struct('Style','checkbox','String','preview','Value',1);
+pard.previewcheck.position=[4,1];
+pard.previewcheck.Width=2;
+pard.previewcheck.object.TooltipString='Preview if checked. Otherwise the image is saved.';
 pard.overwrite.object=struct('Style','checkbox','String','replace, not append');
 pard.overwrite.position=[5,1];
 pard.overwrite.Width=2;
