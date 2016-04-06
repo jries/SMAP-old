@@ -83,10 +83,13 @@ switch ext
         end
         
         searchstr='img_0';
-        if isempty(f)||~strcmp(f(1:length(searchstr)),searchstr) %single image tiffs 
-            searchstr='';
-        end
         fall=myfastdir(p, [searchstr '*.tif']);
+        if isempty(fall)
+%         if isempty(f)||~strcmp(f(1:length(searchstr)),searchstr) %single image tiffs 
+            searchstr='';
+        
+        fall=myfastdir(p, [searchstr '*.tif']);
+        end
         info.files=fall;
         info.path=p;
         inds=strfind(p,filesep);

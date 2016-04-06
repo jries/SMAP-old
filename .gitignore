@@ -3,3 +3,4 @@ settings/temp
 ~$*
 *.m~
 plugins/plugin.m
+*.asv
