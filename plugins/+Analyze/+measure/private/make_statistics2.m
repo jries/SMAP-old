@@ -110,13 +110,16 @@ if p.checkphot
              phot{k}(phot{k}>p.photrange(2))=[];
         end
     end
+    pr=p.photrange;
+else
+    pr=0.99;
 end
 
 % if ploton
 % axes(ax1)
 % hold off
 % end
-hphot=plothist(phot,0.99,[],0,ax1);
+hphot=plothist(phot,pr,[],0,ax1);
 sphot={'Photons'};
 
 phot1=1000;
@@ -334,10 +337,16 @@ end
 function his=plothist(v,quantile,dphot,hmin,ax)
 
 for k=1:length(v)
-    qq=myquantile(v{k},[quantile,1-quantile]);
-    q(k)=qq(1);q0(k)=qq(2);
+    if length(quantile)==1
+    qq=myquantile(v{k},[1-quantile,quantile]);
+    else
+    qq=quantile;
+    end
+    q(k)=qq(2);q0(k)=qq(1);
+
     l(k)=length(v{k});
 end
+
 qmax=(max(q));
 qmin=min(q0);
 if qmax==qmin
@@ -345,7 +354,7 @@ if qmax==qmin
 end
 lmax=max(l);
 
-qfac=log10(lmax)-1.5;
+qfac=log10(lmax)-1;
 
 if nargin==2||isempty(dphot)
 dphot=(10^ceil(log10(qmax/qfac)))/100;
