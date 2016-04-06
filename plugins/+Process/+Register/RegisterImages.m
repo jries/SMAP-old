@@ -9,6 +9,7 @@ classdef RegisterImages<interfaces.DialogProcessor
         end
         
         function out=run(obj,p)
+            out=[];
             pixrec=p.sr_pixrec;
             targetlayer=p.targetselect.Value;
             reflayer=p.refselect.Value;

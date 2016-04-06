@@ -181,13 +181,16 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
 %             obj.initializeGuiParameters;
         end
 
-        function p=getAllParameters(obj,inputParameters)
+        function p=getAllParameters(obj,inputParameters,editonly)
             % gets Gui Parameters (without children) and inputParameters
             % p=getAllParameters(inputParameters)
             % inputParameters can be omitted: then obj.inputParameters are
             % used
-            if nargin==1
+            if nargin<2||isempty(inputParameters)
                 inputParameters=obj.inputParameters;
+            end
+            if nargin<3
+                editonly=false;
             end
             if any(strcmp(inputParameters,'layers'))
                 for k=1:obj.getPar('numberOfLayers')
@@ -195,7 +198,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                 end
             end
             p=getAllParameters@interfaces.ParameterInterface(obj,inputParameters);
-            p=copyfields(p,obj.getGuiParameters(false,true));
+            p=copyfields(p,obj.getGuiParameters(false,editonly));
             
         end
         
@@ -218,7 +221,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
             else
                 layer=layeri;
             end
-            pall=obj.getAllParameters(inputParameters);
+            pall=obj.getAllParameters(inputParameters,false);
             for k=1:length(layer)
                 p{k}=pall;
                 lp=obj.getPar('','layer',layer(k));

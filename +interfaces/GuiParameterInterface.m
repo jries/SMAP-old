@@ -230,8 +230,9 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                             sstring=hfn.String;
                         if iscell(sstring)
                             if hfn.Value>0
-                            par.selection=sstring{hfn.Value};
-                            else par.selection='';
+                                par.selection=sstring{hfn.Value};
+                            else
+                                par.selection='';
                             end
                         else
                             s=size(sstring);
@@ -397,6 +398,9 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                 obj.changecallback(field)
             end
             if ~isempty(oldcallback)
+                if ~iscell(oldcallback)
+                    oldcallback={oldcallback};
+                end
                 feval(oldcallback{1},handle,event,oldcallback{2:end})
             end
         end

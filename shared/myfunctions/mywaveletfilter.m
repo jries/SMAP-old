@@ -15,17 +15,18 @@ if refine
     level2=level*2;
     [L,S]=dtwavexfm2_L(in,level2,wf1,wf2);
     bg=dtwaveifm2_L(L,level2,wf1,wf2,S);
+    if numel(bg)~=numel(in)
+        s=size(in);
+        bg=bg(1:s(1),1:s(2));
+    end
     in=in-bg;co=3*std(in(:)); in(in>co)=co;   
 end
 [L,S]=dtwavexfm2_L(in,level,wf1,wf2);
 out=dtwaveifm2_L(L,level,wf1,wf2,S);
-if refine
-    out=out+bg;
-end
-
-
-
 if numel(out)~=numel(in)
     s=size(in);
     out=out(1:s(1),1:s(2));
+end
+if refine
+    out=out+bg;
 end

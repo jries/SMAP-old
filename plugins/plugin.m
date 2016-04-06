@@ -90,6 +90,8 @@ case 'Process.Drift.driftcorrection'
    module=Process.Drift.driftcorrection(varargin{:}); 
 case 'Process.Drift.showdriftinfo' 
    module=Process.Drift.showdriftinfo(varargin{:}); 
+case 'Process.Images.Tiff_remove_BG' 
+   module=Process.Images.Tiff_remove_BG(varargin{:}); 
 case 'Process.Modify.Connect2Unconnect' 
    module=Process.Modify.Connect2Unconnect(varargin{:}); 
 case 'Process.Modify.MathParser' 
@@ -242,6 +244,7 @@ out.Process.Assign2C.Intensity2Channel={'Process','Assign2C','Intensity2Channel'
 out.Process.Assign2C.SALMInt2z={'Process','Assign2C','SALMInt2z'}; 
 out.Process.Drift.driftcorrection={'Process','Drift','driftcorrection'}; 
 out.Process.Drift.showdriftinfo={'Process','Drift','showdriftinfo'}; 
+out.Process.Images.Tiff_remove_BG={'Process','Images','Tiff_remove_BG'}; 
 out.Process.Modify.Connect2Unconnect={'Process','Modify','Connect2Unconnect'}; 
 out.Process.Modify.MathParser={'Process','Modify','MathParser'}; 
 out.Process.Modify.Mathematics={'Process','Modify','Mathematics'}; 
