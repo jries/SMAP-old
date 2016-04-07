@@ -4,6 +4,7 @@ classdef intensityTiff<interfaces.SEEvaluationProcessor
                 obj@interfaces.SEEvaluationProcessor(varargin{:});
         end
         function out=run(obj,p)
+            % at some point: use shift_xy to fit with offset
             pos=obj.site.pos;
             file=obj.locData.files.file(obj.site.info.filenumber);
             pixcam=file.info.pixsize*1000;
