@@ -33,7 +33,7 @@ end
     
 
     
-end
+% end
 
 function p=parseline(txt,replacestruct,parseascell)
 indp=strfind(txt,'.');
