@@ -163,10 +163,12 @@ par=obj.getAllParameters;
 sites=obj.SE.sites;
 sortmatrix=zeros(length(sites),4);
 for k=1:4
-    field{k}=par.(['sortedit' num2str(k)]);
+    if isfield(par,['sortedit' num2str(k)])
+        field{k}=par.(['sortedit' num2str(k)]);
+    end
 end
 for k=1:length(sites)
-    for s=1:4
+    for s=1:length(field)
 %         if isfield(sites(k),field{s})
 %          try
          if ~isempty(field{s})
