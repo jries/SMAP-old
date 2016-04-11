@@ -23,7 +23,11 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             makeGui@interfaces.DialogProcessor(obj);
             h=obj.guihandles;
             
-            h.ptranslation=makepanel(h.ttranslation,'translation','');
+           
+        end
+        
+        function showpanel_callback(obj)
+             h.ptranslation=makepanel(h.ttranslation,'translation','');
             h.protation=makepanel(h.trot,'rot (command/strg)','command');
             h.pzoom=makepanel(h.tzoom,'zoom (alt)','alt');
 %             h.protation=uipanel('Parent',obj.handle,'Units','pixels','Position',pos,'Title','translation');
@@ -60,9 +64,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             
              set(obj.axis,'NextPlot','replacechildren','PickableParts','all','Units','pixels')
             fig=getParentFigure(obj.axis);
-             axis(obj.axis,'tight')
-             axis(obj.axis,'equal')
-             axis(obj.axis,'ij')
+             axis(obj.axis,'tight');
+             axis(obj.axis,'equal');
+             axis(obj.axis,'ij');
              
              set(fig,'WindowKeyPressFcn',{@obj.keypress,[]})
 %              obj.theta=0;
@@ -201,18 +205,14 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                         obj.setGuiParameters(po);
                 end
             end
-            
-            
             roih.setPosition(pos);
-%             toc
         end
+        
+        
         function redraw(obj)
             
-%             if toc(obj.timer)<0.01
-%                 return
-%             end
              p=obj.getAllParameters;
-%             tic
+             stereo=true;
             locCopy=obj.locData; %maybe not needed
             lo=logical(obj.getPar('sr_layerson'));
             layerson=find(lo);
@@ -236,54 +236,13 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             end
             
             zmean=(p.zmin+p.zmax)/2;
+            
             if group(1)
-                [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},'inlayeru'},'position','roi','grouping','ungrouped','layer',layerson);
-                
-                [yrot,depth]=rotcoord(loc.znm-zmean,loc.ynmline,p.theta);
-%                 [zmrot]=rotcoord(zmean,0,obj.theta);
-                depth=depth-min(depth);
-%                 md=max(depth);
-                [~,sortindu]=sort(depth);
-                loc.x=loc.xnmline(sortindu);
-                %change later:
-                sx=loc.locprecnm(sortindu);
-                sy=loc.locprecznm(sortindu);
-                loc.sx=sx;
-                loc.sy=sy;
-                loc.y=yrot(sortindu)+zmean;
-                loc.znm=loc.znm(sortindu);
-                for k=1:length(renderfield)
-                    if ~isempty(loc.(renderfield{k}))
-                        loc.(renderfield{k})=loc.(renderfield{k})(sortindu);
-                    end
-                end
-    %             locCopy.loc.x=locCopy.loc.xnmline;
-%                 loc.intensity_render=intd(sortind);
-                
+                [loc,indu,sortind]=getlocrot('ungrouped','inlayeru');                
             end
             
             if group(2)
-                [locg,indg]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},'inlayerg'},'position','roi','grouping','grouped','layer',layerson);
-                [yrot,depth]=rotcoord(locg.znm-zmean,locg.ynmline,p.theta);
-                depth=depth-min(depth);
-                md=max(depth);
-%                 intd=1./(1+4*depth/md);
-                
-                [~,sortindg]=sort(depth);
-
-                locg.x=locg.xnmline(sortindg);
-                %change later:
-                sx=locg.locprecnm(sortindg);
-                sy=locg.locprecznm(sortindg);
-                locg.sx=sx;
-                locg.sy=sy;
-                locg.znm=locg.znm(sortindg);
-                locg.y=yrot(sortindg)+zmean;
-                for k=1:length(renderfield)
-                    if ~isempty(locg.(renderfield{k}))
-                        locg.(renderfield{k})=locg.(renderfield{k})(sortindg);
-                    end
-                end
+                [locg,indg,sortindg]=getlocrot('grouped','inlayerg');
             end
 
             ph.rangey=[p.zmin p.zmax];
@@ -310,26 +269,91 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 pl=p.(['layer' num2str(k) '_']);
                 if pl.layercheck
                      pr=copyfields(copyfields(p,pl),ph);
-                     if pl.groupcheck
-                        indroi=locg.inlayerg{layerson(k)};
-                        indh=(indroi(indg));
-                        layer(k).images.srimage=renderSMAP(locg,pr,k,indh(sortindg),transparency);
-                     else 
-                         indroi=loc.inlayeru{layerson(k)};
-                         indh=(indroi(indu));
-                         layer(k).images.srimage=renderSMAP(loc,pr,k,indh(sortindu),transparency);
+                     if stereo
+                         layer1(k).images=renderplotlayer(pr,1);
+                         %same intensity scaling
+                         pr.imax=layer1(k).images.finalImages.imax;
+                         pr.imaxtoggle=0;
+                         layer2(k).images=renderplotlayer(pr,1);
+                     else
+                        layer(k).images=renderplotlayer(pr,0);
                      end
-                    layer(k).images.finalImages=drawerSMAP(layer(k).images.srimage,pr);        
-
                 end
             end
+            if stereo
+                srim1=displayerSMAP(layer1,pr);
+                srim2=displayerSMAP(layer2,pr);
+                srim.image=horzcat(srim1.composite*0,srim1.composite, srim2.composite,srim1.composite*0);
+                srim.image=vertcat(srim.image*0,srim.image,srim.image*0);
+            else
             srim=displayerSMAP(layer,pr);
+            end
             obj.currentimage=srim.image;
 %             ax.Children.CData=srim.image;
 %            imagesc(ph.rangex,ph.rangey,layer(1).images.srimage.image,'Parent',ax);
            imagesc(ph.rangex,ph.rangey,srim.image,'Parent',ax);
-            drawnow limitrate 
-%             refreshdata(ax.Parent)
+           drawnow limitrate 
+           
+            function images=renderplotlayer(pr,stereochannel)
+                if stereochannel>0
+                    if pr.groupcheck
+                        locg.x=locg.(['x' num2str(stereochannel)]);
+                    else
+                        loc.x=loc.(['x' num2str(stereochannel)]);
+                    end
+                end
+                 if pr.groupcheck
+                        indroi=locg.inlayerg{layerson(k)};
+                        indh=(indroi(indg));
+                        images.srimage=renderSMAP(locg,pr,k,indh(sortindg),transparency);
+                 else 
+                     indroi=loc.inlayeru{layerson(k)};
+                     indh=(indroi(indu));
+%                          if stereo
+%                              loc.x=loc.x1;
+%                              layer1(k).images.srimage=renderSMAP(loc,pr,k,indh(sortindg),transparency);
+%                              loc.x=loc.x2;
+%                              layer2(k).images.srimage=renderSMAP(loc,pr,k,indh(sortind),transparency);
+%                          else
+                     images.srimage=renderSMAP(loc,pr,k,indh(sortind),transparency);
+%                          end
+                 end
+%                      if stereo
+%                          layer1(k).images.finalImages=drawerSMAP(layer1(k).images.srimage,pr);
+%                          layer2(k).images.finalImages=drawerSMAP(layer2(k).images.srimage,pr);
+%                      else
+                images.finalImages=drawerSMAP(images.srimage,pr);        
+%                      end
+                
+            end
+            function [loc,indu,sortind]=getlocrot(grouping,inlayer)
+                [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},inlayer},'position','roi','grouping',grouping,'layer',layerson);             
+                [yrot,depth]=rotcoord(loc.znm-zmean,loc.ynmline,p.theta);
+                [~,sortind]=sort(depth);
+                if stereo
+                    disteyes=min(depth)*2;
+%                     disteyes=1000;
+                    xe1=0;xe2=0;
+                    
+                    x=loc.xnmline(sortind);
+                    loc.x1=(x-xe1)./(1-depth/disteyes)+xe1;
+                    loc.x2=(x-xe2)./(1+depth/disteyes)+xe2;
+                else
+                loc.x=loc.xnmline(sortind);
+                end
+                %change later:
+                sx=loc.locprecnm(sortind);
+                sy=loc.locprecznm(sortind);
+                loc.sx=sx;
+                loc.sy=sy;
+                loc.y=yrot(sortind)+zmean;
+                loc.znm=loc.znm(sortind);
+                for kc=1:length(renderfield)
+                    if ~isempty(loc.(renderfield{kc}))
+                        loc.(renderfield{kc})=loc.(renderfield{kc})(sortind);
+                    end
+                end
+        end
 
         end
         function rotate_callback(obj,button,b)
@@ -499,15 +523,16 @@ pard.pixrecset.object=struct('Style','edit','String','5 5');
 pard.pixrecset.position=[5,2.1];
 pard.pixrecset.Width=0.5;
 
-
-pard.ttranslation.object=struct('String','translate','Style','text');
-pard.ttranslation.position=[4,3];
-
-pard.trot.object=struct('String','rot (command)','Style','text');
-pard.trot.position=[4,4];
-
-pard.tzoom.object=struct('String','zoom (alt)','Style','text');
-pard.tzoom.position=[8,4];
+pard.showcontrols.object=struct('String','Show Controls','Style','pushbugtton','Callback',@obj.showpanel_callback);
+pard.showcontrols.position=[4,1];
+% pard.ttranslation.object=struct('String','translate','Style','text');
+% pard.ttranslation.position=[4,3];
+% 
+% pard.trot.object=struct('String','rot (command)','Style','text');
+% pard.trot.position=[4,4];
+% 
+% pard.tzoom.object=struct('String','zoom (alt)','Style','text');
+% pard.tzoom.position=[8,4];
 
 pard.rotateb.object=struct('String','Rotate','Style','togglebutton','Callback',@obj.rotate_callback);
 pard.rotateb.position=[6,3];
