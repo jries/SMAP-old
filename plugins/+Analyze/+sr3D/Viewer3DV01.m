@@ -3,9 +3,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         axis
         timer
         currentimage
-%         rotating=false;
-%         theta=0;
-%         locCopy;
+        commandfig
     end
     methods
         function obj=Viewer3DV01(varargin)        
@@ -17,26 +15,28 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             obj.inputParameters{end+1}='numberOfLayers';
             obj.inputParameters=unique(obj.inputParameters);
              obj.showresults=false;
-
         end
         function makeGui(obj)
             makeGui@interfaces.DialogProcessor(obj);
-            h=obj.guihandles;
-            
-           
+            h=obj.guihandles;           
         end
         
-        function showpanel_callback(obj)
-             h.ptranslation=makepanel(h.ttranslation,'translation','');
-            h.protation=makepanel(h.trot,'rot (command/strg)','command');
-            h.pzoom=makepanel(h.tzoom,'zoom (alt)','alt');
-%             h.protation=uipanel('Parent',obj.handle,'Units','pixels','Position',pos,'Title','translation');
-%             h.pzoom=uipanel('Parent',obj.handle,'Units','pixels','Position',pos,'Title','translation');
-            
-            function h=makepanel(htext,title,modifier)
-                pos=htext.Position;
-                pos(4)=pos(4)*4;
-                h=uipanel('Parent',obj.handle,'Units','pixels','Position',pos,'Title',title);
+        function showpanel_callback(obj,a,b)
+            if isempty(obj.commandfig)||~isvalid(obj.commandfig)
+                
+                fp=getParentFigure(obj.handle);
+                posfig=fp.Position;
+                posfig(1)=posfig(1)+posfig(3);
+                posfig(3:4)=[200,200];
+                obj.commandfig=figure('MenuBar','none','Toolbar','none','Position',posfig);
+            end
+            figure(obj.commandfig);
+             h.ptranslation=makepanel([0 0.5 0.5 0.5],'translation','');
+            h.protation=makepanel([0.5 0.5 0.5 0.5],'rot (command/strg)','command');
+            h.pzoom=makepanel([0.5 0.0 0.5 0.5],'zoom (alt)','alt');
+
+            function h=makepanel(pos,title,modifier)
+                h=uipanel('Parent',obj.commandfig,'Units','normalized','Position',pos,'Title',title);
                 h.Units='normalized';
                 uicontrol('Parent',h,'Units','normalized','Position',[1 1 1 1]/3,'String','0','Callback',{@obj.keypress,struct('Modifier',modifier,'Key','0')})
                 uicontrol('Parent',h,'Units','normalized','Position',[0 1 1 1]/3,'String','<-','Callback',{@obj.keypress,struct('Modifier',modifier,'Key','leftarrow')})
@@ -58,7 +58,6 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 figure;
                 obj.axis=gca;
             end
-%             obj.axis=initaxis(obj.resultstabgroup,'3Dimage');
             obj.axis.Units='normalized';
             obj.axis.Position=[0.05 0.05 .95 .9];
             
@@ -67,13 +66,10 @@ classdef Viewer3DV01<interfaces.DialogProcessor
              axis(obj.axis,'tight');
              axis(obj.axis,'equal');
              axis(obj.axis,'ij');
-             
+            
              set(fig,'WindowKeyPressFcn',{@obj.keypress,[]})
-%              obj.theta=0;
              obj.timer=uint64(0);
              obj.redraw
-             
-
         end
 
         function pard=pardef(obj)
@@ -85,7 +81,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             end
            
             p=obj.getGuiParameters;
-            if (length(data.Key)<5 && ~strcmp(data.Key,'0'))||(length(data.Key)>5 && ~(strcmp(data.Key(end-4:end),'arrow')|| strcmp(data.Key,'period')|| strcmp(data.Key,'comma')))
+            if (length(data.Key)<5 && ~strcmp(data.Character,'0'))||(length(data.Key)>5 && ~(strcmp(data.Key(end-4:end),'arrow')|| strcmp(data.Key,'period')|| strcmp(data.Key,'comma')))
                 return
             end
            
@@ -135,7 +131,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     case 'rightarrow'
                         phi=-dphi*stepfac;
                     case '0'
+                        if strcmp(data.Character,'0')
                         theta=0;
+                        end
                 end
                  mpos=mean(pos,1);
                 [dx,dy]=rotcoord(roivec(1)/2,roivec(2)/2,phi);
@@ -200,9 +198,11 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                         po.zmax=p.zmax-stepfac*step*(p.zmax-p.zmin);
                         obj.setGuiParameters(po);
                     case '0'
+                        if strcmp(data.Character,'0')
                         po.zmin=p.zmin-(p.zmax+p.zmin)/2;
                         po.zmax=p.zmax-(p.zmax+p.zmin)/2;
                         obj.setGuiParameters(po);
+                        end
                 end
             end
             roih.setPosition(pos);
@@ -260,7 +260,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 ph.sr_pixrec=p.pixrecset;
             end            
             if p.settransparency
-            transparency=p.transparency/ph.sr_pixrec^2*10;
+            transparency=p.transparency/ph.sr_pixrec(1)^2*10;
             else
                 transparency=[];
             end
@@ -270,7 +270,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 if pl.layercheck
                      pr=copyfields(copyfields(p,pl),ph);
                      if stereo
-                         layer1(k).images=renderplotlayer(pr,1);
+                         layer1(k).images=renderplotlayer(pr,2);
                          %same intensity scaling
                          pr.imax=layer1(k).images.finalImages.imax;
                          pr.imaxtoggle=0;
@@ -289,8 +289,6 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             srim=displayerSMAP(layer,pr);
             end
             obj.currentimage=srim.image;
-%             ax.Children.CData=srim.image;
-%            imagesc(ph.rangex,ph.rangey,layer(1).images.srimage.image,'Parent',ax);
            imagesc(ph.rangex,ph.rangey,srim.image,'Parent',ax);
            drawnow limitrate 
            
@@ -309,21 +307,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                  else 
                      indroi=loc.inlayeru{layerson(k)};
                      indh=(indroi(indu));
-%                          if stereo
-%                              loc.x=loc.x1;
-%                              layer1(k).images.srimage=renderSMAP(loc,pr,k,indh(sortindg),transparency);
-%                              loc.x=loc.x2;
-%                              layer2(k).images.srimage=renderSMAP(loc,pr,k,indh(sortind),transparency);
-%                          else
                      images.srimage=renderSMAP(loc,pr,k,indh(sortind),transparency);
-%                          end
                  end
-%                      if stereo
-%                          layer1(k).images.finalImages=drawerSMAP(layer1(k).images.srimage,pr);
-%                          layer2(k).images.finalImages=drawerSMAP(layer2(k).images.srimage,pr);
-%                      else
                 images.finalImages=drawerSMAP(images.srimage,pr);        
-%                      end
                 
             end
             function [loc,indu,sortind]=getlocrot(grouping,inlayer)
@@ -332,14 +318,13 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 [~,sortind]=sort(depth);
                 if stereo
                     disteyes=min(depth)*2;
-%                     disteyes=1000;
                     xe1=0;xe2=0;
                     
                     x=loc.xnmline(sortind);
                     loc.x1=(x-xe1)./(1-depth/disteyes)+xe1;
                     loc.x2=(x-xe2)./(1+depth/disteyes)+xe2;
                 else
-                loc.x=loc.xnmline(sortind);
+                    loc.x=loc.xnmline(sortind);
                 end
                 %change later:
                 sx=loc.locprecnm(sortind);
@@ -524,7 +509,7 @@ pard.pixrecset.position=[5,2.1];
 pard.pixrecset.Width=0.5;
 
 pard.showcontrols.object=struct('String','Show Controls','Style','pushbutton','Callback',@obj.showpanel_callback);
-pard.showcontrols.position=[4,1];
+pard.showcontrols.position=[1,4];
 % pard.ttranslation.object=struct('String','translate','Style','text');
 % pard.ttranslation.position=[4,3];
 % 
