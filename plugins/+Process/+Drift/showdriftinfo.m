@@ -6,6 +6,7 @@ classdef showdriftinfo<interfaces.DialogProcessor
         end
         
         function out=run(obj,p)
+            out=[];
             driftinfo=obj.locData.files.file(p.dataselect.Value).driftinfo;
             dx=driftinfo.dx;
             dy=driftinfo.dy;
