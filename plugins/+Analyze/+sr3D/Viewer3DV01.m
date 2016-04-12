@@ -523,7 +523,7 @@ pard.pixrecset.object=struct('Style','edit','String','5 5');
 pard.pixrecset.position=[5,2.1];
 pard.pixrecset.Width=0.5;
 
-pard.showcontrols.object=struct('String','Show Controls','Style','pushbugtton','Callback',@obj.showpanel_callback);
+pard.showcontrols.object=struct('String','Show Controls','Style','pushbutton','Callback',@obj.showpanel_callback);
 pard.showcontrols.position=[4,1];
 % pard.ttranslation.object=struct('String','translate','Style','text');
 % pard.ttranslation.position=[4,3];
