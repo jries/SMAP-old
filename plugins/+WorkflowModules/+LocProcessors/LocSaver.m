@@ -66,6 +66,10 @@ classdef LocSaver<interfaces.WorkflowModule;
                 end
                 fitpar=obj.parent.getGuiParameters(true).children;
                 obj.locDatatemp.savelocs(filename,[],struct('fitparameters',fitpar));
+                if isempty(obj.locData.loc)
+                    obj.locData.addLocData(obj.locDatatemp);
+                end
+                output=data;
             end
             
         end

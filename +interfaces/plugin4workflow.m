@@ -16,7 +16,8 @@ classdef plugin4workflow<interfaces.WorkflowModule
             thisplugin.attachLocData(obj.locData);
             thisplugin.attachPar(obj.P);
             if isa(thisplugin, 'interfaces.DialogProcessor')
-                obj.guiPar.Vrim=80;
+                obj.guiPar.Vrim=0;
+                thisplugin.processorgui=false;
             end
             thisplugin.setGuiAppearence(obj.guiPar);
             thisplugin.makeGui;
@@ -28,7 +29,8 @@ classdef plugin4workflow<interfaces.WorkflowModule
             p=obj.getGuiParameters;
            
         end
-        function run(obj,data,p)
+        function out=run(obj,data,p)
+            out=[];
             if ~data.eof
                 return
             end

@@ -233,7 +233,7 @@ for k=1:dnumframesh-1
         ddx(l,k)=-dxh; ddy(l,k)=-dyh;
         errx(l,k)=errx(k,l);erry(l,k)=erry(k,l);
     
-    if par.showresults
+    if isfield(par,'showresults')&&par.showresults
         fhold=imagesc(outim,'Parent',results_ax1);
         imagesc(outimnorm,'Parent',results_ax3)
         results_ax3.Title.String=num2str(k/dnumframesh+(l-k)/dnumframesh^2);

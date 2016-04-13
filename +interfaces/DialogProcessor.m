@@ -103,7 +103,9 @@ p=obj.getAllParameters;
 
  p.obj=obj;
 p.resultstabgroup=obj.guihandles.resultstabgroup;
+if obj.processorgui
 obj.resultshandle.Visible=onoff(p.showresults);
+end
 if isempty(obj.locData.loc)
     warning('no localization data present')
 end

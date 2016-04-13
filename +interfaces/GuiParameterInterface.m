@@ -199,7 +199,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                         end
                         st=hfn.String;
                         if isempty(st)
-                            par=[];
+                            par='';
                             return
                         end
 %                         v=str2num(st);

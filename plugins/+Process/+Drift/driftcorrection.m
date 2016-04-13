@@ -45,6 +45,9 @@ classdef driftcorrection<interfaces.DialogProcessor
                 obj.locData.regroup;
             else
                 locs=obj.locData.getloc({'frame','xnm','ynm'},'position','fov','grouping',groupcheck);
+                if length(locs.xnm)<100
+                    locs=obj.locData.getloc({'frame','xnm','ynm'},'position','all');
+                end
                 p.maxframeall=max(obj.locData.loc.frame);
                 p.framestart=p.layer1_.frame_min;
                 p.framestop=min(p.layer1_.frame_max,p.maxframeall);

@@ -51,11 +51,13 @@ classdef Workflow<interfaces.DialogProcessor
             elseif iscell(p.module)
                 modulepath=p.module;
                 module=plugin(p.module{:});
+                
                 if ~isa(module,'interfaces.GuiModuleInterface')
                     
                     return
                 end
                 if ~isa(module,'interfaces.WorkflowModule') %regular plugin
+                    module.pluginpath=p.module;
                     module=interfaces.plugin4workflow;
                     module.subpluginpath=p.module;
                     ph.Vpos=0;
@@ -173,6 +175,9 @@ classdef Workflow<interfaces.DialogProcessor
                 mk=obj.modules{k};
                 modules(k).tag=mk.tag;
                 modules(k).path=mk.module.pluginpath;
+                if isempty(modules(k).path)
+                     modules(k).path=mk.module.subpluginpath;
+                end
                 modules(k).inputmodules=mk.inputmodules;
             end
             parameters=obj.getGuiParameters(true);
@@ -584,7 +589,8 @@ switch object.Label
     case 'replace'
          idx=obj.guihandles.modulelist.Value;
          oldmodule=obj.modules{idx};
-         obj.add_callback(0,0);
+%          obj.add_callback(0,0);
+         listmenu_callback(struct('Label','add'),b,obj)
          obj.modules{idx}=obj.modules{end};
          obj.modules(end)=[];
          obj.numberOfModules=length(obj.modules);
