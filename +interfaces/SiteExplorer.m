@@ -287,7 +287,7 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
                 
                 image=obj.plotobject(p1,cell.info.filenumber);%filenumber
                 image.image=single(image.image);
-                cell.image=copyfields([],image,{'image','rangex','rangey','parameters'});
+                cell.image=copyfields([],image,{'image','rangex','rangey','parameters','layers'});
              end
             displayimage(cell.image,hax)
             
