@@ -113,7 +113,7 @@ switch lower(p.rendermode.selection)
             p.cam_pixelsize_nm=140;
         end
         p.sr_pixrec=p.cam_pixelsize_nm;
-        pos.s=loch.PSFxnm(indin);
+        pos.s=locsh.PSFxnm(indin);
         if isempty(pos.s)
             pos.s=pos.x*0+p.cam_pixelsize_nm;
         end
