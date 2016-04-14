@@ -8,7 +8,7 @@ if strcmpi(ext,'.tif')
     emptylocs=false;
     return
 end
-if strcmpi(ext,'.mat')&& (strcmp(f(end-4:end),'_sml'))
+if strcmpi(ext,'.mat')&& (strcmp(f(end-3:end),'_sml'))
     mode='sml';
     emptylocs=true;
     return
