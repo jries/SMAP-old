@@ -13,7 +13,7 @@ classdef locsfromSE<interfaces.DialogProcessor
             psf=zeros(nums,1);
             switch p.c_groupfield.Value
                 case 1
-                    gfield='Nlocsg';
+                    gfield='Nlocs';
                 case 2
                     gfield='Nlocsg';
                 case 3
