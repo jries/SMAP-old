@@ -1,6 +1,7 @@
 classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
     properties
         fitpar
+        fitfunction
     end
     methods
         function obj=EMCCD_SE_MLE_GPU(varargin)
@@ -10,6 +11,25 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
         end
         function pard=pardef(obj)
             pard=pardef;
+        end
+        function fitinit(obj)
+            obj.fitfunction = @obj.nofound;
+            img=zeros(7);img(3,3)=1;
+            try 
+                gaussmlev2_cuda50(img,1,10,1)
+                obj.fitfunction=@gaussmlev2_cuda50;
+            catch
+                disp('cuda 5.0 not working')
+            end
+            try 
+                GPUgaussMLEv2_CUDA75(img,1,10,1)
+                obj.fitfunction=@GPUgaussMLEv2_CUDA75;
+            catch
+                disp('cuda 7.5 not working')
+            end
+        end
+        function nofound(obj,varargin)
+            disp('fit function not working. Wrong Cuda version?')
         end
         
         function locs=fit(obj,imstack,stackinfo)
@@ -21,18 +41,18 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
                  locs=[];
                  return
              end
-               
-             EMexcess=obj.fitpar.EMexcessNoise;
+           fitpar=obj.fitpar;
+            EMexcess=fitpar.EMexcessNoise;
            try %%for test set to 0: no fitting
                if obj.fitpar.fitmode==3
-                    zpar=[obj.fitpar.zpar(:)];
+                    zpar=[fitpar.zpar(:)];
 %                     (ii{1},data,PSFSigma,iterations,fittype,Ax,Ay,Bx,By,gamma,d,PSFy0);
 %                     [P CRLB LogL]=fitter.gaussmlev2_cuda70_newz(imstack,zpar(1),p.iterations,p.fitmode,zpar(2),zpar(3),zpar(4),zpar(5),zpar(6),zpar(7),zpar(8));
 %                     [P CRLB LogL]=fitter.GPU_MLE_Lidke_55(imstack,zpar(1),p.iterations,p.fitmode,zpar(2),zpar(3),zpar(4)*0,zpar(5)*0,zpar(6),zpar(7),zpar(8));
 %                      [P CRLB LogL]=fitter.GPUMLESINGEMITTER(imstack,zpar(1),p.iterations,p.fitmode,zpar(2),zpar(3),zpar(4)*0,zpar(5)*0,zpar(6),zpar(7),zpar(8));
-                    [P CRLB LogL]=gaussmlev2_cuda50(imstack/EMexcess,zpar(1),obj.fitpar.iterations,obj.fitpar.fitmode,zpar(2),zpar(3),zpar(4),zpar(5),zpar(6),zpar(7),zpar(8));
+                    [P CRLB LogL]=obj.fitfunction(imstack/EMexcess,zpar(1),obj.fitpar.iterations,obj.fitpar.fitmode,zpar(2),zpar(3),zpar(4),zpar(5),zpar(6),zpar(7),zpar(8));
                else
-                   [P CRLB LogL]=gaussmlev2_cuda50(imstack/EMexcess,obj.fitpar.PSFx0,obj.fitpar.iterations,obj.fitpar.fitmode); 
+                   [P CRLB LogL]=obj.fitfunction(imstack/EMexcess,obj.fitpar.PSFx0,obj.fitpar.iterations,obj.fitpar.fitmode); 
 %                     [P CRLB LogL]=fitter.gaussmlev2_cuda70_newz(imstack,p.PSFx0,p.iterations,p.fitmode);  
 %                      [P CRLB LogL]=fitter.GPU_MLE_Lidke_55(imstack,p.PSFx0,p.iterations,p.fitmode);  
                end
@@ -69,7 +89,7 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
 
             switch obj.fitpar.fitmode
                 case 1 %sx not fitted
-                    sx=obj.fitpar.PSFx0*v1;
+                    sx=fitpar.PSFx0*v1;
                     locs.PSFxpix=0*locs.xpix+sx;
                     locs.PSFypix=locs.PSFxpix;
                 case 2 % sx free
@@ -78,8 +98,8 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
 %                     sx=locs.PSFx;
                     locs.PSFypix=locs.PSFxpix;
                 case 3
-                    locs.znm=(P(:,5)+obj.fitpar.objPos*v1)*1000*obj.fitpar.refractive_index_mismatch;
-                    locs.zerr=sqrt(CRLB(:,5))*1000*obj.fitpar.refractive_index_mismatch;
+                    locs.znm=(P(:,5)+obj.fitpar.objPos*v1)*1000*fitpar.refractive_index_mismatch;
+                    locs.zerr=sqrt(CRLB(:,5))*1000*fitpar.refractive_index_mismatch;
                     [locs.PSFxpix,locs.PSFypix]=zpar2sigma(locs.znm/1000,zpar);
                     
 
@@ -94,9 +114,8 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
             locs.locpthompson=sqrt((locs.PSFxpix.*locs.PSFypix+1/12*v1)./( locs.phot/EMexcess)+8*pi*(locs.PSFxpix.*locs.PSFypix).^2.* locs.bg./( locs.phot/EMexcess).^2);
             
         end
-%         function makeGui(obj)
-%             makeGui@recgui.WorkflowModule(obj);
-%         end
+
+        
         function initGui(obj)
             initGui@interfaces.WorkflowFitter(obj);
             obj.guihandles.fitmode.Callback={@fitmode_callback,obj};
@@ -204,7 +223,5 @@ pard.trefractive_index_mismatch.Width=3;
 pard.refractive_index_mismatch.object=struct('Style','edit','String','.8');
 pard.refractive_index_mismatch.position=[5,4];
 pard.refractive_index_mismatch.TooltipString=sprintf('Correction factor to take into account the different refracrive indices of immersion oil and buffer. \n This leads to smaller distances inside the sample compared to bead calibration. \n Bead calibration: in piezo positions (nm). \n This factor transforms z positions to real-space z positions.');
-% pard.fitterPanel.object=struct('Style','uipanel','String','parameters');
-% pard.fitterPanel.position=[4,2];
-% pard.fitterPanel.Height=4;
+
 end
