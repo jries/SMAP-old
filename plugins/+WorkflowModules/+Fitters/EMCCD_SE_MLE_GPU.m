@@ -14,19 +14,29 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
         end
         function fitinit(obj)
             obj.fitfunction = @obj.nofound;
-            img=zeros(7);img(3,3)=1;
+            reporttext='GPU fit function did not run. Possibly the wrong CUDA version is installed.';
+            img=zeros(7,'single');img(3,3)=1;
             try 
-                gaussmlev2_cuda50(img,1,10,1)
+                gaussmlev2_cuda50(img,1,10,1);
                 obj.fitfunction=@gaussmlev2_cuda50;
-            catch
-                disp('cuda 5.0 not working')
+                reporttext='gaussmlev2_cuda50';
+            catch err
+%                  disp('cuda 5.0 not working')
             end
             try 
-                GPUgaussMLEv2_CUDA75(img,1,10,1)
+                GPUgaussMLEv2_CUDA75(img,1,10,1);
                 obj.fitfunction=@GPUgaussMLEv2_CUDA75;
-            catch
-                disp('cuda 7.5 not working')
+                reporttext='GPUgaussMLEv2_CUDA75';
+            catch err2
+%                  disp('cuda 7.5 not working')
             end
+            disp(reporttext)
+            if exist('err','var')&&exist('err2','var')
+                err
+                err2
+            end
+               
+
         end
         function nofound(obj,varargin)
             disp('fit function not working. Wrong Cuda version?')
