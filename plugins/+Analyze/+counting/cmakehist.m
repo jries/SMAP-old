@@ -9,7 +9,7 @@ classdef cmakehist<interfaces.DialogProcessor
             clusters=obj.getResults('counting_clusters');
             histogram=cluster_mmaple_makehist(p,clusters);
             obj.setResults('counting_histogram',histogram);
-            out=cluster;
+            out=clusters;
 
         end
         
