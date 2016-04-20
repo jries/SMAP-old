@@ -264,12 +264,23 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             if group(2)
                 [locg,indg,sortindg]=getlocrot('grouped','inlayerg');
             end
-          
-            if p.settransparency
-            transparency=p.transparency/ph.sr_pixrec(1)^2*10;
-            else
-                transparency=[];
+           
+            %transparency
+            transparency.parameter=p.transparencypar;
+            transparency.mode=p.transparencymode.Value;
+            switch p.transparencymode.Value
+                case 1 %MIP
+                case 2 %transparent
+                    transparency.parameter=p.transparencypar/ph.sr_pixrec(1)^2*10;
+                case 3 %balls
             end
+%             if p.settransparency
+%             transparency=p.transparency/ph.sr_pixrec(1)^2*10;
+%             else
+%                 transparency=[];
+%             end
+            
+            
             ph.sr_axes=[];
             for k=1:p.numberOfLayers
                 pl=p.(['layer' num2str(k) '_']);
@@ -303,9 +314,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                         srim=srim1;
                         srim.image=srim1.image+srim2.image;
                     case 3
-                        srim=assembleSideviews(srim1,srim2,p);
-                    case 4
                         srim=assembleSideviews(srim2,srim1,p);
+                    case 4
+                        srim=assembleSideviews(srim1,srim2,p);
                 end
             else
                 srim=displayerSMAP(layer,pr);
@@ -546,9 +557,9 @@ pard.text3.position=[3,1];
 pard.setpixelsize.object=struct('String','set pixelsize (x z): ','Style','checkbox','Value',1);
 pard.setpixelsize.position=[5,1];
 pard.setpixelsize.Width=1.5;
-pard.settransparency.object=struct('String','use transparency: ','Style','checkbox');
-pard.settransparency.position=[6,1];
-pard.settransparency.Width=1.5;
+pard.transparencymode.object=struct('String',{{'maximum intensity', 'transparency','balls'}} ,'Style','popupmenu');
+pard.transparencymode.position=[6,1];
+pard.transparencymode.Width=1.1;
 pard.thetat.object=struct('String','Azimuth angle theta ','Style','text');
 pard.thetat.position=[4,1];
 pard.thetat.Width=1.5;
@@ -562,9 +573,9 @@ pard.zmax.Width=0.5;
 pard.theta.object=struct('Style','edit','String','0'); 
 pard.theta.position=[4,2.1];
 pard.theta.Width=0.5;
-pard.transparency.object=struct('Style','edit','String','1'); 
-pard.transparency.position=[6,2.1];
-pard.transparency.Width=0.5;
+pard.transparencypar.object=struct('Style','edit','String','1'); 
+pard.transparencypar.position=[6,2.1];
+pard.transparencypar.Width=0.5;
 pard.pixrecset.object=struct('Style','edit','String','5 5'); 
 pard.pixrecset.position=[5,2.1];
 pard.pixrecset.Width=0.5;
