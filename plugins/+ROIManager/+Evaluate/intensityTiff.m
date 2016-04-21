@@ -65,9 +65,9 @@ end
 
 
 function fit=doublegaussfit(img,rangex,rangey,startp,fixp)
-[X,Y]=meshgrid(rangex,rangey);
+[X,Y]=meshgrid(double(rangex),double(rangey));
 lb=[0 0 -inf -inf 150 0];ub=[inf inf inf inf 750 inf];
-fit=lsqnonlin(@dgaussforfiterr,startp,lb,ub,[],img,X,Y,fixp);
+fit=lsqnonlin(@dgaussforfiterr,double(startp),lb,ub,[],double(img),X,Y,fixp);
 
 end
 function out=dgaussforfiterr(fitp,img,X,Y,fixp)
@@ -84,6 +84,6 @@ x1=fixp(1);y1=fixp(2); sigma1=fixp(3);
 %adjsut x1, y1
 if x2<x1, x2=min(x2,x1-d); else x2=max(x2,x1+d); end
 if y2<y1, y2=min(y2,y1-d); else y2=max(y2,y1+d); end
-out=A1* exp( - ((X-x1).^2+(Y-y1).^2)/sigma1^2/2)+A2* exp( - ((X-x2).^2+(Y-y2).^2)/sigma2^2/2)+bg;
+out=double(A1* exp( - ((X-x1).^2+(Y-y1).^2)/sigma1^2/2)+A2* exp( - ((X-x2).^2+(Y-y2).^2)/sigma2^2/2)+bg);
 
 end
