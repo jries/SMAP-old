@@ -1,5 +1,5 @@
 
-all.file=plugins/workflows/fit_tif_Falcon2D.mat
+all.file=settings/workflows/fit_tif_Falcon2D.mat
 
 all.FieldHeight=25;
 

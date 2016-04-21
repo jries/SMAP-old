@@ -2,7 +2,7 @@ function d=makeplugincallfile(plugindir)
 if ~isdeployed
     addpath('plugins')
     addpath('plugins/shared');
-    addpath('plugins/workflows');
+%     addpath('settings/workflows');
     
     try
     pold=plugin;

@@ -104,7 +104,7 @@ switch callobj.Label
             guimodules.(obj.maindir)=rmfield(guimodules.(obj.maindir),fieldr); 
         end
     case 'add workflow'
-        [file,path]=uigetfile(['plugins/workflows/*.mat']);
+        [file,path]=uigetfile(['settings/workflows/*.mat']);
         if file
             [~,name]=fileparts(file);
             name=name(1:min(end,16));

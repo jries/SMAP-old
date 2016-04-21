@@ -8,7 +8,7 @@ classdef Get2CIntImagesWF<interfaces.DialogProcessor
             
             f=figure(389);
             f.Visible='off';
-            wffile='plugins/workflows/get2CIntensityImagesWF.mat';
+            wffile='settings/workflows/get2CIntensityImagesWF.mat';
             wf=interfaces.Workflow(f,obj.P);
             wf.attachLocData(obj.locData);
             wf.makeGui;

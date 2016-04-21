@@ -215,7 +215,7 @@ switch callobj.Label
 %         guimodules.(pluginname{1}).(pluginname{2}).(pluginname{3})=pluginname;
 %         save(obj.guipluginpath,'guimodules')
     case 'add workflow'
-        [file,path]=uigetfile(['plugins/workflows/*.mat']);
+        [file,path]=uigetfile(['settings/workflows/*.mat']);
         [~,name]=fileparts(file);
         if ~file
             return
