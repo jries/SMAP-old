@@ -235,7 +235,7 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
             p1.sr_pixrec=obj.getPar('se_sitepixelsize');
 %             p1.pixrec=obj.sePar.Settings.sitepixelsize;
             p1.sr_sizeRecPix=round((p1.sr_size*2)/p1.sr_pixrec);
-            p1.sr_axes=hax;
+%             p1.sr_axes=hax;
             p1.sr_axes=-1;
             p1.normalizeFoV=p1.sr_sizeRecPix(1)/obj.getPar('se_sitefov')*obj.getPar('se_siteroi')/2;
             angle=pos2angle(site.annotation.rotationpos.pos);
@@ -263,13 +263,14 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
             site.image.angle=p1.rotationangle; %remove later? not needed
             end
             
+            if ishandle(hax)
              displayimage(site.image,hax);
              plotbox(hax,site.pos,obj.getPar('se_siteroi'));
              plotcirc(hax,site.pos,obj.getPar('se_siteroi'));
              line(site.pos(1)/1000+[-.001 .001],site.pos(2)/1000+[0 0],'Color',[1 1 1],'Parent',hax,'LineWidth',3)
              delete(obj.temp.siteincell);
              obj.temp.siteincell=plotbox(hbox,site.pos,obj.getPar('se_sitefov'));
-             
+            end
             imout=site.image;
             
         end
