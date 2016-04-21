@@ -7,6 +7,7 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
         end
         
         function out=run(obj,p)
+            out=[];
             %get localizations
             [path,file,ext]=fileparts(p.mainfile);
             if ~exist(path,'dir')
@@ -15,8 +16,13 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
             filenew=fullfile(path,[file '_temp.csv']);
             
             lochere=obj.locData.copy;
+            if p.shiftpix
             shiftx=-0.5*p.cam_pixelsize_nm;
             shifty=-0.5*p.cam_pixelsize_nm;
+            else
+                shiftx=0;
+                shifty=0;
+            end
             lochere.loc.xnm=lochere.loc.xnm+shiftx;
             lochere.loc.ynm=lochere.loc.ynm+shifty;
             descfile=saveLocalizationsCSV(lochere,filenew,p.onlyfiltered,p.numberOfLayers,p.sr_layerson);
@@ -52,4 +58,7 @@ pard.onlyfiltered.object=struct('Style','checkbox','String','Export filtered (di
 pard.onlyfiltered.position=[2,1];
 pard.onlyfiltered.Width=4;
 
+pard.shiftpix.object=struct('Style','checkbox','String','Shift by 0.5 camera pixels','Value',0);
+pard.shiftpix.position=[3,1];
+pard.shiftpix.Width=4;
 end

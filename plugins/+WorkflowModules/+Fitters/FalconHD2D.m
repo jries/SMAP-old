@@ -1,6 +1,7 @@
 classdef FalconHD2D<interfaces.WorkflowModule
     properties
         fitpar
+        fitfunction
     end
     methods
        function obj=FalconHD2D(varargin)
@@ -8,16 +9,22 @@ classdef FalconHD2D<interfaces.WorkflowModule
 %             obj.inputChannels=2; 
 %              obj.setInputChannels(2,'frame');
        end
-       function initgui(obj)
-           initgui@interfaces.WorkflowFitter(obj);
-           addpath('plugins/+WorkflowModules/+Fitters/FALCON')
-       end
+%        function initgui(obj)
+%            initgui@interfaces.WorkflowFitter(obj);
+% %            addpath('plugins/+WorkflowModules/+Fitters/FALCON')
+%        end
         function pard=pardef(obj)
             pard=pardef(obj);
         end
        function prerun(obj,p)
-  
-            
+           try
+            FALCON_GPU_rel3_WF(rand(30,'single'),p.Gsigma,p.speed.selection,false);
+            obj.fitfunction=@FALCON_GPU_rel3_WF;
+           catch
+               obj.fitfunction=@FALCON_CPU_rel3_WF;
+               disp('using CPU Falcon fitter');
+           end
+               
         end
         function dato=run(obj,data,p)
             
@@ -32,8 +39,11 @@ classdef FalconHD2D<interfaces.WorkflowModule
         end
         function locs=fit(obj,imagephot,p,frame)
             debug=false;
-            [Results,avgImg]= FALCON_CPU_rel3_WF(imagephot,p.Gsigma,p.speed.selection,debug);
-            
+   
+%             [Results,avgImg]= FALCON_CPU_rel3_WF(imagephot,p.Gsigma,p.speed.selection,debug);
+   
+            [Results,avgImg]= obj.fitfunction(imagephot,p.Gsigma,p.speed.selection,debug);
+
 %              s=size(imstack);
 %              if length(s)==2 
 %                  s(3)=1;

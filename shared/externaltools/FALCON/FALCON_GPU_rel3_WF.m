@@ -1,7 +1,7 @@
 %% ****************************************************************************************************
 %%
 %% Fast localization algorithm based on a continuous-space formulation (FALCON) for high density super-resolution microscopy
-%% This code was demonstrated in MATLAB 2013a version with CPU
+%% This code was demonstrated in MATLAB 2013a version with GPU
 %%
 %% Input:  filename          : file name of raw camera images, ex) xxx.tif
 %%         numFrame          : number of frames to be reconstructed
@@ -17,7 +17,7 @@
 %% Output: Results           : || frame number || x positions || y positions || photon counts || PSF_width_ratio
 %%         avgImg            : Temporally averaged image
 %% ****************************************************************************************************
-function [Results,avgImg]= FALCON_CPU_rel3_WF(imagephot,Gsigma,speed,debug)
+function [Results,avgImg]= FALCON_GPU_rel3_WF(imagephot,Gsigma,speed,debug)
 %% initialization
 dummyFrame=0;
 ADU=1;
@@ -25,36 +25,23 @@ baseline=0;
 EM=0;
 
 beep off;
-% if matlabpool('size') == 0
-%     myCluster = parcluster();
-%     matlabpool(myCluster)
-% end
-
 if isempty(gcp('nocreate')) 
     parpool; 
 end
 
 [y_dim,x_dim]= size(imagephot);
-% numFrame = min(numFrame,length(imfinfo(filename)));
-% [y_dim,x_dim]= size(single(imread(filename,1)));
-% if nargin <7
-%     error('Wrong number of input arguments');
-% elseif nargin == 7
-%     debug = 0;
-% end
-
 %% Common parameters settings
 % parameters are opimized for the condition: PSF_width/pixelsize >> 2
-boundary = 2;
+boundary = 4;
 frame_subset_length = 20;
-wavelet_level = 6;                                                         % for background estimation
+wavelet_level = 5;                                                         % for background estimation
 thresh_delta = 1.1;                                                        % maximum displacement of PSF
 thresh_level = 0.05;                                                       % Threshold level for initial localization
 
 % sparsity level (if too many false positive, set para = 2.5 or 3) 
-para = 2;    
+para = 1.5;    
 
-
+% 
 % if EM > 0
 %     ADU = ADU/1.4;
 % end
@@ -111,12 +98,12 @@ sigma_delta = 0.15;
     Gen_kernelsVer2(x_dim,y_dim,up_decon,up_refine,Gsigma,sigma_delta);
 
 % Fourier coefficients
-InvPSF_base = (repmat(abs(fPSF_decon).^2,[1,1,frame_subset_length]))/(up_decon)^2;
-fPSF_decon_base = (repmat(fPSF_decon,[1,1,frame_subset_length]));
-fPSF_refine_base = (repmat(fPSF_refine,[1,1,frame_subset_length]));
-fPSF_dev_x_base = (repmat(fPSF_dev_x,[1,1,frame_subset_length]));
-fPSF_dev_y_base = (repmat(fPSF_dev_y,[1,1,frame_subset_length]));
-fPSF_dev_z_base = (repmat(fPSF_dev_z,[1,1,frame_subset_length]));
+InvPSF_base = gpuArray(repmat(abs(fPSF_decon).^2,[1,1,frame_subset_length]))/(up_decon)^2;
+fPSF_decon_base = gpuArray(repmat(fPSF_decon,[1,1,frame_subset_length]));
+fPSF_refine_base = gpuArray(repmat(fPSF_refine,[1,1,frame_subset_length]));
+fPSF_dev_x_base = gpuArray(repmat(fPSF_dev_x,[1,1,frame_subset_length]));
+fPSF_dev_y_base = gpuArray(repmat(fPSF_dev_y,[1,1,frame_subset_length]));
+fPSF_dev_z_base = gpuArray(repmat(fPSF_dev_z,[1,1,frame_subset_length]));
 
 %% downsampling index
 % downsampling index for deconvolution
@@ -134,15 +121,13 @@ D1 = @(x) x(ind_down_y1,ind_down_x1,:);
 D2 = @(x) x(ind_down_y2,ind_down_x2,:);
 
 %% output
-% numFrame = min(numFrame,length(imfinfo(filename)));
-% [y_dim,x_dim]= size(single(imread(filename,1)));
 numFrame=1;
 Results = zeros(1000*numFrame,5,'single');
 index_Results = 1;
 avgImg = zeros(y_dim,x_dim,'single');
 
 %% localization start
-% fprintf('FALCON CPU start...\n'); 
+% fprintf('FALCON GPU start...\n');
 for frame_count = 1: ceil(numFrame/frame_subset_length)
     
     sframe = (frame_count-1)*frame_subset_length+1+dummyFrame;
@@ -154,8 +139,7 @@ for frame_count = 1: ceil(numFrame/frame_subset_length)
     
     % load camera images
     for zz = sframe:eframe
-        CCD_imgs_sub(:,:,zz-sframe+1) = imagephot(:,:,zz);
-%         CCD_imgs_sub(:,:,zz-sframe+1) = single(imread(filename,zz));
+         CCD_imgs_sub(:,:,zz-sframe+1) = imagephot(:,:,zz);
     end
     % averaged image
     avgImg = avgImg +sum(CCD_imgs_sub,3)*ADU/numFrame;
@@ -168,26 +152,25 @@ for frame_count = 1: ceil(numFrame/frame_subset_length)
         ind = CCD_imgs_sub_temp > medVal;
         CCD_imgs_sub_temp(ind) = medVal;
     end
-%     est_backgrounds = background_estimation(CCD_imgs_sub_temp,1,wavelet_level,'db6',5);
-    est_backgrounds =  mywaveletfilter(CCD_imgs_sub_temp,4); %XXX adjust wavelet level?
+    est_backgrounds = mywaveletfilter(CCD_imgs_sub_temp,4); %XXX adjust wavelet level?
     
     
     % initialize variables
-    est_c = (zeros(est_y_dim_decon_up,est_x_dim_decon_up,subset_length,'single'));          % super resolution grid.
-    d = (zeros(est_y_dim_decon_up,est_x_dim_decon_up,subset_length,'single'));              % auxilliary variable
-    v = (zeros(est_y_dim_decon_up,est_x_dim_decon_up,subset_length,'single'));              % auxilliary variable
-    gradient_c = (zeros(est_y_dim_refine_up,est_x_dim_refine_up,subset_length,'single'));
-    gradient_dx = (zeros(est_y_dim_refine_up,est_x_dim_refine_up,subset_length,'single'));
-    gradient_dy = (zeros(est_y_dim_refine_up,est_x_dim_refine_up,subset_length,'single'));
-    gradient_dz = (zeros(est_y_dim_refine_up,est_x_dim_refine_up,subset_length,'single'));
-    grad_c_temp = (zeros(est_y_dim_refine_up,est_x_dim_refine_up,subset_length,'single'));
-    grad_d_temp = (zeros(est_y_dim_refine_up,est_x_dim_refine_up,subset_length,'single'));
+    est_c = gpuArray(zeros(est_y_dim_decon_up,est_x_dim_decon_up,subset_length,'single'));          % super resolution grid.
+    d = gpuArray(zeros(est_y_dim_decon_up,est_x_dim_decon_up,subset_length,'single'));              % auxilliary variable
+    v = gpuArray(zeros(est_y_dim_decon_up,est_x_dim_decon_up,subset_length,'single'));              % auxilliary variable
+    gradient_c = gpuArray(zeros(est_y_dim_refine_up,est_x_dim_refine_up,subset_length,'single'));
+    gradient_dx = gpuArray(zeros(est_y_dim_refine_up,est_x_dim_refine_up,subset_length,'single'));
+    gradient_dy = gpuArray(zeros(est_y_dim_refine_up,est_x_dim_refine_up,subset_length,'single'));
+    gradient_dz = gpuArray(zeros(est_y_dim_refine_up,est_x_dim_refine_up,subset_length,'single'));
+    grad_c_temp = gpuArray(zeros(est_y_dim_refine_up,est_x_dim_refine_up,subset_length,'single'));
+    grad_d_temp = gpuArray(zeros(est_y_dim_refine_up,est_x_dim_refine_up,subset_length,'single'));
     
     % parameter settings for ADMM
     bg_min = max(CCD_imgs_sub(:))*0.02;
     w = para*sqrt(max(imresize(est_backgrounds,up_decon),bg_min));         % weights for sparsity priors
     mu = 0.05;                                                             % auxiliary parameter for ADMM
-    thresh_c = (w/mu);
+    thresh_c = gpuArray(w/mu);
     
     % PSF kernels in Fourier domain.
     InvPSF = 1./(InvPSF_base(:,:,1:subset_length) + mu*1);
@@ -220,9 +203,9 @@ for frame_count = 1: ceil(numFrame/frame_subset_length)
     %% Step1 Deconvolution with sparse priors
     
     % pre-calculation for the gradients
-    CCD_imgs_sub = (CCD_imgs_sub);
-    est_backgrounds = (est_backgrounds);
-    CCD_imgs_sub_bg = (zeros(est_y_dim_decon_up,est_x_dim_decon_up,subset_length,'single'));
+    CCD_imgs_sub = gpuArray(CCD_imgs_sub);
+    est_backgrounds = gpuArray(est_backgrounds);
+    CCD_imgs_sub_bg = gpuArray(zeros(est_y_dim_decon_up,est_x_dim_decon_up,subset_length,'single'));
     CCD_imgs_sub_bg(ind_down_y1,ind_down_x1,:) = CCD_imgs_sub-est_backgrounds;
     temp_PSF_t = real(ifft2(fft2(CCD_imgs_sub_bg).*fPSF_decon));
     
@@ -235,19 +218,18 @@ for frame_count = 1: ceil(numFrame/frame_subset_length)
         
         % background update
         if (mod(count,bg_iter1) == 0)&&(count>=bg_s)
-            res =  (CCD_imgs_sub-D1(real(ifft2(fft2(est_c).*fPSF_decon))));
+            res =  gather(CCD_imgs_sub-D1(real(ifft2(fft2(est_c).*fPSF_decon))));
 %             est_backgrounds_new = padarray(background_estimation(res((boundary+1):end-boundary,(boundary+1):end-boundary,:),1,wavelet_level,'db6',2),[boundary,boundary],'replicate','both');
-            est_backgrounds_new = padarray(mywaveletfilter(res((boundary+1):end-boundary,(boundary+1):end-boundary,:),4),[boundary,boundary],'replicate','both');
-            
+             est_backgrounds_new = padarray(mywaveletfilter(res((boundary+1):end-boundary,(boundary+1):end-boundary,:),4),[boundary,boundary],'replicate','both');
             w = para*sqrt(max(imresize(single(est_backgrounds_new),up_decon),bg_min));          % weights for sparsity priors
-            thresh_c = (w/mu);
-            est_backgrounds = (est_backgrounds_new);
+            thresh_c = gpuArray(w/mu);
+            est_backgrounds = gpuArray(est_backgrounds_new);
             CCD_imgs_sub_bg(ind_down_y1,ind_down_x1,:) = CCD_imgs_sub-est_backgrounds;
             temp_PSF_t = real(ifft2(fft2(CCD_imgs_sub_bg).*fPSF_decon));
         end
         
         % debug mode : display current estimated variables
-        if debug > 0 && mod(count,30)==0;
+        if debug > 0
             figure(100);
             subplot(1,3,1,'align')
             imagesc(CCD_imgs_sub(:,:,1)); colormap(hot); axis image; axis off; axis tight; colormap(hot); title('CCD img'); colorbar;
@@ -257,7 +239,6 @@ for frame_count = 1: ceil(numFrame/frame_subset_length)
             subplot(1,3,3,'align')
             imagesc(est_backgrounds((boundary+1):end-boundary,(boundary+1):end-boundary,1));
             colormap(hot); axis image; axis off; axis tight; title('current background'); colorbar;
-            drawnow
         end
     end
     
@@ -276,17 +257,16 @@ for frame_count = 1: ceil(numFrame/frame_subset_length)
             
             % background update
             if mod(count,bg_iter2) == 0
-                res =  (CCD_imgs_sub-D1(real(ifft2(fft2(est_c).*fPSF_decon))));
+                res =  gather(CCD_imgs_sub-D1(real(ifft2(fft2(est_c).*fPSF_decon))));
 %                 est_backgrounds_new = padarray(background_estimation(res((boundary+1):end-boundary,(boundary+1):end-boundary,:),0,wavelet_level,'db6',1),[boundary,boundary],'replicate','both');
                 est_backgrounds_new = padarray(mywaveletfilter(res((boundary+1):end-boundary,(boundary+1):end-boundary,:),4),[boundary,boundary],'replicate','both');
-
-                est_backgrounds = (est_backgrounds_new);
+                est_backgrounds = gpuArray(est_backgrounds_new);
                 CCD_imgs_sub_bg(ind_down_y1,ind_down_x1,:) = CCD_imgs_sub-est_backgrounds;
                 temp_PSF_t = real(ifft2(fft2(CCD_imgs_sub_bg).*fPSF_decon));
             end
             
             % debug mode : display current estimated variables
-            if debug > 0 && mod(count,30)==0;
+            if debug > 0
                 figure(101);
                 subplot(1,3,1,'align')
                 imagesc(CCD_imgs_sub(:,:,1)); colormap(hot); axis image; axis off; axis tight; colormap(hot); title('CCD img'); colorbar;
@@ -296,7 +276,6 @@ for frame_count = 1: ceil(numFrame/frame_subset_length)
                 subplot(1,3,3,'align')
                 imagesc(est_backgrounds((boundary+1):end-boundary,(boundary+1):end-boundary,1));
                 colormap(hot); axis image; axis off; axis tight; title('current background'); colorbar;
-                drawnow
             end
         end
         
@@ -306,7 +285,7 @@ for frame_count = 1: ceil(numFrame/frame_subset_length)
         % get initial localizations
         thresh = mean(max(max(est_c,[],1),[],2))*thresh_level;
         est_c(est_c<0) = 0;
-        [est_c,delta_x,delta_y] = Peakdets((est_c),thresh);
+        [est_c,delta_x,delta_y] = Peakdets(gather(est_c),thresh);
         ind_set = find(est_c>0);
         
         % grid rearrangement
@@ -318,21 +297,21 @@ for frame_count = 1: ceil(numFrame/frame_subset_length)
             est_pos_x = (est_pos_x+delta_x(ind_set)-offset1)/up_decon*up_refine+offset2;
             est_pos_y = (est_pos_y+delta_y(ind_set)-offset1)/up_decon*up_refine+offset2;
             ind_set = sub2ind([est_y_dim_refine_up, est_x_dim_refine_up,subset_length],round(est_pos_y),round(est_pos_x),nn);
-            est_c = (zeros(est_y_dim_refine_up, est_x_dim_refine_up,subset_length,'single'));
-            delta_x = (zeros(est_y_dim_refine_up, est_x_dim_refine_up,subset_length,'single'));
-            delta_y = (zeros(est_y_dim_refine_up, est_x_dim_refine_up,subset_length,'single'));
+            est_c = gpuArray(zeros(est_y_dim_refine_up, est_x_dim_refine_up,subset_length,'single'));
+            delta_x = gpuArray(zeros(est_y_dim_refine_up, est_x_dim_refine_up,subset_length,'single'));
+            delta_y = gpuArray(zeros(est_y_dim_refine_up, est_x_dim_refine_up,subset_length,'single'));
             est_c(ind_set) = (est_photon);
             delta_x(ind_set) = (est_pos_x-round(est_pos_x));
             delta_y(ind_set) = (est_pos_y-round(est_pos_y));
-            CCD_imgs_sub_bg = (zeros(est_y_dim_refine_up,est_x_dim_refine_up,subset_length,'single'));
+            CCD_imgs_sub_bg = gpuArray(zeros(est_y_dim_refine_up,est_x_dim_refine_up,subset_length,'single'));
             CCD_imgs_sub_bg(ind_down_y2,ind_down_x2,:) = CCD_imgs_sub-est_backgrounds;
         end
         
         % variables to be estimated
-        est_c = (est_c);
-        delta_x = (delta_x);
-        delta_y = (delta_y);
-        delta_z = (zeros(est_y_dim_refine_up, est_x_dim_refine_up,subset_length,'single'));
+        est_c = gpuArray(est_c);
+        delta_x = gpuArray(delta_x);
+        delta_y = gpuArray(delta_y);
+        delta_z = gpuArray(zeros(est_y_dim_refine_up, est_x_dim_refine_up,subset_length,'single'));
         step_boost = 1.6;
         
         % pre-calculation for the gradients
@@ -345,9 +324,9 @@ for frame_count = 1: ceil(numFrame/frame_subset_length)
         
         
         for count = 1:iter_step3
-             
+            
             % debug mode : display current estimated variables
-            if debug > 0 && mod(count,30)==0;
+            if debug > 0
                 figure(102);
                 subplot(2,2,1,'align')
                 imagesc(est_c((boundary*up_decon+1):end-boundary*up_decon,(boundary*up_decon+1):end-boundary*up_decon,1));
@@ -361,7 +340,6 @@ for frame_count = 1: ceil(numFrame/frame_subset_length)
                 subplot(2,2,4,'align')
                 imagesc(delta_z((boundary*up_decon+1):end-boundary*up_decon,(boundary*up_decon+1):end-boundary*up_decon,1));
                 colormap(hot); axis image; axis off; axis tight; title(['delta witdh, iter = ',num2str(count)]); colorbar;
-                drawnow
             end
             
             % % refine locations in x,y and width of PSF
@@ -440,10 +418,10 @@ for frame_count = 1: ceil(numFrame/frame_subset_length)
     est_c(est_c<thresh) = 0;
     mask = zeros(est_y_dim_refine,est_x_dim_refine,subset_length);
     mask(boundary*up_refine+1:end-boundary*up_refine,boundary*up_refine+1:end-boundary*up_refine,:) = 1;
-    est_c = (est_c(1:est_y_dim_refine,1:est_x_dim_refine,:).*mask);
-    delta_x = (delta_x(1:est_y_dim_refine,1:est_x_dim_refine,:).*mask);
-    delta_y = (delta_y(1:est_y_dim_refine,1:est_x_dim_refine,:).*mask);
-    delta_z = (delta_z(1:est_y_dim_refine,1:est_x_dim_refine,:).*mask);
+    est_c = gather(est_c(1:est_y_dim_refine,1:est_x_dim_refine,:).*mask);
+    delta_x = gather(delta_x(1:est_y_dim_refine,1:est_x_dim_refine,:).*mask);
+    delta_y = gather(delta_y(1:est_y_dim_refine,1:est_x_dim_refine,:).*mask);
+    delta_z = gather(delta_z(1:est_y_dim_refine,1:est_x_dim_refine,:).*mask);
     
     ind_set = find((est_c>1));
     est_photon = est_c(ind_set);
