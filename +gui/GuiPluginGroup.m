@@ -103,7 +103,13 @@ classdef GuiPluginGroup< interfaces.GuiModuleInterface & interfaces.LocDataInter
             if iscell(pluginpath)&&length(pluginpath)==3
                 thisplugin=plugin(pluginpath{:});
                 if ~isa(thisplugin,'interfaces.DialogProcessor')
-                    warning('selected plugin is not a subclass of interfaces.DialogProcessor')
+                    if isstruct(thisplugin)
+                        
+                        obj.guiplugins=myrmfield(obj.guiplugins,'name');
+                    else
+                        pluginpath
+                        warning('selected plugin is not a subclass of interfaces.DialogProcessor')
+                    end
                     return
                 end
                 isworkflow=false;
