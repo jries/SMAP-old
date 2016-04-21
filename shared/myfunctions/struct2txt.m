@@ -30,6 +30,6 @@ else
     if ~isempty(p)
     txt={[prefix '=' p(1,:)]};
     else
-        txt={prefix};
+        txt={[prefix '=']};
     end
 end

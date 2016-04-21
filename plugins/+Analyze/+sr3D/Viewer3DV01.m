@@ -4,6 +4,8 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         timer
         currentimage
         commandfig
+        recpar={};
+        stereopar
     end
     methods
         function obj=Viewer3DV01(varargin)        
@@ -38,13 +40,13 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             function h=makepanel(pos,title,modifier)
                 h=uipanel('Parent',obj.commandfig,'Units','normalized','Position',pos,'Title',title);
                 h.Units='normalized';
-                uicontrol('Parent',h,'Units','normalized','Position',[1 1 1 1]/3,'String','0','Callback',{@obj.keypress,struct('Modifier',modifier,'Key','0')})
-                uicontrol('Parent',h,'Units','normalized','Position',[0 1 1 1]/3,'String','<-','Callback',{@obj.keypress,struct('Modifier',modifier,'Key','leftarrow')})
-                uicontrol('Parent',h,'Units','normalized','Position',[2 1 1 1]/3,'String','->','Callback',{@obj.keypress,struct('Modifier',modifier,'Key','rightarrow')})
-                uicontrol('Parent',h,'Units','normalized','Position',[1 2 1 1]/3,'String','^','Callback',{@obj.keypress,struct('Modifier',modifier,'Key','uparrow')})
-                uicontrol('Parent',h,'Units','normalized','Position',[1 0 1 1]/3,'String','v','Callback',{@obj.keypress,struct('Modifier',modifier,'Key','downarrow')})   
-                uicontrol('Parent',h,'Units','normalized','Position',[0 2 1 1]/3,'String','x (,)','Callback',{@obj.keypress,struct('Modifier',modifier,'Key','comma')})
-                uicontrol('Parent',h,'Units','normalized','Position',[2 2 1 1]/3,'String','(.)','Callback',{@obj.keypress,struct('Modifier',modifier,'Key','period')})                  
+                uicontrol('Parent',h,'Units','normalized','Position',[1 1 1 1]/3,'String','0','Callback',{@obj.keypress,struct('Modifier',modifier,'Key','0','Character','0')})
+                uicontrol('Parent',h,'Units','normalized','Position',[0 1 1 1]/3,'String','<-','Callback',{@obj.keypress,struct('Modifier',modifier,'Key','leftarrow','Character','')})
+                uicontrol('Parent',h,'Units','normalized','Position',[2 1 1 1]/3,'String','->','Callback',{@obj.keypress,struct('Modifier',modifier,'Key','rightarrow','Character','')})
+                uicontrol('Parent',h,'Units','normalized','Position',[1 2 1 1]/3,'String','^','Callback',{@obj.keypress,struct('Modifier',modifier,'Key','uparrow','Character','')})
+                uicontrol('Parent',h,'Units','normalized','Position',[1 0 1 1]/3,'String','v','Callback',{@obj.keypress,struct('Modifier',modifier,'Key','downarrow','Character','')})   
+                uicontrol('Parent',h,'Units','normalized','Position',[0 2 1 1]/3,'String','x (,)','Callback',{@obj.keypress,struct('Modifier',modifier,'Key','comma','Character',',')})
+                uicontrol('Parent',h,'Units','normalized','Position',[2 2 1 1]/3,'String','(.)','Callback',{@obj.keypress,struct('Modifier',modifier,'Key','period','Character','.')})                  
             end
         end
         function initGui(obj)
@@ -211,8 +213,8 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         
         function redraw(obj)
             
-             p=obj.getAllParameters;
-             stereo=true;
+            p=obj.getAllParameters;
+            stereo=p.stereo.Value>1;
             locCopy=obj.locData; %maybe not needed
             lo=logical(obj.getPar('sr_layerson'));
             layerson=find(lo);
@@ -236,14 +238,12 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             end
             
             zmean=(p.zmin+p.zmax)/2;
+            if p.setpixelsize
+                ph.sr_pixrec=p.pixrecset;
+            else
+                ph.sr_pixrec=p.sr_pixrec;
+            end  
             
-            if group(1)
-                [loc,indu,sortind]=getlocrot('ungrouped','inlayeru');                
-            end
-            
-            if group(2)
-                [locg,indg,sortindg]=getlocrot('grouped','inlayerg');
-            end
 
             ph.rangey=[p.zmin p.zmax];
             roih=obj.getPar('sr_roihandle');
@@ -256,42 +256,111 @@ classdef Viewer3DV01<interfaces.DialogProcessor
            
             ph.sr_roihandle=obj.getPar('sr_roihandle');       
             ph.rangex=rx;
-            if p.setpixelsize
-                ph.sr_pixrec=p.pixrecset;
-            end            
-            if p.settransparency
-            transparency=p.transparency/ph.sr_pixrec(1)^2*10;
-            else
-                transparency=[];
+            
+            if group(1)
+                [loc,indu,sortind]=getlocrot('ungrouped','inlayeru');                
             end
+            
+            if group(2)
+                [locg,indg,sortindg]=getlocrot('grouped','inlayerg');
+            end
+           
+            %transparency
+            transparency.parameter=p.transparencypar;
+            transparency.mode=p.transparencymode.Value;
+            switch p.transparencymode.Value
+                case 1 %MIP
+                case 2 %transparent
+                    transparency.parameter=p.transparencypar/ph.sr_pixrec(1)^2*10;
+                case 3 %balls
+            end
+%             if p.settransparency
+%             transparency=p.transparency/ph.sr_pixrec(1)^2*10;
+%             else
+%                 transparency=[];
+%             end
+            
+            
             ph.sr_axes=[];
             for k=1:p.numberOfLayers
                 pl=p.(['layer' num2str(k) '_']);
                 if pl.layercheck
-                     pr=copyfields(copyfields(p,pl),ph);
+                    if length(obj.recpar)>=k
+                        rp=obj.recpar{k};
+                    else
+                        rp=[];
+                    end
+                     pr=copyfields(copyfields(copyfields(p,pl),ph),rp);
                      if stereo
-                         layer1(k).images=renderplotlayer(pr,2);
+                         pr=getstereosettings(pr,1);
+                         layer1(k).images=renderplotlayer(pr,1);
                          %same intensity scaling
                          pr.imax=layer1(k).images.finalImages.imax;
+                         obj.currentimage.imax(k)=pr.imax;
                          pr.imaxtoggle=0;
-                         layer2(k).images=renderplotlayer(pr,1);
+                         pr=getstereosettings(pr,2);
+                         layer2(k).images=renderplotlayer(pr,2);
                      else
                         layer(k).images=renderplotlayer(pr,0);
+                        obj.currentimage.imax(k)=layer(k).images.finalImages.imax;
                      end
                 end
             end
             if stereo
                 srim1=displayerSMAP(layer1,pr);
                 srim2=displayerSMAP(layer2,pr);
-                srim.image=horzcat(srim1.composite*0,srim1.composite, srim2.composite,srim1.composite*0);
-                srim.image=vertcat(srim.image*0,srim.image,srim.image*0);
+                switch p.stereo.Value
+                    case 2
+                        srim=srim1;
+                        srim.image=srim1.image+srim2.image;
+                    case 3
+                        srim=assembleSideviews(srim2,srim1,p);
+                    case 4
+                        srim=assembleSideviews(srim1,srim2,p);
+                end
             else
-            srim=displayerSMAP(layer,pr);
+                srim=displayerSMAP(layer,pr);
             end
-            obj.currentimage=srim.image;
-           imagesc(ph.rangex,ph.rangey,srim.image,'Parent',ax);
+            obj.currentimage=copyfields(obj.currentimage,srim);
+            imagesc(srim.rangex*1000,srim.rangey*1000,srim.image,'Parent',ax);
            drawnow limitrate 
            
+           
+           
+            function srim=assembleSideviews(srim1,srim2,p)
+                srim=srim1;
+                mpar=p.stereomagnification;
+                widths=obj.axis.Parent.Position(3);
+                
+                ar=obj.axis.Parent.Position(3)/obj.axis.Parent.Position(4);
+                sx=ceil(round(widths*mpar/2))*2;
+                sy=ceil(round(widths*mpar/ar/2))*2;
+                image=zeros(sy,sx,3);
+                s=size(srim1.composite);
+                mpx=ceil(sx/2);
+                mpy=ceil(sy/2);
+                shalfimy=floor(s(1)/2);
+                shalfimx=floor(s(2)/2);
+                eyepx=round(obj.stereopar.eyemm/p.monitorpmm*mpar);
+                mpxh=mpx-eyepx;
+                shalfy=min(shalfimy,mpy);
+                shalfx=min(shalfimx,eyepx);
+%                 im1=srim1.composite;
+                rim1=shalfimy-shalfy+1:shalfimy+shalfy;
+                rim2=shalfimx+1-shalfx:shalfimx+shalfx;
+                imcut1=srim1.composite(rim1,rim2,:);
+                imcut2=srim2.composite(rim1,rim2,:);
+                
+                image(mpy-shalfy+1:mpy+shalfy,mpxh-shalfx+1:mpxh+shalfx,:)=imcut1;
+                mpxh=mpx+eyepx;
+                image(mpy-shalfy+1:mpy+shalfy,mpxh-shalfx+1:mpxh+shalfx,:)=imcut2;
+%                 image(mpy-shalf(1)+1:mpy-shalf(1)+s(1),mpxh-shalf(2)+1:mpxh-shalf(2)+s(2),:)=imcut2;                
+                
+                fx=sx/s(2);fy=sy/s(1);
+                srim.image=image;
+                srim.rangex=srim1.rangex*fx;
+                srim.rangey=srim1.rangey*fy;
+            end
             function images=renderplotlayer(pr,stereochannel)
                 if stereochannel>0
                     if pr.groupcheck
@@ -315,17 +384,31 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             function [loc,indu,sortind]=getlocrot(grouping,inlayer)
                 [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},inlayer},'position','roi','grouping',grouping,'layer',layerson);             
                 [yrot,depth]=rotcoord(loc.znm-zmean,loc.ynmline,p.theta);
-                [~,sortind]=sort(depth);
+                [sortdepth,sortind]=sort(depth);
+%                 sortdepth=sortdepth-max(sortdepth); %reference point on plane
                 if stereo
-                    disteyes=min(depth)*2;
-                    xe1=0;xe2=0;
+                    eyemm=35;
+                    dplanemm=p.dplanemm;
+                    pixmm=p.monitorpmm;
+                    widthpix=obj.axis.Position(3);
+%                     pixnm=ph.sr_pixrec;
+                    widthnm=ph.rangex(2)-ph.rangex(1);
+                    heightpix=obj.axis.Position(4);
+                    widthmm=widthpix*pixmm;
+                    eyenm=eyemm*widthnm/widthmm;
+                    dplanenm=dplanemm*widthnm/widthmm;
+                    xe1=eyenm;xe2=-eyenm;
                     
                     x=loc.xnmline(sortind);
-                    loc.x1=(x-xe1)./(1-depth/disteyes)+xe1;
-                    loc.x2=(x-xe2)./(1+depth/disteyes)+xe2;
+                    loc.x1=(x-xe1)./(1-sortdepth/dplanenm)+xe1;
+                    loc.x2=(x-xe2)./(1-sortdepth/dplanenm)+xe2;
+                    
+                    obj.stereopar=struct('eyemm',eyemm,'eyenm',eyenm,'widthnm',widthnm,'widthmm',widthmm,'widthpix',widthpix,'heightpix',heightpix);
                 else
                     loc.x=loc.xnmline(sortind);
                 end
+                
+                
                 %change later:
                 sx=loc.locprecnm(sortind);
                 sy=loc.locprecznm(sortind);
@@ -343,9 +426,6 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         end
         function rotate_callback(obj,button,b)
             global SMAP_stopnow
-%             SMAP_stopnow
-%             obj.rotating=true;
-%             obj.axis.Tag='busy';
             bh=obj.guihandles.rotateb;
             if bh.Value
                 bh.FontWeight='bold';
@@ -375,15 +455,10 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             
             if  ~ strcmp(p.raxis.selection,obj.getSingleGuiParameter('raxis').selection)
                 rotate_callback(obj,button,b)
-            end
-%             disp('done')
-%             obj.rotating=false;
-%             obj.axis.Tag='done';
-            
+            end            
         end
         function savemovie_callback(obj,a,b)
             global SMAP_stopnow
-
             [path,fo]=fileparts(obj.locData.files.file(1).name);
             [file,path]=uiputfile([path filesep fo '.tif']);
             if ~file
@@ -399,11 +474,17 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             else
                 angles=(p.anglerange(1):p.dangle:p.anglerange(2))*pi/180;
             end
-            s=size(obj.currentimage);
+            s=size(obj.currentimage.image);
             if length(s)==2
                 s(3)=1;
             end
             outim=zeros(s(1),s(2),s(3),length(angles));
+            obj.redraw;
+            for k=1:length(obj.currentimage.imax)
+                obj.recpar{k}.imaxtoggle=false;
+                obj.recpar{k}.imax=obj.currentimage.imax(k);
+            end
+
             switch p.raxis.selection
                 case 'vertical'
                     roih=obj.getPar('sr_roihandle');
@@ -411,7 +492,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     for k=1:length(angles) 
                         posr=rotpos(pos,angles(k));
                         roih.setPosition(posr);
-                        outim(:,:,:,k)=obj.currentimage;
+                        outim(:,:,:,k)=obj.currentimage.image;
                         drawnow
                         if SMAP_stopnow
                             break
@@ -422,7 +503,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     for k=1:length(angles) 
                         obj.setGuiParameters(struct('theta',angles(k)));
                         obj.redraw;
-                        outim(:,:,:,k)=obj.currentimage;
+                        outim(:,:,:,k)=obj.currentimage.image;
                         drawnow
                         if SMAP_stopnow
                             break
@@ -433,33 +514,10 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             options.message=true;
             options.comp='lzw';
 
-            imout=uint8(outim/max(outim(:))*(2^8-1));
+            imout=uint8(outim*(2^8-1));
             saveastiff(imout,[path,file],options)
-            
+            obj.recpar={};
         end
-%         function axischange_callback(obj,a,b)
-% %             global SMAP_stopnow
-%             oldv=obj.guihandles.rotateb.Value;
-% %             obj.rotating
-%             if oldv==true
-% %                 SMAP_stopnow=true;
-%                  obj.guihandles.rotateb.Value=false;
-% %                  drawnow
-% %                 while obj.rotating
-% %                     obj.rotating
-% %                     pause(1)
-% %                     obj.rotating
-% %                 end
-% %                 waitfor(obj.axis,'Tag','done')
-% %                 pause(0.1)
-% %                  SMAP_stopnow=false;
-% %                 obj.guihandles.rotateb.Value=true;
-% %                 drawnow
-% %                  pause(1)
-% %                 obj.rotating
-% %                 obj.rotate_callback(obj.guihandles.rotateb,0)
-%             end
-%         end
                    
     end
 end
@@ -474,6 +532,20 @@ pos(1,2)=mpos(2)-dy;
 pos(2,2)=mpos(2)+dy;
 end
 
+function p=getstereosettings(p,channel)
+switch p.stereo.Value
+    case 2
+        if channel==1
+            p.lut.selection='cyan';
+        else
+            p.lut.selection='red';
+        end
+        
+    case 3
+    case 4
+end
+end
+
 function pard=pardef(obj)
 pard.text1.object=struct('String','parameters','Style','text');
 pard.text1.position=[1,1];
@@ -485,9 +557,9 @@ pard.text3.position=[3,1];
 pard.setpixelsize.object=struct('String','set pixelsize (x z): ','Style','checkbox','Value',1);
 pard.setpixelsize.position=[5,1];
 pard.setpixelsize.Width=1.5;
-pard.settransparency.object=struct('String','use transparency: ','Style','checkbox');
-pard.settransparency.position=[6,1];
-pard.settransparency.Width=1.5;
+pard.transparencymode.object=struct('String',{{'maximum intensity', 'transparency','balls'}} ,'Style','popupmenu');
+pard.transparencymode.position=[6,1];
+pard.transparencymode.Width=1.1;
 pard.thetat.object=struct('String','Azimuth angle theta ','Style','text');
 pard.thetat.position=[4,1];
 pard.thetat.Width=1.5;
@@ -501,9 +573,9 @@ pard.zmax.Width=0.5;
 pard.theta.object=struct('Style','edit','String','0'); 
 pard.theta.position=[4,2.1];
 pard.theta.Width=0.5;
-pard.transparency.object=struct('Style','edit','String','1'); 
-pard.transparency.position=[6,2.1];
-pard.transparency.Width=0.5;
+pard.transparencypar.object=struct('Style','edit','String','1'); 
+pard.transparencypar.position=[6,2.1];
+pard.transparencypar.Width=0.5;
 pard.pixrecset.object=struct('Style','edit','String','5 5'); 
 pard.pixrecset.position=[5,2.1];
 pard.pixrecset.Width=0.5;
@@ -520,20 +592,44 @@ pard.showcontrols.position=[1,4];
 % pard.tzoom.position=[8,4];
 
 pard.rotateb.object=struct('String','Rotate','Style','togglebutton','Callback',@obj.rotate_callback);
-pard.rotateb.position=[6,3];
+pard.rotateb.position=[2,3];
 pard.raxis.object=struct('String',{{'horizontal','vertical'}},'Style','popupmenu');%,'Callback',@obj.axischange_callback);
-pard.raxis.position=[7,3];
+pard.raxis.position=[3,3];
 pard.danglet.object=struct('String','step','Style','text');
-pard.danglet.position=[8,3];
+pard.danglet.position=[3,4];
 pard.danglet.Width=0.5;
 pard.dangle.object=struct('String','3','Style','edit');
-pard.dangle.position=[8,3.5];
+pard.dangle.position=[3,4.5];
 pard.dangle.Width=0.5;
 
 pard.savemovie.object=struct('String','save movie','Style','pushbutton','Callback',@obj.savemovie_callback);
-pard.savemovie.position=[7,1];
+pard.savemovie.position=[4,3];
 pard.tx.object=struct('String','min max angle (deg)','Style','text');
-pard.tx.position=[8,1];
+pard.tx.position=[5,3];
 pard.anglerange.object=struct('String','0 360','Style','edit');
-pard.anglerange.position=[8,2];
+pard.anglerange.position=[5,4];
+
+pard.stereo.object=struct('Style','popupmenu','String',{{'no stereo','anaglyphs (color)','free-view','cross-eyed'}}); 
+pard.stereo.position=[7,1];
+pard.stereo.Width=1;
+pard.tx2.object=struct('String','pixel (mm)','Style','text');
+pard.tx2.position=[7,2];
+pard.tx2.Width=.6;
+pard.monitorpmm.object=struct('Style','edit','String','0.3'); 
+pard.monitorpmm.position=[7,2.6];
+pard.monitorpmm.Width=.4;
+
+pard.tx3.object=struct('String','d plane','Style','text');
+pard.tx3.position=[7,3];
+pard.tx3.Width=.6;
+pard.dplanemm.object=struct('Style','edit','String','1000');  
+pard.dplanemm.position=[7,3.6];
+pard.dplanemm.Width=.4;
+
+pard.tx4.object=struct('String','M two images','Style','text');
+pard.tx4.position=[7,4];
+pard.tx4.Width=.6;
+pard.stereomagnification.object=struct('Style','edit','String','1');  
+pard.stereomagnification.position=[7,4.6];
+pard.stereomagnification.Width=.4;
 end

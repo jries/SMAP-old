@@ -1,5 +1,5 @@
 function fitpar=mygaussfit(xdat,ydat,start,fixbg)
-if nargin<3
+if nargin<4
     fixbg=false;
 end
 %a x sigma bg

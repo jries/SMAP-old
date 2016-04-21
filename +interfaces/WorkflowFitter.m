@@ -21,6 +21,8 @@ classdef WorkflowFitter<interfaces.WorkflowModule
             obj.stackind=0;
 
         end
+        function fitinit(obj) %dummy function
+        end
         function prerun(obj,p)
             global fitterstackinfo fitterimagestack fitterbgstack
             obj.stackind=0;
@@ -36,6 +38,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
             fitterstackinfo.x=zeros(obj.numberInBlock,1,'single');
             fitterstackinfo.y=zeros(obj.numberInBlock,1,'single');
             fitterstackinfo.frame=zeros(obj.numberInBlock,1,'double');
+            obj.fitinit;
             
             
             
@@ -67,19 +70,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
                      s(3)=1;
                  end                 
                  
-                 
-                 
-
-
-%                  %subtract BG frame by frame, add mean 
-%                  if obj.getPar('loc_fitOnBackground') 
-%                      for k=1:s(3)
-%                          bgh=fitterbgstack(:,:,k);
-%                          fitterimagestack(:,:,k)=fitterimagestack(:,:,k)-bgh+mean(bgh(:));
-%                      end             
-%                  end
-                 
-%                  stackindh=0;
+                
                 if passbg
                     bgstack=data{2}.data.img;
                 end
@@ -141,40 +132,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
                 
                 outputlocs(obj,locs,fitterstackinfo,obj.newID,true);
             end
-% return
-                 
-                 
-%                  
-%                  for k=1:s(3)
-%                      stackindh=stackindh+1;
-%                      if stackindh>numberInBlockh %full 
-%                          if passbg
-%                             locs=obj.fit(fitterimagestack,fitterbgstack,fitterstackinfo);
-%                          else
-%                              locs=obj.fit(fitterimagestack,fitterstackinfo);
-%                          end
-%                          outputlocs(obj,locs,fitterstackinfo,obj.newID,data{1}.eof);
-%                          stackindh=1;
-%                          obj.newID=obj.newID+1;
-%                      end
-%                      fitterimagestack(:,:,stackindh)=imgstack(:,:,k);
-%                      for fsi=1:length(fninfo) %TODO this might not be perfect. Slow. 
-%                         fitterstackinfo(stackindh).(fninfo{fsi})=stackinf.(fninfo{fsi})(k);
-%                      end
-%                      if passbg
-%                         fitterbgstack(:,:,stackindh)=bgstack(:,:,k);
-%                      end
-%                  end
-%                  obj.stackind=stackindh;
-%             end
-%             if eof
-%                 if passbg
-%                     locs=obj.fit(fitterimagestack(:,:,1:obj.stackind),fitterbgstack(:,:,1:obj.stackind),fitterstackinfo(1:obj.stackind));
-%                 else
-%                     locs=obj.fit(fitterimagestack(:,:,1:obj.stackind),fitterstackinfo(1:obj.stackind));
-%                 end
-%                 outputlocs(obj,locs,fitterstackinfo(1:obj.stackind),obj.newID,true);
-%             end
+
         end
     end
 end
@@ -186,11 +144,6 @@ dato.eof=eof;
 dato.data=(locs);
 obj.output(dato);
 
-% if obj.getPar('loc_preview') && ~isempty(locs)&&~isempty(locs.xpix)
-%     ax=findobj(obj.getPar('loc_outputfig').Children,'Type','Axes');
-%     ax.NextPlot='add';
-%     plot(locs.xpix,locs.ypix,'k.','Parent',ax)
-% end 
 end
 
 function pard=pardef

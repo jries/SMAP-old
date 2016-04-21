@@ -92,14 +92,14 @@ mask=createMask(hroi,him(k));
 end
 
 function pard=pardef
-pard.addroi.object=struct('Style','pushbutton','String','Fit in ROI ');
+pard.addroi.object=struct('Style','pushbutton','String','ROI to include');
 pard.addroi.position=[1,1];
 pard.addroi.TooltipString=sprintf('Add a region of interest in which to fit. \n Use Preview before to display image in which to select ROI. \n After selcting ROI: double click on it to confirm.');
-pard.removeroi.object=struct('Style','pushbutton','String','Remove ROI ');
+pard.removeroi.object=struct('Style','pushbutton','String','ROI to exclude');
 pard.removeroi.position=[2,1];
 pard.removeroi.TooltipString=sprintf('Add a region of interest in which NOT to fit. \n Use Preview before to display image in which to select ROI. \n After selcting ROI: double click on it to confirm.');
 
-pard.clearroi.object=struct('Style','pushbutton','String','Clear ROI ');
+pard.clearroi.object=struct('Style','pushbutton','String','Clear ROIs');
 pard.clearroi.position=[3,1];
 pard.clearroi.TooltipString=sprintf('Clear all ROIs');
 pard.roistyle.object=struct('Style','popupmenu','String','rectangle|ellipse');

@@ -195,6 +195,7 @@ classdef Workflow<interfaces.DialogProcessor
             if isempty(obj.getPar('loc_preview'))
                 obj.setPar('loc_preview',false)
             end
+            obj.module(tag).clearinitialize;
             obj.module(tag).initialize;
             p=obj.module(tag).getAllParameters;
             data=interfaces.WorkflowData;

@@ -10,7 +10,7 @@ if nargin==0
     return          
 end
 if nargin<5
-    transparency=[];
+    transparency.mode=1;
 end
 if strcmpi('tiff', p.rendermode.selection) %obj.locData.files.file(p.ch_filelist.value).istiff
     file=locs.files.file;
@@ -86,7 +86,7 @@ if p.remout==0&&isfield(pos,'c')&&isfield(p,'colorfield_max')&&isfield(p,'colorf
     pos.c(pos.c>p.colorfield_max)=p.colorfield_max;
     pos.c(pos.c<p.colorfield_min)=p.colorfield_min;
 end     
-
+tpar=0;
 switch lower(p.rendermode.selection)
     case {'gauss','other'}
         if isempty(locsh.sx)|| isempty(locsh.sy) 
@@ -100,11 +100,18 @@ switch lower(p.rendermode.selection)
         else
             pos.sx=max(locsh.sx(indin)*p.gaussfac,max(p.mingaussnm,p.mingausspix*p.sr_pixrec(1)));
             pos.sy=max(locsh.sy(indin)*p.gaussfac,max(p.mingaussnm,p.mingausspix*p.sr_pixrec(2)));
-            if isempty(transparency)
-                frender=@gaussrender_ellipt;
-             
-            else
-                frender=@gaussrenderT_ellipt;
+            switch transparency.mode
+                case 1
+%             if isempty(transparency)
+                    frender=@gaussrender_ellipt;
+                case 2
+                    frender=@gaussrenderT_ellipt;
+                    tpar=transparency.parameter;
+                case 3
+                    pos.sx(1)=transparency.parameter;
+                    pos.sy(1)=pos.sx(1);
+                    frender=@gaussrenderTx_ellipt;
+                    tpar=transparency.parameter;
             end
            
         end
@@ -129,7 +136,7 @@ end
           
 
 
-[srimage,nlocs]=frender(pos,rangex, rangey, p.sr_pixrec(1), p.sr_pixrec(end),lut,[p.colorfield_min p.colorfield_max],transparency);
+[srimage,nlocs]=frender(pos,rangex, rangey, p.sr_pixrec(1), p.sr_pixrec(end),lut,[p.colorfield_min p.colorfield_max],tpar);
 if dl
     if isfield(p,'sr_sizeRecPix')
         newsize=round(p.sr_sizeRecPix([2 1]));

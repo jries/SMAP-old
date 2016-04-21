@@ -307,7 +307,7 @@ pard.autosavecheck.object=struct('Style','checkbox','String','Auto save (min):',
 pard.autosavecheck.position=[10,3.5];
 pard.autosavecheck.Width=1.3;
 
-pard.autosavetime.object=struct('Style','edit','String','10','Callback',{{@autosavetime_callback,obj}});
+pard.autosavetime.object=struct('Style','edit','String','30','Callback',{{@autosavetime_callback,obj}});
 pard.autosavetime.position=[10,4.5];
 pard.autosavetime.Width=0.5;
 

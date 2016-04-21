@@ -52,8 +52,10 @@ obj.SEpreview.redrawall;
 end
 
 function clearall_callback(a,b,obj) 
+answer=questdlg('Do you really want to clear all sites and cells?','Clear ROIs','No');
+if strcmp(answer,'Yes')
 obj.SEpreview.clearall;
-
+end
 end
 
 function pard=pardef
@@ -103,10 +105,10 @@ pard.se_drawboxes.object=struct('Style','checkbox','String','draw boxes','Value'
 pard.se_drawboxes.position=[6,2];
 
 pard.redrawall.object=struct('Style','pushbutton','String','redraw all','Value',0);
-pard.redrawall.position=[8.5,3];
+pard.redrawall.position=[8.5,4];
 
 pard.clearall.object=struct('Style','pushbutton','String','clear all','Value',0);
-pard.clearall.position=[10,4];
+pard.clearall.position=[4,4];
 
 pard.showSE.object=struct('Style','togglebutton','String','show ROI manager','Value',0);
 pard.showSE.position=[9,1];

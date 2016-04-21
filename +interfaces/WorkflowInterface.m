@@ -4,6 +4,7 @@ classdef WorkflowInterface<handle
         outputModules
         inputChannels=1;  
         isstartmodule=false;
+        initialized=false;
     end
     properties(Access=private) 
         inputData
@@ -94,9 +95,18 @@ classdef WorkflowInterface<handle
             obj.updateObjectParameters;
             p=obj.getAllParameters;
             obj.runparameters=p;
-            obj.prerun(p);
+            if ~obj.initialized
+                obj.prerun(p);
+                obj.initialized=true;
+            end
             for k=1:length(obj.outputModules)
                  obj.outputModules(k).module.initialize;
+            end
+        end
+        function clearinitialize(obj,a,b)
+            obj.initialized=false;
+            for k=1:length(obj.outputModules)
+                 obj.outputModules(k).module.clearinitialize;
             end
         end
         function prerun(obj,p)
