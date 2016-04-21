@@ -24,9 +24,13 @@ classdef export_tiffs<interfaces.DialogProcessor&interfaces.SEProcessor
                 return
             end
             [~,f]=fileparts(f);
+     
             for k=selectedsites
                 site=sites(k);
-                
+                imold=site.image.image;
+                site.image=[];
+                site.image=obj.SE.plotsite(site,-1);
+                site.image.image=imold;
                 options.color=true;
                 options.comp='lzw';
                 filen=[f strrep(site.name,'.','_')];
@@ -43,6 +47,7 @@ classdef export_tiffs<interfaces.DialogProcessor&interfaces.SEProcessor
                         saveastiff(imoutll,[path filell],options);
                     end
                 end
+                site.image.layers=[];site.image.composite=[];
             end
             out=0;
         end

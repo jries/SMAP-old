@@ -5,11 +5,8 @@ function fitp=spherecoverage(tc,pc,rc,hax)
 
         tx=-pi/2:pi/128:pi/2;
         
-<<<<<<< HEAD
-        hxx=(hist(pc,tx)).^(1/3);
-=======
+
         hxx=(hist(pc,tx)).^(1/2);
->>>>>>> develop
         
       
         hm=max(hxx);
@@ -36,10 +33,8 @@ end
 function h=areasegment(fitp,tx)
 % fitp(4)=0.1;
 h=fitp(1)*cos(tx).*(1+erf((tx-fitp(2))/fitp(4))).*(1-erf((tx-fitp(3))/fitp(5)));
-<<<<<<< HEAD
-h=(h).^(1/3);
-=======
+
 h=(h).^(1/2);
->>>>>>> develop
+
 % h=fitp(1).*(1+erf((tx-fitp(2))/fitp(4))).*(1-erf((tx-fitp(3))/fitp(4)));
 end
