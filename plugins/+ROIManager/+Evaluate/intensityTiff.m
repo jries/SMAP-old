@@ -5,8 +5,13 @@ classdef intensityTiff<interfaces.SEEvaluationProcessor
         end
         function out=run(obj,p)
             % at some point: use shift_xy to fit with offset
+            if ~isempty(p.layer2_)
             shiftx=p.layer2_.shiftxy_min;
             shifty=p.layer2_.shiftxy_max;
+            else
+                shiftx=0;
+                shifty=0;
+            end
             
             pos=obj.site.pos;
             pos(1)=pos(1)-shiftx;
@@ -38,9 +43,9 @@ classdef intensityTiff<interfaces.SEEvaluationProcessor
           
                 fitp=doublegaussfit(coim,rangex,rangey,startp,fixp);   
                 
-                
-                if fitp(3)<pos(1), fitp(3)=min(fitp(3),pos(1)-p.mind); else fitp(3)=max(fitp(3),pos(1)+p.mind); end
-                if fitp(4)<pos(2), fitp(4)=min(fitp(4),pos(2)-p.mind); else fitp(4)=max(fitp(4),pos(2)+p.mind); end
+                [fitp(3),fitp(4)]=restrictcoordiantes(fitp(3),fitp(4),pos(1),pos(2),p.mind);
+%                 if fitp(3)<pos(1), fitp(3)=min(fitp(3),pos(1)-p.mind); else fitp(3)=max(fitp(3),pos(1)+p.mind); end
+%                 if fitp(4)<pos(2), fitp(4)=min(fitp(4),pos(2)-p.mind); else fitp(4)=max(fitp(4),pos(2)+p.mind); end
                 
                 fitim=dgaussforfit(fitp,X,Y,fixp);
                 ax=obj.setoutput('image');
@@ -123,8 +128,22 @@ A1=fitp(1); A2=fitp(2); x2=fitp(3); y2=fitp(4); sigma2=fitp(5); bg=fitp(6);
 d=fixp(4);
 x1=fixp(1);y1=fixp(2); sigma1=fixp(3);
 %adjsut x1, y1
-if x2<x1, x2=min(x2,x1-d); else x2=max(x2,x1+d); end
-if y2<y1, y2=min(y2,y1-d); else y2=max(y2,y1+d); end
+% if x2<x1, x2=min(x2,x1-d); else x2=max(x2,x1+d); end
+% if y2<y1, y2=min(y2,y1-d); else y2=max(y2,y1+d); end
+[x2,y2]=restrictcoordiantes(x2,y2,x1,y1,d);
 out=double(A1* exp( - ((X-x1).^2+(Y-y1).^2)/sigma1^2/2)+A2* exp( - ((X-x2).^2+(Y-y2).^2)/sigma2^2/2)+bg);
 
+end
+
+
+function [x2,y2]=restrictcoordiantes(x2,y2,x1,y1,d)
+dvec=[x2-x1;y2-y1];
+dist=norm(dvec);
+% dist=sqrt((x2-x1)^2+(y2-y1)^2);
+if dist<d
+    xnew=[x1;x2]+dvec/dist*d;
+    x2=xnew(1);
+    y2=xnew(2);
+
+end
 end

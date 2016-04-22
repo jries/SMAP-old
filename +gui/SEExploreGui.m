@@ -121,8 +121,12 @@ classdef SEExploreGui<interfaces.SEProcessor
             redraw_celllist(obj)
         end
         
-        function redrawall(obj)
+        function redrawall(obj,onlysites)
             global SMAP_stopnow
+            if nargin<2
+                onlysites=false;
+            end
+            if ~onlysites
         files=obj.SE.files;
         for k=1:length(files)
             obj.guihandles.filelist.Value=k;
@@ -137,6 +141,7 @@ classdef SEExploreGui<interfaces.SEProcessor
             end
 
         end
+            
         
         cells=obj.SE.cells;
         for k=1:length(cells)
@@ -149,7 +154,7 @@ classdef SEExploreGui<interfaces.SEProcessor
 
         end
         obj.SE.currentcell=cells(k);
-        
+        end
         sites=obj.SE.sites;
         for k=1:length(sites)
             obj.guihandles.sitelist.Value=k;   

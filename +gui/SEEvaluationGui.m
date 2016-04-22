@@ -16,7 +16,7 @@ classdef SEEvaluationGui< interfaces.SEProcessor
             obj.currentmodule.number=1;
         end
         function pard=pardef(obj)
-            pard=pardef;
+            pard=pardef(obj);
         end
         function initGui(obj)
             initGui@interfaces.SEProcessor(obj);
@@ -43,6 +43,9 @@ classdef SEEvaluationGui< interfaces.SEProcessor
         function evaluate(obj,site)
             evaluatesite(obj,site);
         end
+        function redrawall(obj,a,b)
+            obj.SE.processors.preview.redrawall(true);
+        end
         
         function setGuiParameters(obj,p,setchildren)
             setGuiParameters@interfaces.SEProcessor(obj,p,setchildren);
@@ -51,8 +54,12 @@ classdef SEEvaluationGui< interfaces.SEProcessor
             if isfield(p,'children')
                 modules=fieldnames(p.children);
                 for k=1:length(modules);
+                    mh=modules{k};
+                    while mh(end)>'0'&&mh(end)<'9'
+                        mh=mh(1:end-1);
+                    end
                     par=p.children.(modules{k});
-                    addmodule(obj,modules{k},par);
+                    addmodule(obj,mh,par);
                 end
 
                 %set on / off
@@ -118,6 +125,7 @@ process.handle=panel;
 % process.pardef;
 % process.addGuiParameters(obj.guiPar);
 process.attachLocData(obj.locData);
+% process.showresults=true;
 process.makeGui;
 if nargin>2 && ~isempty(p)%set parameters
     process.setGuiParameters(p);
@@ -179,7 +187,7 @@ end
 end
 
 
-function pard=pardef
+function pard=pardef(obj)
 
 pard.addmodule.object=struct('Style','pushbutton','String','add module');
 pard.addmodule.position=[1,1];
@@ -191,10 +199,14 @@ pard.removemodule.Width=.6;
 
 pard.preview.object=struct('Style','pushbutton','String','preview');
 pard.preview.position=[11,1];
+
+pard.redrawall.object=struct('Style','pushbutton','String','redraw all','Callback',@obj.redrawall);
+pard.redrawall.position=[9,1.5];
+
 pard.evaluateon.object=struct('Style','checkbox','String','evaluate on','Value',1);
-pard.evaluateon.position=[8,1];
+pard.evaluateon.position=[7,1];
 pard.evaluateon.Width=1.5;
 pard.display.object=struct('Style','checkbox','String','display','Value', 1);
-pard.display.position=[9,1];
+pard.display.position=[8,1];
 pard.display.Width=1.5;
 end

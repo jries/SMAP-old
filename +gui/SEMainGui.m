@@ -29,6 +29,7 @@ classdef SEMainGui< gui.GuiPluginWindow;
             settings=gui.SEGUISettings(h.settingspanel,obj.P);
             settings.attachSE(se);
             settings.makeGui;
+            se.processors.settings=settings;
             obj.children.settings=settings;
             
             %annotation panel

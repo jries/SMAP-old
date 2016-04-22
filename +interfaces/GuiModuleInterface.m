@@ -89,6 +89,10 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
             for k=1:length(psave)
                 p.(psave{k})=obj.(psave{k});
             end
+            p.classname=class(obj);
+            if isprop(obj,'pluginpath')
+            p.pluginpath=obj.pluginpath;
+            end
             pout=p;
 
             %children
