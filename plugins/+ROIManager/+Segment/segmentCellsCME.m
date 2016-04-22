@@ -60,7 +60,7 @@ cutoffmax=p.cutoff;
     hf=initaxis(p.resultstabgroup,'find cells');
     
 if p.preview
-    rangef=se.currentfileID;
+    rangef=se.currentfile.ID;
 else
 rangef=1:length(files);
 end
@@ -103,8 +103,7 @@ end
         currentcell=interfaces.SEsites;
         currentcell.pos=[cx(kc),cy(kc)];
         currentcell.ID=0;
-    %     currentcell.sePar=obj.SE.sePar;
-    %     currentcell.info.cell=obj.SE.currentcellID;
+
         currentcell.info.filenumber=kf;
         obj.SE.addCell(currentcell);
     end

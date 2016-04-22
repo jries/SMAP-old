@@ -10,9 +10,9 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
         maxcell=0;
         processors
         files={};
-        currentsiteID=0;
-        currentcellID=0;
-        currentfileID=1;
+%         currentsiteID=0;
+%         currentcellID=0;
+%         currentfileID=1;
         currentsite
         currentcell
         currentfile       
@@ -39,8 +39,7 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
             obj.numberOfCells=0;
             obj.numberOfFiles=0;
             obj.maxcell=0;
-            obj.currentsiteID=0;
-            obj.currentcellID=0;
+
         end
 %         function attachLocData(obj,locData)
 %             attachLocData@interfaces.LocDataInterface(obj,locData);

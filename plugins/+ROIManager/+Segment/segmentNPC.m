@@ -54,7 +54,7 @@ getmask=p.getmask;
 % if saveon==1
 if getmask
 figure(24)
-file=se.files(se.indexFromID(se.files,se.currentfileID));
+file=se.files(se.indexFromID(se.files,se.currentfile.ID));
 imagesc(file.image.image)
 colormap  hot
 h = imfreehand;

@@ -211,23 +211,6 @@ function sizechanged_callback(object, event, obj)
 % end
 end
 
-% function redrawfile(data,x,obj)
-% disp('redraw')
-% if strcmp(data.Style,'listbox')
-%     filenumber=obj.SE.files(data.Value).ID;
-% else 
-%     fn=obj.guihandles.filelist.Value;
-%     filenumber=obj.SE.files(fn).ID;
-% %     filenumber=obj.SE.currentfileID;
-% end
-% obj.SE.plotfile(filenumber,obj.guihandles.fileax)
-% obj.SE.currentfileID=filenumber;
-
-% end 
-
-% function redrawcell(data,event,obj)
-% 
-% end
 
 
 function fileaxclick(data,action,obj)
@@ -239,9 +222,8 @@ else
     currentcell=interfaces.SEsites;
     currentcell.pos=pos;
     currentcell.ID=0;
-%     currentcell.sePar=obj.SE.sePar;
-%     currentcell.info.cell=obj.SE.currentcellID;
-    currentcell.info.filenumber=obj.SE.currentfileID;
+
+    currentcell.info.filenumber=obj.SE.currentfile.ID;
     obj.SE.currentcell=currentcell;
     obj.SE.plotcell(obj.SE.currentcell,obj.guihandles.cellax,obj.guihandles.fileax);
 end
@@ -260,7 +242,7 @@ else
     currentsite=interfaces.SEsites;
     currentsite.pos=pos;     
     currentsite.info.cell=obj.SE.currentcell.ID;
-    currentsite.info.filenumber=obj.SE.currentfileID;
+    currentsite.info.filenumber=obj.SE.currentfile.ID;
 %     currentsite.sePar=obj.SE.sePar;
 %     currentsite.annotation.rotationangle=0;
 %     currentsite.annotation.rotationpos=zeros(2);
@@ -290,7 +272,7 @@ end
 
 function addcell(data,action,obj)
 obj.SE.currentcell.ID=obj.SE.addCell(obj.SE.currentcell);
-plotfile(obj,obj.SE.currentfileID);
+plotfile(obj,obj.SE.currentfile.ID);
 redraw_celllist(obj);
 end
 
@@ -374,7 +356,7 @@ function plotcell(obj,cell)
 %      file=obj.SE.files(cell.info.filenumber);
      
      plotfile(obj,cell.info.filenumber);
-     obj.SE.currentfileID=cell.info.filenumber;
+     obj.SE.currentfile=obj.SE.files(cell.info.filenumber);
  end
 
 newcellind=obj.SE.indexFromID(obj.SE.cells,cell.ID);
@@ -463,7 +445,7 @@ end
 function filelist_callback(data,action,obj)
     filenumber=obj.SE.files(data.Value).ID;
 
-obj.SE.currentfileID=filenumber;
+obj.SE.currentfile=obj.SE.files(filenumber);
 plotfile(obj,filenumber);
 end
 
@@ -484,10 +466,10 @@ obj.SE.currentcell.image=[];
 plotcell(obj,obj.SE.currentcell);
 end
 function redrawfile_callback(a,b,obj)
-fileID=obj.SE.currentfileID;
+fileID=obj.SE.currentfile.ID;
 indf=obj.SE.indexFromID(obj.SE.files,fileID);
 obj.SE.files(indf).image=[];
-plotfile(obj,obj.SE.currentfileID);
+plotfile(obj,obj.SE.currentfile.ID);
 end
 
 
