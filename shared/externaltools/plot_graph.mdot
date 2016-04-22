@@ -1,9 +1,0 @@
-digraph AAAAAAAA1_calls{
-rankdir="UD"
-node [shape=box, color=blue, facecolor=white]
-A6 -> AAAAAAAA1;
-AAAAAAAA1 -> AAAAAAAAAAAAAA2;
-AAAAAAAAAAAAAA2 -> AAAAAAAAA3;
-AAAAAAAAA3 -> AAAAAAAAAAAAAAAAAAA4;
-AAAAAAAAA3 -> AAAAAAA5;
-}

@@ -81,12 +81,28 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             if isempty(data)
                 data=d2;
             end
-           
-            p=obj.getGuiParameters;
-            if (length(data.Key)<5 && ~strcmp(data.Character,'0'))||(length(data.Key)>5 && ~(strcmp(data.Key(end-4:end),'arrow')|| strcmp(data.Key,'period')|| strcmp(data.Key,'comma')))
-                return
+           %1.up, 2.down, 3.left, 4.right, 5.back, 6.front, 0.reset
+            switch data.Character
+                case {'w','8',30}
+                    dir=1;
+                case {'s','2',31}
+                    dir=2;
+                case {'a','4',28}
+                    dir=3;
+                case {'d','6',29}
+                    dir=4;
+                case {',','q','7'}
+                    dir=5;
+                case {'.','e','9'}
+                    dir=6;
+                case {'0'}
+                    dir=0;   
+               
+                otherwise 
+                    return
             end
-           
+            
+            p=obj.getGuiParameters;
             roih=obj.getPar('sr_roihandle');
             pos=roih.getPosition;
             roivec=pos(2,:)-pos(1,:);
@@ -95,7 +111,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             step=0.1;
             stepl=0.3;
             dphi=pi/16;
-            dtheta=pi/8;
+            dtheta=pi/16;
             if any(strcmp(data.Modifier,'shift'))
                 stepfac=0.2;
             else
@@ -106,9 +122,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 %rotate
                 phi=0;
                 theta=p.theta;
-                switch data.Key
+                switch dir
                     
-                    case 'uparrow'
+                    case 1
                        %tilt up down
                        theta=theta+dtheta*stepfac;
                        if theta>pi
@@ -118,7 +134,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                            theta=theta+2*pi;
                        end
                        phi=0;
-                    case 'downarrow'
+                    case 2
                         phi=0;
                        theta=theta-dtheta*stepfac;
                        if theta>pi
@@ -128,11 +144,11 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                        if theta<-pi
                            theta=theta+2*pi;
                        end
-                    case 'leftarrow'
+                    case 3
                        phi=dphi*stepfac;
-                    case 'rightarrow'
+                    case 4
                         phi=-dphi*stepfac;
-                    case '0'
+                    case 0
                         if strcmp(data.Character,'0')
                         theta=0;
                         end
@@ -146,60 +162,58 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 obj.setGuiParameters(struct('theta',theta));
             elseif any(strcmp(data.Modifier,'alt'))
                 %change size
-                switch data.Key
-                    case 'period'
+                switch dir
+                    case 6
                         lw=obj.getPar('linewidth_roi');
                         lw2=lw*(1+step*stepfac);
                         obj.setPar('linewidth_roi',lw2);
                        %tilt up down
-                    case 'comma'
+                    case 5
                         lw=obj.getPar('linewidth_roi');
                         lw2=lw*(1-step*stepfac);
                         obj.setPar('linewidth_roi',lw2);
                       
-                    case 'leftarrow'
+                    case 3
                         
                        pos(1,:)=pos(1,:)+roivec/2*step*stepfac;
                        pos(2,:)=pos(2,:)-roivec/2*step*stepfac;
-                    case 'rightarrow'
+                    case 4
                         pos(1,:)=pos(1,:)-roivec/2*step*stepfac;
                        pos(2,:)=pos(2,:)+roivec/2*step*stepfac;
-                    case 'uparrow'
+                    case 1
                         po.zmin=p.zmin-stepfac*step*(p.zmax-p.zmin);
                         po.zmax=p.zmax+stepfac*step*(p.zmax-p.zmin);
                         obj.setGuiParameters(po);
-                    case 'downarrow'
+                    case 2
                         po.zmin=p.zmin+stepfac*step*(p.zmax-p.zmin);
                         po.zmax=p.zmax-stepfac*step*(p.zmax-p.zmin);
                         obj.setGuiParameters(po);
-                    
-                       
                 end
             else
-                switch data.Key
-                    case 'period'
+                switch dir
+                    case 6
                         lw=obj.getPar('linewidth_roi')/1000;
                         pos(1,:)=pos(1,:)+stepl*roivecp./norm(roivecp)*stepfac*lw;
                         pos(2,:)=pos(2,:)+stepl*roivecp./norm(roivecp)*stepfac*lw;
-                    case 'comma'
+                    case 5
                         lw=obj.getPar('linewidth_roi')/1000;
                         pos(1,:)=pos(1,:)-stepl*roivecp./norm(roivecp)*stepfac*lw;
                         pos(2,:)=pos(2,:)-stepl*roivecp./norm(roivecp)*stepfac*lw;
-                    case 'leftarrow'
+                    case 3
                         pos(1,:)=pos(1,:)+step*roivec*stepfac;
                         pos(2,:)=pos(2,:)+step*roivec*stepfac;
-                    case 'rightarrow'
+                    case 4
                         pos(1,:)=pos(1,:)-step*roivec*stepfac;
                         pos(2,:)=pos(2,:)-step*roivec*stepfac;
-                    case 'uparrow'
+                    case 1
                         po.zmin=p.zmin+stepfac*step*(p.zmax-p.zmin);
                         po.zmax=p.zmax+stepfac*step*(p.zmax-p.zmin);
                         obj.setGuiParameters(po);
-                    case 'downarrow'
+                    case 2
                         po.zmin=p.zmin-stepfac*step*(p.zmax-p.zmin);
                         po.zmax=p.zmax-stepfac*step*(p.zmax-p.zmin);
                         obj.setGuiParameters(po);
-                    case '0'
+                    case 0
                         if strcmp(data.Character,'0')
                         po.zmin=p.zmin-(p.zmax+p.zmin)/2;
                         po.zmax=p.zmax-(p.zmax+p.zmin)/2;
@@ -424,6 +438,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         end
 
         end
+        
         function rotate_callback(obj,button,b)
             global SMAP_stopnow
             bh=obj.guihandles.rotateb;
@@ -518,6 +533,11 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             saveastiff(imout,[path,file],options)
             obj.recpar={};
         end
+        
+        function resetazimuth(obj, a,b)
+            obj.setGuiParameters(struct('theta',0));
+            obj.redraw;
+        end
                    
     end
 end
@@ -547,41 +567,42 @@ end
 end
 
 function pard=pardef(obj)
-pard.text1.object=struct('String','parameters','Style','text');
-pard.text1.position=[1,1];
+% pard.text1.object=struct('String','parameters','Style','text');
+% pard.text1.position=[1,1];
 
 pard.text2.object=struct('String','zmin','Style','text');
-pard.text2.position=[2,1];
+pard.text2.position=[1,1];
 pard.text3.object=struct('String','zmax','Style','text');
-pard.text3.position=[3,1];
+pard.text3.position=[2,1];
 pard.setpixelsize.object=struct('String','set pixelsize (x z): ','Style','checkbox','Value',1);
-pard.setpixelsize.position=[5,1];
+pard.setpixelsize.position=[4,1];
 pard.setpixelsize.Width=1.5;
 pard.transparencymode.object=struct('String',{{'maximum intensity', 'transparency','balls'}} ,'Style','popupmenu');
 pard.transparencymode.position=[6,1];
-pard.transparencymode.Width=1.1;
-pard.thetat.object=struct('String','Azimuth angle theta ','Style','text');
-pard.thetat.position=[4,1];
-pard.thetat.Width=1.5;
+pard.transparencymode.Width=1.5;
+pard.thetat.object=struct('String','Azimuth angle theta ','Style','pushbutton','Callback',@obj.resetazimuth);
+pard.thetat.position=[3,1];
+pard.thetat.Width=1.1;
 
 pard.zmin.object=struct('Style','edit','String','-400'); 
-pard.zmin.position=[2,2.1];
+pard.zmin.position=[1,2.1];
 pard.zmin.Width=0.5;
 pard.zmax.object=struct('Style','edit','String','400'); 
-pard.zmax.position=[3,2.1];
+pard.zmax.position=[2,2.1];
 pard.zmax.Width=0.5;
 pard.theta.object=struct('Style','edit','String','0'); 
-pard.theta.position=[4,2.1];
+pard.theta.position=[3,2.1];
 pard.theta.Width=0.5;
 pard.transparencypar.object=struct('Style','edit','String','1'); 
-pard.transparencypar.position=[6,2.1];
+pard.transparencypar.position=[6,2.5];
 pard.transparencypar.Width=0.5;
 pard.pixrecset.object=struct('Style','edit','String','5 5'); 
-pard.pixrecset.position=[5,2.1];
+pard.pixrecset.position=[4,2.1];
 pard.pixrecset.Width=0.5;
 
 pard.showcontrols.object=struct('String','Show Controls','Style','pushbutton','Callback',@obj.showpanel_callback);
-pard.showcontrols.position=[1,4];
+pard.showcontrols.position=[1,3];
+pard.showcontrols.Width=2;
 % pard.ttranslation.object=struct('String','translate','Style','text');
 % pard.ttranslation.position=[4,3];
 % 

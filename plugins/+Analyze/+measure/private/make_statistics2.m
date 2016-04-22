@@ -45,8 +45,8 @@ else
     ax6=initaxis(p.resultstabgroup,['error ' txt]);
     ax6.Position(3)=0.55;
     if zexist
-    ax7=initaxis(p.resultstabgroup,['error ' txt ' vs ' txt]);
-    ax7.Position(3)=0.55;
+        ax7=initaxis(p.resultstabgroup,['error ' txt ' vs ' txt]);
+        ax7.Position(3)=0.55;
     end
 
 
@@ -296,8 +296,13 @@ rsz=[0 100];
 %     end
 if ploton
     text(ax6.XLim(2)*1.1,0.5,slp,'FontSize',14)
+    
 end
     
+end
+
+if ploton && ~p.overview
+   ax1.Parent.Parent.SelectedTab=ax1.Parent;
 end
 
     

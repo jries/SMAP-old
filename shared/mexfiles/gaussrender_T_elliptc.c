@@ -31,7 +31,7 @@ double erf(double x)
 double gaussrender(float *srim,float *xpix, float *ypix, mwSize *srec, float *sigmax, float *sigmay, float *Gtemplate, float Gsigma, float roiks,  float *N, int uselut, float *c, float *lut, float *rangec, mwSize Gx,mwSize numlocs, mwSize sl, float transparency)
 {
 mwSize Gsizegauss,indc,xt,yt,col,srimindlin;
-float dx,dy,intcorrectionx,intcorrectiony,gaussnorm,inttemp,oldfac;
+float dx,dy,intcorrectionx,intcorrectiony,gaussnorm,inttemp,oldfac,oldfac2;
 long k,dnx,dny,xr,yr,xax,yax,xp,yp;
 double numberOfLocs;
 
@@ -77,7 +77,8 @@ for(k=0;k<numlocs;k++)
                             {
                             inttemp=(Gtemplate[xt+yt*Gx]*gaussnorm);
                             oldfac=transparency*inttemp;
-                            if(oldfac>1) oldfac=1;
+                            oldfac2=oldfac;
+                            if(oldfac2>1) oldfac2=1;
                             
                             for(col=0;col<3;col++)
                                 {
@@ -86,7 +87,7 @@ for(k=0;k<numlocs;k++)
                                 /* srim[srimindlin]+=Gtemplate[xt+yt*Gx]*gaussnorm*lut[indc+col*sl];*/
 
                                 
-                                srim[srimindlin]=oldfac*lut[indc+col*sl]+(1-oldfac)*srim[srimindlin];
+                                srim[srimindlin]=oldfac*lut[indc+col*sl]+(1-oldfac2)*srim[srimindlin];
                                 }
                             }
                         }
@@ -99,9 +100,10 @@ for(k=0;k<numlocs;k++)
                         //srim[xp+yp*srec[0]]=transparency*inttemp*inttemp+oldfac*srim[xp+yp*srec[0]];
                         
                         oldfac=transparency*inttemp;
-                        if(oldfac>1) oldfac=1;
+                        oldfac2=oldfac;
+                        if(oldfac2>1) oldfac2=1;
                         srimindlin=yp*srec[0]+xp;
-                        srim[srimindlin]=oldfac+(1-oldfac)*srim[srimindlin];
+                        srim[srimindlin]=oldfac+(1-oldfac2)*srim[srimindlin];
                         }
 
                     }
