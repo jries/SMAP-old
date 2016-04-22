@@ -117,8 +117,11 @@ if isfield(locs,'PSFypix')
 else
     locdat.PSFynm=locdat.PSFxnm;
 end
-
+if isfield(locs,'zerr')
+    locdat.locprecznm=locs.zerr(indin);
+end
 locdat.locprecnm=sqrt((locdat.xerr.^2+locdat.yerr.^2)/2);
+
 locdat.filenumber=uint8(0*locdat.xnm+obj.filenumber);
 locdat.channel=0*locdat.xnm;
 end
