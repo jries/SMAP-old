@@ -25,15 +25,6 @@ classdef cfithist<interfaces.DialogProcessor
         
 
     end
-%     methods(Static)
-%         function info=info(obj)
-%             info.name='4. fit brightness histogram';
-%             info.class=@cfithist;
-%             info.tag='cfithist';
-% %             obj.info=info;
-%         end
-% 
-%     end
 end
 
 

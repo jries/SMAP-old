@@ -20,17 +20,13 @@ for k=1:length(names1)
         h2(k,l)=uimenu(h1(k),'Label',names2{l});
         names3=pluginnames(names1{k},names2{l});
         modulethere3=false;
-        for m=1:length(names3)       
-%             module=plugin(names1{k},names2{l},names3{m});
-%             if isa(module,'interfaces.DialogProcessor')
-                h3(k,l,m)=uimenu(h2(k,l),'Label',names3{m},'Callback',{@makeplugin,obj,{names1{k},names2{l},names3{m}}});
+        for m=1:length(names3)     
+                pluginpath=pluginnames(names1{k},names2{l},names3{m});
+                pname=pluginpath{end};
+                h3(k,l,m)=uimenu(h2(k,l),'Label',pname,'Callback',{@makeplugin,obj,{names1{k},names2{l},names3{m}}});
                 modulethere3=true;  
                 modulethere2=true;
                 pout.(names1{k}).(names2{l}).(names3{m}).module={names1{k},names2{l},names3{m}};
-%                 pout.(names1{k}).(names2{l}).(names3{m}).position=m;
-%                 pout.(names1{k}).(names2{l}).(names3{m}).name=names3{m};
-%             end
-
         end
         if ~modulethere3
             delete(h2(k,l));

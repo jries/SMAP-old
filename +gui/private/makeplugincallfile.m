@@ -34,18 +34,31 @@ if ~isdeployed
                     try
                         ptry=pold.(fn1h).(fn2h).(fn3h);
                         ismodule=true;
+                        if length(ptry)>3
+                            pname=ptry{4};
+                        else
+                            pname=ptry{3};
+                        end
                     catch
                         try
                             module=callmodule(fn1h,fn2h,fn3h);
+                            
                         if isa(module,'interfaces.GuiModuleInterface')
+                            module.pluginpath={fn1h,fn2h,fn3h};
                             ismodule=true;
+                            try
+                                pardef=module.pardef;
+                                pname=pardef.plugininfo.name;
+                            catch
+                            pname=module.info.name;
+                            end
                         end
                         catch 
                         end
                     end
                     if ismodule
                         strcase(end+1:end+2)=makecase(fn1h,fn2h,fn3h);
-                        strlist(end+1)=makelist(fn1h,fn2h,fn3h);
+                        strlist(end+1)=makelist(fn1h,fn2h,fn3h,pname);
                     end
 %                     catch
 %                          fn3h
@@ -58,7 +71,7 @@ if ~isdeployed
  
     end
     %assemble outher lines
-    strpre1{1}='function out=plugins(fn1,fn2,fn3,varargin)';
+    strpre1{1}='function out=plugin(fn1,fn2,fn3,varargin)';
     strpre1{2}='if nargin>0';
     strpre1{3}='fstr=[fn1 ''.'' fn2 ''.'' fn3];';
     strpre1{4}='switch fstr';
@@ -102,8 +115,12 @@ out{1}=['case ''' a '.' b '.' c ''''];
 out{2}=['   module=' a '.' b '.' c '(varargin{:});'];
 end
 
-function out=makelist(a,b,c)
-out{1}=['out.' a '.' b '.' c '={''' a ''',''' b ''',''' c '''};'];
+function out=makelist(a,b,c,d)
+if nargin <4
+    out{1}=['out.' a '.' b '.' c '={''' a ''',''' b ''',''' c '''};'];
+else
+    out{1}=['out.' a '.' b '.' c '={''' a ''',''' b ''',''' c ''',''' d '''};'];
+end
 end
 
 function out=callmodule(a,b,c)
