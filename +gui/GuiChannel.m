@@ -664,7 +664,7 @@ pard.PSFxnmb.object=struct('Style','pushbutton','String','PSF xy');
 pard.PSFxnmb.position=[5,1];
 pard.PSFxnmb.Width=.6;
             
-pard.PSFxnm_min.object=struct('Style','edit','String','100','BackgroundColor',[1 1 1]*.7);
+pard.PSFxnm_min.object=struct('Style','edit','String','0','BackgroundColor',[1 1 1]*.7);
 pard.PSFxnm_min.position=[5,1.6];
 pard.PSFxnm_min.Width=.6;
 

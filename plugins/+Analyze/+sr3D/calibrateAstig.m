@@ -7,17 +7,25 @@ classdef calibrateAstig<interfaces.DialogProcessor
             obj@interfaces.DialogProcessor(varargin{:}) ;
              obj.inputParameters={'cam_pixelsize_nm'};
              obj.zold.changed=0;
+             obj.showresults=true;
 
         end
         function out=run(obj,p)
-            locs=obj.locData.getloc({'frame','PSFxnm','PSFynm'},'layer',1,'position','roi');
-            if ~isempty(locs.PSFynm)
+            out=[];
+            if isfield(obj.locData.loc,'gradient3Dellipticity')
+                locs=obj.locData.getloc({'frame','gradient3Dellipticity'},'layer',1,'position','roi');
+                p.fileout=obj.locData.files(1).file.name;
+                out=calibrategradient3D(locs,p)  ;  
+                obj.setPar('fit_gradient3Dellipticity',(out))
+            elseif isfield(obj.locData.loc,'PSFynm')
+                locs=obj.locData.getloc({'frame','PSFxnm','PSFynm'},'layer',1,'position','roi');
+%             if ~isempty(locs.PSFynm)
                 p.fileout=obj.locData.files(1).file.name;
                 calibrateAstig3D(locs,p)         
             else
-                error('no PSFy found')
+                error('no 3D data found')
             end
-            out=0;
+            
         end
         function pard=pardef(obj)
             pard=pardef;
@@ -28,6 +36,71 @@ classdef calibrateAstig<interfaces.DialogProcessor
     methods(Static)
     end
 end
+
+
+function ttxt=calibrategradient3D(locs,p)  
+global zt 
+framet=double(locs.frame);
+zt=framet*p.dz/1000;
+eps=locs.gradient3Dellipticity;
+epsl=log(eps);
+B0=double(~p.B0);
+initaxis(p.resultstabgroup,'select range');
+plot(framet,epsl,'ro')
+% hold on
+% plot(framet,syt,'bo')
+% hold off
+title('select range (two points)')
+[indi,y]=ginput(2);
+
+rangef=round(max(min(indi))):round(min(max(indi)));
+range=find(framet>=rangef(1),1,'first'):find(framet<=rangef(end),1,'last');
+epslr=epsl(range);
+frame=framet(range);
+z=frame*p.dz/1000;
+
+indz0=find(epslr>0,1,'first');
+midp=z(indz0);
+
+% 
+% midpreal=(z(ix)+z(iy))/2;
+% 
+% indframez0=find(p.framez0<=framet,1,'first');
+% midp=zt(indframez0);
+% 
+z=z-midp;zt=zt-midp;
+
+plot(zt,epsl,'r.')
+hold on
+
+plot(z,epslr,'ro')
+
+
+
+% fitp=lsqnonlin(@sbothfromsigmaerr,startp,[],[],[],[z z],[sx sy],B0);
+
+E=[ones(length(epslr),1) epslr];
+b=E\z;
+bplot(1)=-b(1)/b(2);
+bplot(2)=1/b(2);
+plot(zt,bplot(1)+bplot(2)*zt)
+ttxt=sprintf([num2str(b(1)) '\t' num2str(b(2))]);
+title(ttxt)
+%zpar=[sigma0x,Ax,Ay,Bx,By,gamma,d,sigma0y)
+outforfit=b;
+button = questdlg('Is the fit good?','3D astigmatism bead calibration','Refit','Save','Cancel','Refit') ;
+switch button
+    case 'Refit'
+        calibrategradient3D(locs,p)
+    case 'Save'
+        fn=[p.fileout(1:end-4) '_3DAGcal.mat'];
+        [f,p]=uiputfile(fn);
+        if f
+            save([p f],'outforfit')
+        end
+end
+end
+
 
 function calibrateAstig3D(locs,p)
 global zt sxf syf

@@ -421,11 +421,15 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 else
                     loc.x=loc.xnmline(sortind);
                 end
-                
+    
                 
                 %change later:
                 sx=loc.locprecnm(sortind);
+                if ~isempty(loc.locprecznm)
                 sy=loc.locprecznm(sortind);
+                else
+                    sy=sx;
+                end
                 loc.sx=sx;
                 loc.sy=sy;
                 loc.y=yrot(sortind)+zmean;

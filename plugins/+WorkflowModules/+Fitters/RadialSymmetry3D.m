@@ -37,23 +37,25 @@ classdef RadialSymmetry3D<interfaces.WorkflowFitter
                  bg(k)=mean(bgs(:));
                  phot(k)=sum(ims(:))-bg(k)*s(1)*s(2);
              end
+             goodind=abs(x)<3&abs(y)<3;
+             
              shiftx=0;%-0.5; %deviation from ground truth
              shifty=0;%-0.5;
              posx=stackinfo.x+shiftx;
              posy=stackinfo.y+shifty;             
             
-             locs.frame=stackinfo.frame;
-            locs.xpix=x+posx;
-            locs.ypix=-y+posy; %really funny definition 
-             locs.PSFxpix=wx;
-             locs.PSFypix=wy;
-             locs.phot=phot;
-             locs.bg=bg;
+             locs.frame=stackinfo.frame(goodind);
+            locs.xpix=x(goodind)+posx(goodind);
+            locs.ypix=-y(goodind)+posy(goodind); %really funny definition 
+             locs.PSFxpix=wx(goodind);
+             locs.PSFypix=wy(goodind);
+             locs.phot=phot(goodind);
+             locs.bg=bg(goodind);
 %              locs.xerrpix=sqrt((locs.PSFx.*locs.PSFy+1/12)./( locs.phot)+8*pi*(locs.PSFx.*locs.PSFy).^2.* locs.bg./( locs.phot).^2);
               locs.xerrpix=sqrt((locs.PSFxpix.*locs.PSFypix+1/12)./( locs.phot)+8*pi*(locs.PSFxpix.*locs.PSFypix).^2.* locs.bg./( locs.phot).^2);
-             locs.peakfindx=posx;
-             locs.peakfindy=posy;
-             locs.gradient3Dellipticity=epsilon;
+             locs.peakfindx=posx(goodind);
+             locs.peakfindy=posy(goodind);
+             locs.gradient3Dellipticity=epsilon(goodind);
              
 
     end
