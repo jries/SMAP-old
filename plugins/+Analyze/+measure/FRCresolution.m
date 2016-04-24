@@ -1,9 +1,15 @@
 classdef FRCresolution<interfaces.DialogProcessor
+    %FRCresolution calculates FRC resolution
+    %     FRC resolution implementation based on the matlab code provided with: 
+    %[1]	R. P. J. Nieuwenhuizen, K. A. Lidke, M. Bates, D. L. Puig, D. Gr?nwald,
+    %S. Stallinga, and B. Rieger, ?Measuring image resolution in optical nanoscopy.,? 
+    %Nat Methods, vol. 10, no. 6, pp. 557?562, Jun. 2013.
     methods
         function obj=FRCresolution(varargin)           
             obj@interfaces.DialogProcessor(varargin{:}) 
             obj.inputParameters=anyRender;
             obj.showresults=true;
+            obj.history=false;
         end
         
         function out=run(obj,p)
@@ -31,7 +37,7 @@ classdef FRCresolution<interfaces.DialogProcessor
             [FRC_resolutionp,rl,rh]=frctoresolution(frc_curve,size(image1));
             FRC_resolution=FRC_resolutionp*p.pixrec_frc;
             errres=(rh-rl)/2*p.pixrec_frc;
-            ax1=obj.initaxis('frc')
+            ax1=obj.initaxis('frc');
              qmax = 0.5/(p.pixrec_frc);
             
             plot([0 qmax],[0 0],'k')
@@ -46,8 +52,6 @@ classdef FRCresolution<interfaces.DialogProcessor
             xlabel('Spatial frequency (nm^{-1})');
             ylabel('FRC')
             title(['FRC reoslution (nm): ' num2str(FRC_resolution,'%4.1f') ' +/- ' num2str(errres,'%4.1f')])
-            
-
         end
         function pard=guidef(obj)
             pard=guidef;
@@ -283,29 +287,33 @@ end
 
 
 function pard=guidef
-pard.takeimage.object=struct('String','use rendered image','Style','checkbox','Value',0);
-pard.takeimage.position=[1,1];
+pard.t0.object=struct('String','FRC resolution. Uses ROI or FoV (if rendered image)','Style','text');
+pard.t0.position=[1,1];
+pard.t0.Width=4;
+
+pard.takeimage.object=struct('String','use all settings from rendered image','Style','checkbox','Value',0);
+pard.takeimage.position=[2,1];
 pard.takeimage.Width=2;
-pard.t1.object=struct('String','otherwise','Style','text');
-pard.t1.position=[2,1];
+pard.t1.object=struct('String','otherwise:','Style','text');
+pard.t1.position=[3,1];
 pard.t2.object=struct('String','pixelsize (nm)','Style','text');
-pard.t2.position=[3,1];
+pard.t2.position=[4,1];
 
 pard.pixrec_frc.object=struct('String','5','Style','edit');
-pard.pixrec_frc.position=[3,2];
+pard.pixrec_frc.position=[4,2];
 
 pard.t3.object=struct('String','binning of the data in blocks','Style','text');
-pard.t3.position=[1,3];
+pard.t3.position=[2,3];
 pard.t3.Width=2;
 pard.t4.object=struct('String','number of blocks','Style','text');
-pard.t4.position=[2,3];
+pard.t4.position=[3,3];
 
 pard.frc_blocks.object=struct('String','10','Style','edit');
-pard.frc_blocks.position=[2,4];
+pard.frc_blocks.position=[3,4];
 
 pard.blockassignment.object=struct('String',{{'alternating','random'}},'Style','popupmenu');
-pard.blockassignment.position=[3,4];
+pard.blockassignment.position=[4,4];
 
 pard.plugininfo.name='FRC resolution';
-pard.plugininfo.description='FRC resolution implementation based on the matlab code provided with: [1]	R. P. J. Nieuwenhuizen, K. A. Lidke, M. Bates, D. L. Puig, D. Gr?nwald, S. Stallinga, and B. Rieger, ?Measuring image resolution in optical nanoscopy.,? Nat Methods, vol. 10, no. 6, pp. 557?562, Jun. 2013.';
+pard.plugininfo.description='FRC resolution. Uses ROI or FoV (if rendered image is ticked). implementation based on the matlab code provided with: [1]	R. P. J. Nieuwenhuizen, K. A. Lidke, M. Bates, D. L. Puig, D. Gr?nwald, S. Stallinga, and B. Rieger, ?Measuring image resolution in optical nanoscopy.,? Nat Methods, vol. 10, no. 6, pp. 557?562, Jun. 2013.';
 end

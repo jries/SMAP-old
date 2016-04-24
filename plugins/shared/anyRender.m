@@ -7,7 +7,7 @@ function [srim,hax]=anyRender(locD,p,varargin)
 %also determine beforehand if grouped or not
 
 if nargin==0
-    srim={'renderfield','layers','sr_pixrec','sr_pos','sr_size','numberOfLayers','sr_layerson','cam_pixelsize_nm','sr_roihandle','linewidth_roi'};
+    srim={'layers','sr_pixrec','sr_pos','sr_size','numberOfLayers','sr_layerson','cam_pixelsize_nm','sr_roihandle','linewidth_roi'};
     return;
 end
 
