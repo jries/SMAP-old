@@ -18,13 +18,14 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             h.lwtxt=uicontrol('Parent',h.hroi,'Style','text','String','|<->|','Position',[0, 0,width/3,fieldheight*1.2],'FontSize',fontsize*.85);
             
             swidth=widtht/3-1;
-            h.roishow=uicontrol('Parent',h.hroi,'Style','checkbox','String','show','FontSize',fontsize,'Position',[0*swidth,1.3*fieldheight+2,width,fieldheight*1.2],'Callback',{@roi_callback,obj,0},'Value',1);
-            h.roi1=uicontrol('Parent',h.hroi,'Style','togglebutton','String','[]','FontSize',fontsize,'Position',[0*swidth,2.8*fieldheight,swidth,fieldheight*1.5],'Callback',{@roi_callback,obj,1});
-            h.roi2=uicontrol('Parent',h.hroi,'Style','togglebutton','String','O','FontSize',fontsize,'Position',[swidth,2.8*fieldheight,swidth,fieldheight*1.5],'Callback',{@roi_callback,obj,2});
-            h.roi3=uicontrol('Parent',h.hroi,'Style','togglebutton','String','{}','FontSize',fontsize,'Position',[2*swidth,2.8*fieldheight,swidth,fieldheight*1.5],'Callback',{@roi_callback,obj,3});
-            h.roi4=uicontrol('Parent',h.hroi,'Style','togglebutton','String','|','FontSize',fontsize,'Position',[0,4.3*fieldheight,swidth,fieldheight*1.5],'Callback',{@roi_callback,obj,4});
-            h.roi5=uicontrol('Parent',h.hroi,'Style','togglebutton','String','+','FontSize',fontsize,'Position',[swidth,4.3*fieldheight,swidth,fieldheight*1.5],'Callback',{@roi_callback,obj,5});
-            h.roi6=uicontrol('Parent',h.hroi,'Style','togglebutton','String','<>','FontSize',fontsize,'Position',[2*swidth,4.3*fieldheight,swidth,fieldheight*1.5],'Callback',{@roi_callback,obj,6});
+            h.roishow=uicontrol('Parent',h.hroi,'Style','checkbox','String','show','FontSize',fontsize,'Position',[0*swidth,1.3*fieldheight+2,width-fieldheight,fieldheight*1.2],'Callback',{@roi_callback,obj,0},'Value',1);
+            h.roidelete=uicontrol('Parent',h.hroi,'Style','pushbutton','String','X','FontSize',fontsize,'Position',[width-fieldheight,1.3*fieldheight+2,fieldheight,fieldheight*1.2],'Callback',{@roi_callback,obj,-1});
+            h.roi1=uicontrol('Parent',h.hroi,'Style','pushbutton','String','[]','FontSize',fontsize,'Position',[0*swidth,2.8*fieldheight,swidth,fieldheight*1.5],'Callback',{@roi_callback,obj,1});
+            h.roi2=uicontrol('Parent',h.hroi,'Style','pushbutton','String','O','FontSize',fontsize,'Position',[swidth,2.8*fieldheight,swidth,fieldheight*1.5],'Callback',{@roi_callback,obj,2});
+            h.roi3=uicontrol('Parent',h.hroi,'Style','pushbutton','String','{}','FontSize',fontsize,'Position',[2*swidth,2.8*fieldheight,swidth,fieldheight*1.5],'Callback',{@roi_callback,obj,3});
+            h.roi4=uicontrol('Parent',h.hroi,'Style','pushbutton','String','|','FontSize',fontsize,'Position',[0,4.3*fieldheight,swidth,fieldheight*1.5],'Callback',{@roi_callback,obj,4});
+            h.roi5=uicontrol('Parent',h.hroi,'Style','pushbutton','String','+','FontSize',fontsize,'Position',[swidth,4.3*fieldheight,swidth,fieldheight*1.5],'Callback',{@roi_callback,obj,5});
+            h.roi6=uicontrol('Parent',h.hroi,'Style','pushbutton','String','<>','FontSize',fontsize,'Position',[2*swidth,4.3*fieldheight,swidth,fieldheight*1.5],'Callback',{@roi_callback,obj,6});
             
             %format
             h.hformat=uipanel('Parent',obj.handle,'Title','format','Units','pixel','Position',[1 8.5*fieldheight+10 widtht 7.2*fieldheight]);
@@ -107,7 +108,8 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             h.roi6.TooltipString='polynome roi';
             h.roi3.TooltipString='free roi';
             h.roishow.TooltipString='redraw roi after updating image. Untick if Roi is in the way.';
-
+            h.roidelete.TooltipString='Delete current ROI';
+            
             obj.initGui;
         end
         
@@ -119,7 +121,7 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.setPar('layerson',1);
             addlistener(obj.P,'sr_render',@obj.plotovbox);
             lw_callback(0,0,obj)
-            obj.updateFormatParameters;
+%             obj.updateFormatParameters;
         end
 
         function loaded_notify(obj,~,~)
@@ -489,6 +491,10 @@ switch roimode
         else
             h=[];
         end
+    case -1
+        h=[];
+        obj.roihandle=h;
+        obj.setPar('sr_roihandle',obj.roihandle);
 end
 if ~isempty(h)
     addNewPositionCallback(h,@obj.linecallback);
