@@ -314,6 +314,8 @@ classdef LocalizationData<interfaces.GuiParameterInterface
         function sort(obj,varargin)
             %sorts localizations according to field1, field2,...
             %sort(field1,field2,...)
+            
+            %ungrouped
             sortm=zeros(length(obj.loc.xnm),length(varargin));
             for k=1:length(varargin)
                 if isfield(obj.loc,varargin{k})
@@ -324,6 +326,19 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             fn=fieldnames(obj.loc);
             for k=1:length(fn)
                 obj.loc.(fn{k})=obj.loc.(fn{k})(sortind);
+            end
+            
+            %grouped
+            sortm=zeros(length(obj.grouploc.xnm),length(varargin));
+            for k=1:length(varargin)
+                if isfield(obj.grouploc,varargin{k})
+                    sortm(:,k)=(obj.grouploc.(varargin{k}));
+                end
+            end
+            [~,sortind]=sortrows(sortm);
+            fn=fieldnames(obj.grouploc);
+            for k=1:length(fn)
+                obj.grouploc.(fn{k})=obj.grouploc.(fn{k})(sortind);
             end
         end
 
@@ -436,14 +451,14 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             vu=zeros(length(indexusort),1,'like',values);
             ku=1;
             for k=1:length(indexgsort)
-                while(indexusort(ku)<indexgsort(k))
+                while ku<=length(indexusort)&&(indexusort(ku)<indexgsort(k))
                     ku=ku+1;
                 end
 %                 if (indexusort(ku)>indexgsort(k))
 %                     continue;
 %                 end
                 ku2=ku;
-                while(indexusort(ku2)==indexgsort(k))
+                while ku2<=length(indexusort)&&(indexusort(ku2)==indexgsort(k))
                     vu(indu(ku2))=values(indg(k));
                     ku2=ku2+1;
                 end

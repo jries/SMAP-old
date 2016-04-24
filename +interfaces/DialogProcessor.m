@@ -72,7 +72,7 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
         end
         function ax=initaxis(obj,varargin)
             %initializes axis in results window
-            ax=obj.initaxis(varargin{:});
+            ax=initaxis(obj.resultstabgroup,varargin{:});
         end
         function processgo(obj)
             %provides external access to run module (usually via process
