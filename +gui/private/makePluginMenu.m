@@ -109,8 +109,6 @@ end
     p.Xrim=10;
     module.setGuiAppearence(p)
     module.makeGui;
-    module.guihandles.showresults.Value=1;
-   
 end
 
 function info_callback(a,b)

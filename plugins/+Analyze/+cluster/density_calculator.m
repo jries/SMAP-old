@@ -60,7 +60,7 @@ function pard=guidef
 pard.countingregion.object=struct('String','Gauss wighted counting |circle counting','Style','popupmenu','Value',2);
 pard.countingregion.object.TooltipString=sprintf('count Gauss-weighted locs (more accurate) or locs in circle/cylinder (faster)');
 pard.countingregion.position=[1,1];
-pard.countingregion.Widht=2;
+pard.countingregion.Width=2;
 
 pard.texta.object=struct('String','size in x,y (nm)','Style','text');
 pard.texta.position=[2,1];

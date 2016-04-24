@@ -37,22 +37,10 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
                     'FontSize',obj.guiPar.fontsize,'Style','checkbox', 'String', 'showresults',...
                     'Value',obj.showresults,'Callback',{@showresults_callback,obj});
                 obj.guihandles.processgo_b=uicontrol(obj.handle,'Position',[obj.guiPar.FieldWidth*3, hpos(4)-vrim+20,100,50],...
-                    'Style','pushbutton','String','Process','FontSize',obj.guiPar.fontsize*1.5,'Callback',{@processgo_callback,obj});
+                    'Style','pushbutton','String','Run','FontSize',obj.guiPar.fontsize*1.5,'Callback',{@processgo_callback,obj});
                 obj.guihandles.info=uicontrol(obj.handle,'Position',[obj.guiPar.FieldWidth*2, hpos(4)-vrim+50,100,25],...
                     'Style','pushbutton','String','Info','FontSize',obj.guiPar.fontsize,'Callback',{@info_callback,obj});
             end
-%             if ~isempty(obj.info)
-%                 obj.plugininfo{1}=obj.info.name;
-%             else
-%                 obj.plugininfo{1}=class(obj);
-%             end  
-%             if isfield(guidef,'plugininfo')  
-%                 li=length(guidef.plugininfo);
-%                 obj.plugininfo(2:li+1)=guidef.plugininfo;
-%             else
-%                 obj.plugininfo{2}='no info';
-%                 
-%             end
         end
         function setvisibility(obj,name)
             %shows and hides the GUI. called from module selector
