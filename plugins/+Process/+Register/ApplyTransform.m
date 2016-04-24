@@ -31,8 +31,8 @@ classdef ApplyTransform<interfaces.DialogProcessor
             obj.locData.regroup;
              end
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         function makeGui(obj)
             makeGui@interfaces.DialogProcessor(obj);
@@ -52,7 +52,7 @@ classdef ApplyTransform<interfaces.DialogProcessor
 end
 
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 pard.texta.object=struct('String','dataset','Style','text');
 pard.texta.position=[1,1];
 

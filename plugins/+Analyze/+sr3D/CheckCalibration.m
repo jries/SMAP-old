@@ -22,8 +22,8 @@ classdef CheckCalibration<interfaces.DialogProcessor
             out=0;
         end
         
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         
 
@@ -118,7 +118,7 @@ hold off
 title(['slope: ' num2str(pf(1))])
 end
 
-function pard=pardef
+function pard=guidef
 % pard.d3_color.object=struct('Style','checkbox','String','render in color');
 % pard.d3_color.position=[2,1];
 

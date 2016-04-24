@@ -65,15 +65,15 @@ classdef PushToFiji<interfaces.DialogProcessor
                 mij.exit;
             end
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         function initGui(obj)
         end
     end
 end
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 pard.t1.object=struct('String','select output figure','Style','text');
 pard.t1.position=[1,1];
 pard.outputformat.object=struct('String',{{'rendered image with scalebar','rendered image','layer 1-3 as RGB','layer1 as grayscale'}},'Style','popupmenu');

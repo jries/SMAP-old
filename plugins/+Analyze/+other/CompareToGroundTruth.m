@@ -44,8 +44,8 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
             %after adding javaclasspath(javapath)
             cd(oldp)
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
@@ -53,7 +53,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 pard.onlyfiltered.object=struct('Style','checkbox','String','Export filtered (displayed) localizations.','Value',1);
 pard.onlyfiltered.position=[2,1];
 pard.onlyfiltered.Width=4;

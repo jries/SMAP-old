@@ -44,8 +44,8 @@ classdef Get2CIntImagesWF<interfaces.DialogProcessor
             obj.setPar('locFields',fieldnames(obj.locData.loc))
 
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function initGui(obj)
             par.Vpos=3;
@@ -67,7 +67,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 
 pard.dataselect.object=struct('Style','popupmenu','String','File');
 pard.dataselect.position=[1,1];

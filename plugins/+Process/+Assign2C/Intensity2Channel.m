@@ -11,8 +11,8 @@ classdef Intensity2Channel<interfaces.DialogProcessor
             obj.locData.regroup;
 %             
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function initGui(obj)
             obj.addSynchronization('locFields',[],[],@obj.updateLocFields)
@@ -38,7 +38,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 pard.texta.object=struct('String','dataset','Style','text');
 pard.texta.position=[1,1];
 

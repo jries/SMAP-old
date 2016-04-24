@@ -7,8 +7,8 @@ classdef IntLoc2pos<interfaces.WorkflowModule
         function obj=IntLoc2pos(varargin)
             obj@interfaces.WorkflowModule(varargin{:});
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -100,7 +100,7 @@ locr.y=round(loc.y);
 end
 
 
-function pard=pardef
+function pard=guidef
 pard.Tfile.object=struct('Style','edit','String','Tfile');
 pard.Tfile.position=[1,1];
 pard.Tfile.Width=1.3;

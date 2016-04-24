@@ -292,12 +292,12 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
             end        
         end 
 
-       function makeGui(obj,pardef)
-           % renders the GUI according to pardef, then calls obj.initGui.
-           % if pardef not passed on: calls obj.pardef (that is the usual
+       function makeGui(obj,guidef)
+           % renders the GUI according to guidef, then calls obj.initGui.
+           % if guidef not passed on: calls obj.guidef (that is the usual
            % way of defining a GUI)
             if nargin==1
-                pardef=obj.pardef;
+                guidef=obj.guidef;
             end
             
             if ~isempty(obj.handle)
@@ -305,13 +305,13 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                 hpos=obj.handle.Position;
                 obj.guiPar.FieldWidth=(hpos(3)-3*obj.guiPar.Xsep-2*obj.guiPar.Xrim)/4;
             end
-            if isstruct(pardef)
-                allFields=fieldnames(pardef);
+            if isstruct(guidef)
+                allFields=fieldnames(guidef);
                 guiPar=obj.guiPar;
 
 
                 for k=1:length(allFields) 
-                    thisField=pardef.(allFields{k});
+                    thisField=guidef.(allFields{k});
                     if strcmp(allFields{k},'syncParameters')
                         obj.syncParameters=thisField;
                     elseif strcmp(allFields{k},'inputParameters')
@@ -401,7 +401,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
            obj.setPar('status',txt2);
        end
        
-       function p=pardef(obj)
+       function p=guidef(obj)
            %overwrite in module when defining a GUI.
            %p.fieldname.object=struct('Style','edit','String','x',...)
            %    defines uicontrol with parameters from struct
@@ -418,7 +418,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
            %    interfaces.GuiParameterInterface.addSynchronization
            %p.inputParamters: can be defined here as cell array of char
            %p.outputParameters: same
-           %p.plugininfo: longer text which describes the module
+           %p.plugininfo.name, .description: longer text which describes the module
            
            p=[];
        end
@@ -468,7 +468,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                    sp=obj.syncParameters{k};
                    if ~isempty(sp{2})&&ischar(sp{2})
                    h=obj.guihandles.(sp{2});
-                   obj.addSynchronization(sp{1},h,sp{3});
+                   obj.addSynchronization(sp{1},h,sp{3:end});
                    end
                end
 

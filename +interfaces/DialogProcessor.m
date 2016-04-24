@@ -17,18 +17,18 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
             obj@interfaces.GuiModuleInterface(varargin{:})  
         end
         
-        function makeGui(obj,pardef)
+        function makeGui(obj,guidef)
             %calls makeGui@GuiModuleInterface, additionally provides info
             %and process button and checkbox to show results
             if nargin==1
-                pardef=obj.pardef;
+                guidef=obj.guidef;
             end
             if obj.processorgui
             obj.guiPar.fontsize=obj.guiPar.fontsize-1;
             obj.guiPar.FieldHeight=obj.guiPar.FieldHeight-2;
             end
      
-            makeGui@interfaces.GuiModuleInterface(obj,pardef);
+            makeGui@interfaces.GuiModuleInterface(obj,guidef);
             
             if obj.processorgui && ~isempty(obj.handle)
                 hpos=obj.handle.Position;
@@ -46,9 +46,9 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
 %             else
 %                 obj.plugininfo{1}=class(obj);
 %             end  
-%             if isfield(pardef,'plugininfo')  
-%                 li=length(pardef.plugininfo);
-%                 obj.plugininfo(2:li+1)=pardef.plugininfo;
+%             if isfield(guidef,'plugininfo')  
+%                 li=length(guidef.plugininfo);
+%                 obj.plugininfo(2:li+1)=guidef.plugininfo;
 %             else
 %                 obj.plugininfo{2}='no info';
 %                 

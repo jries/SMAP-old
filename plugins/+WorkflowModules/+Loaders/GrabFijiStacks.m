@@ -14,8 +14,8 @@ classdef GrabFijiStacks<interfaces.WorkflowModule
             obj.inputChannels=0;
             obj.isstartmodule=true;
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -164,7 +164,7 @@ else
     image=[];
 end
 end
-function pard=pardef(obj)
+function pard=guidef(obj)
 pard.text.object=struct('Style','text','String','and open images as virtual stack');
 pard.text.position=[1,2];
 pard.text.Width=2;

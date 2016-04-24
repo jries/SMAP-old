@@ -77,13 +77,13 @@ classdef intensityTiff<interfaces.SEEvaluationProcessor
                 out.Amplitude1=fitp(1);
                 out.Amplitude2=fitp(2);
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
 
-function pard=pardef
+function pard=guidef
 pard.inputParameters={'numberOfLayers','sr_layerson','se_cellfov','se_sitefov','se_siteroi','layer2_'};
 pard.t1.object=struct('Style','text','String','ROI (pixels)');
 pard.t1.position=[1,1];

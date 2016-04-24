@@ -51,8 +51,8 @@ classdef export_tiffs<interfaces.DialogProcessor&interfaces.SEProcessor
             end
             out=0;
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
@@ -60,7 +60,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 
 pard.export_selected.object=struct('String','exprot only selected sites','Style','checkbox');
 pard.export_selected.position=[1,1];

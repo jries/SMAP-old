@@ -18,8 +18,8 @@ classdef GuiChannel< interfaces.LayerInterface
 
         end
         
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
 
         function makeGui(obj)
@@ -556,7 +556,7 @@ obj.updateLayerField(field)
 end
 
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 pard.layercheck.object=struct('Style','checkbox','String','','Value',1);
 pard.layercheck.position=[1,1];
 pard.layercheck.Width=0.2;

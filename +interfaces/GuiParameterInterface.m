@@ -2,7 +2,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
     %provides functionality for global parameter handling related to GUI
     %parameters such as synchronization
     properties
-       syncParameters %cell array of {field, handle of uicontrol, syncmode ='String|Value|otherproperty'}. Set in pardef.
+       syncParameters %cell array of {field, handle of uicontrol, syncmode ='String|Value|otherproperty'}. Set in guidef.
       
     end
     methods
@@ -285,6 +285,10 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                 case {'pushbutton','checkbox','togglebutton'}
                     if isnumeric(v)
                         handle.Value=v;
+                    elseif isstruct(v)
+                        handle=v;
+                    elseif ischar(v)
+                        handle.String='v';
                     end
 
                 case {'popupmenu','listbox'}

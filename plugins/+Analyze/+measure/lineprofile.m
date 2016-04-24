@@ -11,8 +11,8 @@ classdef lineprofile<interfaces.DialogProcessor
             make_lineprofiles(obj.locData,p)
             out.clipboard={'test',1};
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
@@ -20,7 +20,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 pard.text1.object=struct('String','binwidth (nm):','Style','text');
 pard.text1.position=[1,1];
 

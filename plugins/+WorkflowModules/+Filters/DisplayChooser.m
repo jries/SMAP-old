@@ -8,8 +8,8 @@ classdef DisplayChooser<interfaces.WorkflowModule
             obj.outputParameters={'loc_previewmode'};
             obj.inputChannels=0;
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -27,7 +27,7 @@ classdef DisplayChooser<interfaces.WorkflowModule
 end
 
 
-function pard=pardef
+function pard=guidef
 pard.text.object=struct('Style','text','String','preview mode: ');
 pard.text.position=[1,1];
 pard.text.Width=1.5;

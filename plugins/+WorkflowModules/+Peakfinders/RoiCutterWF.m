@@ -9,8 +9,8 @@ classdef RoiCutterWF<interfaces.WorkflowModule
             obj@interfaces.WorkflowModule(varargin{:})
             obj.inputChannels=2; 
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -112,7 +112,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 pard.text.object=struct('Style','text','String','Size ROI (pix)');
 pard.text.position=[1,1];
 

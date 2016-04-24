@@ -22,8 +22,8 @@ classdef Connect2Unconnect<interfaces.DialogProcessor
                    disp('not implemented')
            end  
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
@@ -31,7 +31,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 
 
 

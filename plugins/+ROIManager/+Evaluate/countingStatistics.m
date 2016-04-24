@@ -24,13 +24,13 @@ classdef countingStatistics<interfaces.SEEvaluationProcessor
                      out.Nlocsg=min(sum(diff(locs.frame(inc))>1)+1,out.Nlocsg);
             
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
 
-function pard=pardef
+function pard=guidef
 pard.text1.object=struct('Style','text','String','max dark time (frame)');
 pard.text1.position=[2,1];
 pard.text1.Width=2;

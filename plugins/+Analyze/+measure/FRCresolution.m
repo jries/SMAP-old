@@ -49,8 +49,8 @@ classdef FRCresolution<interfaces.DialogProcessor
             
 
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
@@ -282,7 +282,7 @@ varargout{3} = resolution_low;
 end
 
 
-function pard=pardef
+function pard=guidef
 pard.takeimage.object=struct('String','use rendered image','Style','checkbox','Value',0);
 pard.takeimage.position=[1,1];
 pard.takeimage.Width=2;

@@ -9,7 +9,7 @@ classdef csegmentNPC<recgui.DialogProcessor
                 obj.handle=varargin{1};
             
 %             if nargin>1
-%                 obj.makeGui(pardef);
+%                 obj.makeGui(guidef);
             end
 %             end   
 
@@ -26,8 +26,8 @@ classdef csegmentNPC<recgui.DialogProcessor
         
         function refit_callback(obj)
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         
 
@@ -46,7 +46,7 @@ end
 
 
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 % 
 pard.text2.object=struct('String','length scale nm','Style','text');
 pard.text2.position=[1,1];

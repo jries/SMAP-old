@@ -37,8 +37,8 @@ classdef SALMInt2z<interfaces.DialogProcessor
             obj.locData.regroup;
 %             
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
 %         function attachLocData(obj,locData)
 %             attachLocData@recgui.GuiProcessor(obj,locData);
@@ -78,7 +78,7 @@ obj.guihandles.assignfield2.String=showfields;
 end
 end
 
-function pard=pardef
+function pard=guidef
 pard.texta.object=struct('String','dataset','Style','text');
 pard.texta.position=[1,1];
 

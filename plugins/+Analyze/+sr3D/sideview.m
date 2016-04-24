@@ -13,8 +13,8 @@ classdef sideview<interfaces.DialogProcessor
             sideview_reconstruct(obj.locData.copy,p);  
             out=0;
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
@@ -98,7 +98,7 @@ axis tight
 end
 
 
-function pard=pardef
+function pard=guidef
 pard.text1.object=struct('String','parameters','Style','text');
 pard.text1.position=[1,1];
 

@@ -9,8 +9,8 @@ classdef SESort< interfaces.SEProcessor
                 obj.handle=varargin{1};  
             end        
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function initGui(obj)
             initGui@interfaces.SEProcessor(obj);
@@ -195,7 +195,7 @@ obj.SE.processors.preview.updateSitelist;
 
 end
 
-function pard=pardef
+function pard=guidef
 
 
 pard.title1.object=struct('String','1st sort','Style','text');

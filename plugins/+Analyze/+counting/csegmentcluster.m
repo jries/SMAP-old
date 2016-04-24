@@ -14,8 +14,8 @@ classdef csegmentcluster<interfaces.DialogProcessor
         
         function refit_callback(obj)
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
     end
 end
@@ -23,7 +23,7 @@ end
 
 
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 % 
 pard.text2.object=struct('String','length scale nm','Style','text');
 pard.text2.position=[1,1];

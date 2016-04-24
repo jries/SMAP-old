@@ -8,8 +8,8 @@ classdef PeakFinderNMSWF<interfaces.WorkflowModule
             obj.inputParameters={'loc_filter_sigma','EMexcessNoise'};
 %             obj.parameters.EMexcessNoise=1;
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -88,7 +88,7 @@ p=min(1E10,p);
  obj.guihandles.NMS_cutoff.String=num2str(p);
 end
 
-function pard=pardef
+function pard=guidef
 pard.cutoffmode.object=struct('Style','togglebutton','String','probability (p<1)');
 pard.cutoffmode.position=[1,1];
 pard.cutoffmode.Width=1.3;

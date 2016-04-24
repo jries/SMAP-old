@@ -12,8 +12,8 @@ classdef counting<interfaces.DialogProcessor
             obj.setGuiParameters(pout);
             out=0;
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         
 
@@ -32,7 +32,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 pard.text1.object=struct('String','parameters','Style','text');
 pard.text1.position=[1,1];
 

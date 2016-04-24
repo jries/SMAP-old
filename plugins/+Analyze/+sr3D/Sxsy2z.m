@@ -25,8 +25,8 @@ classdef Sxsy2z<interfaces.DialogProcessor
             obj.setPar('locFields',fieldnames(obj.locData.loc))
             
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
@@ -43,7 +43,7 @@ obj.guihandles.calfile.String=[p f];
 end
 end
 
-function pard=pardef
+function pard=guidef
 % pard.d3_color.object=struct('Style','checkbox','String','render in color');
 % pard.d3_color.position=[2,1];
 

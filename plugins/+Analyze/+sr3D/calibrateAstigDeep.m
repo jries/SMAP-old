@@ -71,8 +71,8 @@ classdef calibrateAstigDeep<interfaces.DialogProcessor
             end
             
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
@@ -311,7 +311,7 @@ err=sf-sx;
 err=err./sqrt(abs(err));
 end
 
-function pard=pardef
+function pard=guidef
 % pard.d3_color.object=struct('Style','checkbox','String','render in color');
 % pard.d3_color.position=[2,1];
 

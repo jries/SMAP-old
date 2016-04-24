@@ -15,8 +15,8 @@ classdef RegisterLocs<recgui.DialogProcessor
             p.isz=obj.isz;
             obj.transformation=   transform_locs(obj.locData,p);
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function attachLocData(obj,locData)
             attachLocData@recgui.GuiProcessor(obj,locData);
@@ -83,7 +83,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 pard.texta.object=struct('String','target','Style','text');
 pard.texta.position=[1,2];
 pard.textb.object=struct('String','reference','Style','text');

@@ -11,8 +11,8 @@ classdef AnalyzeCME2Cside<interfaces.DialogProcessor&interfaces.SEProcessor
         function out=run(obj,p)  
           out=analyze2Cside(obj.SE,p);
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
@@ -20,7 +20,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 
 pard.export_selected.object=struct('String','some parameters','Style','checkbox');
 pard.export_selected.position=[1,1];

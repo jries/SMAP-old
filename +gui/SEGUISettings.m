@@ -6,8 +6,8 @@ classdef SEGUISettings< interfaces.SEProcessor
         function obj=SEGUISettings(varargin)
             obj@interfaces.SEProcessor(varargin{:})    
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function initGui(obj)
             initGui@interfaces.SEProcessor(obj);
@@ -58,7 +58,7 @@ obj.SEpreview.clearall;
 end
 end
 
-function pard=pardef
+function pard=guidef
 
 pard.text3.object=struct('String','FoV (nm)','Style','text');
 pard.text3.position=[1,2];

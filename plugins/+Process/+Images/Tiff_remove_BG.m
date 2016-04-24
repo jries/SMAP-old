@@ -36,8 +36,8 @@ classdef Tiff_remove_BG<interfaces.DialogProcessor
             
              
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         function dataselect_callback(obj,object,b)
             tifs=obj.locData.files.file(object.Value).tif;
@@ -53,7 +53,7 @@ classdef Tiff_remove_BG<interfaces.DialogProcessor
     end
 end
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 pard.dataselect.object=struct('Style','popupmenu','String','File','Callback',{{@obj.dataselect_callback}});
 pard.dataselect.position=[1,1];
 pard.dataselect.object.TooltipString='file for target localizations';

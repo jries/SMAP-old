@@ -10,8 +10,8 @@ classdef fitterGUI<interfaces.WorkflowModule
             
             obj.outputParameters={'bg_dx','bg_dt','subtractbg'};
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
 %         function makeGui(obj)
 %             makeGui@recgui.WorkflowModule(obj);
@@ -87,7 +87,7 @@ obj.currentfitter=fitter;
 
 end
 
-function pard=pardef
+function pard=guidef
 pard.fitterlist.object=struct('Style','listbox','String','EMCCD: Single Emitter|sCMOS: Single Emitter|EMCCD: Multiple Emitter|sCMOS: Mulitple Emitter');
 pard.fitterlist.position=[4,1];
 pard.fitterlist.Height=3;

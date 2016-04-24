@@ -19,8 +19,8 @@ classdef cfithist<interfaces.DialogProcessor
         
         function refit_callback(obj)
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         
 
@@ -30,7 +30,7 @@ end
 
 
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 pard.text1.object=struct('String','parameters','Style','text');
 pard.text1.position=[3,1];
 

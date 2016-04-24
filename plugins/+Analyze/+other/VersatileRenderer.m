@@ -43,8 +43,8 @@ classdef VersatileRenderer<interfaces.DialogProcessor
 %             srim=renderAnyField(obj.locData,p);
 %             
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function initGui(obj)
             obj.guihandles.assignfield1.Callback={@assignfield_callback,obj,1};
@@ -73,7 +73,7 @@ function assignfield_callback(object,a,obj,axis)
 % changemode(0,0,obj);
 %setSingeleParR
 end
-function pard=pardef
+function pard=guidef
 pard.t1.object=struct('String','horizontal axis','Style','text');
 pard.t1.position=[2,2];
 pard.t2.object=struct('String','vertical axis','Style','text');

@@ -15,13 +15,13 @@ classdef CME2CSide<interfaces.SEEvaluationProcessor
          
         end
         
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
 
-function pard=pardef
+function pard=guidef
 
 pard.t1.object=struct('Style','text','String','segment:');
 pard.t1.position=[1,1];

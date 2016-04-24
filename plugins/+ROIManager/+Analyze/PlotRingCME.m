@@ -20,8 +20,8 @@ classdef PlotRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
 %             out=obj.results;
 %           analyzeRingsCME(obj.SE,p)
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         function load_callback(obj,a,b,mode)
             switch mode
@@ -118,7 +118,7 @@ filelist={obj.results(:).filename};
 obj.guihandles.resultslist.String=filelist;
 obj.guihandles.resultslist.Value=min(max(obj.guihandles.resultslist.Value,length(filelist)),1);
 end
-function pard=pardef(obj)
+function pard=guidef(obj)
 pard.resultslist.object=struct('String','empty','Style','listbox');
 pard.resultslist.position=[5,1];
 pard.resultslist.Height=5;

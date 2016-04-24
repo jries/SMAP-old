@@ -9,8 +9,8 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
             obj.inputChannels=1; 
              obj.setInputChannels(1,'frame');
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function fitinit(obj)
             obj.fitfunction = @obj.nofound;
@@ -195,7 +195,7 @@ for k=1:length(toff)
 end
 end
 
-function pard=pardef
+function pard=guidef
 pard.fitmode.object=struct('Style','popupmenu','String','PSF fix|PSF free|3D z|ellipt: PSFx PSFy','Value',2);
 pard.fitmode.position=[1,1];
 pard.fitmode.Width=2;

@@ -7,8 +7,8 @@ classdef SEAnnotation< interfaces.SEProcessor
         function obj=SEAnnotation(varargin)   
             obj@interfaces.SEProcessor(varargin{:})
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function initGui(obj)
             initGui@interfaces.SEProcessor(obj);
@@ -185,7 +185,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 
 pard.list1.object=struct('Style','listbox','String','1|2|3|4|5|6|7|8');
 pard.list1.position=[6,1.];

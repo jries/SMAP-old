@@ -31,8 +31,8 @@ classdef density_calculator<interfaces.DialogProcessor
             obj.locData.regroup;
             obj.setPar('locFields',fieldnames(obj.locData.loc));  
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         
 
@@ -42,7 +42,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 
 
 pard.countingregion.object=struct('String','Gauss wighted counting |circle counting','Style','popupmenu','Value',2);

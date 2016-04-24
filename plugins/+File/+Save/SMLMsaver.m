@@ -32,8 +32,8 @@ classdef SMLMsaver<interfaces.DialogProcessor
             obj.status('save done')
           
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function run(obj,p)
             obj.save(p)
@@ -44,7 +44,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 pard.savevisible.object=struct('Style','checkbox','Visible','on','String','only save visible','Value',0);
 pard.savevisible.position=[1,1];
 pard.savevisible.Width=4;

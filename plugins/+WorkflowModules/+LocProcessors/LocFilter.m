@@ -8,8 +8,8 @@ classdef LocFilter<interfaces.WorkflowModule;
             obj.inputChannels=1; 
 %              obj.setInputChannels(1,'frame');
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -82,7 +82,7 @@ classdef LocFilter<interfaces.WorkflowModule;
 end
 
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 pard.check_locprec.object=struct('Style','checkbox','String','xy-locprec (nm)','Value',1);
 pard.check_locprec.position=[1,1];
 pard.check_locprec.Width=1.3;

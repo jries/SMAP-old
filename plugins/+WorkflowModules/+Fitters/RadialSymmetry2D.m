@@ -8,8 +8,8 @@ classdef RadialSymmetry2D<interfaces.WorkflowFitter
             obj.inputChannels=2; 
              obj.setInputChannels(2,'frame');
         end
-%         function pard=pardef(obj)
-%             pard=pardef;
+%         function pard=guidef(obj)
+%             pard=guidef;
 %         end
         
         function locs=fit(obj,imstack,bgstack,stackinfo)

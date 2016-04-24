@@ -52,8 +52,8 @@ classdef cloadhist<interfaces.DialogProcessor
         
         function refit_callback(obj)
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         function savehist_callback(obj,a,b)
             p=obj.getAllParameters;
@@ -81,7 +81,7 @@ end
 
 
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 
 pard.emptyhist.object=struct('String','empty histogram','Style','pushbutton','Callback',{{@obj.empty_callback}});
 pard.emptyhist.position=[2,1];

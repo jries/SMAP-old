@@ -13,8 +13,8 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
             obj.inputChannels=1; 
 %              obj.setInputChannels(1,'frame');
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -156,7 +156,7 @@ locdat.filenumber=uint8(0*locdat.xnm+obj.filenumber);
 locdat.channel=0*locdat.xnm;
 end
 
-function pard=pardef
+function pard=guidef
 pard.loc_updatetime.object=struct('Style','edit','String','30');
 pard.loc_updatetime.position=[1,2.5];
 pard.loc_updatetime.Width=0.5;

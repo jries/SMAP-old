@@ -9,8 +9,8 @@ classdef segmentSitesPolarCME<interfaces.DialogProcessor&interfaces.SEProcessor
           segmentCME(obj,p)
           out=[];
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
@@ -18,7 +18,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 pard.t1.object=struct('String','cutoffmask','Style','text');
 pard.t1.position=[2,1];
 pard.cutoffmask.object=struct('String','5','Style','edit');

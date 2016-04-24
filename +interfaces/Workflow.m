@@ -278,7 +278,7 @@ classdef Workflow<interfaces.DialogProcessor
             
             obj.children.(thistag)=module;
         end
-        function pard=pardef(obj)
+        function pard=guidef(obj)
             pard.visualizeconnectionsbutton.object=struct('Style','pushbutton','String','Graph','Callback',@obj.graph);
             pard.visualizeconnectionsbutton.position=[2,1.4];
             pard.visualizeconnectionsbutton.Width=0.4;

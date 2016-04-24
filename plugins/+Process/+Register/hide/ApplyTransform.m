@@ -9,7 +9,7 @@ classdef ApplyTransform<recgui.DialogProcessor
                 obj.handle=varargin{1};
             
 %             if nargin>1
-%                 obj.makeGui(pardef);
+%                 obj.makeGui(guidef);
             end
 %             end   
 
@@ -40,8 +40,8 @@ classdef ApplyTransform<recgui.DialogProcessor
 %             
 %             out=1;
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function attachLocData(obj,locData)
             attachLocData@recgui.GuiProcessor(obj,locData);
@@ -73,7 +73,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 pard.texta.object=struct('String','target','Style','text');
 pard.texta.position=[1,1];
 pard.textb.object=struct('String','reference','Style','text');

@@ -8,8 +8,8 @@ classdef RoiAdder<interfaces.WorkflowModule
             obj@interfaces.WorkflowModule(varargin{:});
             obj.propertiesToSave={'mask'};
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -91,7 +91,7 @@ end
 mask=createMask(hroi,him(k));
 end
 
-function pard=pardef
+function pard=guidef
 pard.addroi.object=struct('Style','pushbutton','String','ROI to include');
 pard.addroi.position=[1,1];
 pard.addroi.TooltipString=sprintf('Add a region of interest in which to fit. \n Use Preview before to display image in which to select ROI. \n After selcting ROI: double click on it to confirm.');

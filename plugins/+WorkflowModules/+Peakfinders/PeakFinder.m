@@ -9,8 +9,8 @@ classdef PeakFinder<interfaces.WorkflowModule
             obj@interfaces.WorkflowModule(varargin{:});
             obj.inputParameters={'loc_filter_sigma','EMexcessNoise'};
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -110,7 +110,7 @@ slope=(qs(3)-qs(1))/(ps(3)-ps(1));
 co=qs(2)+slope*0.5*2*factor;
 end
 
-function pard=pardef
+function pard=guidef
 pard.cutoffmode.object=struct('Style','popupmenu','String',{{'dynamic (factor)','probability (p<1)','absolute (photons)'}});
 pard.cutoffmode.position=[1,1];
 pard.cutoffmode.Width=1.5;

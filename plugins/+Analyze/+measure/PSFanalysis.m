@@ -10,8 +10,8 @@ classdef PSFanalysis<interfaces.DialogProcessor
             analyze_PSF(obj.locData,p) 
             out=0;
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         
 
@@ -337,7 +337,7 @@ export_fig(gcf,[fileout '.pdf'],'-pdf');
 end
 
 
-function pard=pardef
+function pard=guidef
 pard.text1.object=struct('String','dz (nm):','Style','text');
 pard.text1.position=[1,1];
 % 

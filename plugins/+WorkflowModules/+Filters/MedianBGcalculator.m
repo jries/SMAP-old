@@ -11,8 +11,8 @@ classdef MedianBGcalculator<interfaces.WorkflowModule
             obj.outputChannels=2; %1: image-background. 2: background image
             obj.outputParameters={'loc_bg_dx','loc_blocksize_frames','loc_subtractbg'};
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
 %         function initGui(obj)
 %             initGui@interfaces.WorkflowModule(obj);
@@ -107,7 +107,7 @@ classdef MedianBGcalculator<interfaces.WorkflowModule
 end
 
 
-function pard=pardef
+function pard=guidef
 pard.loc_subtractbg.object=struct('Style','checkbox','String','Subtract background','Value',1);
 pard.loc_subtractbg.position=[1,1];
 pard.loc_subtractbg.Width=2;

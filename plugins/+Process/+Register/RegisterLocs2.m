@@ -14,8 +14,8 @@ classdef RegisterLocs2<interfaces.DialogProcessor
             p.register_parameters=obj.register_parameters;
             obj.transformation=transform_locs(obj.locData,p);
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function makeGui(obj)
             makeGui@interfaces.DialogProcessor(obj);
@@ -84,7 +84,7 @@ classdef RegisterLocs2<interfaces.DialogProcessor
 end
 
 
-function pard=pardefold
+function pard=guidefold
 pard.texta.object=struct('String','target:','Style','text');
 pard.texta.position=[2,1.5];
 % pard.textb.object=struct('String','reference','Style','text');
@@ -158,7 +158,7 @@ pard.inputParameters={'currentfileinfo'};
 
 end
 
-function pard=pardef
+function pard=guidef
 pard.texta.object=struct('String','target:','Style','text');
 pard.texta.position=[2,2.05];
 % pard.textb.object=struct('String','reference','Style','text');

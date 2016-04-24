@@ -16,8 +16,8 @@ classdef Get2CIntImages<interfaces.DialogProcessor
             obj.setPar('locFields',fieldnames(obj.locData.loc))
 %             notify(obj.locData,'updateGui')
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
 %         function attachLocData(obj,locData)
 %             attachLocData@recgui.GuiProcessor(obj,locData);
@@ -59,7 +59,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 
 pard.dataselect.object=struct('Style','popupmenu','String','File');
 pard.dataselect.position=[1,1];

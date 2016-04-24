@@ -74,8 +74,8 @@ classdef Viewer3DV01<interfaces.DialogProcessor
              obj.redraw
         end
 
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         function keypress(obj,a,d2,data)
             if isempty(data)
@@ -570,7 +570,7 @@ switch p.stereo.Value
 end
 end
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 % pard.text1.object=struct('String','parameters','Style','text');
 % pard.text1.position=[1,1];
 

@@ -143,8 +143,8 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.locData.regroup;
 %             group_callback(0, 0,obj);
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         function delete(obj)
             delete(obj.autosavetimer)
@@ -270,7 +270,7 @@ hsmap.Children=hsmap.Children(indnew);
 % hsmap.Children(ithis)=hdummy;
 end
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 pard.load.object=struct('Style','pushbutton','String','Load','Callback',{{@obj.loadbutton_callback,0}});
 pard.load.position=[4.5,1];
 pard.load.Width=0.75;

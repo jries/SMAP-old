@@ -11,8 +11,8 @@ classdef WorkflowFitter<interfaces.WorkflowModule
         function obj= WorkflowFitter(varargin)
             obj@interfaces.WorkflowModule(varargin{:});
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
 
         function initGui(obj)
@@ -146,7 +146,7 @@ obj.output(dato);
 
 end
 
-function pard=pardef
+function pard=guidef
 
 pard=[];
 

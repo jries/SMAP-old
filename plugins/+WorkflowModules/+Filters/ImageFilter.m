@@ -8,8 +8,8 @@ classdef ImageFilter<interfaces.WorkflowModule
             obj@interfaces.WorkflowModule(varargin{:});
             obj.outputParameters={'loc_filter_sigma'};
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
 %         function initGui(obj)
 %             initGui@interfaces.WorkflowModule(obj);
@@ -43,7 +43,7 @@ classdef ImageFilter<interfaces.WorkflowModule
 end
 
 
-function pard=pardef
+function pard=guidef
 pard.text.object=struct('Style','text','String','Filter: Sigma (pix): ');
 pard.text.position=[1,1];
 pard.text.Width=1.3;

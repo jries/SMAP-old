@@ -13,8 +13,8 @@ classdef Loader_tif<interfaces.DialogProcessor
             loadfile(obj,p,file,mode);
         end
         
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function run(obj,p)
             [f,p]=uigetfile(obj.info.extensions);
@@ -31,7 +31,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 info.name='tif loader';
 info.extensions={'*.tif';'*.*'};
 info.dialogtitle='select any Tif file';

@@ -13,8 +13,8 @@ classdef FalconHD2D<interfaces.WorkflowModule
 %            initgui@interfaces.WorkflowFitter(obj);
 % %            addpath('plugins/+WorkflowModules/+Fitters/FALCON')
 %        end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
        function prerun(obj,p)
            try
@@ -88,7 +88,7 @@ classdef FalconHD2D<interfaces.WorkflowModule
     end
 end
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 pard.t1.object=struct('Style','text','String','Sigma PSF (cam pix)');
 pard.t1.position=[1,1];
 pard.Gsigma.object=struct('Style','edit','String','1.2');

@@ -3,8 +3,8 @@ classdef roi2int_sumG<interfaces.GuiModuleInterface
         function obj=roi2int_sumG(varargin)
             obj@interfaces.GuiModuleInterface(varargin{:});
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         function out=evaluate(obj,roi1,bg1)
             out=roi2int_sum(obj,roi1,bg1);
@@ -49,7 +49,7 @@ for k=1:sim(3)
 end
 end
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 pard.t1.object=struct('Style','text','String','roisize');
 pard.t1.position=[1,1];
 % pard.t1.Width=0.5;

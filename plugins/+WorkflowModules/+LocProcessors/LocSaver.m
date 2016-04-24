@@ -10,7 +10,7 @@ classdef LocSaver<interfaces.WorkflowModule;
             obj@interfaces.WorkflowModule(varargin{:})
             obj.inputChannels=1; 
         end
-        function pard=pardef(obj)
+        function pard=guidef(obj)
             pard=[];
         end
         function initGui(obj)

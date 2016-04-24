@@ -11,8 +11,8 @@ classdef Loader_ioPlugin<interfaces.DialogProcessor
             end
             loadfile(obj,p,file,mode);
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function run(obj,p)
             [f,p]=uigetfile(obj.info.extensions);
@@ -32,7 +32,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 info.name='CSV loader';
 info.extensions={'*.csv';'*.*'};
 info.dialogtitle='select any CSV file';

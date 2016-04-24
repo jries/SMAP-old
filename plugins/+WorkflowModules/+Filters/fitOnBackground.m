@@ -8,8 +8,8 @@ classdef fitOnBackground<interfaces.WorkflowModule
             obj@interfaces.WorkflowModule(varargin{:})
             obj.inputChannels=2; 
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -64,7 +64,7 @@ classdef fitOnBackground<interfaces.WorkflowModule
 end
 
 
-function pard=pardef
+function pard=guidef
 pard.loc_fitonbg.object=struct('Style','checkbox','String','fit on BG');
 pard.loc_fitonbg.position=[1,1];
 pard.loc_fitonbg.Width=1;

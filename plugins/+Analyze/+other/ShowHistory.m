@@ -25,8 +25,8 @@ classdef ShowHistory<interfaces.DialogProcessor
             out=texta;
            
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         
 
@@ -36,7 +36,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 pard.plugininfo.name='Show History';
 
 end

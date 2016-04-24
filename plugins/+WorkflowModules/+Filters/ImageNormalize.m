@@ -8,8 +8,8 @@ classdef ImageNormalize<interfaces.WorkflowModule
             obj@interfaces.WorkflowModule(varargin{:})
             obj.inputChannels=2; 
         end
-%         function pard=pardef(obj)
-%             pard=pardef;
+%         function pard=guidef(obj)
+%             pard=guidef;
 %         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);

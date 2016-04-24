@@ -17,8 +17,8 @@ classdef volume3D<interfaces.DialogProcessor
             make3Dvolume(obj,p)           
             out=0;
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         
 
@@ -135,7 +135,7 @@ obj.zold.changed=true;
 obj.run(p);
 end
 
-function pard=pardef
+function pard=guidef
 pard.d3_color.object=struct('Style','checkbox','String','render in color');
 pard.d3_color.position=[2,1];
 

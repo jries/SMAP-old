@@ -83,8 +83,8 @@ classdef locsfromSE<interfaces.DialogProcessor
         
 %         function refit_callback(obj)
 %         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         function savehist_callback(obj,a,b)
             p=obj.getAllParameters;
@@ -108,7 +108,7 @@ end
 
 
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 % 
 pard.text1.object=struct('String','PSFsigma (nm) min:max','Style','text');
 pard.text1.position=[1,1];

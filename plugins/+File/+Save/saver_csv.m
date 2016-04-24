@@ -24,8 +24,8 @@ classdef saver_csv<interfaces.DialogProcessor
            
           
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function run(obj,p)
             obj.save(p)
@@ -36,7 +36,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 % pard.plugininfo={'csv saver'};
 pard.savevisible.object=struct('Style','checkbox','Visible','on','String','only save visible','Value',1);
 pard.savevisible.position=[1,1];

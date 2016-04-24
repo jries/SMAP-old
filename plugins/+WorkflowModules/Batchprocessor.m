@@ -19,8 +19,8 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
                 obj.guihandles.filelist.String={obj.mainbatchfile};
             end
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         function mainbatchfileb_callback(obj,a,b)
             p=obj.getGuiParameters;
@@ -174,7 +174,7 @@ for k=1:length(files)
 end
 end
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 pard.filelist.object=struct('Style','listbox');%,'Callback',@obj.moduleselect_callback);
 pard.filelist.position=[10,1];
 pard.filelist.Height=8;

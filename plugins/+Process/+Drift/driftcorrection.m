@@ -75,8 +75,8 @@ classdef driftcorrection<interfaces.DialogProcessor
                 out=1;
             end
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
@@ -84,7 +84,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 pard.texta.object=struct('String','timepoints','Style','text');
 pard.texta.position=[1,1];
 

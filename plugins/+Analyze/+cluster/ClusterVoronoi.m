@@ -13,8 +13,8 @@ classdef ClusterVoronoi<interfaces.DialogProcessor
              pos=[p.sr_pos(1)-p.sr_size(1) p.sr_pos(2)-p.sr_size(2) 2*p.sr_size(1) 2*p.sr_size(2)];
                 out=vrender(locs,p.sr_pixrec,pos);
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
@@ -59,7 +59,7 @@ out=[];
                 
 
 end
-function pard=pardef
+function pard=guidef
 pard.t1.object=struct('String','Voronoi cluster analysis from SharpViSu','Style','text');
 pard.t1.position=[1,2];
 pard.t1.Width=4;

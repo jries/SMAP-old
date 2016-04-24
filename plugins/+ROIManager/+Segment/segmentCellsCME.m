@@ -9,8 +9,8 @@ classdef segmentCellsCME<interfaces.DialogProcessor&interfaces.SEProcessor
           segmentCells(obj,p)
           out=[];
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
@@ -18,7 +18,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 pard=[];
 pard.t1.object=struct('String','cutoff','Style','text');
 pard.t1.position=[1,1];

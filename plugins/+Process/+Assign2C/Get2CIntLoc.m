@@ -14,8 +14,8 @@ classdef Get2CIntLoc<interfaces.DialogProcessor
              obj.setPar('locFields',fieldnames(obj.locData.loc))
         end
         
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
 
         function initGui(obj)
@@ -40,7 +40,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 pard.texta.object=struct('String','dataset','Style','text');
 pard.texta.position=[1,1];
 

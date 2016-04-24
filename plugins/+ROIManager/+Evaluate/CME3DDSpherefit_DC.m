@@ -14,13 +14,13 @@ classdef CME3DDSpherefit_DC<interfaces.SEEvaluationProcessor
             out=runintern(obj,p);     
         end
         
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
 
-function pard=pardef
+function pard=guidef
 pard.layer.object=struct('Style','popupmenu','String','layer1|layer2|layer3|layer4|layer5|layer6');
 pard.layer.position=[1,1];
 pard.layer.Width=2;

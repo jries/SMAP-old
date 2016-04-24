@@ -12,8 +12,8 @@ classdef TifLoader<interfaces.WorkflowModule
             obj.inputChannels=1;
             obj.isstartmodule=true;
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -139,7 +139,7 @@ if f
 end  
 end
 
-function pard=pardef
+function pard=guidef
 pard.text.object=struct('Style','text','String','Image source file:');
 pard.text.position=[1,1];
 pard.text.Width=1.5;

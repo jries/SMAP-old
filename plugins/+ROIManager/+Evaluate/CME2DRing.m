@@ -15,13 +15,13 @@ classdef CME2DRing<interfaces.SEEvaluationProcessor
          
         end
         
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
 
-function pard=pardef
+function pard=guidef
 pard.layer.object=struct('Style','popupmenu','String','layer1|layer2');
 pard.layer.position=[1,1];
 pard.layer.Width=2;

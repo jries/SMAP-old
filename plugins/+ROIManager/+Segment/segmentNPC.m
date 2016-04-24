@@ -9,8 +9,8 @@ classdef segmentNPC<interfaces.DialogProcessor&interfaces.SEProcessor
           segmentNPCi(obj.SE,p)
           out=[];
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
@@ -18,7 +18,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 pard.t1.object=struct('String','cutoff','Style','text');
 pard.t1.position=[1,1];
 pard.cutoff.object=struct('String','.04','Style','edit');

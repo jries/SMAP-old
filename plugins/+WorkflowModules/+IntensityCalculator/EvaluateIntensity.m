@@ -12,8 +12,8 @@ classdef EvaluateIntensity<interfaces.WorkflowModule
             obj@interfaces.WorkflowModule(varargin{:});
             obj.inputChannels=3;
         end
-%         function pard=pardef(obj)
-%             pard=pardef;
+%         function pard=guidef(obj)
+%             pard=guidef;
 %         end
         function makeGui(obj)
             makeGui@interfaces.WorkflowModule(obj);

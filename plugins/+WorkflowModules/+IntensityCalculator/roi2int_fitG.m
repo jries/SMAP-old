@@ -3,8 +3,8 @@ classdef roi2int_fitG<interfaces.GuiModuleInterface
         function obj=roi2int_fitG(varargin)
             obj@interfaces.GuiModuleInterface(varargin{:});
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         function out=evaluate(obj,roi,bg,dx,dy,PSFxpix,PSFypix)
             out=roi2int_fit_e(roi,bg, dx,dy,PSFxpix,PSFypix);
@@ -84,7 +84,7 @@ end
 end
 
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 pard.t1.object=struct('Style','text','String','roisize');
 pard.t1.position=[1,1];
 % pard.t1.Width=0.5;

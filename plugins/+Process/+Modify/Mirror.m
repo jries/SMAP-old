@@ -54,8 +54,8 @@ classdef Mirror<interfaces.DialogProcessor
 
 %             
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
 
         function updateGui(obj,event,data)
@@ -76,7 +76,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 pard.texta.object=struct('String','dataset','Style','text');
 pard.texta.position=[1,1];
 

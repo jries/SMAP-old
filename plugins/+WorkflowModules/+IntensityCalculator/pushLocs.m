@@ -7,8 +7,8 @@ classdef pushLocs<interfaces.WorkflowModule
         function obj=pushLocs(varargin)
             obj@interfaces.WorkflowModule(varargin{:});
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -88,7 +88,7 @@ locr.y=round(loc.y);
 end
 
 
-function pard=pardef
+function pard=guidef
 pard.locfields.object=struct('Style','edit','String',{'znm','xnm','ynm','frame'});
 pard.locfields.position=[1,1];
 pard.locfields.Width=1.3;

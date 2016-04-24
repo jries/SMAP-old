@@ -26,8 +26,8 @@ classdef gradientEllipticity3D2z<interfaces.DialogProcessor
             obj.setPar('locFields',fieldnames(obj.locData.loc))
             
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
@@ -44,7 +44,7 @@ obj.guihandles.calfile.String=[p f];
 end
 end
 
-function pard=pardef
+function pard=guidef
 
 pard.pol_check.object=struct('String','linear fit:','Style','text');
 pard.pol_check.position=[2,1];

@@ -58,8 +58,8 @@ classdef showdriftinfo<interfaces.DialogProcessor
             axis equal
           
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
@@ -67,7 +67,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 pard.dataselect.object=struct('Style','popupmenu','String','File');
 pard.dataselect.position=[2,1];
 pard.syncParameters={{'filelist_short','dataselect',{'String'}}};

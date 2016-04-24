@@ -33,8 +33,8 @@ classdef RegisterImages<interfaces.DialogProcessor
             trafo.makeAffine2d(A);
             obj.transformation=trafo;
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         function initGui(obj)
             obj.addSynchronization('transformationfile',obj.guihandles.Tfile,'String');
@@ -54,7 +54,7 @@ end
 
 
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 pard.texta.object=struct('String','target','Style','text');
 pard.texta.position=[1,1];
 pard.textb.object=struct('String','reference','Style','text');

@@ -12,8 +12,8 @@ classdef CameraConverter<interfaces.WorkflowModule
             obj@interfaces.WorkflowModule(varargin{:})
             obj.propertiesToSave={'cameraSettings','EMexcessNoise'};
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function initGui(obj)
            initGui@interfaces.WorkflowModule(obj);
@@ -118,7 +118,7 @@ end
 % end
 
 
-function pard=pardef
+function pard=guidef
 
 pard.text.object=struct('Style','text','String','Acquisition parameters');
 pard.text.position=[1,1];

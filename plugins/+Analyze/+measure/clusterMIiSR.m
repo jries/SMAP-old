@@ -9,14 +9,14 @@ classdef clusterMIiSR<interfaces.DialogProcessor
            disp('not implemented')
             out=0;
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
 
 
 
-function pard=pardef
+function pard=guidef
 pard.plugininfo.name='Cluster with MIiSR';
 end

@@ -24,8 +24,8 @@ classdef MathParser<interfaces.DialogProcessor
              end
              
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         function dobutton(obj,callobj,event,inp1)
             disp('dobutton')
@@ -35,7 +35,7 @@ classdef MathParser<interfaces.DialogProcessor
     end
 end
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 pard.t1.object=struct('String','result field','Style','text');
 pard.t1.position=[2,1];
 

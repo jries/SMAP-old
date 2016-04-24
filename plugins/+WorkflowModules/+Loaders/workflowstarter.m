@@ -20,7 +20,7 @@ classdef workflowstarter<interfaces.WorkflowModule
             dateof.eof=true;
             obj.output(dateof)
         end
-        function pard=pardef(obj)
+        function pard=guidef(obj)
             pard.startb.object=struct('Style','pushbutton','String','Run','Callback',@obj.startcallback);
             pard.startb.position=[1,1];
         end

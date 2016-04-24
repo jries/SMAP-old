@@ -31,8 +31,8 @@ classdef AnalyzeRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
             out=obj.results;
 
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
 
         function save_callback(obj,a,b)
@@ -125,7 +125,7 @@ results.sumrdensityn=results.rdensityn{1};
 end
 
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 
 
 pard.savebutton.object=struct('String','Save','Style','pushbutton','Callback',{{@obj.save_callback}});

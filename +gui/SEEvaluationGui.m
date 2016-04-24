@@ -15,8 +15,8 @@ classdef SEEvaluationGui< interfaces.SEProcessor
             obj.processors{1}=interfaces.SEEvaluationProcessor;
             obj.currentmodule.number=1;
         end
-        function pard=pardef(obj)
-            pard=pardef(obj);
+        function pard=guidef(obj)
+            pard=guidef(obj);
         end
         function initGui(obj)
             initGui@interfaces.SEProcessor(obj);
@@ -122,7 +122,7 @@ process.name=modulename2;
 process.modulename=modulename;
 process.number=sn;
 process.handle=panel;
-% process.pardef;
+% process.guidef;
 % process.addGuiParameters(obj.guiPar);
 process.attachLocData(obj.locData);
 % process.showresults=true;
@@ -187,7 +187,7 @@ end
 end
 
 
-function pard=pardef(obj)
+function pard=guidef(obj)
 
 pard.addmodule.object=struct('Style','pushbutton','String','add module');
 pard.addmodule.position=[1,1];

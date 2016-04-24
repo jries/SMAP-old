@@ -13,8 +13,8 @@ classdef Loader_settings<interfaces.DialogProcessor
                 p.mainGui.setGuiParameters(filedat.parameters,true)
             end
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function run(obj,p)
             [f,p]=uigetfile(obj.info.extensions);
@@ -94,7 +94,7 @@ if ~isempty(siteexplorer)
 end
 end
 
-function pard=pardef
+function pard=guidef
 info.name='Gui settings';
 info.extensions={'*.mat';'*.*'};
 info.dialogtitle='select any GUI settings file or _sml file';

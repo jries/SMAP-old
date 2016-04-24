@@ -33,8 +33,8 @@ classdef Locstatistics<interfaces.DialogProcessor
 %             make_statistics2(obj.locData,p)
 %             out=0;
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
     end
 end
@@ -42,7 +42,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 pard.useroi.object=struct('String','use Roi','Style','checkbox','Value',1);
 pard.useroi.position=[1,1];
 

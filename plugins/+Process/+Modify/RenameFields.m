@@ -32,8 +32,8 @@ classdef RenameFields<interfaces.DialogProcessor
             obj.locData.regroup;
             obj.setPar('locFields',fieldnames(obj.locData.loc))  
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
 
         function updateGui(obj,event,data)
@@ -48,7 +48,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 
 pard.textb.object=struct('String','old field','Style','text');
 pard.textb.position=[2,1];

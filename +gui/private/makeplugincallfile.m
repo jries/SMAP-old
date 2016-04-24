@@ -47,13 +47,16 @@ if ~isdeployed
                             module.pluginpath={fn1h,fn2h,fn3h};
                             ismodule=true;
                             try
-                                pardef=module.pardef;
-                                pname=pardef.plugininfo.name;
+                                guidef=module.guidef;
+                                pname=guidef.plugininfo.name;
                             catch
                             pname=module.info.name;
                             end
                         end
-                        catch 
+                        catch err
+                            if ~strcmp(err.identifier,'MATLAB:scriptNotAFunction')
+                                warning(err.message)
+                            end
                         end
                     end
                     if ismodule

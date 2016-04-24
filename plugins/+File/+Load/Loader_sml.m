@@ -16,8 +16,8 @@ classdef Loader_sml<interfaces.DialogProcessor;
             obj.load(p,[p f]);
             initGuiAfterLoad(obj);
         end
-        function pard=pardef(obj)
-            pard=pardef;
+        function pard=guidef(obj)
+            pard=guidef;
         end
         function clear(obj,file,isadd)
             if isadd 
@@ -32,7 +32,7 @@ end
 
 
 
-function pard=pardef
+function pard=guidef
 info.name='SML loader';
 info.extensions={'*.mat';'*.*'};
 info.dialogtitle='select any SMLM file (_sml or _fitpos)';
