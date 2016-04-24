@@ -46,6 +46,7 @@ classdef Plugin_Template<interfaces.DialogProcessor
             %linked to the fields of localization data.
             
             out=[]; %no output
+            out.clipboard={'results1',3,'text1'}; % out.clipboard is copied to clipboard, separated by tabs.
             
         end
         function pard=guidef(obj)

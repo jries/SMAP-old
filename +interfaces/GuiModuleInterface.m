@@ -322,6 +322,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                         obj.plugininfo=thisField;
                     elseif isstruct(thisField) && ~isempty(obj.handle) %results name
                         if ~isfield(thisField,'object')
+                            allFields{k}
                             thisField
                             str=['guidef definition is incomplete in classe:' class(obj)];
                             error(str)

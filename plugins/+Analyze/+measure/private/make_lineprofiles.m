@@ -1,14 +1,8 @@
-function make_lineprofiles(locD,p)
+function results=make_lineprofiles(locD,p)
 
 ax1=initaxis(p.resultstabgroup,'scatter');
-% ax1.Position(3)=0.55;ax1.Position(1)=0.05;
-% pos=ax1.Position;
-% pos(1)=0.65;pos(3)=0.35;
-% ax1t=axes('Parent',ax1.Parent,'Position',pos);
-% ax1t.Color='none';ax1t.
-% subplot(ax1t,'Position',pos)
 hold off
-ax2=initaxis(p.resultstabgroup,'xprofile');
+[ax2,tab2]=initaxis(p.resultstabgroup,'xprofile');
 ax2.Position(3)=0.55;ax2.Position(1)=0.05;
 hold off
 [ax3,tab3]=initaxis(p.resultstabgroup,'yprofile');
@@ -20,28 +14,31 @@ ax4=initaxis(p.resultstabgroup,'zprofile');
 ax4.Position(3)=0.55;ax4.Position(1)=0.05;
 hold off
 ax5=initaxis(p.resultstabgroup,'scatter xz');
-% ax5.Position(3)=0.55;ax5.Position(1)=0.05;
+
 hold off
 end
 
 
-t1={};t2={};t3={};
+t1={[13 'x profile']};t2={[13 'y profile']};t3={[13 'z profile']};
 
-binwidth=p.binwidth;
+if p.setbinwidth
+    binwidth=p.binwidth;
+else
+    binwidth=p.sr_pixrec;
+end
 
 for layer=1:length(p.sr_layerson)
     if p.sr_layerson(layer)
         [locs,~, hroi]=locD.getloc({'xnm','ynm','znm','locprecnm','locprecznm','xnmline','ynmline'},'layer',layer,'position','roi');
     linew=p.linewidth_roi/2;
-    if isa(hroi,'imline')%isfield(locs,'xnmline')
+    if isa(hroi,'imline')
         x=locs.xnmline;
         y=locs.ynmline;
         mx=0;
         my=0;
         pos=getPosition(hroi);
         linel=sqrt((pos(2,1)-pos(1,1))^2+(pos(2,2)-pos(1,2))^2)/2*1000;
-        
-%         linel=p.linelength/2;
+
     elseif isa(hroi,'impoint')
         x=locs.xnm;
         y=locs.ynm;
@@ -69,7 +66,7 @@ for layer=1:length(p.sr_layerson)
     if p.linelengthcheck
 
         indin=x>mx-p.linelength/2&x<mx+p.linelength/2;
-        x=x(indin);y=y(indin);z=z(indin);locprecnm=locprecnm(indin);locprecznm=locprecznm(indin);
+        x=x(indin);y=y(indin);z=z(indin);locprecnm=locprecnm(indin);%locprecznm=locprecznm(indin);
         linel=p.linelength/2;
     end
     
@@ -78,16 +75,16 @@ for layer=1:length(p.sr_layerson)
     axis equal tight
     hold on
     
-    t1{end+1}=['Layer ' int2str(layer)];
-    t2{end+1}=['Layer ' int2str(layer)];
-    t3{end+1}=['Layer ' int2str(layer)];
+    t1{end+1}=['Layer ' 9 int2str(layer)];
+    t2{end+1}=['Layer ' 9 int2str(layer)];
+    t3{end+1}=['Layer ' 9 int2str(layer)];
     n=my-linew-binwidth:binwidth:my+linew+binwidth;
     profy=hist(y,n);profy([1 end])=[];n([1 end])=[];
     axes(ax2)
     plot(n,profy);
     hold on
     fwhm=getFWHM(profy,n);
-    t1{end+1}=['FWHM: '  num2str(fwhm,3)];
+    t1{end+1}=['FWHM: ' 9 num2str(fwhm,3)];
     
     sigma=median(locprecnm);
     [fitp,fitprof,fittxt]=fitgeneral(profy,n,p,sigma);
@@ -102,7 +99,7 @@ for layer=1:length(p.sr_layerson)
     hold on
     
     fwhm=getFWHM(profx,n);
-    t2{end+1}=['FWHM: '  num2str(fwhm)];
+    t2{end+1}=['FWHM: ' 9 num2str(fwhm)];
      [fitp,fitprof,fittxt]=fitgeneral(profx,n,p,sigma);
     plot(n,fitprof,'k--')
     t2(end+1:end+length(fittxt))=fittxt;
@@ -116,7 +113,7 @@ for layer=1:length(p.sr_layerson)
     plot(n,profz);
     hold on
     fwhm=getFWHM(profz,n);
-    t3{end+1}=['FWHM: '  num2str(fwhm)];
+    t3{end+1}=['FWHM: ' 9  num2str(fwhm)];
     [fitp,fitprof,fittxt]=fitgeneral(profz,n,p,fwhm/2.6);
     plot(n,fitprof,'k--')
     t3(end+1:end+length(fittxt))=fittxt;
@@ -138,20 +135,13 @@ pos=[.65,0.025,.4,.95];
 uicontrol('Parent',ax2.Parent,'style','text','String',t1,'Units','normalized','Position',pos,'FontSize',fontsize,'HorizontalAlignment','left')
 
 uicontrol('Parent',ax3.Parent,'style','text','String',t2,'Units','normalized','Position',pos,'FontSize',fontsize,'HorizontalAlignment','left')
-% xpos2=ax2.XLim(2)+(ax2.XLim(2)-ax2.XLim(1))*.05;
-% xpos3=ax3.XLim(2)+(ax3.XLim(2)-ax3.XLim(1))*.05;
-% 
-% 
-% text(xpos2,mean(ax2.YLim),t1,'FontSize',14,'Parent',ax2)
-% text(xpos3,mean(ax3.YLim),t2,'FontSize',14,'Parent',ax3)
 
 if ~isempty(locs.znm)
     uicontrol('Parent',ax4.Parent,'style','text','String',t3,'Units','normalized','Position',pos,'FontSize',fontsize,'HorizontalAlignment','left')
-% xpos4=ax4.XLim(2)+(ax4.XLim(2)-ax4.XLim(1))*.05;
-% text(xpos4,mean(ax4.YLim),t3,'FontSize',14,'Parent',ax4)
-end
-tab3.Parent.SelectedTab=tab3;
 
+end
+tab2.Parent.SelectedTab=tab2;
+results=[t1 t2 t3];
 
 function [fwhm,fwhmind]=getFWHM(profile,x)
     [mp, ip]=max(profile);
@@ -182,24 +172,24 @@ switch p.fitmodel.Value
         fitp(5)=fitp(3);
     case 2%tophat
         [fitp,fitprof,fstart]=fif(x,profile,sigma,1);
-        fittext=['Step L: ' num2str(fitp(3),3) ];
+        fittext=['Step L: ' 9 num2str(fitp(3),3) ];
     case 4%ring
         [fitp,fitprof,fstart]=fif(x,profile,sigma,3);
-        fittext=['Ring R: ' num2str(fitp(3),3) ];
+        fittext=['Ring R: ' 9 num2str(fitp(3),3) ];
     case 3%disk
         [fitp,fitprof,fstart]=fif(x,profile,sigma,2);
-        fittext=['Disk R: ' num2str(fitp(3),3)];   
+        fittext=['Disk R: ' 9 num2str(fitp(3),3)];   
     case 5 %double Gauss distance
         [fitp,fitprof,fstart]=fif(x,profile,sigma,4);
-        fittext=['Distance d: ' num2str(fitp(4),3)];         
-% fitmodel2convshape=[]
+        fittext=['Distance d: ' 9 num2str(fitp(4),3)];         
+
 end
 fittext={fittext};
 if p.fitmodel.Value>1
 if p.restrictsigma
-    fittext(end+1)={['sigma: ' num2str(sigma,4)]};
+    fittext(end+1)={['sigma: ' 9 num2str(sigma,4)]};
 else
-    fittext(end+1)={['sigma: ' num2str(fitp(5),4)]}; 
+    fittext(end+1)={['sigma: ' 9 num2str(fitp(5),4)]}; 
 end
 end
     
@@ -210,4 +200,4 @@ s=s/2.6*(x(2)-x(1));
 startp=[mp x(ip) s 0];
 fitp=mygaussfit(x,profile,startp);
 fitprof=mygaussforfit(fitp,x);
-fittext=['sigma: ' num2str(fitp(3),4)];
+fittext=['sigma: ' 9 num2str(fitp(3),4)];

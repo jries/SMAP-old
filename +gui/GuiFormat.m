@@ -163,15 +163,17 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             if nargin<2           
                 fignumber=obj.getPar('sr_figurenumber');
             end
-            clf(fignumber);
-            hf=figure(fignumber); 
-            hg.hsr=hf;
+
 
             pos=obj.getPar('mainGuihandle').Position;
             scrsz = get(groot,'ScreenSize');  
-            posim=abs([pos(3)+pos(1)+10 pos(2) max(1,min(pos(4),scrsz(3)-pos(3)-pos(1)-30)), max(1,pos(4))]);
+            posim=abs([pos(3)+pos(1)+10 pos(2) max(1,min(pos(4),scrsz(3)-pos(3)-pos(1)-30)), max(1,pos(4)-30)]);
+            clf(fignumber);
+            hf=figure(fignumber);
+            set(hf,'Units','pixels','Position', posim);
+            hg.hsr=hf;
             
-            set(hg.hsr,'Units','pixels','Position', posim)
+%             set(hg.hsr,'Units','pixels','Position', posim)
             hg.sr_axes=axes('Parent',hg.hsr);%,'Units','normalized','Position',[0.10 0.09,.7,.83]);
             set(hg.sr_axes,'NextPlot','replacechildren','PickableParts','all','Units','pixels')
             set(hg.sr_axes,'ButtonDownFcn',{@clickOnSrImage,obj})
