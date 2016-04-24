@@ -9,8 +9,6 @@ classdef Locstatistics<interfaces.DialogProcessor
         end
         
         function out=run(obj,p)
-            
-
         fields={'filenumber','frame','phot','locprecnm','znm','PSFxnm','locprecznm','numberInGroup','bg'};
         if p.useroi
             position='roi';
