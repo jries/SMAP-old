@@ -2,18 +2,18 @@ function stat=make_statistics2(locs,p,ploton)
 if nargin<3
     ploton=true;
 end
-% ploton=false
+
 if p.filter
     modetxt={'layer','layer','layer','layer','layer','layer','layer','layer','layer','layer','layer','layer','layer','layer'};
 else
     modetxt={'ungroup','group'};
 end
 
-if isfield(locs,'znm')
+if isfield(locs{1},'znm')&&~isempty(locs{1}.znm)
     txt='znm';
    zexist=true;
 else
-    txt='PSFx';
+    txt='PSFxnm';
         zexist=false;
 end
 
@@ -80,7 +80,6 @@ for k=datrange
         indco2=length(n2);
     end
     falloffframe=n2(indco2);
-    
     stat.frames.falloff(k)=falloffframe;
     [stat.frames.histogram(k).h,stat.frames.histogram(k).n]=hist(frames,100);
 end
@@ -97,12 +96,10 @@ end
 
 %photon stats
 phot=getFieldAsVector(locs,'phot');
-% [phot,datrange]=getvals(locD,'phot',p,indin);
 if isempty(phot{1})
     errdlg('no localizations in selected region')
     error('no localizations in selected region')
 end
-
 if p.checkphot
     for k=datrange
         phot{k}(phot{k}<p.photrange(1))=[];
@@ -114,17 +111,10 @@ if p.checkphot
 else
     pr=0.99;
 end
-
-% if ploton
-% axes(ax1)
-% hold off
-% end
 hphot=plothist(phot,pr,[],0,ax1);
 sphot={'Photons'};
-
 phot1=1000;
 phot2=3000;
-
 for k=datrange
     sphot{end+1}='';
     sphot{end+1}=[num2str(k) '.' modetxt{k} ];
@@ -137,22 +127,16 @@ for k=datrange
     sphot{end+1}=['<P'  '> = ' num2str(meanphot(k),'%5.0f')];
     sphot{end+1}=['r'  ' = ' num2str(N1(k)/N2(k),'%5.2f')];
     dat(k)=fitexpphot(hphot{k},[],ploton);
-    sphot{end+1}=['\mu'  ' = ' num2str(dat(k).mu,'%5.0f')];
-    
+    sphot{end+1}=(['\mu'  ' = ' num2str(dat(k).mu,'%5.0f')]);   
 end
-
 stat.photons.Nloc=Nloc;
 stat.photons.meanphot=meanphot;
 stat.photons.mu=[dat(:).mu];
 
-
 %locprec
-% locp={locs{:}.locprecnm};
 locp=getFieldAsVector(locs,'locprecnm');
-
 hlocp=plothist(locp,0.99,.25,0,ax2);
 slp={'locprec_x'};
-
 for k=datrange
     slp{end+1}='';
     slp{end+1}=[num2str(k) '.' modetxt{k} ];
@@ -176,30 +160,20 @@ for k=datrange
     slp{end+1}=['rising: ' num2str(risingedge,3)];
 end
 
-
-
 %lifetime
-% [lifetime,datrange]=getvals(locD,'numberInGroup',p,indin);
-% lifetime={locs{:}.numberInGroup};
 lifetime=getFieldAsVector(locs,'numberInGroup');
-
 hlifet=plothist(lifetime,0.999,1,0,ax3);
 slt={'lifetime'};
 for k=datrange
     slt{end+1}='';
     slt{end+1}=[num2str(k) '.' modetxt{k} ];
     dat(k)=fitexpphot(hlifet{k},2,ploton);
-    slt{end+1}=['\mu'  ' = ' num2str(dat(k).mu,3)];
+    slt{end+1}=(['\mu'  ' = ' num2str(dat(k).mu,3)]);
     stat.lifetime.mu(k)=dat(k).mu;
 end
 
-
 %background
-
-% bg={locs{:}.bg};
 bg=getFieldAsVector(locs,'bg');
-
-
 hbg=plothist(bg,0.95,1,0,ax4);
 slb={'Background'};
 for k=datrange
@@ -210,26 +184,12 @@ for k=datrange
     stat.background.mean(k)=mbg;
 end
 
-
-
 %z/sigma
-if ~isempty(locs{1}.znm)
-% if isfield(locs{1},'znm')
-%     v={locs{:}.znm};
+if zexist
     v=getFieldAsVector(locs,'znm');
-%     [v,datrange]=getvals(locD,'znm',p,indin);
-    txt='znm';
-
 else
-%     v={locs{:}.PSFxnm};
     v=getFieldAsVector(locs,'PSFxnm');
-%     [v,datrange]=getvals(locD,'PSFxnm',p,indin);
-    txt='PSFxnm';
-    zexist=false;
 end
-
-
-
 hz=plothist(v,.99,[],0,ax5);
 sls={txt};
 for k=1:length(datrange)
@@ -243,70 +203,45 @@ end
 
 
 if ploton
-text(ax1.XLim(2)*1.1,0.5,sphot,'FontSize',14,'Parent',ax1)
-% text(0,-0.2,fn,'FontSize',10,'Interpreter','none','Parent',ax1)
-
-text(ax2.XLim(2)*1.1,0.5,slp,'FontSize',14,'Parent',ax2)
-text(ax3.XLim(2)*1.1,0.5,slt,'FontSize',14,'Parent',ax3)
-
-text(ax4.XLim(2)*1.1,0.5,slb,'FontSize',14,'Parent',ax4)
-
-text(ax5.XLim(2)*1.1,0.5,sls,'FontSize',14,'Parent',ax5)
+fontsize=14;
+pos=[.7,0.025,.3,.95];
+uicontrol('Parent',ax1.Parent,'style','text','String',sphot,'Units','normalized','Position',pos,'FontSize',fontsize,'HorizontalAlignment','left')
+uicontrol('Parent',ax2.Parent,'style','text','String',slp,'Units','normalized','Position',pos,'FontSize',fontsize,'HorizontalAlignment','left')
+uicontrol('Parent',ax3.Parent,'style','text','String',slt,'Units','normalized','Position',pos,'FontSize',fontsize,'HorizontalAlignment','left')
+uicontrol('Parent',ax4.Parent,'style','text','String',slb,'Units','normalized','Position',pos,'FontSize',fontsize,'HorizontalAlignment','left')
+uicontrol('Parent',ax5.Parent,'style','text','String',sls,'Units','normalized','Position',pos,'FontSize',fontsize,'HorizontalAlignment','left')
 end
 
 if zexist
-%     v={locs{:}.locprecznm};
     v=getFieldAsVector(locs,'locprecznm');
-%     [v,datrange]=getvals(locD,'locprecznm',p,indin);
-%     axes(ax6)
-%     hold off
     hz=plothist(v,.99,[],0,ax6);
-    slp={txt};
+    slp={'locprecznm'};
     for k=datrange
         slp{end+1}='';
         slp{end+1}=[num2str(k) '.' modetxt{k} ];
         [~,ind]=max(hz{k}.h);
         mx=hz{k}.n(ind);    
         slp{end+1}=['max: ' num2str(mx,3)];
-    end
-    
-    
+        stat.locprecznm.max(k)=mx;
+    end    
     znm=getFieldAsVector(locs,'znm');
-%    znm={locs{:}.znm};
-%     
-%     znm=getvals(locD,'znm',p,indin);
-%     hold off
-rz=[-800 800];
-rsz=[0 100];
-    him=myhist2(znm{1},v{1},10,1,rz,rsz);
-    
+    rz=[-800 800];
+    rsz=[0 100];
+    him=myhist2(znm{1},v{1},10,1,rz,rsz);    
     if ploton
         axes(ax7)
         imagesc(rz,rsz,him')
         axis xy
         xlabel('znm');ylabel('locprec z');
     end
-%     for k=datrange
-%         [~, znmm, znms]=bintrace(sort(znm{k},length(znm{k})/50);
-%         [~, vm, vs]=bintrace(v{k},length(v{k})/50);
-%         
-%         plot(znmm,vm,'.')
-        
-%         hold on
-%     end
-if ploton
-    text(ax6.XLim(2)*1.1,0.5,slp,'FontSize',14)
-    
-end
-    
+    if ploton
+        uicontrol('Parent',ax6.Parent,'style','text','String',slp,'Units','normalized','Position',pos,'FontSize',fontsize,'HorizontalAlignment','left')
+    end   
 end
 
 if ploton && ~p.overview
    ax1.Parent.Parent.SelectedTab=ax1.Parent;
 end
-
-    
-
 
 function [v,datrange]=getvals(locD,field,p,indin)
 if p.filter %use filtered values
@@ -314,7 +249,6 @@ if p.filter %use filtered values
         if p.sr_layerson(layer)
             if p.useroi                
                 v{layer}=locD.getloc(field,'layer',layer,'position','roi','within',indin).(field);
-%                 v{layer}=struc.(field);
             else
                 v{layer}=locD.getloc(field,'layer',layer,'within',indin).(field);
             end
@@ -337,8 +271,6 @@ else %use all values, plot for unconnected and connected
     datrange=1:2;
 end
 
-
-
 function his=plothist(v,quantile,dphot,hmin,ax)
 
 for k=1:length(v)
@@ -358,7 +290,6 @@ if qmax==qmin
     qmax=qmin+1;
 end
 lmax=max(l);
-
 qfac=log10(lmax)-1;
 
 if nargin==2||isempty(dphot)
@@ -368,9 +299,6 @@ if nargin<4
     hmin=qmin;
 end
 nphot=hmin:dphot:qmax;
-% if length(nphot)==1
-%     nphot=[nphot; 2*nphot];
-% end
 slegend={};
 if ~isempty(ax)
     axes(ax)
@@ -399,10 +327,10 @@ function dat=fitexpphot(hin,fitstart,ploton)
 h=double(hin.h);
 xout=double(hin.n);
 if length(h)>1
-[mmax,mi]=max(h(1:end-1)); 
-halft=find(h(mi:end)<mmax/2,1,'first')+mi;
+    [mmax,mi]=max(h(1:end-1)); 
+    halft=find(h(mi:end)<mmax/2,1,'first')+mi;
 if isempty(halft)
- halft=ceil(length(h)/2);
+    halft=ceil(length(h)/2);
 end
 if nargin<2||isempty(fitstart)
     fitstart=ceil(mi*1.2);
@@ -413,12 +341,11 @@ options=optimset('lsqcurvefit');
 options.Display='off';
 pf=lsqcurvefit(@expforfit,[1,xout(halft)],xout(fitr),h(fitr)/mmax,[],[],options);
 if ploton
-plot(xout(fitr),expforfit(pf,xout(fitr)),'k--')
+    plot(xout(fitr),expforfit(pf,xout(fitr)),'k--')
 end
 dat.mu=pf(2);
 else
-    dat.mu=0;
-    
+    dat.mu=0;  
 end
 
 function out=expforfit(p,x)

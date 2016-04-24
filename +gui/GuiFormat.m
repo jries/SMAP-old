@@ -121,7 +121,8 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.setPar('layerson',1);
             addlistener(obj.P,'sr_render',@obj.plotovbox);
             lw_callback(0,0,obj)
-%             obj.updateFormatParameters;
+            obj.updateFormatParameters;
+            delete(obj.getPar('sr_figurehandle'))
         end
 
         function loaded_notify(obj,~,~)
@@ -136,10 +137,11 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.setPar('sr_size',sr_size);
             updateFormatParameters(obj) 
             redrawov_callback(0,0,obj) 
+
         end
-        function updateFormatParameters(obj)  
+        function updateFormatParameters(obj)
             ax=obj.getPar('sr_axes');
-            if isempty(ax)||~isvalid(ax)
+            if (isempty(ax)||~isvalid(ax))
                 hfg=figure;
                 obj.setPar('sr_figurenumber',hfg.Number);
                 obj.makesrfigure;
