@@ -26,11 +26,11 @@ classdef Tiff_remove_BG<interfaces.DialogProcessor
                     obj.locData.files.file(file).tif(end+1)=tiff;
                 end
             end
-            ax=initaxis(obj.resultstabgroup,'image');
+            ax=obj.initaxis('image');
             imagesc(img,'Parent',ax);
-            ax3=initaxis(obj.resultstabgroup,'bg');
+            ax3=obj.initaxis('bg');
             imagesc(bg,'Parent',ax3);
-            ax2=initaxis(obj.resultstabgroup,'image-bg');
+            ax2=obj.initaxis('image-bg');
             imagesc(imgc,'Parent',ax2);            
              
             

@@ -46,10 +46,10 @@ classdef StatsVsTime<interfaces.DialogProcessor
                     %plot
                     filns=1:maxfn;
                     
-                    axall=initaxis(obj.resultstabgroup,'all');
+                    axall=obj.initaxis('all');
                     delete(axall.Children);
                     hold on
-                   ax0=initaxis(obj.resultstabgroup,'falloff');
+                   ax0=obj.initaxis('falloff');
                     hold off
                     plot(ax0,filns,ps.frames.falloff{1})
                     plot(axall,filns,ps.frames.falloff{1}/max(ps.frames.falloff{1}))
@@ -62,7 +62,7 @@ classdef StatsVsTime<interfaces.DialogProcessor
                     xlabel('filenumber')
                     ylabel('falloff frame')
                     
-                    ax1=initaxis(obj.resultstabgroup,'number of localizations');
+                    ax1=obj.initaxis('number of localizations');
                     hold off
                     plot(ax1,filns,ps.photons.Nloc{1})
                     plot(axall,filns,ps.photons.Nloc{1}/max(ps.photons.Nloc{1}))
@@ -74,7 +74,7 @@ classdef StatsVsTime<interfaces.DialogProcessor
                     xlabel('filenumber')
                     ylabel('number of localizations')
                     
-                    ax2=initaxis(obj.resultstabgroup,'photons (mu)');
+                    ax2=obj.initaxis('photons (mu)');
                     hold off
                     plot(ax2,filns,ps.photons.mu{1})
                     plot(axall,filns,ps.photons.mu{1}/max(ps.photons.mu{1}))
@@ -86,7 +86,7 @@ classdef StatsVsTime<interfaces.DialogProcessor
                     xlabel('filenumber')
                     ylabel('photons (mu)')
                     
-                    ax2b=initaxis(obj.resultstabgroup,'locprec');
+                    ax2b=obj.initaxis('locprec');
                     hold off
                     plot(ax2b,filns,ps.locprec.max{1})
                     hold on
@@ -105,7 +105,7 @@ classdef StatsVsTime<interfaces.DialogProcessor
                     xlabel('filenumber')
                     ylabel('photons (mu)')
                     
-                    ax3=initaxis(obj.resultstabgroup,'lifetime');
+                    ax3=obj.initaxis('lifetime');
                     hold off
                     plot(ax3,filns,ps.lifetime.mu{1})
                     plot(axall,filns,ps.lifetime.mu{1}/max(ps.lifetime.mu{1}))
@@ -117,7 +117,7 @@ classdef StatsVsTime<interfaces.DialogProcessor
                     xlabel('filenumber')
                     ylabel('lifetime (mu)')
                     
-                     ax4=initaxis(obj.resultstabgroup,'BG');
+                     ax4=obj.initaxis('BG');
                     hold off
                     plot(ax4,filns,ps.background.mean{1})
                     plot(axall,filns,ps.background.mean{1}/max(ps.background.mean{1}))
@@ -130,7 +130,7 @@ classdef StatsVsTime<interfaces.DialogProcessor
                     ylabel('mean background')
                     
                     if ~isempty(locs{1}.PSFxnm)
-                        ax4=initaxis(obj.resultstabgroup,'PSF');
+                        ax4=obj.initaxis('PSF');
                         hold off
                         plot(ax4,filns,ps.PSFxnm.max{1})
                         for k=2:length(locs)

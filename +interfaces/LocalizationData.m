@@ -427,6 +427,30 @@ classdef LocalizationData<interfaces.GuiParameterInterface
 %                 obj.setPar('locFields',locfields);
 %             end
 %             obj.setPar('status','grouping done')
-        end    
+        end  
+        function [out,ind]=grouped2ungrouped(obj,indgrouped,values)
+            % grouped2ungrouped writes values corresponding to grouped localizaitons in
+            % indgrouped to corresponding values in ungrouped data.
+            [indexgsort, indg]=sort(obj.grouploc.groupindex(indgrouped));
+            [indexusort, indu]=sort(obj.loc.groupindex);
+            vu=zeros(length(indexusort),1,'like',values);
+            ku=1;
+            for k=1:length(indexgsort)
+                while(indexusort(ku)<indexgsort(k))
+                    ku=ku+1;
+                end
+%                 if (indexusort(ku)>indexgsort(k))
+%                     continue;
+%                 end
+                ku2=ku;
+                while(indexusort(ku2)==indexgsort(k))
+                    vu(indu(ku2))=values(indg(k));
+                    ku2=ku2+1;
+                end
+                ku=ku2; 
+            end
+            
+            out=vu;
+        end
     end    
 end

@@ -325,4 +325,8 @@ addParameter(p,'removeFilter',{});
 addParameter(p,'within',[]);
 parse(p,args{:});
 pres=p.Results;
+if ~isempty(fieldnames(p.Unmatched))
+    warning('locData.getlocs called with unidentified parameter - value pairs')
+    disp(p.Unmatched)
+end
 end

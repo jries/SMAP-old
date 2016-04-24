@@ -591,7 +591,7 @@ pard.imaxtoggle.position=[2,1.6];
 pard.imaxtoggle.Width=.6;
 pard.imaxtoggle.TooltipString='toggle absolute intensity maximum (Imax) or quantile';
 
-pard.imax.object=struct('Style','edit','String','-4');
+pard.imax.object=struct('Style','edit','String','-3.5');
 pard.imax.position=[2,2.2];
 pard.imax.Width=.6;
 pard.imax.TooltipString='absolut intensity or quantile (0<q<1) or v for q=1-10^(v), v<0';

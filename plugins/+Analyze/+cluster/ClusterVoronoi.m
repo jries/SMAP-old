@@ -1,4 +1,9 @@
 classdef ClusterVoronoi<interfaces.DialogProcessor
+    %CLUSTERVORONOI Performs Voronoi clustering and returns the density
+    %(inverse of voronoi cell). Uses code from SharpViSu:
+    %L. Andronov, Y. Lutz, J.-L. Vonesch, and B. P. Klaholz, 
+    %?SharpViSu: integrated analysis and segmentation of super-resolution microscopy data,? 
+    % Bioinformatics, p. btw123, Mar. 2016.
     methods
         function obj=ClusterVoronoi(varargin)        
             obj@interfaces.DialogProcessor(varargin{:}) ;
@@ -20,50 +25,44 @@ classdef ClusterVoronoi<interfaces.DialogProcessor
 end
 function out=vrender(obj,p)
 out=[];
-                warning('off','MATLAB:scatteredInterpolant:DupPtsAvValuesWarnId')
-                locs=obj.locData.getloc({'xnm','ynm','phot','frame','znm','ingrouped','inungrouped'},'layers',find(p.sr_layerson),'position','roi');
-                A=zeros(length(locs.xnm),9);
+warning('off','MATLAB:scatteredInterpolant:DupPtsAvValuesWarnId')
+locs=obj.locData.getloc({'xnm','ynm','phot','frame','znm','ingrouped','inungrouped'},'layer',find(p.sr_layerson),'position','roi');
+A=zeros(length(locs.xnm),9);
 
-                A(:,2)=locs.frame;
-                A(:,4)=locs.xnm-min(locs.xnm);
-                A(:,5)=locs.ynm-min(locs.ynm);  
-                A(:,7)=locs.phot;
-                if ~isempty(locs.znm)
-                    A(:,6)=locs.znm;
-                end
-                Vor = VorArea( A, 1, size(A, 1) );
-                Area = Vor{1};
-                ic = Vor{5};
-                Areacorr = zeros(size(A,1),1);
-                Areacorr(:) = Area(ic,:);
-
-%                 
-                if sum(locs.inungrouped)==length(locs.xnm) %ungrouped data
-%                     
-                ico=zeros(length(locs.inungrouped),1,'single');
-                ico(locs.inungrouped)=ic;
-                obj.locData.setloc('clusterindex',ico);
-                
-                ceo=zeros(length(locs.inungrouped),1,'single');
-                ceo(locs.inungrouped)=Areacorr;
-                obj.locData.setloc('clusterdensity',ceo);
-%                 end
-                obj.setPar('locFields',fieldnames(obj.locData));
-                obj.locData.regroup;
-                else %if clustering performed on grouped data -> write cluster data to all ungrouped data 
-                    %sort according to groupindex
-                    
-                end
-
-                    
-                
-
+A(:,2)=locs.frame;
+A(:,4)=locs.xnm-min(locs.xnm);
+A(:,5)=locs.ynm-min(locs.ynm);  
+A(:,7)=locs.phot;
+if ~isempty(locs.znm)
+    A(:,6)=locs.znm;
 end
+Vor = VorArea( A, 1, size(A, 1) );
+Area = Vor{1};
+ic = Vor{5};
+Areacorr = zeros(size(A,1),1);
+Areacorr(:) = Area(ic,:);
+              
+if sum(locs.inungrouped)==length(locs.xnm) %ungrouped data
+    ceo=zeros(length(locs.inungrouped),1,'single');
+    ceo(locs.inungrouped)=Areacorr;
+else
+    ceo=obj.locData.grouped2ungrouped(locs.ingrouped,Areacorr);
+    
+end
+
+obj.locData.setloc('clusterdensity',ceo);
+obj.setPar('locFields',fieldnames(obj.locData));
+obj.locData.regroup;
+end
+           
+             
 function pard=guidef
 pard.t1.object=struct('String','Voronoi cluster analysis from SharpViSu','Style','text');
 pard.t1.position=[1,2];
 pard.t1.Width=4;
 
+pard.plugininfo.description=sprintf('Performs Voronoi clustering and returns the density (inverse of voronoi cell). Uses code from SharpViSu: L. Andronov, Y. Lutz, J.-L. Vonesch, and B. P. Klaholz, SharpViSu: integrated analysis and segmentation of super-resolution microscopy data, Bioinformatics, p. btw123, Mar. 2016.');
+pard.plugininfo.type='ProcessorPlugin';
 
 end
 

@@ -72,7 +72,7 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
         end
         function ax=initaxis(obj,varargin)
             %initializes axis in results window
-            ax=initaxis(obj.resultstabgroup,varargin{:});
+            ax=obj.initaxis(varargin{:});
         end
         function processgo(obj)
             %provides external access to run module (usually via process
@@ -157,7 +157,7 @@ end
 function info_callback(a,b,obj)
 obj.guihandles.showresults.Value=1;
 showresults_callback(obj.guihandles.showresults,0,obj)
-ax=initaxis(obj.resultstabgroup,'Info');
+ax=obj.initaxis('Info');
 hp=ax.Parent;
  htxt=uicontrol(hp,'Style','text','Units','normalized','Position',[0,0,1,1],...
      'FontSize',obj.guiPar.fontsize,'HorizontalAlignment','left');

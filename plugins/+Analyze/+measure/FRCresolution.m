@@ -31,7 +31,7 @@ classdef FRCresolution<interfaces.DialogProcessor
             [FRC_resolutionp,rl,rh]=frctoresolution(frc_curve,size(image1));
             FRC_resolution=FRC_resolutionp*p.pixrec_frc;
             errres=(rh-rl)/2*p.pixrec_frc;
-            ax1=initaxis(obj.resultstabgroup,'frc')
+            ax1=obj.initaxis('frc')
              qmax = 0.5/(p.pixrec_frc);
             
             plot([0 qmax],[0 0],'k')

@@ -321,6 +321,12 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                     elseif strcmp(allFields{k},'plugininfo')
                         obj.plugininfo=thisField;
                     elseif isstruct(thisField) && ~isempty(obj.handle) %results name
+                        if ~isfield(thisField,'object')
+                            thisField
+                            str=['guidef definition is incomplete in classe:' class(obj)];
+                            error(str)
+                            
+                        end
                         h=thisField.object;
 %                         h=uicontrol(obj.handle,thisField.object);
                         h.FontSize=guiPar.fontsize;
