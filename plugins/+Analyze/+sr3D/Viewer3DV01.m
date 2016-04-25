@@ -81,6 +81,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             if isempty(data)
                 data=d2;
             end
+            data
            %1.up, 2.down, 3.left, 4.right, 5.back, 6.front, 0.reset
             switch data.Character
                 case {'w','8',30}
@@ -99,7 +100,15 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     dir=0;   
                
                 otherwise 
-                    return
+                    switch data.Key
+                        case 'comma'
+                            dir=5;
+                        case 'period'
+                            dir=6;
+                        otherwise 
+                            return;
+                    end
+                    
             end
             
             p=obj.getGuiParameters;
@@ -160,8 +169,10 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 pos(1,2)=mpos(2)-dy;
                 pos(2,2)=mpos(2)+dy;
                 obj.setGuiParameters(struct('theta',theta));
+                
             elseif any(strcmp(data.Modifier,'alt'))
                 %change size
+                
                 switch dir
                     case 6
                         lw=obj.getPar('linewidth_roi');
