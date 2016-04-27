@@ -15,16 +15,11 @@ classdef StatsVsTime<interfaces.DialogProcessor
             else
                 position='all';
             end
-
-
-
             usefields={{'photons','Nloc'},{'photons','mu'},{'lifetime','mu'},{'background','mean'},{'PSFxnm','max'},{'frames','falloff'},{'locprec','max'},{'locprec','rising'}};
             layers=find(p.sr_layerson);            
             
             switch p.timefield.selection
                 case 'files'
-
-                    
                     maxfn=max(obj.locData.getloc('filenumber').filenumber);
                     for filen=1:maxfn
                         if p.filter
@@ -53,10 +48,8 @@ classdef StatsVsTime<interfaces.DialogProcessor
                     end
                     filns=1:maxfn;
                    xl='filenumber';
-                    
-                    
-                case 'frames'
-                   
+
+                case 'frames'                   
                     if p.filter
                         for m=length(layers):-1:1
                             locs{m}=obj.locData.getloc(fields,'layer',layers(m),'position',position);
@@ -98,7 +91,6 @@ classdef StatsVsTime<interfaces.DialogProcessor
                     xl='frame';
             end
              %plot
-
             axall=obj.initaxis('all');
             delete(axall.Children);
             hold on

@@ -1,4 +1,5 @@
 classdef sideview<interfaces.DialogProcessor
+    % sideview Side view from ROI
     methods
         function obj=sideview(varargin)        
             obj@interfaces.DialogProcessor(varargin{:}) ;
@@ -10,7 +11,7 @@ classdef sideview<interfaces.DialogProcessor
         end
         
         function out=run(obj,p)
-            sideview_reconstruct(obj.locData.copy,p);  
+            sideview_reconstruct(obj,obj.locData.copy,p);  
             out=0;
         end
         function pard=guidef(obj)
@@ -19,7 +20,7 @@ classdef sideview<interfaces.DialogProcessor
     end
 end
 
-function sideview_reconstruct(locData,p)
+function sideview_reconstruct(obj,locData,p)
 [locs,indroi]=locData.getloc({'xnm','ynm','locprecnm','xnmline','ynmline'},'grouping','ungrouped','position','roi');
 [glocs,gindroi]=locData.getloc({'xnm','ynm','locprecnm','xnmline','ynmline'},'grouping','grouped','position','roi');
 
@@ -31,23 +32,16 @@ function sideview_reconstruct(locData,p)
 if ~isempty(locs.xnmline) %isfield(locs,'xnmline')
     locData.loc.xnmp(indroi)=locs.xnmline;
     locData.grouploc.xnmp(gindroi)=glocs.xnmline;
-%     p.min1=min(locs.xnmline);
-%     p.max1=max(locs.xnmline);
-    
     roih=p.sr_roihandle;
     if isvalid(roih)
         rpos=roih.getPosition;
-    %     mpos=mean(rpos,1);
         lr=sqrt(sum((rpos(2,:)-rpos(1,:)).^2));
         rx=[-lr/2 lr/2]*1000;
         ry=[-0.5 0.5]*p.linewidth_roi;
     else
-    rx=[min(locs.xnmline) max(locs.xnmline)];
-    ry=[min(locs.ynmline) max(locs.ynmline)];
+        rx=[min(locs.xnmline) max(locs.xnmline)];
+        ry=[min(locs.ynmline) max(locs.ynmline)];
     end
-%     ymin=min(locs.ynmline);
-%     ymax=max(locs.ynmline);
-
     locData.loc.ynmp(indroi)=locs.ynmline;
     locData.grouploc.ynmp(gindroi)=glocs.ynmline;
 else
@@ -59,14 +53,14 @@ else
     ry=[min(locs.ynmp) max(locs.ynmp)];
 end
 
-if p.pixauto
+if ~p.pixauto
     pixelsizex=p.sr_pixrec;pixelsizey=p.sr_pixrec;pixelsizez=p.sr_pixrec;
 else
     pixelsizex=p.pixrecset(1);pixelsizey=p.pixrecset(1);pixelsizez=p.pixrecset(end);
 end
 rz=[p.zmin p.zmax];
 
-yax=initaxis(p.resultstabgroup,'x-y');
+yax=obj.initaxis('x-y');
 p.sr_axes=[];p.rangex=rx;p.rangey=ry;p.sr_pixrec=[pixelsizex pixelsizey];
 yim=anyRender(locData,p,'x','xnmp','y','ynmp','sx','locprecnm','sy','locprecnm');
 imagesc(rx,ry,yim.image,'Parent',yax);
@@ -74,7 +68,7 @@ axes(yax)
 axis equal;
 axis tight
 p.sr_axes=[];
-zax=initaxis(p.resultstabgroup,'x-z');
+zax=obj.initaxis('x-z');
 p.rangex=rx;p.rangey=rz;p.sr_pixrec=[pixelsizex pixelsizez];
 [zim]=anyRender(locData,p,'x','xnmp','y','znm','sx','locprecnm','sy','locprecznm');
 imagesc(rx,rz,zim.image,'Parent',zax);
@@ -86,11 +80,8 @@ axis tight;
 s=size(yim.image);
 border=ones(1,s(2),3);
 comp=vertcat(yim.image,border,zim.image);
-% rx=yim.rangex;
-% rz=zim.rangey;
-% ry=yim.rangey;
 rz(1)=rz(1)-(ry(2)-ry(1));
-cax=initaxis(p.resultstabgroup,'x-z/x-y');
+cax=obj.initaxis('x-z/x-y');
 imagesc(rx,rz,comp,'Parent',cax);
 axis equal;
 axis ij;
@@ -112,8 +103,12 @@ pard.zmin.position=[2,2];
 pard.zmax.object=struct('Style','edit','String',400); 
 pard.zmax.position=[3,2];
 
-pard.pixauto.object=struct('Style','checkbox','String','pixelsize auto','Value',1);
+pard.pixauto.object=struct('Style','checkbox','String','set pixelsize (x,z)','Value',0);
 pard.pixauto.position=[4,1];
-pard.pixrecset.object=struct('Style','edit','String','5,5'); 
+pard.pixrecset.object=struct('Style','edit','String','5, 5'); 
 pard.pixrecset.position=[4,2];
+
+pard.plugininfo.name='Side view';
+pard.plugininfo.description= 'Side view from ROI';
+pard.plugininfo.type='ProcessorPlugin';
 end
