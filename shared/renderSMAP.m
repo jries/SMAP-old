@@ -9,6 +9,7 @@ if nargin==0
                 'rangex','rangey'};
     return          
 end
+
 if nargin<5
     transparency.mode=1;
 end
@@ -19,6 +20,14 @@ if strcmpi('tiff', p.rendermode.selection) %obj.locData.files.file(p.ch_filelist
     return
 end
 
+if nargin>3&&isempty(indin)
+    imageo.image=[];
+    imageo.numberOfLocs=0;
+    imageo.istiff=0;
+    imageo.rangex=[];
+    imageo.rangey=[];
+    return
+end
 
 if nargin<3||isempty(layer)
     layer=p.layer;

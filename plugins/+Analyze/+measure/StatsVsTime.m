@@ -1,4 +1,6 @@
 classdef StatsVsTime<interfaces.DialogProcessor
+    % StatsVsTime calculates localization statistics in dependence of the
+    % filenumber or of the frame
     methods
         function obj=StatsVsTime(varargin)           
             obj@interfaces.DialogProcessor(varargin{:}) 
@@ -7,143 +9,205 @@ classdef StatsVsTime<interfaces.DialogProcessor
         end
         
         function out=run(obj,p)
+            fields={'filenumber','frame','phot','locprecnm','znm','PSFxnm','locprecznm','numberInGroup','bg'};
+            if p.useroi
+                position='roi';
+            else
+                position='all';
+            end
+
+
+
+            usefields={{'photons','Nloc'},{'photons','mu'},{'lifetime','mu'},{'background','mean'},{'PSFxnm','max'},{'frames','falloff'},{'locprec','max'},{'locprec','rising'}};
+            layers=find(p.sr_layerson);            
+            
             switch p.timefield.selection
                 case 'files'
-                    fields={'filenumber','frame','phot','locprecnm','znm','PSFxnm','locprecznm','numberInGroup','bg'};
-                    if p.useroi
-                        position='roi';
-                    else
-                        position='all';
-                    end
-                    
-                    
-                    
-                    usefields={{'photons','Nloc'},{'photons','mu'},{'lifetime','mu'},{'background','mean'},{'PSFxnm','max'},{'frames','falloff'},{'locprec','max'},{'locprec','rising'}};
-                    layers=find(p.sr_layerson);
+
                     
                     maxfn=max(obj.locData.getloc('filenumber').filenumber);
                     for filen=1:maxfn
                         if p.filter
                             for m=length(layers):-1:1
                                 locs{m}=obj.locData.getloc(fields,'layer',layers(m),'position',position,'filenumber',filen);
+                                modetxt{m}=['layer' num2str(layers(m))];
                             end
                         else
                             locs{2}=obj.locData.getloc(fields,'position',position,'grouping','grouped','filenumber',filen);
                             locs{1}=obj.locData.getloc(fields,'position',position,'grouping','ungrouped','filenumber',filen);
+                            modetxt{2}='grouped';
+                            modetxt{1}='ungrouped';
                         end
                         
                         stats=make_statistics2(locs,p,false);
                         for f=1:length(usefields)
                             fh=usefields{f};
+                            if isfield(stats,fh{1})
                             stath=stats.(fh{1}).(fh{2});
                             for l=1:length(stath)
                                 ps.(fh{1}).(fh{2}){l}(filen)=stath(l);
                             end
+                            end
                         end
                         
                     end
-                    
-                    %plot
                     filns=1:maxfn;
-                    
-                    axall=obj.initaxis('all');
-                    delete(axall.Children);
-                    hold on
-                   ax0=obj.initaxis('falloff');
-                    hold off
-                    plot(ax0,filns,ps.frames.falloff{1})
-                    plot(axall,filns,ps.frames.falloff{1}/max(ps.frames.falloff{1}))
-                    
-                    for k=2:length(locs)
-                    hold on
-                    plot(ax0,filns,ps.frames.falloff{k})
-                    plot(axall,filns,ps.frames.falloff{k}/max(ps.frames.falloff{k}))
-                    end
-                    xlabel('filenumber')
-                    ylabel('falloff frame')
-                    
-                    ax1=obj.initaxis('number of localizations');
-                    hold off
-                    plot(ax1,filns,ps.photons.Nloc{1})
-                    plot(axall,filns,ps.photons.Nloc{1}/max(ps.photons.Nloc{1}))
-                    for k=2:length(locs)
-                    hold on
-                    plot(ax1,filns,ps.photons.Nloc{k})
-                    plot(axall,filns,ps.photons.Nloc{k}/max(ps.photons.Nloc{k}))
-                    end
-                    xlabel('filenumber')
-                    ylabel('number of localizations')
-                    
-                    ax2=obj.initaxis('photons (mu)');
-                    hold off
-                    plot(ax2,filns,ps.photons.mu{1})
-                    plot(axall,filns,ps.photons.mu{1}/max(ps.photons.mu{1}))
-                    for k=2:length(locs)
-                    hold on
-                    plot(ax2,filns,ps.photons.mu{k})
-                    plot(axall,filns,ps.photons.mu{k}/max(ps.photons.mu{k}))
-                    end
-                    xlabel('filenumber')
-                    ylabel('photons (mu)')
-                    
-                    ax2b=obj.initaxis('locprec');
-                    hold off
-                    plot(ax2b,filns,ps.locprec.max{1})
-                    hold on
-                    plot(ax2b,filns,ps.locprec.rising{1})
-                    
-                    plot(axall,filns,ps.locprec.rising{1}/max(ps.locprec.rising{1}))
-                    plot(axall,filns,ps.locprec.max{1}/max(ps.locprec.max{1}))
-                    for k=2:length(locs)
-                    hold on
-                    plot(ax2b,filns,ps.locprec.max{k})
-                    plot(ax2b,filns,ps.locprec.rising{k})
-                    plot(axall,filns,ps.locprec.rising{k}/max(ps.locprec.rising{k}))
-                    plot(axall,filns,ps.locprec.max{k}/max(ps.locprec.max{k}))                   
-                    
-                    end
-                    xlabel('filenumber')
-                    ylabel('photons (mu)')
-                    
-                    ax3=obj.initaxis('lifetime');
-                    hold off
-                    plot(ax3,filns,ps.lifetime.mu{1})
-                    plot(axall,filns,ps.lifetime.mu{1}/max(ps.lifetime.mu{1}))
-                    for k=2:length(locs)
-                    hold on
-                    plot(ax3,filns,ps.lifetime.mu{k})
-                    plot(axall,filns,ps.lifetime.mu{k}/max(ps.lifetime.mu{k}))
-                    end
-                    xlabel('filenumber')
-                    ylabel('lifetime (mu)')
-                    
-                     ax4=obj.initaxis('BG');
-                    hold off
-                    plot(ax4,filns,ps.background.mean{1})
-                    plot(axall,filns,ps.background.mean{1}/max(ps.background.mean{1}))
-                    for k=2:length(locs)
-                    hold on
-                    plot(ax4,filns,ps.background.mean{k})
-                    plot(axall,filns,ps.background.mean{k}/max(ps.background.mean{k}))
-                    end
-                    xlabel('filenumber')
-                    ylabel('mean background')
-                    
-                    if ~isempty(locs{1}.PSFxnm)
-                        ax4=obj.initaxis('PSF');
-                        hold off
-                        plot(ax4,filns,ps.PSFxnm.max{1})
-                        for k=2:length(locs)
-                        hold on
-                        plot(ax4,filns,ps.PSFxnm.max{k})
-                        end
-                        xlabel('filenumber')
-                        ylabel('max PSFx (nm)')
-                    end
+                   xl='filenumber';
                     
                     
                 case 'frames'
+                   
+                    if p.filter
+                        for m=length(layers):-1:1
+                            locs{m}=obj.locData.getloc(fields,'layer',layers(m),'position',position);
+                            modetxt{m}=['layer' num2str(layers(m))];
+                        end
+                    else
+                        locs{2}=obj.locData.getloc(fields,'position',position,'grouping','grouped');
+                        locs{1}=obj.locData.getloc(fields,'position',position,'grouping','ungrouped');
+                        modetxt{2}='grouped';
+                        modetxt{1}='ungrouped';
+                    end
+                    maxf=0;
+                    for k=1:length(locs)
+                        maxf=max(maxf,max(locs{k}.frame));
+                    end
+                    df=ceil(maxf/p.framewindows);
+                    frames=[1:df:maxf maxf];
+                    for f=1:length(frames)-1
+                        for k=1:length(locs)
+                            indf=locs{k}.frame>=frames(f)&locs{k}.frame<frames(f+1);
+                            sum(indf)
+                            fn=fieldnames(locs{k});
+                            for l=1:length(fn)
+                                loc2{k}.(fn{l})=locs{k}.(fn{l})(indf);
+                            end
+                        end
+                        stats=make_statistics2(loc2,p,false);
+                        for uf=1:length(usefields)
+                            fh=usefields{uf};
+                            if isfield(stats,fh{1})
+                            stath=stats.(fh{1}).(fh{2});
+                            for l=1:length(stath)
+                                ps.(fh{1}).(fh{2}){l}(f)=stath(l);
+                            end
+                            end
+                        end
+                    end
+                    filns=frames(1:end-1);
+                    xl='frame';
             end
+             %plot
+
+            axall=obj.initaxis('all');
+            delete(axall.Children);
+            hold on
+            if strcmp(xl,'filenumber')
+               ax0=obj.initaxis('falloff');
+                hold off
+                plot(ax0,filns,ps.frames.falloff{1})
+                plot(axall,filns,ps.frames.falloff{1}/max(ps.frames.falloff{1}))
+
+                for k=2:length(locs)
+                hold on
+                plot(ax0,filns,ps.frames.falloff{k})
+                plot(axall,filns,ps.frames.falloff{k}/max(ps.frames.falloff{k}))
+                end
+                xlabel('filenumber')
+                ylabel('falloff frame')
+                legend(modetxt)
+            end
+            
+            ax1=obj.initaxis('number of localizations');
+            hold off
+            plot(ax1,filns,ps.photons.Nloc{1})
+            plot(axall,filns,ps.photons.Nloc{1}/max(ps.photons.Nloc{1}))
+            for k=2:length(locs)
+            hold on
+            plot(ax1,filns,ps.photons.Nloc{k})
+            plot(axall,filns,ps.photons.Nloc{k}/max(ps.photons.Nloc{k}))
+            end
+            xlabel(xl)
+            ylabel('number of localizations')
+            legend(modetxt)
+            
+            ax2=obj.initaxis('photons (mu)');
+            hold off
+            plot(ax2,filns,ps.photons.mu{1})
+            plot(axall,filns,ps.photons.mu{1}/max(ps.photons.mu{1}))
+            for k=2:length(locs)
+            hold on
+            plot(ax2,filns,ps.photons.mu{k})
+            plot(axall,filns,ps.photons.mu{k}/max(ps.photons.mu{k}))
+            end
+            xlabel(xl)
+            ylabel('photons (mu)')
+            legend(modetxt)
+
+            ax2b=obj.initaxis('locprec');
+            hold off
+            plot(ax2b,filns,ps.locprec.max{1})
+            hold on
+            plot(ax2b,filns,ps.locprec.rising{1})
+
+            plot(axall,filns,ps.locprec.rising{1}/max(ps.locprec.rising{1}))
+            plot(axall,filns,ps.locprec.max{1}/max(ps.locprec.max{1}))
+            for k=2:length(locs)
+            hold on
+            plot(ax2b,filns,ps.locprec.max{k})
+            plot(ax2b,filns,ps.locprec.rising{k})
+            plot(axall,filns,ps.locprec.rising{k}/max(ps.locprec.rising{k}))
+            plot(axall,filns,ps.locprec.max{k}/max(ps.locprec.max{k}))                   
+
+            end
+            xlabel(xl)
+            ylabel('locprec (nm)')
+            
+            for k=1:length(modetxt)
+                m2{2*k-1}=[modetxt{k} ' max'];
+                m2{2*k}=[modetxt{k} ' rising'];
+            end
+            legend(m2)
+
+            ax3=obj.initaxis('lifetime');
+            hold off
+            plot(ax3,filns,ps.lifetime.mu{1})
+            plot(axall,filns,ps.lifetime.mu{1}/max(ps.lifetime.mu{1}))
+            for k=2:length(locs)
+            hold on
+            plot(ax3,filns,ps.lifetime.mu{k})
+            plot(axall,filns,ps.lifetime.mu{k}/max(ps.lifetime.mu{k}))
+            end
+            xlabel(xl)
+            ylabel('lifetime (mu)')
+            legend(modetxt)
+            
+             ax4=obj.initaxis('BG');
+            hold off
+            plot(ax4,filns,ps.background.mean{1})
+            plot(axall,filns,ps.background.mean{1}/max(ps.background.mean{1}))
+            for k=2:length(locs)
+            hold on
+            plot(ax4,filns,ps.background.mean{k})
+            plot(axall,filns,ps.background.mean{k}/max(ps.background.mean{k}))
+            end
+            xlabel(xl)
+            ylabel('mean background')
+            legend(modetxt)
+
+            if isfield(ps,'PSFxnm')
+                ax4=obj.initaxis('PSF');
+                hold off
+                plot(ax4,filns,ps.PSFxnm.max{1})
+                for k=2:length(locs)
+                hold on
+                plot(ax4,filns,ps.PSFxnm.max{k})
+                end
+                xlabel(xl)
+                ylabel('max PSFx (nm)')
+                legend(modetxt)
+            end
+                    
             out=0;
         end
         function pard=guidef(obj)
@@ -175,9 +239,21 @@ pard.photrange.position=[2,3];
 pard.timefield.object=struct('String',{{'files','frames'}},'Style','popupmenu');
 pard.timefield.position=[4,1];
 
-pard.t1.object=struct('String','Frame time windows','Style','text');
+pard.t1.object=struct('String','# time windows (for frame)','Style','text');
 pard.t1.position=[5,1];
+pard.t1.Width=2;
 pard.framewindows.object=struct('String','10','Style','edit');
-pard.framewindows.position=[5,2];
-pard.plugininfo.name='statistics vs frame/file';
+pard.framewindows.position=[5,3];
+
+pard.plugininfo.name='Statistics vs frame/file';
+pard.plugininfo.description=sprintf(['statsVsTime calculates localization statistics in dependence of the filenumber or of the frame'...
+    'Locstatistics calculates all kind of statistics for localization data.\n'...
+    'photons: N: number of localizations. <P>: mean. r: ratio between number of localizations above 2000 and between 1000 and 2000. mu: decay constant of exponential fit. \n'...
+    'locprec: max, median and position of rising edge. \n'...
+    'lifetime: how many frames does a fluorophore live (from grouping). mu: from exponential fit.\n'...
+    'background: mean\n'...
+    'either znm or PSFxnm.\n'...
+    'locprecznm \n'...
+    'frames: number of lcoalizations vs. frame. To see when localizations drop off.']);
+pard.plugininfo.type='ProcessorPlugin';
 end

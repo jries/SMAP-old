@@ -293,7 +293,7 @@ pard.t0.object=struct('String','FRC resolution. Uses ROI or FoV (if rendered ima
 pard.t0.position=[1,1];
 pard.t0.Width=4;
 
-pard.takeimage.object=struct('String','use all settings from rendered image','Style','checkbox','Value',0);
+pard.takeimage.object=struct('String','use settings from rendered image','Style','checkbox','Value',0);
 pard.takeimage.position=[2,1];
 pard.takeimage.Width=2;
 pard.t1.object=struct('String','otherwise:','Style','text');
@@ -318,4 +318,5 @@ pard.blockassignment.position=[4,4];
 
 pard.plugininfo.name='FRC resolution';
 pard.plugininfo.description='FRC resolution. Uses ROI or FoV (if rendered image is ticked). implementation based on the matlab code provided with: [1]	R. P. J. Nieuwenhuizen, K. A. Lidke, M. Bates, D. L. Puig, D. Gr?nwald, S. Stallinga, and B. Rieger, ?Measuring image resolution in optical nanoscopy.,? Nat Methods, vol. 10, no. 6, pp. 557?562, Jun. 2013.';
+pard.plugininfo.type='ProcessorPlugin';
 end

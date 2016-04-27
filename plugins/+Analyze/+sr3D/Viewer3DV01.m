@@ -81,7 +81,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             if isempty(data)
                 data=d2;
             end
-            data
+            
            %1.up, 2.down, 3.left, 4.right, 5.back, 6.front, 0.reset
             switch data.Character
                 case {'w','8',30}
@@ -243,6 +243,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             locCopy=obj.locData; %maybe not needed
             lo=logical(obj.getPar('sr_layerson'));
             layerson=find(lo);
+            indg=0;indu=0;
             if sum(lo)==0
                 return
             end
@@ -290,6 +291,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 [locg,indg,sortindg]=getlocrot('grouped','inlayerg');
             end
            
+            if sum(indg)==0&&sum(indu)==0
+                return
+            end
             %transparency
             transparency.parameter=p.transparencypar;
             transparency.mode=p.transparencymode.Value;
