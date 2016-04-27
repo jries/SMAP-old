@@ -1,13 +1,14 @@
 classdef PushToFiji<interfaces.DialogProcessor
+    % PushToFiji opens the reconstructed superresolution image in Fiji
     methods
         function obj=PushToFiji(varargin)        
             obj@interfaces.DialogProcessor(varargin{:}) ;
+            obj.showresults=false;
         end
         
         function out=run(obj,p)
             out=[];
             mij=openfiji(obj);
-%             mij.start;
              title=obj.getPar('layer1_').ch_filelist.selection;
             switch p.outputformat.selection
                 case 'rendered image with scalebar'
@@ -83,6 +84,10 @@ pard.outputformat.Width=2;
 pard.exitfiji.object=struct('String','exit Fiji','Style','pushbutton','Callback',@obj.exitfiji);
 pard.exitfiji.position=[4,1];
 pard.exitfiji.Width=1;
+
+pard.plugininfo.name='Open in Fiji';
+pard.plugininfo.type='ProcessorPlugin';
+pard.plugininfo.description='opens the reconstructed superresolution image in Fiji';
 
 end
 
