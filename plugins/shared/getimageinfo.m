@@ -9,6 +9,7 @@ switch ext
     case '.tif' 
         warning('off','MATLAB:imagesci:tiffmexutils:libtiffWarning');
         omeind=strfind(file,'.ome.');
+        isstack=false;
         if ~isempty(omeind)
             isstack=true;
             numberOfFrames=0;
