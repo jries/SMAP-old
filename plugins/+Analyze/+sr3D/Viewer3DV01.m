@@ -1,4 +1,5 @@
 classdef Viewer3DV01<interfaces.DialogProcessor
+    % Viewer3DV01 localization based 3D viewer for superresolution data.
     properties
         axis
         timer
@@ -18,19 +19,18 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             obj.inputParameters=unique(obj.inputParameters);
              obj.showresults=false;
         end
-        function makeGui(obj)
-            makeGui@interfaces.DialogProcessor(obj);
-            h=obj.guihandles;           
-        end
+%         function makeGui(obj)
+%             makeGui@interfaces.DialogProcessor(obj);
+%             h=obj.guihandles;           
+%         end
         
         function showpanel_callback(obj,a,b)
-            if isempty(obj.commandfig)||~isvalid(obj.commandfig)
-                
+            if isempty(obj.commandfig)||~isvalid(obj.commandfig)               
                 fp=getParentFigure(obj.handle);
                 posfig=fp.Position;
                 posfig(1)=posfig(1)+posfig(3);
                 posfig(3:4)=[200,200];
-                obj.commandfig=figure('MenuBar','none','Toolbar','none','Position',posfig);
+                obj.commandfig=figure('MenuBar','none','Toolbar','none','Position',posfig);               
             end
             figure(obj.commandfig);
              h.ptranslation=makepanel([0 0.5 0.5 0.5],'translation','');
@@ -70,6 +70,8 @@ classdef Viewer3DV01<interfaces.DialogProcessor
              axis(obj.axis,'ij');
             
              set(fig,'WindowKeyPressFcn',{@obj.keypress,[]})
+             set(obj.axis,'ButtonDownFcn',{@obj.mousebutton,[]})
+%              set(obj.axis,'PickableParts','all');
              obj.timer=uint64(0);
              obj.redraw
         end
@@ -77,6 +79,11 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         function pard=guidef(obj)
             pard=guidef(obj);
         end
+        function mousebutton(obj,a,data,x)
+            while
+            display(obj.axis.CurrentPoint)
+        end
+        
         function keypress(obj,a,d2,data)
             if isempty(data)
                 data=d2;
@@ -268,8 +275,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 ph.sr_pixrec=p.pixrecset;
             else
                 ph.sr_pixrec=p.sr_pixrec;
-            end  
-            
+            end           
 
             ph.rangey=[p.zmin p.zmax];
             roih=obj.getPar('sr_roihandle');
@@ -303,12 +309,6 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     transparency.parameter=p.transparencypar/ph.sr_pixrec(1)^2*10;
                 case 3 %balls
             end
-%             if p.settransparency
-%             transparency=p.transparency/ph.sr_pixrec(1)^2*10;
-%             else
-%                 transparency=[];
-%             end
-            
             
             ph.sr_axes=[];
             for k=1:p.numberOfLayers
@@ -351,7 +351,10 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 srim=displayerSMAP(layer,pr);
             end
             obj.currentimage=copyfields(obj.currentimage,srim);
-            imagesc(srim.rangex*1000,srim.rangey*1000,srim.image,'Parent',ax);
+            him=imagesc(srim.rangex*1000,srim.rangey*1000,srim.image,'Parent',ax);
+             ax.HitTest='on';
+            ax.PickableParts='all';
+            him.PickableParts='none';
            drawnow limitrate 
            
            
@@ -458,7 +461,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
 
         end
         
-        function rotate_callback(obj,button,b)
+            function rotate_callback(obj,button,b)
             global SMAP_stopnow
             bh=obj.guihandles.rotateb;
             if bh.Value
@@ -586,9 +589,6 @@ end
 end
 
 function pard=guidef(obj)
-% pard.text1.object=struct('String','parameters','Style','text');
-% pard.text1.position=[1,1];
-
 pard.text2.object=struct('String','zmin','Style','text');
 pard.text2.position=[1,1];
 pard.text3.object=struct('String','zmax','Style','text');
@@ -599,9 +599,12 @@ pard.setpixelsize.Width=1.5;
 pard.transparencymode.object=struct('String',{{'maximum intensity', 'transparency','balls'}} ,'Style','popupmenu');
 pard.transparencymode.position=[6,1];
 pard.transparencymode.Width=1.5;
+pard.transparencymode.TooltipString=sprintf('maximum intensity, \n partial transparency (parameter is related to transparency), \n render as ball (parameter is ball diamter in reconstructed pixels');
+
 pard.thetat.object=struct('String','Azimuth angle theta ','Style','pushbutton','Callback',@obj.resetazimuth);
 pard.thetat.position=[3,1];
 pard.thetat.Width=1.1;
+pard.thetat.TooltipString='Push to set azimutal angle to zero';
 
 pard.zmin.object=struct('Style','edit','String','-400'); 
 pard.zmin.position=[1,2.1];
@@ -615,6 +618,9 @@ pard.theta.Width=0.5;
 pard.transparencypar.object=struct('Style','edit','String','1'); 
 pard.transparencypar.position=[6,2.5];
 pard.transparencypar.Width=0.5;
+
+pard.transparencypar.TooltipString=pard.transparencymode.TooltipString;
+
 pard.pixrecset.object=struct('Style','edit','String','5 5'); 
 pard.pixrecset.position=[4,2.1];
 pard.pixrecset.Width=0.5;
@@ -622,42 +628,49 @@ pard.pixrecset.Width=0.5;
 pard.showcontrols.object=struct('String','Show Controls','Style','pushbutton','Callback',@obj.showpanel_callback);
 pard.showcontrols.position=[1,3];
 pard.showcontrols.Width=2;
-% pard.ttranslation.object=struct('String','translate','Style','text');
-% pard.ttranslation.position=[4,3];
-% 
-% pard.trot.object=struct('String','rot (command)','Style','text');
-% pard.trot.position=[4,4];
-% 
-% pard.tzoom.object=struct('String','zoom (alt)','Style','text');
-% pard.tzoom.position=[8,4];
+pard.showcontrols.TooltipString='opens control panel to move, rotate, zoom';
 
 pard.rotateb.object=struct('String','Rotate','Style','togglebutton','Callback',@obj.rotate_callback);
 pard.rotateb.position=[2,3];
+pard.rotateb.TooltipString='Start continuous rotation';
+
 pard.raxis.object=struct('String',{{'horizontal','vertical'}},'Style','popupmenu');%,'Callback',@obj.axischange_callback);
 pard.raxis.position=[3,3];
+pard.raxis.TooltipString='axis for continuous rotation';
+
 pard.danglet.object=struct('String','step','Style','text');
 pard.danglet.position=[3,4];
 pard.danglet.Width=0.5;
+pard.danglet.TooltipString='step in angle between frames of continuous rotation';
+
 pard.dangle.object=struct('String','3','Style','edit');
 pard.dangle.position=[3,4.5];
 pard.dangle.Width=0.5;
+pard.dangle.TooltipString=pard.danglet.TooltipString;
 
 pard.savemovie.object=struct('String','save movie','Style','pushbutton','Callback',@obj.savemovie_callback);
 pard.savemovie.position=[4,3];
+pard.savemovie.TooltipString='Save rotating movie. Uses min - max angle';
+
 pard.tx.object=struct('String','min max angle (deg)','Style','text');
 pard.tx.position=[5,3];
+pard.tx.TooltipString='start and stop angle for saving. Uses step from above';
 pard.anglerange.object=struct('String','0 360','Style','edit');
 pard.anglerange.position=[5,4];
+pard.anglerange.TooltipString=pard.tx.TooltipString;
 
 pard.stereo.object=struct('Style','popupmenu','String',{{'no stereo','anaglyphs (color)','free-view','cross-eyed'}}); 
 pard.stereo.position=[7,1];
 pard.stereo.Width=1;
+pard.stereo.TooltipString='mode for stereo reconstruction. anaglyphs need cyan/red glasses.';
 pard.tx2.object=struct('String','pixel (mm)','Style','text');
 pard.tx2.position=[7,2];
 pard.tx2.Width=.6;
 pard.monitorpmm.object=struct('Style','edit','String','0.3'); 
 pard.monitorpmm.position=[7,2.6];
 pard.monitorpmm.Width=.4;
+pard.monitorpmm.TooltipString='Size of a monitor pixel in nm. Used to calculate eye distance. Adjust freely to optimize 3D reconstruction';
+pard.tx2.TooltipString=pard.monitorpmm.TooltipString;
 
 pard.tx3.object=struct('String','d plane','Style','text');
 pard.tx3.position=[7,3];
@@ -665,6 +678,8 @@ pard.tx3.Width=.6;
 pard.dplanemm.object=struct('Style','edit','String','1000');  
 pard.dplanemm.position=[7,3.6];
 pard.dplanemm.Width=.4;
+pard.dplanemm.TooltipString='Distance to plane of reconstruction. Smaller values result in stronger 3D effect';
+pard.tx3.TooltipString=pard.dplanemm.TooltipString;
 
 pard.tx4.object=struct('String','M two images','Style','text');
 pard.tx4.position=[7,4];
@@ -672,4 +687,14 @@ pard.tx4.Width=.6;
 pard.stereomagnification.object=struct('Style','edit','String','1');  
 pard.stereomagnification.position=[7,4.6];
 pard.stereomagnification.Width=.4;
+pard.stereomagnification.TooltipString='Used only for side-by-side reconstructions of left and right image. You can adjust the magnification with this paramter';
+pard.tx4.TooltipString=pard.stereomagnification.TooltipString;
+
+pard.plugininfo.name='Viewer 3D';
+pard.plugininfo.type='ProcessorPlugin';
+pard.plugininfo.description=sprintf(['localization based 3D viewer for superresolution data.\n'...
+    'Linked to linear Roi. Updates automatically. \n Keyboard shortcuts: '...
+    '\n left (<-, a,4), right (->,d,6), up (uparrow,w,8),down (downarrow,s,2),front (comma,q,7),'...
+    'back (period,e,9), reset (0)\n '...
+    'translate: no modifier, rotate: command/strg, zoom: alt']);
 end
