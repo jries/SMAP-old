@@ -30,7 +30,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 posfig=fp.Position;
                 posfig(1)=posfig(1)+posfig(3);
                 posfig(3:4)=[200,200];
-                obj.commandfig=figure('MenuBar','none','Toolbar','none','Position',posfig);               
+                obj.commandfig=figure('MenuBar','none','ToolBar','none','Position',posfig);               
             end
             figure(obj.commandfig);
              h.ptranslation=makepanel([0 0.5 0.5 0.5],'translation','');
@@ -70,7 +70,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
              axis(obj.axis,'ij');
             
              set(fig,'WindowKeyPressFcn',{@obj.keypress,[]})
-             set(obj.axis,'ButtonDownFcn',{@obj.mousebutton,[]})
+             set(fig,'WindowButtonDownFcn',{@obj.mousebutton,1})
+             fig.BusyAction='cancel';
+             fig.Interruptible='off';
 %              set(obj.axis,'PickableParts','all');
              obj.timer=uint64(0);
              obj.redraw
@@ -79,10 +81,42 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         function pard=guidef(obj)
             pard=guidef(obj);
         end
-        function mousebutton(obj,a,data,x)
-            while
-            display(obj.axis.CurrentPoint)
+        function mousebutton(obj,src,callbackdata,calltype)
+            src.WindowButtonMotionFcn = @motion;
+            src.WindowButtonUpFcn = @up;
+            disteye=100;
+            roih=obj.getPar('sr_roihandle');
+            pos=roih.getPosition;
+            theta=obj.getSingleGuiParameter('theta');
+%             roivec=pos(2,:)-pos(1,:);
+%             phi=atan2(roivec(2),roivec(1));
+%             vold=sph2cart(phi,theta,1);
+             oldpos=obj.axis.CurrentPoint;
+     
+            oldanglex=atan2(oldpos(1,1),disteye);
+            oldangley=atan2(oldpos(1,2),disteye);
+            
+            function motion(src,callbackdata)
+                 posh=obj.axis.CurrentPoint;
+%                 vnew=vold+(posh-oldpos)/disteye;
+                
+                newanglex=atan2(posh(1,1),disteye);
+                newangley=atan2(posh(1,2),disteye);
+                dax=newanglex-oldanglex;
+                day=newangley-oldangley;
+%                 theta=obj.getSingleGuiParameter('theta');
+                thetan=theta+day;
+                obj.setGuiParameters(struct('theta',thetan));
+                posn=rotpos(pos,dax);
+                roih.setPosition(posn);
+            end
+            function up(src,callbackdata)
+                src.WindowButtonMotionFcn='';
+            end
+            
         end
+        
+        
         
         function keypress(obj,a,d2,data)
             if isempty(data)
@@ -91,17 +125,17 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             
            %1.up, 2.down, 3.left, 4.right, 5.back, 6.front, 0.reset
             switch data.Character
-                case {'w','8',30}
+                case {'w','W','8',30}
                     dir=1;
-                case {'s','2',31}
+                case {'s','S','2',31}
                     dir=2;
-                case {'a','4',28}
+                case {'a','A','4',28}
                     dir=3;
-                case {'d','6',29}
+                case {'d','D','6',29}
                     dir=4;
-                case {',','q','7'}
+                case {',','q','Q','7'}
                     dir=5;
-                case {'.','e','9'}
+                case {'.','e','E','9'}
                     dir=6;
                 case {'0'}
                     dir=0;   
@@ -342,9 +376,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     case 2
                         srim=srim1;
                         srim.image=srim1.image+srim2.image;
-                    case 3
+                    case {3,5}
                         srim=assembleSideviews(srim2,srim1,p);
-                    case 4
+                    case {4}
                         srim=assembleSideviews(srim1,srim2,p);
                 end
             else
@@ -355,13 +389,20 @@ classdef Viewer3DV01<interfaces.DialogProcessor
              ax.HitTest='on';
             ax.PickableParts='all';
             him.PickableParts='none';
+            if  p.stereo.Value==5 %goggles
+                axis(ax,'off')
+                ax.Parent.ToolBar='none';
+                ax.Parent.MenuBar='none';
+                ax.Units='normalized';
+                ax.Position=[0.0 0.0 1 1];
+            end
            drawnow limitrate 
            
            
            
             function srim=assembleSideviews(srim1,srim2,p)
                 srim=srim1;
-                mpar=p.stereomagnification;
+                mpar=1/p.stereomagnification;
                 widths=obj.axis.Parent.Position(3);
                 
                 ar=obj.axis.Parent.Position(3)/obj.axis.Parent.Position(4);
@@ -376,7 +417,8 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 eyepx=round(obj.stereopar.eyemm/p.monitorpmm*mpar);
                 mpxh=mpx-eyepx;
                 shalfy=min(shalfimy,mpy);
-                shalfx=min(shalfimx,eyepx);
+                shalfx=min(min(shalfimx,mpxh),eyepx);
+%                 shalfy=100;shalfx=100;
 %                 im1=srim1.composite;
                 rim1=shalfimy-shalfy+1:shalfimy+shalfy;
                 rim2=shalfimx+1-shalfx:shalfimx+shalfx;
@@ -601,10 +643,10 @@ pard.transparencymode.position=[6,1];
 pard.transparencymode.Width=1.5;
 pard.transparencymode.TooltipString=sprintf('maximum intensity, \n partial transparency (parameter is related to transparency), \n render as ball (parameter is ball diamter in reconstructed pixels');
 
-pard.thetat.object=struct('String','Azimuth angle theta ','Style','pushbutton','Callback',@obj.resetazimuth);
+pard.thetat.object=struct('String','Polar angle theta ','Style','pushbutton','Callback',@obj.resetazimuth);
 pard.thetat.position=[3,1];
 pard.thetat.Width=1.1;
-pard.thetat.TooltipString='Push to set azimutal angle to zero';
+pard.thetat.TooltipString='Push to set polar angle to zero';
 
 pard.zmin.object=struct('Style','edit','String','-400'); 
 pard.zmin.position=[1,2.1];
@@ -659,17 +701,17 @@ pard.anglerange.object=struct('String','0 360','Style','edit');
 pard.anglerange.position=[5,4];
 pard.anglerange.TooltipString=pard.tx.TooltipString;
 
-pard.stereo.object=struct('Style','popupmenu','String',{{'no stereo','anaglyphs (color)','free-view','cross-eyed'}}); 
+pard.stereo.object=struct('Style','popupmenu','String',{{'no stereo','anaglyphs (color)','free-view','cross-eyed','goggles'}}); 
 pard.stereo.position=[7,1];
 pard.stereo.Width=1;
 pard.stereo.TooltipString='mode for stereo reconstruction. anaglyphs need cyan/red glasses.';
 pard.tx2.object=struct('String','pixel (mm)','Style','text');
 pard.tx2.position=[7,2];
 pard.tx2.Width=.6;
-pard.monitorpmm.object=struct('Style','edit','String','0.3'); 
+pard.monitorpmm.object=struct('Style','edit','String','0.12'); 
 pard.monitorpmm.position=[7,2.6];
 pard.monitorpmm.Width=.4;
-pard.monitorpmm.TooltipString='Size of a monitor pixel in nm. Used to calculate eye distance. Adjust freely to optimize 3D reconstruction';
+pard.monitorpmm.TooltipString='Size of a monitor pixel in nm. Used to calculate eye distance. Adjust freely to optimize 3D reconstruction. iPhone: 0.12; iMac: 0.3.';
 pard.tx2.TooltipString=pard.monitorpmm.TooltipString;
 
 pard.tx3.object=struct('String','d plane','Style','text');
@@ -684,7 +726,7 @@ pard.tx3.TooltipString=pard.dplanemm.TooltipString;
 pard.tx4.object=struct('String','M two images','Style','text');
 pard.tx4.position=[7,4];
 pard.tx4.Width=.6;
-pard.stereomagnification.object=struct('Style','edit','String','1');  
+pard.stereomagnification.object=struct('Style','edit','String','2');  
 pard.stereomagnification.position=[7,4.6];
 pard.stereomagnification.Width=.4;
 pard.stereomagnification.TooltipString='Used only for side-by-side reconstructions of left and right image. You can adjust the magnification with this paramter';
