@@ -10,8 +10,10 @@ switch ext
         warning('off','MATLAB:imagesci:tiffmexutils:libtiffWarning');
         omeind=strfind(file,'.ome.');
         if ~isempty(omeind)
-            basefile=file(1:omeind-1);
-            %look if there is first file
+            isstack=true;
+            numberOfFrames=0;
+             basefile=file(1:omeind-1);
+                         %look if there is first file
             indu=strfind(basefile,'_');
             if ~isempty(indu) && ~isnan(str2double(basefile(indu(end)+1:end)))
                 basefile2=basefile(1:indu(end)-1);
@@ -19,10 +21,8 @@ switch ext
                     basefile=basefile2;
                 end
             end
-            info.basefile=basefile;
             info.filename=[basefile '.ome.tif'];
-            
-            %if several files: determine size of all of them
+                        %if several files: determine size of all of them
             allfs=dir([basefile '_*.ome.tif']);
             basepath=fileparts(basefile);
             for k=1:length(allfs)
@@ -32,7 +32,25 @@ switch ext
             firstfile= dir(info.filename);
             firstfile.name=[basepath filesep firstfile.name];
             allfiles=[firstfile allfs ];
+        else
+            infoim=imfinfo(file);
+            if length(infoim)>1
+                isstack=true;
+                numberOfFrames=length(infoim);
+                basefile=file;
+                info.filename=file;
+            end
+            allfiles=dir(file);
+            allfiles.name=[fileparts(file) filesep allfiles.name];
+            allfiles(1).numberOfFrames=numberOfFrames;
+        end
+        if isstack
+            info.basefile=basefile;
+            
+            
+
             metaname=[info.basefile '_metadata.txt'];
+            
             if exist(metaname,'file')
                 try
                 info.metafile=metaname;
@@ -48,7 +66,7 @@ switch ext
                 numberOfFrames=str2double(str)+1;
                  allfiles(1).numberOfFrames=numberOfFrames;
                 catch
-                    numberOfFrames=0;
+                    
                 end
             end
 %                 metadata=minfoparsec(minfo,camcalib);
@@ -58,8 +76,15 @@ switch ext
                     th=Tiff(allfiles(k).name,'r');
                     desc=th.getTag('ImageDescription');
                     ind=strfindfast(desc,'SizeT=',1,1);
-                    sts=desc(ind+7:ind+28);
-                    numframes=sscanf(sts,'%i');
+                    if ~isempty(ind)
+                        sts=desc(ind+7:ind+28);
+                        numframes=sscanf(sts,'%i');
+
+                    else
+                        ind=strfindfast(desc,'images=',1,1);
+                        sts=desc(ind+7:ind+28);
+                        numframes=sscanf(sts,'%i');
+                    end
                     numberOfFrames=numberOfFrames+numframes;             
                     allfiles(k).numberOfFrames=numframes;
                 end
