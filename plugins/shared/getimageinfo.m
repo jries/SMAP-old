@@ -39,10 +39,11 @@ switch ext
                 numberOfFrames=length(infoim);
                 basefile=file;
                 info.filename=file;
-            end
+            
             allfiles=dir(file);
             allfiles.name=[fileparts(file) filesep allfiles.name];
             allfiles(1).numberOfFrames=numberOfFrames;
+            end
         end
         if isstack
             info.basefile=basefile;

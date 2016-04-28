@@ -2,6 +2,7 @@ function [image,layers]=TotalRender(locData,pall,filterremove)
 if nargin<3
     filterremove={};
 end
+imax=0;
 for k=1:length(pall)
     p=pall{k};
     if p.layercheck
@@ -15,9 +16,11 @@ for k=1:length(pall)
         rawimage=renderSMAP(locData,p,k);
         locData.setFilter(filterold,k);
         layers(k).images.finalImages=drawerSMAP(rawimage,p);
+        imax=max(imax,layers(k).images.finalImages.imax);
 
     end
 end
 
 image=displayerSMAP(layers,p);
+image.imax=imax;
 end

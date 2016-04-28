@@ -37,6 +37,8 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
             filestruct=struct('info',obj.getPar('cameraSettings'),'average',[],'name',filename,...
                 'number',obj.filenumber,...
                 'numberOfTif',0,'tif',tifs);
+            
+            
                 obj.locData.files.file=filestruct;  
                 
             filelist={obj.locData.files.file(:).name};
@@ -45,6 +47,16 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
             end
             
             obj.fileinfo=obj.getPar('cameraSettings');
+            if isempty(obj.fileinfo.roi)
+                try
+                    mm=imfinfo(finfo.filename);
+                    obj.fileinfo.roi=[0 0 mm(1).Width mm(1).Height];
+                    
+                catch
+                obj.fileinfo.roi=[0 0 512 512];
+                end
+                obj.locData.files.file.info.roi=obj.fileinfo.roi;
+            end
             obj.setPar('currentfileinfo',obj.fileinfo);
 
             obj.setPar('filelist_long',filelist,'String')

@@ -61,8 +61,7 @@ lochere.regroup;
 lochere.filter;
 
  pall=obj.getLayerParameters;
- phere.imaxtoggle=0;
- phere.imax=10000;
+
  phere.sr_axes=[];
  phere.sr_pixrec=pixxy;
  
@@ -71,9 +70,16 @@ for k=1:length(pall)
     pall{k}=copyfields(pall{k},p);
     pall{k}=copyfields(pall{k},phere);
 end
-
+ phere.imaxtoggle=1;
+  phere.imax=1;
 imall=TotalRender(lochere,pall,{'xnm','ynm'});
-
+ phere.imaxtoggle=0;
+ phere.imax=imall.imax;
+ 
+ for k=1:length(pall)
+    pall{k}=copyfields(pall{k},p);
+    pall{k}=copyfields(pall{k},phere);
+end
 sim=size(imall.image);
 ax=obj.initaxis('image');
 
