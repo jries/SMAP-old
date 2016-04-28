@@ -14,8 +14,8 @@ xf=double(loc.xnm);
 yf=double(loc.ynm);
 switch p.datapart.selection
     case 'all'
-    [x,y]=transform.transformCoordinatesFwd(xf,yf);
-    indt=true(size(x));
+    [x,y]=transform.transformCoordinatesInv(xf(indf),yf(indf));
+    indt=true(size(xf));
     case 'target'
         indt=~transform.getRef(xf,yf);
         [x,y]=transform.transformCoordinatesInv(xf(indf&indt),yf(indf&indt));

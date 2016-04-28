@@ -2,8 +2,9 @@ function transform=transform_locs(locData,p)
 
 %get fields
 if p.uselayers
-    [locref,indref]=locData.getloc({'xnm','ynm','frame','filenumber','znm','PSFxnm'},'layer',p.reflayer.Value,'position','roi');
-    [loctarget,indtarget]=locData.getloc({'xnm','ynm','frame','filenumber','znm','PSFxnm'},'layer',p.targetlayer.Value,'position','roi');
+    [locref,xx]=locData.getloc({'xnm','ynm','frame','filenumber','znm','PSFxnm'},'layer',p.reflayer.Value,'position','roi');
+    [loctarget,yy]=locData.getloc({'xnm','ynm','frame','filenumber','znm','PSFxnm'},'layer',p.targetlayer.Value,'position','roi');
+    
 else
     locref=locData.getloc({'xnm','ynm','frame','filenumber','znm','PSFxnm'});
 %     loctarget=locData.getloc('xnm','ynm','frame','filenumber','znm','PSFxnm');
@@ -31,10 +32,12 @@ else
     end
     loctarget=locref;
 end
-
+indtarget=true(size(loctarget.frame));
+indref=true(size(locref.frame));
 locref.x=locref.xnm;
 locref.y=locref.ynm;
-
+loctarget.x=loctarget.xnm;
+loctarget.y=loctarget.ynm;
 loctT=loctarget;
 % file=locData.files.file(p.layer1_.ch_filelist.Value);
 
@@ -46,26 +49,31 @@ switch p.targetpos.selection
         dy=-chipsizenm/2;
         dx=0;
         separator(2)=chipsizenm/2;
-        indtarget=loctarget.ynm<separator(2);
+        indtarget=indtarget&loctarget.ynm<separator(2);
+        indref=indref&locref.ynm>=separator(2);
     case 'bottom'
         dy=chipsizenm/2;
         dx=0;
         separator(2)=chipsizenm/2;
-        indtarget=loctarget.ynm>separator(2);
+        indtarget=indtarget&loctarget.ynm>separator(2);
+        indref=indref&locref.ynm<=separator(2);
     case 'left'
         dx=-chipsizenm/2;
         dy=0;
         separator(1)=chipsizenm/2;
-        indtarget=loctarget.xnm<separator(1);
+        indtarget=indtarget&loctarget.xnm<separator(1);
+        indref=indref&locref.xnm>=separator(1);
     case 'right'
         dx=chipsizenm/2;
         dy=0;
         separator(1)=chipsizenm/2;
         indtarget=loctarget.xnm>separator(1);
+        indtarget=indtarget&loctarget.xnm>separator(1);
+        indref=indref&locref.xnm<=separator(1);
     otherwise
         dx=0;
         dy=0;
-        indtarget=true(size(loctarget.xnm));
+%         indtarget=true(size(loctarget.xnm));
 end
 
 if p.useT
@@ -117,7 +125,7 @@ rangex=[roinm(1) roinm(1)+roinm(3)*facsize(1)];
 rangey=[roinm(2) roinm(2)+roinm(4)*facsize(2)];
 
 
-imr=myhist2(locref.x(~indtarget),locref.y(~indtarget),pixelsizerec,pixelsizerec,rangex,rangey);
+imr=myhist2(locref.x(indref),locref.y(indref),pixelsizerec,pixelsizerec,rangex,rangey);
 imt=myhist2(loctT.x(indtarget),loctT.y(indtarget),pixelsizerec,pixelsizerec,rangex,rangey);
 % 
 % figure(99);
@@ -159,11 +167,11 @@ loctT.y=loctT.y+dycorr;
 transform=interfaces.LocTransform;
 t.type=p.transform.selection;
 t.parameter=p.transformparam;
-transform.findTransform(locref.x(iAa),locref.y(iAa),locref.x(iBa),locref.y(iBa),t)
+transform.findTransform(locref.x(iAa),locref.y(iAa),loctarget.x(iBa),loctarget.y(iBa),t)
 % transform.findTransform(locref.x(iAa),locref.y(iAa),loctT.x(iBa),loctT.y(iBa),t)
 % if p.showresults
     initaxis(p.resultstabgroup,'scatter')
-    [xa, ya]=transform.transformCoordinatesInv((locref.x(iBa)),(locref.y(iBa)));
+    [xa, ya]=transform.transformCoordinatesInv((loctarget.x(iBa)),(loctarget.y(iBa)));
 %      [xa, ya]=transform.transformCoordinatesInv((loctT.x(iBa)),(loctT.y(iBa)));
 %  [xa, ya]=transform.transformCoordinates((loc.x(indr(iBa))),(loc.y(indt(iBa))),'target');
  
@@ -183,31 +191,3 @@ transform.tinfo.targetpos=p.targetpos.selection;
 transform.tinfo.separator=separator;
 transform.tinfo.mirror=mirrorinfo;
 
-% [f,path]=uiputfile(p.Tfile);
-% if f
-%output: transform object
-%     transform.T=mytform;
-%     transform.midpoint=midp;
-%     transform.refpart=p.refpart.value;
-%     transform.refmirror=0; %%not implemented
-%     transform.targetpart=p.targetpart.value;
-%     transform.targetmirror=0; %%not implemented
-%     save([path filesep f],'transform')
-% end
-% 
-% x=loc.x(ig);
-% y=loc.y(ig);
-% f=loc.frame(ig);
-% fn=loc.filenumber(ig);
-
-
-% mx=myquantile(x,0.9
-
-
-% 
-% 
-% function outim=getsrimage(l,pixrec,m)
-% 
-% [outim,dxo,dyo]=myhist2(l.x,l.y,pixrec,pixrec,m.x,m.y);
-%    
-% 

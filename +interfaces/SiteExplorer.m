@@ -165,23 +165,25 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
             
             %update sites
             si=[obj.sites.info];
-            indrename=find([si.filenumber]>fileID);
-            indout=find([si.filenumber]==fileID);
-            for ir=indrename
-                obj.sites(ir).info.filenumber=obj.sites(ir).info.filenumber-1;
+            if ~isempty(si)
+                indrename=find([si.filenumber]>fileID);
+                indout=find([si.filenumber]==fileID);
+                for ir=indrename
+                    obj.sites(ir).info.filenumber=obj.sites(ir).info.filenumber-1;
+                end
+                obj.sites(indout)=[];
+                obj.numberOfSites=obj.numberOfSites-sum(indout);
+
+                %update cells
+                si=[obj.cells.info];
+                indrename=find([si.filenumber]>fileID);
+                indout=find([si.filenumber]==fileID);
+                for ir=indrename
+                    obj.cells(ir).info.filenumber=obj.cells(ir).info.filenumber-1;
+                end
+                obj.cells(indout)=[];
+                obj.numberOfCells=obj.numberOfCells-sum(indout);
             end
-            obj.sites(indout)=[];
-            obj.numberOfSites=obj.numberOfSites-sum(indout);
-            
-            %update cells
-            si=[obj.cells.info];
-            indrename=find([si.filenumber]>fileID);
-            indout=find([si.filenumber]==fileID);
-            for ir=indrename
-                obj.cells(ir).info.filenumber=obj.cells(ir).info.filenumber-1;
-            end
-            obj.cells(indout)=[];
-            obj.numberOfCells=obj.numberOfCells-sum(indout);
         end
         function ID=addCell(obj,cell)
             obj.numberOfCells=obj.numberOfCells+1;
