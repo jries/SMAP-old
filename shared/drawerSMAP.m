@@ -45,15 +45,7 @@ function [imout,norm]=normalizeImage(img,imaxtoggle,imax,imgnorm)
         if imax<0
             imax=1-10^imax;
         end
-%         s=size(img);
-%         di=min(imax,1-imax);
-%         dim=numel(s);
-%         numstat=10;
-%         step=max(1,ceil(dim*di/numstat));
-%         
-%         norm=myquantile(imgnorm(1:step:end),imax);
-%          norm=myquantile(imgnorm(:),imax);
-         norm=myquantilefast(imgnorm(:),imax);
+         norm=myquantilefast(imgnorm(:),imax,30/(1-imax));
         if norm==0
             norm=max(imgnorm(:));
         end

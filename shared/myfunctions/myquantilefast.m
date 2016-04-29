@@ -3,7 +3,7 @@ if isempty(in)
     n=[];
     return
 end
-if nargin>2
+if nargin>2 && maxnum<numel(in)*.75
     dn=ceil(numel(in)/maxnum);
     in2=in(1:dn:end);
 else

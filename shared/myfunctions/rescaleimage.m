@@ -16,7 +16,7 @@ switch length(s)
 
 
           mini=min(imout(:));
-        maxi=myquantile(imout(:),quant);
+        maxi=myquantilefast(imout(:),quant,30/(1-quant));
         if maxi==mini
             maxi=mini+1
         end
@@ -53,7 +53,7 @@ switch length(s)
             imhere=imhere-mini;
             
             imquant=imhere(end/2-end/4:end/2+end/4,end/2-end/4:end/2+end/4);
-            maxi=myquantile(imquant(:),quant);
+            maxi=myquantilefast(imquant(:),quant,30/(1-quant));
             imout(:,:,k)=(imhere/maxi);
          end
          
@@ -81,7 +81,7 @@ switch length(s)
 
 
           mini=min(imout(:));
-        maxi=myquantile(imout(:),quant);
+        maxi=myquantilefast(imout(:),quant,30/(1-quant));
                 if maxi==mini
                     maxi=mini+1
                 end

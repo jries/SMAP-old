@@ -49,7 +49,7 @@ int2=loc.(p.assignfield2.selection);
 % int1=loc.intA1;
 % int2=loc.intB1;
 
-m1=myquantilefast(int1(:),[0.01,0.98]);m2=myquantile(int2(:),[0.01,0.98]);
+m1=myquantilefast(int1(:),[0.01,0.98],1e5);m2=myquantilefast(int2(:),[0.01,0.98],1e5);
 map=max(m1(2), m2(2));mip=min(m1(1),m2(1));
 
 ps=ceil((map-mip)/250);
@@ -93,7 +93,7 @@ imgc3=myhist2(int1(c3),int2(c3),ps,ps,[mip map],[mip map]);
 outrgb(:,:,3)=imgc3;
 outrgb=log(outrgb)+1;
 outrgb(isinf(outrgb))=0;
-imagesc([mip map],[mip map],outrgb/myquantile(outrgb(:),.9995))
+imagesc([mip map],[mip map],outrgb/myquantilefast(outrgb(:),.9995),1e5)
 hold on
 plotboundary
 hold off

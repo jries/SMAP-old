@@ -275,7 +275,7 @@ function his=plothist(v,quantile,dphot,hmin,ax)
 
 for k=1:length(v)
     if length(quantile)==1
-    qq=myquantile(v{k},[1-quantile,quantile]);
+    qq=myquantilefast(v{k},[1-quantile,quantile],30/(1-quantile));
     else
     qq=quantile;
     end
