@@ -363,13 +363,13 @@ classdef Workflow<interfaces.DialogProcessor
                 disp('shift pressed, gui parameters not loaded')
             end
             
-            [f,p]=uigetfile(['plugins' filesep 'workflows' filesep '*.mat']);
+            [f,p]=uigetfile(['settings' filesep 'workflows' filesep '*.mat']);
             if f
                 obj.load([p f],[],writeParameters)
             end
         end
         function save_callback(obj,a,b)
-            [f,p]=uiputfile(['plugins' filesep 'workflows' filesep '*.mat']);
+            [f,p]=uiputfile(['settings' filesep 'workflows' filesep '*.mat']);
             if f
                 obj.save([p f])
             end

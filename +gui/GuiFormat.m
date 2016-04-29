@@ -342,6 +342,8 @@ else
 pos=action.IntersectionPoint*1000;
 obj.setPar('sr_pos',pos);
 obj.updateFormatParameters;
+hfig=obj.getPar('sr_figurehandle');
+figure(hfig);
 notify(obj.P,'sr_render')
 end
 end

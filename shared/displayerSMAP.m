@@ -84,7 +84,7 @@ end
         set(p.sr_axes,'YDir','reverse')
         p.sr_axes.HitTest='on';
         p.sr_axes.PickableParts='all';
-        axes(p.sr_axes) %bring to forground
+%         axes(p.sr_axes) %bring to forground
         imout.handle=sr_imagehandle;
         drawnow limitrate nocallbacks
     else

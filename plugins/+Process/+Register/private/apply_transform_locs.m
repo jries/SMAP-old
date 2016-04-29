@@ -1,9 +1,14 @@
 function loco=apply_transform_locs(loc,transform,file,p)
 if nargin<4||~isfield(p,'datapart') || isempty(p)
-    p.datapart.selection='all';
+    p.datapart.selection='all (T->R)';
 end
-loco.xnm_preT=loc.xnm;
-loco.ynm_preT=loc.ynm;
+if isfield(loc,'xnm_preT')
+    loco.xnm_preT=loc.xnm_preT;
+    loco.ynm_preT=loc.ynm_preT;
+else
+    loco.xnm_preT=loc.xnm;
+    loco.ynm_preT=loc.ynm;
+end
 loco.xnm=loc.xnm;
 loco.ynm=loc.ynm;
 loco.frame=loc.frame;
@@ -13,9 +18,12 @@ indf=loc.filenumber==file.number;
 xf=double(loc.xnm);
 yf=double(loc.ynm);
 switch p.datapart.selection
-    case 'all'
-    [x,y]=transform.transformCoordinatesInv(xf(indf),yf(indf));
-    indt=true(size(xf));
+    case 'all (T->R)'
+        [x,y]=transform.transformCoordinatesInv(xf(indf),yf(indf));
+        indt=true(size(xf));
+    case 'all (R->T)'
+        [x,y]=transform.transformCoordinatesFwd(xf(indf),yf(indf));
+        indt=true(size(xf));    
     case 'target'
         indt=~transform.getRef(xf,yf);
         [x,y]=transform.transformCoordinatesInv(xf(indf&indt),yf(indf&indt));

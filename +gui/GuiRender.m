@@ -14,7 +14,7 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             h.tab_layer1=uitab(h.layertab,'Title',['Layer' num2str(1)]);
             h.tab_addlayer=uitab(h.layertab,'Title','+');   
             h.reconstruct=uicontrol(obj.handle,'Units','pixels','Position',[15 17,150,35],'String','Reconstruct','Tag','reconstructbutton','FontSize',obj.guiPar.fontsize*1.5,...
-                'Callback',@obj.render_notify);
+                'Callback',@obj.render_callback);
             
             %formatGui
             hmain=obj.getPar('mainGuihandle');
@@ -115,7 +115,11 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             notify(obj.P,'sr_display')
             obj.status('draw done')
         end
-        
+        function render_callback(obj,object,eventdata)
+            hfig=obj.getPar('sr_figurehandle');
+            figure(hfig);
+            obj.render_notify;
+        end
         function render_notify(obj,object,eventdata)
             obj.status('render')  
 %             drawnow

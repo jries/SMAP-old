@@ -4,10 +4,10 @@ if isempty(obj.locData.loc)
 end
 obj.locData.regroup;
 % obj.locData.filter;
-fmax=max(obj.locData.loc.frame);
+% fmax=max(obj.locData.loc.frame);
 %this calls histogram maker etc
-obj.setPar('frame_max',fmax);
-obj.setPar('frame_min',1);
+% obj.setPar('frame_max',fmax);
+% obj.setPar('frame_min',1);
 
 fl={obj.locData.files.file(:).name};
 for k=1:length(fl)
