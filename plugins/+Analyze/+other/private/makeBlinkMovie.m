@@ -82,7 +82,7 @@ aviobj=VideoWriter(outfile,p.outputFormat.selection);
 
 
 % aviobj.Quality=100;
-aviobj.FrameRate=20;
+aviobj.FrameRate=p.framerate;
 open(aviobj);
 
 % tifstack=zeros(ssr(1),ssr(2)*2,3,length(frames));
