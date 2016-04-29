@@ -137,7 +137,9 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
 end
 function wfinfo_callback(a,b,obj)
 obj.mainworkflow.graph;
+if ~isempty(obj.mainworkflow.info.description)
 msgbox(obj.mainworkflow.info.description,obj.mainworkflow.info.name)
+end
     
 %  htxt=uicontrol(hp,'Style','text','Units','normalized','Position',[0,0,1,1],...
 %      'FontSize',obj.guiPar.fontsize,'HorizontalAlignment','left');
