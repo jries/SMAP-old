@@ -25,8 +25,10 @@ tnum=p.renderp1.Value;
  end
  
 srec=round(p.sr_sizeRecPix);
+rangex=rangex+pixsize*1000/2;rangey=rangey+pixsize*1000/2;
 rangexpix=rangex/1000/pixsize;rangeypix=rangey/1000/pixsize;
 rpixrx=[floor(rangexpix(1)) ceil(rangexpix(2))];rpixry=[floor(rangeypix(1)) ceil(rangeypix(2))];
+% rpixrx=[round(rangexpix(1)) round(rangexpix(2))];rpixry=[round(rangeypix(1)) round(rangeypix(2))];
 position=[rpixrx(1),rpixrx(2),rpixry(1),rpixry(2)];
 
 positionc=position;

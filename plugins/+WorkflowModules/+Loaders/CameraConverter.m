@@ -108,6 +108,7 @@ switch ext
         obj.setGuiParameters(par);
         obj.updateGui;
 end
+obj.readmetadata;
 end
 
 % function parseMetatdata(obj)
