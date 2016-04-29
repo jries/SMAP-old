@@ -71,7 +71,10 @@ classdef SEEvaluationProcessor<interfaces.GuiModuleInterface & interfaces.LocDat
             fields=varargin{1};
             fields={fields{:} ,'xnm','ynm','filenumber'};
             parameters=varargin(2:end);
-            
+            inds=find(strcmp(parameters,'size'));
+            if ~isempty(inds)
+                parameters(inds:inds+1)=[];
+            end
             p=roiparser(varargin); 
                 sx=obj.site.image.rangex;
                 fovsize=(sx(2)-sx(1))*1000/2;             

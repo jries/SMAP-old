@@ -117,7 +117,7 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
         end
         function render_callback(obj,object,eventdata)
             hfig=obj.getPar('sr_figurehandle');
-            figure(hfig);
+             figure(hfig);
             obj.render_notify;
         end
         function render_notify(obj,object,eventdata)
