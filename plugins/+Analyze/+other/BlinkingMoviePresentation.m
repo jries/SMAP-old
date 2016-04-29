@@ -44,9 +44,15 @@ pard.frame_min.position=[3,2];
 pard.removedark.object=struct('Style','checkbox','String','remove dark frames','Value',1);
 pard.removedark.position=[4,1];
 %sum
+pard.textc.object=struct('Style','text','String','frame rate fps');
+pard.textc.position=[5,1];
+
+pard.framerate.object=struct('Style','edit','String','20');
+pard.framerate.position=[5,2];
+
 
 pard.outputFormat.object=struct('Style','popupmenu','String',{{'MPEG-4','Uncompressed AVI','Motion JPEG 2000'}});
-pard.outputFormat.position=[5,1];
+pard.outputFormat.position=[6,1];
 pard.outputFormat.Width=2;
 pard.syncParameters={{'filelist_short','dataselect',{'String'}}};
 pard.plugininfo.name='BlinkingMoviePresentation';
