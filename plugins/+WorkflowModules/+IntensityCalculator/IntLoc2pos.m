@@ -15,7 +15,7 @@ classdef IntLoc2pos<interfaces.WorkflowModule
         end
         function prerun(obj,data,p)
             global intLoc2pos_ind2 intLoc2pos_locframes;
-            intLoc2pos_ind2=0;
+            intLoc2pos_ind2=1;
             
             p=obj.getAllParameters;
             load(p.Tfile);
@@ -65,17 +65,21 @@ classdef IntLoc2pos<interfaces.WorkflowModule
                 while ind1>0&&intLoc2pos_locframes(ind1)<frame && ind1<lf;
                     ind1=ind1+1;
                 end
-                ind1=min(ind1+1,lf);
+                ind1=min(ind1,lf);
                 intLoc2pos_ind2=ind1;
                 if ~intLoc2pos_locframes(intLoc2pos_ind2)==frame %no localizatiaon in frame
                       datout=data;%.copy;
                      datout.data.x=[];%.set(maxout);
                     return
                 end
-                while intLoc2pos_ind2<lf&&intLoc2pos_locframes(intLoc2pos_ind2)==frame;
+                while intLoc2pos_ind2<=lf&&intLoc2pos_locframes(intLoc2pos_ind2)==frame;
                     intLoc2pos_ind2=intLoc2pos_ind2+1;
                 end
-                
+                intLoc2pos_ind2=intLoc2pos_ind2-1;
+                if (intLoc2pos_ind2-ind1+1)~=(sum(obj.locs.frame==frame))
+                    disp((intLoc2pos_ind2-ind1+1)-(sum(obj.locs.frame==frame)))
+                    disp(frame)
+                end
                [maxposA,maxposAR]=nm2pixLoc(obj.locs.xA(ind1:intLoc2pos_ind2),obj.locs.yA(ind1:intLoc2pos_ind2),obj.filestruc.info.pixsize*1000,obj.filestruc.info.roi);
                [maxposB,maxposBR]=nm2pixLoc(obj.locs.xB(ind1:intLoc2pos_ind2),obj.locs.yB(ind1:intLoc2pos_ind2),obj.filestruc.info.pixsize*1000,obj.filestruc.info.roi);  
                maxout.x=vertcat(maxposAR.x,maxposBR.x);
@@ -88,6 +92,9 @@ classdef IntLoc2pos<interfaces.WorkflowModule
                datout=data;%.copy;
                datout.data=maxout;%.set(maxout);
 %                obj.output(datout); 
+                if intLoc2pos_ind2==lf
+                    datout.eof=true;
+                end
         end
     end
 end
