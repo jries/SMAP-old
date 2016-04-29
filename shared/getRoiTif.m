@@ -1,6 +1,10 @@
 function roi=getRoiTif(file)
 p=fileparts(file);
 pm=[p filesep 'metadata.txt'];
+if ~exist(pm,'file')
+    mf=dir([p filesep '*metadata.txt']);
+    pm=[p filesep mf(1).name];
+end
 if exist(pm,'file')
     minfo=fileread(pm);
     searchstr='ROI":';
@@ -17,6 +21,7 @@ if exist(pm,'file')
 else
     roi=[0 0 512 512];
 end
+roi
     
     
 function txt=getval(minfo,index,sep1,sep2)

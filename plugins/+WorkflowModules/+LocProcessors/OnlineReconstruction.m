@@ -74,7 +74,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
         end
         function output=run(obj,data,p)
             output=[];
-            if obj.getPar('loc_preview')||~p.update_check
+            if obj.getPar('loc_preview')||~obj.getSingleGuiParameter('update_check')
                 return
             end
             locs=data.data;%get;
@@ -86,7 +86,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
                 locdat.loc=fitloc2locdata(obj,locs,indin);
                 obj.locDatatemp.addLocData(locdat);
 
-                if toc(obj.localtimervalue)>p.loc_updatetime||data.eof 
+                if toc(obj.localtimervalue)>obj.getSingleGuiParameter('loc_updatetime')||data.eof 
                     obj.locData.addLocData(obj.locDatatemp); %Careful: does this add it many time? need to intialize obj.locDatatemp?
                    initGuiAfterLoad(obj);  %resets the view always! 
                     notify(obj.P,'sr_render')
