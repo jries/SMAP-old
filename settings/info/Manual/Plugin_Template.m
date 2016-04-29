@@ -47,7 +47,7 @@ classdef Plugin_Template<interfaces.DialogProcessor
             
             out=[]; %no output
             out.clipboard={'results1',3,'text1'}; % out.clipboard is copied to clipboard, separated by tabs.
-            
+            out.error='this error occured because you did something wrong'; %if an error occoured, you can output it in the status bar with this command.
         end
         function pard=guidef(obj)
            %pard structure can be =[]; All fields are optional.

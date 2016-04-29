@@ -398,7 +398,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
        
        function status(obj,txt)
            %set the status in the status line
-           numchar=60;
+           numchar=65;
            if length(txt)>numchar
                txt2{1}=txt(1:numchar);
                txt2{2}=txt(numchar+1:end);

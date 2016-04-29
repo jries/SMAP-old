@@ -88,7 +88,8 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             h.status=uicontrol(handle,'Style','text','Units','normalized',...
                            'String','status','Position',[0 0 .8 0.035]);
             h.status.Units='pixels';
-            h.status.Position(4)=28;
+            h.status.Position(4)=32;
+            h.status.Position(2)=6;
             obj.addSynchronization('status',h.status,{'String'})             
 
             %Plugins
@@ -106,8 +107,8 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             gfile.makeGui();
             obj.children.guiFile=gfile;
             
-                        %localize
-                        obj.status('init Localize')
+            %localize
+            obj.status('init Localize')
             h.localizepanel=uipanel(h.tab_loc,'units','pixel','Position',obj.guiPar.tabsize1);
             gloc=gui.GuiLocalize(h.localizepanel,obj.P);
             gloc.attachLocData(obj.locData);

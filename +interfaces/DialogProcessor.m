@@ -124,9 +124,12 @@ if obj.history
     obj.addhistory;
 end
 obj.resultshandle.Visible=onoff(p.showresults);
-obj.status([class(obj) ' finished'])
+if ~isfield(results,'error')||isempty(results.error)
+    obj.status([class(obj) ' finished'])
+else
+    obj.status(['ERROR in ' class(obj) '. ' results.error])
 end
-
+end
 
 
 function showresults_callback(object,data,obj)

@@ -1,4 +1,6 @@
 classdef ApplyTransform<interfaces.DialogProcessor
+    % ApplyTransform applies transformation to localizations or associated
+    % Tif images
     methods
         function obj=ApplyTransform(varargin)        
             obj@interfaces.DialogProcessor(varargin{:});
@@ -103,4 +105,6 @@ pard.loadbutton.position=[7,4];
 
 pard.syncParameters={{'filelist_short','dataselect',{'String'}}};
 
+pard.plugininfo.description='ApplyTransform applies transformation to localizations or associated Tif images';
+pard.plugininfo.name='Apply Transformation';
 end

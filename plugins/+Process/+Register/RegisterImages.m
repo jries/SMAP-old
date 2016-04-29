@@ -6,6 +6,7 @@ classdef RegisterImages<interfaces.DialogProcessor
         function obj=RegisterImages(varargin)        
             obj@interfaces.DialogProcessor(varargin{:});
             obj.inputParameters={'sr_pixrec'};
+            obj.showresults=true;
         end
         
         function out=run(obj,p)
@@ -13,8 +14,17 @@ classdef RegisterImages<interfaces.DialogProcessor
             pixrec=p.sr_pixrec;
             targetlayer=p.targetselect.Value;
             reflayer=p.refselect.Value;
+            ll=length(obj.locData.layer);
+            if targetlayer>ll||reflayer>ll
+                out.error=('selected layer does not exist or has not been calculated');
+                return;
+            end
             imref=sum(obj.locData.layer(reflayer).images.finalImages.image,3);
             imtarget=sum(obj.locData.layer(targetlayer).images.finalImages.image,3);
+            if sum(imref(:))==0||sum(imtarget(:))==0
+                out.error=('reconstructed images are empty.');
+                return;
+            end
             initaxis(p.resultstabgroup,'correlation');
              [dy,dx]=getShiftCorr(imref,imtarget,1);
              dx=dx*pixrec;
@@ -65,15 +75,6 @@ pard.targetselect.load=false;
 pard.refselect.object=struct('Style','popupmenu','String','layer1|layer2|layer3|layer4|layer5');
 pard.refselect.position=[2,2];
 pard.refselect.load=false;
-% pard.targetpart.object=struct('Style','popupmenu','String','all|left|right|top|bottom');
-% pard.targetpart.position=[3,1];
-% pard.refpart.object=struct('Style','popupmenu','String','all|left|right|top|bottom');
-% pard.refpart.position=[3,2];
-
-% pard.targetmirror.object=struct('Style','popupmenu','String','no mirror|left-right|up-down');
-% pard.targetmirror.position=[4,1];
-% pard.refmirror.object=struct('Style','popupmenu','String','no mirror|left-right|up-down');
-% pard.refmirror.position=[4,2];
 
 pard.Tfile.object=struct('Style','edit','String','settings/temp/temp_T.mat');
 pard.Tfile.position=[8,1];
@@ -81,10 +82,9 @@ pard.Tfile.Width=3;
 
 pard.savebutton.object=struct('Style','pushbutton','String','save T','Callback',@obj.savebutton);
 pard.savebutton.position=[8,4];
-% 
-% pard.registeronlocs.object=struct('Style','checkbox','String','register locs');
-% pard.registeronlocs.position=[1,3.5];
 
-% pard.transform.object=struct('Style','popupmenu','String','translate|affine|LWM');
-% pard.transform.position=[2,3.5];
+pard.plugininfo.description=sprintf(['Register Images calculates shift between rendered images in two layers and writes this shift into the channel tab of the target layer.'...
+    '\n Adjust pixel size and FoV so that the shift can be calculated from the reconstructed image.'...
+    '\n Transformation can also be saved for later use with Apply Transform']);
+pard.plugininfo.name='Register Images';
 end
