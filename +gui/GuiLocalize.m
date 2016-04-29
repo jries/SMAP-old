@@ -10,11 +10,11 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
         end
         function makeGui(obj)
             h.loctab=uitabgroup(obj.handle,'Position',[0 .1 1 .9]);
-
-            h.frame=uitab(h.loctab,'Title','Input Image');
-            h.filter=uitab(h.loctab,'Title','Peak Finder');
-            h.fit=uitab(h.loctab,'Title','Fitter');
-            h.locprocess=uitab(h.loctab,'Title','Localizations');
+% 
+%             h.frame=uitab(h.loctab,'Title','Input Image');
+%             h.filter=uitab(h.loctab,'Title','Peak Finder');
+%             h.fit=uitab(h.loctab,'Title','Fitter');
+%             h.locprocess=uitab(h.loctab,'Title','Localizations');
 %             h.workflow=uitab(h.loctab,'Title','Workflow');
             
             h.previewbutton=uicontrol(obj.handle,'Style','pushbutton','String','Preview','Position',[10 2, 70 obj.guiPar.FieldHeight*1.2],...
@@ -42,17 +42,45 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             tabsizeh=obj.guiPar.tabsize2;
             tabsizeh(4)=tabsizeh(4)-35;
 %             tabsizeh(2)=tabsizeh(2)+30;
-            h.framepanel=uipanel(h.frame,'Unit','pixels','Position',tabsizeh); 
-            h.filterpanel=uipanel(h.filter,'Unit','pixels','Position',tabsizeh);
-            h.fitpanel=uipanel(h.fit,'Unit','pixels','Position',tabsizeh); 
-            h.locpanel=uipanel(h.locprocess,'Unit','pixels','Position',tabsizeh); 
-            obj.guihandles=h;
+%             h.framepanel=uipanel(h.frame,'Unit','pixels','Position',tabsizeh); 
+%             h.filterpanel=uipanel(h.filter,'Unit','pixels','Position',tabsizeh);
+%             h.fitpanel=uipanel(h.fit,'Unit','pixels','Position',tabsizeh); 
+%             h.locpanel=uipanel(h.locprocess,'Unit','pixels','Position',tabsizeh); 
+           
             
-            replacestruct={{'hframe',h.framepanel},{'hfilter',h.filterpanel},{'hfit',h.fitpanel},{'hloc',h.locpanel}};
+            
             obj.createGlobalSetting('mainLocalizeWFFile','Directories','Description file for fitting workflow, e.g. settings/fit_tif_wavelet.txt',struct('Style','file','String','settings/fit_tif_wavelet.txt'))
 %             settingsfile='settings/mainSMLMLocalizeWF.txt';
             settingsfile=obj.getGlobalSetting('mainLocalizeWFFile');
+            
+            par=readstruct(settingsfile);
+            if ~isfield(par,'tab')
+                par.tab=struct('hframe',struct('name','Input Image'),'hfilter',struct('name','Peak Finder'),'hfit',struct('name','Fitter'),'hloc',struct('name','Localizations'));
+            end
+            tabtags=fieldnames(par.tab);
+            if isempty(tabtags)
+                tabtags={'empty'};
+                par.empty.name='empty';
+            end
+            if isfield(par,'workflowinfo')
+                wfinfo=par.workflowinfo;
+            else
+                wfinfo='';
+            end
+            
+            %create tabs
+            for k=1:length(tabtags)
+                h.(tabtags{k})=uitab(h.loctab,'Title',par.tab.(tabtags{k}).name);
+                h.([tabtags{k} 'panel'])=uipanel(h.(tabtags{k}),'Unit','pixels','Position',tabsizeh); 
+                replacestruct{k}={tabtags{k},h.([tabtags{k} 'panel'])};
+            end
+            firstpanel=h.([tabtags{1} 'panel']);
+             obj.guihandles=h;
+             
+%             replacestruct={{'hframe',h.framepanel},{'hfilter',h.filterpanel},{'hfit',h.fitpanel},{'hloc',h.locpanel}};
+
             par=readstruct(settingsfile,replacestruct);
+            par=myrmfield(par,{'workflowinfo','tab'});
             if isempty(par)
                 warndlg('cannot find settings file for fit workflow. Please set in menu SMAP/Preferences')
             end
@@ -63,8 +91,13 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             mainworkflow.setGuiAppearence(obj.guiPar)
             mainworkflow.setGuiAppearence(par.all)
             mainworkflow.processorgui=false;
+
+%             mainworkflow.pluginpath=wffile;
             mainworkflow.makeGui;
             mainworkflow.load(wffile,par);
+            if ~isempty(wfinfo)
+                mainworkflow.description=wfinfo;
+            end
             obj.mainworkflow=mainworkflow; 
             obj.children.mainworkflow=mainworkflow;
             
@@ -74,15 +107,13 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             m1 = uimenu(c,'Label','remove','Callback',{@menu_callback,obj});
             m3 = uimenu(c,'Label','add workflow','Callback',{@menu_callback,obj});
             
-            
-            
             previewframe_callback(0,0,obj)
             obj.addSynchronization('loc_fileinfo',[],[],@obj.update_slider)
             
-            h.batchprocessor=uicontrol(h.framepanel,'Style','pushbutton','String','Batch Processor','Position',[0, 0, 150 obj.guiPar.FieldHeight*1],...
+            h.batchprocessor=uicontrol(firstpanel,'Style','pushbutton','String','Batch Processor','Position',[0, 0, 150 obj.guiPar.FieldHeight*1],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@batchprocessor_callback,obj});
             h.batchprocessor.TooltipString=sprintf('Open the batch processor GUI to fit many files automatically with pre-defined settings.');
-            h.wfinfo=uicontrol(h.framepanel,'Style','pushbutton','String','Workflow Info','Position',[345, 0, 150 obj.guiPar.FieldHeight*1],...
+            h.wfinfo=uicontrol(firstpanel,'Style','pushbutton','String','Workflow Info','Position',[345, 0, 150 obj.guiPar.FieldHeight*1],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@wfinfo_callback,obj});
             h.wfinfo.TooltipString=sprintf('Show information about current workflow.');            
         end
