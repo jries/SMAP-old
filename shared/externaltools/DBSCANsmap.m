@@ -99,18 +99,24 @@ end
 %% Perform DBSCAN analysis
 eps = Eps;
  x=[[1:m]' x];
+ xs=sortrows(x,2);
 type=zeros(1,m);
 no=1;
 touched=false(1,m);
 countershowo=0;
 class=zeros(1,m);
+inds1=1;
+timerv=tic;
 for i=1:m
     if touched(i)==0;
-       ob=x(i,:);
-       D=dist2(ob(2:n),x(:,2:n));
+       xph=xs(i,2);
+       inds1=find(xs(inds1:end,2)>=xph-eps,1,'first')+inds1-1;
+       inds2=find(xs(inds1:end,2)>=xph+eps,1,'first')+inds1-1;
+       ob=xs(i,:);
+       [indi,nind]=dist2(ob(2:n),xs(:,2:n),inds1,inds2,Eps);
 %        ind=find(D<=Eps);
-       indi=D<=Eps;
-       nind=sum(indi);
+%        indi=D<=Eps;
+%        nind=sum(indi);
     
        if nind>1 && nind<k+1       
           type(i)=0;
@@ -129,13 +135,27 @@ for i=1:m
           while nind>0%~isempty(ind)
 %                 ob=x(ind(1),:);
                 indi1=find(indi,1,'first');
-                ob=x(indi1,:);
+                if isempty(indi1)
+                    nind=0;
+                    continue
+                end
+                ob=xs(indi1,:);
                 touched(indi1)=1;
                 indi(indi1)=false;
-                D=dist2(ob(2:n),x(:,2:n));
+                
+%                 inds3=inds2;
+%                 inds1b=inds2;
+                while(touched(inds1))&&inds1<m
+                    inds1=inds1+1;
+                end
+                while(xs(inds2,2)<ob(2)+eps)&&inds2<m
+                    inds2=inds2+1;
+                end
+%                 inds3=find(xs(inds2:end,2)>=ob(2)+eps,1,'first')+inds2-1;
+                [ieps,neps]=dist2(ob(2:n),xs(:,2:n),inds1,inds2,Eps);
 %                 i1=find(D<=Eps);
-                ieps=(D<=Eps);
-                neps=sum(ieps);
+%                 ieps=(D<=Eps);
+%                 neps=sum(ieps);
      
                 if neps>1
                     
@@ -147,10 +167,11 @@ for i=1:m
                    end
 
                    it=ieps&~touched;
+                   
                    indi(it)=true;
                    nind=sum(indi);
 %                     ind=[ind find(it)];
-                   class(it)=no;
+%                    class(it)=no;
                    touched(it)=true;
 %                    for ix=1:length(i1)
 %                        if touched(i1(ix))==0
@@ -167,14 +188,17 @@ for i=1:m
           no=no+1; 
        end
     end
-  countershow=sum(touched);
-   if countershow-countershowo>1000
+  
+   if toc(timerv)>10
+       countershow=sum(touched);
        setstatus(['DBSCAN: clustering localization ' num2str(countershow) ' of ' num2str(m)]);
        drawnow;
-       countershowo=countershow;
+%        countershowo=countershow;
+       timerv=tic;
    end
 end
-
+[~,sortback]=sort(xs(:,1));
+class=class(sortback);
 i1=find(class==0);
 class(i1)=-1;
 type(i1)=-1;
@@ -223,7 +247,7 @@ if plotClusters && max(class) == -1
 elseif plotClusters
     clustercols = lines(max(class));
 
-    scatter (DBSCANmat.Noise(:,2), DBSCANmat.Noise(:,1), 1, [0.2 0.2 0.2],'Parent',plotaxis);
+    scatter (DBSCANmat.Noise(:,2), DBSCANmat.Noise(:,1), 1, [0.7 0.7 0.7],'Parent',plotaxis);
     plotaxis.NextPlot='add';
     for ii=1:max(class)
         scatter(DBSCANmat.Cluster(ii).Pos(:,2), DBSCANmat.Cluster(ii).Pos(:,1), 1, clustercols(ii,:),'Parent',plotaxis);
@@ -236,7 +260,7 @@ end
 
 
 %% Sub-functions
-function [D]=dist2(i,x)
+function [indi,N]=dist2(i,x,ind1,ind2,eps)
 
 % function: [D]=dist2(i,x)
 %
@@ -244,7 +268,15 @@ function [D]=dist2(i,x)
 
 % [m,n]=size(x);
 % Do=sqrt(sum((((ones(m,1)*i)-x).^2)'));
-D=sqrt(((x(:,1)-i(1)).^2+(x(:,2)-i(2)).^2))';
+indi=false(1,length(x));
+
+ r=ind1:ind2;
+D=sqrt(((x(r,1)-i(1)).^2+(x(r,2)-i(2)).^2))<=eps;
+
+N=sum(D);
+indi(r)=D;
+
+
 
 % if n==1
 %    D=abs((ones(m,1)*i-x))';
