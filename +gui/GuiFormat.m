@@ -283,6 +283,7 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
 %                     linetexth=text(min(pos(:,1)),min(pos(:,2)),[ num2str(w*1000,'%4.0f') ' x ' num2str(l*1000,'%4.0f') ' nm'],'Color','w','FontSize',16,'VerticalAlignment','bottom','HitTest','off','Parent',ax);   
             end
             obj.setPar('sr_roiposition',pos);
+            obj.roiposition=pos;
         end
     end
 end

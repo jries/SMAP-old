@@ -35,9 +35,22 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             end
             obj.inputParameters={'numberOfLayers','filtertable','layer','group_dx','group_dt'};
         end
-        function setloc(obj,name, value)
+        function setloc(obj,name, value,indused)
             %Add a field to all localizations. setloc(field, value) sets obj.loc.(name)=value
-            obj.loc.(name)=real(value);
+            if nargin<4
+                obj.loc.(name)=real(value);
+            else %only part of locs are calculated. Fill rest with zeros. Can be grouped or ungrouped.
+                nu=length(obj.loc.frame);
+%                 ng=length(obj.grouploc.frame);
+                if length(indused)==nu %ungrouped data
+                    v=zeros(nu,1,'single');
+                    v(indused)=value;
+                else
+                    v=obj.grouped2ungrouped(indused,value);
+                end
+                obj.loc.(name)=real(v);
+                obj.regroup;                
+            end
         end
         function addloc(obj,name,value)
             %addloc(field, value) Appends localizations to exisiting field, sets localizations

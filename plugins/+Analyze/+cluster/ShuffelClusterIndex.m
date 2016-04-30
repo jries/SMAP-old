@@ -11,11 +11,14 @@ classdef ShuffelClusterIndex<interfaces.DialogProcessor
         function out=run(obj,p)
             out=[];
             clusterindex=obj.locData.loc.clusterindex;
+            posind=clusterindex>0;
+            
             mi=max(clusterindex);
             n=rand(mi,1);
             [~,indsort]=sort(n);
             indsort=vertcat(1,indsort);
-            clusterindexnew = indsort(clusterindex+1)-1;
+            clusterindexnew=zeros(size(clusterindex),'single');
+            clusterindexnew(posind) = indsort(clusterindex(posind));
             obj.locData.loc.clusterindex=clusterindexnew;
             obj.locData.regroup;
         end

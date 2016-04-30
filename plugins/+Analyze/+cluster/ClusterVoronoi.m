@@ -23,7 +23,7 @@ end
 function out=vrender(obj,p)
 out=[];
 warning('off','MATLAB:scatteredInterpolant:DupPtsAvValuesWarnId')
-locs=obj.locData.getloc({'xnm','ynm','phot','frame','znm','ingrouped','inungrouped'},'layer',find(p.sr_layerson),'position','roi');
+[locs,indloc]=obj.locData.getloc({'xnm','ynm','phot','frame','znm','ingrouped','inungrouped'},'layer',find(p.sr_layerson),'position','roi');
 A=zeros(length(locs.xnm),9);
 
 A(:,2)=locs.frame;
@@ -38,16 +38,8 @@ Area = Vor{1};
 ic = Vor{5};
 Areacorr = zeros(size(A,1),1);
 Areacorr(:) = Area(ic,:);
-              
-if sum(locs.inungrouped)==length(locs.xnm) %ungrouped data
-    ceo=zeros(length(locs.inungrouped),1,'single');
-    ceo(locs.inungrouped)=Areacorr;
-else
-    ceo=obj.locData.grouped2ungrouped(locs.ingrouped,Areacorr);
-    
-end
-
-obj.locData.setloc('clusterdensity',ceo);
+  
+obj.locData.setloc('clusterdensity',Areacorr,indloc);
 obj.setPar('locFields',fieldnames(obj.locData));
 obj.locData.regroup;
 end
