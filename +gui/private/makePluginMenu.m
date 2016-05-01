@@ -98,14 +98,16 @@ if ~iscell(pluginpath)&&strcmp(pluginpath,'Workflow')
     module=interfaces.Workflow;
     module.processorgui=false;
     name='Workflow';
+    p.Vrim=5;
 else
     module=plugin(pluginpath{:});
     name=pluginpath{end};
+    p.Vrim=100;
 end
     module.handle=figure('MenuBar','none','Toolbar','none','Name',name);
     module.attachPar(obj.P);
     module.attachLocData(obj.locData);
-    p.Vrim=100;
+    
     p.Xrim=10;
     module.setGuiAppearence(p)
     module.makeGui;

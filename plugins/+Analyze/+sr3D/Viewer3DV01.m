@@ -108,7 +108,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 thetan=theta+day;
                 obj.setGuiParameters(struct('theta',thetan));
                 posn=rotpos(pos,dax);
+                if isvalid(roih)
                 roih.setPosition(posn);
+                end
             end
             function up(src,callbackdata)
                 src.WindowButtonMotionFcn='';

@@ -107,6 +107,9 @@ end
 function browsecallback(a,b,hedit,style)
 if strcmp(style,'file')
     strstart=hedit.String;
+    if isempty(strstart)
+        strstart='settings/*.txt';
+    end
     [f,p]=uigetfile(strstart);
     if p
         hedit.String=[p f];
