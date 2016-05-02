@@ -7,6 +7,10 @@ classdef Get2CIntLoc<interfaces.DialogProcessor
         function out=run(obj,p)
            
             tload=load(p.Tfile);
+            if ~isfield(tload,'transformation')
+                out.error='selected transformation file does not have a valid transformation';
+                return
+            end
             file=obj.locData.files.file(p.dataselect.Value);
             loc=get2Clocintensities(obj.locData.loc,tload.transformation,file,p);
             obj.locData.loc=copyfields(obj.locData.loc,loc);

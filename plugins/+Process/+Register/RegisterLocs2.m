@@ -10,9 +10,17 @@ classdef RegisterLocs2<interfaces.DialogProcessor
         end
         
         function out=run(obj,p)
+            if p.useT
+                Tload=load(p.Tfile);
+                if ~isfield(Tload,'transformation')
+                    out.error='selected transformation file does not have a valid transformation. Uncheck use inital T';
+                    return 
+                end
+            end
             p.isz=obj.isz;
             p.register_parameters=obj.register_parameters;
             obj.transformation=transform_locs(obj.locData,p);
+            out=[];
         end
         function pard=guidef(obj)
             pard=guidef;
@@ -170,4 +178,5 @@ pard.save.Height=1.5;
 pard.syncParameters={{'filelist_short','dataselect',{'String'}}};
 pard.inputParameters={'currentfileinfo'};
 
+pard.plugininfo.name='Register Localizations';
 end

@@ -69,7 +69,7 @@ else
     rangex=p.rangex;
 end
 if ~isfield(p,'rangey')||isempty(p.rangey)
-    rangey=[p.sr_pos(2)-p.sr_size(2) p.sr_pos(2)+p.sr_size(2)]
+    rangey=[p.sr_pos(2)-p.sr_size(2) p.sr_pos(2)+p.sr_size(2)];
 else   
     rangey=p.rangey;
 end

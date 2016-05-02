@@ -196,7 +196,7 @@ guimodules=obj.getPar('guimodules');
 switch callobj.Label
     case 'add plugin'
         plugins=obj.getPar('menu_plugins');
-        pg=browsefields(plugins,{},2);
+        pg=browsefields(plugins,{},2,0,true);
         
         if isempty(pg)
             return
