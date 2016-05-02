@@ -118,7 +118,7 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.setPar('sr_imsizecheck',false);
             obj.setPar('sr_pixfactor',1);
             obj.setPar('sr_imagesize',1000);
-            obj.setPar('layerson',1);
+            obj.setPar('sr_layerson',1);
             addlistener(obj.P,'sr_render',@obj.plotovbox);
             lw_callback(0,0,obj)
             obj.updateFormatParameters;

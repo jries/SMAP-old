@@ -17,7 +17,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
 
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
-            obj.inputParameters={'ROI_size','EMexcessNoise'};
+            obj.inputParameters={'loc_ROIsize','EMexcessNoise'};
             obj.stackind=0;
 
         end
@@ -26,7 +26,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
         function prerun(obj,p)
             global fitterstackinfo fitterimagestack fitterbgstack
             obj.stackind=0;
-            roisize=obj.getPar('ROI_size');
+            roisize=obj.getPar('loc_ROIsize');
             fitterimagestack=zeros(roisize,roisize,obj.numberInBlock,'single');
             if obj.inputChannels==2
                 fitterbgstack=fitterimagestack;
@@ -44,7 +44,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
             
 %             obj.setInputChannels(2,'frame');
 %             p=obj.getGuiParameters.par;
-%             obj.ROI_size=p.ROI_size;
+%             obj.loc_ROIsize=p.loc_ROIsize;
            
         end
         function out=run(obj,data,p)  

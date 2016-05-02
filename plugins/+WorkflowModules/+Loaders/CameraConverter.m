@@ -1,16 +1,16 @@
 classdef CameraConverter<interfaces.WorkflowModule
     properties
         calfile='settings/CameraCalibration.xls';
-        cameraSettings=struct('camId','default','port','Conventional','exposure',1,'emgain',1,'conversion',1,'offset',400,'pixsize',0.1,...
+        loc_cameraSettings=struct('camId','default','port','Conventional','exposure',1,'emgain',1,'conversion',1,'offset',400,'pixsize',0.1,...
             'roi',[],'temperature',0,'timediff',0,'comments','');
-        cameraSettingsStructure=struct('camId','default','port','Conventional','exposure',1,'emgain',1,'conversion',1,'offset',400,'pixsize',0.1,...
+        loc_cameraSettingsStructure=struct('camId','default','port','Conventional','exposure',1,'emgain',1,'conversion',1,'offset',400,'pixsize',0.1,...
             'roi',[],'temperature',0,'timediff',0,'comments','');
         EMexcessNoise;
     end
     methods
         function obj=CameraConverter(varargin)
             obj@interfaces.WorkflowModule(varargin{:})
-            obj.propertiesToSave={'cameraSettings','EMexcessNoise'};
+            obj.propertiesToSave={'loc_cameraSettings','EMexcessNoise'};
         end
         function pard=guidef(obj)
             pard=guidef;
@@ -19,14 +19,14 @@ classdef CameraConverter<interfaces.WorkflowModule
            initGui@interfaces.WorkflowModule(obj);
            obj.guihandles.loadmetadata.Callback={@loadmetadata_callback,obj};
            obj.guihandles.camparbutton.Callback={@camparbutton_callback,obj};
-           obj.outputParameters={'cameraSettings','EMexcessNoise'};
+           obj.outputParameters={'loc_cameraSettings','EMexcessNoise'};
            obj.addSynchronization('loc_metadatafile',obj.guihandles.metadatafile,'String',@obj.readmetadata)
         end
         function prerun(obj,p)
            
         end
         function datao=run(obj,data,p)
-            pc=obj.cameraSettings;
+            pc=obj.loc_cameraSettings;
             offset=pc.offset;
             adu2phot=(pc.conversion/pc.emgain);
             imphot=single((data.data-offset))*adu2phot;
@@ -48,12 +48,12 @@ classdef CameraConverter<interfaces.WorkflowModule
                 metadata=[];
             end
             if ~isempty(metadata) %otherwise: keep default
-                obj.cameraSettings=copyfields(obj.cameraSettings,metadata,fieldnames(obj.cameraSettings));
+                obj.loc_cameraSettings=copyfields(obj.loc_cameraSettings,metadata,fieldnames(obj.loc_cameraSettings));
             else
                 %default settings
             end
             
-            if strcmp(obj.cameraSettings.port,'Conventional')|| strcmp(obj.cameraSettings.port,'Normal') %still valid?
+            if strcmp(obj.loc_cameraSettings.port,'Conventional')|| strcmp(obj.loc_cameraSettings.port,'Normal') %still valid?
                 emexcess=1;
             else
                 emexcess=2;
@@ -67,27 +67,27 @@ end
 
 
 function camparbutton_callback(a,b,obj)
-fn=fieldnames(obj.cameraSettingsStructure);
+fn=fieldnames(obj.loc_cameraSettingsStructure);
 %remove later: only there because parameters saved with workflow don't
 %include comments
-if ~isfield(obj.cameraSettings,'comments')
-    obj.cameraSettings.comments='no ocmments';
+if ~isfield(obj.loc_cameraSettings,'comments')
+    obj.loc_cameraSettings.comments='no ocmments';
 end
 %XXX
 for k=1:length(fn)
     fields{k}=fn{k};
-    defAns{k}=num2str(obj.cameraSettings.(fn{k}));
+    defAns{k}=num2str(obj.loc_cameraSettings.(fn{k}));
 end
 answer=inputdlg(fields,'Acquisition settings',1,defAns);
 if ~isempty(answer)
     for k=1:length(fn)
-        if isnumeric(obj.cameraSettings.(fn{k}))
-            obj.cameraSettings.(fn{k})=str2num(answer{k});
+        if isnumeric(obj.loc_cameraSettings.(fn{k}))
+            obj.loc_cameraSettings.(fn{k})=str2num(answer{k});
         else
-            obj.cameraSettings.(fn{k})=(answer{k});
+            obj.loc_cameraSettings.(fn{k})=(answer{k});
         end
     end
-%     obj.globpar.parameters.cameraSettings=obj.cameraSettings; %doesnt work
+%     obj.globpar.parameters.loc_cameraSettings=obj.loc_cameraSettings; %doesnt work
 end
 end
 

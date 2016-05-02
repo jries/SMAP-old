@@ -5,7 +5,7 @@ classdef PeakFinderNMSWF<interfaces.WorkflowModule
     methods
         function obj=PeakFinderNMSWF(varargin)
             obj@interfaces.WorkflowModule(varargin{:});
-            obj.inputParameters={'loc_filter_sigma','EMexcessNoise'};
+            obj.inputParameters={'loc_loc_filter_sigma','EMexcessNoise'};
 %             obj.parameters.EMexcessNoise=1;
         end
         function pard=guidef(obj)
@@ -20,7 +20,7 @@ classdef PeakFinderNMSWF<interfaces.WorkflowModule
         end
         function prerun(obj,p)
             p=obj.getAllParameters;
-            filtersize=p.loc_filter_sigma;
+            filtersize=p.loc_loc_filter_sigma;
             excess=p.EMexcessNoise;
 %             if isempty(escess)
 %                 excess=1;
@@ -68,7 +68,7 @@ end
 function cutoffmode_callback(a,b,obj)
 PSFx0=1;
 p=obj.getAllParameters;
-filtersize=p.loc_filter_sigma;
+filtersize=p.loc_loc_filter_sigma;
 excess=p.EMexcessNoise;
 state=p.cutoffmode;
  val=p.NMS_cutoff;

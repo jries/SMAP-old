@@ -1,23 +1,23 @@
 '',layer
-'ROI_size'
+'loc_ROIsize'
 'cam_pixelsize_nm'
-'cameraSettings'
+'loc_cameraSettings'
 'counting_clusters'
 'currentfileinfo'
 'filelist_localize'
 'filelist_long'
 'filelist_short'
-'filter_sigma'
+'loc_filter_sigma'
 'group_dt'
 'group_dx'
 'guiFormat'
-'layerson'
+
 'linewidth_roi'
 'locFields'
 'loc_fileinfo'
 'loc_fitOnBackground'
 'loc_metadatafile'
-'loc_newfile'
+
 'loc_outputfig'
 'loc_preview'
 'loc_previewframe'
@@ -54,7 +54,6 @@
 'sr_size'
 'sr_sizeRecPix'
 'status'
-'statusdone'
 
 
 layer parameters:
@@ -72,7 +71,7 @@ layer parameters:
 'remout'
 'renderfield'
 'rendermode'
-'renderp1'
+'render_colormode'
 'selectedField'
 'shiftxy_max'
 'shiftxy_min'

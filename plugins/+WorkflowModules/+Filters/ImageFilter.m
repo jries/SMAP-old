@@ -6,7 +6,7 @@ classdef ImageFilter<interfaces.WorkflowModule
     methods
         function obj=ImageFilter(varargin)
             obj@interfaces.WorkflowModule(varargin{:});
-            obj.outputParameters={'loc_filter_sigma'};
+            obj.outputParameters={'loc_loc_filter_sigma'};
         end
         function pard=guidef(obj)
             pard=guidef;
@@ -18,7 +18,7 @@ classdef ImageFilter<interfaces.WorkflowModule
 %         end
         function prerun(obj,p)
             p=obj.getAllParameters;
-            fs=p.loc_filter_sigma;
+            fs=p.loc_loc_filter_sigma;
             if fs>0
             obj.filterkernel=fspecial('gaussian', max(5,ceil(3.5/2*fs)*2+1), fs);
             else
@@ -47,8 +47,8 @@ function pard=guidef
 pard.text.object=struct('Style','text','String','Filter: Sigma (pix): ');
 pard.text.position=[1,1];
 pard.text.Width=1.3;
-pard.loc_filter_sigma.object=struct('Style','edit','String','1.2');
-pard.loc_filter_sigma.position=[1,2.3];
-pard.loc_filter_sigma.Width=.7;
-pard.loc_filter_sigma.TooltipString=sprintf('Sigma (in camera pixels) for a Gaussian filter which is applied after \n background correction and before peak finding.');
+pard.loc_loc_filter_sigma.object=struct('Style','edit','String','1.2');
+pard.loc_loc_filter_sigma.position=[1,2.3];
+pard.loc_loc_filter_sigma.Width=.7;
+pard.loc_loc_filter_sigma.TooltipString=sprintf('Sigma (in camera pixels) for a Gaussian filter which is applied after \n background correction and before peak finding.');
 end

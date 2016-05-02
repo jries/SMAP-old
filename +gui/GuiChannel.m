@@ -12,7 +12,7 @@ classdef GuiChannel< interfaces.LayerInterface
             obj.guiPar.mincall=[];
             obj.guiPar.maxcall=[];
             obj.guiPar.srmodes={'normal','z','field'};
-            obj.outputParameters={'ch_filelist','channels','layercheck','rendermode','renderp1','renderfield',...
+            obj.outputParameters={'ch_filelist','channels','layercheck','rendermode','render_colormode','renderfield',...
                 'groupcheck','imaxtoggle','imax','lut','remout','shift','shiftxy_min','shiftxy_max','layer','colorrange',...
                 'znm_min','znm_max','frame_min','frame_max'};
 
@@ -71,7 +71,7 @@ classdef GuiChannel< interfaces.LayerInterface
 
             h.rendermode.Callback={@setvisibility,obj,'rendermode'};
             h.imaxtoggle.Callback={@imaxtoggle_callback,obj};
-            h.renderp1.Callback={@renderp1_callback,obj}; 
+            h.render_colormode.Callback={@render_colormode_callback,obj}; 
             h.renderfield.Callback={@renderfield_callback,obj};  
             h.default_button.Callback=@obj.default_callback;
             h.externalrender.Callback={@renderpar_callback,obj};
@@ -265,7 +265,7 @@ classdef GuiChannel< interfaces.LayerInterface
                 if exist(deffile,'file')
                     l=load(deffile);
                     p=l.defaultChannelParameters;
-                    p=rmfield(p,{'ch_filelist','renderp1','renderfield'});
+                    p=rmfield(p,{'ch_filelist','render_colormode','renderfield'});
                     obj.setGuiParameters(p);
                     obj.status('default parameters restored.');
                     %update
@@ -312,9 +312,9 @@ end
 
 
 
-function renderp1_callback(object,data,obj)
+function render_colormode_callback(object,data,obj)
 p=obj.getAllParameters;
-switch p.renderp1.selection
+switch p.render_colormode.selection
     case {'normal'}
         cmin=0;
         cmax=1;
@@ -347,7 +347,7 @@ end
 % obj.setPar([obj.layerprefix 'colorfield_max'],num2str(cmax),'String')
 obj.guihandles.colorfield_min.String=num2str(cmin);
 obj.guihandles.colorfield_max.String=num2str(cmax);
-obj.updateLayerField('renderp1');
+obj.updateLayerField('render_colormode');
 obj.updateLayerField('colorfield_min');
 obj.updateLayerField('colorfield_max');
 setvisibility(0,0,obj)
@@ -370,8 +370,8 @@ obj.colorrange.mincall(p.Value)=minv;
 obj.colorrange.maxcall(p.Value)=maxv;
 obj.guihandles.colorfield_min.String=num2str(minv);
 obj.guihandles.colorfield_max.String=num2str(maxv);
-% renderp1_callback(object,0,obj)      
-obj.updateLayerField('renderp1');
+% render_colormode_callback(object,0,obj)      
+obj.updateLayerField('render_colormode');
 obj.updateLayerField('renderfield');
 obj.updateLayerField('colorfield_min');
 obj.updateLayerField('colorfield_max');
@@ -430,8 +430,8 @@ end
 
 function setvisibility(a,b,obj,field)
 hgui=obj.guihandles;
-if hgui.renderp1.Value>length(hgui.renderp1.String)
-    set(hgui.renderp1,'Value',1);
+if hgui.render_colormode.Value>length(hgui.render_colormode.String)
+    set(hgui.render_colormode,'Value',1);
     disp('gui channel line 370')
 end
 p=obj.getAllParameters;
@@ -465,9 +465,9 @@ else
     controlVisibility(hgui,'externalrender','off')
 end
 
-%renderp1 
-hgui.renderp1.Value=min(length(hgui.renderp1.String),hgui.renderp1.Value);
-switch lower(p.renderp1.selection)
+%render_colormode 
+hgui.render_colormode.Value=min(length(hgui.render_colormode.String),hgui.render_colormode.Value);
+switch lower(p.render_colormode.selection)
 case 'normal'
     controlVisibility(hgui,{'renderfield'},'off')
 case 'z'
@@ -484,11 +484,11 @@ case {'hist','gauss','dl','other'}
         set(hgui.renderfield,'String',fieldnames(obj.locData.loc));
         hgui.renderfield.Value=min(hgui.renderfield.Value,length(hgui.renderfield.String));
     end
-    if hgui.renderp1.Value>length(hgui.renderp1.String)
-        set(hgui.renderp1,'Value',1);
+    if hgui.render_colormode.Value>length(hgui.render_colormode.String)
+        set(hgui.render_colormode,'Value',1);
         disp('gui channel line 370')
     end
-    set(hgui.renderp1,'String',{'normal','z','field'});
+    set(hgui.render_colormode,'String',{'normal','z','field'});
 case {'tiff'}
     s={};
     sind=1;
@@ -503,13 +503,13 @@ case {'tiff'}
            end
         end
 
-        set(hgui.renderp1,'String',s);
-        set(hgui.renderp1,'Value',min(hgui.renderp1.Value,length(s)));
+        set(hgui.render_colormode,'String',s);
+        set(hgui.render_colormode,'Value',min(hgui.render_colormode.Value,length(s)));
         set(hgui.colorfield_min,'String','0')
         set(hgui.colorfield_max,'String','1')
         updateLayerField(obj,'colorfield_min')
         updateLayerField(obj,'colorfield_max')
-        obj.updateLayerField('renderp1');
+        obj.updateLayerField('render_colormode');
     end
 end
 
@@ -596,10 +596,10 @@ pard.imax.position=[2,2.2];
 pard.imax.Width=.6;
 pard.imax.TooltipString='absolut intensity or quantile (0<q<1) or v for q=1-10^(v), v<0';
 
-pard.renderp1.object=struct('Style','popupmenu','String',{obj.guiPar.srmodes}); 
-pard.renderp1.position=[2,3];
-pard.renderp1.Width=1;
-renderp1.TooltipString=sprintf('normal: intensity coded, z: z color coded, \n param: select field which to color code');
+pard.render_colormode.object=struct('Style','popupmenu','String',{obj.guiPar.srmodes}); 
+pard.render_colormode.position=[2,3];
+pard.render_colormode.Width=1;
+render_colormode.TooltipString=sprintf('normal: intensity coded, z: z color coded, \n param: select field which to color code');
 
 pard.renderfield.object=struct('Style','popupmenu','String','field');            
 pard.renderfield.position=[2,4];

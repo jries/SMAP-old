@@ -5,7 +5,7 @@ rangeyt=[p.sr_pos(2)-p.sr_size(2) p.sr_pos(2)+p.sr_size(2)];
 rangex=rangext-p.shiftxy_min;
 rangey=rangeyt-p.shiftxy_max;
 fs=p.ch_filelist.Value;
-tnum=p.renderp1.Value;
+tnum=p.render_colormode.Value;
 
 %  file=lp.files.file;
  

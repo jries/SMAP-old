@@ -26,7 +26,7 @@ classdef LocSaver<interfaces.WorkflowModule;
             finfo=obj.getPar('loc_fileinfo');
             sfile=finfo.basefile;
             filename=[sfile '_sml.mat'];  
-            infost=obj.getPar('cameraSettings');
+            infost=obj.getPar('loc_cameraSettings');
             infost=copyfields(infost,finfo);
             filestruct=struct('info',infost,'average',[],'name',filename,...
                 'number',obj.filenumber,...
@@ -38,7 +38,7 @@ classdef LocSaver<interfaces.WorkflowModule;
              p=obj.parent.getGuiParameters(true,true);
              p.name=obj.parent.pluginpath;
              obj.locDatatemp.addhistory(p);
-             obj.fileinfo=obj.getPar('cameraSettings');          
+             obj.fileinfo=obj.getPar('loc_cameraSettings');          
         end
         function output=run(obj,data,p)
             output=[];

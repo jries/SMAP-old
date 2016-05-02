@@ -62,9 +62,9 @@ classdef ImageNormalize<interfaces.WorkflowModule
 %         function updateGui(obj)
 %             metadata=readmetadata(obj); 
 %             if ~isempty(metadata)
-%                 obj.cameraSettings=metadata;    
+%                 obj.loc_cameraSettings=metadata;    
 %             end
-%             obj.globpar.parameters.cameraSettings=obj.cameraSettings;
+%             obj.globpar.parameters.loc_cameraSettings=obj.loc_cameraSettings;
 %         end
     end
 end

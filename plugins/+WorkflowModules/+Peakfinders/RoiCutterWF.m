@@ -1,6 +1,6 @@
 classdef RoiCutterWF<interfaces.WorkflowModule
     properties
-        ROI_size
+        loc_ROIsize
         preview
 
     end
@@ -14,14 +14,14 @@ classdef RoiCutterWF<interfaces.WorkflowModule
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
-            obj.addSynchronization('ROI_size',obj.guihandles.ROI_size,'String')
+            obj.addSynchronization('loc_ROIsize',obj.guihandles.loc_ROIsize,'String')
             obj.setInputChannels(2,'frame');
 
         end
         function prerun(obj,p)
             
             p=obj.getAllParameters;
-            obj.ROI_size=p.ROI_size;
+            obj.loc_ROIsize=p.loc_ROIsize;
             obj.preview=obj.getPar('loc_preview');
            
         end
@@ -36,7 +36,7 @@ classdef RoiCutterWF<interfaces.WorkflowModule
 %             data{1}.frame
             
             
-            kernelSize=obj.ROI_size;
+            kernelSize=obj.loc_ROIsize;
             dn=ceil((kernelSize-1)/2);
             sim=size(image);
             cutoutimages=zeros(kernelSize,kernelSize,length(maxima.x),'single');
@@ -103,9 +103,9 @@ classdef RoiCutterWF<interfaces.WorkflowModule
 %         function updateGui(obj)
 %             metadata=readmetadata(obj); 
 %             if ~isempty(metadata)
-%                 obj.cameraSettings=metadata;    
+%                 obj.loc_cameraSettings=metadata;    
 %             end
-%             obj.globpar.parameters.cameraSettings=obj.cameraSettings;
+%             obj.globpar.parameters.loc_cameraSettings=obj.loc_cameraSettings;
 %         end
     end
 end
@@ -117,7 +117,7 @@ pard.text.object=struct('Style','text','String','Size ROI (pix)');
 pard.text.position=[1,1];
 
 
-pard.ROI_size.object=struct('Style','edit','String','7');
-pard.ROI_size.position=[2,1];
-pard.ROI_size.TooltipString=sprintf('Size (pixels) of regions around each peak candidate which are used for fitting. \n Depends on fitter. Use larger ROIs for 3D data.');
+pard.loc_ROIsize.object=struct('Style','edit','String','7');
+pard.loc_ROIsize.position=[2,1];
+pard.loc_ROIsize.TooltipString=sprintf('Size (pixels) of regions around each peak candidate which are used for fitting. \n Depends on fitter. Use larger ROIs for 3D data.');
 end

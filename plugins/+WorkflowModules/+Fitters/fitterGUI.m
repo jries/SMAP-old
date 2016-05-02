@@ -30,7 +30,7 @@ classdef fitterGUI<interfaces.WorkflowModule
             obj.currentfitter.prerun;
 %             obj.setInputChannels(2,'frame');
 %             p=obj.getGuiParameters.par;
-%             obj.ROI_size=p.ROI_size;
+%             obj.loc_ROIsize=p.loc_ROIsize;
            
         end
         function output=run(obj,data,p)
@@ -70,9 +70,9 @@ classdef fitterGUI<interfaces.WorkflowModule
 %         function updateGui(obj)
 %             metadata=readmetadata(obj); 
 %             if ~isempty(metadata)
-%                 obj.cameraSettings=metadata;    
+%                 obj.loc_cameraSettings=metadata;    
 %             end
-%             obj.globpar.parameters.cameraSettings=obj.cameraSettings;
+%             obj.globpar.parameters.loc_cameraSettings=obj.loc_cameraSettings;
 %         end
     end
 end

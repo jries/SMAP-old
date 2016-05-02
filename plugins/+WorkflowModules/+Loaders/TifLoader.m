@@ -115,7 +115,7 @@ classdef TifLoader<interfaces.WorkflowModule
             obj.setPar('loc_fileinfo',obj.imloader.info);
 % 
             obj.guihandles.tiffile.String=obj.imloader.file;
-             obj.setPar('loc_newfile',true);
+%              obj.setPar('loc_newfile',true);
              p=obj.getAllParameters;
              if p.onlineanalysis
                  obj.guihandles.framestop.String='inf';

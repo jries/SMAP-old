@@ -16,7 +16,7 @@ classdef LocFilter<interfaces.WorkflowModule;
         end
         function prerun(obj,p)
 
-           obj.pixelsize=obj.getPar('cameraSettings').pixsize*1000;
+           obj.pixelsize=obj.getPar('loc_cameraSettings').pixsize*1000;
             
         end
         function output=run(obj,data,p)

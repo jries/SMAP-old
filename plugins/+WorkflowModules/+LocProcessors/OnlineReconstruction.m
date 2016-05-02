@@ -34,7 +34,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
             finfo=obj.getPar('loc_fileinfo');
             sfile=finfo.basefile;
             filename=[sfile '_sml.mat'];           
-            filestruct=struct('info',obj.getPar('cameraSettings'),'average',[],'name',filename,...
+            filestruct=struct('info',obj.getPar('loc_cameraSettings'),'average',[],'name',filename,...
                 'number',obj.filenumber,...
                 'numberOfTif',0,'tif',tifs);
             
@@ -46,7 +46,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
                 [~,filelists{k}]=fileparts(filelist{k});
             end
             
-            obj.fileinfo=obj.getPar('cameraSettings');
+            obj.fileinfo=obj.getPar('loc_cameraSettings');
             if isempty(obj.fileinfo.roi)
                 try
                     mm=imfinfo(finfo.filename);
@@ -120,7 +120,7 @@ roi=obj.fileinfo.roi;
 else
     roi=zeros(2);
 end
-% pixelsize=obj.globpar.parameters.cameraSettings.pixsize*1000;
+% pixelsize=obj.globpar.parameters.loc_cameraSettings.pixsize*1000;
 % fields={'frame','phot','bg','bgerr','photerr'};
 % locdat=copyfields([],locs,fields);
 % locdat.frame=locs.frame(indin);

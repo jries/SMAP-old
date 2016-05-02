@@ -45,7 +45,7 @@ for k=1:length(p.sr_layerson)
         txt=[txt 'quantile/Imax: ' num2str(p.([lp '_']).imax) '\n'];
         txt=[txt 'color range: \t' num2str(p.([lp '_']).colorfield_min) '\t' num2str(p.([lp '_']).colorfield_max) '\n'];
         if strcmp(p.([lp '_']).renderfield.selection,'field')
-            txt=[txt 'render field: ' (p.([lp '_']).renderp1.selection) '\n'];
+            txt=[txt 'render field: ' (p.([lp '_']).render_colormode.selection) '\n'];
         end
         if strcmp(p.([lp '_']).renderfield.selection,'z')
             txt=[txt 'render field: znm'  '\n'];

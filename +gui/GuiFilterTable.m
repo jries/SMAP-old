@@ -6,7 +6,7 @@ classdef GuiFilterTable< interfaces.LayerInterface
     methods
         function obj=GuiFilterTable(varargin)
             obj@interfaces.LayerInterface(varargin{:});
-            obj.outputParameters={'filter','filtertable'};
+            obj.outputParameters={'filter'};
         end
         function makeGui(obj)
            obj.excludefields={'peakfindxnm','peakfindynm','groupindex','photerr'};

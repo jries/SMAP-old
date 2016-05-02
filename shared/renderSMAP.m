@@ -3,7 +3,7 @@ function imageo=renderSMAP(locs,p,layer,indin,transparency)
 %(then take as is)
 if nargin==0
     %input parameters
-    imageo={'ch_filelist','sr_pixrec','sr_axes','sr_pos','sr_size','rendermode','renderp1',...
+    imageo={'ch_filelist','sr_pixrec','sr_axes','sr_pos','sr_size','rendermode','render_colormode',...
                 'renderfield','colorfield_min','colorfield_max','groupcheck','lut','shiftxy_min','shiftxy_max'...
                 'mingaussnm','mingausspix','gaussfac','sr_sizeRecPix','shift','displayLocsInd','cam_pixelsize_nm','remout',...
                 'rangex','rangey'};
@@ -64,23 +64,26 @@ else
 end
 
 if ~isfield(p,'rangex')||isempty(p.rangex)
-    rangex=[p.sr_pos(1)-p.sr_size(1) p.sr_pos(1)+p.sr_size(1)]-p.shiftxy_min;
+    rangex=[p.sr_pos(1)-p.sr_size(1) p.sr_pos(1)+p.sr_size(1)];
 else
     rangex=p.rangex;
 end
 if ~isfield(p,'rangey')||isempty(p.rangey)
-    rangey=[p.sr_pos(2)-p.sr_size(2) p.sr_pos(2)+p.sr_size(2)]-p.shiftxy_max; 
+    rangey=[p.sr_pos(2)-p.sr_size(2) p.sr_pos(2)+p.sr_size(2)]
 else   
     rangey=p.rangey;
 end
 dl=0;
+
+rangexrec=rangex-p.shiftxy_min;
+rangeyrec=rangey-p.shiftxy_max; 
 
 if isfield(locsh,'intensity_render')&&~isempty(locsh.intensity_render)
     pos.N=locsh.intensity_render(indin);
 end
 
 lutall=mymakelut(p.lut.selection);
-switch p.renderp1.selection
+switch p.render_colormode.selection
     case 'normal'
         lut=0;
     case 'z'
@@ -136,6 +139,8 @@ switch lower(p.rendermode.selection)
         end
         frender=@gaussrender;
         dl=1;
+%         rangex(1:2)=rangex(1:2)-p.sr_pixrec/2;
+%         rangey(1:2)=rangey(1:2)-p.sr_pixrec/2;
     case 'hist'
         frender=@histrender;
     case 'tiff'
@@ -143,10 +148,11 @@ switch lower(p.rendermode.selection)
 
 end
             
-          
+rangexrec=rangexrec-p.sr_pixrec(1)/2;
+rangeyrec=rangeyrec-p.sr_pixrec(end)/2;
 
 
-[srimage,nlocs]=frender(pos,rangex, rangey, p.sr_pixrec(1), p.sr_pixrec(end),lut,[p.colorfield_min p.colorfield_max],tpar);
+[srimage,nlocs]=frender(pos,rangexrec, rangeyrec, p.sr_pixrec(1), p.sr_pixrec(end),lut,[p.colorfield_min p.colorfield_max],tpar);
 if dl
     if isfield(p,'sr_sizeRecPix')
         newsize=round(p.sr_sizeRecPix([2 1]));
@@ -158,8 +164,8 @@ end
 
 imageo.image=srimage;
 imageo.lut=lutall;
-imageo.rangex=rangex+p.shiftxy_min;
-imageo.rangey=rangey+p.shiftxy_max;
+imageo.rangex=rangex;
+imageo.rangey=rangey;
 imageo.numberOfLocs=nlocs;
 
 end

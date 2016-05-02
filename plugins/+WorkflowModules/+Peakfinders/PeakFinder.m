@@ -7,7 +7,7 @@ classdef PeakFinder<interfaces.WorkflowModule
     methods
         function obj=PeakFinder(varargin)
             obj@interfaces.WorkflowModule(varargin{:});
-            obj.inputParameters={'loc_filter_sigma','EMexcessNoise'};
+            obj.inputParameters={'loc_loc_filter_sigma','EMexcessNoise'};
         end
         function pard=guidef(obj)
             pard=guidef;
@@ -96,10 +96,10 @@ switch state
         obj.dynamicfactor=p.cutoffvalue;
     case 2 %p       
         obj.probability=p.cutoffvalue;
-        obj.absolutecutoff=prob2photon(p.cutoffvalue,PSFx0,p.loc_filter_sigma,p.EMexcessNoise);
+        obj.absolutecutoff=prob2photon(p.cutoffvalue,PSFx0,p.loc_loc_filter_sigma,p.EMexcessNoise);
     case 3 %abs      
         obj.absolutecutoff=p.cutoffvalue;
-        obj.probability=photon2prob(p.cutoffvalue,PSFx0,p.loc_filter_sigma,p.EMexcessNoise);
+        obj.probability=photon2prob(p.cutoffvalue,PSFx0,p.loc_loc_filter_sigma,p.EMexcessNoise);
 end
 end
 
