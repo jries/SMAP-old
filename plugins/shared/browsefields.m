@@ -2,10 +2,10 @@ function str=browsefields(prop,field,recursions,recursive,parsefield)
 if nargin<5
     parsefield=false;
 end
-if nargin<4
+if nargin<4||isempty(recursive)
     recursive=0;
 end
-if nargin<3
+if nargin<3||isempty(recursions)
     recursions=inf;
 end
 if nargin<2||isempty(field)
@@ -22,10 +22,15 @@ elseif strcmp(field,'..')
 elseif isstruct(prop.(field))
     fn=fieldnames(prop.(field));
     fnt=fn;
-    if parsefield&&recursions==0
+    if parsefield %&&recursions==0
         for k=1:length(fn)
             ph=prop.(field).(fn{k});
-            fnt{k}=ph.module{end};
+            if iscell(ph)
+            fnt{k}=ph{end};
+            
+            elseif isfield(ph,'module')
+                fnt{k}=ph.module{end};
+            end
         end
     end
     

@@ -93,9 +93,7 @@ switch callobj.Label
         obj.guiplugins.(name)=[];
         obj.addplugingroup(name);
         guimodules.(obj.maindir).(name)=[];
-%         save(['settings' filesep 'guimodules.mat'],'guimodules')
-%         allplugins=plugin;
-%         browsefields(allplugins,obj.)
+
     case 'remove'
         selected=obj.guihandles.(obj.maindir).SelectedTab;
         fieldr=selected.Title;

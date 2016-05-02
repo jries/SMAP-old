@@ -46,14 +46,14 @@ classdef Workflow<interfaces.DialogProcessor
             %handle, tag (optional),
             %inputmodules={'module,output,moudle,output,...}, if no output,
             %output=1;
-            if isa(p.module,'interfaces.GuiModuleInterface')
+            if isa(p.module,'interfaces.WorkflowModule')|| isa(p.module,'interfaces.DialogProcessor')
                 module=p.module;
             elseif iscell(p.module)
                 modulepath=p.module;
                 module=plugin(p.module{:});
                 
-                if ~isa(module,'interfaces.GuiModuleInterface')
-                    
+                if ~(isa(module,'interfaces.WorkflowModule')|| isa(module,'interfaces.DialogProcessor'))
+                    tag=[];
                     return
                 end
                 if ~isa(module,'interfaces.WorkflowModule') %regular plugin
@@ -269,15 +269,21 @@ classdef Workflow<interfaces.DialogProcessor
             if isempty(module.handle)||~isvalid(module.handle)
                 module.handle=uipanel(obj.handle,'Units','pixels','Position',pospanel); %later: real gui
                 module.setGuiAppearence(pGUI);
-                obj.guihandles.([thistag '_modulepanel'])=module.handle;
+                
             end
+            obj.guihandles.([thistag '_modulepanel'])=module.handle;
             obj.modules{idx}.inputpanel=uipanel(obj.handle,'Units','pixels','Position',posinput); 
             obj.guihandles.([thistag '_inputpanel'])=obj.modules{idx}.inputpanel;
-            
-            module.makeGui;
-            obj.makeinputlist(thistag,obj.modules{idx}.inputpanel,module.inputChannels,module.isstartmodule);
-            
-            obj.children.(thistag)=module;
+%             try
+                module.makeGui;
+                obj.makeinputlist(thistag,obj.modules{idx}.inputpanel,module.inputChannels,module.isstartmodule);
+                obj.children.(thistag)=module;
+%             catch err
+%                 obj.modules(idx)=[];
+%                 obj.numberOfModules=length(obj.modules);
+%                 err
+%             end
+
         end
         function pard=guidef(obj)
             pard.visualizeconnectionsbutton.object=struct('Style','pushbutton','String','Graph','Callback',@obj.graph);
@@ -375,16 +381,6 @@ classdef Workflow<interfaces.DialogProcessor
                 obj.save([p f])
             end
         end
-%         function add_callback(obj,a,b)
-%             plugins=plugin;
-%             field=browsefields(plugins,'WorkflowModules');
-%             if ~isempty(field)
-%               tag=obj.addModule(field2cell(field));
-%               obj.addModuleToGui(tag);
-%               obj.setinputlist;
-%               
-%             end
-%         end
 
         function idx=tag2index(obj,tag)
             idx=[];
@@ -614,11 +610,16 @@ switch object.Label
 %         txth.FontSize=14;
     case 'add'
         plugins=plugin;
-        field=browsefields(plugins,'WorkflowModules');
+%         field=browsefields(plugins,'WorkflowModules');
+        field=browsefields(plugins,'WorkflowModules',[],[],true);
         if ~isempty(field)
           tag=obj.addModule(field2cell(field));
+          if ~isempty(tag)
           obj.addModuleToGui(tag);
           obj.setinputlist;
+          else
+              disp('could not add module. It is not a WorkflowModule or DialogProcessor.')
+          end
 
         end
     case 'move up'
