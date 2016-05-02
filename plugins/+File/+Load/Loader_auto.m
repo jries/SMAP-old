@@ -6,6 +6,7 @@ classdef Loader_auto<interfaces.DialogProcessor
         end
         
         function out=load(obj,p,file,mode)
+            p=copyfields(p,obj.getGuiParameters);
             if nargin<4
                 mode=getfilemode(file);
             end
@@ -15,8 +16,8 @@ classdef Loader_auto<interfaces.DialogProcessor
             pard=guidef;
         end
         function run(obj,p)
-            [f,p]=uigetfile(obj.info.extensions);
-            obj.load(p,[p f]);
+            [f,path]=uigetfile(obj.info.extensions);
+            obj.load(p,[path f]);
             initGuiAfterLoad(obj);
         end
         function clear(obj,file,isadd)
@@ -31,6 +32,11 @@ end
 
 
 function pard=guidef
+
+pard.updateGuiPar.object=struct('Style','checkbox','String','load Gui Parameters');
+pard.updateGuiPar.position=[1,1];
+ pard.updateGuiPar.Width=2;
+pard.updateGuiPar.TooltipString='Restore Gui parameters saved with localization data';
 info.name='auto loader';
 info.extensions={'*.mat;*.tif;*.csv';'*.mat';'*.tif';'*.csv';'*.*'};
 info.dialogtitle='select any SMLM position, Tif, csv, settings or workflow file';

@@ -14,16 +14,24 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             
             fw=obj.guiPar.FieldWidth;
             fh=obj.guiPar.FieldHeight;
-            obj.loaders=pluginnames('File','Load');
+            allloaders=pluginnames('File','Load');
             
             lp={};
-            for k=1:length(obj.loaders)
-                infom=plugin('File','Load',obj.loaders{k});
+            for k=1:length(allloaders)
+
+                loaderhandle=uipanel(obj.handle,'Units','pixels','Position',[1,5.25*fh,2.9*fw,3.*fh],'Visible','off');
+                obj.guihandles.(['loaderpanel_' num2str(k)])=loaderhandle;
+                loaderp=plugin('File','Load',allloaders{k},loaderhandle,obj.P);
 %                 infom.pluginpath={'File','Load',obj.loaders{k}};
-                info=infom.info;
+                info=loaderp.info;
                 lp{k}=info.name;
-                saverhandle=uipanel(obj.handle,'Units','pixels','Position',[1,5.25*fh,2.9*fw,3.*fh],'Visible','on');
+                loaderp.attachLocData(obj.locData);
+                loaderp.makeGui;
+                obj.children.(['loader_' num2str(k)])=loaderp;
+                loaders{k}=loaderp;
             end
+            obj.loaders=loaders;
+            obj.loaders{1}.handle.Visible='on';
             obj.guihandles.loadmodule.String=lp;
             
             allsavers=pluginnames('File','Save');
@@ -68,9 +76,10 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 fm=p.filelist_long.selection;
             end
             path=fileparts(fm);          
-            loader=plugin('File','Load',obj.loaders{p.loadmodule.Value},[],obj.P);
-            loader.attachLocData(obj.locData);
-            loader.makeGui;
+            loader=obj.loaders{p.loadmodule.Value};
+%             loader=plugin('File','Load',obj.loaders{p.loadmodule.Value},[],obj.P);
+%             loader.attachLocData(obj.locData);
+%             loader.makeGui;
             try
                  ext=loader.info.extensions;
                  title=loader.info.dialogtitle;
@@ -181,6 +190,14 @@ for k=1:length(obj.savers)
 end
 obj.savers{data.Value}.handle.Visible='on';
 end
+
+function loadmode_callback(data,b,obj)
+for k=1:length(obj.loaders)
+    obj.loaders{k}.handle.Visible='off';
+end
+obj.loaders{data.Value}.handle.Visible='on';
+end
+
 
 
 function autosavecheck_callback(a,b,obj)
@@ -310,7 +327,7 @@ pard.add.position=[4.75,3.2];
 pard.add.Width=0.7;
 pard.add.Height=1.5;
 
-pard.loadmodule.object=struct('Style','popupmenu','String',{'auto'});
+pard.loadmodule.object=struct('Style','popupmenu','String',{{'auto'}},'Callback',{{@loadmode_callback,obj}});
 pard.loadmodule.position=[4.5,1];
  pard.loadmodule.Width=1.5;
  pard.loadmodule.object.TooltipString='select saver plugin';
