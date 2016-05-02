@@ -82,6 +82,9 @@ if isfield(info,'camId')
 info.chip=info.camId;
 end
 info.comments=getvald(minfo,'Comment','');
+
+%PI position
+info.PIz=str2double(getvald(minfo,c.PiezoZ{indnames},''));
 % catch
 %     disp('metadata could not be parsed')
 % end
@@ -103,13 +106,22 @@ function info=setdefault(c)
 
 
 function [f,t]=minfotime(minfo,direction)
+if direction==-1
+    indf=strfindfast(minfo,'ElapsedTime-ms',1,direction);
+    indf=strfindfast(minfo,'FrameKey',length(minfo)-indf,direction);
+else
 indf=strfindfast(minfo,'FrameKey',1,direction);
+end
 if isempty(indf)
     t=[];
     f=[];
     return
 end
+if direction==-1
+    indf=indf-8;
+end
 sf=minfo(indf:indf+15);
+
 indminus=strfind(sf,'-');
 numstr=sf(indminus(1)+1:indminus(2)-1);
 f=str2double(numstr);

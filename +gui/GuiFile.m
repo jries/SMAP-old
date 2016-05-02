@@ -48,6 +48,11 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             %make file menu
             makefilemenu(obj);
             
+            f=getParentFigure(obj.handle);
+            c=uicontextmenu(f);
+            obj.guihandles.filelist_long.UIContextMenu=c;
+            m1 = uimenu(c,'Label','info','Callback',{@menu_callback,obj});
+            
         end
      
         function loadbutton_callback(obj, handle,actiondata,isadd)
@@ -249,7 +254,31 @@ par=obj.getAllParameters(loader.inputParameters);
 loader.load(par,[pfad f]);
 end
 
+function menu_callback(menuobj,b,obj)
+switch menuobj.Label
+    case 'info'
+        fin=obj.getPar('filelist_long').Value;
+        info=obj.locData.files.file(fin).info;
+        texta={};
+        fn=fieldnames(info);
+        for k=1:length(fn)
+            ph=info.(fn{k});
+            
+            if iscell(ph)
+                v='cell';
+            elseif ischar(ph)
+                v=ph;
+            elseif isnumeric(ph)
+                v=num2str(ph);
+            end
+                
+            texta{end+1}=[fn{k} ': ' sprintf('\t') v];
+        end
+            
+            listdlg('ListString',texta,'ListSize',[800,800]);
 
+end
+end
 
 function makefilemenu(obj)
 hsmap=obj.getPar('mainGuihandle');

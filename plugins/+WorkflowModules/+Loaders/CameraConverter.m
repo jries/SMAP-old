@@ -2,9 +2,9 @@ classdef CameraConverter<interfaces.WorkflowModule
     properties
         calfile='settings/CameraCalibration.xls';
         loc_cameraSettings=struct('camId','default','port','Conventional','exposure',1,'emgain',1,'conversion',1,'offset',400,'pixsize',0.1,...
-            'roi',[],'temperature',0,'timediff',0,'comments','');
+            'roi',[],'temperature',0,'timediff',0,'comment','');
         loc_cameraSettingsStructure=struct('camId','default','port','Conventional','exposure',1,'emgain',1,'conversion',1,'offset',400,'pixsize',0.1,...
-            'roi',[],'temperature',0,'timediff',0,'comments','');
+            'roi',[],'temperature',0,'timediff',0,'comment','');
         EMexcessNoise;
     end
     methods
@@ -48,7 +48,7 @@ classdef CameraConverter<interfaces.WorkflowModule
                 metadata=[];
             end
             if ~isempty(metadata) %otherwise: keep default
-                obj.loc_cameraSettings=copyfields(obj.loc_cameraSettings,metadata,fieldnames(obj.loc_cameraSettings));
+                obj.loc_cameraSettings=copyfields(obj.loc_cameraSettings,metadata);%,fieldnames(obj.loc_cameraSettings));
             else
                 %default settings
             end
@@ -71,7 +71,7 @@ fn=fieldnames(obj.loc_cameraSettingsStructure);
 %remove later: only there because parameters saved with workflow don't
 %include comments
 if ~isfield(obj.loc_cameraSettings,'comments')
-    obj.loc_cameraSettings.comments='no ocmments';
+    obj.loc_cameraSettings.comments='no comments';
 end
 %XXX
 for k=1:length(fn)
