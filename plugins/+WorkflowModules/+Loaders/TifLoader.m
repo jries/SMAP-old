@@ -32,6 +32,7 @@ classdef TifLoader<interfaces.WorkflowModule
             end
             obj.imloader=imageLoader(p.tiffile);     
             obj.imloader.onlineAnalysis=p.onlineanalysis;
+            obj.imloader.waittime=p.onlineanalysiswaittime;
             obj.imloader.setImageNumber(p.framestart-1);
             obj.numberOfFrames=obj.imloader.info.numberOfFrames;
 %             obj.imloader.currentImageNumber=p.framestart-1;
@@ -153,10 +154,15 @@ pard.tiffile.object=struct('Style','edit','String',' ','HorizontalAlignment','ri
 pard.tiffile.position=[2,1];
 pard.tiffile.Width=4;
 
-pard.onlineanalysis.object=struct('Style','checkbox','String','Online analysis','Value',0);
+pard.onlineanalysis.object=struct('Style','checkbox','String','Online analysis. Waittime (s):','Value',0);
 pard.onlineanalysis.position=[3,2.25];
-pard.onlineanalysis.Width=1.25;
+pard.onlineanalysis.Width=1.75;
 pard.onlineanalysis.TooltipString='Fit during acquisition. If checked, max frames is ignored. Waits until no more images are written to file.';
+
+pard.onlineanalysiswaittime.object=struct('Style','edit','String','5');
+pard.onlineanalysiswaittime.position=[3,4];
+pard.onlineanalysiswaittime.Width=0.5;
+pard.onlineanalysiswaittime.TooltipString='Waiting time for online analysis.';
 
 
 pard.textf.object=struct('Style','text','String','Frame range');
