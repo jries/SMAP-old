@@ -321,7 +321,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                     elseif strcmp(allFields{k},'plugininfo')
                         obj.plugininfo=thisField;
                     elseif isstruct(thisField) && ~isempty(obj.handle) %results name
-                        if ~isfield(thisField,'object')
+                        if ~isfield(thisField,'object') || ~isfield(thisField.object,'Style')
                             allFields{k}
                             thisField
                             str=['guidef definition is incomplete in classe:' class(obj)];
@@ -345,8 +345,6 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                         else
                             heightf=1;
                         end
-                        
-                        
 
                         switch h.Style
                             case {'pushbutton','togglebutton'}

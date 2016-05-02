@@ -11,23 +11,27 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.excludeFromSave={'filelist_long','loadmodule','savemodule'};
         end
         function initGui(obj)
+            
+            fw=obj.guiPar.FieldWidth;
+            fh=obj.guiPar.FieldHeight;
             obj.loaders=pluginnames('File','Load');
+            
             lp={};
             for k=1:length(obj.loaders)
                 infom=plugin('File','Load',obj.loaders{k});
 %                 infom.pluginpath={'File','Load',obj.loaders{k}};
                 info=infom.info;
                 lp{k}=info.name;
+                saverhandle=uipanel(obj.handle,'Units','pixels','Position',[1,5.25*fh,2.9*fw,3.*fh],'Visible','on');
             end
             obj.guihandles.loadmodule.String=lp;
             
             allsavers=pluginnames('File','Save');
             
-            fw=obj.guiPar.FieldWidth;
-            fh=obj.guiPar.FieldHeight;
+
 %             obj.savers= plugintemp.plugins('File','Save',allsavers{1},[],obj.P); %to initialize
             for k=1:length(allsavers)
-                saverhandle=uipanel(obj.handle,'Units','pixels','Position',[1,2.5*fh,2.5*fw,2*fh],'Visible','off');
+                saverhandle=uipanel(obj.handle,'Units','pixels','Position',[1,1*fh,2.9*fw,3.*fh],'Visible','off');
                 obj.guihandles.(['saverpanel_' num2str(k)])=saverhandle;
                 
                 saver=plugin('File','Save',allsavers{k},saverhandle,obj.P);
@@ -52,6 +56,7 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             c=uicontextmenu(f);
             obj.guihandles.filelist_long.UIContextMenu=c;
             m1 = uimenu(c,'Label','info','Callback',{@menu_callback,obj});
+            m1 = uimenu(c,'Label','remove','Callback',{@menu_callback,obj});
             
         end
      
@@ -109,11 +114,7 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
        
         
         function remove_callback(obj,callobj,handle,actiondata)
-%             disp('remove_callback in GuiFile not implemented')
             removefile=get(obj.guihandles.filelist_long,'Value');
-%             fl=get(obj.guihandles.filelist_long,'String');
-            
-            %locData
             floc=obj.locData.loc.filenumber;
             removeind=floc==removefile;
             moveup=floc>removefile;
@@ -132,9 +133,6 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.locData.filter;
             obj.setPar('filelist_long',fl,'String');
             obj.setPar('filelist_short',fs,'String');
- 
-
-            
         end     
         
         function setGuiParameters(obj,p,varargin)
@@ -276,6 +274,8 @@ switch menuobj.Label
         end
             
             listdlg('ListString',texta,'ListSize',[800,800]);
+    case 'remove'
+        obj.remove_callback;
 
 end
 end
@@ -301,29 +301,29 @@ end
 
 function pard=guidef(obj)
 pard.load.object=struct('Style','pushbutton','String','Load','Callback',{{@obj.loadbutton_callback,0}});
-pard.load.position=[4.5,1];
-pard.load.Width=0.75;
+pard.load.position=[4.75,2.5];
+pard.load.Width=0.7;
 pard.load.Height=1.5;
 
 pard.add.object=struct('Style','pushbutton','String','Add','Callback',{{@obj.loadbutton_callback,1}});
-pard.add.position=[4.5,1.75];
-pard.add.Width=0.75;
+pard.add.position=[4.75,3.2];
+pard.add.Width=0.7;
 pard.add.Height=1.5;
 
 pard.loadmodule.object=struct('Style','popupmenu','String',{'auto'});
-pard.loadmodule.position=[5.5,1];
+pard.loadmodule.position=[4.5,1];
  pard.loadmodule.Width=1.5;
  pard.loadmodule.object.TooltipString='select saver plugin';
  
-pard.updateGuiPar.object=struct('Style','checkbox','String','load Gui Parameters');
-pard.updateGuiPar.position=[6.5,1];
- pard.updateGuiPar.Width=1.5;
-pard.updateGuiPar.TooltipString='Restore Gui parameters saved with localization data';
+% pard.updateGuiPar.object=struct('Style','checkbox','String','load Gui Parameters');
+% pard.updateGuiPar.position=[5.5,1];
+%  pard.updateGuiPar.Width=1.5;
+% pard.updateGuiPar.TooltipString='Restore Gui parameters saved with localization data';
 
-
-pard.remove.object=struct('Style','pushbutton','String','remove','Callback',{{@obj.remove_callback,1}});
-pard.remove.position=[4,4.5];
-pard.remove.Width=0.5;
+% 
+% pard.remove.object=struct('Style','pushbutton','String','remove','Callback',{{@obj.remove_callback,1}});
+% pard.remove.position=[4,4.5];
+% pard.remove.Width=0.5;
 % pard.add.Height=1.5;
 
 
@@ -332,38 +332,42 @@ pard.filelist_long.position=[3,1];
 pard.filelist_long.Width=4;
 pard.filelist_long.Height=3;
 
-pard.autosavecheck.object=struct('Style','checkbox','String','Auto save (min):','Value',1);
-pard.autosavecheck.position=[10,3.5];
-pard.autosavecheck.Width=1.3;
-
+pard.autosavecheck.object=struct('Style','checkbox','String','Auto save','Value',1);
+pard.autosavecheck.position=[9,4];
+pard.autosavecheck.Width=1;
+pard.as_tdx.object=struct('Style','text','String','Interval (min)');
+pard.as_tdx.position=[10,4];
+pard.as_tdx.Width=0.65;
 pard.autosavetime.object=struct('Style','edit','String','30','Callback',{{@autosavetime_callback,obj}});
-pard.autosavetime.position=[10,4.5];
-pard.autosavetime.Width=0.5;
+pard.autosavetime.position=[10,4.65];
+pard.autosavetime.Width=0.35;
 
 pard.savemodule.object=struct('Style','popupmenu','String',{{'_sml','final image','raw images','_fitpos','settings'}},...
     'Callback',{{@savemode_callback,obj}});
-pard.savemodule.position=[8,1.];
+pard.savemodule.position=[9,1.];
 pard.savemodule.Width=1.5;
 
 pard.save.object=struct('Style','pushbutton','String','Save','Callback',{{@save_callback,obj}});
-pard.save.position=[8,2.5];
-pard.save.Width=.75;
+pard.save.position=[9,2.5];
+pard.save.Width=1;
 
 pard.group_b.object=struct('Style','pushbutton','String','Group','Callback',{{@obj.group_callback}});
-pard.group_b.position=[6,3.5];
-pard.group_b.Width=1.5;
+pard.group_b.position=[5,4];
+pard.group_b.Width=1;
 
 pard.group_tdx.object=struct('Style','text','String','dX (nm)');
-pard.group_tdx.position=[7,3.5];
+pard.group_tdx.position=[6,4];
+pard.group_tdx.Width=0.65;
 pard.group_dx.object=struct('Style','edit','String','75');
-pard.group_dx.position=[7,4.5];
-pard.group_dx.Width=0.5;
+pard.group_dx.position=[6,4.65];
+pard.group_dx.Width=0.35;
 
 pard.group_tdt.object=struct('Style','text','String','dT (frames)');
-pard.group_tdt.position=[8,3.5];
+pard.group_tdt.position=[7,4];
+pard.group_tdt.Width=0.65;
 pard.group_dt.object=struct('Style','edit','String','1');
-pard.group_dt.position=[8,4.5];
-pard.group_dt.Width=0.5;
+pard.group_dt.position=[7,4.65];
+pard.group_dt.Width=0.35;
 
 pard.syncParameters={{'filelist_long','filelist_long',{'String'}}};
 pard.outputParameters= {'group_dx','group_dt'};
@@ -372,7 +376,7 @@ pard.inputParameters={'mainfile'};
 
 pard.load.object.TooltipString='load localization data or image. Load at least one localization data before adding an image.';
 pard.add.object.TooltipString='add localization data or image';
-pard.remove.object.TooltipString='remove file';
+% pard.remove.object.TooltipString='remove file';
 pard.savemodule.object.TooltipString='select what to save';
 pard.group_b.object.TooltipString='group localizations in consecutive frames';
 pard.group_dx.object.TooltipString=sprintf('distance in nm which two locs can be apart \n and still grouped together');
