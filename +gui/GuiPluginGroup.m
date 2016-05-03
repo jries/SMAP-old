@@ -58,7 +58,7 @@ classdef GuiPluginGroup< interfaces.GuiModuleInterface & interfaces.LocDataInter
                     'Position',[5,posparent(4)-83,200,80],'Style','listbox','String',{'empty'},...
                     'FontSize',fontsize,'Callback',{@processorselect_callback,obj});
                 
-                if ~isempty(obj.guiplugins)
+                if ~isempty(obj.guiplugins)&&~isempty(obj.plugins)
                     obj.setprocessorlist;
                     data.Value=1;
                     processorselect_callback(data,0,obj)
@@ -100,7 +100,7 @@ classdef GuiPluginGroup< interfaces.GuiModuleInterface & interfaces.LocDataInter
             if nargin<4
                 isprocessor=true;
             end
-            if iscell(pluginpath)&&length(pluginpath)==3
+            if iscell(pluginpath)&&length(pluginpath)>=3
                 thisplugin=[];
                 try
                 thisplugin=plugin(pluginpath{:});
@@ -141,7 +141,7 @@ classdef GuiPluginGroup< interfaces.GuiModuleInterface & interfaces.LocDataInter
             thisplugin.processorgui=processorgui;
             thisplugin.makeGui;
             if isworkflow
-                
+                pluginpath
                 thisplugin.load(pluginpath)
             end
             
@@ -171,10 +171,12 @@ classdef GuiPluginGroup< interfaces.GuiModuleInterface & interfaces.LocDataInter
             obj.children.(name)=obj.processors.(name);
         end
         function setprocessorlist(obj)
+%             if ~isempty(obj.plugins)
             obj.guihandles.processorselect.String=obj.plugins.pluginnames;
             if obj.guihandles.processorselect.Value<1||obj.guihandles.processorselect.Value>length(obj.plugins.pluginnames)
                 obj.guihandles.processorselect.Value=1;
             end
+%             end
         end
     end
 end
