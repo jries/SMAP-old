@@ -19,7 +19,7 @@ indf=loc.filenumber==file.number;
 xf=double(loc.xnm);
 yf=double(loc.ynm);
 switch p.datapart.selection
-    case 'all (T->R)'
+    case {'all (T->R)','all'}
         [x,y]=transform.transformCoordinatesInv(xf(indf),yf(indf));
         indt=true(size(xf));
     case 'all (R->T)'

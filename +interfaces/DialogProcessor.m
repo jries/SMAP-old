@@ -86,6 +86,7 @@ function processgo_callback(a,b,obj)
 % notify(obj.locData,'undo',recgui.simpleEvent('backup'));
 
 obj.status(['executing ' class(obj)])
+drawnow;
 if isempty(obj.resultshandle)||~isvalid(obj.resultshandle)
     obj.makeResultsWindow;
 end

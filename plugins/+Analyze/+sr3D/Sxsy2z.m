@@ -19,6 +19,7 @@ classdef Sxsy2z<interfaces.DialogProcessor
             end
             sx2sy2=(locs.PSFxnm/p.cam_pixelsize_nm).^2-(locs.PSFynm/p.cam_pixelsize_nm).^2;
             z=feval(obj.outsx2sy2,sx2sy2);
+            z(locs.PSFynm==0)=-2;
 %             refractiveIndexMismatch=1.25
             obj.locData.loc.znm=-z*1000*p.refractiveIndexMismatch;
             obj.locData.regroup;
@@ -37,7 +38,9 @@ fn=obj.guihandles.calfile.String;
 [f,p]=uigetfile(fn);
 if f
 load([p f])
+if exist('cal3D','var')
 obj.cal3D=cal3D;
+end
 obj.outsx2sy2=outsx2sy2;
 obj.guihandles.calfile.String=[p f];
 end

@@ -80,6 +80,7 @@ end
 
 function h=PkB(k,B,pblink)
 global sumk
+k=round(k);
 h=pblink^B*(1-pblink).^k.*sumk(k+1,B+1);
 
 function h=PP1(k,mu)
