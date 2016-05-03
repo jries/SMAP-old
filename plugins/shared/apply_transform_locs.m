@@ -12,6 +12,7 @@ end
 loco.xnm=loc.xnm;
 loco.ynm=loc.ynm;
 loco.frame=loc.frame;
+loco.channel=loc.channel;
 %only correct file
 indf=loc.filenumber==file.number;
 
@@ -39,7 +40,7 @@ loco.ynm(indff)=single(y);
 
 if isfield(p,'setchannel')&&p.setchannel
     loco.ch_preT=loc.channel;
-    loco.channel=ones(size(loc.xnm))*1;
+    loco.channel(indf&~indt)=1;
     loco.channel(indff)=2;
 end
 
