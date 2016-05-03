@@ -12,11 +12,11 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
             try
             loadfile(obj,p,file,mode);
             %search for Tiff
-            ind=regexp(file,'time_[0-9]_sml.mat');
-            path=[file(1:ind(end)-1) 'zstack_1' filesep 'Pos0' filesep];
+            ind=regexp(file,p.searchstring);
+            path=[file(1:ind(end)-1) p.replacestring filesep 'Pos0' filesep];
             il=imageLoader(path);
             im=il.getImage(38);
-            for k=39:44
+            for k=p.framerange
                 im=max(im,il.getImage(k));
             end
             catch
@@ -30,9 +30,22 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
             tiff.info.name='MIP';
             
             bg=mywaveletfilter(double(im),3,true);
+            mipbg=double(im)-bg;
+            load(p.Tfile)
+            if ~exist('transformation','var')
+                disp('selected transformation file does not have a valid transformation, image not transformed');
+                mipbgT=mipbg;
+            else
+                p.cam_pixelsize_nm=tiff.info.pixsize*1000;
+                p.roitiff=tiff.info.roi;
+                p.datapart.selection='target';
+                mipbgT=apply_transform_image(mipbg,transformation,p);
+            end
+            
+            
             tiffbg=tiff;
-            tiffbg.image=double(im)-bg;
-            tiffbg.info.name='MIP-BG';
+            tiffbg.image=mipbgT;
+            tiffbg.info.name='MIP-BG-T';
             obj.locData.files.file(end).tif=[tiffbg,tiff];
             obj.locData.files.file(end).numberOfTif=2;          
             
@@ -43,7 +56,7 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
             initGuiAfterLoad(obj);
         end
         function pard=guidef(obj)
-            pard=guidef;
+            pard=guidef(obj);
         end
         function clear(obj,file,isadd)
             if isadd 
@@ -52,13 +65,56 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
                 obj.locData.clear;
             end
         end        
+        function loadTfile(obj,a,b)
+             fn=obj.guihandles.Tfile.String;
+            [f,path]=uigetfile(fn,'Open transformation file _T.mat');
+            if f
+                obj.guihandles.Tfile.String=[path f];
+                obj.setPar('transformationfile',[path f]);
+            end
+        end
     end
 end
 
 
 
 
-function pard=guidef
+function pard=guidef(obj)
+pard.frameranget.object=struct('Style','text','String','frame range:');
+pard.frameranget.position=[1,1];
+ pard.frameranget.Width=1.25;
+pard.frameranget.TooltipString='frame range';
+
+pard.framerange.object=struct('Style','edit','String','39 44');
+pard.framerange.position=[1,2.25];
+ pard.framerange.Width=.75;
+pard.framerange.TooltipString='frame range';
+
+pard.searchstringt.object=struct('Style','text','String','search string');
+pard.searchstringt.position=[2,1];
+ pard.searchstringt.Width=1.25;
+
+pard.searchstring.object=struct('Style','edit','String','time_[0-9]_sml.mat');
+pard.searchstring.position=[2,2.25];
+ pard.searchstring.Width=1.75;
+pard.searchstring.TooltipString='serach string. Use matlab regular expression';
+
+pard.replacestring.object=struct('Style','edit','String','zstack_1');
+pard.replacestring.position=[2,4];
+ pard.replacestring.Width=1;
+pard.replacestring.TooltipString='replace string.';
+
+
+pard.Tfile.object=struct('Style','edit','String','settings/temp/temp_T.mat');
+pard.Tfile.position=[3,1];
+pard.Tfile.Width=3;
+pard.syncParameters={{'transformationfile','Tfile',{'String'}}};
+
+pard.browseTfile.object=struct('Style','pushbutton','String','load Tfile','Callback',@obj.loadTfile);
+pard.browseTfile.position=[3,4];
+ pard.browseTfile.Width=1;
+pard.browseTfile.TooltipString='frame range';
+
 info.name='SML loader';
 info.extensions={'*.mat';'*.*'};
 info.dialogtitle='select any SMLM file (_sml or _fitpos)';

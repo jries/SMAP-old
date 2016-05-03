@@ -2,6 +2,9 @@ function info=getimageinfo(file)
 [p,f,ext]=fileparts(file);
 if isempty(f)
     ext='.tif';
+    allf=dir([p filesep '*' ext]);
+    f=allf(1).name;
+    file=[p filesep f];
 end
  info.metafile=[];
  info.filename=file;

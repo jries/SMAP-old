@@ -37,7 +37,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
             else
                 path=fileparts(p.mainbatchfile);
             end
-            [f,path]=uigetfile(fullfile(path,'*_batch.mat;*.tif'),'Select image or batch files');
+            [f,path]=uigetfile(fullfile(path,'*_batch.mat;*.tif'),'Select image or batch files','MultiSelect','on');
             if ~f
                 return
             end

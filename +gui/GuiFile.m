@@ -77,6 +77,7 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             end
             path=fileparts(fm);          
             loader=obj.loaders{p.loadmodule.Value};
+%             p=copyfields(p,loader.getGuiParameters);
 %             loader=plugin('File','Load',obj.loaders{p.loadmodule.Value},[],obj.P);
 %             loader.attachLocData(obj.locData);
 %             loader.makeGui;
@@ -266,6 +267,7 @@ end
 
 
 par=obj.getAllParameters(loader.inputParameters);
+par=copyfields(par,loader.getGuiParameters);
 loader.load(par,[pfad f]);
 end
 
