@@ -137,8 +137,8 @@ if p.dualchannel
         imc2=makeimage(p,xf2,yf2,s2);
         sim=size(imc1);
         outim=zeros(sim(1),sim(2),3);
-        outim(:,:,1)=imc1;
-        outim(:,:,2)=imc2;
+        outim(:,:,1)=imc2;
+        outim(:,:,2)=imc1;
         
 %         figure(88);imagesc(outim/max(outim(:)))
         hr.NextPlot='replace';

@@ -60,7 +60,18 @@ classdef AnalyzeRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
                         results.sumrdensity=obj.results.sumrdensity;
                         results.numberofsites=obj.results.numsites;
                         save([path file],'results');
+                    case 'all (not sites)'
+                        results=obj.results;
+                        save([path 'results.mat'],'results');
                         
+                        results.sumimage=obj.results.sumimage;
+                        results.sumrdensity=obj.results.sumrdensity;
+                        results.numberofsites=obj.results.numsites;
+                        save([path 'rad_av.mat'],'results');
+                        
+                        image=obj.results.sumimage/obj.results.numsites;
+                        saveastiff(uint16(image/max(image(:))*2^16),[path file])
+                         export_fig([path file],'-pdf','-nocrop',obj.resultsfigure)
 
                 end
             end
@@ -132,7 +143,7 @@ function pard=guidef(obj)
 pard.savebutton.object=struct('String','Save','Style','pushbutton','Callback',{{@obj.save_callback}});
 pard.savebutton.position=[1,1];
 
-pard.savemenu.object=struct('String',{{'results.pdf','average.tif','results.mat','sites.mat','rad_av.mat'}},'Style','popupmenu');
+pard.savemenu.object=struct('String',{{'all (not sites)','results.pdf','average.tif','results.mat','sites.mat','rad_av.mat'}},'Style','popupmenu');
 pard.savemenu.position=[2,1];
 
 pard.t1.object=struct('String','max dr/ro','Style','text');
