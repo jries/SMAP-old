@@ -117,7 +117,15 @@ hdt=datacursormode(fh);
 set(hdt,'UpdateFcn',{@CMElabel,results.sitenames,results.images,axim})
 
 subplot(3,4,11);
-imagesc(results.sumimage/results.numsites)
+pim=results.sumimage;
+s=size(pim);
+if length(s)==3
+npim=squeeze(max(max(pim)));
+pim(:,:,1)=pim(:,:,1)/npim(1);
+pim(:,:,2)=pim(:,:,2)/npim(2);
+pim(:,:,3)=pim(:,:,3)/npim(3);
+end
+imagesc(pim)
 title('average image')
 axis equal
 axis tight

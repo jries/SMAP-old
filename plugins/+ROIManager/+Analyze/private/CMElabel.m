@@ -17,7 +17,7 @@ txt{2}=['Y: ' num2str(pos(2))];
 if ~isempty(idx)
 txt{3}=label{idx};
 if nargin>4
-    imagesc(image{idx},'Parent',imaxis)
+    imagesc(1.3*image{idx}/max(image{idx}(:)),'Parent',imaxis)
     title(txt{3},'Parent',imaxis)
 end
 end

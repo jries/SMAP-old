@@ -2,6 +2,7 @@ function initGuiAfterLoad(obj)
 if isempty(obj.locData.loc)
     return
 end
+disp('init gui after load')
 obj.locData.regroup;
 % obj.locData.filter;
 % fmax=max(obj.locData.loc.frame);

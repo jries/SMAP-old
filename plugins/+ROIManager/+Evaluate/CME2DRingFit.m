@@ -145,12 +145,12 @@ circfactor=1.5;
 % histogram(angle+360,10);
 % hold off
 
-out.r2D=fitp(1);
+out.r1=fitp(1);
 out.x0=fitp(2);
 out.y0=fitp(3);
 out.Ncirc=sum((xm-fitp(2)).^2+(ym-fitp(3)).^2<fitp(1).^2*circfactor^2);
 
-title(['N=' num2str(out.Ncirc) ', r=' num2str(out.r2D)],'Parent',ho)
+title(['N=' num2str(out.Ncirc) ', r=' num2str(out.r1)],'Parent',ho)
 
 
 end

@@ -11,7 +11,7 @@ image_cumulative=0;
 % for k=1:length(se.sites)
 for k=1:153
         si=se.sites(k).evaluation.CME2DRingFit;
-        r2D(k)=si.r2D;
+       .r1(k)=si.r1;
         Ncirc(k)=si.Ncirc;
         x0(k)=si.x0;
         y0(k)=si.y0;
@@ -35,10 +35,10 @@ end
 figure(11)
 clf
 subplot(1,3,1)
-histfit(r2D,15)
-[mu_r, sigma_r]=normfit(r2D);
+histfit.r1,15)
+[mu_r, sigma_r]=normfit.r1);
 xlabel('radius');
-title(strcat('Ede1: number of evaluated sites: ',sprintf('%d',length(r2D))));
+title(strcat('Ede1: number of evaluated sites: ',sprintf('%d',length.r1))));
 
 subplot(1,3,2)
 histfit(Ncirc,15)
@@ -47,7 +47,7 @@ xlabel('number within 1.5x radius ??');
 title(strcat('mu_r= ',sprintf('%.2f',mu_r),'+-',sprintf('%.2f',sigma_r),' mu_N= ',sprintf('%.2f',mu_n),'+-',sprintf('%.2f',sigma_n)));
 
 subplot(1,3,3)
-plot(Ncirc,r2D,'.b')
+plot(Ncirc.r1,'.b')
 xlabel('Ncirc'); ylabel('radius from fit');
 
 % cumulative image

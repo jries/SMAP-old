@@ -100,12 +100,12 @@ if p.dualchannel
         ht=obj.setoutput('theta');  
         hr.Children.delete;
         ht.Children.delete;
-        xf=locs1.xnmr-circfit.x0;yf=locs1.xnmr-circfit.y0;
+        xf=locs1.xnmr-circfit.x0;yf=locs1.ynmr-circfit.y0;
         profiles=rthetaprofiles(p,xf,yf,hr,ht);
         circfit.profiles1=profiles;
         hr.NextPlot='add';
         ht.NextPlot='add';
-        xf=locs2.xnmr-circfit.x0;yf=locs2.xnmr-circfit.y0;
+        xf=locs2.xnmr-circfit.x0;yf=locs2.ynmr-circfit.y0;
         profiles=rthetaprofiles(p,xf,yf,hr,ht);
         circfit.profiles2=profiles;
         
@@ -124,12 +124,23 @@ if p.dualchannel
         imfit.Ncircu2=sum((locsu2.xnmr-imfit.x0).^2+(locsu2.ynmr-imfit.y0).^2<imfit.r2.^2*circfactor^2);
         
         
-        xf=locs1.xnmr-imfit.x0;yf=locs1.xnmr-imfit.y0;
-        profiles=rthetaprofiles(p,xf,yf,hr,ht);
+        xf1=locs1.xnmr-imfit.x0;yf1=locs1.ynmr-imfit.y0;
+        profiles=rthetaprofiles(p,xf1,yf1,hr,ht);
         imfit.profiles1=profiles;
-        xf=locs2.xnmr-imfit.x0;yf=locs2.xnmr-imfit.y0;
-        profiles=rthetaprofiles(p,xf,yf,hr,ht);
+        xf2=locs2.xnmr-imfit.x0;yf2=locs2.ynmr-imfit.y0;
+        profiles=rthetaprofiles(p,xf2,yf2,hr,ht);
         imfit.profiles2=profiles;
+        
+        s1=locs1.locprecnm/2;
+        imc1=makeimage(p,xf1,yf1,s1);
+        s2=locs2.locprecnm/2;
+        imc2=makeimage(p,xf2,yf2,s2);
+        sim=size(imc1);
+        outim=zeros(sim(1),sim(2),3);
+        outim(:,:,1)=imc1;
+        outim(:,:,2)=imc2;
+        
+%         figure(88);imagesc(outim/max(outim(:)))
         hr.NextPlot='replace';
         ht.NextPlot='replace';
          legend(hr,'circfit l1','circfit l2','imfit l1','imfit l2');
@@ -137,6 +148,7 @@ if p.dualchannel
 
         out.circfit=circfit;
         out.imfit=imfit;
+        out.imfit.image=outim;
         return
 
     end
@@ -153,9 +165,9 @@ circfit=ringfit(p,xm,ym,ho);
 locsg=obj.getLocs({'xnmr','ynmr'},'layer',p.layer.Value,'size',roisize,'grouping','grouped');
 locsu=obj.getLocs({'xnmr','ynmr'},'layer',p.layer.Value,'size',roisize,'grouping','ungrouped');
 circfactor=1.5;
-circfit.Ncirc=sum((locs.xnmr-circfit.x0).^2+(locs.ynmr-circfit.y0).^2<circfit.r2D.^2*circfactor^2);
-circfit.Ncircg=sum((locsg.xnmr-circfit.x0).^2+(locsg.ynmr-circfit.y0).^2<circfit.r2D.^2*circfactor^2);
-circfit.Ncircu=sum((locsu.xnmr-circfit.x0).^2+(locsu.ynmr-circfit.y0).^2<circfit.r2D.^2*circfactor^2);
+circfit.Ncirc1=sum((locs.xnmr-circfit.x0).^2+(locs.ynmr-circfit.y0).^2<circfit.r1.^2*circfactor^2);
+circfit.Ncircg1=sum((locsg.xnmr-circfit.x0).^2+(locsg.ynmr-circfit.y0).^2<circfit.r1.^2*circfactor^2);
+circfit.Ncircu1=sum((locsu.xnmr-circfit.x0).^2+(locsu.ynmr-circfit.y0).^2<circfit.r1.^2*circfactor^2);
 
 
 xf=xm-circfit.x0;yf=ym-circfit.y0;
@@ -171,9 +183,9 @@ hf2=obj.setoutput('fitim2');
 
 
 imfit=imgfit(p,xm,ym,locs,circfit,hf,hf2);
-imfit.Ncirc=sum((locs.xnmr-imfit.x0).^2+(locs.ynmr-imfit.y0).^2<imfit.r2D.^2*circfactor^2);
-imfit.Ncircg=sum((locsg.xnmr-imfit.x0).^2+(locsg.ynmr-imfit.y0).^2<imfit.r2D.^2*circfactor^2);
-imfit.Ncircu=sum((locsu.xnmr-imfit.x0).^2+(locsu.ynmr-imfit.y0).^2<imfit.r2D.^2*circfactor^2);
+imfit.Ncirc1=sum((locs.xnmr-imfit.x0).^2+(locs.ynmr-imfit.y0).^2<imfit.r1.^2*circfactor^2);
+imfit.Ncircg1=sum((locsg.xnmr-imfit.x0).^2+(locsg.ynmr-imfit.y0).^2<imfit.r1.^2*circfactor^2);
+imfit.Ncircu1=sum((locsu.xnmr-imfit.x0).^2+(locsu.ynmr-imfit.y0).^2<imfit.r1.^2*circfactor^2);
 xf=xm-imfit.x0;yf=ym-imfit.y0;
 
 
@@ -223,15 +235,15 @@ startdr=30;
 maxradius=75;
  [X,Y]=meshgrid(-roisize+pixels/2:pixels:roisize);
   startpc=circfit;
- if startpc.r2D>maxradius
-     startpc.x0=0;startpc.y0=0;startpc.r2D=roisize/4;
+ if startpc.r1>maxradius
+     startpc.x0=0;startpc.y0=0;startpc.r1=roisize/4;
  end
- startdr=startpc.r2D*.75;
+ startdr=startpc.r1*.75;
  
 
  sigma=double(median(locs.locprecnm))*sqrt(1+(p.gaussfac_imfit(1)*p.layer1_.gaussfac)^2);%*sqrt(p.exponent);
  imgf=(img).^(1/p.exponent);
-  startp=[mean(img(:)), startpc.x0,startpc.y0,startpc.r2D+startdr/2,startdr];
+  startp=[mean(img(:)), startpc.x0,startpc.y0,startpc.r1+startdr/2,startdr];
   
  
   lb=[0 -inf -inf 0 0];
@@ -258,7 +270,7 @@ imstart=imstart/max(imstart(:));
    imagesc(range,range,imgf.^p.exponent,'Parent',hf2)
 
    hf2.NextPlot='add';
-   circle(circfit.x0,circfit.y0,circfit.r2D,'Parent',hf2);
+   circle(circfit.x0,circfit.y0,circfit.r1,'Parent',hf2);
    circle(fitpim(2),fitpim(3),fitpim(4),'EdgeColor','m','Parent',hf2)
 %    if fitpim(5)<fitpim(4)
     circle(fitpim(2),fitpim(3),fitpim(4)-fitpim(5),'EdgeColor','m','Parent',hf2)
@@ -267,13 +279,13 @@ imstart=imstart/max(imstart(:));
    hf2.NextPlot='replace';
    
    out.x0=fitpim(2);out.y0=fitpim(3);
-   out.r2D=fitpim(4);out.dr=fitpim(5);
-   out.dr_ro=out.dr/(out.r2D);
+   out.r1=fitpim(4);out.dr1=fitpim(5);
+   out.dr_ro1=out.dr1/(out.r1);
    
    if length(fitpim)>5
-       out.sigma=fitpim(6);
+       out.sigma1=fitpim(6);
    else
-       out.sigma=sigma;
+       out.sigma1=sigma;
    end
 %    out.image=img.^2;
   
@@ -355,6 +367,8 @@ range2=[-roisize 3*roisize];
    out.r2=p2(4);out.dr2=p2(5);
    out.dr_ro1=out.dr1/(out.r1);
    out.dr_ro2=out.dr2/(out.r2);
+   out.sigma1=sigma1;
+   out.sigma2=sigma2;
 %    out.image=img.^2;
 %   out
 %  fitpim(1:2)
@@ -439,11 +453,11 @@ ho.NextPlot='replace';
 axis(ho,'ij','equal');
 
  circfactor=1.5;
-out.r2D=fitp(1);
+out.r1=fitp(1);
 out.x0=fitp(2);
 out.y0=fitp(3);
 out.Ncirc=sum((xm-fitp(2)).^2+(ym-fitp(3)).^2<fitp(1).^2*circfactor^2);
-title(['N=' num2str(out.Ncirc) ', r=' num2str(out.r2D)],'Parent',ho)
+title(['N=' num2str(out.Ncirc) ', r=' num2str(out.r1)],'Parent',ho)
 end
 
 function err=gaussringerr(par,img1,img2,X,Y,s1,s2,exponent)

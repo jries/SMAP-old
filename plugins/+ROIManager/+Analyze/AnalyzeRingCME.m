@@ -71,13 +71,14 @@ end
 function results=cmeresults(sites)
 circfitfields={'evaluation','CME2DRing','circfit'};
 imfitfields={'evaluation','CME2DRing','imfit'};
-results.N=getFieldAsVector(sites,circfitfields{:},'Ncirc');
-results.rc=getFieldAsVector(sites,circfitfields{:},'r2D');
+results.N=getFieldAsVector(sites,circfitfields{:},'Ncirc1');
+results.rc=getFieldAsVector(sites,circfitfields{:},'r1');
 
 results.images=getFieldAsVector(sites,imfitfields{:},'image');
-results.dr=getFieldAsVector(sites,imfitfields{:},'dr');
-results.ro=getFieldAsVector(sites,imfitfields{:},'r2D');
-results.sigma=getFieldAsVector(sites,imfitfields{:},'sigma');
+results.dr=getFieldAsVector(sites,imfitfields{:},'dr1');
+results.ro=getFieldAsVector(sites,imfitfields{:},'r1');
+
+results.sigma=getFieldAsVector(sites,imfitfields{:},'sigma1');
 
 results.rdensity=getFieldAsVector(sites,imfitfields{:},'profiles1','rdensity');
 results.ac=getFieldAsVector(sites,imfitfields{:},'profiles1','thetaAC');
