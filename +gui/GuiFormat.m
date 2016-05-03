@@ -431,7 +431,11 @@ pall=obj.getLayerParameters;
 for k=1:length(pall)
     pall{k}=copyfields(pall{k},p);
 end
+try
 TotalRender(obj.locData,pall,{'xnm','ynm'});
+catch
+    obj.status('Error in reconstruction. Maybe some render settings are incompatible with current data');
+end
 end
 
 

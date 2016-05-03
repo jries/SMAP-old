@@ -62,7 +62,12 @@ rz=[p.zmin p.zmax];
 
 yax=obj.initaxis('x-y');
 p.sr_axes=[];p.rangex=rx;p.rangey=ry;p.sr_pixrec=[pixelsizex pixelsizey];
-yim=anyRender(locData,p,'x','xnmp','y','ynmp','sx','locprecnm','sy','locprecnm');
+if isfield(locData.loc,'locprecznm')
+    fieldsz='locprecznm';
+else
+    fieldsz='locprecnm';
+end
+yim=anyRender(locData,p,'x','xnmp','y','ynmp','sx','locprecnm','sy',fieldsz);
 imagesc(rx,ry,yim.image,'Parent',yax);
 axes(yax)
 axis equal;
@@ -70,7 +75,7 @@ axis tight
 p.sr_axes=[];
 zax=obj.initaxis('x-z');
 p.rangex=rx;p.rangey=rz;p.sr_pixrec=[pixelsizex pixelsizez];
-[zim]=anyRender(locData,p,'x','xnmp','y','znm','sx','locprecnm','sy','locprecznm');
+[zim]=anyRender(locData,p,'x','xnmp','y','znm','sx','locprecnm','sy',fieldsz);
 imagesc(rx,rz,zim.image,'Parent',zax);
 % [~,ax1]=renderAnyField(locData,p,'x-z');
 axes(zax)

@@ -19,7 +19,7 @@ classdef calibrateAstig<interfaces.DialogProcessor
                 obj.setPar('fit_gradient3Dellipticity',(out))
             elseif isfield(obj.locData.loc,'PSFynm')
                 locs=obj.locData.getloc({'frame','PSFxnm','PSFynm'},'layer',1,'position','roi');
-%             if ~isempty(locs.PSFynm)
+
                 p.fileout=obj.locData.files(1).file.name;
                 calibrateAstig3D(locs,p)         
             else
@@ -153,10 +153,13 @@ syf=sigmafromz(fpy,zt,B0);
 plot(zt,syf,'k')
 hold off
 axis tight
-
+ylabel('PSFx,PSFy')
 
 %zpar=[sigma0x,Ax,Ay,Bx,By,gamma,d,sigma0y)
-outforfit=real(fitp([2 4 5 6 7 8 1 3]))
+outforfit=real(fitp([2 4 5 6 7 8 1 3]));
+% initaxis(p.resultstabgroup,'sx^2-sy^2');
+outsx2sy2=fitsx2sy2(sx,sy,z,1);
+% outsx2sy2=obj.outsx2sy2;
 button = questdlg('Is the fit good?','3D astigmatism bead calibration','Refit','Save','Cancel','Refit') ;
 switch button
     case 'Refit'
@@ -165,7 +168,7 @@ switch button
         fn=[p.fileout(1:end-4) '_3DAcal.mat'];
         [f,p]=uiputfile(fn);
         if f
-            save([p f],'outforfit')
+            save([p f],'outforfit','outsx2sy2')
         end
 end
 end
@@ -195,13 +198,42 @@ err=sf-sx;
 err=err./sqrt(abs(err));
 end
 
+function fitpsx=fitsx2sy2(sx,sy,z,zrange)
+
+indf=abs(z)<zrange;
+if sum(indf)>5
+fitpsx=fit(sx(indf).^2-sy(indf).^2,z(indf),'poly3','Robust','LAR');
+yyaxis right
+% hold on
+% % fitpsx=polyfit(zcorr,sx.^2-sy.^2,4);
+% plot(z,sx.^2-sy.^2,'r.')
+hold on
+plot(z(indf),sx(indf).^2-sy(indf).^2,'.','Color',[0 0.5 0])
+
+sxsort=sort(sx.^2-sy.^2);
+zsort=feval(fitpsx,sxsort);
+
+plot(zsort,sxsort,'k')
+ylabel('sx^2-sy^2')
+% plot(zcorr,polyval(fitpsx,zcorr),'.')
+hold off
+% xlim([-6 6])
+else
+    fitpsx=zeros(2,1);
+end
+end
+
+
 function pard=guidef
 % pard.d3_color.object=struct('Style','checkbox','String','render in color');
 % pard.d3_color.position=[2,1];
+% pard.mode3D.object=struct('String',{{'astigmatic PSFx/y for MLE','astigmatic gradient fit','bi-plane'}},'Style','popupmenu');
+% pard.mode3D.position=[2,3];
+% pard.mode3D.Width=3;
 
-pard.text2.object=struct('String','calibrate 3D astigmatism','Style','text');
+pard.text2.object=struct('String','calibrate 3D ','Style','text');
 pard.text2.position=[2,1];
-pard.text2.Width=3;
+pard.text2.Width=2;
 pard.text3.object=struct('String','dz (nm)','Style','text');
 pard.text3.position=[3,2];
 % 
@@ -219,5 +251,5 @@ pard.framez0.position=[4,3];
 pard.B0.object=struct('String','set B = 0','Style','checkbox','Value',0);
 pard.B0.position=[5,1];
 
-
+pard.plugininfo.name='calibrate 3D';
 end
