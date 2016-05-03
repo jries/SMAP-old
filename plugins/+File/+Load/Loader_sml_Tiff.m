@@ -38,16 +38,20 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
             else
                 p.cam_pixelsize_nm=tiff.info.pixsize*1000;
                 p.roitiff=tiff.info.roi;
-                p.datapart.selection='target';
+                p.datapart.selection='reference';
                 mipbgT=apply_transform_image(mipbg,transformation,p);
             end
             
             
             tiffbg=tiff;
-            tiffbg.image=mipbgT;
-            tiffbg.info.name='MIP-BG-T';
-            obj.locData.files.file(end).tif=[tiffbg,tiff];
-            obj.locData.files.file(end).numberOfTif=2;          
+            tiffbg.image=mipbg;
+            tiffbg.info.name='MIP-BG';
+            tiffbgT=tiff;
+            tiffbgT.image=mipbgT;
+            tiffbgT.info.name='MIP-BG-T';
+           
+            obj.locData.files.file(end).tif=[tiffbgT,tiff,tiffbg];
+            obj.locData.files.file(end).numberOfTif=3;          
             
         end
         function run(obj,p)
