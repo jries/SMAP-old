@@ -383,16 +383,19 @@ p=obj.getGuiParameters;
 
 switch p.rendermode.selection
 case 'Other'
+    if strcmp(p.externalrender.selection,'Select')
+        return
+    end
     rendermodules=obj.getPar('rendermodules');
     
-    if length(rendermodules)>=obj.layer && ~isempty(rendermodules{obj.layer})
+    if length(rendermodules)>=obj.layer && ~isempty(rendermodules{obj.layer})&&isvalid(rendermodules{obj.layer})
         delete(rendermodules{obj.layer}.handle)
         delete(rendermodules{obj.layer})
     end
     renderer=p.externalrender.selection;
     guiplugins=obj.getPar('menu_plugins');
     pluginpath=guiplugins.Analyze.render.(renderer).module;
-    module=plugin(pluginpath{:});
+    module=plugin(pluginpath{1:3});
     if strcmp(object.Style,'popupmenu')
         vis='off';
     else
