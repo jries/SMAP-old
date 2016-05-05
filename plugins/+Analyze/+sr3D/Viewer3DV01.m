@@ -282,7 +282,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         function redraw(obj)
             
             p=obj.getAllParameters;
-            stereo=p.stereo.Value>1;
+            stereo=p.stereo.Value>2;
             locCopy=obj.locData; %maybe not needed
             lo=logical(obj.getPar('sr_layerson'));
             layerson=find(lo);
@@ -375,12 +375,12 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 srim1=displayerSMAP(layer1,pr);
                 srim2=displayerSMAP(layer2,pr);
                 switch p.stereo.Value
-                    case 2
+                    case 3
                         srim=srim1;
                         srim.image=srim1.image+srim2.image;
-                    case {3,5}
+                    case {4,5}
                         srim=assembleSideviews(srim2,srim1,p);
-                    case {4}
+                    case {6}
                         srim=assembleSideviews(srim1,srim2,p);
                 end
             else
@@ -460,9 +460,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             function [loc,indu,sortind]=getlocrot(grouping,inlayer)
                 [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},inlayer},'position','roi','grouping',grouping,'layer',layerson);             
                 [yrot,depth]=rotcoord(loc.znm-zmean,loc.ynmline,p.theta);
-                [sortdepth,sortind]=sort(depth);
+                [sortdepth,sortind]=sort(-depth);
 %                 sortdepth=sortdepth-max(sortdepth); %reference point on plane
-                if stereo
+                
                     eyemm=35;
                     dplanemm=p.dplanemm;
                     pixmm=p.monitorpmm;
@@ -474,14 +474,19 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     eyenm=eyemm*widthnm/widthmm;
                     dplanenm=dplanemm*widthnm/widthmm;
                     xe1=eyenm;xe2=-eyenm;
-                    
                     x=loc.xnmline(sortind);
+                    y=yrot(sortind)+zmean;
+               if stereo   
                     loc.x1=(x-xe1)./(1-sortdepth/dplanenm)+xe1;
                     loc.x2=(x-xe2)./(1-sortdepth/dplanenm)+xe2;
-                    
+                    loc.y=(y)./(1-sortdepth/dplanenm);
                     obj.stereopar=struct('eyemm',eyemm,'eyenm',eyenm,'widthnm',widthnm,'widthmm',widthmm,'widthpix',widthpix,'heightpix',heightpix);
+                elseif p.stereo.Value==2
+                    loc.x=(x)./(1-sortdepth/dplanemm);
+                    loc.y=(y)./(1-sortdepth/dplanemm);
                 else
-                    loc.x=loc.xnmline(sortind);
+                    loc.x=x;
+                    loc.y=y;
                 end
     
                 
@@ -494,7 +499,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 end
                 loc.sx=sx;
                 loc.sy=sy;
-                loc.y=yrot(sortind)+zmean;
+%                 loc.y=yrot(sortind)+zmean;
                 loc.znm=loc.znm(sortind);
                 for kc=1:length(renderfield)
                     if ~isempty(loc.(renderfield{kc}))
@@ -620,7 +625,7 @@ end
 
 function p=getstereosettings(p,channel)
 switch p.stereo.Value
-    case 2
+    case 3
         if channel==1
             p.lut.selection='cyan';
         else
@@ -703,7 +708,7 @@ pard.anglerange.object=struct('String','0 360','Style','edit');
 pard.anglerange.position=[5,4];
 pard.anglerange.TooltipString=pard.tx.TooltipString;
 
-pard.stereo.object=struct('Style','popupmenu','String',{{'no stereo','anaglyphs (color)','free-view','cross-eyed','goggles'}}); 
+pard.stereo.object=struct('Style','popupmenu','String',{{'no stereo','perspective','anaglyphs (color)','free-view','cross-eyed','goggles'}}); 
 pard.stereo.position=[7,1];
 pard.stereo.Width=1;
 pard.stereo.TooltipString='mode for stereo reconstruction. anaglyphs need cyan/red glasses.';
@@ -725,7 +730,7 @@ pard.dplanemm.Width=.4;
 pard.dplanemm.TooltipString='Distance to plane of reconstruction. Smaller values result in stronger 3D effect';
 pard.tx3.TooltipString=pard.dplanemm.TooltipString;
 
-pard.tx4.object=struct('String','M two images','Style','text');
+pard.tx4.object=struct('String','Mag','Style','text');
 pard.tx4.position=[7,4];
 pard.tx4.Width=.6;
 pard.stereomagnification.object=struct('Style','edit','String','2');  

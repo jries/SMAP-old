@@ -40,7 +40,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                 lf=length(obj.P.par.(field));
                 posnew=lf+1;
                 for k=1:lf
-                    if obj.P.par.(field)(k).obj==hstruc.obj && obj.P.par.(field)(k).handle==handle
+                    if obj.P.par.(field)(k).obj==hstruc.obj && ((isempty(handle) && isempty(obj.P.par.(field)(k).handle) )|| obj.P.par.(field)(k).handle==handle)
                         posnew=k;
                         break
                     end
