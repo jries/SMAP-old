@@ -1,9 +1,9 @@
 classdef DBSCAN_cluster<interfaces.DialogProcessor
-    %CLUSTERVORONOI Performs Voronoi clustering and returns the density
-    %(inverse of voronoi cell). Uses code from SharpViSu:
-    %L. Andronov, Y. Lutz, J.-L. Vonesch, and B. P. Klaholz, 
-    %?SharpViSu: integrated analysis and segmentation of super-resolution microscopy data,? 
-    % Bioinformatics, p. btw123, Mar. 2016.
+    %DBSCAN_cluster is an optimized version of the DBSCAN algorithm from 
+    %F. A. Caetano, B. S. Dirk, J. H. K. Tam, P. C. Cavanagh, M. Goiko, S. S. G. Ferguson, S. H. Pasternak, 
+    %J. D. Dikeakos, J. R. de Bruyn, and B. Heit, ?MIiSR: Molecular Interactions in Super-Resolution Imaging 
+    %Enables the Analysis of Protein Interactions, Dynamics and Formation of Multi-protein Structures.,? 
+    %PLoS Comput. Biol., vol. 11, no. 12, p. e1004634, Dec. 2015.
     methods
         function obj=DBSCAN_cluster(varargin)        
             obj@interfaces.DialogProcessor(varargin{:}) ;
@@ -53,8 +53,13 @@ pard.seteps.Width=3;
 pard.eps_dbscan.object=struct('String','5','Style','edit');
 pard.eps_dbscan.position=[3,4];
 
-pard.plugininfo.description=sprintf('DBSCAN.');
+pard.plugininfo.description=sprintf(['DBSCAN_cluster is an optimized version of the DBSCAN algorithm from',...
+    'F. A. Caetano, B. S. Dirk, J. H. K. Tam, P. C. Cavanagh, M. Goiko, S. S. G. Ferguson, S. H. Pasternak,',... 
+    'J. D. Dikeakos, J. R. de Bruyn, and B. Heit, ?MIiSR: Molecular Interactions in Super-Resolution Imaging ',...
+    'Enables the Analysis of Protein Interactions, Dynamics and Formation of Multi-protein Structures.,? ',...
+    'PLoS Comput. Biol., vol. 11, no. 12, p. e1004634, Dec. 2015.'    ]);
 pard.plugininfo.type='ProcessorPlugin';
+pard.plugininfo.name='Cluster DBSCAN';
 
 end
 

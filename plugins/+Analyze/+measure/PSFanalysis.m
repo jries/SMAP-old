@@ -3,12 +3,11 @@ classdef PSFanalysis<interfaces.DialogProcessor
         function obj=PSFanalysis(varargin)        
                 obj@interfaces.DialogProcessor(varargin{:});
             obj.inputParameters={'sr_layerson','linewidth_roi','sr_roihandle','znm_min','znm_max','numberOfLayers'};
-%             obj.maxresultstabs=6;
         end
         
         function out=run(obj,p)           
             analyze_PSF(obj.locData,p) 
-            out=0;
+            out=[];
         end
         function pard=guidef(obj)
             pard=guidef;

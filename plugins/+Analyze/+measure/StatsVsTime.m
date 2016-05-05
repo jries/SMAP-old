@@ -9,6 +9,7 @@ classdef StatsVsTime<interfaces.DialogProcessor
         end
         
         function out=run(obj,p)
+            out=[];
             fields={'filenumber','frame','phot','locprecnm','znm','PSFxnm','locprecznm','numberInGroup','bg'};
             if p.useroi
                 position='roi';
@@ -200,7 +201,7 @@ classdef StatsVsTime<interfaces.DialogProcessor
                 legend(modetxt)
             end
                     
-            out=0;
+            
         end
         function pard=guidef(obj)
             pard=guidef;

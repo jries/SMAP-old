@@ -1,11 +1,16 @@
 classdef BlinkingMoviePresentation<interfaces.DialogProcessor
+%     BlinkingMoviePresentation renders a movie with the left side showing
+%     the camera images and the right side showing sngle molecule
+%     localizations slowly building up a superresolution image
     methods
         function obj=BlinkingMoviePresentation(varargin)        
                 obj@interfaces.DialogProcessor(varargin{:});
             obj.inputParameters={'sr_size','sr_pos','sr_pixrec'};
+            obj.showresults=true;
         end
         
-        function out=run(obj,p)           
+        function out=run(obj,p)         
+            out=[];
             file=obj.locData.files.file(p.dataselect.Value);
             locs=obj.locData.getloc({'xnm','ynm','frame','locprecnm'},'layer',1,'position','roi');
             makeBlinkMovie(locs,file,p);
@@ -22,8 +27,9 @@ end
 
 function pard=guidef
 
-pard.texta.object=struct('Style','text','String','filter from layer 1');
-pard.texta.position=[1,3];
+pard.textx.object=struct('Style','text','String','filter settings from layer 1');
+pard.textx.position=[1,3];
+pard.textx.Width=2;
 
 pard.dataselect.object=struct('Style','popupmenu','String','File');
 pard.dataselect.position=[1,1];
@@ -43,6 +49,8 @@ pard.frame_min.position=[3,2];
 
 pard.removedark.object=struct('Style','checkbox','String','remove dark frames','Value',1);
 pard.removedark.position=[4,1];
+pard.removedark.Width=2;
+pard.removedark.TooltipString='removes frames without localiaztions';
 %sum
 pard.textc.object=struct('Style','text','String','frame rate fps');
 pard.textc.position=[5,1];
