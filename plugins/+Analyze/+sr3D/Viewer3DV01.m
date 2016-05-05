@@ -461,6 +461,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},inlayer},'position','roi','grouping',grouping,'layer',layerson);             
                 [yrot,depth]=rotcoord(loc.znm-zmean,loc.ynmline,p.theta);
                 [sortdepth,sortind]=sort(-depth);
+                sortdepth=depth(sortind);
 %                 sortdepth=sortdepth-max(sortdepth); %reference point on plane
                 
                     eyemm=35;
@@ -477,13 +478,13 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     x=loc.xnmline(sortind);
                     y=yrot(sortind)+zmean;
                if stereo   
-                    loc.x1=(x-xe1)./(1-sortdepth/dplanenm)+xe1;
-                    loc.x2=(x-xe2)./(1-sortdepth/dplanenm)+xe2;
-                    loc.y=(y)./(1-sortdepth/dplanenm);
+                    loc.x1=(x-xe1)./(1+sortdepth/dplanenm)+xe1;
+                    loc.x2=(x-xe2)./(1+sortdepth/dplanenm)+xe2;
+                    loc.y=(y)./(1+sortdepth/dplanenm);
                     obj.stereopar=struct('eyemm',eyemm,'eyenm',eyenm,'widthnm',widthnm,'widthmm',widthmm,'widthpix',widthpix,'heightpix',heightpix);
-                elseif p.stereo.Value==2
-                    loc.x=(x)./(1-sortdepth/dplanemm);
-                    loc.y=(y)./(1-sortdepth/dplanemm);
+                elseif strcmp(p.stereo.selection,'perspective')
+                    loc.x=(x)./(1+sortdepth/dplanemm);
+                    loc.y=(y)./(1+sortdepth/dplanemm);
                 else
                     loc.x=x;
                     loc.y=y;
@@ -626,8 +627,13 @@ end
 function p=getstereosettings(p,channel)
 switch p.stereo.Value
     case 3
+        p.render_colormode.selection='normal';
+        p.render_colormode.Value=1;
+        p.colorfield_max=1;
+        p.colorfield_min=0;
         if channel==1
             p.lut.selection='cyan';
+            
         else
             p.lut.selection='red';
         end
