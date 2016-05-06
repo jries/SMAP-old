@@ -38,5 +38,5 @@ end
 
 function pard=guidef
 pard.plugininfo.name='Show History';
-
+pard.plugininfo.type='ProcessorPlugin';
 end

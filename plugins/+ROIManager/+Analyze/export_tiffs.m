@@ -65,5 +65,6 @@ function pard=guidef
 pard.export_selected.object=struct('String','exprot only selected sites','Style','checkbox');
 pard.export_selected.position=[1,1];
 pard.export_selected.Width=2;
+pard.plugininfo.type='ROI_Analyze';
 
 end

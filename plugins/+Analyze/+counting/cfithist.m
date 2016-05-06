@@ -98,7 +98,7 @@ pard.fitselection.position=[4,3.25];
 pard.fitselection.Width=1.75;
 
 pard.plugininfo.name='fit brightness histogram';
-
+pard.plugininfo.type='ProcessorPlugin';
 % pard.text2.object=struct('String','length scale nm','Style','text');
 % pard.text2.position=[8,1];
 % 

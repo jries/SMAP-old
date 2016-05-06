@@ -42,6 +42,7 @@ pard.saveon.position=[1,3];
 
 pard.getmask.object=struct('String','getmask','Style','checkbox');
 pard.getmask.position=[2,3];
+pard.plugininfo.type='ROI_Analyze';
 end
 
 function segmentNPCi(se,p)

@@ -99,4 +99,5 @@ pard.assignfield2.position=[5,2];
 
 pard.assignfield1.object.TooltipString='choose which field to use for splitting';
 pard.assignfield2.object.TooltipString=pard.assignfield1.object.TooltipString;
+pard.plugininfo.type='ProcessorPlugin';
 end

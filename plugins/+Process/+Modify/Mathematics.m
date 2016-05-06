@@ -63,5 +63,6 @@ pard.assignfield1.position=[3,1];
 pard.syncParameters={{'filelist_short','dataselect',{'String'}},{'locFields','assignfield1',{'String'}}};
 
 pard.assignfield1.object.TooltipString='choose  field';
+pard.plugininfo.type='ProcessorPlugin';
 % pard.assignfield2.object.TooltipString=pard.assignfield1.object.TooltipString;
 end

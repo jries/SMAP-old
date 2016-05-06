@@ -178,5 +178,6 @@ pard.update_check.object=struct('Style','checkbox','String','Render update (s):'
 pard.update_check.position=[1,1];
 pard.update_check.Width=1.5;
 pard.update_check.TooltipString=sprintf('If checked, the fitted localizations are directly rendered and can be analyzed during the fit.');
-      
+ 
+pard.plugininfo.type='WorkflowModule'; 
 end

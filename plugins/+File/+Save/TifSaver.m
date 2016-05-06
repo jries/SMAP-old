@@ -21,9 +21,9 @@ classdef TifSaver<interfaces.DialogProcessor
             obj.status('save done')
           
         end
-%         function pard=guidef(obj)
-%             pard=guidef;
-%         end
+        function pard=guidef(obj)
+           pard.plugininfo.type='SaverPlugin';
+        end
         function run(obj,p)
             obj.save(p)
         end        

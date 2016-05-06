@@ -36,7 +36,7 @@ end
 
 
 function pard=guidef
+pard.plugininfo.type='ROI_Analyze';
 
-pard=[];
 
 end

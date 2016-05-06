@@ -1,4 +1,7 @@
-function str=browsefields(prop,field,recursions,recursive,parsefield)
+function str=browsefields(prop,field,recursions,recursive,parsefield,types)
+if nargin<6
+    types={'all'};
+end
 if nargin<5
     parsefield=false;
 end
@@ -22,18 +25,31 @@ elseif strcmp(field,'..')
 elseif isstruct(prop.(field))
     fn=fieldnames(prop.(field));
     fnt=fn;
+    indin=true(length(fn),1);
+    type='none';
     if parsefield %&&recursions==0
         for k=1:length(fn)
             ph=prop.(field).(fn{k});
             if iscell(ph)
-            fnt{k}=ph{end};
+                fnt{k}=ph{4};
+                type=ph{5};
             
             elseif isfield(ph,'module')
-                fnt{k}=ph.module{end};
+                fnt{k}=ph.module{4};
+                type=ph.module{5};
+            else
+                type='dir';
+            end
+            if ~any(strcmp(types,'all'))
+                
+                if ~strcmp(type,'dir')&&~any(strcmp(types,type))
+                    indin(k)=false;
+                end
             end
         end
     end
-    
+    fn=fn(indin);
+    fnt=fnt(indin);
     fn={'..',fn{:}};
     fnt={'..',fnt{:}};
     psub=prop.(field);
@@ -56,9 +72,9 @@ else
 %         field
     field2=fn{answ};
     if strcmp(field2,'..')
-        str=browsefields(prop,field2,recursions,true,parsefield);
+        str=browsefields(prop,field2,recursions,true,parsefield,types);
     else
-        str=[field '.' browsefields(psub,field2,recursions-1,1,parsefield)];
+        str=[field '.' browsefields(psub,field2,recursions-1,1,parsefield,types)];
     end
 end
 if  ~recursive&&~isempty(strfind(str,'abortbutton'))

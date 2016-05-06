@@ -41,6 +41,7 @@ info.name='auto loader';
 info.extensions={'*.mat;*.tif;*.csv';'*.mat';'*.tif';'*.csv';'*.*'};
 info.dialogtitle='select any SMLM position, Tif, csv, settings or workflow file';
 pard.plugininfo=info;
+pard.plugininfo.type='LoaderPlugin';
 end
 
 function loadfile(obj,p,file,mode)            

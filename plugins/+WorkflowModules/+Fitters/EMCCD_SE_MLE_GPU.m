@@ -236,5 +236,5 @@ pard.trefractive_index_mismatch.Width=3;
 pard.refractive_index_mismatch.object=struct('Style','edit','String','.8');
 pard.refractive_index_mismatch.position=[5,4];
 pard.refractive_index_mismatch.TooltipString=sprintf('Correction factor to take into account the different refracrive indices of immersion oil and buffer. \n This leads to smaller distances inside the sample compared to bead calibration. \n Bead calibration: in piezo positions (nm). \n This factor transforms z positions to real-space z positions.');
-
+pard.plugininfo.type='WorkflowFitter';
 end

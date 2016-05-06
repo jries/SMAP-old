@@ -34,11 +34,17 @@ if ~isdeployed
                     try
                         ptry=pold.(fn1h).(fn2h).(fn3h);
                         ismodule=true;
-                        if length(ptry)>3
+%                         if length(ptry)>3
                             pname=ptry{4};
-                        else
-                            pname=ptry{3};
-                        end
+%                         else
+%                             pname=ptry{3};
+%                         end
+                        
+%                         if length(ptry)>4
+                            pkind=ptry{5};
+%                         else
+%                             pkind='';
+%                         end                        
                     catch
                         try
                             module=callmodule(fn1h,fn2h,fn3h);
@@ -52,6 +58,12 @@ if ~isdeployed
                             catch
                             pname=module.info.name;
                             end
+                            try
+                                guidef=module.guidef;
+                                pkind=guidef.plugininfo.type;
+                            catch
+                                pkind='';
+                            end
                         end
                         catch err
                             if ~strcmp(err.identifier,'MATLAB:scriptNotAFunction')
@@ -61,7 +73,7 @@ if ~isdeployed
                     end
                     if ismodule
                         strcase(end+1:end+2)=makecase(fn1h,fn2h,fn3h);
-                        strlist(end+1)=makelist(fn1h,fn2h,fn3h,pname);
+                        strlist(end+1)=makelist(fn1h,fn2h,fn3h,pname,pkind);
                     end
 %                     catch
 %                          fn3h
@@ -118,11 +130,13 @@ out{1}=['case ''' a '.' b '.' c ''''];
 out{2}=['   module=' a '.' b '.' c '(varargin{:});'];
 end
 
-function out=makelist(a,b,c,d)
-if nargin <4
+function out=makelist(a,b,c,d,e)
+if nargin<4
     out{1}=['out.' a '.' b '.' c '={''' a ''',''' b ''',''' c '''};'];
-else
+elseif nargin<5
     out{1}=['out.' a '.' b '.' c '={''' a ''',''' b ''',''' c ''',''' d '''};'];
+else
+    out{1}=['out.' a '.' b '.' c '={''' a ''',''' b ''',''' c ''',''' d ''',''' e '''};'];
 end
 end
 

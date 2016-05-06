@@ -27,7 +27,7 @@ pard.cutoff.position=[1,2];
 
 pard.preview.object=struct('String','preview','Style','checkbox','Value',1);
 pard.preview.position=[3,1];
-
+pard.plugininfo.type='ROI_Analyze';
 % 
 % pard.t2.object=struct('String','sigmaNMS','Style','text');
 % pard.t2.position=[2,1];

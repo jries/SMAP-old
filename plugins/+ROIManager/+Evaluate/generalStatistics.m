@@ -62,4 +62,5 @@ end
 
 function pard=guidef
 pard.inputParameters={'numberOfLayers','sr_layerson','se_cellfov','se_sitefov','se_siteroi'};
+pard.plugininfo.type='ROI_Evaluate';
 end

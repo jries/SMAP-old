@@ -60,5 +60,5 @@ info.prefix='sum';
 info.name='sum';
 info.fields={'sum_n','sum_bg'};
 pard.plugininfo=info;
-
+pard.plugininfo.type='WorkflowIntensity'; 
 end

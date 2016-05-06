@@ -11,7 +11,7 @@ classdef LocSaver<interfaces.WorkflowModule;
             obj.inputChannels=1; 
         end
         function pard=guidef(obj)
-            pard=[];
+            pard.plugininfo.type='WorkflowModule'; 
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);

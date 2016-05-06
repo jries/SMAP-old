@@ -79,6 +79,7 @@ pard.saveimagesb.Width=1;
 pard.saveimagesdir.object=struct('Style','edit','String','');
 pard.saveimagesdir.position=[9,2.4];
 pard.saveimagesdir.Width=2.6;
+pard.plugininfo.type='ROI_Evaluate';
 end
 
 function saveimagesb_callback(a,b,obj)

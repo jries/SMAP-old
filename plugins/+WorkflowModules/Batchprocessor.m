@@ -222,4 +222,5 @@ pard.useforall.Height=1;
 pard.status.object=struct('Style','text','String','status','Value',0);
 pard.status.position=[12,1];
 pard.status.Width=4;
+pard.plugininfo.type='ProcessorPlugin'; 
 end

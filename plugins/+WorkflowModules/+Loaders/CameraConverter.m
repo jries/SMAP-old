@@ -137,4 +137,5 @@ pard.camparbutton.object=struct('Style','pushbutton','String','set Cam Parameter
 pard.camparbutton.position=[3,3.5];
 pard.camparbutton.Width=1.5;
 pard.camparbutton.TooltipString=sprintf('Edit camera acquisition parameters.');
+pard.plugininfo.type='WorkflowModule'; 
 end

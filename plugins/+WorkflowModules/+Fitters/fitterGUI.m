@@ -98,6 +98,7 @@ pard.fitterlist.TooltipString=sprintf('Select here which Fitter plugin is used.'
 % pard.loc_fitOnBackground.position=[4,4];
 
 pard.outputParameters={'loc_fitOnBackground'};
+pard.plugininfo.type='WorkflowModule';
 % pard.fitterPanel.object=struct('Style','uipanel','String','parameters');
 % pard.fitterPanel.position=[4,2];
 % pard.fitterPanel.Height=4;

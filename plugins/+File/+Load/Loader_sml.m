@@ -37,6 +37,7 @@ info.name='SML loader';
 info.extensions={'*.mat';'*.*'};
 info.dialogtitle='select any SMLM file (_sml or _fitpos)';
 pard.plugininfo=info;
+pard.plugininfo.type='LoaderPlugin';
 end
 
 function loadfile(obj,p,file,mode)

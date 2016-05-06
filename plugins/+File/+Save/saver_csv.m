@@ -41,4 +41,6 @@ function pard=guidef
 pard.savevisible.object=struct('Style','checkbox','Visible','on','String','only save visible','Value',1);
 pard.savevisible.position=[1,1];
 pard.savevisible.Width=4;
+
+pard.plugininfo.type='SaverPlugin';
 end

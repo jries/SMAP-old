@@ -106,4 +106,5 @@ info.prefix='fit';
 info.name='fit';
 info.fields={'fit_n','fit_bg'};
 pard.plugininfo=info;
+pard.plugininfo.type='WorkflowIntensity'; 
 end

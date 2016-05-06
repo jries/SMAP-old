@@ -99,4 +99,5 @@ info.name='Gui settings';
 info.extensions={'*.mat';'*.*'};
 info.dialogtitle='select any GUI settings file or _sml file';
 pard.plugininfo=info;
+pard.plugininfo.type='LoaderPlugin';
 end

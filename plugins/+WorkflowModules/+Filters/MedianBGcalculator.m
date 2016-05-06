@@ -135,4 +135,5 @@ pard.loc_blocksize_frames.object=struct('Style','edit','String','100');
 pard.loc_blocksize_frames.position=[4,2.3];
 pard.loc_blocksize_frames.Width=.7;
 pard.loc_blocksize_frames.TooltipString=sprintf('Number of frames over which the median is calculated.');
+pard.plugininfo.type='WorkflowModule';
 end

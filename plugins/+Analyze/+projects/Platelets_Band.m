@@ -249,6 +249,6 @@ pard.numoverlap.position=[6,2];
 % pard.pmature_v.isnumeric=1;
 % 
 % 
-
+pard.plugininfo.type='ProcessorPlugin';
 
 end

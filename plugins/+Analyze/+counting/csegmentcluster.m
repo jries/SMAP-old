@@ -39,4 +39,5 @@ pard.segment_maxPSF.position=[2,2];
 pard.segment_maxPSF.isnumeric=1;
 
 pard.plugininfo.name='segment cluster';
+pard.plugininfo.type='ProcessorPlugin';
 end

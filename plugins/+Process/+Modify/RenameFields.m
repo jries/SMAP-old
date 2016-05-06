@@ -74,5 +74,5 @@ pard.keepold.position=[4,1];
 pard.keepold.object.TooltipString='If checked: keep old field (duplicate), if unchecked: delete old field';
 
 pard.syncParameters={{'locFields','fieldselect',{'String'}}};
-
+pard.plugininfo.type='ProcessorPlugin';
 end

@@ -8,9 +8,9 @@ classdef ImageNormalize<interfaces.WorkflowModule
             obj@interfaces.WorkflowModule(varargin{:})
             obj.inputChannels=2; 
         end
-%         function pard=guidef(obj)
-%             pard=guidef;
-%         end
+        function pard=guidef(obj)
+            pard.plugininfo.type='WorkflowModule';
+        end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
             obj.setInputChannels(2,'frame');

@@ -124,53 +124,5 @@ function pard=guidef
 
 pard.text2.object=struct('String','check astigmatism calibration','Style','text');
 pard.text2.position=[2,1];
-% pard.text3.object=struct('String','dz (nm)','Style','text');
-% pard.text3.position=[3,1];
-% 
-% pard.dz.object=struct('Style','edit','String','50'); 
-% pard.dz.position=[3,2];
-% 
-% 
-% pard.text4.object=struct('String','frame of Zero position','Style','text');
-% pard.text4.position=[4,1];
-% 
-% pard.framez0.object=struct('Style','edit','String','21'); 
-% pard.framez0.position=[4,2];
-% % 
-% pard.d3_color.object=struct('Style','checkbox','String','render in color');
-% pard.d3_color.position=[5,1];
-% 
-% 
-% pard.pixauto.object=struct('Style','checkbox','String','pixelsize in z auto','Value',1);
-% pard.pixauto.position=[4,1];
-% pard.pixrecset.object=struct('Style','edit','String','5'); 
-% pard.pixrecset.position=[4,2];
-% 
-% pard.text4.object=struct('String','filter  \sigma in z (planes)','Style','text');
-% pard.text4.position=[6,1];
-% pard.filterz.object=struct('Style','edit','String','1'); 
-% pard.filterz.position=[6,2];
-% 
-% 
-% pard.preview.object=struct('Style','checkbox','String','preview');
-% pard.preview.position=[2,4];
-% 
-% pard.N0_fit.object=struct('String','N0','Style','radiobutton');
-% pard.N0_fit.position=[2,2];
-% 
-% pard.N0_v.object=struct('String','10','Style','edit');
-% pard.N0_v.position=[2,3];
-% pard.N0_v.isnumeric=1;
-% 
-% 
-% pard.pmature_fit.object=struct('String','p mature','Style','radiobutton');
-% pard.pmature_fit.position=[3,2];
-% 
-% pard.pmature_v.object=struct('String','.5','Style','edit');
-% pard.pmature_v.position=[3,3];
-% pard.pmature_v.isnumeric=1;
-% 
-% 
-
-
+pard.plugininfo.type='ProcessorPlugin';
 end

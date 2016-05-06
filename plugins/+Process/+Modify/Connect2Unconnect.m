@@ -44,4 +44,5 @@ pard.channel.position=[1,2];
 
 pard.connectmode.object=struct('String','connect->unconnect|unconnect->connect','Style','popupmenu','Value',1);
 pard.connectmode.position=[2,1];
+pard.plugininfo.type='ProcessorPlugin';
 end

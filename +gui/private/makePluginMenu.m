@@ -12,6 +12,7 @@ mwf1=uimenu(hmainplugin,'Label','New workflow','Callback',{@makeplugin,obj,'Work
 obj.loadGlobalSettings;
 % names1={'File','Analyze','Process','Siteexplorer'};
 names1=pluginnames;
+nomenutypes={'WorkflowModule', 'WorkflowFitter','ROI_Evaluate','WorkflowIntensity'}; %dont put those processors into menu
 for k=1:length(names1)
     names2=pluginnames(names1{k});
     h1(k)=uimenu(hmainplugin,'Label',names1{k});
@@ -22,11 +23,16 @@ for k=1:length(names1)
         modulethere3=false;
         for m=1:length(names3)     
                 pluginpath=pluginnames(names1{k},names2{l},names3{m});
-                pname=pluginpath{end};
+                pname=pluginpath{4};
+                ptype=pluginpath{5};
+                if any(strcmp(nomenutypes,ptype))
+                    continue
+                end
                 h3(k,l,m)=uimenu(h2(k,l),'Label',pname,'Callback',{@makeplugin,obj,{names1{k},names2{l},names3{m}}});
                 modulethere3=true;  
                 modulethere2=true;
-                pout.(names1{k}).(names2{l}).(names3{m}).module={names1{k},names2{l},names3{m},pname};
+                
+                pout.(names1{k}).(names2{l}).(names3{m}).module={names1{k},names2{l},names3{m},pname,ptype};
         end
         if ~modulethere3
             delete(h2(k,l));

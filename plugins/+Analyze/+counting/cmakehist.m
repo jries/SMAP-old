@@ -81,5 +81,5 @@ pard.savehist.object=struct('String','Save histogram','Style','pushbutton','Call
 pard.savehist.position=[5,1];
 
 pard.plugininfo.name='make brightness histogram';
-
+pard.plugininfo.type='ProcessorPlugin';
 end

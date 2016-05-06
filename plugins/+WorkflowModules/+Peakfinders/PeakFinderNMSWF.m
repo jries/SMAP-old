@@ -101,4 +101,5 @@ pard.text.Width=1.3;
 pard.NMS_kernel_size.object=struct('Style','edit','String','7');
 pard.NMS_kernel_size.position=[2,2.3];
 pard.NMS_kernel_size.Width=.7;
+pard.plugininfo.type='WorkflowModule'; 
 end

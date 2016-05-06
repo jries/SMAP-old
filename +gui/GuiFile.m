@@ -20,15 +20,21 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             for k=1:length(allloaders)
 
                 loaderhandle=uipanel(obj.handle,'Units','pixels','Position',[1,5.25*fh,2.9*fw,3.*fh],'Visible','off');
-                obj.guihandles.(['loaderpanel_' num2str(k)])=loaderhandle;
+                
                 loaderp=plugin('File','Load',allloaders{k},loaderhandle,obj.P);
 %                 infom.pluginpath={'File','Load',obj.loaders{k}};
-                info=loaderp.info;
-                lp{k}=info.name;
+                       
                 loaderp.attachLocData(obj.locData);
                 loaderp.makeGui;
+                info=loaderp.info;     
+                if ~strcmp(info.type,'LoaderPlugin')
+                    delete(loaderhandle)
+                else
+                lp{k}=info.name;
+                obj.guihandles.(['loaderpanel_' num2str(k)])=loaderhandle;
                 obj.children.(['loader_' num2str(k)])=loaderp;
                 loaders{k}=loaderp;
+                end
             end
             obj.loaders=loaders;
             obj.loaders{1}.handle.Visible='on';
@@ -40,16 +46,22 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
 %             obj.savers= plugintemp.plugins('File','Save',allsavers{1},[],obj.P); %to initialize
             for k=1:length(allsavers)
                 saverhandle=uipanel(obj.handle,'Units','pixels','Position',[1,1*fh,2.9*fw,3.*fh],'Visible','off');
-                obj.guihandles.(['saverpanel_' num2str(k)])=saverhandle;
+               
                 
                 saver=plugin('File','Save',allsavers{k},saverhandle,obj.P);
 %                 saver.pluginpath={'File','Save',allsavers{k}};
                 saver.attachLocData(obj.locData);
                 saver.makeGui;
-%                 info=plugintemp.plugins('File','Save',obj.savers{k}).info;
-                ls{k}=saver.info.name;
-                obj.children.(['saver_' num2str(k)])=saver;
-                savers{k}=saver;
+                info=saver.info;
+                
+                if ~strcmp(info.type,'SaverPlugin')
+                    delete(saverhandle)
+                else
+                    ls{k}=saver.info.name;
+                     obj.guihandles.(['saverpanel_' num2str(k)])=saverhandle;
+                    obj.children.(['saver_' num2str(k)])=saver;
+                    savers{k}=saver;
+                end
             end 
             obj.savers=savers;
             obj.savers{1}.handle.Visible='on';

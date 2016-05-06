@@ -78,4 +78,5 @@ pard.overwrite.Width=2;
 pard.overwrite.object.TooltipString='If checked, the original image is replaced. Otherwise the BG corrected image is appended to the tiffs.';
 
 pard.syncParameters={{'filelist_short','dataselect',{'String'}}};
+pard.plugininfo.type='ProcessorPlugin';
 end

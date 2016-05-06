@@ -156,4 +156,5 @@ pard.restrictcheck.position=[2,3];
 pard.usesites.object=struct('String','150','Style','edit');
 pard.usesites.position=[2,4];
 pard.usesites.TooltipString='first N sites, or LIst of sites or s1:s2 notation';
+pard.plugininfo.type='ROI_Analyze';
 end

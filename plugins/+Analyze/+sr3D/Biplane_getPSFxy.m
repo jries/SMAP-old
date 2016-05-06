@@ -82,6 +82,6 @@ pard.Tfile.Width=3;
 
 pard.loadbutton.object=struct('Style','pushbutton','String','load');
 pard.loadbutton.position=[8,4];
-
+pard.plugininfo.type='ProcessorPlugin';
 
 end

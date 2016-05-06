@@ -14,6 +14,9 @@ classdef PlotLocsPreview<interfaces.WorkflowModule;
         function prerun(obj,p)
             
         end
+        function pard=guidef(obj)
+            pard.plugininfo.type='WorkflowModule'; 
+        end
         function output=run(obj,data,p)
             output=[];
             if obj.getPar('loc_preview') 

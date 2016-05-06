@@ -26,6 +26,7 @@ pard.export_selected.object=struct('String','some parameters','Style','checkbox'
 pard.export_selected.position=[1,1];
 pard.export_selected.Width=2;
 
+pard.plugininfo.type='ROI_Analyze';
 end
 
 function out=analyze2Cside(SE,p)

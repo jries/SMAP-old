@@ -5,7 +5,9 @@ classdef VISPexport<interfaces.DialogProcessor
             obj@interfaces.DialogProcessor(varargin{:}) ;
              obj.inputParameters={'sr_layerson'};
         end
-
+        function pard=guidef(obj)
+            pard.plugininfo.type='ProcessorPlugin';
+        end
         function out=run(obj,p)
             locs=obj.locData.getloc({'xnm','ynm','znm','locprecznm','locprecnm','phot','frame'},'position','roi');
             [path,f]=fileparts(obj.locData.files.file(1).name);

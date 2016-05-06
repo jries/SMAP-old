@@ -80,6 +80,6 @@ pard.calfile.Width=3;
 pard.savebutton.object=struct('String','load','Style','pushbutton');
 pard.savebutton.position=[4,4];
 
-
+pard.plugininfo.type='ProcessorPlugin';
 
 end

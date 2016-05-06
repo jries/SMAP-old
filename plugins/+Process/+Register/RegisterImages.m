@@ -87,4 +87,5 @@ pard.plugininfo.description=sprintf(['Register Images calculates shift between r
     '\n Adjust pixel size and FoV so that the shift can be calculated from the reconstructed image.'...
     '\n Transformation can also be saved for later use with Apply Transform']);
 pard.plugininfo.name='Register Images';
+pard.plugininfo.type='ProcessorPlugin';
 end

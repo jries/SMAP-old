@@ -37,4 +37,5 @@ pard.text1.Width=2;
 pard.noblinktime.object=struct('Style','edit','String','20');
 pard.noblinktime.position=[2,3];
 pard.noblinktime.Width=2;
+pard.plugininfo.type='ROI_Evaluate';
 end

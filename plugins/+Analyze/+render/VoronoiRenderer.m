@@ -51,7 +51,7 @@ function pard=guidef
 pard.t1.object=struct('String','Voronoi Renderer from SharpViSu','Style','text');
 pard.t1.position=[1,2];
 pard.t1.Width=4;
-
+pard.plugininfo.type='Renderer';
 
 end
 

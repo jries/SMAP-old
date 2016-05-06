@@ -36,6 +36,7 @@ info.name='tif loader';
 info.extensions={'*.tif';'*.*'};
 info.dialogtitle='select any Tif file';
 pard.plugininfo=info;
+pard.plugininfo.type='LoaderPlugin';
 end
 
 function loadfile(obj,p,file,mode)  

@@ -140,6 +140,6 @@ pard.t1.object=struct('String','max dr/ro','Style','text');
 pard.t1.position=[7,1];
 pard.maxdrro.object=struct('String','1.5','Style','edit');
 pard.maxdrro.position=[7,2];
-
+pard.plugininfo.type='ROI_Analyze';
     
 end

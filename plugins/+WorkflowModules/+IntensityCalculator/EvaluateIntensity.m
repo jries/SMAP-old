@@ -12,9 +12,9 @@ classdef EvaluateIntensity<interfaces.WorkflowModule
             obj@interfaces.WorkflowModule(varargin{:});
             obj.inputChannels=3;
         end
-%         function pard=guidef(obj)
-%             pard=guidef;
-%         end
+        function pard=guidef(obj)
+             pard.plugininfo.type='WorkflowModule'; 
+        end
         function makeGui(obj)
             makeGui@interfaces.WorkflowModule(obj);
             fw=obj.guiPar.FieldWidth;

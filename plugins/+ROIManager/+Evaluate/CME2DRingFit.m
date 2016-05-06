@@ -25,7 +25,7 @@ function pard=guidef
 pard.layer.object=struct('Style','popupmenu','String','layer1|layer2|layer3|layer4|layer5|layer6');
 pard.layer.position=[1,1];
 pard.layer.Width=2;
-
+pard.plugininfo.type='ROI_Evaluate';
 % pard.text1.object=struct('Style','text','String','slice thickness (nm)');
 % pard.text1.position=[2,1];
 % pard.text1.Width=2;

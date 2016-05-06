@@ -98,5 +98,6 @@ pard.t2.object=struct('Style','text','String','Speed:');
 pard.t2.position=[2,1];
 pard.speed.object=struct('Style','popupmenu','String',{{'fast','normal','slow'}});
 pard.speed.position=[2,2];
+pard.plugininfo.type='WorkflowModule';
 end
 

@@ -48,7 +48,7 @@ pard.fit_sigma.object=struct('Style','checkbox','String','Fit sigma of ring','Va
 pard.fit_sigma.position=[5,1];
 pard.fit_sigma.Width=2;
 
-
+pard.plugininfo.type='ROI_Evaluate';
 pard.inputParameters={'numberOfLayers','sr_layerson','se_cellfov','se_sitefov','se_siteroi','layer1_','layer2_','se_sitepixelsize'};
 end
 

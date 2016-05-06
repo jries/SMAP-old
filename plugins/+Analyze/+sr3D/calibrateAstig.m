@@ -252,4 +252,5 @@ pard.B0.object=struct('String','set B = 0','Style','checkbox','Value',0);
 pard.B0.position=[5,1];
 
 pard.plugininfo.name='calibrate 3D';
+pard.plugininfo.type='ProcessorPlugin';
 end

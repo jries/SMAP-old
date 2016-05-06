@@ -115,6 +115,7 @@ pard.pixcam.object=struct('Style','edit','String','138');
 pard.pixcam.position=[2,1];
 pard.PSFxnm.object=struct('Style','edit','String','138');
 pard.PSFxnm.position=[2,1];
+pard.plugininfo.type='WorkflowModule'; 
 end
 
 function PSFx=sigmafromz_simple(z,p)%[d g sx0]);

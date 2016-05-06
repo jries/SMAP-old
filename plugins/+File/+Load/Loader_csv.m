@@ -36,7 +36,8 @@ function pard=guidef
 info.name='CSV loader';
 info.extensions={'*.csv';'*.*'};
 info.dialogtitle='select any CSV file';
-pard.plugininfo=info;     
+pard.plugininfo=info;  
+pard.plugininfo.type='LoaderPlugin';
 end
 
 function loadfile(obj,p,file,mode)

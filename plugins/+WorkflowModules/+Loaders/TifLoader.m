@@ -180,4 +180,5 @@ pard.locdata_empty.object=struct('Style','checkbox','String','Empty localization
 pard.locdata_empty.position=[4.2,3.5];
 pard.locdata_empty.Width=1.5;
 pard.locdata_empty.TooltipString=sprintf('Empty localization data before fitting. \n Important if post-processing (eg drift correction) is perfromed as part of workflow');
+pard.plugininfo.type='WorkflowModule'; 
 end

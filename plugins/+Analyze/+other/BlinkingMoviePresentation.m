@@ -64,5 +64,5 @@ pard.outputFormat.position=[6,1];
 pard.outputFormat.Width=2;
 pard.syncParameters={{'filelist_short','dataselect',{'String'}}};
 pard.plugininfo.name='BlinkingMoviePresentation';
-
+pard.plugininfo.type='ProcessorPlugin';
 end

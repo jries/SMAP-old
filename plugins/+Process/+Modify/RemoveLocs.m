@@ -32,5 +32,5 @@ pard.textb.object=struct('String','remove locs in ROI','Style','text');
 pard.textb.position=[2,1];
 pard.textb.Width=3;
 pard.textb.object.TooltipString='';
-
+pard.plugininfo.type='ProcessorPlugin';
 end

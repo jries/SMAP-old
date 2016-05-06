@@ -70,5 +70,5 @@ pard.savebutton.position=[4,4];
 pard.syncParameters={{'fit_gradient3Dellipticity','fitpol',{'String'}}};
 
 pard.plugininfo.name='z from gradient3D fit';
-
+pard.plugininfo.type='ProcessorPlugin';
 end

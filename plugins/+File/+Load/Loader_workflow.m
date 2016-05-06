@@ -32,6 +32,7 @@ info.name='workflow loader';
 info.extensions={'*.mat';'*.*'};
 info.dialogtitle='select workflow file';
 pard.plugininfo=info;
+pard.plugininfo.type='LoaderPlugin';
 end
 
 function loadfile(obj,p,file,mode)            

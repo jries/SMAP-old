@@ -80,7 +80,7 @@ classdef Plugin_Template<interfaces.DialogProcessor
             %provide a description and name in the field: plugininfo.
             pard.plugininfo.name='Plugin Name';
             pard.plugininfo.description='write a description for your plugin';
-            
+            pard.plugininfo.type='ProcessorPlugin'; %type of plugin. Currently: ProcessorPlugin, WorkflowModule, WorkflowFitter, Renderer, LoaderPlugin, SaverPlugin, ROI_Analyze, ROI_Evaluate,WorkflowIntensity
              %define global paramters that are used (passed on in p)
             pard.inputParameters={'sr_pixrec'};
             

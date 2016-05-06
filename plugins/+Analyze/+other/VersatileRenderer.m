@@ -148,6 +148,6 @@ pard.max2.position=[5,3];
 % pard.filtersize.position=[2,4];
 
 pard.syncParameters={{'locFields','assignfield1',{'String'}},{'locFields','assignfield2',{'String'}},{'locFields','sigmafield2',{'String'}},{'locFields','sigmafield1',{'String'}}};
-
+pard.plugininfo.type='ProcessorPlugin';
 end
 

@@ -61,4 +61,5 @@ pard.onlyfiltered.Width=4;
 pard.shiftpix.object=struct('Style','checkbox','String','Shift by 0.5 camera pixels','Value',0);
 pard.shiftpix.position=[3,1];
 pard.shiftpix.Width=4;
+pard.plugininfo.type='ProcessorPlugin';
 end

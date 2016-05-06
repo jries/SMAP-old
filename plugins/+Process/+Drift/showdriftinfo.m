@@ -71,4 +71,5 @@ function pard=guidef
 pard.dataselect.object=struct('Style','popupmenu','String','File');
 pard.dataselect.position=[2,1];
 pard.syncParameters={{'filelist_short','dataselect',{'String'}}};
+pard.plugininfo.type='ProcessorPlugin';
 end

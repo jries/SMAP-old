@@ -129,4 +129,5 @@ pard.peakfindmethod.TooltipString=sprintf('Maximum: all local maxima. \n NMS: no
 pard.NMS_kernel_size.object=struct('Style','edit','String','5','Visible','off');
 pard.NMS_kernel_size.position=[2,2.5];
 pard.NMS_kernel_size.Width=.5;
+pard.plugininfo.type='WorkflowModule'; 
 end

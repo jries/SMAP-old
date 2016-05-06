@@ -106,5 +106,5 @@ pard.roistyle.object=struct('Style','popupmenu','String','rectangle|ellipse');
 pard.roistyle.position=[4,1];
 pard.roistyle.TooltipString=sprintf('Use rectangular or elliptical ROI.');
 % pard.mask_store.object=struct('Style','text','String','');
-
+pard.plugininfo.type='WorkflowModule'; 
 end

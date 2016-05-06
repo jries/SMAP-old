@@ -344,6 +344,7 @@ pard.dz.object=struct('String','50','Style','edit');
 pard.dz.position=[1,2];
 % 
 pard.plugininfo.name='PSFanalysis';
+pard.plugininfo.type='ProcessorPlugin';
 % pard.text2.object=struct('String','fitmodel:','Style','text');
 % pard.text2.position=[2,1];
 % 

@@ -60,4 +60,5 @@ pard.loc_wavelet_refine.position=[4,1.3];
 pard.loc_wavelet_refine.Width=2;
 pard.loc_wavelet_refine.TooltipString=sprintf('Iterative refinement of background estimation. \n Slower, only use for high background and when detection of weak fluorophores is necessary.');
 
+pard.plugininfo.type='WorkflowModule';
 end

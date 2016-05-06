@@ -22,6 +22,7 @@ classdef workflowstarter<interfaces.WorkflowModule
         end
         function pard=guidef(obj)
             pard.startb.object=struct('Style','pushbutton','String','Run','Callback',@obj.startcallback);
+            pard.plugininfo.type='WorkflowModule'; 
             pard.startb.position=[1,1];
         end
         function startcallback(obj,a,b)
@@ -29,5 +30,6 @@ classdef workflowstarter<interfaces.WorkflowModule
 %              obj.initialize;
 %             obj.run;
         end
+
     end
 end

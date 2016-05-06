@@ -105,7 +105,7 @@ pard.t3.Width=2;
 
 pard.sigmaG.object=struct('Style','edit','String','150');
 pard.sigmaG.position=[3,3];
-
+pard.plugininfo.type='ROI_Evaluate';
 end
 
 

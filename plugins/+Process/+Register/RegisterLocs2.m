@@ -179,4 +179,5 @@ pard.syncParameters={{'filelist_short','dataselect',{'String'}}};
 pard.inputParameters={'currentfileinfo'};
 
 pard.plugininfo.name='Register Localizations';
+pard.plugininfo.type='ProcessorPlugin';
 end

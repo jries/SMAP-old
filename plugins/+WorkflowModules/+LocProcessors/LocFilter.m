@@ -113,5 +113,5 @@ pard.val_phot.object=struct('Style','edit','String','[200 inf]');
 pard.val_phot.position=[3,2.3];
 pard.val_phot.Width=.7;
 pard.val_phot.TooltipString=sprintf('minimum number of photons or vector with minimum and maximum number of photons.');
-
+pard.plugininfo.type='WorkflowModule'; 
 end

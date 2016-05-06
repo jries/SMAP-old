@@ -91,5 +91,5 @@ pard.savehist.position=[5,1];
 
 
 pard.plugininfo.name='load brightness histograms';
-
+pard.plugininfo.type='ProcessorPlugin';
 end

@@ -66,6 +66,7 @@ pard.preview.position=[6,1];
 pard.t11.object=struct('String','Works best with: PSF filtered, locprec filter larger than usual (~30-60 nm), grouped','Style','text');
 pard.t11.position=[8,1];
 pard.t11.Width=4;
+pard.plugininfo.type='ROI_Analyze';
 end
 
 function segmentCME(obj,p)

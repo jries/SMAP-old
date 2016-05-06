@@ -59,6 +59,7 @@ pard.t6.Width=2;
 pard.dilation.object=struct('Style','edit','String','2');
 pard.dilation.position=[3,3.5];
 
+pard.plugininfo.type='ROI_Evaluate';
 
 pard.inputParameters={'numberOfLayers','sr_layerson','se_cellfov','se_sitefov','se_siteroi','layer1_','layer2_','se_sitepixelsize'};
 end

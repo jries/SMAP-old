@@ -104,6 +104,7 @@ pard.loadbutton.object=struct('Style','pushbutton','String','load');
 pard.loadbutton.position=[8,4];
 
 pard.syncParameters={{'filelist_short','dataselect',{'String'}},{'transformationfile','Tfile',{'String'}}};
+pard.plugininfo.type='ProcessorPlugin';
 end
 
 

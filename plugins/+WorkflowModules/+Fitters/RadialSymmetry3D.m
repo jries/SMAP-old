@@ -64,5 +64,5 @@ end
 
 
 function pard=guidef
-pard=[];
+pard.plugininfo.type='WorkflowFitter';
 end

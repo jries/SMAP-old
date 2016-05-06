@@ -4,7 +4,10 @@ classdef saver_settings<interfaces.DialogProcessor
                 obj@interfaces.DialogProcessor(varargin{:}) ;
                 obj.inputParameters={'filelist_long','mainfile','mainGui','numberOfLayers','sr_layerson'};
         end
-        
+        function pard=guidef(obj)
+            pard.plugininfo.type='SaverPlugin';
+        end
+            
         function out=save(obj,p)
             obj.status('save GUI settings')          
             fn=p.filelist_long.selection;          

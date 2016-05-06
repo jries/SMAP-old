@@ -98,4 +98,5 @@ pard.mirrormode.object=struct('String','top-bottom|left-right|both','Style','pop
 pard.mirrormode.position=[4,2];
 
 pard.syncParameters={{'filelist_short','dataselect',{'String'}}};
+pard.plugininfo.type='ProcessorPlugin';
 end

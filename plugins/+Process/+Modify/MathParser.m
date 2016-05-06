@@ -55,5 +55,5 @@ pard.t3.Width=3;
 pard.equation.object = struct('String','','Style','edit');
 pard.equation.position=[3,2];
 pard.equation.Width=3;
-
+pard.plugininfo.type='ProcessorPlugin';
 end
