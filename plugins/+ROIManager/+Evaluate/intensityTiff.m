@@ -13,20 +13,31 @@ classdef intensityTiff<interfaces.SEEvaluationProcessor
                 shifty=0;
             end
             
+
             pos=obj.site.pos;
             pos(1)=pos(1)-shiftx;
             pos(2)=pos(2)-shifty;
+            if p.posfromeval
+                fieldx=p.dxfield;
+                fieldy=p.dyfield;
+                dx=eval(['obj.site.evaluation.' fieldx]);
+                dy=eval(['obj.site.evaluation.' fieldy]);
+                pos(1)=pos(1)+dx;
+                pos(2)=pos(2)+dy;
+               
+            end
+            
             file=obj.locData.files.file(obj.site.info.filenumber);
             pixcam=file.info.pixsize*1000;
             roi=file.tif(1).info.roi;
 
-            pospixr=floor(pos(1:2)/pixcam)-roi(1:2)';
+            pospixr=round(pos(1:2)/pixcam)-roi(1:2)';
             
             sfit=round((p.roisize-1)/2);
             
             coim=file.tif(1).image(pospixr(2)-sfit:pospixr(2)+sfit,pospixr(1)-sfit:pospixr(1)+sfit,:);
         
-            pr=floor(pos/pixcam)+.5;
+            pr=round(pos/pixcam);
             rangex=(pr(1)-sfit:pr(1)+sfit)*pixcam;
             rangey=(pr(2)-sfit:pr(2)+sfit)*pixcam;
                 
@@ -51,10 +62,21 @@ classdef intensityTiff<interfaces.SEEvaluationProcessor
                 ax=obj.setoutput('image');
                 
                 imagesc(rangex,rangey,coim,'Parent',ax)
+                 axis(ax,'equal')
                 ax.NextPlot='add';
                 plot(pos(1),pos(2),'ko','Parent',ax)
-                plot(fitp(3),fitp(4),'kx','Parent',ax)
                 d=sqrt((fitp(3)-pos(1))^2+(fitp(4)-pos(2)).^2);
+                sx=(rangex(end)-rangex(1))/2;
+                dv=(fitp(3:4)-pos(1:2));
+                mv=max(abs(dv));
+                if mv<=sx
+                 plot(fitp(3),fitp(4),'kx','Parent',ax)
+                else
+                    dv=dv/mv*(sx+pixcam);
+                    plot(pos(1)+dv(1),pos(2)+dv(2),'k*','Parent',ax)
+                    ax.XLim=[rangex(1)-pixcam rangex(end)+pixcam];
+                    ax.YLim=[rangey(1)-pixcam rangey(end)+pixcam];
+                end
                 ttxt=['A1=' num2str(fitp(1),'%5.0f') ', A2=' num2str(fitp(2),'%5.0f') ', d=' num2str(d,'%5.0f')];
                 title(ttxt,'Parent',ax)
                 axis(ax,'equal')
@@ -90,22 +112,41 @@ pard.t1.position=[1,1];
 pard.t1.Width=2;
 
 pard.roisize.object=struct('Style','edit','String','7');
-pard.roisize.position=[1,3];
+pard.roisize.position=[1,4];
 
 pard.t2.object=struct('Style','text','String','minimal distance 2nd Gauss (nm)');
 pard.t2.position=[2,1];
-pard.t2.Width=2;
+pard.t2.Width=3;
 
 pard.mind.object=struct('Style','edit','String','100');
-pard.mind.position=[2,3];
+pard.mind.position=[2,4];
 
 pard.t3.object=struct('Style','text','String','sigma first Gauss (nm)');
 pard.t3.position=[3,1];
 pard.t3.Width=2;
 
 pard.sigmaG.object=struct('Style','edit','String','150');
-pard.sigmaG.position=[3,3];
+pard.sigmaG.position=[3,4];
 pard.plugininfo.type='ROI_Evaluate';
+
+pard.posfromeval.object=struct('Style','checkbox','String','use position from evaluation field: site.evaluation.');
+pard.posfromeval.position=[5,1];
+pard.posfromeval.Width=4;
+pard.t4.object=struct('Style','text','String','dx0');
+pard.t4.position=[6,1];
+pard.t4.Width=.5;
+pard.t5.object=struct('Style','text','String','dy0');
+pard.t5.position=[7,1];
+pard.t5.Width=.5;
+
+pard.dxfield.object=struct('Style','edit','String','CME2DRing.imfit.x0');
+pard.dxfield.position=[6,1.5];
+pard.dxfield.Width=3.5;
+pard.dyfield.object=struct('Style','edit','String','CME2DRing.imfit.y0');
+pard.dyfield.position=[7,1.5];
+pard.dyfield.Width=3.5;
+pard.plugininfo.type='ROI_Evaluate';
+
 end
 
 
