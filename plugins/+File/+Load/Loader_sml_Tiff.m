@@ -6,24 +6,27 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
         end
         
         function out=load(obj,p,file,mode)
+            out=[];
             if nargin<4
                 mode=getfilemode(file);
             end
             try
+            framerange=p.framerange(1):p.framerange(end);
+            
             loadfile(obj,p,file,mode);
             %search for Tiff
             ind=regexp(file,p.searchstring);
             path=[file(1:ind(end)-1) p.replacestring filesep 'Pos0' filesep];
             il=imageLoader(path);
-            im=il.getImage(38);
-            for k=p.framerange
+            im=il.getImage(framerange(1));
+            for k=framerange
                 im=max(im,il.getImage(k));
             end
             catch
                 disp(['no image found for ' file])
             end
             
-            filetest=[il.info.path filesep il.info.files{37}];
+            filetest=[il.info.path filesep il.info.files{framerange(1)}];
             tiff=gettif(filetest);
             tiff.image=im;
             tiff.info.pixsize=obj.locData.files.file(end).info.pixsize;
@@ -38,7 +41,7 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
             else
                 p.cam_pixelsize_nm=tiff.info.pixsize*1000;
                 p.roitiff=tiff.info.roi;
-                p.datapart.selection='reference';
+                p.datapart.selection='all (T->R)';
                 mipbgT=apply_transform_image(mipbg,transformation,p);
             end
             
