@@ -3,6 +3,7 @@ classdef Workflow<interfaces.DialogProcessor
         modules={};
         graphfigure=[];
         description='';
+       
         %.module
         %.tag
         %.path:{'directory','.'

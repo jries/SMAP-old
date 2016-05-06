@@ -7,6 +7,6 @@ end
 try
 g=gui.GuiMainSMAP;g.makeGui;    
 catch err
-    disp('try deleting plugins.m in the plugins directory and the temp directory in teh settings directory')
+    disp('try deleting plugins.m in the plugins directory and the temp directory in the settings directory')
     err
 end
