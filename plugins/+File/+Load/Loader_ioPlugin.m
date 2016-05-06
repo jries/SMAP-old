@@ -33,7 +33,7 @@ end
 
 
 function pard=guidef
-info.name='CSV loader';
+info.name='imagin optics loader';
 info.extensions={'*.csv';'*.*'};
 info.dialogtitle='select any CSV file';
 pard.plugininfo=info;     

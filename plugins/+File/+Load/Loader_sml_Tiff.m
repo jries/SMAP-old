@@ -122,7 +122,7 @@ pard.browseTfile.position=[3,4];
  pard.browseTfile.Width=1;
 pard.browseTfile.TooltipString='frame range';
 
-info.name='SML loader';
+info.name='SML - Tiff loader';
 info.extensions={'*.mat';'*.*'};
 info.dialogtitle='select any SMLM file (_sml or _fitpos)';
 pard.plugininfo=info;
