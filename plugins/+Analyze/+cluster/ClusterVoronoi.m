@@ -52,7 +52,6 @@ pard.t1.Width=4;
 
 pard.plugininfo.description=sprintf('Performs Voronoi clustering and returns the density (inverse of voronoi cell).If grouped or ungrouped data is used depends on setting in layers. Uses code from SharpViSu: L. Andronov, Y. Lutz, J.-L. Vonesch, and B. P. Klaholz, SharpViSu: integrated analysis and segmentation of super-resolution microscopy data, Bioinformatics, p. btw123, Mar. 2016.');
 pard.plugininfo.type='ProcessorPlugin';
-
 pard.plugininfo.Name='Cluster Voronoi';
 end
 
