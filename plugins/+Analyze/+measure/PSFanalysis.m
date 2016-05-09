@@ -28,9 +28,6 @@ end
 
 
 
-
-
-
 function analyze_PSF(locData,p) %analyze PSF 
 allzdist=3;
 % allzstart=1;
@@ -53,9 +50,13 @@ offset=min(img(:));
 rp=p.sr_roihandle.getPosition;
 croi=fileinfo.roi;
 c=rp/fileinfo.pixsize;
+
+positions=locData.getloc({'frame','xnm','ynm','PSFxnm','PSFynm'},'position','roi');
 % c=par.roicoords/par.pixelsize;
-ccentx=round(c(1)+c(3)/2)-croi(1);
-ccenty=round(c(2)+c(4)/2)-croi(2);
+ccentx=round(median(positions.xnm)/fileinfo.pixsize/1000-croi(1));
+ccenty=round(median(positions.ynm)/fileinfo.pixsize/1000-croi(2));
+% ccentx=round(c(1)+c(3)/2)-croi(1);
+% ccenty=round(c(2)+c(4)/2)-croi(2);
 wins=round((p.roisize-1)/2);
 
 xx=(-wins:wins)*fileinfo.pixsize*1000;
@@ -77,12 +78,15 @@ ssm=size(smallim);
 [~,ind]=max(smallim(:));
 [mx,my,mz]=ind2sub(size(smallim),ind);
 
-positions=locData.getloc({'frame','xnm','ynm','PSFxnm','PSFynm'},'position','roi');
+
 
 badind=(positions.frame<=minf)|(positions.frame>maxf);
 positions.xnm(badind)=[];positions.ynm(badind)=[];
 positions.frame(badind)=[];
-positions.PSFxnm(badind)=[];positions.PSFynm(badind)=[];
+positions.PSFxnm(badind)=[];
+if ~isempty(positions.PSFynm)
+    positions.PSFynm(badind)=[];
+end
 positions.frame=positions.frame-minf+1;
 
 % zz=((1:ssm(3))-mz)*DZ;
@@ -101,8 +105,10 @@ subplot(3,3,1)
 imagesc(combinedim)
 axis off
 title(filen,'Interpreter','none')
+xlabel('z (nm)')
+ylabel('intensity')
 
-subplot(3,3,4)
+subplot(3,3,2)
 nind0=mz-allzdist*4:allzdist:mz+allzdist*4;
 nind0(nind0<1)=1;nind0(nind0>l)=l;
 nind=ones(9,1);
@@ -140,32 +146,33 @@ indz=find(positions.frame>=mz,1,'first');
 % mx=positions.xnm(indz);
 % my=positions.ynm(indz);
 zz=((1:ssm(3)))*DZ;
+zznm=zz*1000;
 
 zzs=zz(mz-3:mz+3);
 p1=fitpx(3,:);
 p1s=p1(mz-3:mz+3);
-p=polyfit(zzs,p1s,2);
-m1=-p(2)/2/p(1);
+pfit=polyfit(zzs,p1s,2);
+m1=-pfit(2)/2/pfit(1);
 
 p1=fitpy(3,:);
 p1s=p1(mz-3:mz+3);
-p=polyfit(zzs,p1s,2);
-m2=-p(2)/2/p(1);
+pfit=polyfit(zzs,p1s,2);
+m2=-pfit(2)/2/pfit(1);
 
 % zzss=zz(positions.frame);
 
 m3=0;
 
 subplot(3,3,8)
-plot(zz,fitpx(3,:))
+plot(zznm,fitpx(3,:))
 hold on
-plot(zz,fitpy(3,:),'r')
-plot(zz(positions.frame),positions.PSFxnm,'k')
+plot(zznm,fitpy(3,:),'r')
+plot(zznm(positions.frame),positions.PSFxnm,'k')
 if ~isempty(positions.PSFynm)
-    plot(zz(positions.frame),positions.PSFynm,'k')
+    plot(zznm(positions.frame),positions.PSFynm,'k')
 end
-plot([zz(mz),zz(mz)],[min(fitpy(3,:)),max(fitpy(3,:))],'r')
-plot([zz(mzsig),zz(mzsig)],[min(fitpy(3,:)),max(fitpy(3,:))],'g')
+plot([zznm(mz),zznm(mz)],[min(fitpy(3,:)),max(fitpy(3,:))],'r')
+plot([zznm(mzsig),zznm(mzsig)],[min(fitpy(3,:)),max(fitpy(3,:))],'g')
 hold off
 axis tight
 ylim([0 0.5]*1000)
@@ -177,11 +184,24 @@ title(['\sigma_x = ' num2str(fitpx(3,mz),3) ', \sigma_y = ' num2str(fitpy(3,mz),
 minx=positions.xnm(indz);miny=positions.ynm(indz);
 x=(positions.xnm-minx);
 y=(positions.ynm-miny);
+xlabel('z(nm)')
+ylabel('PSFx/y (nm)')
+
 
 subplot(3,3,5)
-plot(positions.frame,x,positions.frame,y)
-dx1=myquantilefast((x),[0.05 .95]);dy1=myquantilefast(abs(y),[0.05 .95]);
-ylim(dy1);
+plot(positions.frame*DZ*1000,x,positions.frame*DZ*1000,y)
+
+std2=(std(x)+std(y));
+m2=(mean(x)+mean(y))/2;
+dx1(1)=max(m2-std2,min(min(x),min(y))); dx1(2)=min(m2+std2,max(max(x),max(y)));
+% dx1=myquantilefast((x),[0.05 .95]);dy1=myquantilefast(abs(y),[0.05 .95]);
+axis('tight')
+ylim(dx1);
+title('displacement with z')
+xlabel('z(nm)')
+ylabel('x/y (nm)')
+
+
 subplot(3,3,6)
 
 plot(x, y,'+')
@@ -194,54 +214,62 @@ hold off
 
 dxs=max(positions.xnm(inframes1))-min(positions.xnm(inframes1));
 dys=max(positions.ynm(inframes1))-min(positions.ynm(inframes1));
+dxs2=max(positions.xnm(inframes))-min(positions.xnm(inframes));
+dys2=max(positions.ynm(inframes))-min(positions.ynm(inframes));
 dxa=max(positions.xnm)-min(positions.xnm);
 dya=max(positions.ynm)-min(positions.ynm);
 
-title(['d_{1000} = ' num2str(sqrt(dxs.^2+dys.^2),3),...
-    ', d_{all} = ' num2str(sqrt(dxa.^2+dya.^2),4) ' nm'])
+title(['d_{21} = ' num2str(sqrt(dxs.^2+dys.^2),3),...
+    ', d_{11} = ' num2str(sqrt(dxs2.^2+dys2.^2),4) ' nm'])
 axis tight
+xlabel('x(nm)')
+ylabel('y(nm)')
+legend('all','21 frames','11 frames' )
 
 r=[1 0 0]; k=[0 0 0]; b=[0 1 0];
 col=[r;r;r;r;k;b;b;b;b];
 
-subplot(3,3,2)
+subplot(3,3,3)
 for k=1:9
-plot(xx,profilex(:,mz-k+5),'Color',col(k,:))
+plot(xx,profilex(:,nind(k)),'Color',col(k,:))
 hold on
 end
 plot(xx,profilex(:,mz),'k')
 hold off
 axis tight
 set(gca,'YTickLabel','')
-title('profile x')
+title('profile x, corresponding to images')
+xlabel('x(nm)')
+ylabel('intensity')
 
-
-subplot(3,3,3)
-plot(xx,profilex(:,mz))
-hold on
-fitf=mygaussforfit(fitpx(:,mz),xx);
-plot(xx,fitf,'r')
-hold off
-title(['x(z0), If= ' num2str(fitpx(1,mz))] )
-
+% subplot(3,3,4)
+% plot(xx,profilex(:,mz))
+% hold on
+% fitf=mygaussforfit(fitpx(:,mz),xx);
+% plot(xx,fitf,'r')
+% hold off
+% title(['x(z0), If= ' num2str(fitpx(1,mz))] )
+% axis tight
+% xlabel('z(nm)')
+% ylabel('intensity')
 
 subplot(3,3,7)
-plot(zz,fitpx(1,:),zz,0*fitpx(4,:),zz,fitpy(1,:),zz,0*fitpy(4,:))
-hold on
+% plot(zznm,fitpx(1,:),zznm,0*fitpx(4,:),zznm,fitpy(1,:),zznm,0*fitpy(4,:))
+% hold on
 [~,inx]=max(profilex(:));
 [mxx,mzz]=ind2sub(size(profilex),inx);
 
 profz=profilex(mxx,:);
-fitpz=mygaussfit(zz,profz,[max(profz),1,0.5,0]);
-profzf=mygaussforfit(fitpz,zz);
-plot(zz,profz,zz,profzf);
+fitpz=mygaussfit(zznm,profz,[max(profz),1000,500,0]);
+profzf=mygaussforfit(fitpz,zznm);
+plot(zznm,profz,zznm,profzf);
 hold off
 
 mf=max(profzf);
 ylim([-mf*.2 mf*1.5])
-title(['z: \sigma = ' num2str(abs(fitpz(3)))]);
+title(['z profile: \sigma_z = ' num2str(abs(fitpz(3)))]);
 xlabel('z')
-
+ylabel('Intensity');
 plotpos=max(1,minf-20);
 
 subplot(3,3,9)
@@ -250,11 +278,11 @@ hold on
 plot(ccentx,ccenty,'ow')
 hold off
 axis off
-
 title([num2str(m1-1,3) ', ' num2str(m2-1,3)  ', ' num2str(m3-1,3)])
-
+if p.exportpdf
 fileout=[fd(1:end-1) '_PSF' ];
 export_fig(gcf,[fileout '.pdf'],'-pdf');
+end
 end
 
 
@@ -271,7 +299,7 @@ pard.dz.position=[2,2];
 
 pard.text2.object=struct('String','ROI size (pixel):','Style','text');
 pard.text2.position=[3,1]; 
-pard.roisize.object=struct('String','11','Style','edit');
+pard.roisize.object=struct('String','15','Style','edit');
 pard.roisize.position=[3,2];
 
 pard.text3.object=struct('String','number of frames:','Style','text');
@@ -280,6 +308,7 @@ pard.numframes.object=struct('String','32','Style','edit');
 pard.numframes.position=[4,2];
 pard.exportpdf.object=struct('String','Export results as PDF','Style','checkbox','Value',0);
 pard.exportpdf.position=[5,1];
+pard.exportpdf.Width=2;
 % 
 pard.plugininfo.name='PSFanalysis';
 pard.plugininfo.type='ProcessorPlugin';
