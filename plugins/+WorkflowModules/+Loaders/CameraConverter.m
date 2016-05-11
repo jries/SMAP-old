@@ -36,6 +36,9 @@ classdef CameraConverter<interfaces.WorkflowModule
         
         function readmetadata(obj)
              p=obj.getGuiParameters;
+            if ~isfield(p,'metadatafile')
+                return
+            end
             camcalib=readtable(obj.calfile);
             fid=fopen(p.metadatafile);
             if fid>0
