@@ -103,8 +103,9 @@ classdef GuiPluginGroup< interfaces.GuiModuleInterface & interfaces.LocDataInter
             if iscell(pluginpath)&&length(pluginpath)>=3
                 thisplugin=[];
                 try
-                thisplugin=plugin(pluginpath{:});
+                thisplugin=plugin(pluginpath{1:3});
                 catch
+                    
                     obj.guiplugins=myrmfield(obj.guiplugins,'name');
                 end
                 if isempty(thisplugin)||~isa(thisplugin,'interfaces.DialogProcessor')

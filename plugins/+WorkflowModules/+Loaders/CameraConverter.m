@@ -6,6 +6,9 @@ classdef CameraConverter<interfaces.WorkflowModule
         loc_cameraSettingsStructure=struct('camId','default','port','Conventional','exposure',1,'emgain',1,'conversion',1,'offset',400,'pixsize',0.1,...
             'roi',[],'temperature',0,'timediff',0,'comment','');
         EMexcessNoise;
+        calibrategain=false;
+        calibratecounter
+        calibrateimages
     end
     methods
         function obj=CameraConverter(varargin)
@@ -19,6 +22,7 @@ classdef CameraConverter<interfaces.WorkflowModule
            initGui@interfaces.WorkflowModule(obj);
            obj.guihandles.loadmetadata.Callback={@loadmetadata_callback,obj};
            obj.guihandles.camparbutton.Callback={@camparbutton_callback,obj};
+           obj.guihandles.calibrate.Callback={@calibrate_callback,obj};
            obj.outputParameters={'loc_cameraSettings','EMexcessNoise'};
            obj.addSynchronization('loc_metadatafile',obj.guihandles.metadatafile,'String',@obj.readmetadata)
         end
@@ -26,6 +30,29 @@ classdef CameraConverter<interfaces.WorkflowModule
            
         end
         function datao=run(obj,data,p)
+            
+            %calibrate gain offset from images
+            global SMAP_stopnow           
+             
+            if obj.calibrategain
+                datao=[];
+                if data.eof            
+                    SMAP_stopnow=false;
+                    calculategain(obj.calibrateimages);
+                    obj.calibrategain=false;
+                    return
+                end
+
+                obj.calibrateimages(:,:,obj.calibratecounter)=data.data;
+                obj.calibratecounter=obj.calibratecounter+1;
+                if obj.calibratecounter>140
+                    SMAP_stopnow=true;
+                end
+                
+                
+                
+                return
+            end
             pc=obj.loc_cameraSettings;
             offset=pc.offset;
             adu2phot=(pc.conversion/pc.emgain);
@@ -67,7 +94,12 @@ classdef CameraConverter<interfaces.WorkflowModule
     end
 end
 
-
+function calibrate_callback(a,b,obj)
+obj.calibrategain=true;
+obj.calibratecounter=1;
+obj.calibrateimages=[];
+obj.parent.run;
+end
 
 function camparbutton_callback(a,b,obj)
 fn=fieldnames(obj.loc_cameraSettingsStructure);
@@ -120,7 +152,18 @@ end
 % fclose(fid);
 % minfo=minfoparsec(metadatatxt);
 % end
-
+function calculategain(img)
+img=double(img);
+m=mean(img,3);
+v=var(img,0,3);
+figure(88);
+plot(m(:),v(:),'.')
+gain=15.6;offs=200;em=200;
+pix2phot=gain/em;
+hold on
+plot(m(:),1/pix2phot*(m(:)-offs),'.')
+hold off
+end
 
 function pard=guidef
 
@@ -135,6 +178,10 @@ pard.metadatafile.Width=4;
 pard.loadmetadata.object=struct('Style','pushbutton','String','Load metadata');
 pard.loadmetadata.position=[3,1];
 pard.loadmetadata.TooltipString=sprintf('Load micromanager Metadata.txt file.');
+
+pard.calibrate.object=struct('Style','pushbutton','String','auto calibration');
+pard.calibrate.position=[3,2];
+pard.calibrate.TooltipString=sprintf('calibrate gain and offset from images (from simpleSTORM)');
 
 pard.camparbutton.object=struct('Style','pushbutton','String','set Cam Parameters');
 pard.camparbutton.position=[3,3.5];

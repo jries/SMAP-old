@@ -14,6 +14,7 @@ function t = myrmfield(s,field)
 %--------------------------------------------------------------------------------------------
 % handle input arguments
 if isa(s,'struct') 
+    field=unique(field);
    field = cellstr(field); 
 
 

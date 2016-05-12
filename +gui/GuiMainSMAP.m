@@ -161,7 +161,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             gsites.attachLocData(obj.locData);
 %             gsites.addGuiParameters(guipar);
             gsites.maindir='ROIManager';
-            gsites.guiplugins=rmfield(guimodules.ROIManager,'Evaluate');
+            gsites.guiplugins=myrmfield(guimodules.ROIManager,'Evaluate');
             gsites.makeGui();
             obj.children.guiSites=gsites;
             

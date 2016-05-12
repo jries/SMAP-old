@@ -156,7 +156,9 @@ classdef Workflow<interfaces.DialogProcessor
                     p=pGui.(fn{k});
                     p=copyfields(p,pall);
 %                     obj.module(fn{k}).setGuiAppearence(pGui.(fn{k}))
+                    if ~strcmp( fn{k},'all')
                     obj.module(fn{k}).setGuiAppearence(p)
+                    end
                 end
             end
             obj.addAllModulesToGui;
