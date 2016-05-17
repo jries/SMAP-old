@@ -52,12 +52,12 @@ if nargin<4
 end
     
     
-if isempty(locsh.x)
+if ~isfield(locsh,'x')||isempty(locsh.x)
     pos.x=locsh.xnm(indin);
 else
     pos.x=locsh.x(indin);
 end
-if isempty(locsh.y)
+if ~isfield(locsh,'y')||isempty(locsh.y)
     pos.y=locsh.ynm(indin);
 else
     pos.y=locsh.y(indin);
@@ -101,8 +101,8 @@ end
 tpar=0;
 switch lower(p.rendermode.selection)
     case {'gauss','other'}
-        if isempty(locsh.sx)|| isempty(locsh.sy) 
-            if ~isempty(locsh.s)
+        if ~isfield(locsh,'sx') || ~isfield(locsh,'sy') || isempty(locsh.sx)|| isempty(locsh.sy) 
+            if isfield(locsh,'s')&&~isempty(locsh.s)
                 sd=locsh.s(indin);
             else
                 sd=locsh.locprecnm(indin);

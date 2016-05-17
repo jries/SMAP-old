@@ -21,19 +21,7 @@ classdef LocSaver<interfaces.WorkflowModule;
                 return
             end
             obj.locDatatemp=interfaces.LocalizationData;
-            obj.filenumber=1;%obj.locData.files.filenumberEnd+1;
-%             tifs=struct('image',[],'info',[]);
-%             finfo=obj.getPar('loc_fileinfo');
-%             sfile=finfo.basefile;
-%             filename=[sfile '_sml.mat'];  
-%             infost=obj.getPar('loc_cameraSettings');
-%             infost=copyfields(infost,finfo);
-%             filestruct=struct('info',infost,'average',[],'name',filename,...
-%                 'number',obj.filenumber,...
-%                 'numberOfTif',0,'tif',tifs);
-%              if ~isfield(filestruct.info,'roi')||isempty(filestruct.info.roi)
-%                  filestruct.info.roi=[0 0 filestruct.info.Width filestruct.info.Height];
-%              end
+            obj.filenumber=1;
              obj.locDatatemp.files.file=locsaveFileinfo(obj);  
              p=obj.parent.getGuiParameters(true,true);
              p.name=obj.parent.pluginpath;
@@ -71,6 +59,14 @@ classdef LocSaver<interfaces.WorkflowModule;
                 if isempty(obj.locData.loc)
                     obj.locData.addLocData(obj.locDatatemp);
                 end
+                [path,file]=fileparts(filename);
+                imageout=makeSRimge(obj.locDatatemp);
+                options.comp='jpeg';
+                options.color=true;
+                s=size(imageout);
+                sr=ceil(s/16)*16;
+                imageout(sr(1),sr(2),1)=0;
+                saveastiff(uint8(imageout/max(imageout(:))*255),[path filesep file '.tif'],options)
                 output=data;
             end
             
@@ -79,5 +75,22 @@ classdef LocSaver<interfaces.WorkflowModule;
     end
 end
 
-
+function imout=makeSRimge(locDatatemp)
+channelfile='settings/FitTif_Channelsettings.mat';
+pall=load(channelfile);
+p=pall.globalParameters;
+p.sr_pixrec=20;
+p.layer=1;
+% p.gaussfac=0.4;
+minx=min(locDatatemp.loc.xnm);maxx=max(locDatatemp.loc.xnm);
+miny=min(locDatatemp.loc.ynm);maxy=max(locDatatemp.loc.ynm);
+p.sr_pos=[(minx+maxx)/2 (miny+maxy)/2];
+p.sr_size=[(maxx-minx)/2 (maxy-miny)/2];
+p.sr_layerson=1;
+rawimage=renderSMAP(locDatatemp.loc,p);
+layers.images.finalImages=drawerSMAP(rawimage,p);
+imoutt=displayerSMAP(layers,p);
+imout=imoutt.image;
+% imout=TotalRender(locDatatemp,pall.defaultChannelParameters);
+end
 

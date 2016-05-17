@@ -3,6 +3,9 @@ if nargin<3
     filterremove={};
 end
 imax=0;
+if ~iscell(pall)
+    pall={pall};
+end
 for k=1:length(pall)
     p=pall{k};
     if p.layercheck

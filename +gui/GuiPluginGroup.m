@@ -113,8 +113,9 @@ classdef GuiPluginGroup< interfaces.GuiModuleInterface & interfaces.LocDataInter
                         
                         obj.guiplugins=myrmfield(obj.guiplugins,'name');
                     else
-                        pluginpath
-                        warning('selected plugin is not a subclass of interfaces.DialogProcessor')
+                        disp([pluginpath{:} ' is not a subclass of interfaces.DialogProcessor'])
+%                         pluginpath
+%                         warning('selected plugin is not a subclass of interfaces.DialogProcessor')
                     end
                     return
                 end

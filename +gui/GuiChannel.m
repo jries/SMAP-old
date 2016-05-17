@@ -258,7 +258,9 @@ classdef GuiChannel< interfaces.LayerInterface
             if ismember('shift',modifiers);
                 %save
                 defaultChannelParameters=obj.getGuiParameters;
-                save(deffile,'defaultChannelParameters');
+                globalParameters=obj.getLayerParameters(obj.layer);
+                globalParameters=rmfield(globalParameters,{'mainGuihandle','mainGui','loc_outputfig','filterpanel','ov_axes','guiFormat','sr_image','sr_imagehandle'});
+                save(deffile,'defaultChannelParameters','globalParameters');
                 disp('default parameters saved.');
                 obj.status('default parameters saved.');
             else
