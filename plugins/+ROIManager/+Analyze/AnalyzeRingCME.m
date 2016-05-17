@@ -38,8 +38,12 @@ classdef AnalyzeRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
         function save_callback(obj,a,b)
             p=obj.getAllParameters;
             selection=p.savemenu.selection;
+            pf=selection;
+            if strcmp(selection,'all (not sites)')
+                pf='all.mat';
+            end
 %             [~,~,ext]=fileparts(selection);
-            [file,path]=uiputfile(selection);
+            [file,path]=uiputfile(pf);
             if path
                 switch selection
                     case 'results.mat'
@@ -61,17 +65,20 @@ classdef AnalyzeRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
                         results.numberofsites=obj.results.numsites;
                         save([path file],'results');
                     case 'all (not sites)'
+                        [~,filen]=fileparts(file);
                         results=obj.results;
-                        save([path 'results.mat'],'results');
-                        
+                        save([path filen '_results.mat'],'results');
+                        results=[];
                         results.sumimage=obj.results.sumimage;
                         results.sumrdensity=obj.results.sumrdensity;
                         results.numberofsites=obj.results.numsites;
-                        save([path 'rad_av.mat'],'results');
+                        save([path filen '_rad_av.mat'],'results');
                         
                         image=obj.results.sumimage/obj.results.numsites;
-                        saveastiff(uint16(image/max(image(:))*2^16),[path file])
-                         export_fig([path file],'-pdf','-nocrop',obj.resultsfigure)
+                        
+                        
+                        saveastiff(uint16(image/max(image(:))*2^16),[path filen '.tif'])
+                        export_fig([path filen '.pdf'],'-pdf','-nocrop',obj.resultsfigure)
 
                 end
             end
