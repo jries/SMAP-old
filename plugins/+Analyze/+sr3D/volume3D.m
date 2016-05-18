@@ -140,12 +140,8 @@ end
 end
 
 function openfiji_callback(a,b,obj)
-disp('not yet implemented. Please save and open manually in fiji')
-%     imout3=obj.imagestack;
-%     imout=uint8(imout3/max(imout3(:))*(2^8-1));
-%     mij=openfiji(obj);
-%     title=obj.getPar('layer1_').ch_filelist.selection;
-%     mij.createColor(title,imout,true);
+title=obj.getPar('layer1_').ch_filelist.selection;
+openstackinfiji(obj,obj.imagestack,title)
 end
 
 function pard=guidef(obj)
