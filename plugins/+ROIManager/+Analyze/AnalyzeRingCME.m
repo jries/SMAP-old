@@ -87,16 +87,30 @@ classdef AnalyzeRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
 end
 
 function results=cmeresults(sites)
+if isfield(sites(1).evaluation.CME2DRing.circfit,'Ncirc1')
+    name.Ncirc='Ncirc1';
+    name.rc='r1';
+    name.dr='dr1';
+    name.ro='r1';
+    name.sigma='sigma1';
+else
+    name.Ncirc='Ncirc';
+    name.rc='r2D';
+    name.dr='dr';
+    name.ro='r2D';
+    name.sigma='sigma';
+end
+
 circfitfields={'evaluation','CME2DRing','circfit'};
 imfitfields={'evaluation','CME2DRing','imfit'};
-results.N=getFieldAsVector(sites,circfitfields{:},'Ncirc1');
-results.rc=getFieldAsVector(sites,circfitfields{:},'r1');
+results.N=getFieldAsVector(sites,circfitfields{:},name.Ncirc);
+results.rc=getFieldAsVector(sites,circfitfields{:},name.rc);
 
 results.images=getFieldAsVector(sites,imfitfields{:},'image');
-results.dr=getFieldAsVector(sites,imfitfields{:},'dr1');
-results.ro=getFieldAsVector(sites,imfitfields{:},'r1');
+results.dr=getFieldAsVector(sites,imfitfields{:},name.dr);
+results.ro=getFieldAsVector(sites,imfitfields{:},name.ro);
 
-results.sigma=getFieldAsVector(sites,imfitfields{:},'sigma1');
+results.sigma=getFieldAsVector(sites,imfitfields{:},name.sigma);
 
 results.rdensity=getFieldAsVector(sites,imfitfields{:},'profiles1','rdensity');
 results.ac=getFieldAsVector(sites,imfitfields{:},'profiles1','thetaAC');
