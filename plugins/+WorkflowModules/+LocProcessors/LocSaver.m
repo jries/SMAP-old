@@ -70,10 +70,15 @@ classdef LocSaver<interfaces.WorkflowModule;
                     ind=ind+1;
                 end
                 fitpar=obj.parent.getGuiParameters(true).children;
-                obj.locDatatemp.savelocs(filename,[],struct('fitparameters',fitpar,'sampleframes',{obj.frames}));
-                if isempty(obj.locData.loc)
-                    obj.locData.addLocData(obj.locDatatemp);
-                end
+                obj.locDatatemp.files.file.raw=obj.frames;
+                obj.locDatatemp.savelocs(filename,[],struct('fitparameters',fitpar));
+                
+%               write to main GUI
+%                 obj.locData.clear;
+                obj.locData.setLocData(obj.locDatatemp);
+
+                initGuiAfterLoad(obj);
+                
                 [path,file]=fileparts(filename);
                 imageout=makeSRimge(obj.locDatatemp);
                 options.comp='jpeg';
@@ -81,7 +86,7 @@ classdef LocSaver<interfaces.WorkflowModule;
                 s=size(imageout);
                 sr=ceil(s/16)*16;
                 imageout(sr(1),sr(2),1)=0;
-                saveastiff(uint8(imageout/max(imageout(:))*255),[path filesep file '.tif'],options)
+                saveastiff(uint16(imageout/max(imageout(:))*(2^16-1)),[path filesep file '.tif'],options)
                 output=data;
             end
             

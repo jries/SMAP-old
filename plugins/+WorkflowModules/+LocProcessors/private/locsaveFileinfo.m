@@ -24,7 +24,7 @@ end
 
 filestruct=struct('info',infost,'average',[],'name',filename,...
     'number',obj.filenumber,...
-    'numberOfTif',0,'tif',tifs);
+    'numberOfTif',0,'tif',tifs,'raw',struct('image',[],'frame',[]));
 if ~isfield(filestruct.info,'roi')||isempty(filestruct.info.roi)
     try
         mm=imfinfo(finfo.filename);
