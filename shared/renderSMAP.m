@@ -46,13 +46,15 @@ else
 end
 
 
-if nargin<4
+if nargin<4||isempty(indin)
     fn=fieldnames(locsh);
     indin=true(length(locsh.(fn{1})),1);
 end
     
     
 if ~isfield(locsh,'x')||isempty(locsh.x)
+%     length(locsh.xnm)
+%     length(indin)
     pos.x=locsh.xnm(indin);
 else
     pos.x=locsh.x(indin);
