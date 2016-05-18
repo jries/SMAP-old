@@ -131,9 +131,9 @@ pard.text2.position=[2,1];
 pard.text3.object=struct('String','window (frames)','Style','text');
 pard.text3.position=[3,1];
 
-pard.df.object=struct('Style','edit','String','5000'); 
+pard.df.object=struct('Style','edit','String','1000'); 
 pard.df.position=[2,2.5];
-pard.window.object=struct('Style','edit','String','1000'); 
+pard.window.object=struct('Style','edit','String','5000'); 
 pard.window.position=[3,2.5];
 
 
