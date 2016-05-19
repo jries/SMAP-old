@@ -128,6 +128,7 @@ maxhist=myquantile(dlocs,0.998);
 [y,x]=hist(dlocs,0:maxhist);
 xlim([1,100])
 plot(x,y)
+title(length(dlocs));
 % sum(y)
 % length(cluster)
 
