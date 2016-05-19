@@ -56,6 +56,9 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
              end
            fitpar=obj.fitpar;
             EMexcess=fitpar.EMexcessNoise;
+            if isempty(EMexcess)
+                EMexcess=1;
+            end
            try %%for test set to 0: no fitting
                if obj.fitpar.fitmode==3
                     zpar=[fitpar.zpar(:)];

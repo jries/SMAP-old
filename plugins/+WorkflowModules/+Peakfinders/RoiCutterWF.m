@@ -86,8 +86,9 @@ classdef RoiCutterWF<interfaces.WorkflowModule
                 ax.NextPlot='add';
 %                 hold on
                 for k=1:length(maxima.x)
-                pos=[maxima.x(k)-dn maxima.y(k)-dn maxima.x(k)+dn maxima.y(k)+dn ];
-                plotrect(ax,pos,[1 0. 1]);
+                    pos=[maxima.x(k)-dn maxima.y(k)-dn maxima.x(k)+dn maxima.y(k)+dn ];
+                    col=[0.3 0.3 0.3];
+                    plotrect(ax,pos,col);
                 end
 
 %             drawnow
