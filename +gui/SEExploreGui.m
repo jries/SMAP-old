@@ -58,11 +58,7 @@ classdef SEExploreGui<interfaces.SEProcessor
      
         end
  
-%         function attachLocData(obj,locData)
-%             attachLocData@interfaces.SEProcessor(obj,locData);
-%             %XXXXXXXXX
-% %             addlistener(obj.locData,'loaded',@obj.updateFilelist);
-%         end
+
         function updateSitelist(obj)
             redraw_sitelist(obj);
         end
@@ -74,46 +70,10 @@ classdef SEExploreGui<interfaces.SEProcessor
             if ~isvalid(obj.handle)
                 return
             end
-%             lDfiles=obj.locData.files.file;
-%             lDfilenames=obj.getPar('filelist_long').String;
-%             if ~isempty(obj.SE.files(1).name) % MARKUS
-%                 sefiles={obj.SE.files.name};
-%             else 
-%                 sefiles={};
-%             end
-%             [filesremove,fnremove]=setdiff(sefiles,lDfilenames);
-%             [filesadd,fnadd]=setdiff(lDfilenames,sefiles);
-%             
-%             %add files
-%             for k=1:length(fnadd) 
-%                    f=filesadd{k};
-%                     obj.SE.addFile(f,fnadd(k),lDfiles(fnadd(k)).info);
-%             end            
-%             
-%             %remove files
-%             if ~isempty(fnremove)
-%                 for k=1:length(fnremove)
-%                         obj.SE.removeFile(fnremove(k));
-%                 end    
-%                 for k=1:length(obj.SE.files)
-%                     obj.SE.files(k).image=[];
-%                     plotfile(obj,k);
-%                 end
-%             end
-%             get local filelist (from SE)
-                % get difference: files to add and files to remove
-                %use remove / add file functionality (to remove also cells
-                %/ sites associated to files.
-            
 
             if ishandle(obj.guihandles.filelist)
                 obj.guihandles.filelist.String={obj.SE.files.name};
                 obj.guihandles.filelist.Value=1;
-%                 redraw_celllist(obj);
-%                 redraw_sitelist(obj);
-%                 
-
-
             end
             infofile=['settings' filesep 'infostruct.txt'];
             obj.infostruct=getinfostruct(infofile);

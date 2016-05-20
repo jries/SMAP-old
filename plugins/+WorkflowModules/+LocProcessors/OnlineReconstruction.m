@@ -68,7 +68,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
 
                 if toc(obj.localtimervalue)>obj.getSingleGuiParameter('loc_updatetime')||data.eof 
                     obj.locData.addLocData(obj.locDatatemp); %Careful: does this add it many time? need to intialize obj.locDatatemp?
-                   initGuiAfterLoad(obj);  %resets the view always! 
+                   initGuiAfterLoad(obj,false);  %resets the view always! 
                     notify(obj.P,'sr_render')
                     drawnow
                     obj.localtimervalue=tic;

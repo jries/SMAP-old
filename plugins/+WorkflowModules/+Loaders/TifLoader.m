@@ -82,10 +82,11 @@ classdef TifLoader<interfaces.WorkflowModule
                 id=id+1;
                 obj.output(datout)
                 image=imloader.readNext;
-                obj.setPar('loc_currentframe',struct('frame',datout.frame,'image',image));
+                
                 
                 %display
                 if mod(datout.frame,10)==0
+                    obj.setPar('loc_currentframe',struct('frame',datout.frame,'image',image));
                     if p.onlineanalysis
                         
                         totalf=imloader.info.numberOfFrames-obj.framestart;
