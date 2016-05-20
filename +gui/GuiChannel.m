@@ -69,7 +69,7 @@ classdef GuiChannel< interfaces.LayerInterface
             callobj=obj;
             h.ch_filelist.Callback={@callobj.filelist_callback,1};
 
-            h.rendermode.Callback={@setvisibility,obj,'rendermode'};
+            h.rendermode.Callback={@rendermode_callback,obj};
             h.imaxtoggle.Callback={@imaxtoggle_callback,obj};
             h.render_colormode.Callback={@render_colormode_callback,obj}; 
             h.renderfield.Callback={@renderfield_callback,obj};  
@@ -352,7 +352,7 @@ obj.guihandles.colorfield_max.String=num2str(cmax);
 obj.updateLayerField('render_colormode');
 obj.updateLayerField('colorfield_min');
 obj.updateLayerField('colorfield_max');
-setvisibility(0,0,obj)
+ setvisibility(0,0,obj)
 end
 
 function renderfield_callback(object, handle,obj)
@@ -432,12 +432,15 @@ otherwise
     end
 end
 end
-
+function rendermode_callback(a,b,obj)
+setvisibility(a,b,obj,'rendermode');
+render_colormode_callback(a,b,obj)
+end
 function setvisibility(a,b,obj,field)
 hgui=obj.guihandles;
 if hgui.render_colormode.Value>length(hgui.render_colormode.String)
     set(hgui.render_colormode,'Value',1);
-    disp('gui channel line 370')
+%     disp('gui channel line 370')
 end
 p=obj.getAllParameters;
 
@@ -447,7 +450,7 @@ fh={'PSFxnmb','PSFxnm_min','PSFxnm_max','znmb','znm_min','znm_max','locprecznmb'
     'channels','text1','renderfield','groupcheck',...
     'locprecnmb','locprecnm_min','locprecnm_max'};
 %tiff
-if p.rendermode.Value==4 %obj.fileinfo(fileselect).istiff
+if strcmp(p.rendermode.selection,'tiff')||strcmp(p.rendermode.selection,'raw') %obj.fileinfo(fileselect).istiff
     controlVisibility(hgui,fh,'off')
 else
     controlVisibility(hgui,fh,'on')
@@ -489,23 +492,38 @@ case {'hist','gauss','dl','other'}
         set(hgui.renderfield,'String',fieldnames(obj.locData.loc));
         hgui.renderfield.Value=min(hgui.renderfield.Value,length(hgui.renderfield.String));
     end
+    set(hgui.render_colormode,'String',{'normal','z','field'});
     if hgui.render_colormode.Value>length(hgui.render_colormode.String)
         set(hgui.render_colormode,'Value',1);
         disp('gui channel line 370')
     end
-    set(hgui.render_colormode,'String',{'normal','z','field'});
-case {'tiff'}
+    hgui.render_colormode.TooltipString='normal: intenisty coded. z: z-coded. Field: select field for color-coding';
+    
+case {'tiff','raw'}
+    if strcmp(p.rendermode.selection,'tiff');
+        form='tif';
+        hgui.render_colormode.TooltipString='Name of tiff file (loaded with File -> add)';
+    else
+        form='raw';
+        hgui.render_colormode.TooltipString='raw camera frames: frame number';
+    end
     s={};
     sind=1;
     file=hgui.ch_filelist.Value;
+
     s{1}='empty';
-    if ~isempty(obj.locData.files.file)&&isfield(obj.locData.files.file(file),'tif')
-        for k=1:length(obj.locData.files.file(file).tif)
-           if ~isempty(obj.locData.files.file(file).tif(k).info)
-                [p,f,ext]=fileparts(obj.locData.files.file(file).tif(k).info.name);
-                s{sind}=f;
+    if ~isempty(obj.locData.files.file)&&isfield(obj.locData.files.file(file),form)
+        for k=1:length(obj.locData.files.file(file).(form))
+            if strcmp(form,'tif')
+               if ~isempty(obj.locData.files.file(file).tif(k).info)
+                    [p,f,ext]=fileparts(obj.locData.files.file(file).tif(k).info.name);
+                    s{sind}=f;
+                    sind=sind+1;
+               end
+            else
+                s{sind}=num2str(obj.locData.files.file(file).raw(k).frame);
                 sind=sind+1;
-           end
+            end
         end
 
         set(hgui.render_colormode,'String',s);
@@ -579,9 +597,9 @@ pard.text1.Width=0.2;
 pard.channels.object=struct('Style','edit','String','0 1');
 pard.channels.position=[1,2.4];
 pard.channels.Width=0.6;
-pard.channels.TooltipString='channels to display. Use a,b,c and a:c notation';
+pard.channels.TooltipString='channels to display. Use a b c and a:c notation';
 
-pard.rendermode.object=struct('Style','popupmenu','String',{{'hist','Gauss','DL','tiff','Other'}},'Value',2);
+pard.rendermode.object=struct('Style','popupmenu','String',{{'hist','Gauss','DL','tiff','raw','Other'}},'Value',2);
 pard.rendermode.position=[1,3];
 pard.rendermode.Width=1;  
 pard.rendermode.TooltipString='how to render image. DL is diffraction limited';
@@ -599,7 +617,7 @@ pard.imaxtoggle.TooltipString='toggle absolute intensity maximum (Imax) or quant
 pard.imax.object=struct('Style','edit','String','-3.5');
 pard.imax.position=[2,2.2];
 pard.imax.Width=.6;
-pard.imax.TooltipString='absolut intensity or quantile (0<q<1) or v for q=1-10^(v), v<0';
+pard.imax.TooltipString='absolut intensity or quantile (0<q<1, typically 0.999) or v for q=1-10^(v), v<0, typically -3.5';
 
 pard.render_colormode.object=struct('Style','popupmenu','String',{obj.guiPar.srmodes}); 
 pard.render_colormode.position=[2,3];
@@ -615,7 +633,7 @@ pard.renderfield.TooltipString='field to color code';
 pard.colorfieldb.object=struct('Style','pushbutton','String','c range');
 pard.colorfieldb.position=[3,1];
 pard.colorfieldb.Width=.6;
-pard.colorfieldb.TooltipString='range of values to fill the lookup table';
+pard.colorfieldb.TooltipString=sprintf('Range of values to fill the lookup table (LUT). Usually 0 and 1. \n If fields (or z) are used for color coding: range of these values mapped to LUT.');
 
 
 pard.colorfield_min.object=struct('Style','edit','String','0');
@@ -704,15 +722,18 @@ pard.frame_max.Width=.6;
 pard.shiftxyb.object=struct('Style','pushbutton','String','shift x,y');
 pard.shiftxyb.position=[6,3.2];
 pard.shiftxyb.Width=.6;
+pard.shiftxyb.TooltipString='Shift reconstructed image by this value (nm). Useful to correct for chromatic aberrations.';
 
 pard.shiftxy_min.object=struct('Style','edit','String','0');
 pard.shiftxy_min.position=[6,3.8];
 pard.shiftxy_min.Width=.6;
-
+pard.shiftxy_min.TooltipString=pard.shiftxyb.TooltipString;
 
 pard.shiftxy_max.object=struct('Style','edit','String','0');
 pard.shiftxy_max.position=[6,4.4];
 pard.shiftxy_max.Width=.6;
+pard.shiftxy_max.TooltipString=pard.shiftxyb.TooltipString;
+
 
 pard.parbutton.object=struct('Style','pushbutton','String','par');
 pard.parbutton.position=[1,4.5];

@@ -13,9 +13,16 @@ end
 if nargin<5
     transparency.mode=1;
 end
-if strcmpi('tiff', p.rendermode.selection) %obj.locData.files.file(p.ch_filelist.value).istiff
+if strcmpi('tiff', p.rendermode.selection)%obj.locData.files.file(p.ch_filelist.value).istiff
     file=locs.files.file;
     imageo=tif2srimage(file,p);
+    imageo.istiff=1;
+    return
+end
+
+if strcmpi('raw', p.rendermode.selection) %obj.locData.files.file(p.ch_filelist.value).istiff
+    file=locs.files.file;
+    imageo=tif2srimage(file,p,'raw');
     imageo.istiff=1;
     return
 end

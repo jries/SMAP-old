@@ -6,7 +6,8 @@ classdef LocSaver<interfaces.WorkflowModule;
          deltaframes;
          index;
         numsaved
-        frames={};
+        frames;
+        saveframes=20;
         
     end
     methods
@@ -24,12 +25,11 @@ classdef LocSaver<interfaces.WorkflowModule;
             if obj.getPar('loc_preview')
                 return
             end
-            saveframes=10;
             numberofframes=obj.getPar('loc_fileinfo').numberOfFrames;
-            obj.deltaframes=round(numberofframes)/saveframes;
+            obj.deltaframes=floor(numberofframes/obj.saveframes);
              obj.index=round(obj.deltaframes/2);
             obj.numsaved=0;
-            obj.frames={};
+            obj.frames=struct('image',[],'frame',[]);
             obj.locDatatemp=interfaces.LocalizationData;
             obj.filenumber=1;
              obj.locDatatemp.files.file=locsaveFileinfo(obj);  
@@ -53,10 +53,10 @@ classdef LocSaver<interfaces.WorkflowModule;
                 locdat=interfaces.LocalizationData;
                 locdat.loc=fitloc2locdata(obj,locs,indin);
                 obj.locDatatemp.addLocData(locdat);
-                    if locs.frame(end)>obj.index && obj.numsaved<10
+                    if locs.frame(end)>obj.index && obj.numsaved<obj.saveframes
                         obj.numsaved=obj.numsaved+1;
                         obj.index=obj.index+obj.deltaframes;
-                        obj.frames{obj.numsaved}=obj.getPar('loc_currentframe');
+                        obj.frames(obj.numsaved)=obj.getPar('loc_currentframe');
                     end
             end
             
