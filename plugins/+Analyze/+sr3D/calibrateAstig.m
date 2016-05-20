@@ -13,12 +13,12 @@ classdef calibrateAstig<interfaces.DialogProcessor
         function out=run(obj,p)
             out=[];
             if isfield(obj.locData.loc,'gradient3Dellipticity')
-                locs=obj.locData.getloc({'frame','gradient3Dellipticity'},'layer',1,'position','roi');
+                locs=obj.locData.getloc({'frame','gradient3Dellipticity'},'layer',1,'position','roi','removeFilter',{'PSFxnm'});
                 p.fileout=obj.locData.files(1).file.name;
                 out=calibrategradient3D(locs,p)  ;  
                 obj.setPar('fit_gradient3Dellipticity',(out))
             elseif isfield(obj.locData.loc,'PSFynm')
-                locs=obj.locData.getloc({'frame','PSFxnm','PSFynm'},'layer',1,'position','roi');
+                locs=obj.locData.getloc({'frame','PSFxnm','PSFynm'},'layer',1,'position','roi','removeFilter',{'PSFxnm'});
 
                 p.fileout=obj.locData.files(1).file.name;
                 calibrateAstig3D(locs,p)         

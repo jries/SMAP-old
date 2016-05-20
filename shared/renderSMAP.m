@@ -148,6 +148,7 @@ switch lower(p.rendermode.selection)
         end
         frender=@gaussrender;
         dl=1;
+        imageo.istiff=1;
 %         rangex(1:2)=rangex(1:2)-p.sr_pixrec/2;
 %         rangey(1:2)=rangey(1:2)-p.sr_pixrec/2;
     case 'hist'

@@ -125,7 +125,7 @@ pard.text2.position=[3,1.3];
 pard.loc_bg_dx.object=struct('Style','edit','String','3');
 pard.loc_bg_dx.position=[3,2.3];
 pard.loc_bg_dx.Width=.7;
-pard.loc_bg_dx.TooltipString=sprintf('number of pixels over which the median is calculated.');
+pard.loc_bg_dx.TooltipString=sprintf('Number of pixels over which the median is calculated. (0-5)');
 
 pard.text3.object=struct('Style','text','String','dt (frames)');
 pard.text3.position=[4,1.3];
@@ -134,6 +134,6 @@ pard.text3.position=[4,1.3];
 pard.loc_blocksize_frames.object=struct('Style','edit','String','100');
 pard.loc_blocksize_frames.position=[4,2.3];
 pard.loc_blocksize_frames.Width=.7;
-pard.loc_blocksize_frames.TooltipString=sprintf('Number of frames over which the median is calculated.');
+pard.loc_blocksize_frames.TooltipString=sprintf('Number of frames over which the median is calculated. (Typically 100. range: 0-1000)');
 pard.plugininfo.type='WorkflowModule';
 end
