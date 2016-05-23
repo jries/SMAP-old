@@ -58,10 +58,17 @@ classdef AnalyzeRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
 
                     case 'average.tif'
                         image=obj.results.sumimage/obj.results.numsites;
+                        if size(image,3)==3
+                            options.color=true;
+                        else
+                            options.color=false;
+                        end
+                        saveastiff(uint16(image/max(image(:))*2^16),[path filen '.tif'],options)
                         saveastiff(uint16(image/max(image(:))*2^16),[path file])
                     case 'rad_av.mat'
                         results.sumimage=obj.results.sumimage;
-                        results.sumrdensity=obj.results.sumrdensity;
+                        results.sumrdensity1=obj.results.sumrdensity1;
+                        results.sumrdensity2=obj.results.sumrdensity2;
                         results.numberofsites=obj.results.numsites;
                         save([path file],'results');
                     case 'all (not sites)'
@@ -70,14 +77,19 @@ classdef AnalyzeRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
                         save([path filen '_results.mat'],'results');
                         results=[];
                         results.sumimage=obj.results.sumimage;
-                        results.sumrdensity=obj.results.sumrdensity;
+                        results.sumrdensity1=obj.results.sumrdensity1;
+                        results.sumrdensity2=obj.results.sumrdensity2;
                         results.numberofsites=obj.results.numsites;
                         save([path filen '_rad_av.mat'],'results');
                         
                         image=obj.results.sumimage/obj.results.numsites;
                         
-                        
-                        saveastiff(uint16(image/max(image(:))*2^16),[path filen '.tif'])
+                        if size(image,3)==3
+                            options.color=true;
+                        else
+                            options.color=false;
+                        end
+                        saveastiff(uint16(image/max(image(:))*2^16),[path filen '.tif'],options)
                         export_fig([path filen '.pdf'],'-pdf','-nocrop',obj.resultsfigure)
 
                 end
@@ -112,8 +124,14 @@ results.ro=getFieldAsVector(sites,imfitfields{:},name.ro);
 
 results.sigma=getFieldAsVector(sites,imfitfields{:},name.sigma);
 
-results.rdensity=getFieldAsVector(sites,imfitfields{:},'profiles1','rdensity');
+
 results.ac=getFieldAsVector(sites,imfitfields{:},'profiles1','thetaAC');
+if isfield(sites(1).evaluation.CME2DRing.circfit,'profiles2')
+    results.rdensity1=getFieldAsVector(sites,imfitfields{:},'profiles1','rdensity');
+    results.rdensity2=getFieldAsVector(sites,imfitfields{:},'profiles2','rdensity');
+else
+    results.rdensity1=getFieldAsVector(sites,imfitfields{:},'profiles1','rdensity');
+end
 results.rdensityn=getFieldAsVector(sites,imfitfields{:},'profiles1','rn');
 results.acthetan=getFieldAsVector(sites,imfitfields{:},'profiles1','thetan');
 
@@ -144,15 +162,17 @@ results.Nnormmedian=Nnormmedian;
 
 results.numsites=length(sites);
 sumim=zeros(size(results.images{1}));
-sumrdensity=zeros(size(results.rdensity{1}));
+sumrdensity1=zeros(size(results.rdensity1{1}));
+sumrdensity2=zeros(size(results.rdensity2{1}));
 for k=1:length(sites)
 %     size(results.images{k})
     sumim=results.images{k}+sumim;
-    sumrdensity=results.rdensity{k}+sumrdensity;
+    sumrdensity1=results.rdensity1{k}+sumrdensity1;
+    sumrdensity2=results.rdensity2{k}+sumrdensity2;
 end
 results.sumimage=sumim;
-results.sumrdensity=sumrdensity;
-
+results.sumrdensity1=sumrdensity1;
+results.sumrdensity2=sumrdensity2;
 results.sumrdensityn=results.rdensityn{1};
 
 end
