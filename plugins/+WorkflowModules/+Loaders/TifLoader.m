@@ -28,9 +28,9 @@ classdef TifLoader<interfaces.WorkflowModule
                 obj.status('TifLoader: localization file not found')
                  error('TifLoader: localization file not found')
             end
-            if ~obj.getPar('loc_preview')
-                obj.locData.clear;
-            end
+%             if ~obj.getPar('loc_preview')
+%                 obj.locData.clear;
+%             end
             obj.imloader=imageLoader(p.tiffile);     
             obj.imloader.onlineAnalysis=p.onlineanalysis;
             obj.imloader.waittime=p.onlineanalysiswaittime;
