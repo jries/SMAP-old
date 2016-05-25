@@ -17,6 +17,9 @@ classdef LocSaver<interfaces.WorkflowModule;
         end
         function pard=guidef(obj)
             pard.plugininfo.type='WorkflowModule'; 
+            pard.savelocal.object=struct('Style','checkbox','String','save local and copy','Value',0);
+            pard.savelocal.position=[1,1];
+            pard.savelocal.Width=2;
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -74,10 +77,17 @@ classdef LocSaver<interfaces.WorkflowModule;
                     filename=[filenameold(1:end-7) num2str(ind) '_sml.mat'];
                     ind=ind+1;
                 end
+                if p.savelocal
+                    filenameremote=filename;
+                    filename=[pwd filesep 'temp.sml'];
+                end
                 fitpar=obj.parent.getGuiParameters(true).children;
                 obj.locDatatemp.files.file.raw=obj.frames;
                 obj.locDatatemp.savelocs(filename,[],struct('fitparameters',fitpar));
                 
+                if p.savelocal
+                    movefile(filename,filenameremote);
+                end
 %               write to main GUI
 %                 obj.locData.clear;
                 obj.locData.setLocData(obj.locDatatemp);

@@ -33,3 +33,7 @@ EMCCD_SE_MLE_GPU.handle=hfit;
 LocFilter.handle=hloc;
 LocFilter.Vpos=1;
 LocFilter.Xpos=3;
+
+LocSaver.handle=hloc;
+LocSaver.Vpos=3;
+LocSaver.Xpos=1;
