@@ -21,7 +21,9 @@ function [locData,parameters,siteexplorer]=load_smlV3(filedat)
             end
         end
         if ~isfield(locData.loc,'filenumber')
-            locData.addloc('filenumber',ones(s(1),1,'uint8'));
+            locData.addloc('filenumber',ones(s(1),1,'uint16'));
+        else
+            locData.loc.filenumber=uint16(locData.loc.filenumber);
         end
         if ~isfield(saveloc.loc,'channel')
             locData.addloc('channel',zeros(s(1),1,'single'));
