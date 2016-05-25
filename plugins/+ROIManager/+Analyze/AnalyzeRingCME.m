@@ -163,12 +163,22 @@ results.Nnormmedian=Nnormmedian;
 results.numsites=length(sites);
 sumim=zeros(size(results.images{1}));
 sumrdensity1=zeros(size(results.rdensity1{1}));
-sumrdensity2=zeros(size(results.rdensity2{1}));
+
+if ~isfield (results, 'rdensity2')
+    sumrdensity2=sumrdensity1;
+else
+    sumrdensity2=zeros(size(results.rdensity2{1}));
+end
+
 for k=1:length(sites)
 %     size(results.images{k})
     sumim=results.images{k}+sumim;
     sumrdensity1=results.rdensity1{k}+sumrdensity1;
-    sumrdensity2=results.rdensity2{k}+sumrdensity2;
+    if ~isfield (results, 'rdensity2')
+        sumrdensity2=sumrdensity1;
+    else
+        sumrdensity2=results.rdensity2{k}+sumrdensity2;
+    end
 end
 results.sumimage=sumim;
 results.sumrdensity1=sumrdensity1;
