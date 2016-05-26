@@ -42,9 +42,8 @@ classdef ImageFilter<interfaces.WorkflowModule
     end
 end
 
-
 function pard=guidef
-pard.text.object=struct('Style','text','String','Filter: Sigma (pix): ');
+pard.text.object=struct('Style','text','String','Filter: Sigma (pix): Typical size of PSF in pixels, eg 1 (range: 0.5-5) ');
 pard.text.position=[1,1];
 pard.text.Width=1.3;
 pard.loc_loc_filter_sigma.object=struct('Style','edit','String','1.2');

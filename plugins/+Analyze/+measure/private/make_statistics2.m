@@ -272,7 +272,7 @@ else %use all values, plot for unconnected and connected
 end
 
 function his=plothist(v,quantile,dphot,hmin,ax)
-
+his=[];
 for k=1:length(v)
     if length(quantile)==1
     qq=myquantilefast(v{k},[1-quantile,quantile],30/(1-quantile));

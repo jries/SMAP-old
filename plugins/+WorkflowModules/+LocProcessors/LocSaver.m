@@ -3,6 +3,11 @@ classdef LocSaver<interfaces.WorkflowModule;
         filenumber
         fileinfo
         locDatatemp;
+         deltaframes;
+         index;
+        numsaved
+        frames;
+        saveframes=20;
         
     end
     methods
@@ -12,6 +17,9 @@ classdef LocSaver<interfaces.WorkflowModule;
         end
         function pard=guidef(obj)
             pard.plugininfo.type='WorkflowModule'; 
+            pard.savelocal.object=struct('Style','checkbox','String','save local and copy','Value',0);
+            pard.savelocal.position=[1,1];
+            pard.savelocal.Width=2;
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -20,20 +28,14 @@ classdef LocSaver<interfaces.WorkflowModule;
             if obj.getPar('loc_preview')
                 return
             end
+            numberofframes=obj.getPar('loc_fileinfo').numberOfFrames;
+            obj.deltaframes=floor(numberofframes/obj.saveframes);
+             obj.index=round(obj.deltaframes/2);
+            obj.numsaved=0;
+%             obj.frames=struct('image',[],'frame',[]);
+            obj.frames=[];
             obj.locDatatemp=interfaces.LocalizationData;
-            obj.filenumber=1;%obj.locData.files.filenumberEnd+1;
-%             tifs=struct('image',[],'info',[]);
-%             finfo=obj.getPar('loc_fileinfo');
-%             sfile=finfo.basefile;
-%             filename=[sfile '_sml.mat'];  
-%             infost=obj.getPar('loc_cameraSettings');
-%             infost=copyfields(infost,finfo);
-%             filestruct=struct('info',infost,'average',[],'name',filename,...
-%                 'number',obj.filenumber,...
-%                 'numberOfTif',0,'tif',tifs);
-%              if ~isfield(filestruct.info,'roi')||isempty(filestruct.info.roi)
-%                  filestruct.info.roi=[0 0 filestruct.info.Width filestruct.info.Height];
-%              end
+            obj.filenumber=1;
              obj.locDatatemp.files.file=locsaveFileinfo(obj);  
              p=obj.parent.getGuiParameters(true,true);
              p.name=obj.parent.pluginpath;
@@ -55,6 +57,15 @@ classdef LocSaver<interfaces.WorkflowModule;
                 locdat=interfaces.LocalizationData;
                 locdat.loc=fitloc2locdata(obj,locs,indin);
                 obj.locDatatemp.addLocData(locdat);
+                    if locs.frame(end)>obj.index && obj.numsaved<obj.saveframes
+                        obj.numsaved=obj.numsaved+1;
+                        obj.index=obj.index+obj.deltaframes;
+                        if isempty(obj.frames)
+                            obj.frames=obj.getPar('loc_currentframe');
+                        else
+                            obj.frames(obj.numsaved)=obj.getPar('loc_currentframe');
+                        end
+                    end
             end
             
             if data.eof %save locs
@@ -66,11 +77,31 @@ classdef LocSaver<interfaces.WorkflowModule;
                     filename=[filenameold(1:end-7) num2str(ind) '_sml.mat'];
                     ind=ind+1;
                 end
-                fitpar=obj.parent.getGuiParameters(true).children;
-                obj.locDatatemp.savelocs(filename,[],struct('fitparameters',fitpar));
-                if isempty(obj.locData.loc)
-                    obj.locData.addLocData(obj.locDatatemp);
+                if p.savelocal
+                    filenameremote=filename;
+                    filename=[pwd filesep 'temp.sml'];
                 end
+                fitpar=obj.parent.getGuiParameters(true).children;
+                obj.locDatatemp.files.file.raw=obj.frames;
+                obj.locDatatemp.savelocs(filename,[],struct('fitparameters',fitpar));
+                
+                if p.savelocal
+                    movefile(filename,filenameremote);
+                end
+%               write to main GUI
+%                 obj.locData.clear;
+                obj.locData.setLocData(obj.locDatatemp);
+
+                initGuiAfterLoad(obj);
+                
+                [path,file]=fileparts(filename);
+                imageout=makeSRimge(obj.locDatatemp);
+                options.comp='jpeg';
+                options.color=true;
+                s=size(imageout);
+                sr=ceil(s/16)*16;
+                imageout(sr(1),sr(2),1)=0;
+                saveastiff(uint16(imageout/max(imageout(:))*(2^16-1)),[path filesep file '.tif'],options)
                 output=data;
             end
             
@@ -79,5 +110,22 @@ classdef LocSaver<interfaces.WorkflowModule;
     end
 end
 
-
+function imout=makeSRimge(locDatatemp)
+channelfile='settings/FitTif_Channelsettings.mat';
+pall=load(channelfile);
+p=pall.globalParameters;
+p.sr_pixrec=20;
+p.layer=1;
+% p.gaussfac=0.4;
+minx=min(locDatatemp.loc.xnm);maxx=max(locDatatemp.loc.xnm);
+miny=min(locDatatemp.loc.ynm);maxy=max(locDatatemp.loc.ynm);
+p.sr_pos=[(minx+maxx)/2 (miny+maxy)/2];
+p.sr_size=[(maxx-minx)/2 (maxy-miny)/2];
+p.sr_layerson=1;
+rawimage=renderSMAP(locDatatemp.loc,p);
+layers.images.finalImages=drawerSMAP(rawimage,p);
+imoutt=displayerSMAP(layers,p);
+imout=imoutt.image;
+% imout=TotalRender(locDatatemp,pall.defaultChannelParameters);
+end
 

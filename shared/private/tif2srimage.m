@@ -1,4 +1,7 @@
-function im=tif2srimage(file,p)
+function im=tif2srimage(file,p,form)
+if nargin<3
+    form='tif';
+end
 rangext=[p.sr_pos(1)-p.sr_size(1) p.sr_pos(1)+p.sr_size(1)];
 rangeyt=[p.sr_pos(2)-p.sr_size(2) p.sr_pos(2)+p.sr_size(2)]; 
 
@@ -11,16 +14,16 @@ tnum=p.render_colormode.Value;
  
  fileh=file(fs);
  
- if length(fileh.tif)<tnum||isempty(fileh.tif(tnum).image)
-     im.image=zeros(p.sr_sizeRecPix(1),p.sr_sizeRecPix(2));
+ if length(fileh.(form))<tnum||isempty(fileh.(form)(tnum).image)
+     im.image=[];%zeros(round(p.sr_sizeRecPix(1)),round(p.sr_sizeRecPix(2)));
      im.rangex=rangex+p.shiftxy_min;
      im.rangey=rangey+p.shiftxy_max;
      return
  end
  
- if isfield(fileh.tif(tnum).info,'pixsize') 
-    pixsize=fileh.tif(tnum).info.pixsize;
-    roi=fileh.tif(tnum).info.roi;
+ if strcmp(form,'tif')&&isfield(fileh.(form)(tnum).info,'pixsize') 
+    pixsize=fileh.(form)(tnum).info.pixsize;
+    roi=fileh.(form)(tnum).info.roi;
  else
     pixsize=fileh.info.pixsize;
     roi=fileh.info.roi;
@@ -37,7 +40,7 @@ positionc=position;
 positionc(1:2)=position(1:2)-roi(1);
 positionc(3:4)=position(3:4)-roi(2);
 
-coim=cutoutim(permute(double(fileh.tif(tnum).image),[2 1 3]),positionc);
+coim=cutoutim(permute(double(fileh.(form)(tnum).image),[2 1 3]),positionc);
 
 magnification=pixsize/p.sr_pixrec*1000;
 srcoim=imresize(coim,magnification,'nearest');

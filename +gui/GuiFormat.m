@@ -127,14 +127,14 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
 
         function loaded_notify(obj,~,~)
             if isempty(obj.locData.loc),return;end
-            file=obj.locData.files(1).file;
-            info=file.info;
-            roi=info.roi;
-            sr_pos(1)=(roi(1)+roi(3)/2)*info.pixsize*1000;
-            sr_pos(2)=(roi(2)+roi(4)/2)*info.pixsize*1000;  
-            sr_size=roi(3:4)*info.pixsize*1000/2;
-            obj.setPar('sr_pos',sr_pos);
-            obj.setPar('sr_size',sr_size);
+%             file=obj.locData.files(1).file;
+%             info=file.info;
+%             roi=info.roi;
+%             sr_pos(1)=(roi(1)+roi(3)/2)*info.pixsize*1000;
+%             sr_pos(2)=(roi(2)+roi(4)/2)*info.pixsize*1000;  
+%             sr_size=roi(3:4)*info.pixsize*1000/2;
+%             obj.setPar('sr_pos',sr_pos);
+%             obj.setPar('sr_size',sr_size);
             updateFormatParameters(obj) 
             redrawov_callback(0,0,obj) 
 

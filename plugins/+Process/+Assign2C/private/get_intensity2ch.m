@@ -93,7 +93,7 @@ imgc3=myhist2(int1(c3),int2(c3),ps,ps,[mip map],[mip map]);
 outrgb(:,:,3)=imgc3;
 outrgb=log(outrgb)+1;
 outrgb(isinf(outrgb))=0;
-imagesc([mip map],[mip map],outrgb/myquantilefast(outrgb(:),.9995),1e5)
+imagesc([mip map],[mip map],outrgb/myquantilefast(outrgb(:),.9995,1e5))
 hold on
 plotboundary
 hold off

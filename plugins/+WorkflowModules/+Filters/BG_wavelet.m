@@ -3,7 +3,7 @@ classdef BG_wavelet<interfaces.WorkflowModule
     end
     methods
         function obj=BG_wavelet(varargin)
-            obj@interfaces.WorkflowModule(varargin{:});;
+            obj@interfaces.WorkflowModule(varargin{:});
             obj.outputChannels=1; %1: image-background. 2: background image
             obj.outputParameters={'loc_subtractbg'};
         end
@@ -53,7 +53,7 @@ pard.text2.position=[3,1.3];
 pard.loc_wavelet_level.object=struct('Style','edit','String','3');
 pard.loc_wavelet_level.position=[3,2.3];
 pard.loc_wavelet_level.Width=.7;
-pard.loc_wavelet_level.TooltipString=sprintf('Wavelet level for background correction. Typical: 3');
+pard.loc_wavelet_level.TooltipString=sprintf('Wavelet level for background correction. Typical: 3 (range: 2-6)');
 
 pard.loc_wavelet_refine.object=struct('Style','checkbox','String','Refined background estimation (slower)','Value',0);
 pard.loc_wavelet_refine.position=[4,1.3];

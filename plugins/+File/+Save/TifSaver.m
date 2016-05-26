@@ -40,6 +40,13 @@ for k=1:length(p.sr_layerson)
         lp=['layer' num2str(k)];
         txt=[txt lp ':\n'];
         txt=[txt p.([lp '_']).ch_filelist.selection '\n'];
+        
+        filn=p.([lp '_']).ch_filelist.Value;
+        txt=[txt p.filelist_long.String{filn} '\n'];
+        try
+            txt=[txt obj.locData.files.file(filn).info.filename '\n'];
+        catch
+        end
         txt=[txt 'channels: ' num2str(p.([lp '_']).channels) '\n'];
         txt=[txt 'grouping: ' num2str(p.([lp '_']).groupcheck) '\n'];
         txt=[txt 'quantile/Imax: ' num2str(p.([lp '_']).imax) '\n'];

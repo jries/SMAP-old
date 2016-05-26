@@ -27,9 +27,10 @@ classdef TifLoader<interfaces.WorkflowModule
             if ~exist(p.tiffile,'file')
                 obj.status('TifLoader: localization file not found')
                  error('TifLoader: localization file not found')
-            elseif p.locdata_empty
-                obj.locData.clear;
             end
+%             if ~obj.getPar('loc_preview')
+%                 obj.locData.clear;
+%             end
             obj.imloader=imageLoader(p.tiffile);     
             obj.imloader.onlineAnalysis=p.onlineanalysis;
             obj.imloader.waittime=p.onlineanalysiswaittime;
@@ -83,8 +84,10 @@ classdef TifLoader<interfaces.WorkflowModule
                 obj.output(datout)
                 image=imloader.readNext;
                 
+                
                 %display
                 if mod(datout.frame,10)==0
+                    obj.setPar('loc_currentframe',struct('frame',datout.frame,'image',image));
                     if p.onlineanalysis
                         
                         totalf=imloader.info.numberOfFrames-obj.framestart;
@@ -176,9 +179,9 @@ pard.framestop.object=struct('Style','edit','String','1000000');
 pard.framestop.position=[4.2,2.7];
 pard.framestop.Width=0.7;
 
-pard.locdata_empty.object=struct('Style','checkbox','String','Empty localizations','Value',1);
-pard.locdata_empty.position=[4.2,3.5];
-pard.locdata_empty.Width=1.5;
-pard.locdata_empty.TooltipString=sprintf('Empty localization data before fitting. \n Important if post-processing (eg drift correction) is perfromed as part of workflow');
+% pard.locdata_empty.object=struct('Style','checkbox','String','Empty localizations','Value',1);
+% pard.locdata_empty.position=[4.2,3.5];
+% pard.locdata_empty.Width=1.5;
+% pard.locdata_empty.TooltipString=sprintf('Empty localization data before fitting. \n Important if post-processing (eg drift correction) is perfromed as part of workflow');
 pard.plugininfo.type='WorkflowModule'; 
 end

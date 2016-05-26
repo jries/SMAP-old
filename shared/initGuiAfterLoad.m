@@ -1,8 +1,11 @@
-function initGuiAfterLoad(obj)
+function initGuiAfterLoad(obj, resetview)
 if isempty(obj.locData.loc)
     return
 end
-disp('init gui after load')
+if nargin<2
+    resetview=true;
+end
+% disp('init gui after load')
 obj.locData.regroup;
 % obj.locData.filter;
 % fmax=max(obj.locData.loc.frame);
@@ -19,8 +22,20 @@ end
 
 obj.setPar('filelist_long',fl,'String');
 % obj.locData.filter;
-obj.setPar('cam_pixelsize_nm',obj.locData.files.file(1).info.pixsize*1000)
+if resetview
+    obj.setPar('cam_pixelsize_nm',obj.locData.files.file(1).info.pixsize*1000)
+    file=obj.locData.files(1).file;
+    info=file.info;
+    roi=info.roi;
+    sr_pos(1)=(roi(1)+roi(3)/2)*info.pixsize*1000;
+    sr_pos(2)=(roi(2)+roi(4)/2)*info.pixsize*1000;  
+    sr_size=roi(3:4)*info.pixsize*1000/2;
+    obj.setPar('sr_pos',sr_pos);
+    obj.setPar('sr_size',sr_size);
+
 % obj.setPar('mainfile',fl{1});
+end
+
 
 locfields=fieldnames(obj.locData.loc);
 obj.setPar('locFields',locfields,'String');
@@ -29,7 +44,7 @@ obj.setPar('filelist_short',fls,'String');
 obj.locData.filter;
 obj.setPar('currentfileinfo',obj.locData.files.file(1).info)
 
-
+obj.locData.SE.addFile(obj.locData.files.file(k).name,obj.locData.files.file(k).number,obj.locData.files.file(k).info)
 
 if ~isempty(strfind(obj.getPar('mainfile'),'_sml'))
    tg=obj.getPar('mainGui').guihandles.maintab;

@@ -56,6 +56,9 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
              end
            fitpar=obj.fitpar;
             EMexcess=fitpar.EMexcessNoise;
+            if isempty(EMexcess)
+                EMexcess=1;
+            end
            try %%for test set to 0: no fitting
                if obj.fitpar.fitmode==3
                     zpar=[fitpar.zpar(:)];
@@ -206,7 +209,7 @@ pard.text.position=[1,3.3];
 pard.text.Width=0.7;
 pard.iterations.object=struct('Style','edit','String','50');
 pard.iterations.position=[1,4];
-pard.iterations.TooltipString=sprintf('number of iterations for the GPU fitter');
+pard.iterations.TooltipString=sprintf('number of iterations for the GPU fitter (typical 50, use 100-250 for ellipt: PSFx PSFy or 3Dz).');
 
 pard.tPSFx0.object=struct('Style','text','String','PSFx start (pix)');
 pard.tPSFx0.position=[2,1];
@@ -233,8 +236,8 @@ pard.objPos.TooltipString=sprintf('Position of the objective above the coverslip
 pard.trefractive_index_mismatch.object=struct('Style','text','String','Refractive Index mismatch factor:');
 pard.trefractive_index_mismatch.position=[5,1];
 pard.trefractive_index_mismatch.Width=3;
-pard.refractive_index_mismatch.object=struct('Style','edit','String','.8');
+pard.refractive_index_mismatch.object=struct('Style','edit','String','.72');
 pard.refractive_index_mismatch.position=[5,4];
-pard.refractive_index_mismatch.TooltipString=sprintf('Correction factor to take into account the different refracrive indices of immersion oil and buffer. \n This leads to smaller distances inside the sample compared to bead calibration. \n Bead calibration: in piezo positions (nm). \n This factor transforms z positions to real-space z positions.');
+pard.refractive_index_mismatch.TooltipString=sprintf('Correction factor to take into account the different refracrive indices of immersion oil and buffer. \n This leads to smaller distances inside the sample compared to bead calibration. \n Bead calibration: in piezo positions (nm). \n This factor transforms z positions to real-space z positions. \n For high-NA oil objectives: typical 0.72 (range 0.7-1).');
 pard.plugininfo.type='WorkflowFitter';
 end

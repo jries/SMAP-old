@@ -97,6 +97,7 @@ if draw
 figure(outputfig)
 hold off
 imagesc(imd);
+colormap jet
 colorbar;
 axis equal
 end

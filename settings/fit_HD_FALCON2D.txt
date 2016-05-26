@@ -15,8 +15,9 @@ OnlineReconstruction.Vpos=4;
 OnlineReconstruction.Xpos=1;
 OnlineReconstruction.handle=hfit;  
 
-    
- 
+LocSaver.handle=hfit;
+LocSaver.Vpos=6;
+LocSaver.Xpos=1;
 
 
 

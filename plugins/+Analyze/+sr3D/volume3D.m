@@ -140,12 +140,8 @@ end
 end
 
 function openfiji_callback(a,b,obj)
-disp('not yet implemented. Please save and open manually in fiji')
-%     imout3=obj.imagestack;
-%     imout=uint8(imout3/max(imout3(:))*(2^8-1));
-%     mij=openfiji(obj);
-%     title=obj.getPar('layer1_').ch_filelist.selection;
-%     mij.createColor(title,imout,true);
+title=obj.getPar('layer1_').ch_filelist.selection;
+openstackinfiji(obj,obj.imagestack,title)
 end
 
 function pard=guidef(obj)
@@ -154,9 +150,9 @@ pard.text2.position=[2,1];
 pard.text3.object=struct('String','zmax','Style','text');
 pard.text3.position=[3,1];
 
-pard.zmin.object=struct('Style','edit','String',-400); 
+pard.zmin.object=struct('Style','edit','String','-400'); 
 pard.zmin.position=[2,2.5];
-pard.zmax.object=struct('Style','edit','String',400); 
+pard.zmax.object=struct('Style','edit','String','400'); 
 pard.zmax.position=[3,2.5];
 
 pard.pixxyauto.object=struct('Style','checkbox','String','set pixelsize in xy (nm) to:','Value',0);

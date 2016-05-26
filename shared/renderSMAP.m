@@ -13,9 +13,16 @@ end
 if nargin<5
     transparency.mode=1;
 end
-if strcmpi('tiff', p.rendermode.selection) %obj.locData.files.file(p.ch_filelist.value).istiff
+if strcmpi('tiff', p.rendermode.selection)%obj.locData.files.file(p.ch_filelist.value).istiff
     file=locs.files.file;
     imageo=tif2srimage(file,p);
+    imageo.istiff=1;
+    return
+end
+
+if strcmpi('raw', p.rendermode.selection) %obj.locData.files.file(p.ch_filelist.value).istiff
+    file=locs.files.file;
+    imageo=tif2srimage(file,p,'raw');
     imageo.istiff=1;
     return
 end
@@ -46,18 +53,20 @@ else
 end
 
 
-if nargin<4
+if nargin<4||isempty(indin)
     fn=fieldnames(locsh);
     indin=true(length(locsh.(fn{1})),1);
 end
     
     
-if isempty(locsh.x)
+if ~isfield(locsh,'x')||isempty(locsh.x)
+%     length(locsh.xnm)
+%     length(indin)
     pos.x=locsh.xnm(indin);
 else
     pos.x=locsh.x(indin);
 end
-if isempty(locsh.y)
+if ~isfield(locsh,'y')||isempty(locsh.y)
     pos.y=locsh.ynm(indin);
 else
     pos.y=locsh.y(indin);
@@ -101,8 +110,8 @@ end
 tpar=0;
 switch lower(p.rendermode.selection)
     case {'gauss','other'}
-        if isempty(locsh.sx)|| isempty(locsh.sy) 
-            if ~isempty(locsh.s)
+        if ~isfield(locsh,'sx') || ~isfield(locsh,'sy') || isempty(locsh.sx)|| isempty(locsh.sy) 
+            if isfield(locsh,'s')&&~isempty(locsh.s)
                 sd=locsh.s(indin);
             else
                 sd=locsh.locprecnm(indin);
@@ -139,6 +148,7 @@ switch lower(p.rendermode.selection)
         end
         frender=@gaussrender;
         dl=1;
+        imageo.istiff=1;
 %         rangex(1:2)=rangex(1:2)-p.sr_pixrec/2;
 %         rangey(1:2)=rangey(1:2)-p.sr_pixrec/2;
     case 'hist'

@@ -30,16 +30,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
             fn=fieldnames(obj.locData.loc);
             obj.setPar('locFields',fn);
             obj.locData.clear;
-%             tifs=struct('image',[],'info',[]);
-%             finfo=obj.getPar('loc_fileinfo');
-%             sfile=finfo.basefile;
-%             filename=[sfile '_sml.mat'];           
-%             filestruct=struct('info',obj.getPar('loc_cameraSettings'),'average',[],'name',filename,...
-%                 'number',obj.filenumber,...
-%                 'numberOfTif',0,'tif',tifs);
-            
-            
-                obj.locData.files.file=locsaveFileinfo(obj);
+            obj.locData.files.file=locsaveFileinfo(obj);
                 
             filelist={obj.locData.files.file(:).name};
             for k=1:length(filelist)
@@ -47,18 +38,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
             end
             
             obj.fileinfo=obj.getPar('loc_cameraSettings');
-%             if isempty(obj.fileinfo.roi)
-%                 try
-%                     mm=imfinfo(finfo.filename);
-%                     obj.fileinfo.roi=[0 0 mm(1).Width mm(1).Height];
-%                     
-%                 catch
-%                 obj.fileinfo.roi=[0 0 512 512];
-%                 end
-%                 obj.locData.files.file.info.roi=obj.fileinfo.roi;
-%             end
             obj.setPar('currentfileinfo',obj.fileinfo);
-
             obj.setPar('filelist_long',filelist,'String')
             obj.setPar('filelist_short',filelists,'String')
             pos=(obj.fileinfo.roi(1:2)+obj.fileinfo.roi(3:4)/2)*obj.fileinfo.pixsize*1000;
@@ -79,7 +59,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
             end
             locs=data.data;%get;
             
-            if ~isempty(locs)
+            if ~isempty(locs)&& ~data.eof
                 maxfitdist=5;
                 indin=abs(locs.xpix-locs.peakfindx)<maxfitdist & abs(locs.ypix-locs.peakfindy)<maxfitdist;
                 locdat=interfaces.LocalizationData;
@@ -88,85 +68,17 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
 
                 if toc(obj.localtimervalue)>obj.getSingleGuiParameter('loc_updatetime')||data.eof 
                     obj.locData.addLocData(obj.locDatatemp); %Careful: does this add it many time? need to intialize obj.locDatatemp?
-                   initGuiAfterLoad(obj);  %resets the view always! 
+                   initGuiAfterLoad(obj,false);  %resets the view always! 
                     notify(obj.P,'sr_render')
                     drawnow
                     obj.localtimervalue=tic;
                     obj.locDatatemp.clear; %??? new
-                    
-
-                end   
-            
-           
-            end
-            
+                end                    
+            end           
         end
-
     end
 end
-% 
-% function locdat=fitloc2locdata(obj,locs,indin)
-% fieldsremove={'xerrpix','yerrpix','PSFxpix','PSFypix','xpix','ypix'};
-% fn=fieldnames(locs);
-% keepfields=setdiff(fn,fieldsremove);
-% 
-% for k=1:length(keepfields)
-%     locdat.(keepfields{k})=locs.(keepfields{k})(indin);
-% end
-% 
-% pixelsize=obj.fileinfo.pixsize*1000;
-% if isfield(obj.fileinfo,'roi')&&~isempty(obj.fileinfo.roi)
-% roi=obj.fileinfo.roi;
-% else
-%     roi=zeros(2);
-% end
-% % pixelsize=obj.globpar.parameters.loc_cameraSettings.pixsize*1000;
-% % fields={'frame','phot','bg','bgerr','photerr'};
-% % locdat=copyfields([],locs,fields);
-% % locdat.frame=locs.frame(indin);
-% % locdat.phot=locs.phot(indin);
-% % locdat.bg=locs.bg(indin);
-% % if isfield(locs,'photerr')
-% % locdat.photerr=locs.photerr(indin);
-% % end
-% % if isfield(locs,'bgerr')
-% % locdat.bgerr=locs.bgerr(indin);
-% % end
-% 
-% locdat.xnm=(locs.xpix(indin)+roi(1))*pixelsize;
-% locdat.ynm=(locs.ypix(indin)+roi(2))*pixelsize;
-% 
-% if isfield(locs,'xerrpix')
-% locdat.xerr=locs.xerrpix(indin)*pixelsize;
-% else
-%     locdat.xerr=locdat.xnm*0+1;
-% end
-% 
-% if isfield(locs,'yerrpix')
-% locdat.yerr=locs.yerrpix(indin)*pixelsize;
-% else
-%     locdat.yerr=locdat.xerr;
-% end
-% if isfield(locs,'PSFxpix')
-% locdat.PSFxnm=locs.PSFxpix(indin)*pixelsize;
-% else
-%     locdat.PSFxnm=0*locdat.xnm+100;
-% end
-% if isfield(locs,'PSFypix')
-%     locdat.PSFynm=locs.PSFypix(indin)*pixelsize;
-% else
-%     locdat.PSFynm=locdat.PSFxnm;
-% end
-% 
-% % if isfield(locs,'gradient3Dellipticity')
-% % locdat.gradient3Dellipticity=locs.gradient3Dellipticity(indin);
-% % end
-% 
-% 
-% locdat.locprecnm=sqrt((locdat.xerr.^2+locdat.yerr.^2)/2);
-% locdat.filenumber=uint8(0*locdat.xnm+obj.filenumber);
-% locdat.channel=0*locdat.xnm;
-% end
+
 
 function pard=guidef
 pard.loc_updatetime.object=struct('Style','edit','String','30');

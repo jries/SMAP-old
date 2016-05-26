@@ -25,6 +25,9 @@ for k=1:length(layers)
                 show=1;
             end
          fi=layers(k).images.finalImages;
+         if isempty(fi.image)
+             continue
+         end
          if fi.istiff==1
                 imtiff=imtiff+fi.image;
                 tiffthere=1;
