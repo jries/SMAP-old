@@ -280,7 +280,13 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         
         
         function redraw(obj)
-            
+                if isempty(obj.axis)||~isvalid(obj.axis)
+                    return
+                end
+            roih=obj.getPar('sr_roihandle');
+            if ~isa(roih,'imline')
+                return
+            end
             p=obj.getAllParameters;
             stereo=p.stereo.Value>2;
             locCopy=obj.locData; %maybe not needed
@@ -314,7 +320,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             end           
 
             ph.rangey=[p.zmin p.zmax];
-            roih=obj.getPar('sr_roihandle');
+            
             rpos=roih.getPosition;
 
             lr=sqrt(sum((rpos(2,:)-rpos(1,:)).^2));
@@ -458,6 +464,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 
             end
             function [loc,indu,sortind]=getlocrot(grouping,inlayer)
+
                 [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},inlayer},'position','roi','grouping',grouping,'layer',layerson);             
                 [yrot,depth]=rotcoord(loc.znm-zmean,loc.ynmline,p.theta);
                 [sortdepth,sortind]=sort(-depth);
@@ -651,7 +658,7 @@ pard.text3.position=[2,1];
 pard.setpixelsize.object=struct('String','set pixelsize (x z): ','Style','checkbox','Value',1);
 pard.setpixelsize.position=[4,1];
 pard.setpixelsize.Width=1.5;
-pard.transparencymode.object=struct('String',{{'maximum intensity', 'transparency','balls'}} ,'Style','popupmenu');
+pard.transparencymode.object=struct('String',{{'projection', 'transparency','balls'}} ,'Style','popupmenu');
 pard.transparencymode.position=[6,1];
 pard.transparencymode.Width=1.5;
 pard.transparencymode.TooltipString=sprintf('maximum intensity, \n partial transparency (parameter is related to transparency), \n render as ball (parameter is ball diamter in reconstructed pixels');

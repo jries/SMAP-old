@@ -5,7 +5,7 @@ classdef Get2CIntImagesWF<interfaces.DialogProcessor
         end
         
         function out=run(obj,p)
-            
+            out=[];
             f=figure(389);
             f.Visible='off';
             wffile='settings/workflows/get2CIntensityImagesWF.mat';
@@ -82,14 +82,14 @@ pard.dataselect.position=[1,1];
 pard.t1.object=struct('Style','text','String','Background filter');
 pard.t1.position=[3,1];
 pard.t1.Width=1;
-pard.t2.object=struct('Style','text','String',' \xi');
+pard.t2.object=struct('Style','text','String',' dx');
 pard.t2.position=[4,1];
 pard.t2.Width=0.5;
 pard.filterx.object=struct('Style','edit','String','3');
 pard.filterx.position=[4,1.5];
 pard.filterx.Width=0.5;
 
-pard.t3.object=struct('Style','text','String','BG \tau');
+pard.t3.object=struct('Style','text','String','dt');
 pard.t3.position=[5,1];
 pard.t3.Width=0.5;
 pard.filtert.object=struct('Style','edit','String','100');

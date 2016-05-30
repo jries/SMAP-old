@@ -44,6 +44,11 @@ obj.setPar('filelist_short',fls,'String');
 obj.locData.filter;
 obj.setPar('currentfileinfo',obj.locData.files.file(1).info)
 
+%set logLikelyhood? or in channel?
+%         sf={fn,s{data.Indices(1),2},s{data.Indices(1),6},s{data.Indices(1),7},true,true};
+%         obj.setPar('selectedField',sf,'layer',obj.layer)
+        
+        
 obj.locData.SE.addFile(obj.locData.files.file(k).name,obj.locData.files.file(k).number,obj.locData.files.file(k).info)
 
 if ~isempty(strfind(obj.getPar('mainfile'),'_sml'))

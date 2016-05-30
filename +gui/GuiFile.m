@@ -68,7 +68,7 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.guihandles.savemodule.String=ls;
             obj.guihandles.savemodule.Value=1;
             obj.addSynchronization('filelist_long',obj.guihandles.filelist_long,'String');
-            
+            obj.addSynchronization('autosavecheck',obj.guihandles.autosavecheck,'Value',{@autosavecheck_callback,0,0,obj});
             %make file menu
             makefilemenu(obj);
             
@@ -214,6 +214,7 @@ end
 
 
 function autosavecheck_callback(a,b,obj)
+
 p=obj.getAllParameters;
 t=obj.autosavetimer;
 %creaste timer if empty or invalid
@@ -227,11 +228,13 @@ if isempty(t)||~isa(t,'timer')||~isvalid(t)
 end
 
 if p.autosavecheck %deactivate
+    disp('auto save enabled')
     if strcmpi(t.Running,'off')
     start(t);
     end
 else
     if strcmpi(t.Running,'on')
+        disp('auto save disabled')
     stop(t);
     end
 end
@@ -363,7 +366,7 @@ pard.filelist_long.position=[3,1];
 pard.filelist_long.Width=4;
 pard.filelist_long.Height=3;
 
-pard.autosavecheck.object=struct('Style','checkbox','String','Auto save','Value',1);
+pard.autosavecheck.object=struct('Style','checkbox','String','Auto save','Value',0);
 pard.autosavecheck.position=[9,4];
 pard.autosavecheck.Width=1;
 pard.as_tdx.object=struct('Style','text','String','Interval min');

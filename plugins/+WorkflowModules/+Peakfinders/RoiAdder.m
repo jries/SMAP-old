@@ -58,7 +58,7 @@ end
 
 function removeroi_callback(a,b,obj)
 p=obj.getAllParameters;
-obj.status('select roi...')
+obj.status('select roi and double clock on ROI when done...')
 mask=getroi(obj.getPar('loc_outputfig'),p.roistyle.selection);
 obj.status('ROI selected')
 if isempty(obj.mask)||any(size(mask)~=size(obj.mask));

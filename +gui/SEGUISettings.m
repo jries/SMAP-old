@@ -25,6 +25,12 @@ classdef SEGUISettings< interfaces.SEProcessor
 end
 
 function make_siteexplorer(data,b,obj)
+if obj.getPar('autosavecheck')==0
+    answer=questdlg('autosave is disable. Enable autosave now?');
+    if strcmp(answer,'Yes')
+        obj.setPar('autosavecheck',1);
+    end
+end
 if data.Value
     if isempty(obj.SEpreview)||~isvalid(obj.SEpreview.handle)
         pfig=figure(205);

@@ -7,6 +7,8 @@ classdef RegisterLocs2<interfaces.DialogProcessor
     methods
         function obj=RegisterLocs2(varargin)        
             obj@interfaces.DialogProcessor(varargin{:});
+            obj.showresults=true;
+            obj.history=true;
         end
         
         function out=run(obj,p)
