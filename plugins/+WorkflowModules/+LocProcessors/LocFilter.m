@@ -140,7 +140,7 @@ pard.check_LL.TooltipString=sprintf('Filter log-lieklihood before saving.');
 pard.val_LL.object=struct('Style','edit','String','2');
 pard.val_LL.position=[4,2.3];
 pard.val_LL.Width=.7;
-pard.val_LL.TooltipString=sprintf('Cutoff relative to maximum of log-likelihood distribution (typically 2, not much smaller).');
+pard.val_LL.TooltipString=sprintf('Cutoff relative to maximum of log-likelihood distribution (typically 1, not much smaller).');
 
 pard.plugininfo.type='WorkflowModule'; 
 end
