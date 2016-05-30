@@ -280,7 +280,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         
         
         function redraw(obj)
-            
+                if isempty(obj.axis)||~isvalid(obj.axis)
+                    return
+                end
             p=obj.getAllParameters;
             stereo=p.stereo.Value>2;
             locCopy=obj.locData; %maybe not needed
@@ -458,6 +460,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 
             end
             function [loc,indu,sortind]=getlocrot(grouping,inlayer)
+
                 [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},inlayer},'position','roi','grouping',grouping,'layer',layerson);             
                 [yrot,depth]=rotcoord(loc.znm-zmean,loc.ynmline,p.theta);
                 [sortdepth,sortind]=sort(-depth);
