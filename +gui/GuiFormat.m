@@ -533,6 +533,9 @@ end
 function lw_callback(oject,data,obj)
 lw=obj.getSingleGuiParameter('linewidth_roi');
 obj.setPar('linewidth_roi',lw);
+if ~isempty(obj.roihandle)
+obj.linecallback(obj.roihandle.getPosition);
+end
 end
 
 function detach_callback(a,b,obj,handle)
