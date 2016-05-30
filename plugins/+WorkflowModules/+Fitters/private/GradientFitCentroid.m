@@ -10,6 +10,10 @@
 % -------------------------------------------------------------------------
 
 function [x0, y0, e0,Wx,Wy] = Centroid(ROI)
+if sum(ROI(:))==0
+    x0=0;y0=0; e0=0;Wx=0;Wy=0;
+    return
+end
 
 [Ny, Nx] = size(ROI);
 w = (Ny-1)/2;
