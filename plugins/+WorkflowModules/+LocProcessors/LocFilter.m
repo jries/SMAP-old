@@ -6,6 +6,7 @@ classdef LocFilter<interfaces.WorkflowModule;
        function obj=LocFilter(varargin)
             obj@interfaces.WorkflowModule(varargin{:})
             obj.inputChannels=1; 
+            obj.inputParameters={'loc_ROIsize'};
 %              obj.setInputChannels(1,'frame');
         end
         function pard=guidef(obj)
@@ -73,6 +74,21 @@ classdef LocFilter<interfaces.WorkflowModule;
                 for k=1:length(fn)
                     locsout.(fn{k})=locs.(fn{k})(indin);
                 end
+                %LL
+                if p.check_LL && isfield(locs,'logLikelihood')
+                    ll=-locs.logLikelihood;
+                    
+                    val=p.val_LL*p.loc_ROIsize^2;
+
+                    indinh=ll<=val;
+                    indin=indin&indinh;
+                end 
+                
+                fn=fieldnames(locs);
+                for k=1:length(fn)
+                    locsout.(fn{k})=locs.(fn{k})(indin);
+                end                
+                
                 output=data;
                 output.data=locsout;
 %             end
@@ -113,5 +129,18 @@ pard.val_phot.object=struct('Style','edit','String','[200 inf]');
 pard.val_phot.position=[3,2.3];
 pard.val_phot.Width=.7;
 pard.val_phot.TooltipString=sprintf('minimum number of photons or vector with minimum and maximum number of photons.');
+
+
+pard.check_LL.object=struct('Style','checkbox','String','rel. Log Likelihood','Value',1);
+pard.check_LL.position=[4,1];
+pard.check_LL.Width=1.3;
+pard.check_LL.TooltipString=sprintf('Filter log-lieklihood before saving.');
+
+
+pard.val_LL.object=struct('Style','edit','String','2');
+pard.val_LL.position=[4,2.3];
+pard.val_LL.Width=.7;
+pard.val_LL.TooltipString=sprintf('Cutoff relative to maximum of log-likelihood distribution (typically 2, not much smaller).');
+
 pard.plugininfo.type='WorkflowModule'; 
 end
