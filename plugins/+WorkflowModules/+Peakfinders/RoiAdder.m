@@ -23,8 +23,13 @@ classdef RoiAdder<interfaces.WorkflowModule
  
         end
         function resetmask(obj,a,b)
-            sim=size(obj.getPar('loc_currentframe').image);
-            obj.mask=true(sim);          
+            cf=obj.getPar('loc_currentframe');
+            if isemtpy(cf)
+                obj.mask=[];
+            else
+                sim=size(cf.image);
+                obj.mask=true(sim);   
+            end
         end
         
         function setrim(obj)
