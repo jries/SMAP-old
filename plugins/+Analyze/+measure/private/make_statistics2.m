@@ -72,7 +72,8 @@ for k=datrange
     else
     ind=ind+2;
     end
-    r2=round([n(ind)-mf*.2 n(ind)+mf*.2]);
+    mr=0.3;
+    r2=round([n(ind)-mf*mr n(ind)+mf*mr]);
     frames2=frames(frames>=r2(1)&frames<=r2(2));
     [hfr2,n2]=hist(frames2,20);
     indco2=find(hfr2>(max(hfr2)-min(hfr2))/2+min(hfr2),1,'last');
