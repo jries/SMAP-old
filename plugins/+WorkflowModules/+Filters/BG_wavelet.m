@@ -8,11 +8,12 @@ classdef BG_wavelet<interfaces.WorkflowModule
             obj.outputParameters={'loc_subtractbg'};
         end
         function pard=guidef(obj)
-            pard=guidef;
+            pard=guidef(obj);
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
             obj.setPar('loc_blocksize_frames',1); %preview: tiff loader should load only one frame
+            atrous_callback(obj.guihandles.loc_wavelet_atrous,0,obj)
         end
         function prerun(obj,p)
         end
@@ -26,7 +27,19 @@ classdef BG_wavelet<interfaces.WorkflowModule
             end
             if ~isempty(data.data)
                 img=data.data;
-                bg=mywaveletfilter(img,p.loc_wavelet_level,p.loc_wavelet_refine);
+                if p.loc_wavelet_atrous
+                    imgg=gpuArray(img);
+                    bgg=(mywaveletfilteratrous(gpuArray(imgg),false));
+%                     bgg(1:end,1:2)=imgg(1:end,1:2);
+%                      bgg(1:end,end-1:end)=imgg(1:end,end-1:end);
+%                      bgg(1:2,1:end)=imgg(1:2,1:end);
+%                      bgg(end-1:end,1:end)=imgg(end-1:end,1:end);
+                    bg=gather(bgg);
+                    clear imgg;
+%                     bg=(mywaveletfilteratrous((img),false));
+                else
+                    bg=mywaveletfilter(img,p.loc_wavelet_level,p.loc_wavelet_refine);
+                end
                 
                 dato=data;
                 dato.data=bg;
@@ -39,14 +52,30 @@ classdef BG_wavelet<interfaces.WorkflowModule
     end
 end
 
+function atrous_callback(object,b,obj)
+if object.Value
+    offstr='off';
+else
+    offstr='on';
+end
+obj.guihandles.text2.Visible=offstr;
+obj.guihandles.loc_wavelet_level.Visible=offstr;
+obj.guihandles.loc_wavelet_refine.Visible=offstr;
 
-function pard=guidef
+end
+
+function pard=guidef(obj)
 pard.loc_subtractbg.object=struct('Style','checkbox','String','Subtract background','Value',1);
 pard.loc_subtractbg.position=[1,1];
 pard.loc_subtractbg.Width=2;
 pard.loc_subtractbg.TooltipString=sprintf('If checked, the background is subtracted for Peak finding. \n This does NOT mean, that fitting is performed on the background corrected images.');
 pard.text1.object=struct('Style','text','String','Wavelet filtering:');
 pard.text1.position=[2,1];
+
+pard.loc_wavelet_atrous.object=struct('Style','checkbox','String','fast a trous','Value',0,'Callback',{{@atrous_callback,obj}});
+pard.loc_wavelet_atrous.position=[2,2];
+pard.loc_wavelet_atrous.Width=1.3;
+pard.loc_wavelet_atrous.TooltipString=sprintf('If checked, the a trous algorithm is used. Only level 2. Can be faster on GPU.');
 
 pard.text2.object=struct('Style','text','String','Wavelet level');
 pard.text2.position=[3,1.3];

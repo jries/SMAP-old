@@ -19,10 +19,20 @@ classdef RoiAdder<interfaces.WorkflowModule
         end
         function prerun(obj,p)
             obj.preview=obj.getPar('loc_preview');
+            obj.setrim;
  
         end
         function resetmask(obj,a,b)
-            obj.mask=[];
+            sim=size(obj.getPar('loc_currentframe').image);
+            obj.mask=true(sim);          
+        end
+        
+        function setrim(obj)
+            dn=round((obj.getPar('loc_ROIsize')-1)/2);
+            obj.mask(1:end,1:dn)=false;
+            obj.mask(1:end,end-dn+1:end)=false;
+            obj.mask(1:dn,1:end)=false;
+            obj.mask(end-dn+1:end,1:end)=false;  
         end
         function dato=run(obj,data,p)
 
@@ -69,7 +79,8 @@ end
 end
 
 function clearroi_callback(a,b,obj)
-    obj.mask=[];
+%     obj.mask=[];
+    obj.resetmask;
 end
 
 function mask=getroi(figh,roistyle)
