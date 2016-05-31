@@ -80,7 +80,7 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             
         end
      
-        function loadbutton_callback(obj, handle,actiondata,isadd)
+        function loadbutton_callback(obj, handle,actiondata,isadd,pfad,f)
             %load data 
             p=obj.getAllParameters;
             fm=p.mainfile;   
@@ -100,7 +100,9 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 ext='*.*';
                 title='format not specified'
             end
+            if nargin<5
             [f,pfad]=uigetfile(ext,title,path,'MultiSelect','on');
+            end
             if pfad %file selected
                 if ~iscell(f)
                     f={f};
