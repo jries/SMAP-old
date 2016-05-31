@@ -157,6 +157,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
                 return
             end
             for k=1:length(filelist)
+                obj.locData.clear;
                 filen=filelist{k};
                 if ~isempty(strfind(filen,'.tif'))
                     obj.processtiff(filen);
