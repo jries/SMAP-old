@@ -19,8 +19,7 @@ classdef BatchAnalyze<interfaces.DialogProcessor&interfaces.SEProcessor
             
             [f,pfad]=uigetfile('*.mat');
             gf=g.children.guiFile;
-            gf.loadbutton_callback(0,0,0,pfad,f);
-            
+            gf.loadbutton_callback(0,0,0,pfad,f);           
             if p.redrawall
                 g.locData.SE.processors.preview.redrawall;
             end
