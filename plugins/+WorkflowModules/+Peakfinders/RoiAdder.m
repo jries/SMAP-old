@@ -22,11 +22,20 @@ classdef RoiAdder<interfaces.WorkflowModule
         function prerun(obj,p)
             obj.preview=obj.getPar('loc_preview');
             if isempty(obj.mask)
-                cf=obj.getPar('loc_currentframe');
-                sim=size(cf.image);
+%                 cf=obj.getPar('loc_currentframe');
+%                 if isfield(cf,'image')
+%                     sim=size(cf.image);
+%                 else
+                    cf=obj.getPar('loc_fileinfo');
+                    if ~isempty(cf)&&isfield(cf,'Width')
+                        sim=[cf.Width cf.Height];
+                    else
+                        sim=[0 0];
+                    end
+%                 end
                 obj.maskrun=true(sim);  
             else
-                obj.maskrun=obj.mask;
+                obj.maskrun=obj.mask; 
             end
             obj.setrim;
  
