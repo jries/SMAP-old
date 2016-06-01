@@ -38,7 +38,9 @@ end
 
 
 locfields=fieldnames(obj.locData.loc);
+% if ~isempty(obj.locData.loc.(locfields{1}))
 obj.setPar('locFields',locfields,'String');
+% end
 
 obj.setPar('filelist_short',fls,'String');
 obj.locData.filter;

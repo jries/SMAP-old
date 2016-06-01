@@ -25,7 +25,7 @@ else
     p.fields=fields;
 end
  indlayer={};
-if isempty(locData.loc)
+if isempty(locData.loc)||isempty(locData.loc.(getelement(fieldnames(locData.loc),1)))
     for k=1:length(p.fields)
         locsout.(p.fields{k})=[];
     end

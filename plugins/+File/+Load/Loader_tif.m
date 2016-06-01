@@ -45,6 +45,11 @@ if ~strcmp(mode,'tif')
    return
 end
 
+if obj.locData.files.filenumberEnd==0
+    [p,f]=fileparts(file);
+    filename=[p filesep f];
+   obj.locData.addfile(filename) 
+end
 if length(obj.locData.files.file)>1
     s=p.filelist_short.String;
     f=listdlg('ListString',s);
@@ -56,7 +61,7 @@ imout=gettif(file);
 imout.info.pixsize=obj.locData.files.file(f).info.pixsize;
 obj.locData.files.file(f).tif(obj.locData.files.file(f).numberOfTif)=imout;
 
-    
+  initGuiAfterLoad(obj)    
 end
         
 

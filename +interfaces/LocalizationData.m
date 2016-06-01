@@ -35,6 +35,26 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             end
             obj.inputParameters={'numberOfLayers','filtertable','layer','group_dx','group_dt'};
         end
+        function addfile(obj,filename)
+            %initializes obj.files.file(end+1) to default. 
+             if nargin <2
+                 filename='';
+             end
+            obj.files.filenumberEnd=obj.files.filenumberEnd+1;
+            filenew=initfile(filename);
+            filenew.number= obj.files.filenumberEnd;
+            if obj.files.filenumberEnd==1
+                obj.files.file=filenew;
+            else
+            obj.files.file(obj.files.filenumberEnd)=filenew;
+            end
+            if isempty(obj.loc)
+            locs=struct('frame',[],'xnm',[],'ynm',[],'channel',[],'locprecnm',[],'filenumber',[]);
+            obj.loc=locs;
+            obj.grouploc=locs;
+            end
+            
+        end
         function setloc(obj,name, value,indused)
             %Add a field to all localizations. setloc(field, value) sets obj.loc.(name)=value
             if nargin<4
@@ -194,7 +214,10 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             if isempty(obj.loc)
                 return
             end
-            
+            f=fieldnames(obj.loc);     
+            if isempty(obj.loc.(f{1}))
+                return
+            end
             if nargin<3||isempty(layers) %filter all layers
                 layers=1:obj.getPar('numberOfLayers');
             end
