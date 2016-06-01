@@ -113,6 +113,7 @@ classdef GuiChannel< interfaces.LayerInterface
             obj.updateLayerField;
 %             obj.filelist_callback;
             obj.updatelayer_callback;
+            obj.setfiltergray;
         end
         
         function updateframes_callback(obj,a,b)
@@ -146,6 +147,7 @@ classdef GuiChannel< interfaces.LayerInterface
 
             obj.updateLayerField;
              setvisibility(0,0,obj)
+             obj.setfiltergray;
         end
         
         function setcolorfield_callback(obj)
@@ -229,6 +231,29 @@ classdef GuiChannel< interfaces.LayerInterface
             end
 
         end
+        function setfiltergray(obj)
+            cf={'locprecnm','znm','PSFxnm','locprecznm','frame'};
+            s=obj.getPar('filtertable','layer',obj.layer);
+            if isempty(s)
+                return
+            end
+            
+            fields=s(:,1);
+            for k=1:length(cf)
+                fieldh=cf{k};
+                ind=find(strcmp(fields,fieldh));
+                if ~isempty(ind)
+                    filterstate=s{ind(1),7};
+                    if filterstate
+                        color=[1 1 1];
+                    else
+                        color=[1 1 1]*.7;
+                    end
+                    obj.guihandles.([fieldh '_min']).BackgroundColor=color;
+                    obj.guihandles.([fieldh '_max']).BackgroundColor=color;
+                end
+            end
+        end
         function updatefields_callback(obj,f1, data, field,filteron,updatehist)
             if nargin <6
                 updatehist=true;
@@ -288,6 +313,13 @@ classdef GuiChannel< interfaces.LayerInterface
 %             %update fields to histogram
                 obj.updateLayerField;
 
+            end
+        end
+        function setvisibility(obj,field)
+            if nargin==1
+                setvisibility(0,0,obj);
+            else
+                setvisibility(0,0,obj,field);
             end
         end
 

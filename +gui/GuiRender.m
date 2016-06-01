@@ -67,7 +67,11 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
              layer.makeGui;
              if isfield(obj.children,'Layer1')
                  pold=getGuiParameters(obj.children.Layer1);
+                 s=obj.getPar('filtertable','layer',1);
+                 obj.setPar('filtertable',s,'layer',layer.layer);
                  layer.setGuiParameters(pold);
+                 layer.setvisibility;
+                 layer.setfiltergray;
              end
              layer.updateLayerField;
              obj.children.(['Layer' num2str(k)])=layer;
