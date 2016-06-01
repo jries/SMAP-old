@@ -96,7 +96,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
             obj.guihandles.filelist.String=str;          
         end
         function adddironlineb_callback(obj,a,b)
-            disp('not implemented')
+         
             p=obj.getGuiParameters;
             if ~isempty(p.filelist.selection)
                 path=fileparts(p.filelist.selection);

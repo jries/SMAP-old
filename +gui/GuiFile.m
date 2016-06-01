@@ -98,7 +98,8 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                  title=loader.info.dialogtitle;
             catch
                 ext='*.*';
-                title='format not specified'
+                title='format not specified';
+                
             end
             if nargin<5
             [f,pfad]=uigetfile(ext,title,path,'MultiSelect','on');
@@ -107,8 +108,13 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 if ~iscell(f)
                     f={f};
                 end
-                
+                try
                 loader.clear([pfad f{1}],isadd)
+                catch
+                    obj.status('file type not recognized');
+                    warning('file type not recognized');
+                    return
+                end
 %                 [~,~,ext]=fileparts(f{1});
 
 %                 [mode, emptylocs]=getfilemode([pfad f{1}]);

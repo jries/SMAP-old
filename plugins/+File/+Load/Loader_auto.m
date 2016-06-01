@@ -1,4 +1,7 @@
 classdef Loader_auto<interfaces.DialogProcessor
+    properties
+        notfound=false;
+    end
     methods
         function obj=Loader_auto(varargin)        
                 obj@interfaces.DialogProcessor(varargin{:}) ;
@@ -15,10 +18,15 @@ classdef Loader_auto<interfaces.DialogProcessor
         function pard=guidef(obj)
             pard=guidef;
         end
-        function run(obj,p)
+        function out=run(obj,p)
             [f,path]=uigetfile(obj.info.extensions);
             obj.load(p,[path f]);
+            
+            if obj.notfound
+                out.error='file not recognized. Cannot be loaded.';
+            else
             initGuiAfterLoad(obj);
+            end
         end
         function clear(obj,file,isadd)
             mode=getfilemode(file);
@@ -46,11 +54,14 @@ end
 
 function loadfile(obj,p,file,mode)            
         loader=getloader(obj,mode);
+        if ~isempty(loader)
         loader.load(p,file);
+        end
 end
 
         
-function loader=getloader(obj,mode)   
+function loader=getloader(obj,mode)  
+obj.notfound=false;
         switch mode
             case 'tif'
                 loadername='Loader_tif';
@@ -67,7 +78,10 @@ function loader=getloader(obj,mode)
                 loadername='Loader_csv';
               
             otherwise
-                disp('file type not recognized')
+                warning('file type not recognized')
+                obj.notfound=true;
+                loader=[];
+                return
         end
         loader=plugin('File','Load',loadername,[],obj.P);
         loader.attachLocData(obj.locData);
