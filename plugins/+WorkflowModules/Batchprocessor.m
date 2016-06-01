@@ -96,7 +96,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
             obj.guihandles.filelist.String=str;          
         end
         function adddironlineb_callback(obj,a,b)
-            disp('not implemented')
+         
             p=obj.getGuiParameters;
             if ~isempty(p.filelist.selection)
                 path=fileparts(p.filelist.selection);
@@ -157,6 +157,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
                 return
             end
             for k=1:length(filelist)
+                obj.locData.clear;
                 filen=filelist{k};
                 if ~isempty(strfind(filen,'.tif'))
                     obj.processtiff(filen);
@@ -208,7 +209,8 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
             %workflow: recover tiff file and start
             tiffile=wf.module(wf.startmodule).getGuiParameters.tiffile;
             wf.module(wf.startmodule).addFile(tiffile);
-            wf.run;   
+            wf.run;  
+            delete(wf)
         end
         function processtiff(obj,tiffile)
             p=obj.getGuiParameters;
@@ -218,6 +220,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
             wf.load(p.mainbatchfile);
             wf.module(wf.startmodule).addFile(tiffile);
             wf.run;
+            delete(wf)
         end
         
         function processtiffromWF(obj,wffile)
@@ -228,6 +231,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
             %workflow: recover tiff file and start
             tiffile=wf.module(wf.startmodule).getGuiParameters.tiffile;
             obj.processtiff(tiffile);
+            delete(wf)
         end
         
     end

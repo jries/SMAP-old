@@ -73,27 +73,50 @@ classdef AnalyzeRingCME<interfaces.DialogProcessor&interfaces.SEProcessor
                         save([path file],'results');
                     case 'all (not sites)'
                         [~,filen]=fileparts(file);
-                        results=obj.results;
-                        save([path filen '_results.mat'],'results');
-                        results=[];
-                        results.sumimage=obj.results.sumimage;
-                        results.sumrdensity1=obj.results.sumrdensity1;
-                        results.sumrdensity2=obj.results.sumrdensity2;
-                        results.numberofsites=obj.results.numsites;
-                        save([path filen '_rad_av.mat'],'results');
-                        
-                        image=obj.results.sumimage/obj.results.numsites;
-                        
-                        if size(image,3)==3
-                            options.color=true;
-                        else
-                            options.color=false;
-                        end
-                        saveastiff(uint16(image/max(image(:))*2^16),[path filen '.tif'],options)
-                        export_fig([path filen '.pdf'],'-pdf','-nocrop',obj.resultsfigure)
+                        obj.saveall(path,filen);
+%                         results=obj.results;
+%                         save([path filen '_results.mat'],'results');
+%                         results=[];
+%                         results.sumimage=obj.results.sumimage;
+%                         results.sumrdensity1=obj.results.sumrdensity1;
+%                         results.sumrdensity2=obj.results.sumrdensity2;
+%                         results.numberofsites=obj.results.numsites;
+%                         save([path filen '_rad_av.mat'],'results');
+%                         
+%                         image=obj.results.sumimage/obj.results.numsites;
+%                         
+%                         if size(image,3)==3
+%                             options.color=true;
+%                         else
+%                             options.color=false;
+%                         end
+%                         saveastiff(uint16(image/max(image(:))*2^16),[path filen '.tif'],options)
+%                         export_fig([path filen '.pdf'],'-pdf','-nocrop',obj.resultsfigure)
 
                 end
             end
+        end
+        
+        function saveall(obj,path,filen)
+            results=obj.results;
+            save([path filen '_results.mat'],'results');
+            results=[];
+            results.sumimage=obj.results.sumimage;
+            results.sumrdensity1=obj.results.sumrdensity1;
+            results.sumrdensity2=obj.results.sumrdensity2;
+            results.numberofsites=obj.results.numsites;
+            save([path filen '_rad_av.mat'],'results');
+
+            image=obj.results.sumimage/obj.results.numsites;
+
+            if size(image,3)==3
+                options.color=true;
+            else
+                options.color=false;
+            end
+            saveastiff(uint16(image/max(image(:))*2^16),[path filen '.tif'],options)
+            export_fig([path filen '.pdf'],'-pdf','-nocrop',obj.resultsfigure)
+            
         end
     end
 end

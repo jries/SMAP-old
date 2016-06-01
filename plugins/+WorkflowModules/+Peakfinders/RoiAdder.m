@@ -1,7 +1,9 @@
 classdef RoiAdder<interfaces.WorkflowModule
     properties
+        maskrun
         mask
         preview
+        
     end
     methods
         function obj=RoiAdder(varargin)
@@ -19,16 +21,47 @@ classdef RoiAdder<interfaces.WorkflowModule
         end
         function prerun(obj,p)
             obj.preview=obj.getPar('loc_preview');
+            if isempty(obj.mask)
+%                 cf=obj.getPar('loc_currentframe');
+%                 if isfield(cf,'image')
+%                     sim=size(cf.image);
+%                 else
+                    cf=obj.getPar('loc_fileinfo');
+                    if ~isempty(cf)&&isfield(cf,'Width')
+                        sim=[cf.Width cf.Height];
+                    else
+                        sim=[0 0];
+                    end
+%                 end
+                obj.maskrun=true(sim);  
+            else
+                obj.maskrun=obj.mask; 
+            end
+            obj.setrim;
  
         end
         function resetmask(obj,a,b)
-            obj.mask=[];
+%             cf=obj.getPar('loc_currentframe');
+%             if isempty(cf)
+                obj.mask=[];
+%             else
+%                 sim=size(cf.image);
+%                 obj.mask=true(sim);   
+%             end
+        end
+        
+        function setrim(obj)
+            dn=round((obj.getPar('loc_ROIsize')-1)/2);
+            obj.maskrun(1:end,1:dn)=false;
+            obj.maskrun(1:end,end-dn+1:end)=false;
+            obj.maskrun(1:dn,1:end)=false;
+            obj.maskrun(end-dn+1:end,1:end)=false;  
         end
         function dato=run(obj,data,p)
 
             img=data.data;%get;
-            if ~isempty(img)&&all(size(obj.mask)==size(img))
-                img(~obj.mask)=-1;
+            if ~isempty(img)&&all(size(obj.maskrun)==size(img))
+                img(~obj.maskrun)=-1;
             end
             dato=data;%.copy;
             dato.data=img;%set(img);
@@ -36,7 +69,7 @@ classdef RoiAdder<interfaces.WorkflowModule
                 figure(obj.getPar('loc_outputfig'));
                 ax=gca;
                 maxv=ax.CLim(2)/2;
-                imagesc('CData',obj.mask*0+maxv,'AlphaData',double(~obj.mask)*0.5) 
+                imagesc('CData',obj.maskrun*0+maxv,'AlphaData',double(~obj.maskrun)*0.5) 
             end  
         end
     end
@@ -69,7 +102,8 @@ end
 end
 
 function clearroi_callback(a,b,obj)
-    obj.mask=[];
+%     obj.mask=[];
+    obj.resetmask;
 end
 
 function mask=getroi(figh,roistyle)

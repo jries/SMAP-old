@@ -51,7 +51,7 @@ classdef LocSaver<interfaces.WorkflowModule;
             end
             locs=data.data;%get;
             
-            if ~isempty(locs)
+            if ~isempty(locs)&&~isempty(locs.frame)
                 maxfitdist=5;
                 indin=abs(locs.xpix-locs.peakfindx)<maxfitdist & abs(locs.ypix-locs.peakfindy)<maxfitdist;
                 locdat=interfaces.LocalizationData;
