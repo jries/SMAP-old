@@ -1,4 +1,7 @@
 classdef roi2int_fitG<interfaces.GuiModuleInterface 
+    %determines intensity around a localization by a regression of a
+    %Gaussian model with fixed positions and sigma. Either amplitude and
+    %background or only the amplitude are fitting parameters
     methods
         function obj=roi2int_fitG(varargin)
             obj@interfaces.GuiModuleInterface(varargin{:});
@@ -87,20 +90,24 @@ end
 function pard=guidef(obj)
 pard.t1.object=struct('Style','text','String','roisize');
 pard.t1.position=[1,1];
+pard.t1.TooltipString='Roi size around localizations for fitting';
 % pard.t1.Width=0.5;
 pard.roisize_fit.object=struct('Style','edit','String','5');
 pard.roisize_fit.position=[1,2];
-
+pard.roisize_fit.TooltipString=pard.t1.TooltipString;
 pard.fixpsf.object=struct('Style','checkbox','String','Fix PSF (nm) size to:');
 pard.fixpsf.position=[2,1];
 pard.fixpsf.Width=3;
+pard.fixpsf.TooltipString='fix the PSF during the fit (value in nm). Otherwise the fitted PSF size is used.';
 
 pard.psfsize_fit.object=struct('Style','edit','String','130');
 pard.psfsize_fit.position=[2,4];
+pard.psfsize_fit.TooltipString=pard.fixpsf.TooltipString;
 
 pard.fitonbg.object=struct('Style','checkbox','String','fit on BG','Value',1);
 pard.fitonbg.position=[3,1];
 pard.fitonbg.Width=4;
+pard.fitonbg.TooltipString='If selected, the background is subtracted and the fit is performed with an offset=0. Otherwise the background is a fit parameter.';
 
 info.prefix='fit';
 info.name='fit';

@@ -1,4 +1,5 @@
 classdef EvaluateIntensity<interfaces.WorkflowModule
+    %EvaluateIntensity Workflow module that calls intensity evaluators.
     properties
         evaluators
         intensities
@@ -27,6 +28,7 @@ classdef EvaluateIntensity<interfaces.WorkflowModule
             huitable.ColumnWidth={fs,'auto'};
             huitable.CellSelectionCallback={@evalselect_callback,obj};
             huitable.Units='normalized';
+            huitable.TooltipString='Select (check) evaluators to determine intensities';
             obj.guihandles.evalmodules=huitable;
             ev1={plugin('WorkflowModules','IntensityCalculator','roi2int_sumG')};
              obj.evaluators=ev1;

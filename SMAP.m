@@ -3,7 +3,7 @@ addpath(dirlist)
 if ~isempty(who('g'))
     delete(g)
 end
- close all
+%  close all
 try
 g=gui.GuiMainSMAP;g.makeGui;    
 catch err
@@ -16,3 +16,4 @@ if status==0
     ind=find(message==10);
     disp(message(1:ind(2)));
 end
+

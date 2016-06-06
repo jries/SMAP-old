@@ -7,7 +7,7 @@ classdef GuiChannel< interfaces.LayerInterface
     methods
         function obj=GuiChannel(varargin)
             obj@interfaces.LayerInterface(varargin{:});
-
+            obj.processorgui=false;
             obj.guiPar.par=[];
             obj.guiPar.mincall=[];
             obj.guiPar.maxcall=[];
@@ -15,7 +15,7 @@ classdef GuiChannel< interfaces.LayerInterface
             obj.outputParameters={'ch_filelist','channels','layercheck','rendermode','render_colormode','renderfield',...
                 'groupcheck','imaxtoggle','imax','lut','remout','shift','shiftxy_min','shiftxy_max','layer','colorrange',...
                 'znm_min','znm_max','frame_min','frame_max'};
-
+            obj.guiselector.show=true;
         end
         
         function pard=guidef(obj)
@@ -23,7 +23,7 @@ classdef GuiChannel< interfaces.LayerInterface
         end
 
         function makeGui(obj)
-            makeGui@interfaces.GuiModuleInterface(obj);
+            makeGui@interfaces.DialogProcessor(obj);
             hmain=obj.getPar('filterpanel');
             pp=hmain.Position;
             
@@ -284,7 +284,7 @@ classdef GuiChannel< interfaces.LayerInterface
                 %save
                 defaultChannelParameters=obj.getGuiParameters;
                 globalParameters=obj.getLayerParameters(obj.layer);
-                globalParameters=rmfield(globalParameters,{'mainGuihandle','mainGui','loc_outputfig','filterpanel','ov_axes','guiFormat','sr_image','sr_imagehandle'});
+                globalParameters=rmfield(globalParameters,{'mainGuihandle','mainGui','loc_outputfig','filterpanel','ov_axes','guiFormat','sr_image','sr_imagehandle','sr_figurehandle','sr_axes'});
                 save(deffile,'defaultChannelParameters','globalParameters');
                 disp('default parameters saved.');
                 obj.status('default parameters saved.');
@@ -578,7 +578,7 @@ end
 
 function paro=renderpardialog(par,default)
 if nargin==0 || isempty(par)
-    par.mingaussnm=1;
+    par.mingaussnm=3;
     par.mingausspix=.7;
     par.gaussfac=0.4;
     par.gamma=1;
@@ -619,163 +619,218 @@ pard.layercheck.TooltipString='switch layer on and off';
             
 pard.ch_filelist.object=struct('Style','popupmenu','String',{'File'});
 pard.ch_filelist.position=[1,1.2];
-pard.ch_filelist.Width=1;
+pard.ch_filelist.Width=2.2;
 pard.ch_filelist.TooltipString='which file (loc or image) to display';
 
 pard.text1.object=struct('Style','text','String','Ch');
-pard.text1.position=[1,2.2];
+pard.text1.position=[1,3.4];
 pard.text1.Width=0.2;
 
 pard.channels.object=struct('Style','edit','String','0 1');
-pard.channels.position=[1,2.4];
+pard.channels.position=[1,3.6];
 pard.channels.Width=0.6;
 pard.channels.TooltipString='channels to display. Use a b c and a:c notation';
 
-pard.rendermode.object=struct('Style','popupmenu','String',{{'hist','Gauss','DL','tiff','raw','Other'}},'Value',2);
-pard.rendermode.position=[1,3];
-pard.rendermode.Width=1;  
-pard.rendermode.TooltipString='how to render image. DL is diffraction limited';
- 
-pard.groupcheck.object=struct('Style','checkbox','String','group');
-pard.groupcheck.position=[2,1];
+pard.groupcheck.object=struct('Style','checkbox','String','group','Value',1);
+pard.groupcheck.position=[1,4.2];
 pard.groupcheck.Width=.6;
 pard.groupcheck.TooltipString='use grouped or ungrouped locs';
 
+w1=.6;
+w2=0.9;
+w3=0.9;
+p1=1;
+p2=1.5;
+p3=2.4;
+pard.rendertxt.object=struct('Style','text','String','Renderer:');
+pard.rendertxt.position=[2,p1];
+pard.rendertxt.Width=w1;  
+pard.rendertxt.TooltipString='how to render image. DL is diffraction limited';
+
+
+pard.rendermode.object=struct('Style','popupmenu','String',{{'hist','Gauss','DL','tiff','raw','Other'}},'Value',2);
+pard.rendermode.position=[2,p2];
+pard.rendermode.Width=w2;  
+pard.rendermode.TooltipString='how to render image. DL is diffraction limited';
+
+pard.externalrender.object=struct('Style','popupmenu','String','empty');
+pard.externalrender.position=[2,p3];
+pard.externalrender.Width=w3;
+pard.externalrender.TooltipString='External renderer';
+
+pard.intensitytxt.object=struct('Style','text','String','Intensity:');
+pard.intensitytxt.position=[3,p1];
+pard.intensitytxt.Width=w1;  
+pard.intensitytxt.TooltipString='how to render image. DL is diffraction limited';
+pard.intensitytxt.Optional=true;
+
+pard.intensitycoding.object=struct('Style','popupmenu','String',{{'normal','photons','blinks'}});
+pard.intensitycoding.position=[3,p2];
+pard.intensitycoding.Width=w2;
+pard.intensitycoding.TooltipString='Intensity of each localization';
+pard.intensitycoding.Optional=true;
+
+pard.parbutton.object=struct('Style','pushbutton','String','render par');
+pard.parbutton.position=[3,p3];
+pard.parbutton.Width=w3;
+pard.parbutton.TooltipString='Additional render paramters';
+
+
+pard.colortxt.object=struct('Style','text','String','Color:');
+pard.colortxt.position=[4,p1];
+pard.colortxt.Width=w1;  
+pard.colortxt.TooltipString='how to render image. DL is diffraction limited';
+
+pard.render_colormode.object=struct('Style','popupmenu','String',{obj.guiPar.srmodes}); 
+pard.render_colormode.position=[4,p2];
+pard.render_colormode.Width=w2;
+pard.render_colormode.TooltipString=sprintf('normal: intensity coded, z: z color coded, \n param: select field which to color code');
+
+pard.renderfield.object=struct('Style','popupmenu','String','field');            
+pard.renderfield.position=[4,p3];
+pard.renderfield.Width=w3;
+pard.renderfield.TooltipString='field to color code';
+
+pard.luttxt.object=struct('Style','text','String','LUT:');
+pard.luttxt.position=[5,p1];
+pard.luttxt.Width=w1;  
+pard.luttxt.TooltipString='how to render image. DL is diffraction limited';
+
+pard.lut.object=struct('Style','popupmenu','String',{mymakelut});
+pard.lut.position=[5,p2];
+pard.lut.Width=w2;
+pard.lut.TooltipString='select the lookup table';
+
+pard.remout.object=struct('Style','checkbox','String','restrict');
+pard.remout.position=[5,p3];
+pard.remout.Width=w3;
+pard.remout.TooltipString=sprintf('if checked: remove loclizations outside lut. \n If unchecked: set them to maximum color');
+pard.remout.Optional=true;
+
+
+pard.colorfieldb.object=struct('Style','pushbutton','String','c range');
+pard.colorfieldb.position=[6,p1];
+pard.colorfieldb.Width=.6;
+pard.colorfieldb.TooltipString=sprintf('Range of values to fill the lookup table (LUT). Usually 0 and 1. \n If fields (or z) are used for color coding: range of these values mapped to LUT.');
+
+pard.colorfieldb.Optional=true;
+
+pard.colorfield_min.object=struct('Style','edit','String','0');
+pard.colorfield_min.position=[6,1.6];
+pard.colorfield_min.Width=.6;
+pard.colorfield_min.TooltipString=pard.colorfieldb.TooltipString;
+pard.colorfield_min.Optional=true;
+
+pard.colorfield_max.object=struct('Style','edit','String','1');
+pard.colorfield_max.position=[6,2.2];
+pard.colorfield_max.Width=.6;
+pard.colorfield_max.TooltipString=pard.colorfieldb.TooltipString;
+pard.colorfield_max.Optional=true;
+
+pard.contrastb.object=struct('Style','pushbutton','String','contrast');
+pard.contrastb.position=[7,1];
+pard.contrastb.Width=.6;
+pard.contrastb.TooltipString=sprintf('Contrast');
+
+
 pard.imaxtoggle.object=struct('Style','togglebutton','String','quantile','Value',1);
-pard.imaxtoggle.position=[2,1.6];
+pard.imaxtoggle.position=[7,1.6];
 pard.imaxtoggle.Width=.6;
 pard.imaxtoggle.TooltipString='toggle absolute intensity maximum (Imax) or quantile';
 
 pard.imax.object=struct('Style','edit','String','-3.5');
-pard.imax.position=[2,2.2];
+pard.imax.position=[7,2.2];
 pard.imax.Width=.6;
 pard.imax.TooltipString='absolut intensity or quantile (0<q<1, typically 0.999) or v for q=1-10^(v), v<0, typically -3.5';
 
-pard.render_colormode.object=struct('Style','popupmenu','String',{obj.guiPar.srmodes}); 
-pard.render_colormode.position=[2,3];
-pard.render_colormode.Width=1;
-render_colormode.TooltipString=sprintf('normal: intensity coded, z: z color coded, \n param: select field which to color code');
+p4=3.4;
+pard.filtertxt.object=struct('Style','text','String','Filter fields:');
+pard.filtertxt.position=[2,p4];
+pard.filtertxt.Width=2;  
+pard.filtertxt.TooltipString='';
 
-pard.renderfield.object=struct('Style','popupmenu','String','field');            
-pard.renderfield.position=[2,4];
-pard.renderfield.Width=1;
-pard.renderfield.TooltipString='field to color code';
-
-
-pard.colorfieldb.object=struct('Style','pushbutton','String','c range');
-pard.colorfieldb.position=[3,1];
-pard.colorfieldb.Width=.6;
-pard.colorfieldb.TooltipString=sprintf('Range of values to fill the lookup table (LUT). Usually 0 and 1. \n If fields (or z) are used for color coding: range of these values mapped to LUT.');
-
-
-pard.colorfield_min.object=struct('Style','edit','String','0');
-pard.colorfield_min.position=[3,1.6];
-pard.colorfield_min.Width=.6;
-pard.colorfield_min.TooltipString=pard.colorfieldb.TooltipString;
-
-pard.colorfield_max.object=struct('Style','edit','String','1');
-pard.colorfield_max.position=[3,2.2];
-pard.colorfield_max.Width=.6;
-pard.colorfield_max.TooltipString=pard.colorfieldb.TooltipString;
-
-% pard.lut.object=struct('Style','popupmenu','String',lutnames);
-
-pard.lut.object=struct('Style','popupmenu','String',{mymakelut});
-pard.lut.position=[3,3];
-pard.lut.Width=1;
-pard.lut.TooltipString='select the lookup table';
-
-pard.remout.object=struct('Style','checkbox','String','remove out');
-pard.remout.position=[3,4];
-pard.remout.Width=1;
-pard.remout.TooltipString=sprintf('if checked: remove loclizations outside lut. \n If unchecked: set them to maximum color');
-            
+    
 pard.locprecnmb.object=struct('Style','pushbutton','String','locp');
-pard.locprecnmb.position=[4,1];
+pard.locprecnmb.position=[3,3.4];
 pard.locprecnmb.Width=.6;
 
 
 pard.locprecnm_min.object=struct('Style','edit','String','0','BackgroundColor',[1 1 1]*.7);
-pard.locprecnm_min.position=[4,1.6];
-pard.locprecnm_min.Width=.6;
+pard.locprecnm_min.position=[3,4];
+pard.locprecnm_min.Width=.5;
 
 pard.locprecnm_max.object=struct('Style','edit','String','30');  
-pard.locprecnm_max.position=[4,2.2];
-pard.locprecnm_max.Width=.6;
+pard.locprecnm_max.position=[3,4.5];
+pard.locprecnm_max.Width=.5;
 
 pard.znmb.object=struct('Style','pushbutton','String','z');
-pard.znmb.position=[4,3.2];
+pard.znmb.position=[5,3.4];
 pard.znmb.Width=.6;
 
 pard.znm_min.object=struct('Style','edit','String','-500','BackgroundColor',[1 1 1]*.7);
-pard.znm_min.position=[4,3.8];
-pard.znm_min.Width=.6;
+pard.znm_min.position=[5,4];
+pard.znm_min.Width=.5;
 
 pard.znm_max.object=struct('Style','edit','String','500');  
-pard.znm_max.position=[4,4.4];
-pard.znm_max.Width=.6;
+pard.znm_max.position=[5,4.5];
+pard.znm_max.Width=.5;
       
 pard.PSFxnmb.object=struct('Style','pushbutton','String','PSF xy');
-pard.PSFxnmb.position=[5,1];
+pard.PSFxnmb.position=[5,3.4];
 pard.PSFxnmb.Width=.6;
             
 pard.PSFxnm_min.object=struct('Style','edit','String','0','BackgroundColor',[1 1 1]*.7);
-pard.PSFxnm_min.position=[5,1.6];
-pard.PSFxnm_min.Width=.6;
+pard.PSFxnm_min.position=[5,4];
+pard.PSFxnm_min.Width=.5;
 
 pard.PSFxnm_max.object=struct('Style','edit','String','175');  
-pard.PSFxnm_max.position=[5,2.2];
-pard.PSFxnm_max.Width=.6;
+pard.PSFxnm_max.position=[5,4.5];
+pard.PSFxnm_max.Width=.5;
             
 pard.locprecznmb.object=struct('Style','pushbutton','String','locprec z');
-pard.locprecznmb.position=[5,3.2];
+pard.locprecznmb.position=[6,3.4];
 pard.locprecznmb.Width=.6;
 
 pard.locprecznm_min.object=struct('Style','edit','String','0','BackgroundColor',[1 1 1]*.7);
-pard.locprecznm_min.position=[5,3.8];
-pard.locprecznm_min.Width=.6;
+pard.locprecznm_min.position=[6,4];
+pard.locprecznm_min.Width=.5;
 
 pard.locprecznm_max.object=struct('Style','edit','String','45');  
-pard.locprecznm_max.position=[5,4.4];
-pard.locprecznm_max.Width=.6;
+pard.locprecznm_max.position=[6,4.5];
+pard.locprecznm_max.Width=.5;
    
 pard.frameb.object=struct('Style','pushbutton','String','frame');
-pard.frameb.position=[6,1];
+pard.frameb.position=[4,3.4];
 pard.frameb.Width=.6;
+pard.frameb.Optional=true;
 
 pard.frame_min.object=struct('Style','edit','String','0','BackgroundColor',[1 1 1]*.7);
-pard.frame_min.position=[6,1.6];
-pard.frame_min.Width=.6;
+pard.frame_min.position=[4,4];
+pard.frame_min.Width=.5;
+pard.frame_min.Optional=true;
 
 pard.frame_max.object=struct('Style','edit','String','inf');  
-pard.frame_max.position=[6,2.2];
-pard.frame_max.Width=.6;
-            
+pard.frame_max.position=[4,4.5];
+pard.frame_max.Width=.5;
+pard.frame_max.Optional=true;
+
 pard.shiftxyb.object=struct('Style','pushbutton','String','shift x,y');
-pard.shiftxyb.position=[6,3.2];
+pard.shiftxyb.position=[7,3.4];
 pard.shiftxyb.Width=.6;
 pard.shiftxyb.TooltipString='Shift reconstructed image by this value (nm). Useful to correct for chromatic aberrations.';
 
 pard.shiftxy_min.object=struct('Style','edit','String','0');
-pard.shiftxy_min.position=[6,3.8];
-pard.shiftxy_min.Width=.6;
+pard.shiftxy_min.position=[7,4];
+pard.shiftxy_min.Width=.5;
 pard.shiftxy_min.TooltipString=pard.shiftxyb.TooltipString;
 
 pard.shiftxy_max.object=struct('Style','edit','String','0');
-pard.shiftxy_max.position=[6,4.4];
-pard.shiftxy_max.Width=.6;
+pard.shiftxy_max.position=[7,4.5];
+pard.shiftxy_max.Width=.5;
 pard.shiftxy_max.TooltipString=pard.shiftxyb.TooltipString;
 
 
-pard.parbutton.object=struct('Style','pushbutton','String','par');
-pard.parbutton.position=[1,4.5];
-pard.parbutton.Width=.5;
-pard.parbutton.TooltipString='Additional render paramters';
 
-pard.externalrender.object=struct('Style','popupmenu','String','empty');
-pard.externalrender.position=[1,3.9];
-pard.externalrender.Width=.6;
-pard.externalrender.TooltipString='External renderer';
 
 pard.default_button.object=struct('Style','pushbutton','String','Default');
 pard.default_button.position=[8,4];

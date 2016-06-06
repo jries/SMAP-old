@@ -7,6 +7,8 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
         processorgui=true; %switch. true if process button etc are to be rendered. false if called externally (for workflow)
         showresults=false; % defined state for results
         history=false;
+        simplegui=false;
+        guiselector=struct('position',[],'show',false);
 %         moduleinfo;
     end
     properties (SetAccess = private, GetAccess = private)
@@ -29,6 +31,14 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
             end
      
             makeGui@interfaces.GuiModuleInterface(obj,guidef);
+            
+            if obj.guiselector.show
+                posh=obj.handle.Position;
+                pos(1:2)=posh(1:2)+posh(3:4)-[20,20];
+                pos(3:4)=[20,20];
+                obj.guihandles.simplegui=uicontrol(obj.handle,'Style','togglebutton','String','A','Position',pos,'Callback',@obj.simplegui_callback);
+                obj.guihandles.simplegui.TooltipString='toggle between simple and advanced GUI';
+            end
             
             if obj.processorgui && ~isempty(obj.handle)
                 hpos=obj.handle.Position;
@@ -72,6 +82,22 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
             p.name=class(obj);
             obj.locData.addhistory(p);
         end      
+        function simplegui_callback(obj,a,b)
+            if ~obj.getSingleGuiParameter('simplegui')
+                state='on';
+                obj.guihandles.simplegui.String='A';
+            else
+                state='off';
+                obj.guihandles.simplegui.String='S';
+            end
+            pard=obj.guidef;
+            fn=fieldnames(pard);
+            for k=1:length(fn)
+                if isfield(pard.(fn{k}),'Optional')&&pard.(fn{k}).Optional==true
+                    obj.guihandles.(fn{k}).Visible=state;
+                end
+            end
+        end
 
     end
     methods (Access=private)
@@ -151,7 +177,9 @@ obj.guihandles.showresults.Value=1;
 showresults_callback(obj.guihandles.showresults,0,obj)
 ax=obj.initaxis('Info');
 hp=ax.Parent;
- htxt=uicontrol(hp,'Style','text','Units','normalized','Position',[0,0,1,1],...
+ htxt=uicontrol(hp,'Style','text','Units','normalized','Position',[0,0,.95,1],...
      'FontSize',obj.guiPar.fontsize,'HorizontalAlignment','left');
-htxt.String=obj.info.description;
+txt=textwrap(htxt,{obj.info.description});
+ htxt.String=txt;
+  htxt.Position=[0 0 1 1];
 end
