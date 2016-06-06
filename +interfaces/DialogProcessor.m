@@ -34,7 +34,7 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
             
             if obj.guiselector.show
                 posh=obj.handle.Position;
-                pos(1:2)=posh(1:2)+posh(3:4)-[20,20];
+                pos(1:2)=posh(1:2)+posh(3:4)-[23,22];
                 pos(3:4)=[20,20];
                 obj.guihandles.simplegui=uicontrol(obj.handle,'Style','togglebutton','String','A','Position',pos,'Callback',@obj.simplegui_callback);
                 obj.guihandles.simplegui.TooltipString='toggle between simple and advanced GUI';
@@ -83,12 +83,22 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
             obj.locData.addhistory(p);
         end      
         function simplegui_callback(obj,a,b)
-            if ~obj.getSingleGuiParameter('simplegui')
-                state='on';
+            obj.simplegui=obj.getSingleGuiParameter('simplegui');
+            if ~obj.simplegui
                 obj.guihandles.simplegui.String='A';
             else
-                state='off';
                 obj.guihandles.simplegui.String='S';
+            end
+            obj.setguistate;
+        end
+        function setguistate(obj,state)
+            if nargin>1
+                obj.simplegui=state;
+            end
+            if ~obj.simplegui
+                state='on';
+            else
+                state='off';
             end
             pard=obj.guidef;
             fn=fieldnames(pard);

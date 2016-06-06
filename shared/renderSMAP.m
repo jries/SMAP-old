@@ -6,7 +6,7 @@ if nargin==0
     imageo={'ch_filelist','sr_pixrec','sr_axes','sr_pos','sr_size','rendermode','render_colormode',...
                 'renderfield','colorfield_min','colorfield_max','groupcheck','lut','shiftxy_min','shiftxy_max'...
                 'mingaussnm','mingausspix','gaussfac','sr_sizeRecPix','shift','displayLocsInd','cam_pixelsize_nm','remout',...
-                'rangex','rangey'};
+                'rangex','rangey','intensitycoding'};
     return          
 end
 
@@ -108,8 +108,10 @@ if p.remout==0&&isfield(pos,'c')&&isfield(p,'colorfield_max')&&isfield(p,'colorf
     pos.c(pos.c<p.colorfield_min)=p.colorfield_min;
 end     
 tpar=0;
+
+%build pos
 switch lower(p.rendermode.selection)
-    case {'gauss','other'}
+    case {'gauss','other','constgauss'}
         if ~isfield(locsh,'sx') || ~isfield(locsh,'sy') || isempty(locsh.sx)|| isempty(locsh.sy) 
             if isfield(locsh,'s')&&~isempty(locsh.s)
                 sd=locsh.s(indin);
@@ -117,21 +119,20 @@ switch lower(p.rendermode.selection)
                 sd=locsh.locprecnm(indin);
             end
             pos.s=min(max(sd*p.gaussfac,max(p.mingaussnm,p.mingausspix*p.sr_pixrec(1))),400);
-            frender=@gaussrender;
         else
             pos.sx=max(locsh.sx(indin)*p.gaussfac,max(p.mingaussnm,p.mingausspix*p.sr_pixrec(1)));
             pos.sy=max(locsh.sy(indin)*p.gaussfac,max(p.mingaussnm,p.mingausspix*p.sr_pixrec(2)));
             switch transparency.mode
                 case 1
 %             if isempty(transparency)
-                    frender=@gaussrender_ellipt;
+           
                 case 2
-                    frender=@gaussrenderT_ellipt;
+     
                     tpar=transparency.parameter;
                 case 3
                     pos.sx(1)=transparency.parameter;
                     pos.sy(1)=pos.sx(1);
-                    frender=@gaussrenderTx_ellipt;
+      
                     tpar=transparency.parameter;
             end
            
@@ -146,23 +147,52 @@ switch lower(p.rendermode.selection)
         else
             pos.s=pos.x*0+p.cam_pixelsize_nm;
         end
-        frender=@gaussrender;
+ 
         dl=1;
         imageo.istiff=1;
 %         rangex(1:2)=rangex(1:2)-p.sr_pixrec/2;
 %         rangey(1:2)=rangey(1:2)-p.sr_pixrec/2;
-    case 'hist'
+    case {'hist'}
         frender=@histrender;
     case 'tiff'
     
 
 end
-            
+
+% set frender
+switch lower(p.rendermode.selection)
+    case {'gauss','other'}
+        if ~isfield(pos,'sx') 
+            frender=@gaussrender;
+        else    
+            switch transparency.mode
+                case 1
+                    frender=@gaussrender_ellipt;
+                case 2
+                    frender=@gaussrenderT_ellipt;
+                case 3
+                    frender=@gaussrenderTx_ellipt;
+            end
+           
+        end
+    case 'dl'
+        frender=@gaussrender;
+    case {'hist'}
+        frender=@histrender;
+    case {'constgauss'}
+        frender=@constgaussrender;
+    case 'tiff'
+    
+
+end
+
+
 rangexrec=rangexrec-p.sr_pixrec(1)/2;
 rangeyrec=rangeyrec-p.sr_pixrec(end)/2;
 
-
+tic
 [srimage,nlocs]=frender(pos,rangexrec, rangeyrec, p.sr_pixrec(1), p.sr_pixrec(end),lut,[p.colorfield_min p.colorfield_max],tpar);
+toc
 if dl
     if isfield(p,'sr_sizeRecPix')
         newsize=round(p.sr_sizeRecPix([2 1]));

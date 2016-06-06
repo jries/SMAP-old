@@ -648,7 +648,7 @@ pard.rendertxt.Width=w1;
 pard.rendertxt.TooltipString='how to render image. DL is diffraction limited';
 
 
-pard.rendermode.object=struct('Style','popupmenu','String',{{'hist','Gauss','DL','tiff','raw','Other'}},'Value',2);
+pard.rendermode.object=struct('Style','popupmenu','String',{{'hist','Gauss','constGauss','DL','tiff','raw','Other'}},'Value',2);
 pard.rendermode.position=[2,p2];
 pard.rendermode.Width=w2;  
 pard.rendermode.TooltipString='how to render image. DL is diffraction limited';
@@ -818,17 +818,18 @@ pard.shiftxyb.object=struct('Style','pushbutton','String','shift x,y');
 pard.shiftxyb.position=[7,3.4];
 pard.shiftxyb.Width=.6;
 pard.shiftxyb.TooltipString='Shift reconstructed image by this value (nm). Useful to correct for chromatic aberrations.';
+pard.shiftxyb.Optional=true;
 
 pard.shiftxy_min.object=struct('Style','edit','String','0');
 pard.shiftxy_min.position=[7,4];
 pard.shiftxy_min.Width=.5;
 pard.shiftxy_min.TooltipString=pard.shiftxyb.TooltipString;
-
+pard.shiftxy_min.Optional=true;
 pard.shiftxy_max.object=struct('Style','edit','String','0');
 pard.shiftxy_max.position=[7,4.5];
 pard.shiftxy_max.Width=.5;
 pard.shiftxy_max.TooltipString=pard.shiftxyb.TooltipString;
-
+pard.shiftxy_max.Optional=true;
 
 
 
