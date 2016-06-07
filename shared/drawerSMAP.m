@@ -1,7 +1,7 @@
 
 function imout=drawerSMAP(him,p)
 if nargin==0
-    imout={'imaxtoggle','imax','sr_sizeRecPix','lut','colorfield_min','colorfield_max','gamma','normalizeFoV'};
+    imout={'imaxtoggle','imax_min','sr_sizeRecPix','lut','colorfield_min','colorfield_max','gamma','normalizeFoV'};
     return
 end
 
@@ -18,7 +18,7 @@ else
     imgnorm=img;
 end
 
-[imgn,norm]=normalizeImage(img,p.imaxtoggle,p.imax,imgnorm);
+[imgn,norm]=normalizeImage(img,p.imaxtoggle,p.imax_min,imgnorm);
 if p.gamma ~=1
     imgn=imgn.^p.gamma;
 end

@@ -3,6 +3,7 @@ classdef GuiChannel< interfaces.LayerInterface
         shift
         colorrange
         quantilestore=-4;
+        imax
     end
     methods
         function obj=GuiChannel(varargin)
@@ -86,6 +87,10 @@ classdef GuiChannel< interfaces.LayerInterface
                  h.([cfields{k} '_min']).Callback={@obj.updatefields_callback,cfields{k}};
                  h.([cfields{k} '_max']).Callback={@obj.updatefields_callback,cfields{k}};
             end
+             h.imaxb.Callback={@obj.updatefields_callback,'imax'};
+             h.imax_min.Callback={@obj.updatefields_callback,'imax'};
+%                  h.([cfields{k} '_max']).Callback={@obj.updatefields_callback,cfields{k}};
+            
             obj.addSynchronization([obj.layerprefix 'layercheck'],h.layercheck,'Value',{@callobj.updatelayer_callback,'layercheck'})       
             h.parbutton.Callback={@renderpar_callback,obj};
             
@@ -329,18 +334,19 @@ end
 function imaxtoggle_callback(object,data,obj)
 if(object.Value)
     object.String='quantile';
-    obj.guihandles.imax.String=num2str(obj.quantilestore);
+    obj.guihandles.imax_min.String=num2str(obj.quantilestore);
 else
     object.String='Imax';
-    obj.quantilestore=str2num(obj.guihandles.imax.String);
+    obj.quantilestore=str2num(obj.guihandles.imax_min.String);
     try
-    imax=obj.locData.layer(obj.layer).images.finalImages.imax;
+    imax=obj.locData.layer(obj.layer).images.finalImages.imax_min;
     catch
         imax=1;
     end
-    obj.guihandles.imax.String=num2str(imax);
+    obj.guihandles.imax_min.String=num2str(imax);
 end
 obj.updateLayerField('imaxtoggle');
+
 obj.updateLayerField('imax');
 end
 
@@ -727,10 +733,10 @@ pard.colorfield_max.Width=.6;
 pard.colorfield_max.TooltipString=pard.colorfieldb.TooltipString;
 pard.colorfield_max.Optional=true;
 
-pard.contrastb.object=struct('Style','pushbutton','String','contrast');
-pard.contrastb.position=[7,1];
-pard.contrastb.Width=.6;
-pard.contrastb.TooltipString=sprintf('Contrast');
+pard.imaxb.object=struct('Style','pushbutton','String','contrast');
+pard.imaxb.position=[7,1];
+pard.imaxb.Width=.6;
+pard.imaxb.TooltipString=sprintf('Contrast');
 
 
 pard.imaxtoggle.object=struct('Style','togglebutton','String','quantile','Value',1);
@@ -738,10 +744,13 @@ pard.imaxtoggle.position=[7,1.6];
 pard.imaxtoggle.Width=.6;
 pard.imaxtoggle.TooltipString='toggle absolute intensity maximum (Imax) or quantile';
 
-pard.imax.object=struct('Style','edit','String','-3.5');
-pard.imax.position=[7,2.2];
-pard.imax.Width=.6;
-pard.imax.TooltipString='absolut intensity or quantile (0<q<1, typically 0.999) or v for q=1-10^(v), v<0, typically -3.5';
+pard.imax_min.object=struct('Style','edit','String','-3.5');
+pard.imax_min.position=[7,2.2];
+pard.imax_min.Width=.6;
+pard.imax_min.TooltipString='absolut intensity or quantile (0<q<1, typically 0.999) or v for q=1-10^(v), v<0, typically -3.5';
+
+pard.imax_max.object=struct('Style','edit','String','-3.5','Visible','off');
+pard.imax_max.position=[7,2.2];
 
 p4=3.4;
 pard.filtertxt.object=struct('Style','text','String','Filter fields:');

@@ -67,6 +67,11 @@ classdef GuiHistSlider< interfaces.LayerInterface
                         obj.guihandles.smin.Max=500;
                         obj.guihandles.smax.Min=-500;
                         obj.guihandles.smax.Max=500;
+                    case 'imax'
+                        obj.guihandles.smin.Min=-5;
+                        obj.guihandles.smin.Max=-1;
+                        obj.guihandles.smax.Min=-1;
+                        obj.guihandles.smax.Max=-1+0.001;
                 end
 %                 vchanged_callback([],0, obj,'minmax',false)
 %                 return
@@ -78,7 +83,7 @@ classdef GuiHistSlider< interfaces.LayerInterface
                 obj.guihandles.filteron.Value=sfield{4};
             end
             
-            if isfield(obj.backup,fieldh)&&~strcmpi(fieldh,'colorfield')...
+            if isfield(obj.backup,fieldh)&& isfield(obj.locData,fieldh)&&~strcmpi(fieldh,'colorfield')...
                     &&obj.backup.(fieldh).len==length(obj.locData.loc.(fieldh))...
                     &&obj.backup.(fieldh).histogram.filenumber == filenumber; 
                 restorestruc=obj.backup.(fieldh);
@@ -116,7 +121,7 @@ classdef GuiHistSlider< interfaces.LayerInterface
                     q=getquantile(v);
                     
 %                     obj.data.quantile=q;
-%                     obj.guihandles.lockrange.Value=0;
+                    obj.guihandles.lockrange.Value=0;
 %                     obj.guihandles.autoupdate.Value=0;
                     set(obj.guihandles.smin,'Min',q(1),'Max',q(2),'Value',q(1))
                     set(obj.guihandles.smax,'Min',q(1),'Max',q(2),'Value',q(2))
@@ -124,6 +129,7 @@ classdef GuiHistSlider< interfaces.LayerInterface
                     obj.histogram.filenumber=filenumber;
 
             else
+                obj.guihandles.lockrange.Value=0;
                 dx=(-obj.guihandles.smin.Min+obj.guihandles.smin.Max)/50;
                 obj.histogram.x=obj.guihandles.smin.Min:dx:obj.guihandles.smin.Max;
                 obj.histogram.hist=ones(size(obj.histogram.x));
