@@ -47,7 +47,7 @@ end
 imageo.istiff=0;
 if isa(locs,'interfaces.LocalizationData')
 %        locsh=locs.getloc({'x','y','sx','sy','c','s',p.renderfield.selection},'layer',layer,'position','default');
-    locsh=locs.getloc({'xnm','ynm','znm','x','y','locprecnm','sx','sy','PSFxnm','c','s','intensity_render',p.renderfield.selection},'layer',layer,'position','default');
+    locsh=locs.getloc({'xnm','ynm','znm','x','y','locprecnm','sx','sy','PSFxnm','c','s','intensity_render','phot','numberInGroup',p.renderfield.selection},'layer',layer,'position','default');
 else
     locsh=locs;
 end
@@ -89,6 +89,13 @@ rangeyrec=rangey-p.shiftxy_max;
 
 if isfield(locsh,'intensity_render')&&~isempty(locsh.intensity_render)
     pos.N=locsh.intensity_render(indin);
+else
+    switch p.intensitycoding.selection
+        case 'photons'
+            pos.N=locsh.phot;
+        case 'blinks'
+            pos.N=locsh.numberInGroup;
+    end
 end
 
 lutall=mymakelut(p.lut.selection);
@@ -190,9 +197,9 @@ end
 rangexrec=rangexrec-p.sr_pixrec(1)/2;
 rangeyrec=rangeyrec-p.sr_pixrec(end)/2;
 
-tic
+% tic
 [srimage,nlocs]=frender(pos,rangexrec, rangeyrec, p.sr_pixrec(1), p.sr_pixrec(end),lut,[p.colorfield_min p.colorfield_max],tpar);
-toc
+% toc
 if dl
     if isfield(p,'sr_sizeRecPix')
         newsize=round(p.sr_sizeRecPix([2 1]));
