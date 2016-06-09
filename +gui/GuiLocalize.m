@@ -9,7 +9,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             obj@interfaces.GuiModuleInterface(varargin{:})
         end
         function makeGui(obj)
-            h.loctab=uitabgroup(obj.handle,'Position',[0 .1 1 .9]);
+            h.loctab=uitabgroup(obj.handle,'Position',[0 .15 1 .85]);
 % 
 %             h.frame=uitab(h.loctab,'Title','Input Image');
 %             h.filter=uitab(h.loctab,'Title','Peak Finder');
@@ -17,22 +17,36 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
 %             h.locprocess=uitab(h.loctab,'Title','Localizations');
 %             h.workflow=uitab(h.loctab,'Title','Workflow');
             
-            h.previewbutton=uicontrol(obj.handle,'Style','pushbutton','String','Preview','Position',[10 2, 70 obj.guiPar.FieldHeight*1.2],...
-                'FontSize',obj.guiPar.fontsize,'Callback',{@preview_callback,obj});
+            l2=obj.guiPar.FieldHeight*1.2;
+            h2=obj.guiPar.FieldHeight*1.2;
+            h.previewbutton=uicontrol(obj.handle,'Style','pushbutton','String','Preview','Position',[10 2, 70 h2],...
+                'FontSize',obj.guiPar.fontsize,'Callback',{@preview_callback,obj},'FontWeight','bold');
             h.previewbutton.TooltipString=sprintf('Test current fitter settings on a single frame. \n Opens window which shows found localizations.\n Use before running fit on all frames.\n Use to open image to select ROIs for fitting.'); 
-            h.previewframe=uicontrol(obj.handle,'Style','edit','String','1','Position',[180 2, 60 obj.guiPar.FieldHeight*1.2],...
+            h.previewframe=uicontrol(obj.handle,'Style','edit','String','1','Position',[160, 2, 60 h2],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@previewframe_callback,obj});
-           h.previewframeslider=uicontrol(obj.handle,'Style','slider','Position',[80 2, 100 20],...
+           h.previewframeslider=uicontrol(obj.handle,'Style','slider','Position',[80, 2, 80, 22],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@previewframeslider_callback,obj});
             
-            h.localizebutton=uicontrol(obj.handle,'Style','pushbutton','String','Localize','Position',[380 2, 100 obj.guiPar.FieldHeight*1.2],...
-                'FontSize',obj.guiPar.fontsize,'Callback',{@localize_callback,obj});
+            h.localizebutton=uicontrol(obj.handle,'Style','pushbutton','String','Localize','Position',[250 2, 100, h2],...
+                'FontSize',obj.guiPar.fontsize,'Callback',{@localize_callback,obj},'FontWeight','bold');
             h.localizebutton.TooltipString=sprintf('Start localization.');
-            h.batchbutton=uicontrol(obj.handle,'Style','pushbutton','String','Batch','Position',[260 2, 70 obj.guiPar.FieldHeight*1.2],...
+            h.batchbutton=uicontrol(obj.handle,'Style','pushbutton','String','Batch','Position',[370, 2, 65, h2],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@batch_callback,obj});
             h.previewframe.TooltipString=sprintf('Frame for preview. Select directly or with slider.');
             h.previewframeslider.TooltipString=h.previewframe.TooltipString;
-            h.batchbutton.TooltipString=sprintf('Save batch file with all fitting parameters.');
+            h.batchbutton.TooltipString=sprintf('Save batch file with all fitting parameters.');            
+            
+            h.batchprocessor=uicontrol(obj.handle,'Style','pushbutton','String','Processor','Position',[430, 2, 90 h2],...
+                'FontSize',obj.guiPar.fontsize,'Callback',{@batchprocessor_callback,obj});
+            h.batchprocessor.TooltipString=sprintf('Open the batch processor GUI to fit many files automatically with pre-defined settings.');
+            h.wfinfo=uicontrol(obj.handle,'Style','pushbutton','String','Info','Position',[450, l2, 70 h2],...
+                'FontSize',obj.guiPar.fontsize,'Callback',{@wfinfo_callback,obj});
+            h.wfinfo.TooltipString=sprintf('Show information about current workflow.');  
+            h.wfname=uicontrol(obj.handle,'Style','text','String','x','Position',[10, l2, 350 h2],...
+                'FontSize',obj.guiPar.fontsize,'HorizontalAlignment','left');            
+             h.wfload=uicontrol(obj.handle,'Style','pushbutton','String','Change','Position',[370, l2, 80 h2],...
+                'FontSize',obj.guiPar.fontsize,'Callback',{@wfload_callback,obj});
+            
             
             
             outputfig=figure(207);
@@ -40,19 +54,9 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             obj.setPar('loc_outputfig',outputfig)
 
             tabsizeh=obj.guiPar.tabsize2;
-            tabsizeh(4)=tabsizeh(4)-35;
-%             tabsizeh(2)=tabsizeh(2)+30;
-%             h.framepanel=uipanel(h.frame,'Unit','pixels','Position',tabsizeh); 
-%             h.filterpanel=uipanel(h.filter,'Unit','pixels','Position',tabsizeh);
-%             h.fitpanel=uipanel(h.fit,'Unit','pixels','Position',tabsizeh); 
-%             h.locpanel=uipanel(h.locprocess,'Unit','pixels','Position',tabsizeh); 
-           
-            
-            
+            tabsizeh(4)=tabsizeh(4)-45;            
             obj.createGlobalSetting('mainLocalizeWFFile','Directories','Description file for fitting workflow, e.g. settings/fit_tif_wavelet.txt',struct('Style','file','String','settings/fit_tif_wavelet.txt'))
-%             settingsfile='settings/mainSMLMLocalizeWF.txt';
             settingsfile=obj.getGlobalSetting('mainLocalizeWFFile');
-            
             par=readstruct(settingsfile);
             if ~isfield(par,'tab')
                 par.tab=struct('hframe',struct('name','Input Image'),'hfilter',struct('name','Peak Finder'),'hfit',struct('name','Fitter'),'hloc',struct('name','Localizations'));
@@ -74,10 +78,8 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
                 h.([tabtags{k} 'panel'])=uipanel(h.(tabtags{k}),'Unit','pixels','Position',tabsizeh); 
                 replacestruct{k}={tabtags{k},h.([tabtags{k} 'panel'])};
             end
-            firstpanel=h.([tabtags{1} 'panel']);
+%             firstpanel=h.([tabtags{1} 'panel']);
              obj.guihandles=h;
-             
-%             replacestruct={{'hframe',h.framepanel},{'hfilter',h.filterpanel},{'hfit',h.fitpanel},{'hloc',h.locpanel}};
 
             par=readstruct(settingsfile,replacestruct);
             par=myrmfield(par,{'workflowinfo','tab'});
@@ -85,6 +87,9 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
                 warndlg('cannot find settings file for fit workflow. Please set in menu SMAP/Preferences')
             end
             wffile=par.all.file;
+            [~,wfname]=fileparts(wffile);
+            h.wfname.String=['Workflow: ' wfname];
+            
 
             mainworkflow=interfaces.Workflow([],obj.P);
             mainworkflow.attachLocData(obj.locData);
@@ -110,12 +115,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             previewframe_callback(0,0,obj)
             obj.addSynchronization('loc_fileinfo',[],[],@obj.update_slider)
             
-            h.batchprocessor=uicontrol(firstpanel,'Style','pushbutton','String','Batch Processor','Position',[0, 0, 150 obj.guiPar.FieldHeight*1],...
-                'FontSize',obj.guiPar.fontsize,'Callback',{@batchprocessor_callback,obj});
-            h.batchprocessor.TooltipString=sprintf('Open the batch processor GUI to fit many files automatically with pre-defined settings.');
-            h.wfinfo=uicontrol(firstpanel,'Style','pushbutton','String','Workflow Info','Position',[345, 0, 150 obj.guiPar.FieldHeight*1],...
-                'FontSize',obj.guiPar.fontsize,'Callback',{@wfinfo_callback,obj});
-            h.wfinfo.TooltipString=sprintf('Show information about current workflow.');            
+
         end
         
         function update_slider(obj,a,b)        
@@ -135,16 +135,16 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
         end
     end
 end
-function wfinfo_callback(a,b,obj)
+function wfinfo_callback(~,~,obj)
 obj.mainworkflow.graph;
 if ~isempty(obj.mainworkflow.info.description)
 msgbox(obj.mainworkflow.info.description,obj.mainworkflow.info.name)
 end
-    
-%  htxt=uicontrol(hp,'Style','text','Units','normalized','Position',[0,0,1,1],...
-%      'FontSize',obj.guiPar.fontsize,'HorizontalAlignment','left');
-% htxt.String=obj.info.description;
 end
+
+function wfload_callback(~,~,obj)
+end
+
 function menu_callback(callobj,b,obj)
 switch callobj.Label
     case 'remove'

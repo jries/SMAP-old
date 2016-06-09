@@ -26,18 +26,23 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
                 guidef=obj.guidef;
             end
             if obj.processorgui
-            obj.guiPar.fontsize=obj.guiPar.fontsize-1;
-            obj.guiPar.FieldHeight=obj.guiPar.FieldHeight-2;
+                obj.guiPar.fontsize=obj.guiPar.fontsize-1;
+                obj.guiPar.FieldHeight=obj.guiPar.FieldHeight-2;
             end
      
             makeGui@interfaces.GuiModuleInterface(obj,guidef);
             
             if obj.guiselector.show
                 posh=obj.handle.Position;
-                pos(1:2)=posh(1:2)+posh(3:4)-[23,22];
-                pos(3:4)=[20,20];
+                if isempty(obj.guiselector.position)
+                    pos(1:2)=posh(1:2)+posh(3:4)-[23,22];
+                    pos(3:4)=[20,20];
+                else
+                    pos=obj.guiselector.position;
+                end
                 obj.guihandles.simplegui=uicontrol(obj.handle,'Style','togglebutton','String','A','Position',pos,'Callback',@obj.simplegui_callback);
                 obj.guihandles.simplegui.TooltipString='toggle between simple and advanced GUI';
+                obj.fieldvisibility('guistate',obj.simplegui);
             end
             
             if obj.processorgui && ~isempty(obj.handle)
@@ -82,25 +87,29 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
             p.name=class(obj);
             obj.locData.addhistory(p);
         end      
-        function simplegui_callback(obj,a,b)
+        function simplegui_callback(obj,~,~)
             simplegui=obj.getSingleGuiParameter('simplegui');
-%             if ~simplegui
-%                 obj.guihandles.simplegui.String='A';
-%             else
-%                 obj.guihandles.simplegui.String='S';
-%             end
             obj.fieldvisibility('guistate',simplegui);
-%             obj.setguistate;
         end
         function fieldvisibility(obj,varargin)
+            %sets the gui state (simple/advanced) and sets visibility of
+            %certain fields
+            %Arguments:
+            %'guistate' 'simple'/'advanced' 1/0
+            %'on', {fields}
+            %'off', {fields}
+            if nargin<2
+                p.on={};p.off={};p.guistate=obj.simplegui;
+            else
             p=fieldvisibiltyparser(varargin);
+            end
             pard=obj.guidef;
             fn=fieldnames(pard);
             oldstate=obj.simplegui;
             switch p.guistate
                 case {'S','s','simple',1,true}
                     obj.simplegui=true;
-                    obj.guihandles.simplegui.String='S';
+                    obj.guihandles.simplegui.String='v';
                     obj.guihandles.simplegui.Value=1;
                     
                     for k=1:length(fn)
@@ -118,7 +127,7 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
 %                     switch on all optional fields with
 %                     smapVisible=visible
                     obj.simplegui=false;
-                    obj.guihandles.simplegui.String='A';
+                    obj.guihandles.simplegui.String='-';
                     obj.guihandles.simplegui.Value=0;
                     for k=1:length(fn)
                         if isfield(pard.(fn{k}),'Optional')&&pard.(fn{k}).Optional==true
@@ -126,11 +135,9 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
                                  obj.guihandles.(fn{k}).Visible=obj.guihandles.(fn{k}).UserData.visibleSMAP;
                             else
                                 obj.guihandles.(fn{k}).Visible='on';
-                            end
-                            
+                            end   
                         end
                     end
-
             end
             if ~iscell(p.on)
                 p.on={p.on};
@@ -147,34 +154,32 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
                 p.off={p.off};
             end            
             for k=1:length(p.off)
-                if isfield(obj.guihandles,p.off{k})
-                    
+                if isfield(obj.guihandles,p.off{k})      
                     obj.guihandles.(p.off{k}).Visible='off';
-                    
                     obj.guihandles.(p.off{k}).UserData.visibleSMAP='off';
                 end
             end            
 %             for all p.on: smapvisible='on'. if optional: switch on if state=advanced. 
 %             for all p.off: smapvisible, visible='off';
         end
-        function setguistate(obj,state)
-            if nargin>1
-                obj.simplegui=state;
-            end
-            if ~obj.simplegui
-                state='on';
-            else
-                state='off';
-            end
-            pard=obj.guidef;
-            fn=fieldnames(pard);
-            for k=1:length(fn)
-                if isfield(pard.(fn{k}),'Optional')&&pard.(fn{k}).Optional==true
-                    obj.guihandles.(fn{k}).Visible=state;
-                end
-            end
-        end
-
+%         function setguistate(obj,state)
+%             if nargin>1
+%                 obj.simplegui=state;
+%             end
+%             if ~obj.simplegui
+%                 state='on';
+%             else
+%                 state='off';
+%             end
+%             pard=obj.guidef;
+%             fn=fieldnames(pard);
+%             for k=1:length(fn)
+%                 if isfield(pard.(fn{k}),'Optional')&&pard.(fn{k}).Optional==true
+%                     obj.guihandles.(fn{k}).Visible=state;
+%                 end
+%             end
+%         end
+% 
     end
     methods (Access=private)
 %         function outhandle=addresultstab(obj,name)
@@ -184,7 +189,7 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
     end
 end
 
-function processgo_callback(a,b,obj)
+function processgo_callback(~,~,obj)
 % notify(obj.locData,'undo',recgui.simpleEvent('backup'));
 
 obj.status(['executing ' class(obj)])
@@ -219,8 +224,7 @@ if ~isempty(results)
             end
         end
         ct=sprintf('%s\t',cl{:});
-        clipboard('copy',ct);
-        
+        clipboard('copy',ct); 
     end
 end
 if obj.history
@@ -235,7 +239,7 @@ end
 end
 
 
-function showresults_callback(object,data,obj)
+function showresults_callback(object,~,obj)
 if isempty(obj.resultshandle)||~isvalid(obj.resultshandle)
     obj.makeResultsWindow;
 end
@@ -248,7 +252,7 @@ end
 set(obj.resultshandle,'Visible',state)
 end
 
-function info_callback(a,b,obj)
+function info_callback(~,~,obj)
 obj.guihandles.showresults.Value=1;
 showresults_callback(obj.guihandles.showresults,0,obj)
 ax=obj.initaxis('Info');
