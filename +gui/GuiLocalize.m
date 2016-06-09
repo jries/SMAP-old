@@ -143,6 +143,14 @@ end
 end
 
 function wfload_callback(~,~,obj)
+settingsfile=obj.getGlobalSetting('mainLocalizeWFFile');
+[f,p]=uigetfile(settingsfile,'Select workflow *.txt file');
+if ~isempty(f)
+    settingsfilen=[p filesep f]
+    obj.setGlobalSetting('mainLocalizeWFFile',settingsfilen);
+    delete(obj.handle.Children)
+    obj.makeGui;
+end
 end
 
 function menu_callback(callobj,b,obj)
