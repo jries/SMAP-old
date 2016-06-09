@@ -470,10 +470,12 @@ otherwise
     end
 end
 end
+
 function rendermode_callback(a,b,obj)
 setvisibility(a,b,obj,'rendermode');
 render_colormode_callback(a,b,obj)
 end
+
 function setvisibility(a,b,obj,field)
 hgui=obj.guihandles;
 if hgui.render_colormode.Value>length(hgui.render_colormode.String)
@@ -489,38 +491,50 @@ fh={'PSFxnmb','PSFxnm_min','PSFxnm_max','znmb','znm_min','znm_max','locprecznmb'
     'locprecnmb','locprecnm_min','locprecnm_max'};
 %tiff
 if strcmp(p.rendermode.selection,'tiff')||strcmp(p.rendermode.selection,'raw') %obj.fileinfo(fileselect).istiff
-    controlVisibility(hgui,fh,'off')
+    obj.fieldvisibility('off',fh);
+%     controlVisibility(hgui,fh,'off')
 else
-    controlVisibility(hgui,fh,'on')
+    obj.fieldvisibility('on',fh);
+%     controlVisibility(hgui,fh,'on')
     zh={'znmb','znm_min','znm_max','locprecznmb','locprecznm_min','locprecznm_max'};
     znoth={'PSFxnmb','PSFxnm_min','PSFxnm_max'};
     znm=obj.locData.getloc({'znm'},'position','all');
     
     if ~isempty(znm)&&~isempty(znm.znm)&&any(znm.znm~=0)
-        controlVisibility(hgui,zh,'on')
-        controlVisibility(hgui,znoth,'off')
+        obj.fieldvisibility('on',zh);
+%         controlVisibility(hgui,zh,'on')
+%         controlVisibility(hgui,znoth,'off')
+        obj.fieldvisibility('off',znoth);
     else
-        controlVisibility(hgui,zh,'off')
-        controlVisibility(hgui,znoth,'on')
+        obj.fieldvisibility('off',zh);
+        obj.fieldvisibility('on',znoth);
+%         controlVisibility(hgui,zh,'off')
+%         controlVisibility(hgui,znoth,'on')
     end
 end
 
 if strcmp(p.rendermode.selection,'Other')
-    controlVisibility(hgui,'externalrender','on')
+    obj.fieldvisibility('on','externalrender');
+%     controlVisibility(hgui,'externalrender','on')
 else
-    controlVisibility(hgui,'externalrender','off')
+    obj.fieldvisibility('off','externalrender');
+%     controlVisibility(hgui,'externalrender','off')
 end
 
 %render_colormode 
 hgui.render_colormode.Value=min(length(hgui.render_colormode.String),hgui.render_colormode.Value);
 switch lower(p.render_colormode.selection)
 case 'normal'
-    controlVisibility(hgui,{'renderfield'},'off')
+    obj.fieldvisibility('off','renderfield');
+%     controlVisibility(hgui,{'renderfield'},'off')
 case 'z'
-    controlVisibility(hgui,{'remout','cb','colorfield_min','colorfield_max'},'on')
-    controlVisibility(hgui,{'renderfield'},'off')
+    obj.fieldvisibility('on',{'remout','cb','colorfield_min','colorfield_max'});
+    obj.fieldvisibility('off','renderfield');
+%     controlVisibility(hgui,{'remout','cb','colorfield_min','colorfield_max'},'on')
+%     controlVisibility(hgui,{'renderfield'},'off')
 case 'field'
-     controlVisibility(hgui,{'renderfield','remout','cb','colorfield_min','colorfield_max'},'on')
+    obj.fieldvisibility('on',{'renderfield','remout','cb','colorfield_min','colorfield_max'});
+%      controlVisibility(hgui,{'renderfield','remout','cb','colorfield_min','colorfield_max'},'on')
 end
 
 % render or image

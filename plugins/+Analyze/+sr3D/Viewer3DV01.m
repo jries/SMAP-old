@@ -465,7 +465,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             end
             function [loc,indu,sortind]=getlocrot(grouping,inlayer)
 
-                [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},inlayer},'position','roi','grouping',grouping,'layer',layerson);             
+                [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},inlayer,'numberInGroup','phot'},'position','roi','grouping',grouping,'layer',layerson);             
                 [yrot,depth]=rotcoord(loc.znm-zmean,loc.ynmline,p.theta);
                 [sortdepth,sortind]=sort(-depth);
                 sortdepth=depth(sortind);

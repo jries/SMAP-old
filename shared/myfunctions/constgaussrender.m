@@ -4,8 +4,8 @@ if isfield(pos,'s')
     s=myquantilefast(pos.s,0.5,1000)/pixelsx*ones(1,2);
     
 elseif isfield(pos,'sx')
-    s(1)=myquantilefast(pos.sx,0.5,1000)/pixelsx;
-    s(2)=myquantilefast(pos.sy,0.5,1000)/pixelsy;
+    s(2)=myquantilefast(pos.sx,0.5,1000)/pixelsx;
+    s(1)=myquantilefast(pos.sy,0.5,1000)/pixelsy;
 else
     s=[3 3];
 end

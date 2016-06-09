@@ -53,7 +53,7 @@ classdef LocFilter<interfaces.WorkflowModule;
                     psfnm=psf*obj.pixelsize;
                     val=p.val_psf;
                     if length(val)==1
-                        val=[0 val];
+                        val=[obj.pixelsize*.52 val];
                     end
                     indinh=psfnm>=val(1)&psfnm<=val(2);
                     indin=indin&indinh;
@@ -114,7 +114,7 @@ pard.check_psf.position=[2,1];
 pard.check_psf.Width=1.3;
 pard.check_psf.TooltipString=sprintf('Filter size of fitted PSF before saving.');
 
-pard.val_psf.object=struct('Style','edit','String','300');
+pard.val_psf.object=struct('Style','edit','String',' 80 300');
 pard.val_psf.position=[2,2.3];
 pard.val_psf.Width=.7;
 pard.val_psf.TooltipString=sprintf('maximum size of PSF (nm)');
