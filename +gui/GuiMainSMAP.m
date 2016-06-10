@@ -89,7 +89,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
                            'String','status','Position',[0 0 .8 0.035]);
             h.status.Units='pixels';
             h.status.Position(4)=32;
-            h.status.Position(2)=6;
+            h.status.Position(2)=2;
             obj.addSynchronization('status',h.status,{'String'})             
 
             %Plugins

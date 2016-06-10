@@ -45,19 +45,14 @@ classdef GuiChannel< interfaces.LayerInterface
             histgui.makeGui;
             
             obj.children.histgui=histgui;
-            
-            
-            
+
                %menu to detach Format Gui
             f=getParentFigure(obj.handle);
             c=uicontextmenu(f); 
-%             c2=uicontextmenu(f); 
             hfigf.UIContextMenu=c;
             hfigh.UIContextMenu=c;
             
-            m4 = uimenu(c,'Label','detach','Callback',{@detach_callback,obj,hmain});
-%              m5 = uimenu(c2,'Label','detach','Callback',{@detach_callback,obj,obj.handle});
-           
+            m4 = uimenu(c,'Label','detach','Callback',{@detach_callback,obj,hmain});           
         end
         
         function initGui(obj)
@@ -107,8 +102,7 @@ classdef GuiChannel< interfaces.LayerInterface
             obj.addSynchronization(['frame_min'],[],[],{@callobj.updateframes_callback})
             obj.addSynchronization(['frame_max'],[],[],{@callobj.updateframes_callback})
             obj.guihandles=h;
-%             obj.shift=[str2double(obj.guihandles.shiftxy_min.String), str2double(obj.guihandles.shiftxy_max.String)];
-            
+
             recpar=renderpardialog([],1);
             p=obj.getAllParameters;
             layerp=copyfields(p,recpar);
@@ -116,7 +110,7 @@ classdef GuiChannel< interfaces.LayerInterface
             
             setvisibility(0,0,obj)
             obj.updateLayerField;
-%             obj.filelist_callback;
+
             obj.updatelayer_callback;
             obj.setfiltergray;
         end
@@ -126,17 +120,8 @@ classdef GuiChannel< interfaces.LayerInterface
             p.frame_max=obj.getPar('frame_max');
             obj.setGuiParameters(p);
         end
-%         function externalrender_callback(obj,a,b)
-%             renderpar_callback(0,0,obj)
-%         end
-        
+
         function filelist_callback(obj,x,y,z)
-%             fn=obj.guihandles.ch_filelist.Value;
-% %             if ~isempty(obj.getPar('selectedField')
-%                 sf={'filenumber',fn,fn,true};
-%                 obj.setPar('selectedField',sf,'layer',obj.layer)
-%                 obj.setPar('selectedField',sframe,'layer',obj.layer)
-%             end
                 znm=obj.locData.getloc('znm');
                 if isfield(znm,'znm')&&any(znm.znm~=0) % loical: dont update hist slider
                      obj.updatefields_callback(0,0,'znm',[],false)
@@ -149,7 +134,6 @@ classdef GuiChannel< interfaces.LayerInterface
                 end                   
                 obj.updatefields_callback(0,0,'locprecnm',true,true)
                 obj.updatefields_callback(0,0,'frame',false,false)
-
             obj.updateLayerField;
              setvisibility(0,0,obj)
              obj.setfiltergray;
@@ -171,14 +155,10 @@ classdef GuiChannel< interfaces.LayerInterface
             	p=obj.getAllParameters;
                 layerp=copyfields(layerp,p);
                 obj.setPar(obj.layerprefix,layerp);
-
                 fn=obj.guihandles.ch_filelist.Value;
-%             if ~isempty(obj.getPar('selectedField')
                 sf={'filenumber',fn,fn,true};
-                obj.setPar('selectedField',sf,'layer',obj.layer)
-                
-            else
-                
+                obj.setPar('selectedField',sf,'layer',obj.layer);
+            else             
                 if nargin<3
                     value=obj.getSingleGuiParameter(field);
                 end
@@ -198,15 +178,12 @@ classdef GuiChannel< interfaces.LayerInterface
         
         function setlayer(obj,layer)
             if obj.layer==layer
-                state='on';
-                
+                state='on';            
             else
                 state='off';
             end
             obj.children.filterTableGui.handle.Visible=state;
             obj.children.histgui.handle.Visible=state;
-            
-%             obj.filelist_callback;
         end
         
         function selectedField_callback(obj)
@@ -301,25 +278,21 @@ classdef GuiChannel< interfaces.LayerInterface
                     obj.setGuiParameters(p);
                     obj.status('default parameters restored.');
                     %update
-                    obj.updateLayerField;
-
-                    
+                    obj.updateLayerField; 
                 else
                     disp('no default configuration found at: /settings/temp/Channel_default.mat')
                 end
             end
         end
         
-        function setGuiParameters(obj,varargin)
-            
+        function setGuiParameters(obj,varargin)          
             setGuiParameters@interfaces.GuiModuleInterface(obj,varargin{:});  
-           
             if length(varargin)>1&&varargin{2}==true
 %             %update fields to histogram
                 obj.updateLayerField;
-
             end
         end
+        
         function setvisibility(obj,field)
             if nargin==1
                 setvisibility(0,0,obj);
@@ -395,6 +368,7 @@ end
 
 function renderfield_callback(object, handle,obj)
 if isempty(obj.locData.loc)
+     setvisibility(0,0,obj)
     return
 end
 p=obj.getSingleGuiParameter('renderfield');
@@ -694,7 +668,7 @@ pard.parbutton.object=struct('Style','pushbutton','String','render par');
 pard.parbutton.position=[3,p3];
 pard.parbutton.Width=w3;
 pard.parbutton.TooltipString='Additional render paramters';
-
+pard.parbutton.Optional=true;
 
 pard.colortxt.object=struct('Style','text','String','Color:');
 pard.colortxt.position=[4,p1];
@@ -757,6 +731,7 @@ pard.imaxtoggle.object=struct('Style','togglebutton','String','quantile','Value'
 pard.imaxtoggle.position=[7,1.6];
 pard.imaxtoggle.Width=.6;
 pard.imaxtoggle.TooltipString='toggle absolute intensity maximum (Imax) or quantile';
+pard.imaxtoggle.Optional=true;
 
 pard.imax_min.object=struct('Style','edit','String','-3.5');
 pard.imax_min.position=[7,2.2];
@@ -773,7 +748,7 @@ pard.filtertxt.Width=2;
 pard.filtertxt.TooltipString='';
 
     
-pard.locprecnmb.object=struct('Style','pushbutton','String','locp');
+pard.locprecnmb.object=struct('Style','pushbutton','String','locprec');
 pard.locprecnmb.position=[3,3.4];
 pard.locprecnmb.Width=.6;
 
@@ -801,27 +776,31 @@ pard.znm_max.Width=.5;
 pard.PSFxnmb.object=struct('Style','pushbutton','String','PSF xy');
 pard.PSFxnmb.position=[5,3.4];
 pard.PSFxnmb.Width=.6;
-            
+pard.PSFxnmb.Optional=true;            
 pard.PSFxnm_min.object=struct('Style','edit','String','0','BackgroundColor',[1 1 1]*.7);
 pard.PSFxnm_min.position=[5,4];
 pard.PSFxnm_min.Width=.5;
-
+pard.PSFxnm_min.Optional=true;
 pard.PSFxnm_max.object=struct('Style','edit','String','175');  
 pard.PSFxnm_max.position=[5,4.5];
 pard.PSFxnm_max.Width=.5;
-            
+pard.PSFxnm_max.Optional=true;
+
 pard.locprecznmb.object=struct('Style','pushbutton','String','locprec z');
 pard.locprecznmb.position=[6,3.4];
 pard.locprecznmb.Width=.6;
+pard.locprecznmb.Optional=true;
 
 pard.locprecznm_min.object=struct('Style','edit','String','0','BackgroundColor',[1 1 1]*.7);
 pard.locprecznm_min.position=[6,4];
 pard.locprecznm_min.Width=.5;
+pard.locprecznm_min.Optional=true;
 
 pard.locprecznm_max.object=struct('Style','edit','String','45');  
 pard.locprecznm_max.position=[6,4.5];
-pard.locprecznm_max.Width=.5;
-   
+pard.locprecznm_max.Width=.5; 
+pard.locprecznm_max.Optional=true;
+
 pard.frameb.object=struct('Style','pushbutton','String','frame');
 pard.frameb.position=[4,3.4];
 pard.frameb.Width=.6;
@@ -860,6 +839,7 @@ pard.default_button.object=struct('Style','pushbutton','String','Default');
 pard.default_button.position=[8,4];
 pard.default_button.Width=1;
 pard.default_button.TooltipString='Reset to default. Click with shift to save default.';
+pard.default_button.Optional=true;
 %%%put in again
 % pard.layercolorz.object=struct('Style','checkbox','String','layers same c/z');
 % pard.layercolorz.position=[7,3.8];

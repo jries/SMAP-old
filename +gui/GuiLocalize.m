@@ -10,12 +10,6 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
         end
         function makeGui(obj)
             h.loctab=uitabgroup(obj.handle,'Position',[0 .15 1 .85]);
-% 
-%             h.frame=uitab(h.loctab,'Title','Input Image');
-%             h.filter=uitab(h.loctab,'Title','Peak Finder');
-%             h.fit=uitab(h.loctab,'Title','Fitter');
-%             h.locprocess=uitab(h.loctab,'Title','Localizations');
-%             h.workflow=uitab(h.loctab,'Title','Workflow');
             
             l2=obj.guiPar.FieldHeight*1.2;
             h2=obj.guiPar.FieldHeight*1.2;
@@ -146,14 +140,14 @@ function wfload_callback(~,~,obj)
 settingsfile=obj.getGlobalSetting('mainLocalizeWFFile');
 [f,p]=uigetfile(settingsfile,'Select workflow *.txt file');
 if ~isempty(f)
-    settingsfilen=[p filesep f]
+    settingsfilen=[p filesep f];
     obj.setGlobalSetting('mainLocalizeWFFile',settingsfilen);
     delete(obj.handle.Children)
     obj.makeGui;
 end
 end
 
-function menu_callback(callobj,b,obj)
+function menu_callback(callobj,~,obj)
 switch callobj.Label
     case 'remove'
         selected=obj.guihandles.loctab.SelectedTab;
@@ -172,7 +166,7 @@ switch callobj.Label
         name=['WF' num2str(nwf+1)];
         obj.guihandles.(['tab_' name])=uitab(obj.guihandles.loctab,'Title',name);
         tabsizeh=obj.guiPar.tabsize2;
-        tabsizeh(4)=250;
+        tabsizeh(4)=235;
         obj.guihandles.(['panel_' name])=uipanel(obj.guihandles.(['tab_' name]),'Unit','pixels','Position',tabsizeh); 
         module=interfaces.Workflow;
         module.processorgui=false;

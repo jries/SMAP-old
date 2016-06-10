@@ -19,6 +19,8 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
         propertiesToSave={}; %{fileds} obj.(field) is saved/restored with getGuiParameters.
         pluginpath %{path1,path2,filename}: where plugin was stored before creation
         guihandles %handles to gui objects are stored here. ONLY flat structure. All handles should be added, otherwise they will not be resized etc.
+        simplegui=false;
+        guiselector=struct('position',[],'show',false);
     end
     methods
          function obj=GuiModuleInterface(varargin)
@@ -129,6 +131,81 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
 %             end
         end
         
+        
+        function fieldvisibility(obj,varargin)
+            %sets the gui state (simple/advanced) and sets visibility of
+            %certain fields
+            %Arguments:
+            %'guistate' 'simple'/'advanced' 1/0
+            %'on', {fields}
+            %'off', {fields}
+            if nargin<2
+                p.on={};p.off={};p.guistate=obj.simplegui;
+            else
+            p=fieldvisibiltyparser(varargin);
+            end
+            pard=obj.guidef;
+            if ~isstruct(pard)
+                return
+            end
+            fn=fieldnames(pard);
+            oldstate=obj.simplegui;
+            switch p.guistate
+                case {'S','s','simple',1,true}
+                    obj.simplegui=true;
+                    obj.guihandles.simplegui.String='v';
+                    obj.guihandles.simplegui.Value=1;
+                    
+                    for k=1:length(fn)
+                        if isfield(pard.(fn{k}),'Optional')&&pard.(fn{k}).Optional==true
+                            if oldstate==false %if was advanced
+                                obj.guihandles.(fn{k}).UserData.visibleSMAP=obj.guihandles.(fn{k}).Visible;
+                            end
+                            obj.guihandles.(fn{k}).Visible='off';
+                        end
+                    end
+%                     if previeously advanced: write visible status into
+%                     guihandles.field.smapVisible for optional parameters,
+%                     switch off those parameters
+                case {'A','a','advanced',0,false}
+%                     switch on all optional fields with
+%                     smapVisible=visible
+                    obj.simplegui=false;
+                    obj.guihandles.simplegui.String='-';
+                    obj.guihandles.simplegui.Value=0;
+                    for k=1:length(fn)
+                        if isfield(pard.(fn{k}),'Optional')&&pard.(fn{k}).Optional==true
+                            if isfield(obj.guihandles.(fn{k}).UserData,'visibleSMAP')       
+                                 obj.guihandles.(fn{k}).Visible=obj.guihandles.(fn{k}).UserData.visibleSMAP;
+                            else
+                                obj.guihandles.(fn{k}).Visible='on';
+                            end   
+                        end
+                    end
+            end
+            if ~iscell(p.on)
+                p.on={p.on};
+            end
+            for k=1:length(p.on)
+                if isfield(obj.guihandles,p.on{k})
+                    if ~obj.simplegui||~(isfield(pard.(p.on{k}),'Optional')&&pard.(p.on{k}).Optional==true) %not an optional parameter
+                        obj.guihandles.(p.on{k}).Visible='on';
+                    end
+                    obj.guihandles.(p.on{k}).UserData.visibleSMAP='on';
+                end
+            end
+            if ~iscell(p.off)
+                p.off={p.off};
+            end            
+            for k=1:length(p.off)
+                if isfield(obj.guihandles,p.off{k})      
+                    obj.guihandles.(p.off{k}).Visible='off';
+                    obj.guihandles.(p.off{k}).UserData.visibleSMAP='off';
+                end
+            end            
+%             for all p.on: smapvisible='on'. if optional: switch on if state=advanced. 
+%             for all p.off: smapvisible, visible='off';
+        end
         function setGuiParameters(obj,p,setchildren)
             %sets parameters in GUI uicontrols
             %setGuiParameters(p,setchildren)
@@ -309,7 +386,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                 allFields=fieldnames(guidef);
                 guiPar=obj.guiPar;
 
-
+                anyoptional=false;
                 for k=1:length(allFields) 
                     thisField=guidef.(allFields{k});
                     if strcmp(allFields{k},'syncParameters')
@@ -327,6 +404,9 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                             str=['guidef definition is incomplete in classe:' class(obj)];
                             error(str)
                             
+                        end
+                        if isfield(thisField,'Optional')&&thisField.Optional
+                            anyoptional=true;
                         end
                         h=thisField.object;
 %                         h=uicontrol(obj.handle,thisField.object);
@@ -380,6 +460,10 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
 %                             h.TooltipString=thisField.TooltipString;
 %                         end
                     end
+                    if anyoptional
+                        obj.addSynchronization('globalGuiState',[],[],@obj.setglobalguistate);
+                    end
+                       
                 end 
             
             end
@@ -405,7 +489,10 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
            end
            obj.setPar('status',txt2);
        end
-       
+       function setglobalguistate(obj,a,b)
+           simplestate=obj.getPar('globalGuiState');
+               obj.fieldvisibility('guistate',simplestate)
+       end
        function p=guidef(obj)
            %overwrite in module when defining a GUI.
            %p.fieldname.object=struct('Style','edit','String','x',...)
@@ -535,4 +622,18 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
            end
        end
    end
+end
+
+
+function pres=fieldvisibiltyparser(args)
+% fields{end+1}='all';
+p = inputParser;   
+p.KeepUnmatched=true;
+addParameter(p,'guistate','nd',@(x) any(myvalidatestring(x,{'simple','advanced','s','a','S','A','nd'})));
+addParameter(p,'off',{});
+addParameter(p,'on',{});
+
+parse(p,args{:});
+pres=p.Results;
+
 end

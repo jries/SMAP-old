@@ -318,8 +318,8 @@ classdef Workflow<interfaces.DialogProcessor
             pard.savebutton.Width=0.4;
         
             pard.modulelist.object=struct('Style','listbox','Callback',@obj.moduleselect_callback);
-            pard.modulelist.position=[11,1];
-            pard.modulelist.Height=9;
+            pard.modulelist.position=[10.5,1];
+            pard.modulelist.Height=8.5;
             pard.modulelist.Width=0.8;
             
 %             pard.clearbutton.object=struct('Style','togglebutton','String','Clear','Callback',@obj.clear_callback);
@@ -506,22 +506,7 @@ classdef Workflow<interfaces.DialogProcessor
                 obj.description=answ{1};
             end           
         end
-%         function move_callback(obj,a,b,dir)
-%             select=obj.guihandles.modulelist.Value;
-%             lenlist=length(obj.guihandles.modulelist.String);
-%             newpos=select+dir;
-%             if newpos<=lenlist&&newpos>0
-%                 obj.modules([select,newpos])=obj.modules([newpos,select]);
-%             end
-%             obj.guihandles.modulelist.Value=newpos;
-%             obj.updateModuleList;
-%             
-%             obj.setinputlist;
-% %         end
-%         function clear_callback(obj,a,b)
-%             obj.clear;
-%             obj.makeGui;
-%         end
+
     end
 end
 

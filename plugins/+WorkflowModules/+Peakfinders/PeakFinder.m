@@ -111,12 +111,12 @@ co=qs(2)+slope*0.5*2*factor;
 end
 
 function pard=guidef
-pard.cutoffmode.object=struct('Style','popupmenu','String',{{'dynamic (factor)','probability (p<1)','absolute (photons)'}});
+pard.cutoffmode.object=struct('Style','popupmenu','String',{{'dynamic (factor)','probability (p<1)','absolute (photons)'}},'Value',2);
 pard.cutoffmode.position=[1,1];
 pard.cutoffmode.Width=1.5;
 pard.cutoffmode.TooltipString=sprintf('How to determine the cutoff: \n Dynamic: use the distribution of pixel intensity to estimate likely localizations. Factor: adjust sensitivity. \n Probability: use probabilistic model (SimpleSTORM) to determine the likelyhood for pixel being localization. \n Absolut: Pixel intensity in normalized image. \n Choose display=normalized to read out thes normalized values.');
 
-pard.cutoffvalue.object=struct('Style','edit','String','1');
+pard.cutoffvalue.object=struct('Style','edit','String','.05');
 pard.cutoffvalue.position=[1,2.5];
 pard.cutoffvalue.Width=.5;
 pard.cutoffvalue.TooltipString=sprintf('Dynamic: relative factor. \n Probability: directly probability p. \n absolute: cutoff in photons');

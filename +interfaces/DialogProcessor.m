@@ -7,8 +7,6 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
         processorgui=true; %switch. true if process button etc are to be rendered. false if called externally (for workflow)
         showresults=false; % defined state for results
         history=false;
-        simplegui=false;
-        guiselector=struct('position',[],'show',false);
 %         moduleinfo;
     end
     properties (SetAccess = private, GetAccess = private)
@@ -91,77 +89,7 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
             simplegui=obj.getSingleGuiParameter('simplegui');
             obj.fieldvisibility('guistate',simplegui);
         end
-        function fieldvisibility(obj,varargin)
-            %sets the gui state (simple/advanced) and sets visibility of
-            %certain fields
-            %Arguments:
-            %'guistate' 'simple'/'advanced' 1/0
-            %'on', {fields}
-            %'off', {fields}
-            if nargin<2
-                p.on={};p.off={};p.guistate=obj.simplegui;
-            else
-            p=fieldvisibiltyparser(varargin);
-            end
-            pard=obj.guidef;
-            fn=fieldnames(pard);
-            oldstate=obj.simplegui;
-            switch p.guistate
-                case {'S','s','simple',1,true}
-                    obj.simplegui=true;
-                    obj.guihandles.simplegui.String='v';
-                    obj.guihandles.simplegui.Value=1;
-                    
-                    for k=1:length(fn)
-                        if isfield(pard.(fn{k}),'Optional')&&pard.(fn{k}).Optional==true
-                            if oldstate==false %if was advanced
-                                obj.guihandles.(fn{k}).UserData.visibleSMAP=obj.guihandles.(fn{k}).Visible;
-                            end
-                            obj.guihandles.(fn{k}).Visible='off';
-                        end
-                    end
-%                     if previeously advanced: write visible status into
-%                     guihandles.field.smapVisible for optional parameters,
-%                     switch off those parameters
-                case {'A','a','advanced',0,false}
-%                     switch on all optional fields with
-%                     smapVisible=visible
-                    obj.simplegui=false;
-                    obj.guihandles.simplegui.String='-';
-                    obj.guihandles.simplegui.Value=0;
-                    for k=1:length(fn)
-                        if isfield(pard.(fn{k}),'Optional')&&pard.(fn{k}).Optional==true
-                            if isfield(obj.guihandles.(fn{k}).UserData,'visibleSMAP')       
-                                 obj.guihandles.(fn{k}).Visible=obj.guihandles.(fn{k}).UserData.visibleSMAP;
-                            else
-                                obj.guihandles.(fn{k}).Visible='on';
-                            end   
-                        end
-                    end
-            end
-            if ~iscell(p.on)
-                p.on={p.on};
-            end
-            for k=1:length(p.on)
-                if isfield(obj.guihandles,p.on{k})
-                    if ~obj.simplegui||~(isfield(pard.(p.on{k}),'Optional')&&pard.(p.on{k}).Optional==true) %not an optional parameter
-                        obj.guihandles.(p.on{k}).Visible='on';
-                    end
-                    obj.guihandles.(p.on{k}).UserData.visibleSMAP='on';
-                end
-            end
-            if ~iscell(p.off)
-                p.off={p.off};
-            end            
-            for k=1:length(p.off)
-                if isfield(obj.guihandles,p.off{k})      
-                    obj.guihandles.(p.off{k}).Visible='off';
-                    obj.guihandles.(p.off{k}).UserData.visibleSMAP='off';
-                end
-            end            
-%             for all p.on: smapvisible='on'. if optional: switch on if state=advanced. 
-%             for all p.off: smapvisible, visible='off';
-        end
+        
 %         function setguistate(obj,state)
 %             if nargin>1
 %                 obj.simplegui=state;
@@ -265,15 +193,3 @@ txt=textwrap(htxt,{obj.info.description});
 end
 
 
-function pres=fieldvisibiltyparser(args)
-% fields{end+1}='all';
-p = inputParser;   
-p.KeepUnmatched=true;
-addParameter(p,'guistate','nd',@(x) any(myvalidatestring(x,{'simple','advanced','s','a','S','A','nd'})));
-addParameter(p,'off',{});
-addParameter(p,'on',{});
-
-parse(p,args{:});
-pres=p.Results;
-
-end
