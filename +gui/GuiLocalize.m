@@ -142,6 +142,7 @@ settingsfile=obj.getGlobalSetting('mainLocalizeWFFile');
 if ~isempty(f)
     settingsfilen=[p filesep f];
     obj.setGlobalSetting('mainLocalizeWFFile',settingsfilen);
+    obj.mainworkflow.clear;
     delete(obj.handle.Children)
     obj.makeGui;
 end

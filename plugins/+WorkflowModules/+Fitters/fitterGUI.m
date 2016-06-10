@@ -58,6 +58,7 @@ classdef fitterGUI<interfaces.WorkflowModule
                 hp=uipanel(obj.handle,'Units','pixels','Position',panelpos,'Visible','off');
                 fitter.handle=hp;
                 fitter.setGuiAppearence(p);
+                fitter.simplegui=obj.simplegui;
                 fitter.makeGui;
                 obj.children.(fitnames{k})=fitter;
                 obj.fitters{k}=fitter;
@@ -65,6 +66,13 @@ classdef fitterGUI<interfaces.WorkflowModule
             end
             obj.fitters{1}.handle.Visible='on';
             obj.currentfitter=obj.fitters{1};
+        end
+        function fieldvisibility(obj,varargin)
+            fieldvisibility@interfaces.GuiModuleInterface(obj,varargin{:});
+            fn=fieldnames(obj.children);   
+            for k=1:length(fn)
+                    obj.children.(fn{k}).fieldvisibility(varargin{:});
+            end
         end
         
 %         function updateGui(obj)

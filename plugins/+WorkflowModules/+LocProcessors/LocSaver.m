@@ -20,6 +20,7 @@ classdef LocSaver<interfaces.WorkflowModule;
             pard.savelocal.object=struct('Style','checkbox','String','save local and copy','Value',0);
             pard.savelocal.position=[1,1];
             pard.savelocal.Width=2;
+            pard.savelocal.Optional=true;
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);

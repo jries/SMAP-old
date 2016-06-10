@@ -170,18 +170,19 @@ function pard=guidef
 pard.text.object=struct('Style','text','String','Acquisition parameters');
 pard.text.position=[1,1];
 pard.text.Width=3;
-
+pard.text.Optional=true;
 pard.metadatafile.object=struct('Style','edit','String',' ');
 pard.metadatafile.position=[2,1];
 pard.metadatafile.Width=4;
-
+pard.metadatafile.Optional=true;
 pard.loadmetadata.object=struct('Style','pushbutton','String','Load metadata');
 pard.loadmetadata.position=[3,1];
 pard.loadmetadata.TooltipString=sprintf('Load micromanager Metadata.txt file.');
-
+pard.loadmetadata.Optional=true;
 pard.calibrate.object=struct('Style','pushbutton','String','auto calibration');
 pard.calibrate.position=[3,2];
 pard.calibrate.TooltipString=sprintf('calibrate gain and offset from images (from simpleSTORM)');
+pard.calibrate.Optional=true;
 
 pard.camparbutton.object=struct('Style','pushbutton','String','set Cam Parameters');
 pard.camparbutton.position=[3,3.5];

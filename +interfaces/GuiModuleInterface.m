@@ -183,6 +183,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                         end
                     end
             end
+
             if ~iscell(p.on)
                 p.on={p.on};
             end
