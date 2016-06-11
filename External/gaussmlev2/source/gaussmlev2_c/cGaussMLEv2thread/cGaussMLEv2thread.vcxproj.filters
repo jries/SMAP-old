@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{94543a6d-4717-4d13-9162-0171efc1233f}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;cu;cuh</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{61eea41a-3e00-470b-ba66-1dfb426ba412}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd;</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{75d6d93e-981f-49e8-bdd2-102486f0f207}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;def;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="matlab.def">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wrapper.cu">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="mexFunction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GPUgaussLib.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GPUgaussMLEv2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="definitions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GPUgaussLib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GPUgaussMLEv2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MatInvLib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FitInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
