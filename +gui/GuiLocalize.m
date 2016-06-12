@@ -33,7 +33,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             h.batchprocessor=uicontrol(obj.handle,'Style','pushbutton','String','Processor','Position',[430, 2, 90 h2],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@batchprocessor_callback,obj});
             h.batchprocessor.TooltipString=sprintf('Open the batch processor GUI to fit many files automatically with pre-defined settings.');
-            h.wfinfo=uicontrol(obj.handle,'Style','pushbutton','String','Info','Position',[450, l2, 70 h2],...
+            h.wfinfo=uicontrol(obj.handle,'Style','pushbutton','String','Info','Position',[450, l2,50, h2],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@wfinfo_callback,obj});
             h.wfinfo.TooltipString=sprintf('Show information about current workflow.');  
             h.wfname=uicontrol(obj.handle,'Style','text','String','x','Position',[10, l2, 350 h2],...
@@ -41,7 +41,9 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
              h.wfload=uicontrol(obj.handle,'Style','pushbutton','String','Change','Position',[370, l2, 80 h2],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@wfload_callback,obj});
             
-            
+            h.wfsimple=uicontrol(obj.handle,'Style','togglebutton','String','-','Position',[500, l2+3,20, h2-6],...
+                'FontSize',obj.guiPar.fontsize,'Callback',{@wfsimplegui_callback,obj});
+            h.wfsimple.TooltipString=sprintf('Show or hide advanced controls.');  
             
             outputfig=figure(207);
             outputfig.Visible='off';
@@ -274,7 +276,15 @@ end
 % pluginname=pluginpath{end};
 % obj.children.(pluginname)=plugino;
 % end
+function wfsimplegui_callback(object,~,obj)
+if object.Value
+    object.String='v';
+else
+    object.String='-';
+end
+obj.mainworkflow.fieldvisibility('guistate',object.Value)
 
+end
 function batchprocessor_callback(a,b,obj)
 batchprocessor=WorkflowModules.Batchprocessor([],obj.P);
 if ~isempty(obj.batchfile)

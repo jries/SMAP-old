@@ -319,8 +319,7 @@ else
     obj.guihandles.imax_min.String=num2str(imax);
 end
 obj.updateLayerField('imaxtoggle');
-
-obj.updateLayerField('imax');
+obj.updateLayerField('imax_min');
 end
 
 

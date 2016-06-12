@@ -68,17 +68,33 @@ classdef GuiHistSlider< interfaces.LayerInterface
                         obj.guihandles.smax.Min=-500;
                         obj.guihandles.smax.Max=500;
                     case 'imax'
+                        lp=obj.getPar('','layer',obj.layer);
+                        imaxtoggle=lp.imaxtoggle;
+                        if imaxtoggle
                         obj.guihandles.smin.Min=-5;
                         obj.guihandles.smin.Max=-1;
                         obj.guihandles.smax.Min=-1;
                         obj.guihandles.smax.Max=-1+0.001;
+                        obj.guihandles.smax.Value=-1;
+                        obj.guihandles.vmax.String=num2str(-1+.001);
+                        obj.guihandles.field.String='Contrast (q)';
+                        else
+                            img=obj.locData.layer(obj.layer).images.srimage.image;
+                            maximg=max(img(:))*1.4;
+                        obj.guihandles.smin.Min=0;
+                        obj.guihandles.smin.Max=maximg;
+                        obj.guihandles.smax.Min=maximg;
+                        obj.guihandles.smax.Max=maximg*1.001;
+                        obj.guihandles.smax.Value=maximg*1.001;
+                        obj.guihandles.vmax.String=num2str(maximg*1.001);
+                        obj.guihandles.field.String='Contrast (Imax)';
+                        end
+                    otherwise
+                        obj.guihandles.field.String=fieldh;
+                        obj.guihandles.vmin.String=num2str(sfield{2});
+                        obj.guihandles.vmax.String=num2str(sfield{3});
                 end
-%                 vchanged_callback([],0, obj,'minmax',false)
-%                 return
-%             end
-            obj.guihandles.field.String=fieldh;
-            obj.guihandles.vmin.String=num2str(sfield{2});
-            obj.guihandles.vmax.String=num2str(sfield{3});
+
             if length(sfield)>3&&~isempty(sfield{4})
                 obj.guihandles.filteron.Value=sfield{4};
             end
