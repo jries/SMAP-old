@@ -17,7 +17,9 @@ classdef LocSaver<interfaces.WorkflowModule;
         end
         function pard=guidef(obj)
             pard.plugininfo.type='WorkflowModule'; 
+            pard.plugininfo.description='Saves the fitted localizations as a SMAP *.sml file. When fitting via a network, fitting a local copy which is then moved to the destination can be faster.';
             pard.savelocal.object=struct('Style','checkbox','String','save local and copy','Value',0);
+            pard.savelocal.object.TooltipString='Select this if you fit via a network and the saving of the localizations is very long (stauts bar stops for a long time at last frames).';
             pard.savelocal.position=[1,1];
             pard.savelocal.Width=2;
             pard.savelocal.Optional=true;

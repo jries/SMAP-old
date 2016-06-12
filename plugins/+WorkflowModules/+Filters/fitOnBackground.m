@@ -72,4 +72,5 @@ pard.loc_fitonbg.TooltipString=sprintf('If checked, fitting is performed on back
 pard.loc_fitonbg.Optional=true;
 
 pard.plugininfo.type='WorkflowModule';
+pard.plugininfo.description='Allows fitting on background-corrected images. Only recommended for strong static background or centroid-based algorithms.';
 end

@@ -136,4 +136,5 @@ pard.loc_blocksize_frames.position=[4,2.3];
 pard.loc_blocksize_frames.Width=.7;
 pard.loc_blocksize_frames.TooltipString=sprintf('Number of frames over which the median is calculated. (Typically 100. range: 0-1000)');
 pard.plugininfo.type='WorkflowModule';
+pard.plugininfo.description='Background calcualtion based on median filtering. For reasonable computational complexity, the median is calculated for blocks of dx*dx pixels and dt frames. Values are interpolated in x and y.';
 end

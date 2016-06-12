@@ -214,4 +214,5 @@ pard.locdata_empty.position=[4.2,3.5];
 pard.locdata_empty.Width=1.5;
 pard.locdata_empty.TooltipString='empty localization data before fitting. Important if post-processing (eg drift correction) is perfromed as part of workflow';
 pard.plugininfo.type='WorkflowModule'; 
+pard.plugininfo.description='Opens an instance of Fiji in which you can open any image stack (if large, use virtual stack). This image stack can then be selected in the GUI and used for fitting.';
 end

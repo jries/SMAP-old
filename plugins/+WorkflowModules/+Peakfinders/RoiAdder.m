@@ -141,4 +141,5 @@ pard.roistyle.position=[4,1];
 pard.roistyle.TooltipString=sprintf('Use rectangular or elliptical ROI.');
 % pard.mask_store.object=struct('Style','text','String','');
 pard.plugininfo.type='WorkflowModule'; 
+pard.plugininfo.description='Allows the user to select regions of interest on the preview image which to use for fitting, or which to exclude from fitting.';
 end

@@ -92,4 +92,5 @@ pard.update_check.Width=1.5;
 pard.update_check.TooltipString=sprintf('If checked, the fitted localizations are directly rendered and can be analyzed during the fit.');
  
 pard.plugininfo.type='WorkflowModule'; 
+pard.plugininfo.description='Passes on the fitted localizations to the rendering engine of SMAP. This happens at user-defined time intervals.';
 end

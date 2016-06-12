@@ -189,4 +189,5 @@ pard.camparbutton.position=[3,3.5];
 pard.camparbutton.Width=1.5;
 pard.camparbutton.TooltipString=sprintf('Edit camera acquisition parameters.');
 pard.plugininfo.type='WorkflowModule'; 
+pard.plugininfo.description='Converts camera ADU to photon counts and handles metadata (usually from metadata.txt from micromanger). Metadata can also be entered manually.';
 end

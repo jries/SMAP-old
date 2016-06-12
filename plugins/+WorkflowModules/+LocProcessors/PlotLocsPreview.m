@@ -16,6 +16,7 @@ classdef PlotLocsPreview<interfaces.WorkflowModule;
         end
         function pard=guidef(obj)
             pard.plugininfo.type='WorkflowModule'; 
+            pard.plugininfo.description='Plots localizations during preview.';
         end
         function output=run(obj,data,p)
             output=[];

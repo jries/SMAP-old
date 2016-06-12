@@ -366,6 +366,9 @@ classdef Workflow<interfaces.DialogProcessor
         end
         function graph(obj,object,b)
             modulenames=obj.guihandles.modulelist.String;
+            for k=1:length(modulenames)
+                modulenames{k}=[num2str(k) '. ' modulenames{k}];
+            end
             nodebox=char(ones(1,length(modulenames))*'s');
             nodecolor=char(ones(1,length(modulenames))*'b');
             
@@ -405,19 +408,26 @@ classdef Workflow<interfaces.DialogProcessor
         function showinfo(obj,edit)           
             txt=obj.description;
             f=figure;
-            he=uicontrol('Style','edit','units','normalized','Position',[0 0.1 1 .9],'String',txt,'Max',100,'Parent',f,'HorizontalAlignment','left');
+            he=uicontrol('Style','edit','units','normalized','Position',[0 0.55 1 .45],'String',txt,'Max',100,'Parent',f,'HorizontalAlignment','left');
+            hplugin=uicontrol('Style','edit','units','normalized','Position',[0 0.1 1 .45],'String',txt,'Max',100,'Parent',f,'HorizontalAlignment','left');
             b2=uicontrol('Style','pushbutton','units','normalized','Position',[0.75 0 .25 .1],'String','Cancel','Callback',{@buttoncallback},'Parent',f);
             if edit
                 b1=uicontrol('Style','pushbutton','units','normalized','Position',[0 0 .25 .1],'String','Accept changes','Parent',f,'Callback',{@buttoncallback});
-%             else
-%                 b2.Enable='inactive';
+            else
+%                 he.Enable='inactive';
             end    
+%             hplugin.Enable='inactive';
             function buttoncallback(object,b)
                 if ~strcmp(object.String,'Cancel')
                     obj.description=he.String;
                 end
                 close(f)
             end  
+            for k=1:length(obj.modules)
+                info=obj.modules{k}.module.info;
+                txtp{k}=[num2str(k) '. ' info.name ': ' info.description];
+            end
+            hplugin.String=txtp;
         end
         
         function fieldvisibility(obj,varargin)

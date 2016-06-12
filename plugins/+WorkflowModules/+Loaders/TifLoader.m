@@ -185,4 +185,5 @@ pard.framestop.Optional=true;
 % pard.locdata_empty.Width=1.5;
 % pard.locdata_empty.TooltipString=sprintf('Empty localization data before fitting. \n Important if post-processing (eg drift correction) is perfromed as part of workflow');
 pard.plugininfo.type='WorkflowModule'; 
+pard.plugininfo.description='Loads tiff files. Can load single tiff files or tiff stacks, also while they are written. It also tries to locate the metadata.txt file from micromanger and passes it on to the camera converter.';
 end

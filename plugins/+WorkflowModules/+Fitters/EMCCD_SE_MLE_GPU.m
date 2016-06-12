@@ -254,4 +254,5 @@ pard.refractive_index_mismatch.TooltipString=sprintf('Correction factor to take 
 pard.refractive_index_mismatch.Optional=true;
 
 pard.plugininfo.type='WorkflowFitter';
+pard.plugininfo.description='Maximum likelyhood estimater, optimized for GPU processing. According to: C. S. Smith, N. Joseph, B. Rieger, and K. A. Lidke, ?Fast, single-molecule localization that achieves theoretically minimum uncertainty.,? Nat Methods, vol. 7, no. 5, pp. 373?375, May 2010.';
 end

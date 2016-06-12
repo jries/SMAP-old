@@ -152,4 +152,5 @@ pard.val_LL.TooltipString=sprintf('Cutoff relative to maximum of log-likelihood 
 pard.val_LL.Optional=true;
 
 pard.plugininfo.type='WorkflowModule'; 
+pard.plugininfo.description='Filters localizations before saving according to photons, PSF, localization precision, log-likelihood. This can dramatically reduce the file size in case a too low cutoff was chosen during the peak finding.';
 end

@@ -54,5 +54,6 @@ pard.loc_loc_filter_sigma.Width=.7;
 pard.loc_loc_filter_sigma.TooltipString=sprintf('Sigma (in camera pixels) for a Gaussian filter which is applied after \n background correction and before peak finding.');
 pard.plugininfo.type='WorkflowModule';
 pard.loc_loc_filter_sigma.Optional=true;
+pard.plugininfo.description='Gaussian filter, usually applied after background correction and before peak finding.';
 
 end

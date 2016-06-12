@@ -101,4 +101,5 @@ pard.loc_wavelet_refine.Optional=true;
 
 
 pard.plugininfo.type='WorkflowModule';
+pard.plugininfo.description='Wavelet based background estimation. Two implementeations: A trous (can be faster on GPU, but only level 2, adepted from I. Izeddin, J. Boulanger, V. Racine, C. G. Specht, A. Kechkar, D. Nair, A. Triller, D. Choquet, M. Dahan, and J. B. Sibarita, ?Wavelet analysis for single molecule localization microscopy,? Opt Express, vol. 20, no. 3, pp. 2081?2095, Jan. 2012.) and a direct discreet wavelet transform.';
 end
