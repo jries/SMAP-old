@@ -1,5 +1,5 @@
 #CompareLocalization
-#Thu Apr 21 15:30:25 CEST 2016
+#Sun Jun 12 23:39:39 CEST 2016
 spnPixelsize=100.0
 firstRow1=0
 firstRow0=1
@@ -8,8 +8,8 @@ colZ0=4
 shiftY1=0
 shiftY0=0.0
 spnTolStart=10.0
-txtFile1=D:/Data/HDsequence/sequence_2_sml_temp.csv
-txtFile0=D\:\\Data\\HDsequence\\fluorophores\\activation.csv
+txtFile1=/Users/jonas/Documents/Data2/SMLMChallenge/sequence_sml_temp.csv
+txtFile0=/Users/jonas/Documents/Data2/SMLMChallenge/results/Oracle Ground-Truth/fluos-100000-activation.csv
 separator1=comma
 separator0=comma
 shiftF1=0
@@ -34,5 +34,5 @@ shiftUnit1=nm
 shiftUnit0=pixel
 locationUnit1=nm
 locationUnit0=nm
-txtDesc1=D:/Data/HDsequence/file-description.xml
-txtDesc0=D\:\\Data\\HDsequence\\fluorophores\\file-description.xml
+txtDesc1=/Users/jonas/Documents/Data2/SMLMChallenge/file-description.xml
+txtDesc0=/Users/jonas/Documents/Data2/SMLMChallenge/results/Oracle Ground-Truth/file-description.xml
