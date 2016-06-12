@@ -181,15 +181,21 @@ set(obj.resultshandle,'Visible',state)
 end
 
 function info_callback(~,~,obj)
+warnid='MATLAB:strrep:InvalidInputType';
+warnstruct=warning('off',warnid);
+
 obj.guihandles.showresults.Value=1;
 showresults_callback(obj.guihandles.showresults,0,obj)
 ax=obj.initaxis('Info');
 hp=ax.Parent;
- htxt=uicontrol(hp,'Style','text','Units','normalized','Position',[0,0,.95,1],...
-     'FontSize',obj.guiPar.fontsize,'HorizontalAlignment','left');
-txt=textwrap(htxt,{obj.info.description});
+ htxt=uicontrol(hp,'Style','edit','Units','normalized','Position',[0,0,.9,1],...
+     'FontSize',obj.guiPar.fontsize,'HorizontalAlignment','left','Max',100);
+ td=obj.info.description;
+  td=strrep(td,9,' ');
+txt=strrep(td,10,13);
  htxt.String=txt;
   htxt.Position=[0 0 1 1];
+  warning(warnstruct);
 end
 
 

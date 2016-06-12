@@ -257,7 +257,13 @@ classdef Workflow<interfaces.DialogProcessor
         end
         function addAllModulesToGui(obj,moduletag)
             for k=1:length(obj.modules)
-                obj.addModuleToGui(obj.modules{k}.tag);
+                try
+                    obj.addModuleToGui(obj.modules{k}.tag);
+                catch err
+                    disp('error loading workflow. Check workflow definition file');
+                    obj.modules{k}.module
+                    err.rethrow;
+                end
             end
             obj.setinputlist;
         end
@@ -286,7 +292,7 @@ classdef Workflow<interfaces.DialogProcessor
             
             thistag=obj.modules{idx}.tag;
             module=obj.modules{idx}.module;
-%             module
+%              module
             if isempty(module.handle)||~isvalid(module.handle)
                 module.handle=uipanel(obj.handle,'Units','pixels','Position',pospanel); %later: real gui
                 module.setGuiAppearence(pGUI);

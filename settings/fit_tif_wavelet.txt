@@ -4,9 +4,9 @@ all.file=settings/workflows/fit_tif_wavelet.mat
 all.FieldHeight=25;
 
 tab.hframe.name=Input Image
-tab.hiflter.name=Peak Finder
+tab.hfilter.name=Peak Finder
 tab.hfit.name=Fitter;
-tab.hfit.hloc=Localizations;
+tab.hloc.name=Localizations;
 
 TifLoader.Vpos=1;
 TifLoader.handle=hframe;
