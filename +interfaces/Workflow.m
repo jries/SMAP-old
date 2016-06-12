@@ -395,6 +395,25 @@ classdef Workflow<interfaces.DialogProcessor
             plot_graph(modulenames,output,input,'-fontsize',obj.guiPar.fontsize,'-shape',nodebox,'-color',nodecolor,...
                 '-edgeColor',edgecolor);
         end
+        
+        function showinfo(obj,edit)           
+            txt=obj.description;
+            f=figure;
+            he=uicontrol('Style','edit','units','normalized','Position',[0 0.1 1 .9],'String',txt,'Max',100,'Parent',f,'HorizontalAlignment','left');
+            b2=uicontrol('Style','pushbutton','units','normalized','Position',[0.75 0 .25 .1],'String','Cancel','Callback',{@buttoncallback},'Parent',f);
+            if edit
+                b1=uicontrol('Style','pushbutton','units','normalized','Position',[0 0 .25 .1],'String','Accept changes','Parent',f,'Callback',{@buttoncallback});
+%             else
+%                 b2.Enable='inactive';
+            end    
+            function buttoncallback(object,b)
+                if ~strcmp(object.String,'Cancel')
+                    obj.description=he.String;
+                end
+                close(f)
+            end  
+        end
+        
         function fieldvisibility(obj,varargin)
             for k=1:obj.numberOfModules
                 mh=obj.modules{k}.module;
@@ -538,12 +557,9 @@ classdef Workflow<interfaces.DialogProcessor
                 end
             end
         end
+        
         function info_callback(obj,a,b)
-            txt=obj.description;
-            answ=inputdlg('Edit WF description','WF description',20,{txt},'on');
-            if ~isempty(answ)
-                obj.description=answ{1};
-            end           
+            obj.showinfo(true)
         end
     end
 end

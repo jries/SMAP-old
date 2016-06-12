@@ -3,6 +3,11 @@ all.file=settings/workflows/fit_fiji_wavelet.mat
 
 all.FieldHeight=25;
 
+tab.hframe.name=Input Image
+tab.hiflter.name=Peak Finder
+tab.hfit.name=Fitter;
+tab.hfit.hloc=Localizations;
+
 GrabFijiStacks.Vpos=1;
 GrabFijiStacks.handle=hframe;
 CameraConverter.Vpos=6;

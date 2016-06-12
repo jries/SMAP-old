@@ -41,7 +41,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
              h.wfload=uicontrol(obj.handle,'Style','pushbutton','String','Change','Position',[370, l2, 80 h2],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@wfload_callback,obj});
             
-            h.wfsimple=uicontrol(obj.handle,'Style','togglebutton','String','-','Position',[500, l2+3,20, h2-6],...
+            h.wfsimple=uicontrol(obj.handle,'Style','togglebutton','String','-','Position',[500, l2+4,17, h2-8],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@wfsimplegui_callback,obj});
             h.wfsimple.TooltipString=sprintf('Show or hide advanced controls.');  
             
@@ -133,9 +133,10 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
 end
 function wfinfo_callback(~,~,obj)
 obj.mainworkflow.graph;
-if ~isempty(obj.mainworkflow.info.description)
-msgbox(obj.mainworkflow.info.description,obj.mainworkflow.info.name)
-end
+obj.mainworkflow.showinfo(false);
+% if ~isempty(obj.mainworkflow.info.description)
+% msgbox(obj.mainworkflow.info.description,obj.mainworkflow.info.name)
+% end
 end
 
 function wfload_callback(~,~,obj)

@@ -3,6 +3,11 @@ all.file=settings/workflows/fit_tif_Falcon2D.mat
 
 all.FieldHeight=25;
 
+tab.hframe.name=Input Image
+
+tab.hfit.name=Fitter;
+
+
 TifLoader.Vpos=1;
 TifLoader.handle=hframe;
 CameraConverter.Vpos=6;
