@@ -140,6 +140,8 @@ obj.mainworkflow.showinfo(false);
 end
 
 function wfload_callback(~,~,obj)
+obj.status('load workflow *.txt file');
+drawnow
 settingsfile=obj.getGlobalSetting('mainLocalizeWFFile');
 [f,p]=uigetfile(settingsfile,'Select workflow *.txt file');
 if ~isempty(f)
@@ -148,7 +150,11 @@ if ~isempty(f)
     obj.mainworkflow.clear;
     delete(obj.handle.Children)
     obj.makeGui;
+    obj.status('new workflow loaded');
+else
+    obj.status('no workflow *.txt selected');
 end
+
 end
 
 function menu_callback(callobj,~,obj)

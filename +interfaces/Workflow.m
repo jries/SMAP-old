@@ -2,6 +2,7 @@ classdef Workflow<interfaces.DialogProcessor
     properties %(Access=private)
         modules={};
         graphfigure=[];
+        infofigure=[];
         description='';
         makesimplegui=false;
         nirvana;
@@ -407,9 +408,13 @@ classdef Workflow<interfaces.DialogProcessor
         
         function showinfo(obj,edit)           
             txt=obj.description;
-            f=figure;
-            he=uicontrol('Style','edit','units','normalized','Position',[0 0.55 1 .45],'String',txt,'Max',100,'Parent',f,'HorizontalAlignment','left');
-            hplugin=uicontrol('Style','edit','units','normalized','Position',[0 0.1 1 .45],'String',txt,'Max',100,'Parent',f,'HorizontalAlignment','left');
+            if isempty(obj.infofigure)||~isvalid(obj.infofigure)
+                obj.infofigure=figure;
+            end
+            delete(obj.infofigure.Children);
+            f=obj.infofigure;
+            he=uicontrol('Style','edit','units','normalized','Position',[0 0.65 1 .35],'String',txt,'Max',100,'Parent',f,'HorizontalAlignment','left');
+            hplugin=uicontrol('Style','edit','units','normalized','Position',[0 0.1 1 .55],'String',txt,'Max',100,'Parent',f,'HorizontalAlignment','left');
             b2=uicontrol('Style','pushbutton','units','normalized','Position',[0.75 0 .25 .1],'String','Cancel','Callback',{@buttoncallback},'Parent',f);
             if edit
                 b1=uicontrol('Style','pushbutton','units','normalized','Position',[0 0 .25 .1],'String','Accept changes','Parent',f,'Callback',{@buttoncallback});
