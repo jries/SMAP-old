@@ -18,6 +18,18 @@ classdef GuiPluginWindow< interfaces.GuiModuleInterface & interfaces.LocDataInte
             else
                 h.(obj.maindir)=obj.tabgroup;
             end
+            
+%             htg=h.(obj.maindir);
+            obj.adjusttabgroup(h.(obj.maindir));
+%             if ispc
+%             else
+%                 htg.Units='pixel';
+%                 htg.Position(1)=htg.Position(1)-8;
+%                 htg.Position(3)=htg.Position(3)+16;
+%                 htg.Position(2)=htg.Position(2)-12;
+%                 htg.Position(4)=htg.Position(4)+16;
+%                 htg.Units='normalized';
+%             end
             obj.guihandles=h;
             guiplugins=obj.guiplugins;
             if ~isempty(guiplugins)

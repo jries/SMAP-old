@@ -46,10 +46,11 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
             else
                 guiPar.fontsize=15;
                 guiPar.FieldHeight=25;
-                guiPar.tabsize1=[1    0  525 328];
-                guiPar.tabsize2=[1    0  500 277];
+                guiPar.tabsize1=[1    0  527 323];
+                guiPar.tabsize2=[0    -1  521 291];
                 guiPar.Vsep=1;
-                guiPar.Xrim=0;
+                guiPar.Xrim=2;
+                guiPar.Vrim=0; 
             end
             
             %initialze guiPar
@@ -349,6 +350,19 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                     obj.children.(ch{k}).resize(factor);
                 end
             end    
+        end
+        
+        function  adjusttabgroup(obj,htg)
+            %adjusts width of second tabgroup on mac
+            if ispc
+            else
+                htg.Units='pixel';
+                htg.Position(1)=htg.Position(1)-8;
+                htg.Position(3)=htg.Position(3)+16;
+                htg.Position(2)=htg.Position(2)-12;
+                htg.Position(4)=htg.Position(4)+16;
+                htg.Units='normalized';
+            end
         end
         
         function setGuiAppearence(obj,p)

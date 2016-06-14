@@ -9,7 +9,13 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             obj@interfaces.GuiModuleInterface(varargin{:})
         end
         function makeGui(obj)
-            h.loctab=uitabgroup(obj.handle,'Position',[0 .15 1 .85]);
+            h.loctab=uitabgroup(obj.handle);
+            obj.adjusttabgroup(h.loctab);
+            dh=62;
+            h.loctab.Units='pixel';
+            h.loctab.Position(2)=h.loctab.Position(2)+dh;
+            h.loctab.Position(4)=h.loctab.Position(4)-dh;
+            h.loctab.Units='normalized';
             if ispc
                 l2=obj.guiPar.FieldHeight;
                 h2=obj.guiPar.FieldHeight*.95;
@@ -54,7 +60,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             obj.setPar('loc_outputfig',outputfig)
 
             tabsizeh=obj.guiPar.tabsize2;
-            tabsizeh(4)=tabsizeh(4)-45;            
+            tabsizeh(4)=tabsizeh(4)-dh;            
             obj.createGlobalSetting('mainLocalizeWFFile','Directories','Description file for fitting workflow, e.g. settings/fit_tif_wavelet.txt',struct('Style','file','String','settings/fit_tif_wavelet.txt'))
             settingsfile=obj.getGlobalSetting('mainLocalizeWFFile');
             par=readstruct(settingsfile);
