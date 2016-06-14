@@ -15,11 +15,16 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             if ispc
                 l2=obj.guiPar.FieldHeight;
                 h2=obj.guiPar.FieldHeight*.95;
-                 dh=58;
+                dhg=0;
+                dhgx=3;
+                 dh=56;
+                 dhx=22;
             else
                 l2=obj.guiPar.FieldHeight*1.2;
                 h2=obj.guiPar.FieldHeight*1.2;
                  dh=62;
+                 dhg=3;
+                 dhx=0;
             end
                        
             h.loctab.Units='pixel';
@@ -37,24 +42,24 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             h.localizebutton=uicontrol(obj.handle,'Style','pushbutton','String','Localize','Position',[250 2, 100, h2],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@localize_callback,obj},'FontWeight','bold');
             h.localizebutton.TooltipString=sprintf('Start localization.');
-            h.batchbutton=uicontrol(obj.handle,'Style','pushbutton','String','Batch','Position',[370, 2, 65, h2],...
+            h.batchbutton=uicontrol(obj.handle,'Style','pushbutton','String','Batch','Position',[370+dhx, 2, 64, h2],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@batch_callback,obj});
             h.previewframe.TooltipString=sprintf('Frame for preview. Select directly or with slider.');
             h.previewframeslider.TooltipString=h.previewframe.TooltipString;
             h.batchbutton.TooltipString=sprintf('Save batch file with all fitting parameters.');            
             
-            h.batchprocessor=uicontrol(obj.handle,'Style','pushbutton','String','Processor','Position',[430, 2, 90 h2],...
+            h.batchprocessor=uicontrol(obj.handle,'Style','pushbutton','String','Processor','Position',[430+dhx, 2, 90 h2],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@batchprocessor_callback,obj});
             h.batchprocessor.TooltipString=sprintf('Open the batch processor GUI to fit many files automatically with pre-defined settings.');
-            h.wfinfo=uicontrol(obj.handle,'Style','pushbutton','String','Info','Position',[450, l2,50, h2],...
+            h.wfinfo=uicontrol(obj.handle,'Style','pushbutton','String','Info','Position',[450+dhx, l2,50, h2],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@wfinfo_callback,obj});
             h.wfinfo.TooltipString=sprintf('Show information about current workflow.');  
             h.wfname=uicontrol(obj.handle,'Style','text','String','x','Position',[10, l2, 350 h2],...
                 'FontSize',obj.guiPar.fontsize,'HorizontalAlignment','left');            
-             h.wfload=uicontrol(obj.handle,'Style','pushbutton','String','Change','Position',[370, l2, 80 h2],...
+             h.wfload=uicontrol(obj.handle,'Style','pushbutton','String','Change','Position',[370+dhx, l2, 80 h2],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@wfload_callback,obj});
             
-            h.wfsimple=uicontrol(obj.handle,'Style','togglebutton','String','-','Position',[500, l2+4,17, h2-8],...
+            h.wfsimple=uicontrol(obj.handle,'Style','togglebutton','String','-','Position',[500+dhx, l2+dhg,17+dhgx, h2-2*dhg],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@wfsimplegui_callback,obj});
             h.wfsimple.TooltipString=sprintf('Show or hide advanced controls.');  
             
