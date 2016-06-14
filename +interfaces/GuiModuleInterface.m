@@ -38,22 +38,25 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
             if ispc
                  guiPar.fontsize=11;
                  guiPar.FieldHeight=26;
-                 guiPar.tabsize1=[1    1  542 340];
-                 guiPar.tabsize2=[1    1  532 305];    
+                 guiPar.tabsize1=[0    -1  546 342];
+                 guiPar.tabsize2=[0    -1  540 311];    
                  guiPar.Vsep=3;
+                 guiPar.Xrim=3;
+                 guiPar.Vrim=2;  
             else
                 guiPar.fontsize=15;
                 guiPar.FieldHeight=25;
                 guiPar.tabsize1=[1    0  525 328];
                 guiPar.tabsize2=[1    0  500 277];
                 guiPar.Vsep=1;
+                guiPar.Xrim=0;
             end
             
             %initialze guiPar
-            guiPar.Vrim=0;    
+              
             guiPar.Xsep=1;
             guiPar.Vsep=1;
-            guiPar.Xrim=0;
+            
             guiPar.Xpos=1;
             guiPar.Vpos=1;
 

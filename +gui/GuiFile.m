@@ -17,9 +17,10 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             allloaders=pluginnames('File','Load');
             
             lp={};
+            upperpos=obj.guihandles.load.Position;
             for k=1:length(allloaders)
 
-                loaderhandle=uipanel(obj.handle,'Units','pixels','Position',[1,5.25*fh,2.9*fw,3.*fh],'Visible','off');
+                loaderhandle=uipanel(obj.handle,'Units','pixels','Position',[1,5.25*fh,2.9*fw,upperpos(2)-5.25*fh],'Visible','off');
                 
                 loaderp=plugin('File','Load',allloaders{k},loaderhandle,obj.P);
 %                 infom.pluginpath={'File','Load',obj.loaders{k}};
@@ -42,10 +43,10 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             
             allsavers=pluginnames('File','Save');
             
-
+            upperpos=obj.guihandles.save.Position;
 %             obj.savers= plugintemp.plugins('File','Save',allsavers{1},[],obj.P); %to initialize
             for k=1:length(allsavers)
-                saverhandle=uipanel(obj.handle,'Units','pixels','Position',[1,1*fh,2.9*fw,3.*fh],'Visible','off');
+                saverhandle=uipanel(obj.handle,'Units','pixels','Position',[1,1*fh,2.9*fw,upperpos(2)-fh],'Visible','off');
                
                 
                 saver=plugin('File','Save',allsavers{k},saverhandle,obj.P);
@@ -342,7 +343,7 @@ hsmap.Children=hsmap.Children(indnew);
 end
 
 function pard=guidef(obj)
-pard.load.object=struct('Style','pushbutton','String','Load','Callback',{{@obj.loadbutton_callback,0}});
+pard.load.object=struct('Style','pushbutton','String','Load','FontWeight','bold','Callback',{{@obj.loadbutton_callback,0}});
 pard.load.position=[4.75,2.5];
 pard.load.Width=0.7;
 pard.load.Height=1.5;

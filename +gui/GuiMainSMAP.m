@@ -44,7 +44,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 'SizeChangedFcn',{@sizechanged_callback,obj},'NumberTitle','off')
             set(handle,'Units','Pixels', 'Name','SMAP')
             set(handle, 'Name','SMAP');
-            tabpos=[2 30 obj.guiPar.width-2 370];
+            tabpos=[2 32 obj.guiPar.width-2 368];
             [pmenu,hmenu]=makePluginMenu(obj,handle);
 %             obj.setPar('SMAP_menu',hmenu);
             obj.setPar('menu_plugins',pmenu);
@@ -82,14 +82,19 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             set(h.maintab,'SelectedTab',h.tab_file)
             
             h.stopnow=uicontrol('Style','togglebutton','Units','normalized',...
-                'Position',[0.9,0.005,.07,.03],'String','Stop','Callback',{@stopnow_callback,obj});
+                'Position',[0.9,0.002,.07,.03],'String','Stop','Callback',{@stopnow_callback,obj});
             h.stopnow.Units='pixels';
             h.stopnow.Position(4)=28;
             h.status=uicontrol(handle,'Style','text','Units','normalized',...
                            'String','status','Position',[0 0 .8 0.035]);
             h.status.Units='pixels';
-            h.status.Position(4)=32;
-            h.status.Position(2)=2;
+            if ispc
+                hstatus=30;
+            else
+                hstatus=31;
+            end
+            h.status.Position(4)=hstatus;
+            h.status.Position(2)=1;
             obj.addSynchronization('status',h.status,{'String'})             
 
             %Plugins

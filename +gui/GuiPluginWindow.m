@@ -59,7 +59,11 @@ classdef GuiPluginWindow< interfaces.GuiModuleInterface & interfaces.LocDataInte
                 screenname=name;
             end
                     
-                    obj.guihandles.(['tab_' name])=uitab(obj.guihandles.(obj.maindir),'Title',screenname,'Tag',name);
+                    ht=uitab(obj.guihandles.(obj.maindir),'Title',screenname,'Tag',name);
+%                     ht.units='pixels';
+%                     ht.Position(
+%                     ht.units='normalized';
+                    obj.guihandles.(['tab_' name])=ht;
 %                     if isstruct(obj.guiplugins.(name))
                     if ~isfield(obj.guiplugins.(name),'module')    
                         pluging=gui.GuiPluginGroup(obj.guihandles.(['tab_' name]),obj.P);

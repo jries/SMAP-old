@@ -5,9 +5,11 @@ if ~isempty(who('g'))
 end
 %  close all
 try
-g=gui.GuiMainSMAP;g.makeGui;    
+g=gui.GuiMainSMAP;g.makeGui;       
 catch err
     disp('try deleting plugins.m in the plugins directory and the temp directory in the settings directory')
+ 
+    g.status(err.message)
     err.rethrow
 end
 

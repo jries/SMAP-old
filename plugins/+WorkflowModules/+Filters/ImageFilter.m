@@ -43,7 +43,7 @@ classdef ImageFilter<interfaces.WorkflowModule
 end
 
 function pard=guidef
-pard.text.object=struct('Style','text','String','Filter: Sigma (pix): Typical size of PSF in pixels, eg 1 (range: 0.5-5) ');
+pard.text.object=struct('Style','text','String','Filter: Sigma (pix)');
 pard.text.position=[1,1];
 pard.text.Width=1.3;
 pard.text.Optional=true;
@@ -51,9 +51,9 @@ pard.text.Optional=true;
 pard.loc_loc_filter_sigma.object=struct('Style','edit','String','1.2');
 pard.loc_loc_filter_sigma.position=[1,2.3];
 pard.loc_loc_filter_sigma.Width=.7;
-pard.loc_loc_filter_sigma.TooltipString=sprintf('Sigma (in camera pixels) for a Gaussian filter which is applied after \n background correction and before peak finding.');
+pard.loc_loc_filter_sigma.TooltipString=sprintf('Sigma (in camera pixels) for a Gaussian filter which is applied after background correction and before peak finding. \n Typical size of PSF in pixels, eg 1 (range: 0.5-5) ');
 pard.plugininfo.type='WorkflowModule';
 pard.loc_loc_filter_sigma.Optional=true;
 pard.plugininfo.description='Gaussian filter, usually applied after background correction and before peak finding.';
-
+pard.text.TooltipString=pard.loc_loc_filter_sigma.TooltipString;
 end

@@ -10,9 +10,13 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
         end
         function makeGui(obj)
             h.loctab=uitabgroup(obj.handle,'Position',[0 .15 1 .85]);
-            
-            l2=obj.guiPar.FieldHeight*1.2;
-            h2=obj.guiPar.FieldHeight*1.2;
+            if ispc
+                l2=obj.guiPar.FieldHeight;
+                h2=obj.guiPar.FieldHeight*.95;
+            else
+                l2=obj.guiPar.FieldHeight*1.2;
+                h2=obj.guiPar.FieldHeight*1.2;
+            end
             h.previewbutton=uicontrol(obj.handle,'Style','pushbutton','String','Preview','Position',[10 2, 70 h2],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@preview_callback,obj},'FontWeight','bold');
             h.previewbutton.TooltipString=sprintf('Test current fitter settings on a single frame. \n Opens window which shows found localizations.\n Use before running fit on all frames.\n Use to open image to select ROIs for fitting.'); 
