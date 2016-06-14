@@ -28,9 +28,9 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             h.roi6=uicontrol('Parent',h.hroi,'Style','pushbutton','String','<>','FontSize',fontsize,'Position',[2*swidth,4.3*fieldheight,swidth,fieldheight*1.5],'Callback',{@roi_callback,obj,6});
             
             %format
-            h.hformat=uipanel('Parent',obj.handle,'Title','format','Units','pixel','Position',[1 8.5*fieldheight+10 widtht 7.2*fieldheight]);
-            h.hplus=uicontrol('Parent',h.hformat,'Style','togglebutton','String','+','FontSize',fontsize*1.5,'Position',[0,4.8*fieldheight,width/2,fieldheight*1.5],'Callback',{@format_callback,obj,1});
-            h.hminus=uicontrol('Parent',h.hformat,'Style','togglebutton','String','-','FontSize',fontsize*1.5,'Position',[width/2,4.8*fieldheight,width/2,fieldheight*1.5],'Callback',{@format_callback,obj,2});
+            h.hformat=uipanel('Parent',obj.handle,'Title','format','Units','pixel','Position',[1 8.5*fieldheight+10 widtht 7.5*fieldheight]);
+            h.hplus=uicontrol('Parent',h.hformat,'Style','togglebutton','String','+','FontSize',fontsize*1.5,'Position',[0,5*fieldheight,width/2,fieldheight*1.5],'Callback',{@format_callback,obj,1});
+            h.hminus=uicontrol('Parent',h.hformat,'Style','togglebutton','String','-','FontSize',fontsize*1.5,'Position',[width/2,5*fieldheight,width/2,fieldheight*1.5],'Callback',{@format_callback,obj,2});
             h.picrt=uicontrol('Parent',h.hformat,'Style','text','String','Pixrec (nm)','Position',[0 4*fieldheight,width,fieldheight]);
             h.pixrec=uicontrol('Style','edit','Parent',h.hformat,'String','20','Position',[0,2.8*fieldheight,width,fieldheight*1.2],'FontSize',fontsize,'Callback',{@format_callback,obj,3});         
             h.pref1=uicontrol('Style','pushbutton','Parent',h.hformat,'String','2','Position',[0,1.6*fieldheight,width/2,fieldheight*1.2],'FontSize',fontsize,'Callback',{@predef_callback,obj},'KeyPressFcn',{@predefkey_callback,obj});
@@ -38,7 +38,7 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             h.resetview=uicontrol('Style','pushbutton','Parent',h.hformat,'String','Reset','Position',[width/2,0.1*fieldheight,width/2,fieldheight*1.4],'FontSize',fontsize,'Callback',{@resetview_callback,obj});
             h.parformat=uicontrol('Style','pushbutton','Parent',h.hformat,'String','Par','Position',[0,0.1*fieldheight,width/2,fieldheight*1.4],'FontSize',fontsize,'Callback',{@formatpardialog,obj});
             
-            h.hlayers=uipanel('Parent',obj.handle,'Title','layers','Units','pixel','Position',[1 16.5*fieldheight widtht 3*fieldheight+18]);
+            h.hlayers=uipanel('Parent',obj.handle,'Title','layers','Units','pixel','Position',[1 17*fieldheight widtht 3*fieldheight+18]);
             h.layeron3=uicontrol('Style','checkbox','Parent',h.hlayers,'String','L3','Position',[0,0,width/2,fieldheight],'FontSize',fontsize);
             h.layeron6=uicontrol('Style','checkbox','Parent',h.hlayers,'String','L6','Position',[width/2,0,width/2,fieldheight],'FontSize',fontsize);
             h.layeron2=uicontrol('Style','checkbox','Parent',h.hlayers,'String','L2','Position',[0,fieldheight,width/2,fieldheight],'FontSize',fontsize);
