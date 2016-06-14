@@ -46,8 +46,8 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
             else
                 guiPar.fontsize=15;
                 guiPar.FieldHeight=25;
-                guiPar.tabsize1=[1    0  527 323];
-                guiPar.tabsize2=[0    -1  521 291];
+                guiPar.tabsize1=[1    0  527 324];
+                guiPar.tabsize2=[0    -1  521 292];
                 guiPar.Vsep=1;
                 guiPar.Xrim=2;
                 guiPar.Vrim=0; 
