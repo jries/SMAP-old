@@ -25,6 +25,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
                  dh=62;
                  dhg=3;
                  dhx=0;
+                 dhgx=0;
             end
                        
             h.loctab.Units='pixel';
