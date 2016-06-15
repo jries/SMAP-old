@@ -27,8 +27,8 @@ classdef RoiAdder<interfaces.WorkflowModule
 %                     sim=size(cf.image);
 %                 else
                     cf=obj.getPar('loc_fileinfo');
-                    if ~isempty(cf)&&isfield(cf,'Width')
-                        sim=[cf.Width cf.Height];
+                    if ~isempty(cf)&&myisfield(cf,'Width')
+                        sim=[cf.Height cf.Width ];
                     else
                         sim=[0 0];
                     end

@@ -8,7 +8,6 @@ end
 if isempty(strfind(filename,'_sml'))
     filename=[filename '_sml.mat'];  
 end
-% infost=obj.getPar('loc_cameraSettings');
 infost=struct('camId','SMAP generated file','port','none','exposure',0,'emgain',1,...
     'conversion',1,'offset',0,'pixsize',.1,'roi',[0  0 512 512], 'comment','',...
     'filename',filename,'numberOfFrames',0,'Width',512,'Height',512,'format','none');

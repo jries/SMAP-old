@@ -9,14 +9,15 @@ classdef metadataSMAP<handle
         allmetadata=[];
         exposure=1;
         emgain=1;
-        em=false;
+        EMon=false;
         conversion=1;
         offset=100;
-        pixelsize=0.138;
+        pixsize=0.1;
         timediff=30;
         comment='';
-        frames=0;
+        numberOfFrames=0;
         pix2phot=[];
+        basefile;
     end
     
     methods

@@ -8,19 +8,20 @@ info=getimageinfo(obj.file);
                 fclose(fid);
                 md=minfoparsec(minfo,camcalib);
             end
-            obj.metadata.frames=info.numberOfFrames;
+             obj.metadata.numberOfFrames=info.numberOfFrames;
+             obj.metadata.basefile=info.basefile;
             obj.metadata=copyfields(obj.metadata,md);
             obj.metadata.allmetadata=copyfields(info,md);
             obj.metadata.camerainfo=copyfields(obj.metadata.camerainfo,md);
             %determine if EM is used
             switch md.port
                 case {'Conventional','Normal'}
-                    obj.metadata.em=false;
-                case {'Electron Multiplying', 'EM'}
-                    obj.metadata.em=true;
+                    obj.metadata.EMon=false;
+                case {'Electron Multiplying', 'EM','Multiplication Gain'}
+                    obj.metadata.EMon=true;
                 otherwise 
                     md.port
-                    obj.metadata.em=true;      
+                    obj.metadata.EMon=true;      
             end
             mdo=obj.metadata;
 end

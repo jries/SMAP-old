@@ -2,10 +2,10 @@ function [destination,missing]=copyfields(destination,source,fields)
 missing={};
 if nargin==2 %copy all
     if ~isempty(source)
-        if isstruct(destination)
-            fn=fieldnames(source);
-        elseif isa(destination,'handle')
+        if isa(destination,'handle')
             fn=intersect(properties(destination),fieldnames(source));
+        else
+            fn=fieldnames(source);
         end
         for k=1:length(fn)
             destination.(fn{k})=source.(fn{k});

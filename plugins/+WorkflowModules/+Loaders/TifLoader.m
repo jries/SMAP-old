@@ -22,21 +22,18 @@ classdef TifLoader<interfaces.WorkflowModule
             obj.addSynchronization('filelist_localize',obj.guihandles.tiffile,'String',{@loadtif_ext,obj});
         end
         function prerun(obj,p)
-%             p=obj.getAllParameters;
-            
             if ~exist(p.tiffile,'file')
                 obj.status('TifLoader: localization file not found')
                  error('TifLoader: localization file not found')
             end
-%             if ~obj.getPar('loc_preview')
-%                 obj.locData.clear;
-%             end
-            obj.imloader=imageLoader(p.tiffile);     
+%             obj.imloader=imageLoader(p.tiffile);     
+            obj.imloader=imageloaderAll(p.tiffile);     
             obj.imloader.onlineAnalysis=p.onlineanalysis;
             obj.imloader.waittime=p.onlineanalysiswaittime;
             obj.imloader.setImageNumber(p.framestart-1);
-            obj.numberOfFrames=obj.imloader.info.numberOfFrames;
-%             obj.imloader.currentImageNumber=p.framestart-1;
+            obj.numberOfFrames=obj.imloader.metadata.numberOfFrames;
+%             obj.numberOfFrames=obj.imloader.info.numberOfFrames;
+
             if p.onlineanalysis
                 obj.framestop=inf;
             else
@@ -111,12 +108,16 @@ classdef TifLoader<interfaces.WorkflowModule
             disp('fitting done')
         end
         function addFile(obj,file)
-            
-            obj.imloader=imageLoader(file);
-            if ~isempty(obj.imloader.info.metafile)
-             obj.setPar('loc_metadatafile',obj.imloader.info.metafile);
+%         if 1
+%         else
+                
+            obj.imloader=imageloaderAll(file);
+%             if ~isempty(obj.imloader.info.metafile)
+            if ~isempty(obj.imloader.metadata.allmetadata) 
+             obj.setPar('loc_metadatafile',obj.imloader.metadata.allmetadata.metafile);
             end
-            obj.setPar('loc_fileinfo',obj.imloader.info);
+%             end
+            obj.setPar('loc_fileinfo',(obj.imloader.metadata));
 % 
             obj.guihandles.tiffile.String=obj.imloader.file;
 %              obj.setPar('loc_newfile',true);
@@ -124,8 +125,9 @@ classdef TifLoader<interfaces.WorkflowModule
              if p.onlineanalysis
                  obj.guihandles.framestop.String='inf';
              else
-                obj.guihandles.framestop.String=int2str(obj.imloader.info.numberOfFrames);
+                obj.guihandles.framestop.String=int2str(obj.imloader.metadata.numberOfFrames);
              end
+%         end
 % 
         end
         function loadtif_ext(obj)
