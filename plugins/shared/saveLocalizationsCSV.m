@@ -21,7 +21,7 @@ end
 loc=locData.savelocs([],indg).loc; 
 numlocs=length(loc.frame);
 dato=zeros(numlocs,6);
-dato(:,2)=1:numlocs;
+dato(:,1)=1:numlocs;
 dato(:,2)=loc.frame;
 dato(:,3)=loc.xnm;
 dato(:,4)=loc.ynm;
