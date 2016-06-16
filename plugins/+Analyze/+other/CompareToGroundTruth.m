@@ -29,8 +29,8 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
             
             %modify challenge data
             challengepath=['External' filesep 'SMLMChallenge' filesep];
-            javapath=['"' pwd filesep challengepath 'challenge.jar"'];
-
+            javapath=['"' pwd filesep challengepath 'CompareLocalization3D.jar"'];
+%             javapath=['"' pwd filesep challengepath 'challenge.jar"'];
             settingsfile=[challengepath 'CompareLocalizationSettings.txt'];
             
             replacements={'firstRow1','0','shiftY1','0','txtFile1',strrep(filenew,'\','/'),'colY1','2','shiftX1','0','colF1','0','colI1','4','shiftUnit1','nm','txtDesc1',strrep(descfile,'\','/')};

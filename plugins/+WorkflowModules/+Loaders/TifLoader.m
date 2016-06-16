@@ -117,6 +117,7 @@ classdef TifLoader<interfaces.WorkflowModule
              obj.setPar('loc_metadatafile',obj.imloader.metadata.allmetadata.metafile);
             end
 %             end
+obj.imloader.metadata
             obj.setPar('loc_fileinfo',(obj.imloader.metadata));
 % 
             obj.guihandles.tiffile.String=obj.imloader.file;
@@ -139,7 +140,8 @@ end
 
 function loadtif_callback(a,b,obj)
 p=obj.getGuiParameters;
-[f,path]=uigetfile([fileparts(p.tiffile) filesep '*.tif']);
+fe=bfGetFileExtensions;
+[f,path]=uigetfile(fe,'select camera images',[fileparts(p.tiffile) filesep '*.tif']);
 if f
     obj.addFile([path f]);
 end  

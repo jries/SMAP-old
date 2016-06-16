@@ -24,20 +24,7 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
         function image=getimage(obj,frame)
             image=readstack(obj,frame);
         end
-        function updatestack(obj,info)
-            numframes=[info.allfiles(1:end-1).numberOfFrames];
-            obj.stack.imageoffset=cumsum([0 numframes]);
-            obj.stack.lastimage=cumsum([info.allfiles(1:end).numberOfFrames]);
-            obj.stack.files={info.allfiles(:).name};
-        end
-        function [imagenumber,filenumberc,filenumber]=getstacknumber(obj,frame)
-            filenumber=find(frame<=obj.stack.lastimage,1,'first');
-            filenumberc=filenumber;
-            if isempty(filenumber)
-                filenumberc=length(obj.stack.lastimage);
-            end
-            imagenumber=frame-obj.stack.imageoffset(filenumberc);
-        end
+
     end
     
 end
@@ -45,14 +32,24 @@ function meta=getmetadataome(obj)
 reader=obj.reader;
 omemeta=reader.getMetadataStore;
 globalmeta=reader.getGlobalMetadata;
-[~,~,ext]=fileparts(obj.file);
+[ph,fh,ext]=fileparts(obj.file);
 switch ext
     case '.nd2' %Nikon
         meta=getMetaNd2(globalmeta);
+    otherwise
+        meta=[];
 end
+try
 m2.pixsize=double(omemeta.getPixelsPhysicalSizeX(0).value());
+catch
+    m2=[];
+end
 obj.metadata=copyfields(obj.metadata,meta);
 obj.metadata=copyfields(obj.metadata,m2);
+obj.metadata.Width=double(omemeta.getPixelsSizeX(0).getValue());
+obj.metadata.Height=double(omemeta.getPixelsSizeY(0).getValue());
+obj.metadata.numberOfFrames=max(double(omemeta.getPixelsSizeT(0).getValue()),double(omemeta.getPixelsSizeZ(0).getValue()));
+obj.metadata.basefile=[ph filesep fh];
 end
 
 function meta=getMetaNd2(m)
@@ -73,38 +70,10 @@ end
 
 
 
-function image=readstack(obj,imagenumber,recursions)
-    if nargin<3
-        recursions=0;
-    end
-    maxrecursions=1;
-    image=[]; %default, if nothing can be read: end.
-
-    [imagenumber,filenumber]=obj.getstacknumber(imagenumber);
-    if filenumber~=obj.stack.currentfile
-        obj.stack.tiffh.close;
-        newfile=obj.stack.files{filenumber};
-%         obj.info=getimageinfo(newfile);
-        obj.updatestack(getimageinfo(newfile));
-        obj.stack.tiffh=Tiff(newfile,'r');
-        obj.stack.currentfile=filenumber;
-    end
-    try
-        th=obj.stack.tiffh;
-        th.setDirectory(imagenumber);
-        image=th.read;                    
-    catch
-
-        if obj.onlineAnalysis
-            if recursions<maxrecursions
-                pause(obj.waittime*2);
-                obj.stack.currentfile=-1; %update stuff
-                image=readstack(obj,imagenumber,recursions+1);
-            else
-                disp('after waiting no more files')
-            end
-        else
-            disp('image out of range');
-        end
-    end
+function image=readstack(obj,imagenumber)
+   if imagenumber<obj.reader.getImageCount()
+       image=bfGetPlane(obj.reader,imagenumber+1);
+   else
+       image=[];
+   end
 end

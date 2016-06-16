@@ -9,7 +9,7 @@ function io=imageloaderAll(file)
            elseif ~isempty(dir([path filesep '*metadata.txt']))
                 imloader=@imageloaderMMstack;
            else
-               imloader=@imgageloaderOME;
+               imloader=@imageloaderOME;
            end
        otherwise
            imloader=@imageloaderOME;

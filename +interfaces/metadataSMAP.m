@@ -30,7 +30,7 @@ classdef metadataSMAP<handle
         end
         function cv=get.pix2phot(obj)
             if isempty(obj.pix2phot)
-                if obj.em
+                if obj.EMon
                     cv=obj.conversion/obj.emgain;
                 else
                     cv=obj.conversion;
