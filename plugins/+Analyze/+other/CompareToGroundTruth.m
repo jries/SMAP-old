@@ -29,8 +29,13 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
             
             %modify challenge data
             challengepath=['External' filesep 'SMLMChallenge' filesep];
-            javapath=['"' pwd filesep challengepath 'CompareLocalization3D.jar"'];
-%             javapath=['"' pwd filesep challengepath 'challenge.jar"'];
+            switch p.comparer.Value
+                case 1
+                    javapath=['"' pwd filesep challengepath 'challenge.jar"'];
+                case 2   
+                    javapath=['"' pwd filesep challengepath 'CompareLocalization3D.jar"'];
+            end
+%             
             settingsfile=[challengepath 'CompareLocalizationSettings.txt'];
             
             replacements={'firstRow1','0','shiftY1','0','txtFile1',strrep(filenew,'\','/'),'colY1','2','shiftX1','0','colF1','0','colI1','4','shiftUnit1','nm','txtDesc1',strrep(descfile,'\','/')};
@@ -58,8 +63,13 @@ pard.onlyfiltered.object=struct('Style','checkbox','String','Export filtered (di
 pard.onlyfiltered.position=[2,1];
 pard.onlyfiltered.Width=4;
 
-pard.shiftpix.object=struct('Style','checkbox','String','Shift by 0.5 camera pixels','Value',0);
+pard.shiftpix.object=struct('Style','checkbox','String','Shift by 0.5 camera pixels','Value',1);
 pard.shiftpix.position=[3,1];
 pard.shiftpix.Width=4;
+
+pard.comparer.object=struct('Style','popupmenu','String',{{'2D, 2013','3D, 2016'}});
+pard.comparer.position=[3,1];
+pard.comparer.Width=4;
+
 pard.plugininfo.type='ProcessorPlugin';
 end
