@@ -68,7 +68,7 @@ pard.shiftpix.position=[3,1];
 pard.shiftpix.Width=4;
 
 pard.comparer.object=struct('Style','popupmenu','String',{{'2D, 2013','3D, 2016'}});
-pard.comparer.position=[3,1];
+pard.comparer.position=[4,1];
 pard.comparer.Width=4;
 
 pard.plugininfo.type='ProcessorPlugin';
