@@ -37,7 +37,7 @@ txt=[txt 'pixelsize(nm) \t' num2str(p.sr_pixrec) '\n'];
 txt=[txt 'position (nm) \t' num2str(p.sr_pos (1:2)) '\n'];
 for k=1:length(p.sr_layerson)
     if p.sr_layerson(k)
-        lp=['Layer' num2str(k)];
+        lp=['layer' num2str(k)];
         txt=[txt lp ':\n'];
         txt=[txt p.([lp '_']).ch_filelist.selection '\n'];
         
@@ -51,7 +51,7 @@ for k=1:length(p.sr_layerson)
         end
         txt=[txt 'channels: ' num2str(p.([lp '_']).channels) '\n'];
         txt=[txt 'grouping: ' num2str(p.([lp '_']).groupcheck) '\n'];
-        txt=[txt 'quantile/Imax: ' num2str(p.([lp '_']).imax) '\n'];
+        txt=[txt 'quantile/Imax: ' num2str(p.([lp '_']).imax_min) '\n'];
         txt=[txt 'color range: \t' num2str(p.([lp '_']).colorfield_min) ' : \t' num2str(p.([lp '_']).colorfield_max) '\n'];
         if strcmp(p.([lp '_']).renderfield.selection,'field')
             txt=[txt 'render field: ' (p.([lp '_']).render_colormode.selection) '\n'];
