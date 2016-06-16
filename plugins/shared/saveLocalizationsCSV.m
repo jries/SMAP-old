@@ -8,7 +8,7 @@ if saveroi
         if sr_layerson(k)
            [~,indgh]=locData.getloc('xnm','layer',k); 
            if length(indgh)~=length(indg)
-               dips('save visible works only for ungrouped data')
+               disp('save visible works only for ungrouped data')
            end
            indg=indg&indgh;
        
