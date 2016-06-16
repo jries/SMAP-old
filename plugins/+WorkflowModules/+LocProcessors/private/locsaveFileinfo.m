@@ -13,7 +13,7 @@ filestruct.number=obj.filenumber;
 % filestruct=struct('info',infost,'average',[],'name',filename,...
 %     'number',obj.filenumber,...
 %     'numberOfTif',0,'tif',tifs,'raw',struct('image',[],'frame',[]));
-if ~isfield(filestruct.info,'roi')||isempty(filestruct.info.roi)
+if ~myisfield(filestruct.info,'roi')||isempty(filestruct.info.roi)
     try
         mm=imfinfo(finfo.filename);
         obj.fileinfo.roi=[0 0 mm(1).Width mm(1).Height];

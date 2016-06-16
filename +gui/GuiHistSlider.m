@@ -227,7 +227,7 @@ obj.setGuiParameters(ph);
 
 % q=obj.data.quantile;
 if isempty(obj.histogram)|| obj.histogram.filenumber ~=filenumber%check if filenumber has changed   
-    v=double(obj.data.values(obj.locData.loc.filenunber==filenumber));
+    v=double(obj.data.values(obj.locData.loc.filenumber==filenumber));
     q=getquantile(v);
     [obj.histogram.x,obj.histogram.hist]=makeHist(v,q);
     obj.histogram.filenumber=filenumber;

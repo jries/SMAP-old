@@ -101,13 +101,7 @@ classdef RoiCutterWF<interfaces.WorkflowModule
 %             outputdat=[];
         end
         
-%         function updateGui(obj)
-%             metadata=readmetadata(obj); 
-%             if ~isempty(metadata)
-%                 obj.loc_cameraSettings=metadata;    
-%             end
-%             obj.globpar.parameters.loc_cameraSettings=obj.loc_cameraSettings;
-%         end
+
     end
 end
 

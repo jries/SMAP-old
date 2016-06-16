@@ -2,10 +2,14 @@ function [destination,missing]=copyfields(destination,source,fields)
 missing={};
 if nargin==2 %copy all
     if ~isempty(source)
-    fn=fieldnames(source);
-    for k=1:length(fn)
-        destination.(fn{k})=source.(fn{k});
-    end
+        if isa(destination,'handle')
+            fn=intersect(properties(destination),fieldnames(source));
+        else
+            fn=fieldnames(source);
+        end
+        for k=1:length(fn)
+            destination.(fn{k})=source.(fn{k});
+        end
     end
 elseif nargin>2
 
@@ -23,7 +27,7 @@ elseif nargin>2
 %     end
 %     fn=fields;
     for k=1:length(fields)
-        if sum(strcmp(fnsource,fields{k}))
+        if any(strcmp(fnsource,fields{k}))
             destination.(fields{k})=source.(fields{k});
         else
             missing{indm}=fields{k};

@@ -89,7 +89,7 @@ rangeyrec=rangey-p.shiftxy_max;
 
 if isfield(locsh,'intensity_render')&&~isempty(locsh.intensity_render)
     pos.N=locsh.intensity_render(indin);
-else
+elseif isfield(p,'intensitycoding')
     switch p.intensitycoding.selection
         case 'photons'
             pos.N=locsh.phot;

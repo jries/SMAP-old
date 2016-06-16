@@ -17,7 +17,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
 
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
-            obj.inputParameters={'loc_ROIsize','EMexcessNoise'};
+            obj.inputParameters={'loc_ROIsize','loc_cameraSettings'};
             obj.stackind=0;
 
         end

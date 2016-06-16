@@ -22,6 +22,9 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             
             makeplugincallfile('plugins');
             
+            %add java path
+            bfCheckJavaPath;
+            
             handle=figure(199);
 %             clf(handle,'reset')
              delete(handle.Children)

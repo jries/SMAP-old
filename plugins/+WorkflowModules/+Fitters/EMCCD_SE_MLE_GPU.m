@@ -175,7 +175,12 @@ if fitpar.fitmode==3
 else
     fitpar.PSFx0=p.PSFx0;
 end
-fitpar.EMexcessNoise=p.EMexcessNoise;
+if p.loc_cameraSettings.EMon
+    fitpar.EMexcessNoise=2;
+else
+fitpar.EMexcessNoise=1;
+end
+% fitpar.EMexcessNoise
 end
 
 function fitmode_callback(a,b,obj)

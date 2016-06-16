@@ -1,10 +1,11 @@
 classdef CameraConverter<interfaces.WorkflowModule
     properties
         calfile='settings/CameraCalibration.xls';
-        loc_cameraSettings=struct('camId','default','port','Conventional','exposure',1,'emgain',1,'conversion',1,'offset',400,'pixsize',0.1,...
-            'roi',[],'temperature',0,'timediff',0,'comment','');
-        loc_cameraSettingsStructure=struct('camId','default','port','Conventional','exposure',1,'emgain',1,'conversion',1,'offset',400,'pixsize',0.1,...
-            'roi',[],'temperature',0,'timediff',0,'comment','');
+        loc_cameraSettings=interfaces.metadataSMAP;
+%         struct('camId','default','port','Conventional','exposure',1,'emgain',1,'conversion',1,'offset',400,'pixsize',0.1,...
+%             'roi',[],'temperature',0,'timediff',0,'comment','');
+        loc_cameraSettingsStructure=struct('EMon',1,'emgain',1,'conversion',1,'offset',400,'pixsize',0.1,...
+            'roi',[],'exposure',1,'timediff',0,'comment','');
         EMexcessNoise;
         calibrategain=false;
         calibratecounter
@@ -13,7 +14,8 @@ classdef CameraConverter<interfaces.WorkflowModule
     methods
         function obj=CameraConverter(varargin)
             obj@interfaces.WorkflowModule(varargin{:})
-            obj.propertiesToSave={'loc_cameraSettings','EMexcessNoise'};
+            obj.loc_cameraSettings=interfaces.metadataSMAP;
+            obj.propertiesToSave={'loc_cameraSettings'};
         end
         function pard=guidef(obj)
             pard=guidef;
@@ -23,8 +25,17 @@ classdef CameraConverter<interfaces.WorkflowModule
            obj.guihandles.loadmetadata.Callback={@loadmetadata_callback,obj};
            obj.guihandles.camparbutton.Callback={@camparbutton_callback,obj};
            obj.guihandles.calibrate.Callback={@calibrate_callback,obj};
-           obj.outputParameters={'loc_cameraSettings','EMexcessNoise'};
-           obj.addSynchronization('loc_metadatafile',obj.guihandles.metadatafile,'String',@obj.readmetadata)
+            obj.outputParameters={'loc_cameraSettings'};
+           obj.addSynchronization('loc_fileinfo',[],[],@obj.setmetadata)
+        end
+        function setmetadata(obj)
+            obj.loc_cameraSettings=obj.getPar('loc_fileinfo');
+            obj.setPar('loc_cameraSettings',obj.loc_cameraSettings);
+%             if obj.loc_cameraSettings.EMon
+%             	obj.EMexcessNoise=2;
+%             else
+%                 obj.EMexcessNoise=1;
+%             end
         end
         function prerun(obj,p)
            
@@ -61,11 +72,13 @@ classdef CameraConverter<interfaces.WorkflowModule
                datao.data=imphot;  
         end
         
-        function readmetadata(obj)
+        function readmetadata(obj,file)
+            dagl
              p=obj.getGuiParameters;
-            if ~isfield(p,'metadatafile')
-                return
-            end
+             p.metadatafile=fiele;
+%             if ~isfield(p,'metadatafile')
+%                 return
+%             end
             camcalib=readtable(obj.calfile);
             fid=fopen(p.metadatafile);
             if fid>0
@@ -105,9 +118,9 @@ function camparbutton_callback(a,b,obj)
 fn=fieldnames(obj.loc_cameraSettingsStructure);
 %remove later: only there because parameters saved with workflow don't
 %include comments
-if ~isfield(obj.loc_cameraSettings,'comments')
-    obj.loc_cameraSettings.comments='no comments';
-end
+% if ~isfield(obj.loc_cameraSettings,'comment')
+%     obj.loc_cameraSettings.comment='no comments';
+% end
 %XXX
 for k=1:length(fn)
     fields{k}=fn{k};
@@ -116,17 +129,25 @@ end
 answer=inputdlg(fields,'Acquisition settings',1,defAns);
 if ~isempty(answer)
     for k=1:length(fn)
-        if isnumeric(obj.loc_cameraSettings.(fn{k}))
+        if isnumeric(obj.loc_cameraSettings.(fn{k}))||islogical(obj.loc_cameraSettings.(fn{k}))
             obj.loc_cameraSettings.(fn{k})=str2num(answer{k});
         else
             obj.loc_cameraSettings.(fn{k})=(answer{k});
         end
     end
+    obj.setPar('loc_cameraSettings',obj.loc_cameraSettings);
+%     if obj.loc_cameraSettings.EMon
+%         obj.EMexcessNoise=2;
+%     else
+%         obj.EMexcessNoise=1;
+%     end
 %     obj.globpar.parameters.loc_cameraSettings=obj.loc_cameraSettings; %doesnt work
 end
 end
 
 function loadmetadata_callback(a,b,obj)
+disp('under construction')
+return
 [f,p]=uigetfile('*.*','Select metadata.txt, tif or _sml.mat');
 [~,~,ext ]=fileparts(f);
 switch ext
@@ -171,23 +192,23 @@ pard.text.object=struct('Style','text','String','Acquisition parameters');
 pard.text.position=[1,1];
 pard.text.Width=3;
 pard.text.Optional=true;
-pard.metadatafile.object=struct('Style','edit','String',' ');
-pard.metadatafile.position=[2,1];
-pard.metadatafile.Width=4;
-pard.metadatafile.Optional=true;
+% pard.metadatafile.object=struct('Style','edit','String',' ');
+% pard.metadatafile.position=[2,1];
+% pard.metadatafile.Width=4;
+% pard.metadatafile.Optional=true;
 pard.loadmetadata.object=struct('Style','pushbutton','String','Load metadata');
-pard.loadmetadata.position=[3,1];
+pard.loadmetadata.position=[2,1];
 pard.loadmetadata.TooltipString=sprintf('Load micromanager Metadata.txt file.');
 pard.loadmetadata.Optional=true;
 pard.calibrate.object=struct('Style','pushbutton','String','auto calibration');
-pard.calibrate.position=[3,2];
+pard.calibrate.position=[2,2];
 pard.calibrate.TooltipString=sprintf('calibrate gain and offset from images (from simpleSTORM)');
 pard.calibrate.Optional=true;
 
 pard.camparbutton.object=struct('Style','pushbutton','String','set Cam Parameters');
-pard.camparbutton.position=[3,3.5];
+pard.camparbutton.position=[2,3.5];
 pard.camparbutton.Width=1.5;
 pard.camparbutton.TooltipString=sprintf('Edit camera acquisition parameters.');
 pard.plugininfo.type='WorkflowModule'; 
-pard.plugininfo.description='Converts camera ADU to photon counts and handles metadata (usually from metadata.txt from micromanger). Metadata can also be entered manually.';
+pard.plugininfo.description='Allows editing metadata, or loading from a file.';
 end
