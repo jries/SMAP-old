@@ -7,6 +7,8 @@ classdef Sxsy2z<interfaces.DialogProcessor
         function obj=Sxsy2z(varargin)        
            obj@interfaces.DialogProcessor(varargin{:}) ;
              obj.inputParameters={'cam_pixelsize_nm'};
+           obj.showresults=false;
+            obj.history=true;
         end
         function initGui(obj)
             set(obj.guihandles.savebutton,'Callback',{@loadcalfile,obj})
@@ -67,10 +69,11 @@ pard.fitpol.object=struct('Style','edit','String','1 0 0');
 pard.fitpol.position=[2,3];
 
 
-pard.t1.object=struct('Style','edit','String','refractive Index Mismatch factor (<=1)'); 
+pard.t1.object=struct('Style','text','String','refractive Index Mismatch factor (<=1)'); 
 pard.t1.position=[3,1];
+pard.t1.Width=2;
 pard.refractiveIndexMismatch.object=struct('Style','edit','String','1'); 
-pard.refractiveIndexMismatch.position=[3,2];
+pard.refractiveIndexMismatch.position=[3,3];
 
 pard.calfile.object=struct('Style','edit','String','settings/cal_3DAcal.mat');
 pard.calfile.position=[4,1];

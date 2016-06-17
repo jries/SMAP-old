@@ -47,7 +47,7 @@ descfile=dir([path filesep 'file-description.xml']);
 if ~isempty(descfile)
     pfile=pxml2p(xml2struct([path filesep descfile(1).name]));
 else
-    pfile.frame=1;pfile.xnano=2;pfile.ynano=3;pfile.znano=4;pfile.intensity=5;
+    pfile.frame=2;pfile.xnano=3;pfile.ynano=4;pfile.znano=5;pfile.intensity=6;
 end
 dat=csvread(file,1,0);
 sdat=size(dat);
@@ -83,11 +83,12 @@ filestruc.name=file;
 filestruc.info=struct('Width',256,'Height',256,'roi',[0 0 256 256],'pixsize',psfnm/1000);
 if obj.locData.files.filenumberEnd==0
     obj.locData.files.file=filestruc;
+    
 else
     obj.locData.files.file(filenumber)=copyfields(obj.locData.files.file(1),filestruc,fieldnames(obj.locData.files.file(1)));
 end
 obj.locData.files.filenumberEnd=length(obj.locData.files.file);
-
+obj.locData.files.file(filenumber).number=filenumber;
 end
 
 function p=pxml2p(pxml)

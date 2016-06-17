@@ -80,9 +80,11 @@ classdef LocSaver<interfaces.WorkflowModule;
                     filename=[filenameold(1:end-7) num2str(ind) '_sml.mat'];
                     ind=ind+1;
                 end
+                mainfile=filename;
                 if p.savelocal
                     filenameremote=filename;
                     filename=[pwd filesep 'temp.sml'];
+                    mainfile=filename;
                 end
                 fitpar=obj.parent.getGuiParameters(true).children;
                 obj.locDatatemp.files.file.raw=obj.frames;
@@ -96,7 +98,7 @@ classdef LocSaver<interfaces.WorkflowModule;
                 obj.locData.setLocData(obj.locDatatemp);
 
                 initGuiAfterLoad(obj);
-                
+                obj.setPar('mainfile',mainfile);
                 [path,file]=fileparts(filename);
                 imageout=makeSRimge(obj.locDatatemp);
                 options.comp='jpeg';

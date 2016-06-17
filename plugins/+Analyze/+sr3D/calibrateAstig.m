@@ -105,7 +105,13 @@ end
 function calibrateAstig3D(locs,p)
 global zt sxf syf
 sxt=double(locs.PSFxnm)/p.cam_pixelsize_nm;syt=double(locs.PSFynm)/p.cam_pixelsize_nm;framet=double(locs.frame);
+if p.reverse
+   p.dz=-p.dz;
+end
+
 zt=framet*p.dz/1000;
+
+
 
 B0=double(~p.B0);
 initaxis(p.resultstabgroup,'select range');
@@ -232,24 +238,27 @@ function pard=guidef
 % pard.mode3D.Width=3;
 
 pard.text2.object=struct('String','calibrate 3D ','Style','text');
-pard.text2.position=[2,1];
-pard.text2.Width=2;
+pard.text2.position=[1,1];
+pard.text2.Width=1.5;
 pard.text3.object=struct('String','dz (nm)','Style','text');
-pard.text3.position=[3,2];
+pard.text3.position=[3,1];
 % 
 pard.dz.object=struct('Style','edit','String','50'); 
-pard.dz.position=[3,3];
+pard.dz.position=[3,2.5];
 
 
 pard.text4.object=struct('String','frame of Zero position','Style','text');
 pard.text4.position=[4,1];
-pard.text4.Width=3;
+pard.text4.Width=1.5;
 
 pard.framez0.object=struct('Style','edit','String','21'); 
-pard.framez0.position=[4,3];
+pard.framez0.position=[4,2.5];
 
 pard.B0.object=struct('String','set B = 0','Style','checkbox','Value',0);
 pard.B0.position=[5,1];
+
+pard.reverse.object=struct('String','reverse z axis','Style','checkbox','Value',0);
+pard.reverse.position=[4,3.5];
 
 pard.plugininfo.name='calibrate 3D';
 pard.plugininfo.type='ProcessorPlugin';

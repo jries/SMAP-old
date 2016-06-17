@@ -41,32 +41,32 @@ loctarget.y=loctarget.ynm;
 loctT=loctarget;
 % file=locData.files.file(p.layer1_.ch_filelist.Value);
 
-chipsizenm=p.currentfileinfo.pixsize*512*1000; 
+chipsizenm=p.currentfileinfo.pixsize*1000*[p.currentfileinfo.Width p.currentfileinfo.Height]; 
 facsize=ones(2,1);
-separator=[chipsizenm chipsizenm];
+separator=chipsizenm;
 switch p.targetpos.selection
     case 'top'
-        dy=-chipsizenm/2;
+        dy=-chipsizenm(2)/2;
         dx=0;
-        separator(2)=chipsizenm/2;
+        separator(2)=chipsizenm(2)/2;
         indtarget=indtarget&loctarget.ynm<separator(2);
         indref=indref&locref.ynm>=separator(2);
     case 'bottom'
-        dy=chipsizenm/2;
+        dy=chipsizenm(2)/2;
         dx=0;
-        separator(2)=chipsizenm/2;
+        separator(2)=chipsizenm(2)/2;
         indtarget=indtarget&loctarget.ynm>separator(2);
         indref=indref&locref.ynm<=separator(2);
     case 'left'
-        dx=-chipsizenm/2;
+        dx=-chipsizenm(1)/2;
         dy=0;
-        separator(1)=chipsizenm/2;
+        separator(1)=chipsizenm(1)/2;
         indtarget=indtarget&loctarget.xnm<separator(1);
         indref=indref&locref.xnm>=separator(1);
     case 'right'
-        dx=chipsizenm/2;
+        dx=chipsizenm(1)/2;
         dy=0;
-        separator(1)=chipsizenm/2;
+        separator(1)=chipsizenm(1)/2;
         indtarget=loctarget.xnm>separator(1);
         indtarget=indtarget&loctarget.xnm>separator(1);
         indref=indref&locref.xnm<=separator(1);

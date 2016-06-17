@@ -41,7 +41,7 @@ fprintf(fid,' <firstrow>0</firstrow>\n');
 fprintf(fid,' <frame>1</frame>\n');
 fprintf(fid,' <xnano>2</xnano>\n');
 fprintf(fid,' <ynano>3</ynano>\n');
-fprintf(fid,' <ynano>4</znano>\n');
+fprintf(fid,' <znano>4</znano>\n');
 fprintf(fid,' <intensity>5</intensity>\n');
 fprintf(fid,' <separator>COMMA</separator>\n');
 fprintf(fid,' <xshift>0</xshift>\n');

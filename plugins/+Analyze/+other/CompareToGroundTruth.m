@@ -38,7 +38,7 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
 %             
             settingsfile=[challengepath 'CompareLocalizationSettings.txt'];
             
-            replacements={'firstRow1','0','shiftY1','0','txtFile1',strrep(filenew,'\','/'),'colY1','2','shiftX1','0','colF1','0','colI1','4','shiftUnit1','nm','txtDesc1',strrep(descfile,'\','/')};
+            replacements={'firstRow1','0','shiftY1','0','txtFile1',strrep(filenew,'\','/'),'colY1','3','colX1','2','colZ1','4','shiftX1','0','colF1','1','colI1','5','shiftUnit1','nm','txtDesc1',strrep(descfile,'\','/')};
             modifySettingsFile(settingsfile,replacements{:});
             oldp=pwd;
             cd(challengepath);
