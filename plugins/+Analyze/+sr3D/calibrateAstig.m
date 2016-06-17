@@ -105,9 +105,9 @@ end
 function calibrateAstig3D(locs,p)
 global zt sxf syf
 sxt=double(locs.PSFxnm)/p.cam_pixelsize_nm;syt=double(locs.PSFynm)/p.cam_pixelsize_nm;framet=double(locs.frame);
-if p.reverse
-   p.dz=-p.dz;
-end
+% if p.reverse
+%    p.dz=-p.dz;
+% end
 
 zt=framet*p.dz/1000;
 
@@ -257,8 +257,8 @@ pard.framez0.position=[4,2.5];
 pard.B0.object=struct('String','set B = 0','Style','checkbox','Value',0);
 pard.B0.position=[5,1];
 
-pard.reverse.object=struct('String','reverse z axis','Style','checkbox','Value',0);
-pard.reverse.position=[4,3.5];
+% pard.reverse.object=struct('String','reverse z axis','Style','checkbox','Value',0);
+% pard.reverse.position=[4,3.5];
 
 pard.plugininfo.name='calibrate 3D';
 pard.plugininfo.type='ProcessorPlugin';

@@ -25,8 +25,10 @@ classdef WorkflowFitter<interfaces.WorkflowModule
         end
         function prerun(obj,p)
             global fitterstackinfo fitterimagestack fitterbgstack
-            obj.stackind=0;
             roisize=obj.getPar('loc_ROIsize');
+            obj.numberInBlock=round(2500*100/roisize^2);
+            obj.stackind=0;
+            
             fitterimagestack=zeros(roisize,roisize,obj.numberInBlock,'single');
             if obj.inputChannels==2
                 fitterbgstack=fitterimagestack;

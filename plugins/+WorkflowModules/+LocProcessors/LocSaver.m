@@ -100,6 +100,7 @@ classdef LocSaver<interfaces.WorkflowModule;
                 initGuiAfterLoad(obj);
                 obj.setPar('mainfile',mainfile);
                 [path,file]=fileparts(filename);
+                try
                 imageout=makeSRimge(obj.locDatatemp);
                 options.comp='jpeg';
                 options.color=true;
@@ -107,6 +108,9 @@ classdef LocSaver<interfaces.WorkflowModule;
                 sr=ceil(s/16)*16;
                 imageout(sr(1),sr(2),1)=0;
                 saveastiff(uint16(imageout/max(imageout(:))*(2^16-1)),[path filesep file '.tif'],options)
+                catch err
+                    err
+                end
                 output=data;
             end
             

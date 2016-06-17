@@ -23,7 +23,7 @@ classdef Sxsy2z<interfaces.DialogProcessor
             z=feval(obj.outsx2sy2,sx2sy2);
             z(locs.PSFynm==0)=-2;
 %             refractiveIndexMismatch=1.25
-            obj.locData.loc.znm=-z*1000*p.refractiveIndexMismatch;
+            obj.locData.loc.znm=z*1000*p.refractiveIndexMismatch;
             obj.locData.regroup;
             obj.setPar('locFields',fieldnames(obj.locData.loc))
             
