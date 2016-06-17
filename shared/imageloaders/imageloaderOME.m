@@ -50,9 +50,12 @@ obj.metadata.Width=double(omemeta.getPixelsSizeX(0).getValue());
 obj.metadata.Height=double(omemeta.getPixelsSizeY(0).getValue());
 obj.metadata.numberOfFrames=max(double(omemeta.getPixelsSizeT(0).getValue()),double(omemeta.getPixelsSizeZ(0).getValue()));
 obj.metadata.basefile=[ph filesep fh];
+
 end
 
 function meta=getMetaNd2(m)
+
+%CameraUniqueName, Conversion Gain, Vertical Shift Speed, Readout Speed
 searchstr={'exposure','Exposure:','emgain','Multiplier:'};
     str=m.get('sSpecSettings'); %
     for k=1:2:length(searchstr);
