@@ -31,6 +31,7 @@ classdef CameraConverter<interfaces.WorkflowModule
         function setmetadata(obj)
             obj.loc_cameraSettings=obj.getPar('loc_fileinfo');
             obj.setPar('loc_cameraSettings',obj.loc_cameraSettings);
+            obj.setPar('EMon',obj.loc_cameraSettings.EMon);
 %             if obj.loc_cameraSettings.EMon
 %             	obj.EMexcessNoise=2;
 %             else
@@ -135,7 +136,8 @@ if ~isempty(answer)
             obj.loc_cameraSettings.(fn{k})=(answer{k});
         end
     end
-    obj.setPar('loc_cameraSettings',obj.loc_cameraSettings);
+%     obj.setPar('loc_cameraSettings',obj.loc_cameraSettings);
+obj.setmetadata;
 %     if obj.loc_cameraSettings.EMon
 %         obj.EMexcessNoise=2;
 %     else

@@ -7,7 +7,7 @@ classdef PeakFinder<interfaces.WorkflowModule
     methods
         function obj=PeakFinder(varargin)
             obj@interfaces.WorkflowModule(varargin{:});
-            obj.inputParameters={'loc_loc_filter_sigma','EMexcessNoise'};
+            obj.inputParameters={'loc_loc_filter_sigma','EMon'};
         end
         function pard=guidef(obj)
             pard=guidef;
@@ -17,6 +17,7 @@ classdef PeakFinder<interfaces.WorkflowModule
             obj.guihandles.cutoffmode.Callback={@cutoffmode_callback,obj};
             obj.guihandles.cutoffvalue.Callback={@cutoffvalue_callback,obj};
              obj.guihandles.peakfindmethod.Callback={@peakfindmethod_callback,obj};
+             cutoffvalue_callback(0,0,obj)
         end
         function prerun(obj,p)
         end
@@ -38,6 +39,7 @@ classdef PeakFinder<interfaces.WorkflowModule
                 case {2,3} 
                     cutoff=obj.absolutecutoff;
             end
+%             cutoff
             maxind= (maxima(:,3)>cutoff);
             maxout.y=maxima(maxind,1);
             maxout.x=maxima(maxind,2);
@@ -91,15 +93,19 @@ function cutoffvalue_callback(a,b,obj)
 p=obj.getAllParameters;
 PSFx0=1;
 state=p.cutoffmode.Value;
+excess=double(p.EMon)+1;
+if isempty(excess)
+    excess=1;
+end
 switch state
     case 1 %dynamic
         obj.dynamicfactor=p.cutoffvalue;
     case 2 %p       
         obj.probability=p.cutoffvalue;
-        obj.absolutecutoff=prob2photon(p.cutoffvalue,PSFx0,p.loc_loc_filter_sigma,p.EMexcessNoise);
+        obj.absolutecutoff=prob2photon(p.cutoffvalue,PSFx0,p.loc_loc_filter_sigma,excess);
     case 3 %abs      
         obj.absolutecutoff=p.cutoffvalue;
-        obj.probability=photon2prob(p.cutoffvalue,PSFx0,p.loc_loc_filter_sigma,p.EMexcessNoise);
+        obj.probability=photon2prob(p.cutoffvalue,PSFx0,p.loc_loc_filter_sigma,excess);
 end
 end
 
