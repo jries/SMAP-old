@@ -129,6 +129,9 @@ end
 function loadfile(obj,p,file,mode)
 
 tab=readtable(file);
+if ~isfield(p,'importdef') %if called from loader
+    p.importdef.Value=1;
+end
 if p.importdef.Value==1 %new file
 %look for file description
 path=fileparts(file);
@@ -217,7 +220,8 @@ end
 
 locData.addloc('filenumber',zd+filenumber);
 catch err
-    display('import did not work. Select a different import format file or define new file')
+    warndlg('import did not work. Select a different import format file or define new file')
+    return
 %     rethrow(err);
 end
 

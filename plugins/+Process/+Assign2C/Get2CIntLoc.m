@@ -3,10 +3,12 @@ classdef Get2CIntLoc<interfaces.DialogProcessor
     methods
         function obj=Get2CIntLoc(varargin)        
                 obj@interfaces.DialogProcessor(varargin{:}) ;   
+            obj.history=true;
+            obj.showresults=false;
         end
         
         function out=run(obj,p)
-           
+           out=[];
             tload=load(p.Tfile);
             if ~isfield(tload,'transformation')
                 out.error='selected transformation file does not have a valid transformation';

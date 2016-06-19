@@ -2,6 +2,8 @@ classdef Intensity2Channel<interfaces.DialogProcessor
     methods
         function obj=Intensity2Channel(varargin)        
             obj@interfaces.DialogProcessor(varargin{:}) ;  
+            obj.history=false;
+            obj.showresults=true;
         end
         
         function out=run(obj,p)
