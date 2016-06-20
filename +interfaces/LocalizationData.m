@@ -77,6 +77,11 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             %if not exisitng. 
             %FIX: can result in field vecotrs of different length. Pad with
             %zeros?
+            if nargin<3
+                fn=fieldnames(obj.loc);
+                
+                value=zeros(size(obj.loc.(fn{1})),'single');
+            end
             if isfield(obj.loc,name)
                 l1=length(obj.loc.(name));
                 l2=length(value);
@@ -322,8 +327,13 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             %adds localization from interfaces.LocalizationData object
             %addLocData(locData:interfaces.LocalizationData). Pad fields
             %which are not shared by both objects with zeros
-            fn2=fieldnames(locData.loc);
-            lennew=length(locData.loc.(fn2{1}));
+            if myisfield(locData,'loc')
+                loch=locData.loc;
+            else
+                loch=locData;
+            end
+            fn2=fieldnames(loch);
+            lennew=length(loch.(fn2{1}));
             if ~isempty(obj.loc)
                 fn1=fieldnames(obj.loc);
                 lenold=length(obj.loc.(fn1{1}));
@@ -334,11 +344,11 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             %fill missing channels with 0
             fd=setdiff(fn2,fn1);
             for k=1:length(fd)
-                obj.loc.(fd{k})=zeros(lenold,1,'like',locData.loc.(fd{k}));
+                obj.loc.(fd{k})=zeros(lenold,1,'like',loch.(fd{k}));
             end  
             %add new data
             for k=1:length(fn2)
-                obj.addloc(fn2{k},locData.loc.(fn2{k}))
+                obj.addloc(fn2{k},loch.(fn2{k}))
             end     
             %add zeros for the missing data
             fd=setdiff(fn1,fn2);

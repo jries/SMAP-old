@@ -120,7 +120,7 @@ classdef LocSaver<interfaces.WorkflowModule;
 end
 
 function imout=makeSRimge(locDatatemp)
-channelfile='settings/FitTif_Channelsettings.mat';
+channelfile='settings/workflows/FitTif_Channelsettings.mat';
 pall=load(channelfile);
 p=pall.globalParameters;
 p.sr_pixrec=20;
