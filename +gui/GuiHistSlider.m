@@ -99,7 +99,7 @@ classdef GuiHistSlider< interfaces.LayerInterface
                 obj.guihandles.filteron.Value=sfield{4};
             end
             
-            if isfield(obj.backup,fieldh)&& isfield(obj.locData,fieldh)&&~strcmpi(fieldh,'colorfield')...
+            if isfield(obj.backup,fieldh)&& myisfield(obj.locData,fieldh)&&~strcmpi(fieldh,'colorfield')...
                     &&obj.backup.(fieldh).len==length(obj.locData.loc.(fieldh))...
                     &&obj.backup.(fieldh).histogram.filenumber == filenumber; 
                 restorestruc=obj.backup.(fieldh);
@@ -108,7 +108,7 @@ classdef GuiHistSlider< interfaces.LayerInterface
                 restore=false;
             end
              %backup
-            if ~isempty(obj.field) && isfield(obj.locData.loc,fieldh) %first tiem might be empty
+            if ~isempty(obj.field) && myisfield(obj.locData.loc,fieldh) %first tiem might be empty
                 obj.backup.(obj.field).lockrange=obj.guihandles.lockrange.Value;
 %                 obj.backup.(obj.field).quantile=obj.data.quantile;
                 obj.backup.(obj.field).range=obj.guihandles.range.String;

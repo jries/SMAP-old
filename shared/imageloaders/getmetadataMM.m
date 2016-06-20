@@ -12,7 +12,7 @@ info=getimageinfo(obj.file);
              obj.metadata.basefile=info.basefile;
             obj.metadata=copyfields(obj.metadata,md);
             obj.metadata.allmetadata=copyfields(info,md);
-            obj.metadata.camerainfo=copyfields(obj.metadata.camerainfo,md);
+%             obj.metadata.camerainfo=copyfields(obj.metadata.camerainfo,md);
             %determine if EM is used
             switch md.port
                 case {'Conventional','Normal'}
