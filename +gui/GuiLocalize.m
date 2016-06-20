@@ -96,7 +96,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
 %             firstpanel=h.([tabtags{1} 'panel']);
              obj.guihandles=h;
             if ~exist(settingsfile,'file') %to make old settings work. Remove later.
-                settingsfile=strrep(settingsfile,'settings/','settings/workflows/');
+                settingsfile=strrep(settingsfile,'settings',['settings' filesep 'workflows']);
             end
             par=readstruct(settingsfile,replacestruct);
             par=myrmfield(par,{'workflowinfo','tab'});
