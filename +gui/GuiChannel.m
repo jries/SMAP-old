@@ -761,57 +761,57 @@ pard.locprecnm_max.position=[3,4.5];
 pard.locprecnm_max.Width=.5;
 
 pard.znmb.object=struct('Style','pushbutton','String','z');
-pard.znmb.position=[5,3.4];
+pard.znmb.position=[4,3.4];
 pard.znmb.Width=.6;
 
 pard.znm_min.object=struct('Style','edit','String','-500','BackgroundColor',[1 1 1]*.7);
-pard.znm_min.position=[5,4];
+pard.znm_min.position=[4,4];
 pard.znm_min.Width=.5;
 
 pard.znm_max.object=struct('Style','edit','String','500');  
-pard.znm_max.position=[5,4.5];
+pard.znm_max.position=[4,4.5];
 pard.znm_max.Width=.5;
       
 pard.PSFxnmb.object=struct('Style','pushbutton','String','PSF xy');
-pard.PSFxnmb.position=[5,3.4];
+pard.PSFxnmb.position=[4,3.4];
 pard.PSFxnmb.Width=.6;
 pard.PSFxnmb.Optional=true;            
 pard.PSFxnm_min.object=struct('Style','edit','String','0','BackgroundColor',[1 1 1]*.7);
-pard.PSFxnm_min.position=[5,4];
+pard.PSFxnm_min.position=[4,4];
 pard.PSFxnm_min.Width=.5;
 pard.PSFxnm_min.Optional=true;
 pard.PSFxnm_max.object=struct('Style','edit','String','175');  
-pard.PSFxnm_max.position=[5,4.5];
+pard.PSFxnm_max.position=[4,4.5];
 pard.PSFxnm_max.Width=.5;
 pard.PSFxnm_max.Optional=true;
 
 pard.locprecznmb.object=struct('Style','pushbutton','String','locprec z');
-pard.locprecznmb.position=[6,3.4];
+pard.locprecznmb.position=[5,3.4];
 pard.locprecznmb.Width=.6;
 pard.locprecznmb.Optional=true;
 
 pard.locprecznm_min.object=struct('Style','edit','String','0','BackgroundColor',[1 1 1]*.7);
-pard.locprecznm_min.position=[6,4];
+pard.locprecznm_min.position=[5,4];
 pard.locprecznm_min.Width=.5;
 pard.locprecznm_min.Optional=true;
 
 pard.locprecznm_max.object=struct('Style','edit','String','45');  
-pard.locprecznm_max.position=[6,4.5];
+pard.locprecznm_max.position=[5,4.5];
 pard.locprecznm_max.Width=.5; 
 pard.locprecznm_max.Optional=true;
 
 pard.frameb.object=struct('Style','pushbutton','String','frame');
-pard.frameb.position=[4,3.4];
+pard.frameb.position=[6,3.4];
 pard.frameb.Width=.6;
 pard.frameb.Optional=true;
 
 pard.frame_min.object=struct('Style','edit','String','0','BackgroundColor',[1 1 1]*.7);
-pard.frame_min.position=[4,4];
+pard.frame_min.position=[6,4];
 pard.frame_min.Width=.5;
 pard.frame_min.Optional=true;
 
 pard.frame_max.object=struct('Style','edit','String','inf');  
-pard.frame_max.position=[4,4.5];
+pard.frame_max.position=[6,4.5];
 pard.frame_max.Width=.5;
 pard.frame_max.Optional=true;
 
