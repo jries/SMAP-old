@@ -1,10 +1,10 @@
 function filestruct=locsaveFileinfo(obj)
 filestruct=initfile;
 % tifs=struct('image',[],'info',[]);
-finfo=obj.getPar('loc_fileinfo');
+finfo=prop2struct(obj.getPar('loc_fileinfo'));
 sfile=finfo.basefile;
 filename=[sfile '_sml.mat'];  
-infost=obj.getPar('loc_cameraSettings');
+infost=prop2struct(obj.getPar('loc_cameraSettings'));
 infost=copyfields(infost,finfo);
 
 filestruct.info=infost;

@@ -73,7 +73,7 @@ obj.locData.history(end+1:end+length(his))=his;
 for k=1:nfiles
 %     templocData.files.file(k).number=templocData.files.file(k).number+filenumber;
     templocData.files.file(k).number=k+filenumber;
-    if ~isfield(templocData.files.file(k).info,'roi')||isempty(templocData.files.file(k).info.roi)||~isnumeric(templocData.files.file(k).info.roi)
+    if ~myisfield(templocData.files.file(k).info,'roi')||isempty(templocData.files.file(k).info.roi)||~isnumeric(templocData.files.file(k).info.roi)
         templocData.files.file(k).info.roi=[0 0 templocData.files.file(k).info.Width templocData.files.file(k).info.Height];
     end
 end

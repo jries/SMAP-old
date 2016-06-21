@@ -226,7 +226,7 @@ ph.smax=min(max(ph.vmax,hsmax.Min),hsmax.Max);
 obj.setGuiParameters(ph);
 
 % q=obj.data.quantile;
-if isempty(obj.histogram)|| obj.histogram.filenumber ~=filenumber%check if filenumber has changed   
+if isempty(obj.histogram)|| (myisfield(obj.histogram,'filenumber')&&obj.histogram.filenumber ~=filenumber)%check if filenumber has changed   
     v=double(obj.data.values(obj.locData.loc.filenumber==filenumber));
     q=getquantile(v);
     [obj.histogram.x,obj.histogram.hist]=makeHist(v,q);
