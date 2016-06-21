@@ -219,9 +219,9 @@ inchSize = get(0,'ScreenSize')/get(0,'ScreenPixelsPerInch');
 inchSize = inchSize([3 4]);
 screen.wide = inchSize(1)-1; %leave a 1/2" margin left/right
 screen.high = inchSize(2)-1.5; %3/4" margin top/bottom
-opt.fig.scale = min([screen.wide/opt.fig.wide screen.high/opt.fig.high]);
+opt.fig.scale = min([screen.wide/opt.fig.wide screen.high/opt.fig.high 1]);
 
-opt.fig.scale=1;
+% opt.fig.scale=1;
 %axes fill figure
 set(opt.fig.axes,...
     'units','normalized',...

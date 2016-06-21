@@ -1,11 +1,14 @@
 classdef Get2CIntLoc<interfaces.DialogProcessor
+        % Get2CIntLoc gets intensities corresponding localizations in two channels.
     methods
         function obj=Get2CIntLoc(varargin)        
                 obj@interfaces.DialogProcessor(varargin{:}) ;   
+            obj.history=true;
+            obj.showresults=false;
         end
         
         function out=run(obj,p)
-           
+           out=[];
             tload=load(p.Tfile);
             if ~isfield(tload,'transformation')
                 out.error='selected transformation file does not have a valid transformation';
@@ -62,5 +65,6 @@ pard.Tfile.Width=3;
 pard.loadbutton.object=struct('Style','pushbutton','String','load');
 pard.loadbutton.position=[8,4];
 pard.plugininfo.type='ProcessorPlugin';
-
+pard.plugininfo.description='Get2CIntLoc gets intensities corresponding localizations in two channels.';
+pard.plugininfo.name='2C intensities from Localizations';
 end

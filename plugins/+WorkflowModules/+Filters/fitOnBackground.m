@@ -69,5 +69,8 @@ pard.loc_fitonbg.object=struct('Style','checkbox','String','fit on BG');
 pard.loc_fitonbg.position=[1,1];
 pard.loc_fitonbg.Width=1;
 pard.loc_fitonbg.TooltipString=sprintf('If checked, fitting is performed on background-corrected images. \n Usually this is not recommended since the fitter itself determines the background. \n But it might make sense for a strong inhomogeneous constant backgrund');
+pard.loc_fitonbg.Optional=true;
+
 pard.plugininfo.type='WorkflowModule';
+pard.plugininfo.description='Allows fitting on background-corrected images. Only recommended for strong static background or centroid-based algorithms.';
 end

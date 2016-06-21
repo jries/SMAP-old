@@ -22,21 +22,18 @@ classdef TifLoader<interfaces.WorkflowModule
             obj.addSynchronization('filelist_localize',obj.guihandles.tiffile,'String',{@loadtif_ext,obj});
         end
         function prerun(obj,p)
-%             p=obj.getAllParameters;
-            
             if ~exist(p.tiffile,'file')
                 obj.status('TifLoader: localization file not found')
                  error('TifLoader: localization file not found')
             end
-%             if ~obj.getPar('loc_preview')
-%                 obj.locData.clear;
-%             end
-            obj.imloader=imageLoader(p.tiffile);     
+%             obj.imloader=imageLoader(p.tiffile);     
+            obj.imloader=imageloaderAll(p.tiffile);     
             obj.imloader.onlineAnalysis=p.onlineanalysis;
             obj.imloader.waittime=p.onlineanalysiswaittime;
             obj.imloader.setImageNumber(p.framestart-1);
-            obj.numberOfFrames=obj.imloader.info.numberOfFrames;
-%             obj.imloader.currentImageNumber=p.framestart-1;
+            obj.numberOfFrames=obj.imloader.metadata.numberOfFrames;
+%             obj.numberOfFrames=obj.imloader.info.numberOfFrames;
+
             if p.onlineanalysis
                 obj.framestop=inf;
             else
@@ -111,12 +108,17 @@ classdef TifLoader<interfaces.WorkflowModule
             disp('fitting done')
         end
         function addFile(obj,file)
-            
-            obj.imloader=imageLoader(file);
-            if ~isempty(obj.imloader.info.metafile)
-             obj.setPar('loc_metadatafile',obj.imloader.info.metafile);
+%         if 1
+%         else
+                
+            obj.imloader=imageloaderAll(file);
+%             if ~isempty(obj.imloader.info.metafile)
+            if ~isempty(obj.imloader.metadata.allmetadata) 
+             obj.setPar('loc_metadatafile',obj.imloader.metadata.allmetadata.metafile);
             end
-            obj.setPar('loc_fileinfo',obj.imloader.info);
+%             end
+obj.imloader.metadata
+            obj.setPar('loc_fileinfo',(obj.imloader.metadata));
 % 
             obj.guihandles.tiffile.String=obj.imloader.file;
 %              obj.setPar('loc_newfile',true);
@@ -124,8 +126,9 @@ classdef TifLoader<interfaces.WorkflowModule
              if p.onlineanalysis
                  obj.guihandles.framestop.String='inf';
              else
-                obj.guihandles.framestop.String=int2str(obj.imloader.info.numberOfFrames);
+                obj.guihandles.framestop.String=int2str(obj.imloader.metadata.numberOfFrames);
              end
+%         end
 % 
         end
         function loadtif_ext(obj)
@@ -137,7 +140,8 @@ end
 
 function loadtif_callback(a,b,obj)
 p=obj.getGuiParameters;
-[f,path]=uigetfile([fileparts(p.tiffile) filesep '*.tif']);
+fe=bfGetFileExtensions;
+[f,path]=uigetfile(fe,'select camera images',[fileparts(p.tiffile) filesep '*.tif']);
 if f
     obj.addFile([path f]);
 end  
@@ -147,7 +151,7 @@ function pard=guidef
 pard.text.object=struct('Style','text','String','Image source file:');
 pard.text.position=[1,1];
 pard.text.Width=1.5;
-
+pard.text.Optional=true;
 
 pard.loadtifbutton.object=struct('Style','pushbutton','String','load images','Visible','on');
 pard.loadtifbutton.position=[3,1];
@@ -161,27 +165,29 @@ pard.onlineanalysis.object=struct('Style','checkbox','String','Online analysis. 
 pard.onlineanalysis.position=[3,2.25];
 pard.onlineanalysis.Width=1.75;
 pard.onlineanalysis.TooltipString='Fit during acquisition. If checked, max frames is ignored. Waits until no more images are written to file.';
-
+pard.onlineanalysis.Optional=true;
 pard.onlineanalysiswaittime.object=struct('Style','edit','String','5');
 pard.onlineanalysiswaittime.position=[3,4];
 pard.onlineanalysiswaittime.Width=0.5;
 pard.onlineanalysiswaittime.TooltipString='Waiting time for online analysis.';
-
+pard.onlineanalysiswaittime.Optional=true;
 
 pard.textf.object=struct('Style','text','String','Frame range');
 pard.textf.position=[4.2,1.25];
 pard.textf.Width=0.75;
+pard.textf.Optional=true;
 pard.framestart.object=struct('Style','edit','String','1');
 pard.framestart.position=[4.2,2];
 pard.framestart.Width=0.7;
-
+pard.framestart.Optional=true;
 pard.framestop.object=struct('Style','edit','String','1000000');
 pard.framestop.position=[4.2,2.7];
 pard.framestop.Width=0.7;
-
+pard.framestop.Optional=true;
 % pard.locdata_empty.object=struct('Style','checkbox','String','Empty localizations','Value',1);
 % pard.locdata_empty.position=[4.2,3.5];
 % pard.locdata_empty.Width=1.5;
 % pard.locdata_empty.TooltipString=sprintf('Empty localization data before fitting. \n Important if post-processing (eg drift correction) is perfromed as part of workflow');
 pard.plugininfo.type='WorkflowModule'; 
+pard.plugininfo.description='Loads tiff files. Can load single tiff files or tiff stacks, also while they are written. It also tries to locate the metadata.txt file from micromanger and passes it on to the camera converter.';
 end

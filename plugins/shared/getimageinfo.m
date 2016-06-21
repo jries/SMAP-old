@@ -70,6 +70,7 @@ switch ext
                 str=minfo(ind:ind2-1);
                 numberOfFrames=str2double(str)+1;
                  allfiles(1).numberOfFrames=numberOfFrames;
+                 
                 catch
                     
                 end
@@ -100,6 +101,7 @@ switch ext
             else
                 info.numberOfFrames=numberOfFrames;
             end
+            info.frames=info.numberOfFrames;
             th=Tiff(allfiles(1).name,'r');
             info.Width=th.getTag('ImageWidth');
             info.Height=th.getTag('ImageLength');
@@ -160,6 +162,7 @@ switch ext
         catch
             info.numberNameRange=[];
         end
+        info.frames=info.numberOfFrames;
         return
         
 end

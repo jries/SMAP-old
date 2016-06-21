@@ -1,4 +1,6 @@
 classdef roi2int_sumG<interfaces.GuiModuleInterface 
+    %determines intensity and background in a ROI around localizations by
+    %summing up the ROI and a larger ROI;
     methods
         function obj=roi2int_sumG(varargin)
             obj@interfaces.GuiModuleInterface(varargin{:});
@@ -52,10 +54,11 @@ end
 function pard=guidef(obj)
 pard.t1.object=struct('Style','text','String','roisize');
 pard.t1.position=[1,1];
+pard.t1.TooltipString='Roi size around localizations for summing';
 % pard.t1.Width=0.5;
 pard.roisize_sum.object=struct('Style','edit','String','3');
 pard.roisize_sum.position=[1,2];
-
+pard.roisize_sum.TooltipString=pard.t1.TooltipString;
 info.prefix='sum';
 info.name='sum';
 info.fields={'sum_n','sum_bg'};

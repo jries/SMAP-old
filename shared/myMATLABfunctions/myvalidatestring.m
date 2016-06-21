@@ -5,7 +5,8 @@ elseif iscell(x)
     for k=1:length(x)
         out=validatestring(x{k},fields);
     end
-elseif isnumeric(x)   
+elseif isnumeric(x)  ||islogical(x)
+    
     out=1;
 end
 end

@@ -8,7 +8,7 @@ for k=1:length(keepfields)
 end
 
 pixelsize=obj.fileinfo.pixsize*1000;
-if isfield(obj.fileinfo,'roi')&&~isempty(obj.fileinfo.roi)
+if myisfield(obj.fileinfo,'roi')&&~isempty(obj.fileinfo.roi)
 roi=obj.fileinfo.roi;
 else
     roi=zeros(2);

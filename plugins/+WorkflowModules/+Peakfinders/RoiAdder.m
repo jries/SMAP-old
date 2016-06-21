@@ -27,8 +27,8 @@ classdef RoiAdder<interfaces.WorkflowModule
 %                     sim=size(cf.image);
 %                 else
                     cf=obj.getPar('loc_fileinfo');
-                    if ~isempty(cf)&&isfield(cf,'Width')
-                        sim=[cf.Width cf.Height];
+                    if ~isempty(cf)&&myisfield(cf,'Width')
+                        sim=[cf.Height cf.Width ];
                     else
                         sim=[0 0];
                     end
@@ -81,6 +81,7 @@ obj.status('select roi and double clock on ROI when done...')
 mask=getroi(obj.getPar('loc_outputfig'),p.roistyle.selection);
 obj.status('ROI selected')
 if isempty(obj.mask)||any(size(mask)~=size(obj.mask));
+    obj.resetmask;
     obj.mask=mask;
 else
     obj.mask=obj.mask|mask;
@@ -95,6 +96,7 @@ obj.status('select roi and double clock on ROI when done...')
 mask=getroi(obj.getPar('loc_outputfig'),p.roistyle.selection);
 obj.status('ROI selected')
 if isempty(obj.mask)||any(size(mask)~=size(obj.mask));
+    obj.resetmask;
     obj.mask=~mask;
 else
     obj.mask=obj.mask&~mask;
@@ -141,4 +143,5 @@ pard.roistyle.position=[4,1];
 pard.roistyle.TooltipString=sprintf('Use rectangular or elliptical ROI.');
 % pard.mask_store.object=struct('Style','text','String','');
 pard.plugininfo.type='WorkflowModule'; 
+pard.plugininfo.description='Allows the user to select regions of interest on the preview image which to use for fitting, or which to exclude from fitting.';
 end

@@ -17,9 +17,12 @@ classdef LocSaver<interfaces.WorkflowModule;
         end
         function pard=guidef(obj)
             pard.plugininfo.type='WorkflowModule'; 
+            pard.plugininfo.description='Saves the fitted localizations as a SMAP *.sml file. When fitting via a network, fitting a local copy which is then moved to the destination can be faster.';
             pard.savelocal.object=struct('Style','checkbox','String','save local and copy','Value',0);
+            pard.savelocal.object.TooltipString='Select this if you fit via a network and the saving of the localizations is very long (stauts bar stops for a long time at last frames).';
             pard.savelocal.position=[1,1];
             pard.savelocal.Width=2;
+            pard.savelocal.Optional=true;
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -77,9 +80,11 @@ classdef LocSaver<interfaces.WorkflowModule;
                     filename=[filenameold(1:end-7) num2str(ind) '_sml.mat'];
                     ind=ind+1;
                 end
+                mainfile=filename;
                 if p.savelocal
                     filenameremote=filename;
                     filename=[pwd filesep 'temp.sml'];
+                    mainfile=filename;
                 end
                 fitpar=obj.parent.getGuiParameters(true).children;
                 obj.locDatatemp.files.file.raw=obj.frames;
@@ -93,8 +98,9 @@ classdef LocSaver<interfaces.WorkflowModule;
                 obj.locData.setLocData(obj.locDatatemp);
 
                 initGuiAfterLoad(obj);
-                
+                obj.setPar('mainfile',mainfile);
                 [path,file]=fileparts(filename);
+                try
                 imageout=makeSRimge(obj.locDatatemp);
                 options.comp='jpeg';
                 options.color=true;
@@ -102,6 +108,9 @@ classdef LocSaver<interfaces.WorkflowModule;
                 sr=ceil(s/16)*16;
                 imageout(sr(1),sr(2),1)=0;
                 saveastiff(uint16(imageout/max(imageout(:))*(2^16-1)),[path filesep file '.tif'],options)
+                catch err
+                    err
+                end
                 output=data;
             end
             
@@ -111,7 +120,7 @@ classdef LocSaver<interfaces.WorkflowModule;
 end
 
 function imout=makeSRimge(locDatatemp)
-channelfile='settings/FitTif_Channelsettings.mat';
+channelfile='settings/workflows/FitTif_Channelsettings.mat';
 pall=load(channelfile);
 p=pall.globalParameters;
 p.sr_pixrec=20;

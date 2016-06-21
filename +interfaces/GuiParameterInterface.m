@@ -39,18 +39,27 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             else
                 lf=length(obj.P.par.(field));
                 posnew=lf+1;
+                outind=false(lf+1,1);
                 for k=1:lf
-                    if obj.P.par.(field)(k).obj==hstruc.obj && ((isempty(handle) && isempty(obj.P.par.(field)(k).handle) )|| obj.P.par.(field)(k).handle==handle)
+                    phx=obj.P.par.(field)(k);
+                    if ~isvalid(phx.obj)
+                        outind=k;
+                    end
+                    if phx.obj==hstruc.obj &&((isempty(handle) && isempty(phx.handle) )|| phx.handle==handle)
                         posnew=k;
                         break
                     end
                 end
                 obj.P.par.(field)(posnew)=copyfields(obj.P.par.(field)(1),hstruc);
 %                 obj.P.par.(field)(posnew)=hstruc;
+                obj.P.par.(field)(outind)=[];
             end
-            guip=any([obj.P.par.(field).isGuiPar]);
-            for k=1:length(obj.P.par.(field))
-                obj.P.par.(field)(k).isGuiPar=guip;
+            isgp=[obj.P.par.(field).isGuiPar];
+            guip=any(isgp);
+            indchange=find(isgp~=guip);
+%             for k=1:length(obj.P.par.(field))
+            for k=1:length(indchange)
+                obj.P.par.(field)(indchange(k)).isGuiPar=guip;
             end  
             found=false;
             for k=1:length(obj.syncParameters) %dont attach many times

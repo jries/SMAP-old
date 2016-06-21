@@ -24,11 +24,24 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
                 guidef=obj.guidef;
             end
             if obj.processorgui
-            obj.guiPar.fontsize=obj.guiPar.fontsize-1;
-            obj.guiPar.FieldHeight=obj.guiPar.FieldHeight-2;
+                obj.guiPar.fontsize=obj.guiPar.fontsize-1;
+                obj.guiPar.FieldHeight=obj.guiPar.FieldHeight-2;
             end
      
             makeGui@interfaces.GuiModuleInterface(obj,guidef);
+            
+            if obj.guiselector.show
+                posh=obj.handle.Position;
+                if isempty(obj.guiselector.position)
+                    pos(1:2)=posh(1:2)+posh(3:4)-[23,22];
+                    pos(3:4)=[20,20];
+                else
+                    pos=obj.guiselector.position;
+                end
+                obj.guihandles.simplegui=uicontrol(obj.handle,'Style','togglebutton','String','A','Position',pos,'Callback',@obj.simplegui_callback);
+                obj.guihandles.simplegui.TooltipString='toggle between simple and advanced GUI';
+                obj.fieldvisibility('guistate',obj.simplegui);
+            end
             
             if obj.processorgui && ~isempty(obj.handle)
                 hpos=obj.handle.Position;
@@ -72,7 +85,29 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
             p.name=class(obj);
             obj.locData.addhistory(p);
         end      
-
+        function simplegui_callback(obj,~,~)
+            simplegui=obj.getSingleGuiParameter('simplegui');
+            obj.fieldvisibility('guistate',simplegui);
+        end
+        
+%         function setguistate(obj,state)
+%             if nargin>1
+%                 obj.simplegui=state;
+%             end
+%             if ~obj.simplegui
+%                 state='on';
+%             else
+%                 state='off';
+%             end
+%             pard=obj.guidef;
+%             fn=fieldnames(pard);
+%             for k=1:length(fn)
+%                 if isfield(pard.(fn{k}),'Optional')&&pard.(fn{k}).Optional==true
+%                     obj.guihandles.(fn{k}).Visible=state;
+%                 end
+%             end
+%         end
+% 
     end
     methods (Access=private)
 %         function outhandle=addresultstab(obj,name)
@@ -82,7 +117,7 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
     end
 end
 
-function processgo_callback(a,b,obj)
+function processgo_callback(~,~,obj)
 % notify(obj.locData,'undo',recgui.simpleEvent('backup'));
 
 obj.status(['executing ' class(obj)])
@@ -117,8 +152,7 @@ if ~isempty(results)
             end
         end
         ct=sprintf('%s\t',cl{:});
-        clipboard('copy',ct);
-        
+        clipboard('copy',ct); 
     end
 end
 if obj.history
@@ -133,7 +167,7 @@ end
 end
 
 
-function showresults_callback(object,data,obj)
+function showresults_callback(object,~,obj)
 if isempty(obj.resultshandle)||~isvalid(obj.resultshandle)
     obj.makeResultsWindow;
 end
@@ -146,12 +180,22 @@ end
 set(obj.resultshandle,'Visible',state)
 end
 
-function info_callback(a,b,obj)
+function info_callback(~,~,obj)
+warnid='MATLAB:strrep:InvalidInputType';
+warnstruct=warning('off',warnid);
+
 obj.guihandles.showresults.Value=1;
 showresults_callback(obj.guihandles.showresults,0,obj)
 ax=obj.initaxis('Info');
 hp=ax.Parent;
- htxt=uicontrol(hp,'Style','text','Units','normalized','Position',[0,0,1,1],...
-     'FontSize',obj.guiPar.fontsize,'HorizontalAlignment','left');
-htxt.String=obj.info.description;
+ htxt=uicontrol(hp,'Style','edit','Units','normalized','Position',[0,0,.9,1],...
+     'FontSize',obj.guiPar.fontsize,'HorizontalAlignment','left','Max',100);
+ td=obj.info.description;
+  td=strrep(td,9,' ');
+txt=strrep(td,10,13);
+ htxt.String=txt;
+  htxt.Position=[0 0 1 1];
+  warning(warnstruct);
 end
+
+

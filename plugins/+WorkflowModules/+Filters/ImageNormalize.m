@@ -10,6 +10,7 @@ classdef ImageNormalize<interfaces.WorkflowModule
         end
         function pard=guidef(obj)
             pard.plugininfo.type='WorkflowModule';
+            pard.plugininfo.description='Converts photons into a probability map. According to: [1]	U. Koethe, F. Herrmannsdoerfer, I. Kats, and F. A. Hamprecht, SimpleSTORM: a fast, self-calibrating reconstruction algorithm for localization microscopy,HISTOCHEMISTRY AND CELL BIOLOGY, pp. 1-15, Apr. 2014.';
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -59,13 +60,7 @@ classdef ImageNormalize<interfaces.WorkflowModule
             
         end
         
-%         function updateGui(obj)
-%             metadata=readmetadata(obj); 
-%             if ~isempty(metadata)
-%                 obj.loc_cameraSettings=metadata;    
-%             end
-%             obj.globpar.parameters.loc_cameraSettings=obj.loc_cameraSettings;
-%         end
+
     end
 end
 

@@ -21,9 +21,9 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
     end
     methods
         function obj=SiteExplorer(varargin)
-            if nargin>0
-                
-            end
+%             if nargin>0
+                obj@interfaces.LocDataInterface(varargin{:});
+%             end
             obj.sites=interfaces.SEsites.empty;
             obj.cells=interfaces.SEsites.empty;
             obj.files=interfaces.SEsites.empty;

@@ -24,6 +24,7 @@ classdef driftcorrection<interfaces.DialogProcessor
                     lochere.files.file=lochere.files.file(k);
                     badind=lochere.loc.filenumber~=k;
                     lochere.removelocs(badind);
+                    lochere.regroup;
                     lochere.loc.filenumber=lochere.loc.filenumber*0+1;
                     
                     locs=lochere.getloc({'frame','xnm','ynm'},'position','all','grouping',groupcheck);

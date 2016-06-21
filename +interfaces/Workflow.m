@@ -2,8 +2,10 @@ classdef Workflow<interfaces.DialogProcessor
     properties %(Access=private)
         modules={};
         graphfigure=[];
+        infofigure=[];
         description='';
-       
+        makesimplegui=false;
+        nirvana;
         %.module
         %.tag
         %.path:{'directory','.'
@@ -21,6 +23,10 @@ classdef Workflow<interfaces.DialogProcessor
                 obj.handle=figure;
                 obj.handle.Visible='off';
                 delete(obj.handle.Children);
+            end
+            if isempty(obj.nirvana)
+                obj.nirvana=figure;
+                obj.nirvana.Visible='off';
             end
             obj.outputParameters={'description'};
             
@@ -112,6 +118,9 @@ classdef Workflow<interfaces.DialogProcessor
             end
         end
         function clear(obj)
+            for k=1:length(obj.modules)
+                delete(obj.modules{k}.module);
+            end
             obj.modules={};
             obj.numberOfModules=0;
             obj.guiPar.Vpos=1;
@@ -137,6 +146,15 @@ classdef Workflow<interfaces.DialogProcessor
                 if isfield(pGui,'all')
                     pall=pGui.all;
                     pGui=myrmfield(pGui,'all');
+                    if isfield(pall,'guistate')
+                        switch pall.guistate
+                            case {'s','simple',true,1}
+%                                 obj.simplegui=true;
+                                obj.makesimplegui=true;
+                            otherwise
+                                obj.makesimplegui=false;
+                        end
+                    end
                 else
                     pall=[];
                 end
@@ -157,7 +175,7 @@ classdef Workflow<interfaces.DialogProcessor
                     p=copyfields(p,pall);
 %                     obj.module(fn{k}).setGuiAppearence(pGui.(fn{k}))
                     if ~strcmp( fn{k},'all')
-                    obj.module(fn{k}).setGuiAppearence(p)
+                        obj.module(fn{k}).setGuiAppearence(p)
                     end
                 end
             end
@@ -171,7 +189,7 @@ classdef Workflow<interfaces.DialogProcessor
             if isfield(loaded,'description')
                 obj.description=loaded.description;
             end
-            
+            obj.fieldvisibility;
         end
         function save(obj,fn)
             for k=1:length(obj.modules)
@@ -240,7 +258,13 @@ classdef Workflow<interfaces.DialogProcessor
         end
         function addAllModulesToGui(obj,moduletag)
             for k=1:length(obj.modules)
-                obj.addModuleToGui(obj.modules{k}.tag);
+                try
+                    obj.addModuleToGui(obj.modules{k}.tag);
+                catch err
+                    disp('error loading workflow. Check workflow definition file');
+                    obj.modules{k}.module
+                    err.rethrow;
+                end
             end
             obj.setinputlist;
         end
@@ -269,16 +293,31 @@ classdef Workflow<interfaces.DialogProcessor
             
             thistag=obj.modules{idx}.tag;
             module=obj.modules{idx}.module;
+%              module
             if isempty(module.handle)||~isvalid(module.handle)
                 module.handle=uipanel(obj.handle,'Units','pixels','Position',pospanel); %later: real gui
                 module.setGuiAppearence(pGUI);
-                
+              
             end
             obj.guihandles.([thistag '_modulepanel'])=module.handle;
             obj.modules{idx}.inputpanel=uipanel(obj.handle,'Units','pixels','Position',posinput); 
             obj.guihandles.([thistag '_inputpanel'])=obj.modules{idx}.inputpanel;
 %             try
-                module.makeGui;
+        
+                module.simplegui=obj.makesimplegui;
+              module.makeGui;  
+                %shift controls if optional and makesimplegui
+                if obj.makesimplegui
+                    pd=module.guidef;
+                    fn=fieldnames(pd);
+                    for k=1:length(fn)
+                        if isfield(pd.(fn{k}),'Optional')&&pd.(fn{k}).Optional
+                            module.guihandles.(fn{k}).Parent=obj.nirvana;
+                        end
+                    end
+                end
+                
+                
                 obj.makeinputlist(thistag,obj.modules{idx}.inputpanel,module.inputChannels,module.isstartmodule);
                 obj.children.(thistag)=module;
 %             catch err
@@ -318,8 +357,8 @@ classdef Workflow<interfaces.DialogProcessor
             pard.savebutton.Width=0.4;
         
             pard.modulelist.object=struct('Style','listbox','Callback',@obj.moduleselect_callback);
-            pard.modulelist.position=[11,1];
-            pard.modulelist.Height=9;
+            pard.modulelist.position=[10.5,1];
+            pard.modulelist.Height=8.5;
             pard.modulelist.Width=0.8;
             
 %             pard.clearbutton.object=struct('Style','togglebutton','String','Clear','Callback',@obj.clear_callback);
@@ -328,6 +367,9 @@ classdef Workflow<interfaces.DialogProcessor
         end
         function graph(obj,object,b)
             modulenames=obj.guihandles.modulelist.String;
+            for k=1:length(modulenames)
+                modulenames{k}=[num2str(k) '. ' modulenames{k}];
+            end
             nodebox=char(ones(1,length(modulenames))*'s');
             nodecolor=char(ones(1,length(modulenames))*'b');
             
@@ -362,6 +404,43 @@ classdef Workflow<interfaces.DialogProcessor
             delete(obj.graphfigure.Children);
             plot_graph(modulenames,output,input,'-fontsize',obj.guiPar.fontsize,'-shape',nodebox,'-color',nodecolor,...
                 '-edgeColor',edgecolor);
+        end
+        
+        function showinfo(obj,edit)           
+            txt=obj.description;
+            if isempty(obj.infofigure)||~isvalid(obj.infofigure)
+                obj.infofigure=figure;
+            end
+            delete(obj.infofigure.Children);
+            f=obj.infofigure;
+            he=uicontrol('Style','edit','units','normalized','Position',[0 0.65 1 .35],'String',txt,'Max',100,'Parent',f,'HorizontalAlignment','left');
+            hplugin=uicontrol('Style','edit','units','normalized','Position',[0 0.1 1 .55],'String',txt,'Max',100,'Parent',f,'HorizontalAlignment','left');
+            b2=uicontrol('Style','pushbutton','units','normalized','Position',[0.75 0 .25 .1],'String','Cancel','Callback',{@buttoncallback},'Parent',f);
+            if edit
+                b1=uicontrol('Style','pushbutton','units','normalized','Position',[0 0 .25 .1],'String','Accept changes','Parent',f,'Callback',{@buttoncallback});
+            else
+%                 he.Enable='inactive';
+            end    
+%             hplugin.Enable='inactive';
+            function buttoncallback(object,b)
+                if ~strcmp(object.String,'Cancel')
+                    obj.description=he.String;
+                end
+                close(f)
+            end  
+            for k=1:length(obj.modules)
+                info=obj.modules{k}.module.info;
+                txtp{k}=[num2str(k) '. ' info.name ': ' info.description];
+            end
+            hplugin.String=txtp;
+        end
+        
+        function fieldvisibility(obj,varargin)
+            for k=1:obj.numberOfModules
+                mh=obj.modules{k}.module;
+                mh.simplegui=obj.simplegui;
+                mh.fieldvisibility(varargin{:});
+            end
         end
     end
     methods (Access=private)      
@@ -499,29 +578,10 @@ classdef Workflow<interfaces.DialogProcessor
                 end
             end
         end
+        
         function info_callback(obj,a,b)
-            txt=obj.description;
-            answ=inputdlg('Edit WF description','WF description',20,{txt},'on');
-            if ~isempty(answ)
-                obj.description=answ{1};
-            end           
+            obj.showinfo(true)
         end
-%         function move_callback(obj,a,b,dir)
-%             select=obj.guihandles.modulelist.Value;
-%             lenlist=length(obj.guihandles.modulelist.String);
-%             newpos=select+dir;
-%             if newpos<=lenlist&&newpos>0
-%                 obj.modules([select,newpos])=obj.modules([newpos,select]);
-%             end
-%             obj.guihandles.modulelist.Value=newpos;
-%             obj.updateModuleList;
-%             
-%             obj.setinputlist;
-% %         end
-%         function clear_callback(obj,a,b)
-%             obj.clear;
-%             obj.makeGui;
-%         end
     end
 end
 

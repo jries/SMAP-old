@@ -47,25 +47,59 @@ classdef GuiHistSlider< interfaces.LayerInterface
         function updateGui(obj)
 %             obj.field=[];
         end
-        function selectedField_callback(obj)
-            
+        function selectedField_callback(obj,direct)
+            if nargin<2
+                direct=false;
+            end
             sfield=obj.getPar('selectedField','layer',obj.layer);
             if length(sfield)<5||~sfield{5}
                 return
             end
             filenumber=obj.getPar(['layer' num2str(obj.layer) '_']).ch_filelist.Value;
             fieldh=sfield{1};
-            if isempty(obj.locData.loc)||~isfield(obj.locData.loc,fieldh)
+            if isempty(obj.locData.loc)
                 return
             end
-            obj.guihandles.field.String=fieldh;
-            obj.guihandles.vmin.String=num2str(sfield{2});
-            obj.guihandles.vmax.String=num2str(sfield{3});
+%             if ~isfield(obj.locData.loc,fieldh)
+                switch fieldh
+                    case 'shiftxy'
+                        obj.guihandles.smin.Min=-500;
+                        obj.guihandles.smin.Max=500;
+                        obj.guihandles.smax.Min=-500;
+                        obj.guihandles.smax.Max=500;
+                    case 'imax'
+                        lp=obj.getPar('','layer',obj.layer);
+                        imaxtoggle=lp.imaxtoggle;
+                        if imaxtoggle
+                        obj.guihandles.smin.Min=-5;
+                        obj.guihandles.smin.Max=-1;
+                        obj.guihandles.smax.Min=-1;
+                        obj.guihandles.smax.Max=-1+0.001;
+                        obj.guihandles.smax.Value=-1;
+                        obj.guihandles.vmax.String=num2str(-1+.001);
+                        obj.guihandles.field.String='Contrast (q)';
+                        else
+                            img=obj.locData.layer(obj.layer).images.srimage.image;
+                            maximg=max(img(:))*1.4;
+                        obj.guihandles.smin.Min=0;
+                        obj.guihandles.smin.Max=maximg;
+                        obj.guihandles.smax.Min=maximg;
+                        obj.guihandles.smax.Max=maximg*1.001;
+                        obj.guihandles.smax.Value=maximg*1.001;
+                        obj.guihandles.vmax.String=num2str(maximg*1.001);
+                        obj.guihandles.field.String='Contrast (Imax)';
+                        end
+                    otherwise
+                        obj.guihandles.field.String=fieldh;
+                        obj.guihandles.vmin.String=num2str(sfield{2});
+                        obj.guihandles.vmax.String=num2str(sfield{3});
+                end
+
             if length(sfield)>3&&~isempty(sfield{4})
                 obj.guihandles.filteron.Value=sfield{4};
             end
             
-            if isfield(obj.backup,fieldh)&&~strcmpi(fieldh,'colorfield')...
+            if isfield(obj.backup,fieldh)&& myisfield(obj.locData,fieldh)&&~strcmpi(fieldh,'colorfield')...
                     &&obj.backup.(fieldh).len==length(obj.locData.loc.(fieldh))...
                     &&obj.backup.(fieldh).histogram.filenumber == filenumber; 
                 restorestruc=obj.backup.(fieldh);
@@ -74,21 +108,21 @@ classdef GuiHistSlider< interfaces.LayerInterface
                 restore=false;
             end
              %backup
-            if ~isempty(obj.field) %first tiem might be empty
+            if ~isempty(obj.field) && myisfield(obj.locData.loc,fieldh) %first tiem might be empty
                 obj.backup.(obj.field).lockrange=obj.guihandles.lockrange.Value;
 %                 obj.backup.(obj.field).quantile=obj.data.quantile;
                 obj.backup.(obj.field).range=obj.guihandles.range.String;
                 obj.backup.(obj.field).histogram=obj.histogram;
                 obj.backup.(obj.field).len=length(obj.locData.loc.(fieldh));
             end
+%             if obj.field==fieldh
+%                 restore=false;
+%             end
             obj.field=fieldh;
             
-            if strcmp(fieldh,'shiftxy')
-                obj.guihandles.smin.Min=-500;
-                obj.guihandles.smin.Max=500;
-                obj.guihandles.smax.Min=-500;
-                obj.guihandles.smax.Max=500;
-            elseif restore  && ~isempty(restorestruc.histogram)
+%             if strcmp(fieldh,'shiftxy')
+                
+            if restore  && ~isempty(restorestruc.histogram)&&~direct
                 obj.guihandles.lockrange.Value=restorestruc.lockrange;
                 obj.guihandles.range.String=restorestruc.range;
 %                 obj.data.quantile=restorestruc.quantile;
@@ -98,8 +132,7 @@ classdef GuiHistSlider< interfaces.LayerInterface
                 obj.guihandles.smax.Min=q(1);
                 obj.guihandles.smax.Max=q(2);
                 obj.histogram=restorestruc.histogram;        
-            else
-                if 1%~isempty(obj.locData.loc)&&isfield(obj.locData.loc,fieldh)
+            elseif isfield(obj.locData.loc,fieldh)
                     v=double(obj.locData.loc.(fieldh)(obj.locData.loc.filenumber==filenumber));
                     q=getquantile(v);
                     
@@ -110,8 +143,13 @@ classdef GuiHistSlider< interfaces.LayerInterface
                     set(obj.guihandles.smax,'Min',q(1),'Max',q(2),'Value',q(2))
                     [obj.histogram.x,obj.histogram.hist]=makeHist(v,q);
                     obj.histogram.filenumber=filenumber;
-                    
-                end
+
+            else
+                obj.guihandles.lockrange.Value=0;
+                dx=(-obj.guihandles.smin.Min+obj.guihandles.smin.Max)/50;
+                obj.histogram.x=obj.guihandles.smin.Min:dx:obj.guihandles.smin.Max;
+                obj.histogram.hist=ones(size(obj.histogram.x));
+%                 obj.histogram.x
             end
             
             if ~isempty(obj.locData.loc)&&isfield(obj.locData.loc,fieldh)
@@ -155,37 +193,41 @@ end
 p=obj.getGuiParameters;
 filenumber=obj.getPar(['layer' num2str(obj.layer) '_']).ch_filelist.Value;
 if isnan(p.vmin)
-    p.vmin=-inf;
+    ph.vmin=-inf;
+else
+    ph.vmin=p.vmin;
 end
 if isnan(p.vmax)
-    p.vmax=inf;
+    ph.vmax=inf;
+else
+    ph.vmax=p.vmax;
 end
 if p.lockrange
     switch minmax
         case {'min'}
-            p.vmax=p.vmin+p.range;
+            ph.vmax=ph.vmin+p.range;
         case 'max'
-            p.vmin=p.vmax-p.range;
+            ph.vmin=ph.vmax-p.range;
         case 'minmax'
-            p.vmin=p.vmax-p.range;         
+            ph.vmin=ph.vmax-p.range;         
     end            
 else
-   p.range=p.vmax-p.vmin; 
+   ph.range=ph.vmax-ph.vmin; 
 end
 
-if p.vmin==p.vmax
-    p.vmax=p.vmin+1e-4;
+if ph.vmin==ph.vmax
+    ph.vmax=ph.vmin+1e-4;
 end
 hsmin=obj.guihandles.smin;
-p.smin=min(max(p.vmin,hsmin.Min),hsmin.Max);
+ph.smin=min(max(ph.vmin,hsmin.Min),hsmin.Max);
 hsmax=obj.guihandles.smax;
-p.smax=min(max(p.vmax,hsmax.Min),hsmax.Max);
+ph.smax=min(max(ph.vmax,hsmax.Min),hsmax.Max);
 
-obj.setGuiParameters(p);
+obj.setGuiParameters(ph);
 
 % q=obj.data.quantile;
-if isempty(obj.histogram)|| obj.histogram.filenumber ~=filenumber%check if filenumber has changed   
-    v=double(obj.data.values(obj.locData.loc.filenunber==filenumber));
+if isempty(obj.histogram)|| (myisfield(obj.histogram,'filenumber')&&obj.histogram.filenumber ~=filenumber)%check if filenumber has changed   
+    v=double(obj.data.values(obj.locData.loc.filenumber==filenumber));
     q=getquantile(v);
     [obj.histogram.x,obj.histogram.hist]=makeHist(v,q);
     obj.histogram.filenumber=filenumber;
@@ -218,7 +260,7 @@ hlayer(1,1)=0;hlayer(1,end)=0;
 plot(x(:),hlayer(:)/max(hlayer)*max(his),'r','Parent',obj.guihandles.histax)
 
 if direct 
-    sf={obj.field,p.vmin,p.vmax,p.filteron,true};
+    sf={obj.field,ph.vmin,ph.vmax,p.filteron,true};
     obj.setPar('selectedField',sf,'layer',obj.layer)
 end
 
@@ -262,7 +304,7 @@ switch minmax
         h.vmax.String=num2str(h.smax.Value);
 end
 vchanged_callback(object,data, obj,minmax,1)
-obj.selectedField_callback;
+ obj.selectedField_callback(1);
 end
 
 function showchanged_callback(object,data,obj)

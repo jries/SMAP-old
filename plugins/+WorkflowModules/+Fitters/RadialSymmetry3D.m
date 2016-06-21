@@ -65,4 +65,5 @@ end
 
 function pard=guidef
 pard.plugininfo.type='WorkflowFitter';
+pard.plugininfo.description='Adepted from: H. Ma, J. Xu, J. Jin, Y. Gao, L. Lan, and Y. Liu, ?Fast and Precise 3D Fluorophore Localization based on Gradient Fitting.,? Sci. Rep., vol. 5, p. 14335, 2015.';
 end

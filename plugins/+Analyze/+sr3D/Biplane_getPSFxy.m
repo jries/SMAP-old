@@ -2,11 +2,15 @@ classdef Biplane_getPSFxy<interfaces.DialogProcessor
     methods
         function obj=Biplane_getPSFxy(varargin)        
                 obj@interfaces.DialogProcessor(varargin{:}) ;   
+           obj.showresults=false;
+            obj.history=true;                
         end
         
         function out=run(obj,p)
-           
+           out=[];
             tload=load(p.Tfile);
+           obj.setPar('undoModule','Biplane_get_PSFxy');
+            notify(obj.P,'backup4undo');
             if ~isfield(tload,'transformation')
                 out.error='selected transformation file does not have a valid transformation';
                 return

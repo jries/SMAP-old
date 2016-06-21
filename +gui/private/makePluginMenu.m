@@ -6,6 +6,8 @@ hexit=uimenu(hsmap,'Label','Quit SMAP','Callback',{@exit_callback,obj});
 
 hrename=uimenu(hsmap,'Label','Rename window','Callback',{@renamewindow_callback,obj});
 
+hsimplegui=uimenu(hsmap,'Label','Hide advanced controls','Callback',{@simplegui_callback,obj});
+
 hmainplugin=uimenu(handle,'Label','Plugins');
 % hwf=uimenu(handle,'Label','Workflows');
 mwf1=uimenu(hmainplugin,'Label','New workflow','Callback',{@makeplugin,obj,'Workflow'});
@@ -140,4 +142,14 @@ end
 jDesktop = com.mathworks.mde.desk.MLDesktop.getInstance;
 jDesktop.getMainFrame.setTitle(answ{1});
 clear jDesktop;
+end
+
+function simplegui_callback(hmenu,b,obj)
+if strcmp(hmenu.Checked,'off')
+    hmenu.Checked='on';
+    obj.setPar('globalGuiState','s')
+else
+   hmenu.Checked='off';
+   obj.setPar('globalGuiState','a')
+end
 end

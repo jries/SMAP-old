@@ -71,23 +71,35 @@ pard.loc_subtractbg.Width=2;
 pard.loc_subtractbg.TooltipString=sprintf('If checked, the background is subtracted for Peak finding. \n This does NOT mean, that fitting is performed on the background corrected images.');
 pard.text1.object=struct('Style','text','String','Wavelet filtering:');
 pard.text1.position=[2,1];
+pard.text1.Optional=true;
+
 
 pard.loc_wavelet_atrous.object=struct('Style','checkbox','String','fast a trous','Value',0,'Callback',{{@atrous_callback,obj}});
 pard.loc_wavelet_atrous.position=[2,2];
 pard.loc_wavelet_atrous.Width=1.3;
 pard.loc_wavelet_atrous.TooltipString=sprintf('If checked, the a trous algorithm is used. Only level 2. Can be faster on GPU.');
+pard.loc_wavelet_atrous.Optional=true;
+
 
 pard.text2.object=struct('Style','text','String','Wavelet level');
 pard.text2.position=[3,1.3];
+pard.text2.Optional=true;
+
+
 pard.loc_wavelet_level.object=struct('Style','edit','String','3');
 pard.loc_wavelet_level.position=[3,2.3];
 pard.loc_wavelet_level.Width=.7;
 pard.loc_wavelet_level.TooltipString=sprintf('Wavelet level for background correction. Typical: 3 (range: 2-6)');
+pard.loc_wavelet_level.Optional=true;
+
 
 pard.loc_wavelet_refine.object=struct('Style','checkbox','String','Refined background estimation (slower)','Value',0);
 pard.loc_wavelet_refine.position=[4,1.3];
 pard.loc_wavelet_refine.Width=2;
 pard.loc_wavelet_refine.TooltipString=sprintf('Iterative refinement of background estimation. \n Slower, only use for high background and when detection of weak fluorophores is necessary.');
+pard.loc_wavelet_refine.Optional=true;
+
 
 pard.plugininfo.type='WorkflowModule';
+pard.plugininfo.description='Wavelet based background estimation. Two implementeations: A trous (can be faster on GPU, but only level 2, adepted from I. Izeddin, J. Boulanger, V. Racine, C. G. Specht, A. Kechkar, D. Nair, A. Triller, D. Choquet, M. Dahan, and J. B. Sibarita, ?Wavelet analysis for single molecule localization microscopy,? Opt Express, vol. 20, no. 3, pp. 2081?2095, Jan. 2012.) and a direct discreet wavelet transform.';
 end

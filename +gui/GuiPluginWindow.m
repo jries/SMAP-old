@@ -18,6 +18,18 @@ classdef GuiPluginWindow< interfaces.GuiModuleInterface & interfaces.LocDataInte
             else
                 h.(obj.maindir)=obj.tabgroup;
             end
+            
+%             htg=h.(obj.maindir);
+            obj.adjusttabgroup(h.(obj.maindir));
+%             if ispc
+%             else
+%                 htg.Units='pixel';
+%                 htg.Position(1)=htg.Position(1)-8;
+%                 htg.Position(3)=htg.Position(3)+16;
+%                 htg.Position(2)=htg.Position(2)-12;
+%                 htg.Position(4)=htg.Position(4)+16;
+%                 htg.Units='normalized';
+%             end
             obj.guihandles=h;
             guiplugins=obj.guiplugins;
             if ~isempty(guiplugins)
@@ -59,7 +71,11 @@ classdef GuiPluginWindow< interfaces.GuiModuleInterface & interfaces.LocDataInte
                 screenname=name;
             end
                     
-                    obj.guihandles.(['tab_' name])=uitab(obj.guihandles.(obj.maindir),'Title',screenname,'Tag',name);
+                    ht=uitab(obj.guihandles.(obj.maindir),'Title',screenname,'Tag',name);
+%                     ht.units='pixels';
+%                     ht.Position(
+%                     ht.units='normalized';
+                    obj.guihandles.(['tab_' name])=ht;
 %                     if isstruct(obj.guiplugins.(name))
                     if ~isfield(obj.guiplugins.(name),'module')    
                         pluging=gui.GuiPluginGroup(obj.guihandles.(['tab_' name]),obj.P);

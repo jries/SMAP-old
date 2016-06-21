@@ -11,7 +11,9 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
         function makeGui(obj)            
             %make channel tabs
             h.layertab=uitabgroup(obj.handle,'SelectionChangedFcn',{@selectLayer_callback,obj});
+            obj.adjusttabgroup(h.layertab);
             h.tab_layer1=uitab(h.layertab,'Title',['Layer' num2str(1)]);
+            
             h.tab_addlayer=uitab(h.layertab,'Title','+');   
             h.reconstruct=uicontrol(obj.handle,'Units','pixels','Position',[15 17,150,35],'String','Reconstruct','Tag','reconstructbutton','FontSize',obj.guiPar.fontsize*1.5,...
                 'Callback',@obj.render_callback);
@@ -67,7 +69,11 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
              layer.makeGui;
              if isfield(obj.children,'Layer1')
                  pold=getGuiParameters(obj.children.Layer1);
+                 s=obj.getPar('filtertable','layer',1);
+                 obj.setPar('filtertable',s,'layer',layer.layer);
                  layer.setGuiParameters(pold);
+                 layer.setvisibility;
+                 layer.setfiltergray;
              end
              layer.updateLayerField;
              obj.children.(['Layer' num2str(k)])=layer;

@@ -11,7 +11,7 @@ classdef fitterGUI<interfaces.WorkflowModule
             obj.outputParameters={'bg_dx','bg_dt','subtractbg'};
         end
         function pard=guidef(obj)
-            pard=guidef;
+            pard=guidef(obj);
         end
 %         function makeGui(obj)
 %             makeGui@recgui.WorkflowModule(obj);
@@ -41,6 +41,7 @@ classdef fitterGUI<interfaces.WorkflowModule
 
         
         function loadfitters(obj)
+            t1=obj.plugininfo.description;
             fitnames={'EMCCD_SE_MLE_GPU','RadialSymmetry2D','RadialSymmetry3D'};
             obj.guihandles.fitterlist.String=fitnames;
             p=obj.guiPar;
@@ -58,22 +59,26 @@ classdef fitterGUI<interfaces.WorkflowModule
                 hp=uipanel(obj.handle,'Units','pixels','Position',panelpos,'Visible','off');
                 fitter.handle=hp;
                 fitter.setGuiAppearence(p);
+                fitter.simplegui=obj.simplegui;
                 fitter.makeGui;
                 obj.children.(fitnames{k})=fitter;
                 obj.fitters{k}=fitter;
                 obj.guihandles.([fitnames{k} '_panel'])=hp;
+                t1=[t1 13 '   ' 96+k '. ' fitter.info.name fitter.info.description];
             end
             obj.fitters{1}.handle.Visible='on';
             obj.currentfitter=obj.fitters{1};
+            obj.plugininfo.description=t1;
+        end
+        function fieldvisibility(obj,varargin)
+            fieldvisibility@interfaces.GuiModuleInterface(obj,varargin{:});
+            fn=fieldnames(obj.children);   
+            for k=1:length(fn)
+                    obj.children.(fn{k}).fieldvisibility(varargin{:});
+            end
         end
         
-%         function updateGui(obj)
-%             metadata=readmetadata(obj); 
-%             if ~isempty(metadata)
-%                 obj.loc_cameraSettings=metadata;    
-%             end
-%             obj.globpar.parameters.loc_cameraSettings=obj.loc_cameraSettings;
-%         end
+
     end
 end
 
@@ -87,7 +92,7 @@ obj.currentfitter=fitter;
 
 end
 
-function pard=guidef
+function pard=guidef(obj)
 pard.fitterlist.object=struct('Style','listbox','String','EMCCD: Single Emitter|sCMOS: Single Emitter|EMCCD: Multiple Emitter|sCMOS: Mulitple Emitter');
 pard.fitterlist.position=[4,1];
 pard.fitterlist.Height=3;
@@ -99,6 +104,8 @@ pard.fitterlist.TooltipString=sprintf('Select here which Fitter plugin is used.'
 
 pard.outputParameters={'loc_fitOnBackground'};
 pard.plugininfo.type='WorkflowModule';
+t1='Intermediate GUI to select a fitter.';
+pard.plugininfo.description=t1;
 % pard.fitterPanel.object=struct('Style','uipanel','String','parameters');
 % pard.fitterPanel.position=[4,2];
 % pard.fitterPanel.Height=4;

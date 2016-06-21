@@ -30,7 +30,7 @@ if p.overview
     ax3=subplot(3,2,3);ax3.Position(3)=ax3.Position(3)*sf;
     ax4=subplot(3,2,4);ax4.Position(3)=ax4.Position(3)*sf;
     ax5=subplot(3,2,5);ax5.Position(3)=ax5.Position(3)*sf;
-    ax6=subplot(3,2,6);ax6.Position(3)=ax6.Position(3)*sf;
+    ax6=subplot(3,2,6);ax6.Position(3)=ax6.Position(3)*sf;ax7=[];
 else
     ax1=initaxis(p.resultstabgroup,'Photons');
     ax1.Position(3)=0.55;
@@ -42,9 +42,9 @@ else
     ax4.Position(3)=0.55;
     ax5=initaxis(p.resultstabgroup,txt);
     ax5.Position(3)=0.55;
-    ax6=initaxis(p.resultstabgroup,['error ' txt]);
-    ax6.Position(3)=0.55;
     if zexist
+        ax6=initaxis(p.resultstabgroup,['error ' txt]);
+        ax6.Position(3)=0.55;
         ax7=initaxis(p.resultstabgroup,['error ' txt ' vs ' txt]);
         ax7.Position(3)=0.55;
     end
@@ -191,7 +191,7 @@ if zexist
 else
     v=getFieldAsVector(locs,'PSFxnm');
 end
-hz=plothist(v,.99,[],0,ax5);
+hz=plothist(v,.99,[],[],ax5);
 sls={txt};
 for k=1:length(datrange)
     sls{end+1}='';
@@ -296,7 +296,7 @@ qfac=log10(lmax)-1;
 if nargin==2||isempty(dphot)
 dphot=(10^ceil(log10(qmax/qfac)))/100;
 end
-if nargin<4
+if nargin<4||isempty(hmin)
     hmin=qmin;
 end
 nphot=hmin:dphot:qmax;

@@ -36,4 +36,5 @@ pard.loc_previewmode.position=[2,1];
 pard.loc_previewmode.Width=1.5;
 pard.loc_previewmode.TooltipString=sprintf('Determine which image to display in Preview mode. Peak finding is performed on norm(image)');
 pard.plugininfo.type='WorkflowModule';
+pard.plugininfo.description='Select which image to display during preview.';
 end

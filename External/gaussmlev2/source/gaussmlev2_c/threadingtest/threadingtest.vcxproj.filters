@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{c1b37b95-bf53-482d-9474-5addb9aa7f2a}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;cu;cuh</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{4d698a00-6ad1-4dbc-ac73-41a713bf6553}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd;</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{961c79b7-22f9-4417-992d-262158d484be}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;def;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="matlab.def">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="mexFunction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

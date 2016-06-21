@@ -1,0 +1,78 @@
+\documentclass[11pt,letterpaper]{article}
+%\usepackage{sty/opex3}
+
+\usepackage{fullpage,times}
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+\begin{document}
+This code is distributed as accompanying software for the article {\it Fast, single-molecule localization that achieves theoretically minimum uncertainty} by Carlas S. Smith, Nikolai Joseph, Bernd Rieger \& Keith A. Lidke.
+
+\section{General Concept}
+This code performs a maximum likelihood estimate of particle position, emission rate (photons/frame), and background rate (photons/pixels/frame). The found values are used to calculate the Cramer-Rao Lower Bound (CRLB) for each parameter and the CRLBs are returned along with the estimated parameters. The input is one or more identically sized images, each of which is assumed to contain a single fluorophore.  Since the maximum likelihood estimate assumes Poisson statistics, images must be converted from arbitrary ADC units to photon counts.
+
+Because of the parallel nature of the GPU computation, maximum fits/second will be achieved when the number of input images exceeds 1000 (this is GPU card dependent).  Therefore, for fitting it is desirable to preprocess the data so that all desired fits are arranged in a single 3D data stack.  This code does not provide preprocessing functions.
+
+Additional estimates of $\sigma_{PSF}$, $\sigma_{PSF_x}$ and $\sigma_{PSF_y}$, or $z$ can also be performed.   The example code given here demonstrates basic fitting using each of these models. 
+
+The low level code is provided as a MATLAB-mex file. Fitting must be performed inside the MATLAB environment. At this time, included are mex files for Windows 64-bit  and MacOS. A matlab only implementation is also included as a fallback and as demonstration code. Further OS and GPU varients may be inluded in future releases.   
+
+\section{Installation}
+
+\subsection{MATLAB}
+The provided scripts use Matlab ({\tt http://www.mathworks.com}). No additional toolboxes are required.
+
+\subsection{GPU setup}
+To use GPU code, an NVIDIA 8000 series or newer graphics card must be installed as the primary display driver. Both the CUDA Driver and the CUDA Toolkit must be installed.  These can be obtained here:\\
+{\tt http://www.nvidia.com/object/cuda\_get.html}
+%[Is there a need for a certain version??]
+
+\subsection{Windows 7 and Vista registry modification}
+If you are using Vista, you may want to change the display timeout value in the Windows Registry. The default value is 2 seconds, meaning that the card might be reset by Windows before completing fitting on large data sets. This should NOT be necessary to run the example code.
+
+\textbf{Warning}: Messing with the windows registry can cause complete failure of your operating system. If you're not sure what you are doing, get help from someone (who knows what they are doing). We take no responsibility for any results of this action. 
+
+\pagebreak
+Following the article:\\
+{\tt http://www.microsoft.com/whdc/device/display/wddm\_timeout.mspx}\\
+in \\
+{\tt HKLM$\backslash$System$\backslash$CurrentControlSet$\backslash$Control$\backslash$GraphicsDrivers}\\
+ create a DWORD named 'TdrDelay'. (rightclick$\rightarrow$new$\rightarrow$DWORD) Give it a suitable value, 10 is fine, meaning 10 seconds. This can be set longer if you still have timeout issues. Reboot.
+
+\subsection{DIPimage}
+The example code can use some functions from the DIPimage Toolbox for display. DIPimage is a freely available image processing toolbox for MATLAB:\\
+{\tt http://www.diplib.org/}\\
+An installer for Windows is available.  The example code is annotated such that a typical user should be able to modify this to accommodate other or no image processing toolboxes.
+
+\section{Using GPUgaussMLE.m}
+The example code should run correctly when it is located in your current MATLAB working directory or path. The main example code is in the script {\tt TestGPUgaussMLE.m}.
+
+\section{Terms of use}
+{\small
+\begin{verbatim}
+Copyright (c) 2009 Keith A. Lidke & Bernd Rieger
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details,
+see www.gnu.org.
+\end{verbatim}
+}
+
+\begin{tabular}{ll}
+Department of Physics \& Astronomy&Quantitative Imaging Group\\
+800 Yale Blvd. N.E., MSC 07 4220 &Faculty of Applied Sciences\\
+University of New Mexico         &Delft University of Technology\\
+Albuquerque        &Lorentzweg 1\\
+NM 87131-1156&2628 CJ Delft\\
+USA&The Netherlands\\
+klidke@unm.edu & b.rieger@tudelft.nl
+\end{tabular}
+
+\end{document}

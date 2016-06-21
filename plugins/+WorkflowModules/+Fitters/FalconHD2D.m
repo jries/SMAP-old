@@ -99,5 +99,6 @@ pard.t2.position=[2,1];
 pard.speed.object=struct('Style','popupmenu','String',{{'fast','normal','slow'}});
 pard.speed.position=[2,2];
 pard.plugininfo.type='WorkflowModule';
+pard.plugininfo.description='FALCON high-density localizer. Speed-optimized version of:	J. Min, C. Vonesch, H. Kirshner, L. Carlini, N. Olivier, S. Holden, S. Manley, J. C. Ye, and M. Unser, ?FALCON: fast and unbiased reconstruction of high-density super-resolution microscopy data.,? Sci. Rep., vol. 4, p. 4577, 2014.';
 end
 
