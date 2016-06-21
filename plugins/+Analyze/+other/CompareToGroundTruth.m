@@ -23,6 +23,9 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
                 shiftx=0;
                 shifty=0;
             end
+            if p.shiftframe
+                lochere.loc.frame=lochere.loc.frame+1;
+            end
             lochere.loc.xnm=lochere.loc.xnm+shiftx;
             lochere.loc.ynm=lochere.loc.ynm+shifty;
             descfile=saveLocalizationsCSV(lochere,filenew,p.onlyfiltered,p.numberOfLayers,p.sr_layerson);
@@ -67,8 +70,12 @@ pard.shiftpix.object=struct('Style','checkbox','String','Shift by 0.5 camera pix
 pard.shiftpix.position=[3,1];
 pard.shiftpix.Width=4;
 
-pard.comparer.object=struct('Style','popupmenu','String',{{'2D, 2013','3D, 2016'}});
-pard.comparer.position=[4,1];
+pard.shiftframe.object=struct('Style','checkbox','String','Shift frame by +1','Value',1);
+pard.shiftframe.position=[4,1];
+pard.shiftframe.Width=4;
+
+pard.comparer.object=struct('Style','popupmenu','String',{{'2D, 2013','3D, 2016'}},'Value',2);
+pard.comparer.position=[5,1];
 pard.comparer.Width=4;
 
 pard.plugininfo.type='ProcessorPlugin';
