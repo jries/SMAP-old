@@ -59,12 +59,19 @@ classdef intensityTiff<interfaces.SEEvaluationProcessor
 %                 if fitp(4)<pos(2), fitp(4)=min(fitp(4),pos(2)-p.mind); else fitp(4)=max(fitp(4),pos(2)+p.mind); end
                 
                 fitim=dgaussforfit(fitp,X,Y,fixp);
+                
+                startp2=[fitp pos(1) pos(2)];
+                fixp2=fixp;
+                fitp2=doublegaussfit2(coim,rangex,rangey,startp2,fixp2);
+                
+%                 fitimfree=dgaussforfit2(fitp2,X,Y,fixp2);
                 ax=obj.setoutput('image');
                 
                 imagesc(rangex,rangey,coim,'Parent',ax)
                  axis(ax,'equal')
                 ax.NextPlot='add';
                 plot(pos(1),pos(2),'ko','Parent',ax)
+                 plot(fitp2(7),fitp2(8),'kx','Parent',ax)
                 d=sqrt((fitp(3)-pos(1))^2+(fitp(4)-pos(2)).^2);
                 sx=(rangex(end)-rangex(1))/2;
                 dv=(fitp(3:4)-pos(1:2));
@@ -98,6 +105,8 @@ classdef intensityTiff<interfaces.SEEvaluationProcessor
                 axis(ax4,'equal')
                 out.Amplitude1=fitp(1);
                 out.Amplitude2=fitp(2);
+                out.xcent=fitp2(7);
+                out.ycent=fitp2(8);
         end
         function pard=guidef(obj)
             pard=guidef;
@@ -145,6 +154,12 @@ pard.dxfield.Width=3.5;
 pard.dyfield.object=struct('Style','edit','String','CME2DRing.imfit.y0');
 pard.dyfield.position=[7,1.5];
 pard.dyfield.Width=3.5;
+
+% 
+% pard.fitxy.object=struct('Style','checkbox','String','Fit also position of DL peaks');
+% pard.fitxy.position=[6,1];
+% pard.fitxy.Width=4;
+
 pard.plugininfo.type='ROI_Evaluate';
 
 end
@@ -176,6 +191,32 @@ out=double(A1* exp( - ((X-x1).^2+(Y-y1).^2)/sigma1^2/2)+A2* exp( - ((X-x2).^2+(Y
 
 end
 
+
+
+function fit=doublegaussfit2(img,rangex,rangey,startp,fixp)
+[X,Y]=meshgrid(double(rangex),double(rangey));
+lb=[0 0 -inf -inf 150 0 -inf -inf];ub=[inf inf inf inf 750 inf inf inf];
+fit=lsqnonlin(@dgaussforfiterr2,double(startp),lb,ub,[],double(img),X,Y,fixp);
+
+end
+function out=dgaussforfiterr2(fitp,img,X,Y,fixp)
+out=dgaussforfit2(fitp,X,Y,fixp)-img;
+end
+function out=dgaussforfit2(fitp,X,Y,fixp)
+% fitp: A1 A2 x2 y2 sigma2 bg
+%fixp x1, y1, sigma1
+
+A1=fitp(1); A2=fitp(2); x2=fitp(3); y2=fitp(4); sigma2=fitp(5); bg=fitp(6);
+
+d=fixp(4);
+x1=fitp(7);y1=fitp(8); sigma1=fixp(3);
+%adjsut x1, y1
+% if x2<x1, x2=min(x2,x1-d); else x2=max(x2,x1+d); end
+% if y2<y1, y2=min(y2,y1-d); else y2=max(y2,y1+d); end
+[x2,y2]=restrictcoordiantes(x2,y2,x1,y1,d);
+out=double(A1* exp( - ((X-x1).^2+(Y-y1).^2)/sigma1^2/2)+A2* exp( - ((X-x2).^2+(Y-y2).^2)/sigma2^2/2)+bg);
+
+end
 
 function [x2,y2]=restrictcoordiantes(x2,y2,x1,y1,d)
 dvec=[x2-x1;y2-y1];
