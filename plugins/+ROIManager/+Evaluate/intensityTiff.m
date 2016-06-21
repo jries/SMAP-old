@@ -77,10 +77,11 @@ classdef intensityTiff<interfaces.SEEvaluationProcessor
                 dv=(fitp(3:4)-pos(1:2));
                 mv=max(abs(dv));
                 if mv<=sx
-                 plot(fitp(3),fitp(4),'kx','Parent',ax)
+                 plot(fitp(3),fitp(4),'k*','Parent',ax)
                 else
-                    dv=dv/mv*(sx+pixcam);
+                    dv=dv/mv*(sx+0.7*pixcam);
                     plot(pos(1)+dv(1),pos(2)+dv(2),'k*','Parent',ax)
+                    plot(pos(1)+dv(1),pos(2)+dv(2),'ko','Parent',ax)
                     ax.XLim=[rangex(1)-pixcam rangex(end)+pixcam];
                     ax.YLim=[rangey(1)-pixcam rangey(end)+pixcam];
                 end
@@ -107,6 +108,9 @@ classdef intensityTiff<interfaces.SEEvaluationProcessor
                 out.Amplitude2=fitp(2);
                 out.xcent=fitp2(7);
                 out.ycent=fitp2(8);
+                
+                out.Amplitudefreexy1=fitp2(1);
+                out.Amplitudefreexy2=fitp2(2);
         end
         function pard=guidef(obj)
             pard=guidef;
