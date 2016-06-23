@@ -128,9 +128,9 @@ classdef GuiChannel< interfaces.LayerInterface
                      obj.updatefields_callback(0,0,'locprecznm',[],false)
                      obj.updatefields_callback(0,0,'PSFxnm',false,false)
                 else
-                    obj.updatefields_callback(0,0,'PSFxnm',true,false)
+                    obj.updatefields_callback(0,0,'PSFxnm',[],false)
                     obj.updatefields_callback(0,0,'znm',false,false)
-                    obj.updatefields_callback(0,0,'locprecznm',false,false)
+                    obj.updatefields_callback(0,0,'locprecznm',[],false)
                 end                   
                 obj.updatefields_callback(0,0,'locprecnm',true,true)
                 obj.updatefields_callback(0,0,'frame',false,false)
