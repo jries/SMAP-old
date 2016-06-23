@@ -49,10 +49,12 @@ end
 
 function loco=get2ClocPSF(loc,transform,file,p)
 
- p.datapart.selection='all (R->T)';
+ p.datapart.selection='all (T->R)';
 loct=apply_transform_locs(loc,transform,file,p);
 
+% only valid parts?
 [iA,iB,uiA,uiB]=matchlocsall(renamefields(loc),renamefields(loct),0,0,1000);
+length(iA)/(length(uiA)+length(uiB))
 loco.PSFxnm_old=loc.PSFxnm;
 loco.PSFxnm=zeros(size(loc.xnm),'single');
 loco.PSFynm=zeros(size(loc.xnm),'single');
