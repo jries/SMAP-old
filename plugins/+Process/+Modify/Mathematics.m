@@ -45,7 +45,7 @@ pard.dataselect.object.TooltipString='choose localization file data set';
 
 pard.textb.object=struct('String','Channel','Style','text');
 pard.textb.position=[2,2];
-pard.channel.object=struct('Style','edit','String','0,1,2');
+pard.channel.object=struct('Style','edit','String','0 1 2');
 pard.channel.position=[2,3];
 
 pard.operator.object=struct('String','+|-|*|/','Style','popupmenu');
