@@ -56,9 +56,11 @@ else
 end
 datrange=1:length(locs);
 
-
+slegend={};
 % look at frames
 for k=datrange
+    slegend{end+1}=[modetxt{k} num2str(datrange(k))];
+    slegend{end+1}='';
     frames=locs{k}.frame;
     mf=max(frames);
     [hfr,n]=hist(frames,10);
@@ -94,7 +96,7 @@ if ploton
         plot(axf,ones(2,1)*stat.frames.falloff(k),[0,max(stat.frames.histogram(k).h)])
     end
 end
-
+legend(axf,slegend);
 %photon stats
 phot=getFieldAsVector(locs,'phot');
 if isempty(phot{1})
