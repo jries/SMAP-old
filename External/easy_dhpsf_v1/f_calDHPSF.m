@@ -84,6 +84,8 @@ else
 end
 
 [darkFile, darkPath] = uigetfile({'*.tif';'*.*'},'Open image stack with dark counts (same parameters as calibration)');
+    
+    
 [logFile, logPath] = uigetfile({'*.dat';'*.txt';'*.*'},'Open sequence log file for calibration');
 logFile = [logPath logFile];
 if isequal(logFile,0)
@@ -98,12 +100,12 @@ imgHeight = dataFileInfo.Height;
 imgWidth = dataFileInfo.Width;
 
 if channel == '0'
-    outputFilePrefix = [dataFile(1:length(dataFile)-4) '\calibration ' ...
-        datestr(now,'yyyymmdd HHMM') '\'];
+    outputFilePrefix = [dataFile(1:length(dataFile)-4) filesep 'calibration ' ...
+        datestr(now,'yyyymmdd HHMM') filesep];
 
 else 
-    outputFilePrefix = [dataFile(1:length(dataFile)-4) '\' channel(1) ' calibration ' ...
-        datestr(now,'yyyymmdd HHMM') '\'];
+    outputFilePrefix = [dataFile(1:length(dataFile)-4) filesep channel(1) ' calibration ' ...
+        datestr(now,'yyyymmdd HHMM') filesep];
 
 end
 
@@ -125,7 +127,7 @@ if ~isequal(darkFile,0)
         darkAvg = imresize(darkAvg,[imgHeight imgWidth]);
     end
 else
-    darkAvg = 0;
+    darkAvg = 100; %Jonas XXX
 end
 clear darkFileInfo;
 
@@ -133,7 +135,7 @@ clear darkFileInfo;
 
 % Plots the avg image .tif
 dataAvg = zeros(imgHeight,imgWidth);
-for frame = 1:190
+for frame = 1:length(dataFileInfo)
     dataAvg = dataAvg + double(imread(dataFile,frame,'Info',dataFileInfo));
 end
 dataAvg = dataAvg/190 - darkAvg;
