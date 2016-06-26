@@ -290,13 +290,21 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             
         end
         
-        function saveloc=savelocs(obj,filename,goodind,additionalsave)
-            %saves localization data to specific filename. Only saves
-            %ungroupd locs. Returns saved structure:
+        function saveloc=savelocs(obj,filename,goodind,additionalsave,grouping)
+            %saves localization data to specific filename.  Returns saved structure:
             %saveloc=savelocs(filename,goodind)
             %goodind (optional): indices which to save (applies to all
             %fields). Default: save all localizations.
-            saveloc.loc=obj.loc;
+            %grouping: if true, saves grouped data.
+            if nargin<4||isempty(grouping)
+                grouping=false;
+            end
+            if grouping
+                locext='grouploc';
+            else
+                locext='loc';
+            end
+            saveloc.loc=obj.(locext);
             saveloc.file=obj.files.file;
             saveloc.history=obj.history;
             fieldsremove={'original_channel','groupindex','numberInGroup','colorfield'};

@@ -1,15 +1,36 @@
-function  [fdesc]=saveLocalizationsCSV(locData,file,saveroi,numberOfLayers,sr_layerson)
+function  [dato]=saveLocalizationsCSV(locData,file,saveroi,numberOfLayers,sr_layerson)
 if nargin<3
     saveroi=false;
 end
+
+
+    
 if saveroi
-    [~,indg]=locData.getloc('xnm','position','roi');  
+    %find if any layer is grouped
+    grouped=false;
+    nongrouped=false;
+    for k=1:numberOfLayers
+        if sr_layerson(k)
+            grouped=grouped|locData.isgrouped(k);
+            nongrouped=nongrouped|(~locData.isgrouped(k));
+        end
+    end
+    if grouped && nongrouped
+         warning('save visible works only for either grouped or ungrouped data, not for mixed')
+    end
+    if grouped
+        locext='grouploc';
+    else 
+        locext='loc';
+    end
+    
+    [~,indg]=locData.getloc('xnm','position','roi','grouping',grouped);  
     for k=1:numberOfLayers
         if sr_layerson(k)
            [~,indgh]=locData.getloc('xnm','layer',k); 
-           if length(indgh)~=length(indg)
-               disp('save visible works only for ungrouped data')
-           end
+%            if length(indgh)~=length(indg)
+%                disp('save visible works only for ungrouped data')
+%            end
            indg=indg&indgh;
        
         end
@@ -18,7 +39,7 @@ if saveroi
 else
     indg=[];
 end
-loc=locData.savelocs([],indg).loc; 
+loc=locData.savelocs([],indg,[],grouped).loc; 
 numlocs=length(loc.frame);
 dato=zeros(numlocs,6);
 dato(:,1)=1:numlocs;
@@ -29,11 +50,17 @@ if isfield(loc,'znm')
     dato(:,5)=loc.znm;
 end
 dato(:,6)=loc.phot;
+dato(:,7)=loc.bg;
+dato(:,8)=loc.locprecnm;
 
-csvwrite(file,dato);
-path=fileparts(file);
-if 1
+fid=fopen(file,'w');
+fprintf(fid, 'ID,frame,xnm,ynm,znm,phot,bg,locprecnm');
+fclose(fid);
+dlmwrite(file,dato, '-append');
+
+if 0
  %save description file
+ path=fileparts(file);
 fdesc=[path filesep 'file-description.xml'];
 fid=fopen(fdesc,'w');
 fprintf(fid,'<?xml version="1.0" encoding="UTF-8"?> \n <description> \n');
