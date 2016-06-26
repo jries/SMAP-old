@@ -54,7 +54,7 @@ dato(:,7)=loc.bg;
 dato(:,8)=loc.locprecnm;
 
 fid=fopen(file,'w');
-fprintf(fid, 'ID,frame,xnm,ynm,znm,phot,bg,locprecnm');
+fprintf(fid, 'ID,frame,xnm,ynm,znm,phot,bg,locprecnm \n');
 fclose(fid);
 dlmwrite(file,dato, '-append');
 
