@@ -139,7 +139,18 @@ descfile=dir([path filesep 'file-description.xml']);
     if ~isempty(descfile)
         pfile=pxml2p(xml2struct([path filesep descfile(1).name]));
     else
+        
         pfile.frame=1;pfile.xnm=2;pfile.ynm=3;pfile.znm=4;pfile.phot=5;
+        fnh=lower(fieldnames(tab));
+        ind=find(~cellfun(@isempty,strfind(fnh,'frame'))); if ~isempty(ind), pfile.frame=ind(1); end
+        ind=find(~cellfun(@isempty,strfind(fnh,'x'))); if ~isempty(ind), pfile.xnm=ind(1); end
+        ind=find(~cellfun(@isempty,strfind(fnh,'y'))); if ~isempty(ind), pfile.ynm=ind(1); end
+        ind=find(~cellfun(@isempty,strfind(fnh,'z'))); if ~isempty(ind), pfile.znm=ind(1); end
+        ind=find(~cellfun(@isempty,strfind(fnh,'intens'))); if ~isempty(ind), pfile.phot=ind(1); end
+        ind=find(~cellfun(@isempty,strfind(fnh,'phot'))); if ~isempty(ind), pfile.phot=ind(1); end
+        ind=find(~cellfun(@isempty,strfind(fnh,'bg'))); if ~isempty(ind), pfile.bg=ind(1); end
+        ind=find(~cellfun(@isempty,strfind(fnh,'backg'))); if ~isempty(ind), pfile.bg=ind(1); end
+
     end
         %dialog: rename
      pfile=importdialog(tab,pfile,obj);     

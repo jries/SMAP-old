@@ -68,6 +68,7 @@ if ~isdeployed
                         catch err
                             if ~strcmp(err.identifier,'MATLAB:scriptNotAFunction')
                                 warning(err.message)
+                                disp([fn1h,fn2h,fn3h])
                             end
                         end
                     end
