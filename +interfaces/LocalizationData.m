@@ -296,7 +296,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             %goodind (optional): indices which to save (applies to all
             %fields). Default: save all localizations.
             %grouping: if true, saves grouped data.
-            if nargin<4||isempty(grouping)
+            if nargin<5||isempty(grouping)
                 grouping=false;
             end
             if grouping
