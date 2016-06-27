@@ -26,6 +26,7 @@ classdef Mathematics<interfaces.DialogProcessor
                  locs.(field)(inall)=locs.(field)(inall)/p.value;
             end
             obj.locData.loc.(field)=locs.(field);
+            obj.locData.regroup;
 %             
         end
         function pard=guidef(obj)
