@@ -28,7 +28,7 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
             end
             lochere.loc.xnm=lochere.loc.xnm+shiftx;
             lochere.loc.ynm=lochere.loc.ynm+shifty;
-            descfile=saveLocalizationsCSV(lochere,filenew,p.onlyfiltered,p.numberOfLayers,p.sr_layerson);
+            [descfile]=saveLocalizationsCSV(lochere,filenew,p.onlyfiltered,p.numberOfLayers,p.sr_layerson);
             
             %modify challenge data
             challengepath=['External' filesep 'SMLMChallenge' filesep];
@@ -53,22 +53,87 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
             cd(oldp)
         end
         function pard=guidef(obj)
-            pard=guidef;
+            pard=guidef(obj);
         end
     end
 end
 
 
+function wobble_callback(a,b,obj)
+path=fileparts(obj.locData.files.file(1).name);
+gtfile=[path filesep 'activations.csv'];
+if ~exist(gtfile,'file')
+    ind=strfind(path,filesep); 
+    gtfile=[path(1:ind(end))  'activations.csv'];
+end
+ 
+if ~exist(gtfile,'file')
+    [fi,pa]=uigetfile(gtfile);
+    if fi
+    gtfile=[pa fi];
+    else
+        return
+    end
+end
 
+gtData=csvread(gtfile);
+% fullnameLoc = get(handles.text5,'String');
+%hasHeader = fgetl(fopen(fullnameLoc));
+%hasHeader = 1*(sum(isstrprop(hasHeader,'digit'))/length(hasHeader) < .6);
+%localData = csvread(fullnameLoc, hasHeader, 0);
+%SH: switched to importdata tool and defined columns to make more general
+% localData =importdata(fullnameLoc);
+% if isstruct(localData)
+%     %strip the header
+%     localData = localData.data;
+% end
+% xCol = str2num(get(handles.edit_x,'String'));
+% yCol = str2num(get(handles.editY,'String'));
+% frCol = str2num(get(handles.editFr,'String'));
+% 
+% fullnameGT = get(handles.text6,'String');
+% %assumes GT file is as defined in competition
+% %CSV file. X col 3, y col 4.
+% gtData = importdata(fullnameGT);
+XCOLGT =3;
+YCOLGT =4;
+gtAll = gtData(:,[XCOLGT,YCOLGT]);
+gt = unique(gtAll,'rows');
 
-function pard=guidef
+% frameIsOneIndexed = get(handles.radiobutton_is1indexed,'Value');
+% 
+% [pathstr,~,~] = fileparts(fullnameLoc); 
+% output_path = pathstr;
+% xnm = localData(:,xCol);
+% ynm = localData(:,yCol);
+% frame = localData(:,frCol);
+
+%might be set by the users in future updates
+zmin = -750;zmax = 750;zstep = 10;%nm
+roiRadius = 500;%nm
+frameIsOneIndexed=true;
+output_path=path;
+wobbleCorrectSimBead(double(obj.locData.loc.xnm),double(obj.locData.loc.ynm),double(obj.locData.loc.frame), gt,zmin,zstep,zmax,roiRadius,frameIsOneIndexed,output_path)
+
+% addpath('External/SMLMChallenge')
+% wobble_correct;
+end
+
+function pard=guidef(obj)
 pard.onlyfiltered.object=struct('Style','checkbox','String','Export filtered (displayed) localizations.','Value',1);
 pard.onlyfiltered.position=[2,1];
-pard.onlyfiltered.Width=4;
+pard.onlyfiltered.Width=2;
+
+pard.forceungrouped.object=struct('Style','checkbox','String','Force ungrouped localiyations','Value',1);
+pard.forceungrouped.position=[3,3];
+pard.forceungrouped.Width=2;
 
 pard.shiftpix.object=struct('Style','checkbox','String','Shift by 0.5 camera pixels','Value',1);
 pard.shiftpix.position=[3,1];
 pard.shiftpix.Width=4;
+
+
+
 
 pard.shiftframe.object=struct('Style','checkbox','String','Shift frame by +1','Value',1);
 pard.shiftframe.position=[4,1];
@@ -77,6 +142,10 @@ pard.shiftframe.Width=4;
 pard.comparer.object=struct('Style','popupmenu','String',{{'2D, 2013','3D, 2016'}},'Value',2);
 pard.comparer.position=[5,1];
 pard.comparer.Width=4;
+
+pard.wobblebutton.object=struct('Style','pushbutton','String','Wobble.m','Callback',{{@wobble_callback,obj}});
+pard.wobblebutton.position=[4,4];
+pard.wobblebutton.Width=1;
 
 pard.plugininfo.type='ProcessorPlugin';
 end

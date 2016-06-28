@@ -38,13 +38,14 @@ classdef fitDHPSF<interfaces.DialogProcessor
                     pfit.minDistBetweenSMs = 7.5*160/pfit.nmPerPixel;
 
                     pfit.calBeadIdx=1; %later: change
-                    
+        tic            
         totalPSF =f_fitSMs(obj,pfit);
+        timefit=toc;
         goodFit = totalPSF(:,17)>0;
 %         totalPSF=totalPSF(goodFit,:);
         
         % add to loc data
-        csvfile=[p.dhpsf_datafile(1:end-3) 'csv'];
+        csvfile=[p.dhpsf_datafile(1:end-4) '_t' num2str(round(timefit)) '.csv']
         fid=fopen(csvfile,'w');
 %                fprintf(fid, ['frame num,molecule num,x (nm),y (nm),z (nm),' ...
 %             'x fid-corrected (nm),y fid-corrected (nm), z fid-corrected (nm),'...
