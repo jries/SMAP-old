@@ -56,9 +56,11 @@ else
 end
 datrange=1:length(locs);
 
-
+slegend={};
 % look at frames
 for k=datrange
+    slegend{end+1}=[modetxt{k} num2str(datrange(k))];
+    slegend{end+1}='';
     frames=locs{k}.frame;
     mf=max(frames);
     [hfr,n]=hist(frames,10);
@@ -93,6 +95,7 @@ if ploton
         hold on
         plot(axf,ones(2,1)*stat.frames.falloff(k),[0,max(stat.frames.histogram(k).h)])
     end
+    legend(axf,slegend);
 end
 
 %photon stats
@@ -163,7 +166,7 @@ end
 
 %lifetime
 lifetime=getFieldAsVector(locs,'numberInGroup');
-hlifet=plothist(lifetime,0.999,1,0,ax3);
+hlifet=plothist(lifetime,0.99,1,0,ax3);
 slt={'lifetime'};
 for k=datrange
     slt{end+1}='';

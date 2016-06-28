@@ -1,5 +1,6 @@
 classdef LocSaver<interfaces.WorkflowModule;
     properties
+        timer
         filenumber
         fileinfo
         locDatatemp;
@@ -45,7 +46,8 @@ classdef LocSaver<interfaces.WorkflowModule;
              
              obj.locDatatemp.addhistory(p);
              
-             obj.fileinfo=obj.getPar('loc_cameraSettings');    %not used?       
+             obj.fileinfo=obj.getPar('loc_cameraSettings');    %not used?  
+             obj.timer=tic;
         end
         function output=run(obj,data,p)
             output=[];
@@ -87,6 +89,8 @@ classdef LocSaver<interfaces.WorkflowModule;
                     mainfile=filename;
                 end
                 fitpar=obj.parent.getGuiParameters(true).children;
+                fitpar.fittime=toc(obj.timer);
+                disp([num2str(length(obj.locDatatemp.loc.xnm)) ' localizations in ' num2str(fitpar.fittime) ' seconds.']);
                 obj.locDatatemp.files.file.raw=obj.frames;
                 obj.locDatatemp.savelocs(filename,[],struct('fitparameters',fitpar));
                 

@@ -87,7 +87,7 @@ classdef TifLoader<interfaces.WorkflowModule
                     obj.setPar('loc_currentframe',struct('frame',datout.frame,'image',image));
                     if p.onlineanalysis
                         
-                        totalf=imloader.info.numberOfFrames-obj.framestart;
+                        totalf=imloader.metadata.numberOfFrames-obj.framestart;
                         elapsed=toc(obj.timerfitstart);
                         totaltime=elapsed/(datout.frame-obj.framestart+1)*totalf;
                     else

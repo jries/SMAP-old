@@ -127,7 +127,7 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 
                 for k=1:length(f)
                     [~,~,ext]=fileparts(f{k});
-                    if ~isempty(strfind(f{k},'_sml'))
+                    if ~isempty(strfind(f{k},'_sml'))||~isempty(strfind(f{k},'.csv'))
                         obj.setPar('mainfile',[pfad filesep f{k}]);
                     end
                     obj.status(['load: ' f{k}])

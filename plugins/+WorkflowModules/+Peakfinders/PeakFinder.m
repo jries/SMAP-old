@@ -58,6 +58,9 @@ val=sqrt(2)*erfinv(1-2*p); %in paper it is 2p-1
  val=val*sqrt(PSFx0^2/(PSFx0^2+filtersize^2)*excess);
  val=max(1E-7,val);
 val=min(1E7,val);
+if isempty(val)
+    val=1;
+end
 end
 
 function p=photon2prob(val,PSFx0,filtersize,excess)
@@ -65,6 +68,9 @@ val=val/sqrt(PSFx0^2/(PSFx0^2+filtersize^2)*excess);
 p=(1-erf(val/sqrt(2)))/2;
 p=max(1E-7,p);
 p=min(1,p);
+if isempty(p)
+    p=0.01;
+end
 end
 
 function peakfindmethod_callback(a,b,obj)

@@ -95,20 +95,23 @@ else %all initial estimation:
     
     switch p.targetmirror.selection
         case 'left-right'
-            loctT.x=2*midmirror-loctT.x;
+            loctT.x=2*midmirror(1)-loctT.x;
             
         case 'up-down' 
-            loctT.y=2*midmirror-loctT.y;
+            loctT.y=2*midmirror(2)-loctT.y;
             
         case 'both'  
-            loctT.x=2*midmirror-loctT.x;
-            loctT.y=2*midmirror-loctT.y;
+            loctT.x=2*midmirror(1)-loctT.x;
+            loctT.y=2*midmirror(2)-loctT.y;
            
     end
 
 end
 
-
+%reduce
+locref=copystructReduce(locref,indref);
+loctarget=copystructReduce(loctarget,indtarget);
+loctT=copystructReduce(loctT,indtarget);
 
 % indref=loctarget.xnm<chipsizenm*facsize(1)&loctarget.ynm<chipsizenm*facsize(2);
 % loctT=copystructReduce(loctT,ind);
@@ -125,8 +128,11 @@ rangex=[roinm(1) roinm(1)+roinm(3)*facsize(1)];
 rangey=[roinm(2) roinm(2)+roinm(4)*facsize(2)];
 
 
-imr=myhist2(locref.x(indref),locref.y(indref),pixelsizerec,pixelsizerec,rangex,rangey);
-imt=myhist2(loctT.x(indtarget),loctT.y(indtarget),pixelsizerec,pixelsizerec,rangex,rangey);
+% imr=myhist2(locref.x(indref),locref.y(indref),pixelsizerec,pixelsizerec,rangex,rangey);
+% imt=myhist2(loctT.x(indtarget),loctT.y(indtarget),pixelsizerec,pixelsizerec,rangex,rangey);
+
+imr=myhist2(locref.x,locref.y,pixelsizerec,pixelsizerec,rangex,rangey);
+imt=myhist2(loctT.x,loctT.y,pixelsizerec,pixelsizerec,rangex,rangey);
 % 
 % figure(99);
 % hold off
@@ -186,7 +192,9 @@ transform.findTransform(locref.x(iAa),locref.y(iAa),loctarget.x(iBa),loctarget.y
  ax3=initaxis(p.resultstabgroup,'hist');
  hist(dx,50)
 
-
+ ax4=initaxis(p.resultstabgroup,'locs');
+ plot(loctarget.x(iBa),loctarget.y(iBa),'.',loctarget.x(nb),loctarget.y(nb),'r.')
+ 
 transform.tinfo.targetpos=p.targetpos.selection;
 transform.tinfo.separator=separator;
 transform.tinfo.mirror=mirrorinfo;
