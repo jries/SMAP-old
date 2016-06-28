@@ -107,13 +107,21 @@ gt = unique(gtAll,'rows');
 % xnm = localData(:,xCol);
 % ynm = localData(:,yCol);
 % frame = localData(:,frCol);
-
+cam_pixelsize_nm=obj.getPar('cam_pixelsize_nm');
+p=obj.getGuiParameters;
+if p.shiftpix
+shiftx=-0.5*cam_pixelsize_nm;
+shifty=-0.5*cam_pixelsize_nm;
+else
+    shiftx=0;
+    shifty=0;
+end
 %might be set by the users in future updates
 zmin = -750;zmax = 750;zstep = 10;%nm
 roiRadius = 500;%nm
 frameIsOneIndexed=true;
 output_path=path;
-wobbleCorrectSimBead(double(obj.locData.loc.xnm),double(obj.locData.loc.ynm),double(obj.locData.loc.frame), gt,zmin,zstep,zmax,roiRadius,frameIsOneIndexed,output_path)
+wobbleCorrectSimBead(double(obj.locData.loc.xnm+shiftx),double(obj.locData.loc.ynm+shifty),double(obj.locData.loc.frame), gt,zmin,zstep,zmax,roiRadius,frameIsOneIndexed,output_path)
 
 % addpath('External/SMLMChallenge')
 % wobble_correct;
