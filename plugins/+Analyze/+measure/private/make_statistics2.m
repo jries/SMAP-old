@@ -95,8 +95,9 @@ if ploton
         hold on
         plot(axf,ones(2,1)*stat.frames.falloff(k),[0,max(stat.frames.histogram(k).h)])
     end
+    legend(axf,slegend);
 end
-legend(axf,slegend);
+
 %photon stats
 phot=getFieldAsVector(locs,'phot');
 if isempty(phot{1})
