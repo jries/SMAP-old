@@ -17,7 +17,7 @@ classdef saver_csv<interfaces.DialogProcessor
             par=obj.getAllParameters;
             
             par.saveroi=par.savevisible;
-            saveLocalizationsCSV(obj.locData,[path f],par.saveroi,par.numberOfLayers,par.sr_layerson)
+            saveLocalizationsCSV(obj.locData,[path f],par.saveroi,par.numberOfLayers,par.sr_layerson);
             obj.status('save done')
             end
             

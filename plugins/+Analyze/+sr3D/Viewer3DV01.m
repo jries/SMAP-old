@@ -452,11 +452,13 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     end
                 end
                  if pr.groupcheck
-                        indroi=locg.inlayerg{layerson(k)};
+                        ind=find(layerson==k);
+                        indroi=locg.inlayerg{ind};
                         indh=(indroi(indg));
                         images.srimage=renderSMAP(locg,pr,k,indh(sortindg),transparency);
                  else 
-                     indroi=loc.inlayeru{layerson(k)};
+                     ind=find(layerson==k);
+                     indroi=loc.inlayeru{ind};
                      indh=(indroi(indu));
                      images.srimage=renderSMAP(loc,pr,k,indh(sortind),transparency);
                  end

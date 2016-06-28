@@ -26,7 +26,7 @@
 % SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 function [filt_bg,flag] = f_waveletBackground(I)
-
+try
 % decompose image into wavelet basis
 % N = 4 represents amount of detail in background
 % db3 is type of basis, Daubechies "3"
@@ -74,5 +74,9 @@ filt_bg = imfilter(I_filt,h,'replicate');
 %             figure
 %             imagesc((I-filt_bg),[0 300])
 %             axis image
-
+catch
+%     disp('own wavelet bg used')
+    filt_bg=mywaveletfilter(I,4,true);
+    flag=1;
+end
 end

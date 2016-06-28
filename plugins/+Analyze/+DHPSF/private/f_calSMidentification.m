@@ -25,9 +25,13 @@
 % NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
 % SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-function [templateFrames, ROI, dataFile, dataPath, darkFile, logFile,...
-            logPath, EMGain, templateLocs] = f_calSMidentification(calFile,calBeadIdx,...
-            templateFile, boxRadius,channel,sigmaBounds,gaussianFilterSigma,minDistBetweenSMs)
+% function [templateFrames, ROI, dataFile, dataPath, darkFile, logFile,...
+%             logPath, EMGain, templateLocs] = f_calSMidentification(calFile,calBeadIdx,...
+%             p.templateFile, p.boxRadius,channel,p.sigmaBounds,p.gaussianFilterSigma,p.minDistBetweenSMs)
+function [templateFrames, ROI, dataFile, dataPath, templateLocs,outputFilePrefix,imall] = f_calSMidentification(obj,p)
+        
+        
+ploton=false;
 % f_calSMidentification is a module in easy_dhpsf that prepares the
 % templates from f_calDHPSF and uses them to generate a series of template
 % matches. These are then used to judge an appropriate threshold for 
@@ -35,23 +39,24 @@ function [templateFrames, ROI, dataFile, dataPath, darkFile, logFile,...
 % f_fitSMs, as well as some parameters for f_trackFiducials.
 
 % Instrument Specific Parameters
-
-dlg_title = 'Set EM Gain';
-prompt = {  'EM Gain (1 if no gain):' };
-def = {'300'};
-
-num_lines = 1;
-inputdialog = inputdlg(prompt,dlg_title,num_lines,def);
-
-if isempty(inputdialog)
-    error('User cancelled the program')
-end
-
-EMGain = str2double(inputdialog{1});
-if EMGain < 1 || isnan(EMGain)
-    warning('EMGain should be >= 1. Setting to 1...');
-    EMGain = 1;
-end
+channel='0';
+calBeadIdx=1; %XXX extend
+% dlg_title = 'Set EM Gain';
+% prompt = {  'EM Gain (1 if no gain):' };
+% def = {'300'};
+% 
+% num_lines = 1;
+% inputdialog = inputdlg(prompt,dlg_title,num_lines,def);
+% 
+% if isempty(inputdialog)
+%     error('User cancelled the program')
+% end
+% 
+% EMGain = str2double(inputdialog{1});
+% if EMGain < 1 || isnan(EMGain)
+%     warning('EMGain should be >= 1. Setting to 1...');
+%     EMGain = 1;
+% end
 
 frameNum = 1;
 scrsz = get(0,'ScreenSize');
@@ -61,16 +66,19 @@ options = optimset('FunValCheck','on','Diagnostics','off','Jacobian','on', 'Disp
 
 %% ask user for relevant datafiles
 
-[dataFile, dataPath] = uigetfile({'*.tif';'*.*'},...
-    'Open SMACM image stack(s) for data processing',...
-    'MultiSelect', 'on');
-if isequal(dataFile,0)
-    error('User cancelled the program');
-end
-
-if ischar(dataFile)
-    dataFile = cellstr(dataFile);
-end
+% [dataFile, dataPath] = uigetfile({'*.tif';'*.*'},...
+%     'Open SMACM image stack(s) for data processing',...
+%     'MultiSelect', 'on');
+% if isequal(dataFile,0)
+%     error('User cancelled the program');
+% end
+% 
+% if ischar(dataFile)
+%     dataFile = cellstr(dataFile);
+% end
+[dataPath,fi,ex]=fileparts(p.dataFile);
+dataPath=[dataPath filesep];
+dataFile={[fi ex]};
 
 for stack = 1:length(dataFile)
 
@@ -82,25 +90,25 @@ for stack = 1:length(dataFile)
     
     if stack == 1
         
-%         [templateFile, templatePath] = uigetfile({'*.tif;*.mat';'*.*'},'Open image stack or MATLAB *.mat file of a DH-PSF template');
-%         if isequal(templateFile,0)
+%         [p.templateFile, templatePath] = uigetfile({'*.tif;*.mat';'*.*'},'Open image stack or MATLAB *.mat file of a DH-PSF template');
+%         if isequal(p.templateFile,0)
 %             error('User cancelled the program');
 %         end
         
         
-        if strcmp(templateFile(length(templateFile)-2:length(templateFile)),'tif')
+        if strcmp(p.templateFile(length(p.templateFile)-2:length(p.templateFile)),'tif')
             
-            templateInfo = imfinfo(templateFile);
+            templateInfo = imfinfo(p.templateFile);
             if templateInfo(1).Height ~= templateInfo(1).Width
                 error('Template is not square');
             end
             templateSize = templateInfo(1).Height;
         else
-            load(templateFile);
+            load(p.templateFile);
             templateSize = size(template,2);
         end
         
-        load(calFile);
+        load(p.calFile);
         
         % compute templates to use based upon fitted DG angles
         templateFrames = interp1(squeeze(meanAngles(1,calBeadIdx,goodFit_forward)),...
@@ -113,8 +121,10 @@ for stack = 1:length(dataFile)
         if any(isnan(templateFrames))
             if nanmean(diff(templateFrames)) >= 0
                 endFrames = {1 sum(goodFit_forward)};
+                df=-1;
             elseif nanmean(diff(templateFrames)) < 0
                 endFrames = {sum(goodFit_forward) 1};
+                df=1;
             else
                 endFrames = nan;
             end
@@ -126,14 +136,20 @@ for stack = 1:length(dataFile)
             end
         end
 
-        temp = inputdlg({['Input sets of frames corresponding to each template or the index of templates to use (ex. ' ...
-            mat2str(templateFrames) ')']},...
-            'Input template numbers',1, ...
-            {mat2str(templateFrames)}); ...     % {'[8:4:32]'});
-        templateFrames = str2num(temp{1});
+        for m=length(templateFrames)-1:-1:2
+            if isnan(templateFrames(m))
+                templateFrames(m)=(templateFrames(m+1)+templateFrames(m-1))/2;
+            end
+                
+        end
+%         temp = inputdlg({['Input sets of frames corresponding to each template or the index of templates to use (ex. ' ...
+%             mat2str(templateFrames) ')']},...
+%             'Input template numbers',1, ...
+%             {mat2str(templateFrames)}); ...     % {'[8:4:32]'});
+%         templateFrames = str2num(temp{1});
         
-        logPath = 0;
-        logFile = 0;
+%         logPath = 0;
+%         logFile = 0;
 %         [logFile, logPath] = uigetfile({'*.dat';'*.*'},...
 %             'Open sequence log file(s) corresponding to image stack(s) (optional: hit cancel to skip)',...
 %             'MultiSelect', 'on');
@@ -144,7 +160,7 @@ for stack = 1:length(dataFile)
 %             logFile = cellstr(logFile);
 %         end
 
-        [darkFile, darkPath] = uigetfile({'*.tif';'*.*'},'Open image stack with dark counts (same parameters as SMACM data)');
+%         [darkFile, darkPath] = uigetfile({'*.tif';'*.*'},'Open image stack with dark counts (same parameters as SMACM data)');
 %         if isequal(darkFile,0)
 %             error('User cancelled the program');
 %         end
@@ -153,46 +169,47 @@ for stack = 1:length(dataFile)
     
     %% create output log filenames
     if channel == '0'
-        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) '\threshold ' ...
-            datestr(now,'yyyymmdd HHMM') '\'];
+        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) filesep 'threshold ' ...
+            datestr(now,'yyyymmdd HHMM') filesep];
         mkdir(outputFilePrefix{stack});
     elseif channel == 'G'
-        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) '\reflected\threshold ' ...
-            datestr(now,'yyyymmdd HHMM') '\'];
+        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4)  filesep 'reflected' filesep 'threshold ' ...
+            datestr(now,'yyyymmdd HHMM') filesep];
         mkdir(outputFilePrefix{stack});
     elseif channel == 'R'
-        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) '\transmitted\threshold ' ...
-            datestr(now,'yyyymmdd HHMM') '\'];
+        outputFilePrefix{stack} = [dataPath dataFile{stack}(1:length(dataFile{stack})-4) filesep 'transmitted' filesep 'threshold ' ...
+            datestr(now,'yyyymmdd HHMM') filesep];
         mkdir(outputFilePrefix{stack});
     end
     
     if stack==1
         %% Compute darkAvg counts
         
-        if ~isequal(darkFile,0)
-            darkFile = [darkPath darkFile];
-            % Computes average of darkAvg frames for background subtraction
-            darkFileInfo = imfinfo(darkFile);
-            numDarkFrames = length(darkFileInfo);
-            darkAvg = zeros(darkFileInfo(1).Height,darkFileInfo(1).Width);
-            for frame = 1:numDarkFrames
-                darkAvg = darkAvg + double(imread(darkFile,frame,'Info',darkFileInfo));
-            end
-            darkAvg = darkAvg/numDarkFrames;
-            if ~isequal(size(darkAvg),[imgHeight imgWidth])
-                warning('Dark count image and data image stack are not the same size. Resizing darkAvg count image...');
-                darkAvg = imresize(darkAvg,[imgHeight imgWidth]);
-            end
-        else
-            darkAvg = 0;
-        end
-        clear darkFileInfo;
+%         if ~isequal(darkFile,0)
+%             darkFile = [darkPath darkFile];
+%             % Computes average of darkAvg frames for background subtraction
+%             darkFileInfo = imfinfo(darkFile);
+%             numDarkFrames = length(darkFileInfo);
+%             darkAvg = zeros(darkFileInfo(1).Height,darkFileInfo(1).Width);
+%             for frame = 1:numDarkFrames
+%                 darkAvg = darkAvg + double(imread(darkFile,frame,'Info',darkFileInfo));
+%             end
+%             darkAvg = darkAvg/numDarkFrames;
+%             if ~isequal(size(darkAvg),[imgHeight imgWidth])
+%                 warning('Dark count image and data image stack are not the same size. Resizing darkAvg count image...');
+%                 darkAvg = imresize(darkAvg,[imgHeight imgWidth]);
+%             end
+%         else
+%             darkAvg = 0;
+%         end
+%         clear darkFileInfo;
+        darkAvg=p.offsetADU;
         
  
         
         %% opens and processes templates of DH-PSF for template matching
         
-        if strcmp(templateFile(length(templateFile)-2:length(templateFile)),'tif')
+        if strcmp(p.templateFile(length(p.templateFile)-2:length(p.templateFile)),'tif')
             
             numTemplates = size(templateFrames,1);
             templateColors = jet(numTemplates);
@@ -200,12 +217,15 @@ for stack = 1:length(dataFile)
             templateLocs = zeros(numTemplates,5);
             fitParam = zeros(1,8);
             [xIdx, yIdx] = meshgrid(1:templateSize,1:templateSize);
-            hTemplate=figure('Position',[(scrsz(3)-1280)/2 (scrsz(4)-720)/2 1280 720],'color','w');
-            set(hTemplate,'Visible','off');
+            
+%             if ploton
+                hTemplate=figure('Position',[(scrsz(3)-1280)/2 (scrsz(4)-720)/2 1280 720],'color','w');
+                set(hTemplate,'Visible','off');
+%             end
             for a=1:numTemplates
                 for b=templateFrames(a,1):templateFrames(a,2)
                     template(a,:,:) = squeeze(template(a,:,:)) + ...
-                        double(imread([templatePath templateFile],b,'Info',templateInfo));
+                        double(imread([templatePath p.templateFile],b,'Info',templateInfo));
                 end
                 % make minimum count level in template equal to 0
                 template(a,:,:) = template(a,:,:) - min(min(template(a,:,:)));
@@ -227,10 +247,10 @@ for stack = 1:length(dataFile)
                 fitParam(2) = temp(2,3);
                 fitParam(7) = 1.8;
                 fitParam(8) = 1.8;
-                lowerBound = [0 0 1 1 1 1 sigmaBounds(1) sigmaBounds(1)];
+                lowerBound = [0 0 1 1 1 1 p.sigmaBounds(1) p.sigmaBounds(1)];
                 upperBound = [max(max(template(a,:,:))) max(max(template(a,:,:))) ...
                     templateSize templateSize templateSize templateSize ...
-                    sigmaBounds(2) sigmaBounds(2)];
+                    p.sigmaBounds(2) p.sigmaBounds(2)];
                 
                 % Fit with lsqnonlin
                 fitParam = lsqnonlin(@(x) ...
@@ -243,13 +263,15 @@ for stack = 1:length(dataFile)
                 templateLocs(a,5) = 180/pi*atan2(templateLocs(a,2)-templateLocs(a,4), ...
                     templateLocs(a,1)-templateLocs(a,3));
                 
-                subplot(1,numTemplates,a);imagesc(squeeze(template(a,:,:)));
-                axis image;colormap hot;colorbar;
-                hold on;
-                plot(templateLocs(a,1),templateLocs(a,2),'.','MarkerEdgeColor', templateColors(a,:));
-                plot(templateLocs(a,3),templateLocs(a,4),'.','MarkerEdgeColor', templateColors(a,:));
-                title({['Template ' mat2str(templateFrames(a,:))] ...
-                    ['Angle = ' num2str(templateLocs(a,5)) ' deg']});
+%                 if ploton
+                    subplot(1,numTemplates,a);imagesc(squeeze(template(a,:,:)));
+                    axis image;colormap hot;colorbar;
+                    hold on;
+                    plot(templateLocs(a,1),templateLocs(a,2),'.','MarkerEdgeColor', templateColors(a,:));
+                    plot(templateLocs(a,3),templateLocs(a,4),'.','MarkerEdgeColor', templateColors(a,:));
+                    title({['Template ' mat2str(templateFrames(a,:))] ...
+                        ['Angle = ' num2str(templateLocs(a,5)) ' deg']});
+%                 end
             end
             imwrite(frame2im(getframe(hTemplate)),[outputFilePrefix{stack} 'templates.tif']);
             clear templateInfo tempX tempY temp xIdx yIdx;
@@ -289,12 +311,12 @@ for stack = 1:length(dataFile)
                 fitParam(6) = temp(2,2);
                 fitParam(1) = temp(1,3);
                 fitParam(2) = temp(2,3);
-                fitParam(7) = mean(sigmaBounds);
-                fitParam(8) = mean(sigmaBounds);
-                lowerBound = [0 0 1 1 1 1 sigmaBounds(1) sigmaBounds(1)];
+                fitParam(7) = mean(p.sigmaBounds);
+                fitParam(8) = mean(p.sigmaBounds);
+                lowerBound = [0 0 1 1 1 1 p.sigmaBounds(1) p.sigmaBounds(1)];
                 upperBound = [max(max(template(templateFrames(a),:,:))) max(max(template(templateFrames(a),:,:))) ...
                     templateSize templateSize templateSize templateSize ...
-                    sigmaBounds(2) sigmaBounds(2)];
+                    p.sigmaBounds(2) p.sigmaBounds(2)];
                 
                 % Fit with lsqnonlin
                 fitParam = lsqnonlin(@(x) ...
@@ -327,45 +349,47 @@ for stack = 1:length(dataFile)
         % pick region of interest by reading first frame and having user select
         % region
         
-        % Compute average image
-        avgImg = zeros(imgHeight,imgWidth);
-        for a = 1:200
-            avgImg = avgImg + double(imread([dataPath dataFile{stack}],frames(a),'Info',fileInfo)) - darkAvg;
-        end
-        avgImg = avgImg/200;
-        
-        hROI = figure('Position',[(scrsz(3)-1280)/2 (scrsz(4)-720)/2 1280 720],'color','w');
-        imagesc(avgImg);axis image;colormap hot;
-        if channel == 'G'
-            ROI = imrect(gca,[1 1 270 270]);
-        elseif channel == 'R'
-            ROI = imrect(gca,[243 243 270 270]);
-        else
-            ROI = imrect(gca,[1 1 size(avgImg,1) size(avgImg,2)]);
-        end
-        
-        % ROI = imrect(gca,[1 1 128 128]);
-        title({'Shape box and double-click to choose region of interest for PSF extraction' ...
-            ['[xmin ymin width height] = ' mat2str(ROI.getPosition)]...
-            'The displayed image is the average of the first 200 frames'});
-        addNewPositionCallback(ROI,@(p) title({'Shape box and double-click to choose region of interest for PSF extraction' ...
-            ['[xmin ymin width height] = ' mat2str(p,3)]...
-            'The displayed image is the average of the first 200 frames'}));
-        % make sure rectangle stays within image bounds
-        fcn = makeConstrainToRectFcn('imrect',get(gca,'XLim'),get(gca,'YLim'));
-        setPositionConstraintFcn(ROI,fcn);
-        ROI = round(wait(ROI));
-        % make sure ROI is an even number of pixels
+%         % Compute average image
+%         avgImg = zeros(imgHeight,imgWidth);
+%         for a = 1:min(numFrames,200)
+%             avgImg = avgImg + double(imread([dataPath dataFile{stack}],frames(a),'Info',fileInfo)) - darkAvg;
+%         end
+%         avgImg = avgImg/200;
+%         
+%         hROI = figure('Position',[(scrsz(3)-1280)/2 (scrsz(4)-720)/2 1280 720],'color','w');
+%         imagesc(avgImg);axis image;colormap hot;
+%         if channel == 'G'
+%             ROI = imrect(gca,[1 1 270 270]);
+%         elseif channel == 'R'
+%             ROI = imrect(gca,[243 243 270 270]);
+%         else
+%             ROI = imrect(gca,[1 1 size(avgImg,1) size(avgImg,2)]);
+%         end
+%         
+%         % ROI = imrect(gca,[1 1 128 128]);
+%         title({'Shape box and double-click to choose region of interest for PSF extraction' ...
+%             ['[xmin ymin width height] = ' mat2str(ROI.getPosition)]...
+%             'The displayed image is the average of the first 200 frames'});
+%         addNewPositionCallback(ROI,@(p) title({'Shape box and double-click to choose region of interest for PSF extraction' ...
+%             ['[xmin ymin width height] = ' mat2str(p,3)]...
+%             'The displayed image is the average of the first 200 frames'}));
+%         % make sure rectangle stays within image bounds
+%         fcn = makeConstrainToRectFcn('imrect',get(gca,'XLim'),get(gca,'YLim'));
+%         setPositionConstraintFcn(ROI,fcn);
+%         ROI = round(wait(ROI));
+%         % make sure ROI is an even number of pixels
+%         close(hROI) % closes ROI selection
+ROI=[1 1 imgHeight imgWidth];
         if mod(ROI(3),2)==1
             ROI(3) = ROI(3)-1;
         end
         if mod(ROI(4),2)==1
             ROI(4) = ROI(4)-1;
         end
-        %ROI = [84 127 128 130];
+%         %ROI = [84 127 128 130];
         cropWidth = ROI(3);
         cropHeight = ROI(4);
-        close(hROI) % closes ROI selection
+
         
         %% prepare template for template matching
         
@@ -374,7 +398,7 @@ for stack = 1:length(dataFile)
         templateFT = zeros(numTemplates,cropHeight,cropWidth);
         for a=1:numTemplates
             
-            if strcmp(templateFile(length(templateFile)-2:length(templateFile)),'tif')
+            if strcmp(p.templateFile(length(p.templateFile)-2:length(p.templateFile)),'tif')
                 templatePad(a,:,:) = padarray(squeeze(template(a,:,:)),...
                     [(cropHeight-size(template,2))/2 ...
                     (cropWidth-size(template,3))/2],min(min(template(a,:,:))));
@@ -392,31 +416,31 @@ for stack = 1:length(dataFile)
         
         % apply Gaussian filter to phase correlation data to weight low frequencies
         % more heavily since SNR is higher there
-        gaussianFilter = abs(fft2(fspecial('gaussian', [cropHeight cropWidth], gaussianFilterSigma)));
+        gaussianFilter = abs(fft2(fspecial('gaussian', [cropHeight cropWidth], p.gaussianFilterSigma)));
         
     end
     
     %% Identify frames to analyze
 
-    if ~isequal(logPath,0)
-        if length(logFile) == length(dataFile)
-            sifLogData =  importdata([logPath logFile{stack}]);
-            sifLogData = sifLogData(1:numFrames,:);
-        else
-            sifLogData =  importdata([logPath logFile{1}]);
-            sifLogData = sifLogData(frameNum:frameNum+numFrames-1,:);
-            frameNum = frameNum + numFrames;
-        end
-        if channel == '0'
-            selectedFrames = frames;
-        elseif channel == 'G'
-            selectedFrames = find(sifLogData(:,2) == 1);
-        elseif channel == 'R'
-            selectedFrames = find(sifLogData(:,3) == 1);
-        end
-    else
+%     if ~isequal(logPath,0)
+%         if length(logFile) == length(dataFile)
+%             sifLogData =  importdata([logPath logFile{stack}]);
+%             sifLogData = sifLogData(1:numFrames,:);
+%         else
+%             sifLogData =  importdata([logPath logFile{1}]);
+%             sifLogData = sifLogData(frameNum:frameNum+numFrames-1,:);
+%             frameNum = frameNum + numFrames;
+%         end
+%         if channel == '0'
+%             selectedFrames = frames;
+%         elseif channel == 'G'
+%             selectedFrames = find(sifLogData(:,2) == 1);
+%         elseif channel == 'R'
+%             selectedFrames = find(sifLogData(:,3) == 1);
+%         end
+%     else
         selectedFrames = frames;
-    end
+%     end
     
     %% do template matching
     
@@ -424,6 +448,8 @@ for stack = 1:length(dataFile)
     totalPSFfits = zeros(10000, 6+15+3);
     numPSFfits = 0;
     startTime = tic;
+    
+    indimall=1;
     
     for a=length(frames):-1:1
         
@@ -493,7 +519,7 @@ for stack = 1:length(dataFile)
             for b=2:size(temp,1)
                 % make sure that this candidate location is a minimum distance away
                 % from all other candidate locations
-                if sum((temp(b,1)-PSFLocs(1:numPSFLocs,1)).^2 + (temp(b,2)-PSFLocs(1:numPSFLocs,2)).^2 >= minDistBetweenSMs^2) == numPSFLocs
+                if sum((temp(b,1)-PSFLocs(1:numPSFLocs,1)).^2 + (temp(b,2)-PSFLocs(1:numPSFLocs,2)).^2 >= p.minDistBetweenSMs^2) == numPSFLocs
                     % add it to list of locations
                     numPSFLocs = numPSFLocs + 1;
                     PSFLocs(numPSFLocs,:) = temp(b,:);
@@ -512,8 +538,8 @@ for stack = 1:length(dataFile)
             moleFileName = ['template ' num2str(PSFLocs(b,3)) ' threshold ' num2str(moleThreshold,'%g') '.png']; %%f6.4 without scaling
             if isempty(dir([outputFilePrefix{stack} moleFileName]))
                 % create indices to isolate image of candidate molecule
-                [xIdx, yIdx] = meshgrid(PSFLocs(b,1)-boxRadius:PSFLocs(b,1)+boxRadius, ...
-                    PSFLocs(b,2)-boxRadius:PSFLocs(b,2)+boxRadius);
+                [xIdx, yIdx] = meshgrid(PSFLocs(b,1)-p.boxRadius:PSFLocs(b,1)+p.boxRadius, ...
+                    PSFLocs(b,2)-p.boxRadius:PSFLocs(b,2)+p.boxRadius);
                 % make sure indices are inside ROI
                 if min(xIdx(:)) < 1
                     xIdx = xIdx + (1-min(xIdx(:)));
@@ -531,32 +557,41 @@ for stack = 1:length(dataFile)
                 % output a picture of the
                 img = data(yIdx(:,1),xIdx(1,:));
                 img = 1+round(255*(img-min(img(:)))/(max(img(:))-min(img(:))));
-                imwrite(imresize(ind2rgb(img,hot(256)),3,'nearest'),[outputFilePrefix{stack} moleFileName]);
+%                 imwrite(imresize(ind2rgb(img,hot(256)),3,'nearest'),[outputFilePrefix{stack} moleFileName]);
+                imall(indimall).image=img;
+                imall(indimall).threshold=moleThreshold;
+                imall(indimall).threshold=moleThreshold;
+                imall(indimall).template=PSFLocs(b,3);
+                indimall=indimall+1;
             end
         end
         numPSFfits = numPSFfits+numPSFLocs;
         
         %%  plot results of template matching and fitting
-        
-        set(0,'CurrentFigure',hMatchFig);
-        subplot('Position',[0.025 0.025 .9/2 .95],'parent',hMatchFig);
-        imagesc(maxPeakImg,[0 3*peakThreshold]);axis image;
-        title({'Peaks correspond to likely template matches' ...
-            [num2str(numPSFLocs) ' matches found']});
-        
-        subplot('Position',[0.525 0.025 .9/2 .95],'parent',hMatchFig);
-        imagesc(data);axis image;colormap hot;
-        hold on;
-        for b=1:numPSFLocs
-            plot(PSFLocs(b,1), PSFLocs(b,2), 'o', ...
-                'MarkerSize', 15*PSFLocs(b,4)/peakThreshold, ...
-                'MarkerEdgeColor', templateColors(PSFLocs(b,3),:));
+        if ploton
+            set(0,'CurrentFigure',hMatchFig);
+            subplot('Position',[0.025 0.025 .9/2 .95],'parent',hMatchFig);
+            imagesc(maxPeakImg,[0 3*peakThreshold]);axis image;
+            title({'Peaks correspond to likely template matches' ...
+                [num2str(numPSFLocs) ' matches found']});
+
+            subplot('Position',[0.525 0.025 .9/2 .95],'parent',hMatchFig);
+            imagesc(data);axis image;colormap hot;
+            hold on;
+            for b=1:numPSFLocs
+                plot(PSFLocs(b,1), PSFLocs(b,2), 'o', ...
+                    'MarkerSize', 15*PSFLocs(b,4)/peakThreshold, ...
+                    'MarkerEdgeColor', templateColors(PSFLocs(b,3),:));
+            end
+            hold off;
+            title({['Frame ' num2str(frames(a)) ': raw data - darkAvg counts'] ...
+                ['ROI [xmin ymin width height] = ' mat2str(ROI)]});
+
+            drawnow;
         end
-        hold off;
-        title({['Frame ' num2str(frames(a)) ': raw data - darkAvg counts'] ...
-            ['ROI [xmin ymin width height] = ' mat2str(ROI)]});
-        
-        drawnow;
+        if indimall>p.maxfits
+            break
+        end
     end
     elapsedTime = toc(startTime);
     totalPSFfits = totalPSFfits(1:numPSFfits,:);

@@ -25,8 +25,10 @@
 % NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
 % SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+% function [outputFilePrefix, numBeads] = ...
+%     f_calDHPSF(p.conversionGain,p.nmPerPixel,p.boxRadius,channel,p.sigmaBounds,p.lobeDistBounds)
 function [outputFilePrefix, numBeads] = ...
-    f_calDHPSF(conversionGain,nmPerPixel,boxRadius,channel,sigmaBounds,lobeDistBounds)
+    f_calDHPSF(obj,p)
 % f_calDHPSF is a module in easy_dhpsf that calibrates the z vs. angle
 % response of the DH-PSF using one or more discrete fluorescent particles,
 % usually fluorescent beads. To generate the data, an objective stepper
@@ -36,20 +38,20 @@ function [outputFilePrefix, numBeads] = ...
 
 % Instrument Specific Parameters
 
-dlg_title = 'Set EM Gain';
-prompt = { 'EM Gain (1 if no gain):' }; 
-def = { '300' };
-
-num_lines = 1;
-inputdialog = inputdlg(prompt,dlg_title,num_lines,def);
-
-EMGain = str2double(inputdialog{1});
-if EMGain < 1 || isnan(EMGain)
-    warning('EMGain should be a number >= 1. Setting to 1...');
-    EMGain = 1;
-end
-
-conversionFactor = conversionGain/EMGain;
+% dlg_title = 'Set EM Gain';
+% prompt = { 'EM Gain (1 if no gain):' }; 
+% def = { '300' };
+% 
+% num_lines = 1;
+% inputdialog = inputdlg(prompt,dlg_title,num_lines,def);
+% 
+% EMGain = str2double(inputdialog{1});
+% if EMGain < 1 || isnan(EMGain)
+%     warning('EMGain should be a number >= 1. Setting to 1...');
+%     EMGain = 1;
+% end
+channel=0;
+conversionFactor = p.conversion/p.EMgain;
 ampRatioLimit = 0.5;
 sigmaRatioLimit = 0.4;
 
@@ -67,28 +69,30 @@ if isequal(dataFile,0)
 end
 dataFile = [dataPath dataFile];
 
-% batch processing: turned off unless batchProcess set to 1
-if batchProcess == 1
-    dlg_title = 'Please Specify Filename Separation for Batch Processing';
-    prompt = {  'Filename Common Part:'};
-    def = {     dataFile(1:length(dataFile)-4)};
-    num_lines = 1;
-    inputdialog = inputdlg(prompt,dlg_title,num_lines,def);
-
-    commonRoot = inputdialog{1};
-
-    filelist = dir([fileparts(dataFile) filesep [commonRoot '*.tif']]);  % first characters of file header
-    fileNames = {filelist.name}';
-else
+% % batch processing: turned off unless batchProcess set to 1
+% if batchProcess == 1
+%     dlg_title = 'Please Specify Filename Separation for Batch Processing';
+%     prompt = {  'Filename Common Part:'};
+%     def = {     dataFile(1:length(dataFile)-4)};
+%     num_lines = 1;
+%     inputdialog = inputdlg(prompt,dlg_title,num_lines,def);
+% 
+%     commonRoot = inputdialog{1};
+% 
+%     filelist = dir([fileparts(dataFile) filesep [commonRoot '*.tif']]);  % first characters of file header
+%     fileNames = {filelist.name}';
+% else
     fileNames = {dataFile};
-end
+% end
 
-[darkFile, darkPath] = uigetfile({'*.tif';'*.*'},'Open image stack with dark counts (same parameters as calibration)');
-[logFile, logPath] = uigetfile({'*.dat';'*.txt';'*.*'},'Open sequence log file for calibration');
-logFile = [logPath logFile];
-if isequal(logFile,0)
-   error('A sequence log file must be specified for the DHPSF calibration');
-end
+% [darkFile, darkPath] = uigetfile({'*.tif';'*.*'},'Open image stack with dark counts (same parameters as calibration)');
+    
+%     
+% [logFile, logPath] = uigetfile({'*.dat';'*.txt';'*.*'},'Open sequence log file for calibration');
+% logFile = [logPath logFile];
+% if isequal(logFile,0)
+%    error('A sequence log file must be specified for the DHPSF calibration');
+% end
 
 
 numFiles = length(fileNames);
@@ -97,43 +101,43 @@ numFrames = length(dataFileInfo);
 imgHeight = dataFileInfo.Height;
 imgWidth = dataFileInfo.Width;
 
-if channel == '0'
-    outputFilePrefix = [dataFile(1:length(dataFile)-4) '\calibration ' ...
-        datestr(now,'yyyymmdd HHMM') '\'];
+% if channel == '0'
+    outputFilePrefix = [dataFile(1:length(dataFile)-4) filesep 'calibration ' ...
+        datestr(now,'yyyymmdd HHMM') filesep];
 
-else 
-    outputFilePrefix = [dataFile(1:length(dataFile)-4) '\' channel(1) ' calibration ' ...
-        datestr(now,'yyyymmdd HHMM') '\'];
-
-end
+% else 
+%     outputFilePrefix = [dataFile(1:length(dataFile)-4) filesep channel(1) ' calibration ' ...
+%         datestr(now,'yyyymmdd HHMM') filesep];
+% 
+% end
 
 mkdir(outputFilePrefix);
 
 %% Compute dark counts
-if ~isequal(darkFile,0)
-    darkFile = [darkPath darkFile];
-    % Computes average of dark frames for background subtraction
-    darkFileInfo = imfinfo(darkFile);
-    numDarkFrames = length(darkFileInfo);
-    darkAvg = zeros(darkFileInfo(1).Height,darkFileInfo(1).Width);
-    for frame = 1:numDarkFrames
-        darkAvg = darkAvg + double(imread(darkFile,frame,'Info',darkFileInfo));
-    end
-    darkAvg = darkAvg/numDarkFrames;
-    if ~isequal(size(darkAvg),[imgHeight imgWidth])
-        warning('Dark count image and data image stack are not the same size. Resizing dark count image...');
-        darkAvg = imresize(darkAvg,[imgHeight imgWidth]);
-    end
-else
-    darkAvg = 0;
-end
-clear darkFileInfo;
+% if ~isequal(darkFile,0)
+%     darkFile = [darkPath darkFile];
+%     % Computes average of dark frames for background subtraction
+%     darkFileInfo = imfinfo(darkFile);
+%     numDarkFrames = length(darkFileInfo);
+%     darkAvg = zeros(darkFileInfo(1).Height,darkFileInfo(1).Width);
+%     for frame = 1:numDarkFrames
+%         darkAvg = darkAvg + double(imread(darkFile,frame,'Info',darkFileInfo));
+%     end
+%     darkAvg = darkAvg/numDarkFrames;
+%     if ~isequal(size(darkAvg),[imgHeight imgWidth])
+%         warning('Dark count image and data image stack are not the same size. Resizing dark count image...');
+%         darkAvg = imresize(darkAvg,[imgHeight imgWidth]);
+%     end
+% else
+    darkAvg = p.offsetADU; %Jonas XXX
+% end
+% clear darkFileInfo;
 
 %% Pick region of interest for analysis
 
 % Plots the avg image .tif
 dataAvg = zeros(imgHeight,imgWidth);
-for frame = 1:190
+for frame = 1:length(dataFileInfo)
     dataAvg = dataAvg + double(imread(dataFile,frame,'Info',dataFileInfo));
 end
 dataAvg = dataAvg/190 - darkAvg;
@@ -207,60 +211,67 @@ numFrames = length(dataFileInfo);
 
 
 %% Analyze the C-focus scan series
-
-sifLogData =  importdata(logFile);
-     
-step = 1;               
-buffer = 4;             % advance by two frames to make sure new position is achieved
-i = 2*buffer;
-    
-startFrame(n,1) = i;
-
-while i <= size(sifLogData,1)-2
-    if sifLogData(i+1,1) < 0
-        
-        endFrame(n,step) = i;
-        step = step + 1;    % current step position
-        i = i + buffer;     % advance by buffer frames to make sure new position is achieved
-        startFrame(n,step) = i;
-    else
-        i = i + 1;
-    end
-   
+% 
+% sifLogData =  importdata(logFile);
+%      
+% step = 1;               
+% buffer = 4;             % advance by two frames to make sure new position is achieved
+% i = 2*buffer;
+%     
+% startFrame(n,1) = i;
+% 
+% while i <= size(sifLogData,1)-2
+%     if sifLogData(i+1,1) < 0
+%         
+%         endFrame(n,step) = i;
+%         step = step + 1;    % current step position
+%         i = i + buffer;     % advance by buffer frames to make sure new position is achieved
+%         startFrame(n,step) = i;
+%     else
+%         i = i + 1;
+%     end
+%    
+% end
+% 
+% numSteps = step -1;          % the last frames are not part of the scan series
+% startFrame_copy = startFrame(n,1:length(endFrame));
+% initialPosition = 50.0;
+% 
+% for i=1:numSteps
+%     meanCFocPos(n,i) = mean(sifLogData(round((startFrame_copy(i)+endFrame(n,i))/2):endFrame(n,i),4))*1000;     % in units of nm
+%     stdCFocPos(n,i) = std(sifLogData(round((startFrame_copy(i)+endFrame(n,i))/2:endFrame(n,i)),4))*1000;
+% end
+% clear startFrame_copy
+% 
+% relativeStepSize = diff(meanCFocPos(n,:))';
+% 
+% for i=1:numSteps
+%     if i == 1
+%     meanCFocPos(n,i) = initialPosition*1000 ;% in units of nm
+%     else
+%     meanCFocPos(n,i) = meanCFocPos(n,i-1) + relativeStepSize(i-1);% in units of nm
+%     end
+% end
+meanCFocPos=zeros(1,numFrames);
+for kx=0:numFrames/p.dzrep
+    meanCFocPos(1,kx*p.dzrep+1:min(numFrames,(kx+1)*p.dzrep))=kx;
+    startFrame(n,kx+1)=kx*p.dzrep+1;
+    endFrame(n,kx+1)=min(numFrames,(kx+1)*p.dzrep);
 end
-
-numSteps = step -1;          % the last frames are not part of the scan series
-startFrame_copy = startFrame(n,1:length(endFrame));
-initialPosition = 50.0;
-
-for i=1:numSteps
-    meanCFocPos(n,i) = mean(sifLogData(round((startFrame_copy(i)+endFrame(n,i))/2):endFrame(n,i),4))*1000;     % in units of nm
-    stdCFocPos(n,i) = std(sifLogData(round((startFrame_copy(i)+endFrame(n,i))/2:endFrame(n,i)),4))*1000;
-end
-clear startFrame_copy
-
-relativeStepSize = diff(meanCFocPos(n,:))';
-
-for i=1:numSteps
-    if i == 1
-    meanCFocPos(n,i) = initialPosition*1000 ;% in units of nm
-    else
-    meanCFocPos(n,i) = meanCFocPos(n,i-1) + relativeStepSize(i-1);% in units of nm
-    end
-end
-
+meanCFocPos=(meanCFocPos-p.framez0)*p.dz;
+numSteps = ceil(numFrames/p.dzrep) -1;
 
 %% Create output file directories
 
-outputFilePrefix = [dataFile(1:length(dataFile)-4) '\calibration ' ...
-    datestr(now,'yyyymmdd HHMM') '\'];
+outputFilePrefix = [dataFile(1:length(dataFile)-4) filesep 'calibration ' ...
+    datestr(now,'yyyymmdd HHMM') filesep];
 mkdir(outputFilePrefix);
 
 
 %% Fit chosen beads throughout entire image stack
 h = figure('Position',[(scrsz(3)-1280)/2 (scrsz(4)-720)/2 1280 720],'color','w');
 
-for a=1:size(sifLogData,1)-2
+for a=1:numFrames
 % for a=1:130
     dataFrame = double(imread(dataFile,a,'Info',dataFileInfo))-darkAvg;
     data = dataFrame(ROI(2):ROI(2)+ROI(4)-1, ...
@@ -282,8 +293,8 @@ for a=1:size(sifLogData,1)-2
         rowIdx = (a-1)*numBeads+b;
         
         % create indices to use for fitting
-        [xIdx, yIdx] = meshgrid(moleLocs(b,1)-boxRadius:moleLocs(b,1)+boxRadius, ...
-            moleLocs(b,2)-boxRadius:moleLocs(b,2)+boxRadius);
+        [xIdx, yIdx] = meshgrid(moleLocs(b,1)-p.boxRadius:moleLocs(b,1)+p.boxRadius, ...
+            moleLocs(b,2)-p.boxRadius:moleLocs(b,2)+p.boxRadius);
         % make sure indices are inside image
         if min(xIdx(:)) < 1
             xIdx = xIdx + (1-min(xIdx(:)));
@@ -299,7 +310,7 @@ for a=1:size(sifLogData,1)-2
         end
               
         % find two largest peaks in box
-        [tempY, tempX] = ind2sub([2*boxRadius+1 2*boxRadius+1], ...
+        [tempY, tempX] = ind2sub([2*p.boxRadius+1 2*p.boxRadius+1], ...
             find(imregionalmax(dataBlur(yIdx(:,1),xIdx(1,:)))));
         tempX = tempX + min(xIdx(:))-1;
         tempY = tempY + min(yIdx(:))-1;
@@ -316,15 +327,15 @@ for a=1:size(sifLogData,1)-2
             fitParam(6) = temp(2,2);
             fitParam(1) = temp(1,3);
             fitParam(2) = temp(2,3);
-            fitParam(7) = mean(sigmaBounds);
-            fitParam(8) = mean(sigmaBounds);
+            fitParam(7) = mean(p.sigmaBounds);
+            fitParam(8) = mean(p.sigmaBounds);
         end
         lowerBound = [0 0 min(xIdx(:)) min(yIdx(:)) min(xIdx(:)) min(yIdx(:)) ...
-            sigmaBounds(1) sigmaBounds(1)];
+            p.sigmaBounds(1) p.sigmaBounds(1)];
         upperBound = [max(max(data(yIdx(:,1),xIdx(1,:)))) ...
             max(max(data(yIdx(:,1),xIdx(1,:)))) ...
             max(xIdx(:)) max(yIdx(:)) max(xIdx(:)) max(yIdx(:)) ...
-            sigmaBounds(2) sigmaBounds(2)];
+            p.sigmaBounds(2) p.sigmaBounds(2)];
 
         %% Fit with lsqnonlin
         [fitParam,~,residual,exitflag] = lsqnonlin(@(x) ...
@@ -336,8 +347,8 @@ for a=1:size(sifLogData,1)-2
 
         % Calculate midpoint between two Gaussian spots
         % convert from pixels to nm
-        PSFfits(n,rowIdx,14) = ((fitParam(3)+fitParam(5))/2)*nmPerPixel;
-        PSFfits(n,rowIdx,15) = ((fitParam(4)+fitParam(6))/2)*nmPerPixel;
+        PSFfits(n,rowIdx,14) = ((fitParam(3)+fitParam(5))/2)*p.nmPerPixel;
+        PSFfits(n,rowIdx,15) = ((fitParam(4)+fitParam(6))/2)*p.nmPerPixel;
 
         % Below is the calculation of the angle of the two lobes.
         % Remember that two vertical lobes is focal plane because camera
@@ -368,7 +379,7 @@ for a=1:size(sifLogData,1)-2
         PSFfits(n,rowIdx,17) = totalCounts*conversionFactor;
         
         %The actual position read by the C-focus encoder
-        PSFfits(n,rowIdx,18) = sifLogData(a,4); 
+        PSFfits(n,rowIdx,18) = meanCFocPos(1,a);% sifLogData(a,4); 
         
         %The interlobe distance
         lobeDist = sqrt((fitParam(3)-fitParam(5)).^2 + ...
@@ -402,14 +413,14 @@ for a=1:size(sifLogData,1)-2
                || fitParam(4)>max(yIdx(:)) || fitParam(6)>max(yIdx(:))
                 PSFfits(n,rowIdx,13) = -1002;   %% this flag will never show up because it is equivalent to extiflag -2 in lsqnonlin
             end
-            if fitParam(7)<=sigmaBounds(1) || fitParam(8)<=sigmaBounds(1) ...
-                || fitParam(7)>=sigmaBounds(2) || fitParam(8)>=sigmaBounds(2)
+            if fitParam(7)<=p.sigmaBounds(1) || fitParam(8)<=p.sigmaBounds(1) ...
+                || fitParam(7)>=p.sigmaBounds(2) || fitParam(8)>=p.sigmaBounds(2)
                 PSFfits(n,rowIdx,13) = -1003;   
             end
             if simgaRatio > sigmaRatioLimit;
                 PSFfits(n,rowIdx,13) = -1004;
             end
-            if lobeDist < lobeDistBounds(1) || lobeDist > lobeDistBounds(2)        
+            if lobeDist < p.lobeDistBounds(1) || lobeDist > p.lobeDistBounds(2)        
                 PSFfits(n,rowIdx,13) = -1005;
             end
             if ampRatio > ampRatioLimit;
@@ -425,7 +436,7 @@ for a=1:size(sifLogData,1)-2
         % if fit was successful, use the computed center location as center
         % of box for next iteration
         if PSFfits(n,rowIdx,13) > 0
-            moleLocs(b,:) = round(PSFfits(n,rowIdx,14:15)/nmPerPixel);            
+            moleLocs(b,:) = round(PSFfits(n,rowIdx,14:15)/p.nmPerPixel);            
         end
         
         % plot image reconstruction so that fits can be checked
@@ -860,7 +871,11 @@ for n = 1:numFiles
         scanLegend = {'calibration scan'};
         precLegend = {'x precision','y precision'};
     end
-    h1 = figure('Position',[(scrsz(3)-1280)/2 (scrsz(4)-720)/2 1280 720],'color','w');
+%     h1 = figure('Position',[(scrsz(3)-1280)/2 (scrsz(4)-720)/2 1280 720],'color','w');
+    ax=obj.initaxis(['F' num2str(bead)]);
+    h1=getParentFigure(ax);
+    
+    
     subplot(2,3,1:2);
     errorbar(z(goodFit_forward),meanAngles(n,bead,goodFit_forward),stddevAngles(n,bead,goodFit_forward),'-');
     if logical(sum(goodFit_backward))
@@ -930,8 +945,9 @@ for n = 1:numFiles
     
     
     %% plot additional pertaining to the DH-PSF
-    
-    h2=figure('Position',[(scrsz(3)-1280)/2 (scrsz(4)-720)/2 1280 720],'color','w');
+    ax=obj.initaxis(['bF' num2str(bead)]);
+    h2=getParentFigure(ax);
+%     h2=figure('Position',[(scrsz(3)-1280)/2 (scrsz(4)-720)/2 1280 720],'color','w');
     subplot(2,3,1);
     errorbar(z(goodFit_forward),meanAngles(n,bead,goodFit_forward),stddevAngles(n,bead,goodFit_forward),'-');
     hold on
@@ -987,7 +1003,7 @@ for n = 1:numFiles
     hold off;
     
     print(h2,'-dpng',[outputFilePrefix 'bead ' num2str(bead) ' stats_2.png']);
-    close(h2);
+%     close(h2);
   
     %% write calibration parameters to a file
     save([outputFilePrefix 'calibration.mat'], ...
@@ -1001,7 +1017,7 @@ end
 
 %% Generate template Stack of a chosen bead 
 
-templateSize = 2*round(10*160/nmPerPixel);  % 26;
+templateSize = 2*round(10*160/p.nmPerPixel);  % 26;
 
 % make sure templateSize is an even number of pixels
 % if mod(templateSize,2)==1
@@ -1027,8 +1043,8 @@ for bead = 1:numBeads
             data = data - bkgndImg;    
 
             good = PSFfits(n,:,1)==b & PSFfits(n,:,2)==bead;
-            x_Pos = round(PSFfits(n,good,14)/nmPerPixel);
-            y_Pos = round(PSFfits(n,good,15)/nmPerPixel);
+            x_Pos = round(PSFfits(n,good,14)/p.nmPerPixel);
+            y_Pos = round(PSFfits(n,good,15)/p.nmPerPixel);
 
             % check to make sure x_Pos,y_Pos are valid values
             if y_Pos-floor(templateSize/2) < 1
