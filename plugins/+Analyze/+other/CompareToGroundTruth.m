@@ -138,7 +138,7 @@ pard.forceungrouped.Width=2;
 
 pard.shiftpix.object=struct('Style','checkbox','String','Shift by 0.5 camera pixels','Value',1);
 pard.shiftpix.position=[3,1];
-pard.shiftpix.Width=4;
+pard.shiftpix.Width=2;
 
 
 
