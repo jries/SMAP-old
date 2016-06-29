@@ -28,7 +28,9 @@ classdef BG_wavelet<interfaces.WorkflowModule
             if ~isempty(data.data)
                 img=data.data;
                 if p.loc_wavelet_atrous
-                    imgg=gpuArray(img);
+%                     wait(gpuDevice);
+%                     gpu = parallel.gpu.GPUDevice.getDevice(1)
+                    imgg=gpuArray((img));
                     bgg=(mywaveletfilteratrous(gpuArray(imgg),false));
 %                     bgg(1:end,1:2)=imgg(1:end,1:2);
 %                      bgg(1:end,end-1:end)=imgg(1:end,end-1:end);

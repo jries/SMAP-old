@@ -46,7 +46,11 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
             oldp=pwd;
             cd(challengepath);
             disp('to contintue with Matlab, close SMLMChallenge application');
+            if ispc
+                system(javapath)
+            else
             system(['java -jar ' javapath]) 
+            end
             %later fix jave program and call via
             %smlm.assessment.application.Application
             %after adding javaclasspath(javapath)

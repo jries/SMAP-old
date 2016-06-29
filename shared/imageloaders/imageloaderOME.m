@@ -74,8 +74,8 @@ end
 
 
 function image=readstack(obj,imagenumber)
-   if imagenumber<obj.reader.getImageCount()
-       image=bfGetPlane(obj.reader,imagenumber+1);
+   if imagenumber<=obj.reader.getImageCount()
+       image=bfGetPlane(obj.reader,imagenumber);
    else
        image=[];
    end
