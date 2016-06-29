@@ -60,8 +60,9 @@ end
 
 
 function wobble_callback(a,b,obj)
-path=fileparts(obj.locData.files.file(1).name);
-gtfile=[path filesep 'activations.csv'];
+filename=(obj.locData.files.file(1).name);
+path=fileparts(filename);
+gtfile=[path filesep 'activations.csv','load ground truth for data'];
 if ~exist(gtfile,'file')
     ind=strfind(path,filesep); 
     gtfile=[path(1:ind(end))  'activations.csv'];
@@ -121,7 +122,7 @@ zmin = -750;zmax = 750;zstep = 10;%nm
 roiRadius = 500;%nm
 frameIsOneIndexed=true;
 output_path=path;
-wobbleCorrectSimBead(double(obj.locData.loc.xnm+shiftx),double(obj.locData.loc.ynm+shifty),double(obj.locData.loc.frame), gt,zmin,zstep,zmax,roiRadius,frameIsOneIndexed,output_path)
+wobbleCorrectSimBead(double(obj.locData.loc.xnm+shiftx),double(obj.locData.loc.ynm+shifty),double(obj.locData.loc.frame), gt,zmin,zstep,zmax,roiRadius,frameIsOneIndexed,filename)
 
 % addpath('External/SMLMChallenge')
 % wobble_correct;

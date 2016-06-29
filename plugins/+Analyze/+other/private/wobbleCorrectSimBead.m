@@ -21,9 +21,20 @@ wobbleMatrix = wobbleCalibration(xnm, ynm, znm, nBead, 'ROI', ROInm, 'Zfit', znm
 [~, indCorr] = unique(wobbleMatrix(:,1));
 wobbleMatrixUnique = wobbleMatrix(indCorr,[2,3,1]);
 %save in csv file, units : nm, column order : X Y Z
-csvwrite(fullfile(output_path,'wobbleCorrectionData.csv'), wobbleMatrixUnique);
-saveas(gcf,fullfile(output_path,'XY wobble result.fig'));
-saveas(gcf,fullfile(output_path,'XY wobble result.png'));
+
+[pa,fi,ext]=fileparts(output_path);
+if isempty(fi)
+    fi='wobbleCorrectionData';
+else
+    fi=[fi '_wobbleCorrectionData'];
+end
+csvwrite(fullfile(pa,[fi, '.csv']), wobbleMatrixUnique);
+wobbleMatrixUniqueM=wobbleMatrixUnique;
+wobbleMatrixUniqueM(:,1)=-wobbleMatrixUniqueM(:,1);
+wobbleMatrixUniqueM(:,2)=-wobbleMatrixUniqueM(:,2);
+csvwrite(fullfile(pa,[fi, '_Minus.csv']), wobbleMatrixUniqueM);
+saveas(gcf,fullfile(pa,'XY wobble result.fig'));
+saveas(gcf,fullfile(pa,'XY wobble result.png'));
 
 %------------------------------------------------------------------------
 
