@@ -12,11 +12,23 @@ classdef MathParser<interfaces.DialogProcessor
             evalstr=p.equation;
             fn=fieldnames(locs);
             for k = 1:length (fn)
-                evalstr = strrep(evalstr,fn{k},['locs.' fn{k}]);
+                ind=strfind(evalstr,fn{k});
+                for m=1:length(ind)
+                    if ind(m)>1
+                        lbefore=evalstr(ind(m)-1);
+                    else
+                        lbefore='';
+                    end
+                    if lbefore~='.' && ~isstrprop(lbefore,'alpha')
+                    evalstr=[evalstr(1:ind(m)-1) 'locs.' evalstr(ind(m):end)];
+                    end
+%                     evalstr = strrep(evalstr,[lbefore fn{k}],[lbefore 'locs.'  fn{k}]);
+                end
             end
              try
                 newval=eval(evalstr);
                  obj.locData.setloc(p.resultfield,newval)
+                 obj.locData.filter(p.resultfield)
                  obj.locData.regroup;
                  obj.setPar('locFields',fieldnames(obj.locData.loc))
              catch
@@ -39,7 +51,7 @@ function pard=guidef(obj)
 pard.t1.object=struct('String','result field','Style','text');
 pard.t1.position=[2,1];
 
-pard.resultfield.object=struct('String','','Style','edit');
+pard.resultfield.object=struct('String','within','Style','edit');
 pard.resultfield.position=[3,1];
 pard.resultfield.Width=0.8;
 
@@ -52,7 +64,7 @@ pard.t3.object=struct('String','Equation. Use fieldnames (e.g. xnm, phot) as var
 pard.t3.position=[2,2];
 pard.t3.Width=3;
 
-pard.equation.object = struct('String','','Style','edit');
+pard.equation.object = struct('String','(locprecnm<25 & PSFxnm>100) | numberInGroup>1','Style','edit');
 pard.equation.position=[3,2];
 pard.equation.Width=3;
 pard.plugininfo.type='ProcessorPlugin';

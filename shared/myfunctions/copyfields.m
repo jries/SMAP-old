@@ -12,7 +12,9 @@ if nargin==2 %copy all
         end
     end
 elseif nargin>2
-
+    if ~iscell(fields)
+        fields={fields};
+    end
 %     fn=intersect(fields,fnsource);
     if ~isempty(source)
     indm=1;

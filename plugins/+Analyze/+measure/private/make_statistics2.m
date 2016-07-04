@@ -199,6 +199,9 @@ sls={txt};
 for k=1:length(datrange)
     sls{end+1}='';
     sls{end+1}=[num2str(datrange(k)) '.' modetxt{datrange(k)} ];
+    if isempty(hz{datrange(k)})
+        continue
+    end
     [~,ind]=max(hz{datrange(k)}.h);
     mx=hz{datrange(k)}.n(ind);    
     sls{end+1}=['max: ' num2str(mx,3)];
