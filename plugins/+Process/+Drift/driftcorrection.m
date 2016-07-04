@@ -133,6 +133,7 @@ pard.drift_reference.Width=2;
 pard.drift_individual.object=struct('String','correct every file individually','Style','checkbox','Value',1);
 pard.drift_individual.position=[6,1];
 pard.drift_individual.Width=2;
+pard.plugininfo.name='drift correctiom X,Y';
 pard.plugininfo.type='ProcessorPlugin';
 pard.plugininfo.description={'Drift correction based on cross-correlation.','Algorithm: the data set is divided into [timepoints] blocks, for which superresolution images are calculated. The displacement between all images is calcualted with a FFT-based cross-correlation algorithm. The position of the maxima of the cross-correlation curve are fitted with sub-pixel accuracy with a free elliptical Gaussian.',...
     'A robust estimator is used to calculate the drift vs frame from all pairwise displacements.','All localiaztions visible in the superresolution image are used to infer the drift. Use [Render]...[Layer] to control this.',...

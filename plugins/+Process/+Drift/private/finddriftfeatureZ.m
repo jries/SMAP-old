@@ -24,15 +24,15 @@ function [drift,driftinfo]=finddriftfeatureZ(pos,par)
 %displaced. Fill in outside.
 
 
-lastframe=par.framestop;
-firstframe=par.framestart;
+lastframe=round(par.framestop);
+firstframe=round(par.framestart);
 numframes=lastframe-firstframe+1;
 
 %% calculate movie and FFT of movie
-pixrec=par.drift_pixrec; %in nm
+pixrec=par.drift_pixrecz; %in nm
 zb=par.zrange(1):pixrec:par.zrange(2);
 
-window=ceil((par.drift_window-1)/2);
+window=ceil((par.drift_windowz-1)/2);
 timepoints=par.drift_timepoints; %how many timepoints
 % maxdrift=par.drift_maxdrift; %in nanometers
 
@@ -50,7 +50,7 @@ xb=mx(1):par.slicewidth:mx(2);
 % disp('make movie')
 % Fmovier=makemovie;  %calculate fourier transforms of reconstructed images
 % disp('find displacement')
-plotaxis=initaxis(par.resultstabgroup,'crosscorrelations');
+plotaxis=initaxis(par.resultstabgroup,'CC z');
 [ddz,errz]= finddisplacementsZ; %determine displacements
 % 
 % ddx=ddx*pixrec; %convert displacements into nm
@@ -121,7 +121,7 @@ wz=1./sdz.^2;
 [dzt,pz] = csaps(double(cfit1(indgz)),double(dz(indgz)),[],double(ctrue),wz(indgz)) ;
 
 framesall=(1:par.maxframeall)-firstframe+1;
-binend=3*binframes/2;
+binend=floor(1*binframes/2);
 % dxtt=zeros((par.maxframeall),1);dytt=dxtt;
 dztt=dzt;
 dztt(1:firstframe-1+binframes/2)=dztt(firstframe-1+binframes/2);
@@ -129,7 +129,7 @@ dztt(1:firstframe-1+binframes/2)=dztt(firstframe-1+binframes/2);
 dztt(lastframe+1-binend:end)=dztt(lastframe+1-binend);
 
 
-results_ax2=initaxis(par.resultstabgroup,'drift vs frame');
+results_ax2=initaxis(par.resultstabgroup,'dz/frame');
 
 % subplot(1,2,1)
 hold off
@@ -155,9 +155,9 @@ driftinfo.dzplot=ddzplot;
 
 driftinfo.dzt=dztt;
 
-driftinfo.binframes=cfit1;
+driftinfo.binframesz=cfit1;
 %
-initaxis(par.resultstabgroup,'drift vs frame  final');
+initaxis(par.resultstabgroup,'dz/frame final');
 
 % hold off
 plot(cfit1,dz,'x',framesall,dztt,'k')
@@ -175,27 +175,13 @@ drift.z=dztt;
 % asdafd
 % fitposc=adddrift(positions,dxt,dyt); %recalculate positions
 
-function Fmovier=makemovie %calculate fourier transforms of images
-%     posr.x=pos.xnm;posr.y=pos.ynm;
-    binframes=2*ceil(numframes/timepoints/2);
-    frameranges=[firstframe:binframes:lastframe lastframe] ;  
-    Fmovier=zeros(nfftexp,nfftexp,timepoints,'single');
-    for k=1:timepoints
-        indframe=pos.frame<frameranges(k+1)&pos.frame>=frameranges(k);
-        posr.x=pos.xnm(indframe);posr.y=pos.ynm(indframe);
-        imager=histrender(posr,mx, my, pixrec, pixrec)';
-        Fmovier(:,:,k)=fft2(imager,nfftexp,nfftexp);
-%         figure(89)
-%         imagesc(imager)
-%         waitforbuttonpress
-    end
-end
+
 
 function [zpos,errz]= finddisplacementsZ % find displacements
-binframes=2*ceil(numframes/timepoints/2);
+binframes=2*ceil(numframes/timepoints/2+1);
 frameranges=[firstframe:binframes:lastframe lastframe] ;   
 dnumframesh =length(frameranges);
-zpos=zeros(dnumframesh);
+zpos=zeros(dnumframesh-1);
 errz=zpos+1;
 
 for k=1:dnumframesh-1
@@ -213,23 +199,7 @@ for k=1:dnumframesh-1
 end
 end
 
-function [x,y,outim,outimnorm,errx,erry]=findmaximumgauss(img,window)
-s=size(img);
-win=maxdrift/pixrec; %maxdrift
-cent=round(s(1)/2-win:s(1)/2+win);
-imfm=img(cent,cent);
-imfm=filter2(ones(5)/5^2,imfm); %filter a little for better maximum search
-[inten,ind]=max(imfm(:)); %determine pixel with maximum intensity to center roi for fitting
-[mxh,myh]=ind2sub(size(imfm),ind);
-mxh=mxh+cent(1)-1;
-myh=myh+cent(1)-1;
-%now determine maximum
-smallframe=double(img(mxh-window:mxh+window,myh-window:myh+window));
-[fitout,outim,outimnorm,ci]=my2Dgaussfit(smallframe,[window+1,window+1,inten,min(smallframe(:)),max(2,3/window),max(2,3/window),0],3);
-x=mxh-window+fitout(1)-1;y=myh-window+fitout(2)-1;
-dc=ci(:,2)-ci(:,1);
-errx=dc(1);erry=dc(2);
-end
+
 end
 
 function [dx2,sdx2]=bindisplacementfit(ddx,errx)
