@@ -33,7 +33,7 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
             if obj.guiselector.show
                 posh=obj.handle.Position;
                 if isempty(obj.guiselector.position)
-                    pos(1:2)=posh(1:2)+posh(3:4)-[23,22];
+                    pos(1:2)=0*posh(1:2)+posh(3:4)-[23,22];
                     pos(3:4)=[20,20];
                 else
                     pos=obj.guiselector.position;

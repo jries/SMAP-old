@@ -4,6 +4,7 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                 obj@interfaces.DialogProcessor(varargin{:}) ;
                 obj.inputParameters={'layer1_'};
                 obj.history=true;
+                obj.showresults=true;
                 obj.guiselector.show=true;
         end
         
@@ -39,7 +40,11 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                     lochere.files.file(1).driftinfo=driftinfo;
                     obj.locData.files.file(k).driftinfo=driftinfo;
                     fn=lochere.files.file(1).name;
-                    fnn=strrep(fn,'_sml','_driftc_sml');
+                    if strfind(fn,'_sml')
+                        fnn=strrep(fn,'_sml','_driftc_sml');
+                    else
+                        fnn=strrep(fn,'fitpos','driftc_sml');
+                    end
                     lochere.savelocs(fnn); 
                     obj.locData.loc.xnm(~badind)=lochere.loc.xnm;
                     obj.locData.loc.ynm(~badind)=lochere.loc.ynm;
