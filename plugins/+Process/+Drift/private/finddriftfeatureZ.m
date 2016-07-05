@@ -111,14 +111,14 @@ wz=1./sdz.^2;
 % wx(end)=wx(end)/4;
 % wy(end)=wy(end)/4;
 
-% h=cfit1(2)-cfit1(1)
-% pset=1/(1+h^3/6)
-
+ h=cfit1(2)-cfit1(1);
+%  pset=1/(1+h^3/6);
+ pset=1/(1+h^3/24);
 %give higher weight to first data point:
 % wx(1)=wx(1)*2;
 % wy(1)=wy(1)*2;
 
-[dzt,pz] = csaps(double(cfit1(indgz)),double(dz(indgz)),[],double(ctrue),wz(indgz)) ;
+[dzt,pz] = csaps(double(cfit1(indgz)),double(dz(indgz)),pset,double(ctrue),wz(indgz)) ;
 
 framesall=(1:par.maxframeall)-firstframe+1;
 binend=floor(1*binframes/2);
