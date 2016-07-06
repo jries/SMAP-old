@@ -117,7 +117,7 @@ wz=1./sdz.^2;
 %give higher weight to first data point:
 % wx(1)=wx(1)*2;
 % wy(1)=wy(1)*2;
-
+pset=[];
 [dzt,pz] = csaps(double(cfit1(indgz)),double(dz(indgz)),pset,double(ctrue),wz(indgz)) ;
 
 framesall=(1:par.maxframeall)-firstframe+1;
