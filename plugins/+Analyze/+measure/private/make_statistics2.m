@@ -133,7 +133,7 @@ for k=datrange
 %     dat(k)=fitexpphot(hphot{k},[],ploton);
     dat(k)=meanexphere(phot{k},hphot{k},[],ax1,mmax{k});
     
-    sphot{end+1}=(['\mu'  ' = ' num2str(dat(k).mu,'%5.0f')]);   
+    sphot{end+1}=(['Pexp'  ' = ' num2str(dat(k).mu,'%5.0f')]);   
 end
 stat.photons.Nloc=Nloc;
 stat.photons.meanphot=meanphot;
@@ -176,7 +176,7 @@ for k=datrange
     slt{end+1}=[num2str(k) '.' modetxt{k} ];
 %     dat(k)=fitexpphot(hlifet{k},2,ploton);
     dat(k)=meanexphere(lifetime{k},hlifet{k},1,ax3,mmax{k});
-    slt{end+1}=(['\mu'  ' = ' num2str(dat(k).mu,3)]);
+    slt{end+1}=(['texp'  ' = ' num2str(dat(k).mu,3)]);
     slt{end+1}=(['mean'  ' = ' num2str(mean(lifetime{k}))]);
     stat.lifetime.mu(k)=dat(k).mu;
 end
