@@ -168,7 +168,7 @@ end
 
 %lifetime
 lifetime=getFieldAsVector(locs,'numberInGroup');
-[hlifet,mmax]=plothist(lifetime,0.99,1,0,ax3);
+[hlifet,mmax]=plothist(lifetime,0.999,1,0,ax3);
  ax3.NextPlot='add';
 slt={'lifetime'};
 for k=datrange

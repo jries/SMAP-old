@@ -222,6 +222,7 @@ ddx=zeros(dnumframesh-1);ddy=zeros(dnumframesh-1);
 errx=ddx;
 erry=ddy;
 % fhold=imagesc(1,'Parent',results_ax1);
+timerh=tic;
 for k=1:dnumframesh-1
     
     for l=k+1:dnumframesh
@@ -233,7 +234,8 @@ for k=1:dnumframesh-1
         ddx(l,k)=-dxh; ddy(l,k)=-dyh;
         errx(l,k)=errx(k,l);erry(l,k)=erry(k,l);
     
-    if isfield(par,'showresults')&&par.showresults
+    if isfield(par,'showresults') && par.showresults && toc(timerh)>0.5
+        timerh=tic;
         fhold=imagesc(outim,'Parent',results_ax1);
         imagesc(outimnorm,'Parent',results_ax3)
         results_ax3.Title.String=num2str(k/dnumframesh+(l-k)/dnumframesh^2);
