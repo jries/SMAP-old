@@ -38,8 +38,9 @@ classdef SEsites<matlab.mixin.Copyable
         function setlineangle(obj,number,angledeg,len)
             angle=angledeg/180*pi;
             if nargin<4
-                len=100;
+                len=200;
             end
+            len=len/2;
 %             line.length=len;line.angle=angle;line.value=len;
 %             line.
             posh=[obj.pos(1)-len*cos(angle),obj.pos(2)-len*sin(angle);obj.pos(1)+len*cos(angle),obj.pos(2)+len*sin(angle)];
