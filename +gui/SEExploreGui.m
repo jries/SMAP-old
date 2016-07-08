@@ -2,7 +2,7 @@ classdef SEExploreGui<interfaces.SEProcessor
     properties
         hlines
         infostruct
-
+        anglehandle
     end
     methods
         function obj=SEExploreGui(varargin)   
@@ -148,6 +148,11 @@ classdef SEExploreGui<interfaces.SEProcessor
             redraw_sitelist(obj)
         end
         function lineannotation(obj,linenumber,hline)
+            if nargin<3||isempty(hline)
+                hline=obj.anglehandle{linenumber};
+            else
+                obj.anglehandle{linenumber}=obj.getPar(['ROI_lineannotation_handle_' num2str(linenumber)]);
+            end
             plotline(obj,['line',num2str(linenumber)],hline);
         end
         function nextsite(obj,direction)
@@ -356,6 +361,13 @@ if sum(obj.SE.currentsite.annotation.rotationpos.pos(:).^2)~=0
     anglebutton_callback(0,0,obj)
 end
 
+% anotation line
+if obj.SE.currentsite.annotation.line1.length>0
+obj.lineannotation(1)
+end
+if obj.SE.currentsite.annotation.line2.length>0
+obj.lineannotation(2)
+end
 %plot info
 %update annotations
 obj.SE.processors.annotation.sitechange(obj.SE.currentsite);
