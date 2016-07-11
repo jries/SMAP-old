@@ -5,6 +5,7 @@ classdef TifLoader<interfaces.WorkflowModule
         framestart
         numberOfFrames
         timerfitstart
+        edgesize
     end
     methods
         function obj=TifLoader(varargin)
@@ -13,7 +14,7 @@ classdef TifLoader<interfaces.WorkflowModule
             obj.isstartmodule=true;
         end
         function pard=guidef(obj)
-            pard=guidef;
+            pard=guidef(obj);
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -55,7 +56,12 @@ classdef TifLoader<interfaces.WorkflowModule
                     obj.framestop=previewframe;
                 end               
             end
-            obj.timerfitstart=tic;            
+           
+            
+            obj.timerfitstart=tic;   
+            
+            
+            
         end
         function run(obj,data,p)
             global SMAP_stopnow
@@ -73,6 +79,16 @@ classdef TifLoader<interfaces.WorkflowModule
                 
                 datout=interfaces.WorkflowData;
 %                 datout.set(image);
+
+
+                if p.padedges
+                    dr=obj.edgesize;
+                    imgo=zeros(size(image)+2*dr,'like',image);
+                    bg=myquantilefast(image(:),0.2,1000);
+                    imgo=imgo+bg;
+                    imgo(dr+1:end-dr,dr+1:end-dr)=image;
+                    image=imgo;
+                end
                 datout.data=image;
 
                 datout.frame=imloader.currentImageNumber;
@@ -122,8 +138,21 @@ classdef TifLoader<interfaces.WorkflowModule
              obj.setPar('loc_metadatafile',obj.imloader.metadata.allmetadata.metafile);
             end
 %             end
-obj.imloader.metadata
-            obj.setPar('loc_fileinfo',(obj.imloader.metadata));
+% obj.imloader.metadata
+            p=obj.getGuiParameters;
+            fileinf=obj.imloader.metadata;
+            if p.padedges
+%                 locsettings=obj.getPar('loc_cameraSettings');
+                roisize=13;
+                dr=ceil((roisize-1)/2);
+                fileinf.roi(1:2)=fileinf.roi(1:2)-dr;
+                fileinf.roi(3:4)=fileinf.roi(3:4)+2*dr;
+%                 fileinf.Width=fileinf.Width+2*dr;
+%                 fileinf.Height=fileinf.Height+2*dr;
+%                 obj.setPar('loc_cameraSettings',locsettings);
+                obj.edgesize=dr;
+            end
+            obj.setPar('loc_fileinfo',fileinf);
 % 
             obj.guihandles.tiffile.String=obj.imloader.file;
 %              obj.setPar('loc_newfile',true);
@@ -140,6 +169,12 @@ obj.imloader.metadata
             p=obj.getAllParameters;
             obj.addFile(p.tiffile)
         end
+        function loadedges(obj,a,b)
+            tiffile=obj.getSingleGuiParameter('tiffile');
+            if exist(tiffile,'file')
+                obj.addFile(tiffile);
+            end
+        end
     end
 end
 
@@ -152,7 +187,7 @@ if f
 end  
 end
 
-function pard=guidef
+function pard=guidef(obj)
 pard.text.object=struct('Style','text','String','Image source file:');
 pard.text.position=[1,1];
 pard.text.Width=1.5;
@@ -189,6 +224,12 @@ pard.framestop.object=struct('Style','edit','String','1000000');
 pard.framestop.position=[4.2,2.7];
 pard.framestop.Width=0.7;
 pard.framestop.Optional=true;
+
+pard.padedges.object=struct('Style','checkbox','String','Pad edges','Value',0,'Callback',@obj.loadedges);
+pard.padedges.position=[4.2,3.5];
+pard.padedges.Width=1;
+pard.padedges.Optional=true;
+pard.padedges.TooltipString='Pad edges with minimum values to allow detection of localizations close to edges. Usually not necessary.';
 % pard.locdata_empty.object=struct('Style','checkbox','String','Empty localizations','Value',1);
 % pard.locdata_empty.position=[4.2,3.5];
 % pard.locdata_empty.Width=1.5;

@@ -33,7 +33,7 @@ pixrec=par.drift_pixrecz; %in nm
 zb=par.zrange(1):pixrec:par.zrange(2);
 
 window=ceil((par.drift_windowz-1)/2);
-timepoints=par.drift_timepoints; %how many timepoints
+timepoints=par.drift_timepointsz; %how many timepoints
 % maxdrift=par.drift_maxdrift; %in nanometers
 
 mx=[min(pos.xnm) max(pos.xnm)]; %ROI which is used for drift correction. 
@@ -111,14 +111,14 @@ wz=1./sdz.^2;
 % wx(end)=wx(end)/4;
 % wy(end)=wy(end)/4;
 
-% h=cfit1(2)-cfit1(1)
-% pset=1/(1+h^3/6)
-
+ h=cfit1(2)-cfit1(1);
+%  pset=1/(1+h^3/6);
+ pset=1/(1+h^3/24);
 %give higher weight to first data point:
 % wx(1)=wx(1)*2;
 % wy(1)=wy(1)*2;
-
-[dzt,pz] = csaps(double(cfit1(indgz)),double(dz(indgz)),[],double(ctrue),wz(indgz)) ;
+pset=[];
+[dzt,pz] = csaps(double(cfit1(indgz)),double(dz(indgz)),pset,double(ctrue),wz(indgz)) ;
 
 framesall=(1:par.maxframeall)-firstframe+1;
 binend=floor(1*binframes/2);
@@ -184,14 +184,22 @@ dnumframesh =length(frameranges);
 zpos=zeros(dnumframesh-1);
 errz=zpos+1;
 
+timerh=tic;
 for k=1:dnumframesh-1
     indframek=pos.frame<frameranges(k+1)&pos.frame>=frameranges(k);
 %     posr.x=pos.xnm(indframe);posr.y=pos.ynm(indframe);
     for l=k+1:dnumframesh-1
+        if toc(timerh)>.5
+            drawnow
+            timerh=tic;
+            plotaxish=plotaxis;
+        else
+            plotaxish=[];
+        end
         indframel=pos.frame<frameranges(l+1)&pos.frame>=frameranges(l);
-        zpos(k,l)=finddisplacementZ(pos.xnm(indframek),pos.znm(indframek),pos.xnm(indframel),pos.znm(indframel),xb,zb,window, plotaxis);
+        zpos(k,l)=finddisplacementZ(pos.xnm(indframek),pos.znm(indframek),pos.xnm(indframel),pos.znm(indframel),xb,zb,window, plotaxish);
         zpos(l,k)=-zpos(k,l);
-        drawnow
+        
         
    
     end
