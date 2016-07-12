@@ -91,7 +91,11 @@ classdef LocSaver<interfaces.WorkflowModule;
                 fitpar=obj.parent.getGuiParameters(true).children;
                 fitpar.fittime=toc(obj.timer);
                 fitpar.loadtifftime=obj.getPar('tiffloader_loadingtime');
+                try
                 disp([num2str(length(obj.locDatatemp.loc.xnm)) ' localizations in ' num2str(fitpar.fittime) ' seconds.']);
+                catch err
+                    err
+                end
                 obj.locDatatemp.files.file.raw=obj.frames;
                 obj.locDatatemp.savelocs(filename,[],struct('fitparameters',fitpar));
                 
