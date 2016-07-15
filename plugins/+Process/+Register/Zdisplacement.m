@@ -18,12 +18,13 @@ classdef Zdisplacement<interfaces.DialogProcessor
            q2=1-q1;
            minx=min(myquantilefast(locr.xnm,q1),myquantilefast(loct.xnm,q1));maxx=max(myquantilefast(locr.xnm,q2),myquantilefast(loct.xnm,q2));
            miny=min(myquantilefast(locr.ynm,q1),myquantilefast(loct.ynm,q1));maxy=max(myquantilefast(locr.ynm,q2),myquantilefast(loct.ynm,q2));
-           minz=min(myquantilefast(locr.znm,q1),myquantilefast(loct.znm,q1));maxz=max(myquantilefast(locr.znm,q2),myquantilefast(loct.znm,q2));
+           minz=max(-5000,min(myquantilefast(locr.znm,q1),myquantilefast(loct.znm,q1)));maxz=min(5000,max(myquantilefast(locr.znm,q2),myquantilefast(loct.znm,q2)));
+           
            zb=minz:p.binwidth:maxz;
            xb=minx:p.slicewidth:maxx; xb(end)=maxx;
            
            ax=obj.initaxis('cross-correlation');
-           zpos=finddisplacementZ(locr.xnm,locr.znm,loct.xnm,loct.znm,xb,zb,ax);
+           zpos=finddisplacementZ(locr.xnm,locr.znm,loct.xnm,loct.znm,xb,zb,5,ax);
            
 %            [~,sindr]=sort(locr.xnm);
 %            [~,sindt]=sort(loct.xnm);

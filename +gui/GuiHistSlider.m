@@ -134,6 +134,7 @@ classdef GuiHistSlider< interfaces.LayerInterface
                 obj.histogram=restorestruc.histogram;        
             elseif isfield(obj.locData.loc,fieldh)
                     v=double(obj.locData.loc.(fieldh)(obj.locData.loc.filenumber==filenumber));
+                    v(isinf(v))=[];
                     q=getquantile(v);
                     
 %                     obj.data.quantile=q;

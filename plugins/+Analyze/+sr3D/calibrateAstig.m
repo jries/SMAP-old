@@ -65,8 +65,8 @@ midp=z(indz0);
 % 
 % midpreal=(z(ix)+z(iy))/2;
 % 
-% indframez0=find(p.framez0<=framet,1,'first');
-% midp=zt(indframez0);
+indframez0=find(p.framez0<=framet,1,'first');
+midp=zt(indframez0);
 % 
 z=z-midp;zt=zt-midp;
 
