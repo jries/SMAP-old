@@ -29,7 +29,16 @@ classdef CameraConverter<interfaces.WorkflowModule
            obj.addSynchronization('loc_fileinfo',[],[],@obj.setmetadata)
         end
         function setmetadata(obj)
-            obj.loc_cameraSettings=obj.getPar('loc_fileinfo');
+            md=obj.loc_cameraSettings;
+            obj.loc_cameraSettings=interfaces.metadataSMAP;
+            obj.loc_cameraSettings=copyfields(obj.loc_cameraSettings,md);
+            settings=obj.getPar('loc_fileinfo');
+            fn=fieldnames(settings);
+            for k=1:length(fn)
+                if settings.assigned.(fn{k})
+                    obj.loc_cameraSettings.(fn{k})=settings.(fn{k});
+                end
+            end
             obj.setPar('loc_cameraSettings',obj.loc_cameraSettings);
             obj.setPar('EMon',obj.loc_cameraSettings.EMon);
 %             if obj.loc_cameraSettings.EMon
