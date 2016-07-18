@@ -19,7 +19,7 @@ classdef MathParser<interfaces.DialogProcessor
                     else
                         lbefore='';
                     end
-                    if lbefore~='.' && ~isstrprop(lbefore,'alpha')
+                    if isempty(lbefore) || (lbefore~='.' && ~isstrprop(lbefore,'alpha'))
                     evalstr=[evalstr(1:ind(m)-1) 'locs.' evalstr(ind(m):end)];
                     end
 %                     evalstr = strrep(evalstr,[lbefore fn{k}],[lbefore 'locs.'  fn{k}]);
