@@ -25,7 +25,7 @@ classdef fitDHPSF<interfaces.DialogProcessor
         pfit=thresholdf.thresholdparameters;
         pfit.dataFile=p.dhpsf_datafile;
         pfit.peakThreshold=pfit.Thresholds/10000;
-         pfit.peakThreshold= pfit.peakThreshold*.9;
+         pfit.peakThreshold= pfit.peakThreshold*.75;
         %remove
 %         pfit.EMgain=300;
         pfit.framerange=p.framerange;
@@ -40,7 +40,7 @@ classdef fitDHPSF<interfaces.DialogProcessor
                     pfit.calBeadIdx=1; %later: change
         tfit=tic      ;      
         totalPSF =f_fitSMs(obj,pfit);
-        timefit=toc(tfit);
+        timefit=toc(tfit)
         goodFit = totalPSF(:,17)>0;
 %         totalPSF=totalPSF(goodFit,:);
         
