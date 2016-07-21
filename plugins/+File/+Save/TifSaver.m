@@ -6,23 +6,35 @@ classdef TifSaver<interfaces.DialogProcessor
         end
         
         function out=save(obj,p)
+            p2=obj.getGuiParameters;
             obj.status('save tif file')
             fn=p.filelist_long.selection;
             [path,file]=fileparts(fn);
-            of=[path filesep file '.tif'];
+            of=[path filesep file p2.img_ext.selection];
             txt=filterpar(obj,p);
-            [f,path]=uiputfile(of);
+            serchstr={['*' p2.img_ext.selection];['*' strjoin(p2.img_ext.String,';*')]};
+            [f,path]=uiputfile(serchstr,'select output file for image', of);
             if f
                 img=obj.getPar('sr_image');
                 res=ones(2,1)/p.sr_pixrec*2.5e4;       
                 description=sprintf(txt);
-                imwrite(img.image,[path f],'Description',description,'Resolution',res);
+                [~,~,ext]=fileparts(f);
+                switch ext
+                    case '.tif'
+                        imwrite(img.image,[path f],'Description',description,'Resolution',res);
+                    case '.png'
+                        imwrite(img.image,[path f],'Description',description,'XResolution',res(1),'YResolution',res(2));
+                end
             end
             obj.status('save done')
           
         end
         function pard=guidef(obj)
            pard.plugininfo.type='SaverPlugin';
+           
+            pard.img_ext.object=struct('Style','popupmenu','String',{{'.tif','.png'}});
+            pard.img_ext.position=[1,1];
+            pard.img_ext.Width=2;
         end
         function run(obj,p)
             obj.save(p)
@@ -70,7 +82,7 @@ for k=1:length(p.sr_layerson)
             end
             
         end
-        disp(sprintf(txt))
+%         disp(sprintf(txt));
     end
     
 end
