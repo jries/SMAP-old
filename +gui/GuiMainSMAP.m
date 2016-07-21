@@ -57,6 +57,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             %global settings
             obj.createGlobalSetting('guiPluginConfigFile','Directories','Configuration file for GUI plugin structure. Delete path and save to reset plugins.',struct('Style','file','String','settings/SimpleGui.txt'))
             gfile=obj.getGlobalSetting('guiPluginConfigFile');
+            gfile=findsettingsfile(gfile);
             if exist(gfile,'file')
                 guimodules=readstruct(gfile,[],true);
             else
