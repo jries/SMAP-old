@@ -78,44 +78,68 @@ classdef TifLoaderParallel<interfaces.WorkflowModule
             parp=gcp;
             
             frames=obj.framestart:obj.framestop;
-            blocksize=p.parallel_blocksize;
+            blocksize=min(length(frames),p.parallel_blocksize);
             numblocks=ceil(length(frames)/blocksize);
-            indim=0;
-            clear f
-            for k=1:numblocks
-                if SMAP_stopnow
-                    break;
-                end
-                oldindim=indim+1;
-                for l=1:blocksize
-                    indim=indim+1;
-                    if indim>length(frames)
-                        indim=indim-1;
-                        break
-                    end
-                    f(indim)=parfeval(parp,@imloader.getimage,1,frames(indim));
-                end
-                
-                for l2=oldindim:indim
-                    [idx,img]=fetchNext(f);
-                    
+            
+            
+            
+%             indim=0;
+%             clear f
+            frameshere=frames(1:blocksize);
+            images=imloader.getmanyimages(frameshere);
+            
+            for k=2:numblocks
+                indh=(k-1)*blocksize+1:min(k*blocksize,length(frames));
+                framesold=frameshere;
+                frameshere=frames(indh);
+                f=parfeval(parp,@imloader.getmanyimages,1,frameshere);
+                for l=1:length(images)
                     datout=interfaces.WorkflowData;
-                    datout.data=img;
-                    datout.frame=frames(idx);
+                    datout.data=images{l};
+                    datout.frame=framesold(l);
                     datout.ID=id;
                     id=id+1;
-                    obj.output(datout)
-                    
-%                     figure(88)
-%                     imagesc(img)
-%                     waitforbuttonpress
-%                     imall{frames(idx)}=img;
+                    obj.output(datout)  
                 end
+                images=fetchOutputs(f);
             
+                    
+                    
+%                 if SMAP_stopnow
+%                     break;
+%                 end
+%                 oldindim=indim+1;
+%                 tic
+%                 for l=1:blocksize
+%                     indim=indim+1;
+%                     if indim>length(frames)
+%                         indim=indim-1;
+%                         break
+%                     end
+%                     f(indim)=parfeval(parp,@imloader.getimage,1,frames(indim));
+%                 end
+%                 tread=toc
+%                 tic
+%                 for l2=oldindim:indim
+%                     [idx,img]=fetchNext(f);
+%                     
+%                     datout=interfaces.WorkflowData;
+%                     datout.data=img;
+%                     datout.frame=frames(idx);
+%                     datout.ID=id;
+%                     id=id+1;
+%                     obj.output(datout)
+%                     
+% %                     figure(88)
+% %                     imagesc(img)
+% %                     waitforbuttonpress
+% %                     imall{frames(idx)}=img;
+%                 end
+%             tfit=toc
                 
                 %display
 
-                    obj.setPar('loc_currentframe',struct('frame',datout.frame,'image',img));
+                    obj.setPar('loc_currentframe',struct('frame',datout.frame,'image',datout.data));
                     if p.onlineanalysis
                         
                         totalf=imloader.metadata.numberOfFrames-obj.framestart;
@@ -132,6 +156,15 @@ classdef TifLoaderParallel<interfaces.WorkflowModule
                 
                 
             end
+            framesold=frameshere;
+                for l=1:length(images)
+                    datout=interfaces.WorkflowData;
+                    datout.data=images{l};
+                    datout.frame=framesold(l);
+                    datout.ID=id;
+                    id=id+1;
+                    obj.output(datout)  
+                end
             
             obj.setPar('tiffloader_loadingtime',0);
             dateof=interfaces.WorkflowData;
