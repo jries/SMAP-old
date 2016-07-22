@@ -73,7 +73,8 @@ classdef TifLoader<interfaces.WorkflowModule
             id=1;
 %             disp('run loader')
             imloader=obj.imloader;
-            image=imloader.readNext;      
+            image=imloader.readNext ; 
+%             imloader.currentImageNumber
             tall=0;
             while ~isempty(image)&&imloader.currentImageNumber<=obj.framestop&&~SMAP_stopnow
                 

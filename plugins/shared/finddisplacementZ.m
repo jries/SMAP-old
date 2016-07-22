@@ -41,8 +41,11 @@ else
 end
 zc=(-length(hr)+1:length(hr)-1)*(zb(2)-zb(1));
 
-zred=zc(ind-dh:ind+dh);
-[zpos,fp]=mypeakfit(zc(ind-dh:ind+dh),ccc(ind-dh:ind+dh));
+inrange=ind-dh:ind+dh;
+inrange(zc(inrange)==0)=[];
+
+zred=zc(inrange);
+[zpos,fp]=mypeakfit(zc(inrange),ccc(inrange));
 
 indplot=ind-3*dh:ind+3*dh;
 
