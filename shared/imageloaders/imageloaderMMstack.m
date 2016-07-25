@@ -60,6 +60,9 @@ function image=readstack(obj,imagenumber,recursions)
         obj.stack.tiffh=Tiff(newfile,'r');
         obj.stack.currentfile=filenumber;
     end
+%     if ~isvalid(obj.stack.tiffh)
+%         obj.stack.tiffh=Tiff(obj.stack.files{obj.stack.currentfile},'r');  
+%     end
     try
         th=obj.stack.tiffh;
         th.setDirectory(imagenumber);
@@ -75,8 +78,9 @@ function image=readstack(obj,imagenumber,recursions)
                 disp('after waiting no more files')
             end
         else
+
             disp('image out of range');
-%             image=err;
+            image=obj.stack.tiffh;
         end
     end
 end
