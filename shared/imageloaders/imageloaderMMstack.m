@@ -50,7 +50,7 @@ function image=readstack(obj,imagenumber,recursions)
     end
     maxrecursions=1;
     image=[]; %default, if nothing can be read: end.
-
+%     image=imagenumber;
     [imagenumber,filenumber]=obj.getstacknumber(imagenumber);
     if filenumber~=obj.stack.currentfile
         obj.stack.tiffh.close;
@@ -64,7 +64,7 @@ function image=readstack(obj,imagenumber,recursions)
         th=obj.stack.tiffh;
         th.setDirectory(imagenumber);
         image=th.read;                    
-    catch
+    catch err
 
         if obj.onlineAnalysis
             if recursions<maxrecursions
@@ -76,6 +76,7 @@ function image=readstack(obj,imagenumber,recursions)
             end
         else
             disp('image out of range');
+%             image=err;
         end
     end
 end

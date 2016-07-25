@@ -168,7 +168,7 @@ classdef TifLoaderParallel<interfaces.WorkflowModule
             
             obj.setPar('tiffloader_loadingtime',0);
             dateof=interfaces.WorkflowData;
-            dateof.frame=id+1;
+            dateof.frame=datout.frame+1;
             dateof.ID=id;
             dateof.eof=true;
             obj.output(dateof)
