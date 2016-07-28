@@ -17,26 +17,46 @@ classdef BatchAnalyze<interfaces.DialogProcessor&interfaces.SEProcessor
             out=[];
             g=obj.getPar('mainGui');
             
-            [f,pfad]=uigetfile('*.mat');
-            gf=g.children.guiFile;
-            gf.loadbutton_callback(0,0,0,pfad,f);           
-            if p.redrawall
-                g.locData.SE.processors.preview.redrawall;
-            end
-            analzyers=fieldnames(g.children.guiSites.children.Analyze.children);
-            selectedan=p.analyzer.selection;
-            if any(strcmp(analzyers,selectedan))
-                analyzering=g.children.guiSites.children.Analyze.children.(selectedan);
-                analyzering.processgo;
-            else
-                disp('selected analyzer should be added to ROImanager/Analyzers')
+            [f,pfad]=uigetfile('*.mat','MultiSelect','on');
+            if ~iscell(f)
+                f={f};
             end
             
-            
-            g.locData.savelocs([pfad 'rois_' f]);
+            for files=1:length(f)
+                gf=g.children.guiFile;
+                gf.loadbutton_callback(0,0,0,pfad,f{files});           
+                if p.redrawall
 
-            [~,filen]=fileparts([pfad f]);
-            analyzering.saveall(pfad,filen);
+                    g.locData.SE.processors.preview.redrawall;
+
+                end
+                analzyers=fieldnames(g.children.guiSites.children.Analyze.children);
+                selectedan=p.analyzer.selection;
+                if any(strcmp(analzyers,selectedan))
+                    analyzering=g.children.guiSites.children.Analyze.children.(selectedan);
+                    analyzering.processgo;
+                else
+                    disp('selected analyzer should be added to ROImanager/Analyzers')
+                end
+
+                [~,filen]=fileparts([pfad  f{files}]);
+                if length(filen)>20
+                    folder=filen(1:20);
+                else
+                    folder=filen;
+                end
+                
+                if length(f{files})>60
+                    fileprefix=f{files}(1:60);
+                else
+                    [~,fileprefix]=fileparts(f{files});
+                end
+                mkdir([pfad  folder]);
+                g.locData.savelocs([pfad  folder filesep 'rois_' fileprefix '_sml.mat']);
+
+               
+                analyzering.saveall([pfad  folder filesep],fileprefix);
+            end
         end
         function pard=guidef(obj)
             pard=guidef(obj);

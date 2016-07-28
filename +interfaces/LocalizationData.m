@@ -318,6 +318,9 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             if nargin>3&&~isempty(additionalsave)
                 saveloc=copyfields(saveloc,additionalsave);
             end
+            if ~isempty(obj.SE)
+                saveloc.siteexplorer=obj.SE.save;
+            end
             if nargin>1&&~isempty(filename)
                 save(filename,'saveloc','-v7.3')
             end
