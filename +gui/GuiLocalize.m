@@ -103,7 +103,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             if isempty(par)
                 warndlg('cannot find settings file for fit workflow. Please set in menu SMAP/Preferences')
             end
-            wffile=par.all.file;
+            wffile=findsettingsfile(par.all.file);
             [~,wfname]=fileparts(wffile);
             h.wfname.String=['Workflow: ' wfname];
             

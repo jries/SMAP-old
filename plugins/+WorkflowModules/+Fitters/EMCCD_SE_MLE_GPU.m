@@ -38,7 +38,7 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
                 err
                 err2
             end
-               
+               reset(gpuDevice);
 
         end
         function nofound(obj,varargin)
