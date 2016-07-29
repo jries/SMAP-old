@@ -302,7 +302,8 @@ if qmax==qmin
     qmax=qmin+1;
 end
 lmax=max(l);
-qfac=log10(lmax)-1;
+% qfac=log10(lmax)-1-1;
+qfac=5;
 
 if nargin==2||isempty(dphot)
 dphot=(10^ceil(log10(qmax/qfac)))/100;
@@ -373,8 +374,8 @@ end
 if nargin<2||isempty(fitstart)
     fitstart=ceil(mi*1.2);
 end
-fitr=fitstart:min(halft*5,length(h));
-
+fitr=fitstart:min(length(h));
+% fitr=fitstart:min(halft*5,length(h));
 dq=hin.n(2)-hin.n(1);
 rangev=[hin.n(fitr(1)) hin.n(fitr(end))];
 % if ploton
