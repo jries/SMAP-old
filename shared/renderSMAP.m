@@ -6,7 +6,7 @@ if nargin==0
     imageo={'ch_filelist','sr_pixrec','sr_axes','sr_pos','sr_size','rendermode','render_colormode',...
                 'renderfield','colorfield_min','colorfield_max','groupcheck','lut','shiftxy_min','shiftxy_max'...
                 'mingaussnm','mingausspix','gaussfac','sr_sizeRecPix','shift','displayLocsInd','cam_pixelsize_nm','remout',...
-                'rangex','rangey','intensitycoding'};
+                'rangex','rangey','intensitycoding','sr_layersseparate','sr_layerson'};
     return          
 end
 
@@ -58,6 +58,11 @@ if nargin<4||isempty(indin)
     indin=true(length(locsh.(fn{1})),1);
 end
     
+if isfield(p,'sr_layersseparate')&&~isempty(p.sr_layersseparate)&&p.sr_layersseparate
+    if isfield(p,'sr_size')&&~isempty(p.sr_size)&&isfield(p,'sr_layerson')
+        p.sr_size(1)=p.sr_size(1)/sum(p.sr_layerson);
+    end
+end
     
 if ~isfield(locsh,'x')||isempty(locsh.x)
 %     length(locsh.xnm)

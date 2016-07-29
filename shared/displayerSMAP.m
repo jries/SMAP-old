@@ -2,7 +2,7 @@ function [imout,sr_imagehandle]=displayerSMAP(layers,p)
 
 if nargin==0
     %input parameters
-    imout={'sr_layerson','sr_axes','sr_sizeRecPix','roihandle','sr_pixrec','rotationangle','sr_pos','sr_size'};
+    imout={'sr_layerson','sr_axes','sr_sizeRecPix','roihandle','sr_pixrec','rotationangle','sr_pos','sr_size','sr_layersseparate'};
     return          
 end
 
@@ -11,6 +11,7 @@ rim=0;
 show=0;
 tiffthere=0;
 txtN='';
+allnext=[];
 for k=1:length(layers)
 
     if p.sr_layerson(k)
@@ -36,6 +37,7 @@ for k=1:length(layers)
              mask=mask+fi.mask;
               txtN=[txtN 'N'  num2str(k) '=' shortnumber(fi.numberOfLocs) ', '];
          end
+         allnext=horzcat(allnext,fi.image);
 
         end
     end
@@ -77,7 +79,15 @@ for k=1:min(4,length(layers))
     end
 end
 
+        if isfield(p,'sr_layersseparate')&&~isempty(p.sr_layersseparate)&&p.sr_layersseparate
+     imfinal=allnext;
+     nlayer=sum(p.sr_layerson)-1;
+     rangexplot(2)=rangexplot(2)+nlayer*(rangexplot(2)-rangexplot(1));
+        end
+
     imfinal=addscalebar(imfinal,p.sr_pixrec(1));
+
+    
     if isfield(p,'sr_axes')&&~isempty(p.sr_axes)&&ishandle(p.sr_axes)
         sr_imagehandle=image(rangexplot/1000,rangeyplot/1000,imfinal,'Parent',p.sr_axes,'Pickable','none','HitTest','off');
 %                     plotovim=1;
@@ -85,6 +95,7 @@ end
         set(p.sr_axes,'Xlim',rangexplot/1000)
         set(p.sr_axes,'Ylim',rangeyplot/1000)
         set(p.sr_axes,'YDir','reverse')
+        axis(p.sr_axes,'equal')
         p.sr_axes.HitTest='on';
         p.sr_axes.PickableParts='all';
 %         axes(p.sr_axes) %bring to forground
@@ -93,6 +104,9 @@ end
     else
         sr_imagehandle=[];
     end
+    
+
+    
     imout.image=imfinal;
     imout.composite=compimage;
     imout.rangex=rangexplot/1000;
