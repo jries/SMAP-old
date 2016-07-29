@@ -508,6 +508,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     radius=min(radius,maxr);
                     loc.perspective=radius;
                     loc.ballradius=0*loc.x+p.transparencypar(2);
+                    loc.intensity_render=radius.^2;
 %                     loc.locprecnm=loc.locprecnm.*radius;
 %                     loc.locprecznm=loc.locprecznm.*radius;
                 else
