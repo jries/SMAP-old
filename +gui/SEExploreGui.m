@@ -290,10 +290,20 @@ end
 sites=obj.SE.sites;
 if ~isempty(sites)&&~isempty(sites(1).ID)
 for k=1:length(sites)
+    usesite='';
+    if isfield(sites(k).annotation,'use')
+        if sites(k).annotation.use
+            usesite='+';
+        else
+            usesite='-';
+        end
+    end
+        
+    
     list=[num2str(sites(k).annotation.list1.value) num2str(sites(k).annotation.list2.value)...
         num2str(sites(k).annotation.list3.value) num2str(sites(k).annotation.list4.value)];
     sitename=[num2str(sites(k).indList,'%2.0f') '.S' num2str(sites(k).ID,'%02.0f') 'C' num2str(sites(k).info.cell,'%02.0f')...
-        'F' num2str(sites(k).info.filenumber,'%02.0f') 'L' list];
+        'F' num2str(sites(k).info.filenumber,'%02.0f') 'L' list usesite];
     sites(k).name=sitename;
     s{k}=sitename;
 end

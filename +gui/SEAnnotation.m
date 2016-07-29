@@ -8,7 +8,7 @@ classdef SEAnnotation< interfaces.SEProcessor
             obj@interfaces.SEProcessor(varargin{:})
         end
         function pard=guidef(obj)
-            pard=guidef;
+            pard=guidef(obj);
         end
         function initGui(obj)
             initGui@interfaces.SEProcessor(obj);
@@ -69,9 +69,16 @@ classdef SEAnnotation< interfaces.SEProcessor
             angle=pos2angle(pos);%+alphaimage;
             len=sqrt(sum((pos(1,:)-pos(2,:)).^2))*1000;
              obj.guihandles.line2.String=[num2str(angle,'%3.1f') ', ' num2str(len,'%3.0f')];
+             if isfield(site.annotation,'use')
+                obj.guihandles.usesite.Value=site.annotation.use;
+             end
             
         end
-%         
+        function usesite_callback(obj,a,b)
+            site=obj.SE.currentsite;
+            site.annotation.use=obj.guihandles.usesite.Value;
+            obj.SE.processors.preview.updateSitelist;
+        end
 %         function updateSingleParameter(obj, data,actionData,field)
 %             val=obj.getSingleGuiParameter(field);
 % %             obj.SE.sePar.(data.Parent.Title).(field)=val;
@@ -187,8 +194,7 @@ end
 
 
 
-function pard=guidef
-
+function pard=guidef(obj)
 pard.list1.object=struct('Style','listbox','String','1|2|3|4|5|6|7|8');
 pard.list1.position=[6,1.];
 pard.list1.Height=5;
@@ -223,12 +229,16 @@ pard.loadlist.position=[2,3];
 pard.loadlist.Width=0.5;
 
 pard.line1.object=struct('Style','pushbutton','String','line 1');
-pard.line1.position=[4,3.5];
-pard.line1.Height=2;
+pard.line1.position=[5,4];
+pard.line1.Height=1.5;
 
 pard.line2.object=struct('Style','pushbutton','String','line 2');
-pard.line2.position=[7,3.5];
-pard.line2.Height=2;
+pard.line2.position=[7,4];
+pard.line2.Height=1.5;
+
+pard.usesite.object=struct('Style','checkbox','String','use site','Callback',@obj.usesite_callback);
+pard.usesite.position=[2,4];
+pard.usesite.Height=1;
 
 
 pard.t1.object=struct('Style','text','String','Comments:');

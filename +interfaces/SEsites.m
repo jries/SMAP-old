@@ -29,6 +29,7 @@ classdef SEsites<matlab.mixin.Copyable
             obj.annotation.list3=list;
             obj.annotation.list4=list;
             obj.annotation.comments='';
+            obj.annotation.use=true;
 
             line.pos=zeros(2);line.value=0;line.angle=0;line.length=0;
             obj.annotation.line1=line;
