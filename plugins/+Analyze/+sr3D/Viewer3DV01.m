@@ -332,11 +332,13 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             ph.rangex=rx;
             
             if group(1)
-                [loc,indu,sortind]=getlocrot('ungrouped','inlayeru');                
+                [loc,indu,sortind]=getlocrot('ungrouped','inlayeru');  
+               
             end
             
             if group(2)
                 [locg,indg,sortindg]=getlocrot('grouped','inlayerg');
+%                 locg.ballradius=0*locg.xnmline+p.transparencypar(2);
             end
            
             if sum(indg)==0&&sum(indu)==0
@@ -348,8 +350,10 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             switch p.transparencymode.Value
                 case 1 %MIP
                 case 2 %transparent
-                    transparency.parameter=p.transparencypar/ph.sr_pixrec(1)^2*10;
+                    transparency.parameter=p.transparencypar(1)/ph.sr_pixrec(1)^2*10;
                 case 3 %balls
+                    transparency.parameter=[p.transparencypar(1)/ph.sr_pixrec(1)^2*10 p.transparencypar(2)];
+                    
             end
             
             ph.sr_axes=[];
@@ -486,6 +490,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     xe1=eyenm;xe2=-eyenm;
                     x=loc.xnmline(sortind);
                     y=yrot(sortind)+zmean;
+                    if length(p.transparencypar)<2
+                        p.transparencypar(2)=5;
+                    end
                if stereo   
                     loc.x1=(x-xe1)./(1+sortdepth/dplanenm)+xe1;
                     loc.x2=(x-xe2)./(1+sortdepth/dplanenm)+xe2;
@@ -494,9 +501,19 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 elseif strcmp(p.stereo.selection,'perspective')
                     loc.x=(x)./(1+sortdepth/dplanemm);
                     loc.y=(y)./(1+sortdepth/dplanemm);
+                    maxr=4;
+                    minr=0.1;
+                    radius=1./(1+sortdepth/dplanemm);
+                    radius(radius<0)=0;
+                    radius=min(radius,maxr);
+                    loc.perspective=radius;
+                    loc.ballradius=0*loc.x+p.transparencypar(2);
+%                     loc.locprecnm=loc.locprecnm.*radius;
+%                     loc.locprecznm=loc.locprecznm.*radius;
                 else
                     loc.x=x;
                     loc.y=y;
+                    loc.ballradius=0*loc.x+p.transparencypar(2);
                 end
     
                 

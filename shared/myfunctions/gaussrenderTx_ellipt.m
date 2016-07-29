@@ -20,7 +20,7 @@ if isempty(G)
     G=creategausstemplate(roiks);
 end
 G.ellipse=G.template>max(G.template(:))/3;
-G.ellipse=G.ellipse*transparency;
+G.ellipse=G.ellipse*transparency(1);
 
 % n=find(sum(G.ellipse)>0,1,'first');
 
