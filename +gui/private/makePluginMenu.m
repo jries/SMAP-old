@@ -1,12 +1,18 @@
 function [pout,hsmap]=makePluginMenu(obj,handle)
 hsmap=uimenu(handle,'Label','SMAP');
 hinfo=uimenu(hsmap,'Label','About SMAP...','Callback',@info_callback);
-hglobalSettings=uimenu(hsmap,'Label','Preferences...','Callback',{@globalsettings_callback,obj});
-hexit=uimenu(hsmap,'Label','Quit SMAP','Callback',{@exit_callback,obj});
 
-hrename=uimenu(hsmap,'Label','Rename window','Callback',{@renamewindow_callback,obj});
+hglobalSettings=uimenu(hsmap,'Label','Preferences...','Separator','on','Callback',{@globalsettings_callback,obj});
+savegui=uimenu(hsmap,'Label','Save GUI appearence','Callback',{@savegui_callback,obj});
+loadgui=uimenu(hsmap,'Label','Load GUI appearence','Callback',{@loadgui_callback,obj});
+
+
+hrename=uimenu(hsmap,'Label','Rename window','Separator','on','Callback',{@renamewindow_callback,obj});
 
 hsimplegui=uimenu(hsmap,'Label','Hide advanced controls','Callback',{@simplegui_callback,obj});
+hexit=uimenu(hsmap,'Label','Quit SMAP','Callback',{@exit_callback,obj});
+
+
 
 hmainplugin=uimenu(handle,'Label','Plugins');
 % hwf=uimenu(handle,'Label','Workflows');
@@ -151,5 +157,28 @@ if strcmp(hmenu.Checked,'off')
 else
    hmenu.Checked='off';
    obj.setPar('globalGuiState','a')
+end
+end
+
+function loadgui_callback(hmenu,b,obj)
+gfile=obj.getGlobalSetting('guiPluginConfigFile');
+if isempty(gfile)
+    gfile='settings/*.txt';
+end
+[f,p]=uigetfile(gfile);
+if f
+    obj.setGlobalSetting('guiPluginConfigFile',[p f]);
+end
+answ=questdlg('changes take place after restarting SMAP. Restart Now?');
+if strcmp(answ,'Yes')
+    SMAP
+end
+end
+function savegui_callback(hmenu,b,obj)
+gfile=obj.getGlobalSetting('guiPluginConfigFile');
+[f, p]=uiputfile(gfile);
+if f
+    guimodules=obj.getPar('guimodules');
+    writestruct([p f],guimodules);
 end
 end
