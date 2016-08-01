@@ -57,7 +57,14 @@ for k=1:length(replacestruct)
     end
 end
 if ~rep
-valn=str2num(val);
+    valtest=str2double(val(1:min(2,length(val))));
+%     valtest=str2num(val(1:min(3,length(val))));
+%     if ~isempty(valtest)&&isnumeric(valtest)
+    if ~isnan(valtest)
+        valn=str2num(val);
+    else
+        valn=[];
+    end
     if ~isempty(valn)&&isnumeric(valn)
         val=valn;
     elseif parseascell %comma separated

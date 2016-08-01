@@ -180,6 +180,10 @@ gfile=obj.getGlobalSetting('guiPluginConfigFile');
 if f
     guimodules=obj.getPar('guimodules');
     guimodules.globalGuiState=obj.getPar('globalGuiState');
+    
+    parameters=obj.getGuiParameters(true);
+    guimodules.GuiParameters=parameters;
+    
     writestruct([p f],guimodules);
     obj.setGlobalSetting('guiPluginConfigFile',[p f]);
 end

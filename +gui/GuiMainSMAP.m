@@ -58,6 +58,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.createGlobalSetting('guiPluginConfigFile','Directories','Configuration file for GUI plugin structure. Delete path and save to reset plugins.',struct('Style','file','String','settings/SimpleGui.txt'))
             gfile=obj.getGlobalSetting('guiPluginConfigFile');
             gfile=findsettingsfile(gfile);
+            
             if exist(gfile,'file')
                 guimodules=readstruct(gfile,[],true);
 
@@ -65,7 +66,8 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 guimodules=pmenu;
                 guimodules.globalGuiState='a';
             end
-            obj.setPar('guimodules',guimodules);
+            guimodulespure=myrmfield(guimodules,{'GuiParameters','globalGuiState'});
+            obj.setPar('guimodules',guimodulespure);
             
             object=struct('Style','saveparameter','String','save current gui plugin configuration');
             obj.createGlobalSetting('guimodules','Directories','',object);
@@ -185,11 +187,21 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             undo.attachLocData(obj.locData);
             undo.makeGui();
             obj.children.undo=undo;
-            obj.status('all initialized')
+            
 
-                if isfield(guimodules,'globalGuiState')
-                    obj.setPar('globalGuiState',guimodules.globalGuiState);
-                end
+            if isfield(guimodules,'globalGuiState')&&~isempty(guimodules.globalGuiState)
+                obj.setPar('globalGuiState',guimodules.globalGuiState);
+            else
+                obj.setPar('globalGuiState','a');
+            end
+            
+            if isfield(guimodules,'GuiParameters')
+                tic
+                obj.setGuiParameters(guimodules.GuiParameters,true);
+                toc
+            end
+            
+            obj.status('all initialized')
             drawnow  
         end
         function psaved=saveParameters(obj)
@@ -256,6 +268,6 @@ htab.SelectedTab.Parent=hnew;
 
 end
 
-function saveplugin_callback(a,b,obj)
-
-end
+% function saveplugin_callback(a,b,obj)
+% 
+% end
