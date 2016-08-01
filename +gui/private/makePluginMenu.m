@@ -180,9 +180,15 @@ gfile=obj.getGlobalSetting('guiPluginConfigFile');
 if f
     guimodules=obj.getPar('guimodules');
     guimodules.globalGuiState=obj.getPar('globalGuiState');
+    if isempty(guimodules.globalGuiState)
+        guimodules.globalGuiState='a';
+    end
     
-    parameters=obj.getGuiParameters(true);
-    guimodules.GuiParameters=parameters;
+    answ=questdlg('Save all plugin parameters? Might slow downn start of SMAP.');
+    if strcmp(answ,'Yes')
+        parameters=obj.getGuiParameters(true);
+        guimodules.GuiParameters=parameters;
+    end
     
     writestruct([p f],guimodules);
     obj.setGlobalSetting('guiPluginConfigFile',[p f]);

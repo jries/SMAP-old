@@ -64,7 +64,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
 
             else
                 guimodules=pmenu;
-                guimodules.globalGuiState='a';
+%                 guimodules.globalGuiState='a';
             end
             guimodulespure=myrmfield(guimodules,{'GuiParameters','globalGuiState'});
             obj.setPar('guimodules',guimodulespure);
@@ -196,9 +196,9 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             end
             
             if isfield(guimodules,'GuiParameters')
-                tic
+                
                 obj.setGuiParameters(guimodules.GuiParameters,true);
-                toc
+                
             end
             
             obj.status('all initialized')
