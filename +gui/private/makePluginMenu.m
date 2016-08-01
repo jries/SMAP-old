@@ -179,6 +179,8 @@ gfile=obj.getGlobalSetting('guiPluginConfigFile');
 [f, p]=uiputfile(gfile);
 if f
     guimodules=obj.getPar('guimodules');
+    guimodules.globalGuiState=obj.getPar('globalGuiState');
     writestruct([p f],guimodules);
+    obj.setGlobalSetting('guiPluginConfigFile',[p f]);
 end
 end

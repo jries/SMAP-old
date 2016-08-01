@@ -60,8 +60,10 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             gfile=findsettingsfile(gfile);
             if exist(gfile,'file')
                 guimodules=readstruct(gfile,[],true);
+
             else
                 guimodules=pmenu;
+                guimodules.globalGuiState='a';
             end
             obj.setPar('guimodules',guimodules);
             
@@ -185,6 +187,9 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.children.undo=undo;
             obj.status('all initialized')
 
+                if isfield(guimodules,'globalGuiState')
+                    obj.setPar('globalGuiState',guimodules.globalGuiState);
+                end
             drawnow  
         end
         function psaved=saveParameters(obj)

@@ -11,6 +11,12 @@ classdef MathParser<interfaces.DialogProcessor
             locs = obj.locData.loc;
             evalstr=p.equation;
             fn=fieldnames(locs);
+            
+            if p.dataselect_all
+                indin=true(size(locs.filenumber));
+            else
+                indin=locs.filenumber==p.dataselect.Value;
+            end
             for k = 1:length (fn)
                 ind=strfind(evalstr,fn{k});
                 for m=1:length(ind)
@@ -20,14 +26,18 @@ classdef MathParser<interfaces.DialogProcessor
                         lbefore='';
                     end
                     if isempty(lbefore) || (lbefore~='.' && ~isstrprop(lbefore,'alpha'))
-                    evalstr=[evalstr(1:ind(m)-1) 'locs.' evalstr(ind(m):end)];
+                    evalstr=[evalstr(1:ind(m)-1) 'locs.' evalstr(ind(m):ind(m)+length(fn{k})-1) '(indin)' evalstr(ind(m)+length(fn{k}):end)];
                     end
 %                     evalstr = strrep(evalstr,[lbefore fn{k}],[lbefore 'locs.'  fn{k}]);
                 end
             end
              try
                 newval=eval(evalstr);
-                 obj.locData.setloc(p.resultfield,newval)
+                if isfield(obj.locData.loc,p.resultfield)
+                    obj.locData.loc.(p.resultfield)(indin)=newval;
+                else
+                 obj.locData.setloc(p.resultfield,newval,indin);
+                end
                  obj.locData.filter(p.resultfield)
                  obj.locData.regroup;
                  obj.setPar('locFields',fieldnames(obj.locData.loc))
@@ -67,5 +77,17 @@ pard.t3.Width=3;
 pard.equation.object = struct('String','(locprecnm<25 & PSFxnm>100) | numberInGroup>1','Style','edit');
 pard.equation.position=[3,2];
 pard.equation.Width=3;
+
+
+pard.dataselect.object=struct('Style','popupmenu','String','File');
+pard.dataselect.position=[1,1];
+pard.dataselect.object.TooltipString='choose localization file data set';
+
+pard.dataselect_all.object=struct('Style','checkbox','String','all');
+pard.dataselect_all.position=[1,2];
+pard.dataselect_all.object.TooltipString='choose localization file data set';
+
+pard.syncParameters={{'filelist_short','dataselect',{'String'}}};
+
 pard.plugininfo.type='ProcessorPlugin';
 end
