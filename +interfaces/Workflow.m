@@ -192,6 +192,9 @@ classdef Workflow<interfaces.DialogProcessor
             obj.fieldvisibility;
         end
         function save(obj,fn)
+            if nargin<2
+                fn=obj.pluginpath;
+            end
             for k=1:length(obj.modules)
                 mk=obj.modules{k};
                 modules(k).tag=mk.tag;

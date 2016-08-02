@@ -13,7 +13,7 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
             if ~exist(path,'dir')
                 path='settings';
             end
-            filenew=fullfile(path,[file '_temp.csv']);
+            filenew=fullfile(path,['F_' file '_temp.csv']);
             
             lochere=obj.locData.copy;
             if p.shiftpix
@@ -46,7 +46,11 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
             oldp=pwd;
             cd(challengepath);
             disp('to contintue with Matlab, close SMLMChallenge application');
+            if ispc
+                system(javapath)
+            else
             system(['java -jar ' javapath]) 
+            end
             %later fix jave program and call via
             %smlm.assessment.application.Application
             %after adding javaclasspath(javapath)

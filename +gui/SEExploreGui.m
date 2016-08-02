@@ -2,7 +2,7 @@ classdef SEExploreGui<interfaces.SEProcessor
     properties
         hlines
         infostruct
-
+        anglehandle
     end
     methods
         function obj=SEExploreGui(varargin)   
@@ -148,6 +148,10 @@ classdef SEExploreGui<interfaces.SEProcessor
             redraw_sitelist(obj)
         end
         function lineannotation(obj,linenumber,hline)
+            if nargin<3||isempty(hline)           
+                obj.anglehandle{linenumber}=obj.getPar(['ROI_lineannotation_handle_' num2str(linenumber)]);
+                hline=obj.anglehandle{linenumber};
+            end
             plotline(obj,['line',num2str(linenumber)],hline);
         end
         function nextsite(obj,direction)
@@ -286,10 +290,20 @@ end
 sites=obj.SE.sites;
 if ~isempty(sites)&&~isempty(sites(1).ID)
 for k=1:length(sites)
+    usesite='';
+    if isfield(sites(k).annotation,'use')
+        if sites(k).annotation.use
+            usesite='+';
+        else
+            usesite='-';
+        end
+    end
+        
+    
     list=[num2str(sites(k).annotation.list1.value) num2str(sites(k).annotation.list2.value)...
         num2str(sites(k).annotation.list3.value) num2str(sites(k).annotation.list4.value)];
     sitename=[num2str(sites(k).indList,'%2.0f') '.S' num2str(sites(k).ID,'%02.0f') 'C' num2str(sites(k).info.cell,'%02.0f')...
-        'F' num2str(sites(k).info.filenumber,'%02.0f') 'L' list];
+        'F' num2str(sites(k).info.filenumber,'%02.0f') 'L' list usesite];
     sites(k).name=sitename;
     s{k}=sitename;
 end
@@ -356,6 +370,13 @@ if sum(obj.SE.currentsite.annotation.rotationpos.pos(:).^2)~=0
     anglebutton_callback(0,0,obj)
 end
 
+% anotation line
+if obj.SE.currentsite.annotation.line1.length>0
+obj.lineannotation(1)
+end
+if obj.SE.currentsite.annotation.line2.length>0
+obj.lineannotation(2)
+end
 %plot info
 %update annotations
 obj.SE.processors.annotation.sitechange(obj.SE.currentsite);
@@ -485,7 +506,8 @@ hax=obj.guihandles.siteax;
 alphaimage=obj.SE.currentsite.image.angle;
 site=obj.SE.currentsite;
 pos=site.annotation.(posfield).pos;
-
+% posfield
+% site.annotation.(posfield)
 if isa(obj.hlines.(posfield),'imline')
     delete(obj.hlines.(posfield))
 end
@@ -495,7 +517,9 @@ if sum(pos(:).^2)==0
     posin=obj.hlines.(posfield).getPosition;
     roipositon(posin,obj,posfield,anglehandle,hax);
 else
+%     alphaimage
     posr=rotatepos(pos,site.pos/1000,alphaimage);
+%      posr(2)
     obj.hlines.(posfield)=imline(hax,posr);
     roipositon(posr,obj,posfield,anglehandle,hax);
 
@@ -514,10 +538,11 @@ alphaimage=obj.SE.currentsite.image.angle;
 angle=pos2angle(pos)+alphaimage;
 obj.SE.currentsite.annotation.(posfield).pos=rotatepos(pos,obj.SE.currentsite.pos/1000,-alphaimage);
 obj.SE.currentsite.annotation.(posfield).angle=angle;
+% pos
 len=sqrt(sum((pos(1,:)-pos(2,:)).^2))*1000;
 obj.SE.currentsite.annotation.(posfield).length=len;
 obj.SE.currentsite.annotation.(posfield).value=len;
-
+% rotatepos(pos,obj.SE.currentsite.pos/1000,-alphaimage)
 if nargin>3&&~isempty(outputhandle)&&ishandle(outputhandle)
    
     outputhandle.String=[num2str(angle,'%3.1f') ', ' num2str(len,'%3.0f')];

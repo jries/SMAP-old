@@ -28,19 +28,22 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
     end
     
 end
-function meta=getmetadataome(obj)
+function metao=getmetadataome(obj)
 reader=obj.reader;
 omemeta=reader.getMetadataStore;
 globalmeta=reader.getGlobalMetadata;
 [ph,fh,ext]=fileparts(obj.file);
+fn={};
 switch ext
     case '.nd2' %Nikon
         meta=getMetaNd2(globalmeta);
+        fn=fieldnames(meta);
     otherwise
         meta=[];
 end
 try
 m2.pixsize=double(omemeta.getPixelsPhysicalSizeX(0).value());
+fn=[fn fieldnames(m2)];
 catch
     m2=[];
 end
@@ -51,6 +54,12 @@ obj.metadata.Height=double(omemeta.getPixelsSizeY(0).getValue());
 obj.metadata.numberOfFrames=max(double(omemeta.getPixelsSizeT(0).getValue()),double(omemeta.getPixelsSizeZ(0).getValue()));
 obj.metadata.basefile=[ph filesep fh];
 
+fn=[fn {'Width','Height','numberOfFrames','basefile'}];
+
+for k=1:length(fn)
+    obj.metadata.assigned.(fn{k})=true;
+end
+metao=obj.metadata;
 end
 
 function meta=getMetaNd2(m)
@@ -74,8 +83,8 @@ end
 
 
 function image=readstack(obj,imagenumber)
-   if imagenumber<obj.reader.getImageCount()
-       image=bfGetPlane(obj.reader,imagenumber+1);
+   if imagenumber<=obj.reader.getImageCount()
+       image=bfGetPlane(obj.reader,imagenumber);
    else
        image=[];
    end

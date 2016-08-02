@@ -11,7 +11,12 @@ classdef CME2DRing<interfaces.SEEvaluationProcessor
 %             obj.guihandles.saveimagesb.Callback={@saveimagesb_callback,obj};
         end
         function out=run(obj,p)
+            try
             out=runintern(obj,p);
+            catch err
+                err
+                out=[];
+            end
          
         end
         

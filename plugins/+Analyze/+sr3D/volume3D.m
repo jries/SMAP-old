@@ -88,12 +88,12 @@ imout3=zeros(sim(1),sim(2),3,length(z));
 
 showtic=tic;
 updatetime=1;
-if p.sigmazauto
-    sz=lochere.loc.znm*0+p.sigmaz;
-else
+% if p.sigmazauto
+%     sz=lochere.loc.znm*0+p.sigmaz;
+% else
     sz=max((lochere.loc.locprecznm)*p.layer1_.gaussfac,p.layer1_.mingausspix*pixz);%gaussfac etc
     szg=max((lochere.grouploc.locprecznm)*p.layer1_.gaussfac,p.layer1_.mingausspix*pixz);
-end
+% end
 
 for k=1:length(z)
     dz=lochere.loc.znm-z(k);

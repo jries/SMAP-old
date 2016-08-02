@@ -1,4 +1,4 @@
-classdef TifLoader<interfaces.WorkflowModule
+classdef TifLoaderParallel<interfaces.WorkflowModule
     properties     
         imloader
         framestop
@@ -6,9 +6,10 @@ classdef TifLoader<interfaces.WorkflowModule
         numberOfFrames
         timerfitstart
         edgesize
+        
     end
     methods
-        function obj=TifLoader(varargin)
+        function obj=TifLoaderParallel(varargin)
             obj@interfaces.WorkflowModule(varargin{:})
             obj.inputChannels=1;
             obj.isstartmodule=true;
@@ -54,6 +55,7 @@ classdef TifLoader<interfaces.WorkflowModule
                     obj.imloader.setImageNumber(previewframe-1);
 %                     obj.imloader.currentImageNumber=previewframe-1;
                     obj.framestop=previewframe;
+                    obj.framestart=previewframe;
                 end               
             end
            
@@ -73,37 +75,71 @@ classdef TifLoader<interfaces.WorkflowModule
             id=1;
 %             disp('run loader')
             imloader=obj.imloader;
-            image=imloader.readNext ; 
-%             imloader.currentImageNumber
-            tall=0;
-            while ~isempty(image)&&imloader.currentImageNumber<=obj.framestop&&~SMAP_stopnow
-                
-                datout=interfaces.WorkflowData;
-%                 datout.set(image);
-
-
-                if p.padedges
-                    dr=obj.edgesize;
-                    imgo=zeros(size(image)+2*dr,'like',image);
-                    bg=myquantilefast(image(:),0.2,1000);
-                    imgo=imgo+bg;
-                    imgo(dr+1:end-dr,dr+1:end-dr)=image;
-                    image=imgo;
+            parp=gcp;
+            
+            frames=obj.framestart:obj.framestop;
+            blocksize=min(length(frames),p.parallel_blocksize);
+            numblocks=ceil(length(frames)/blocksize);
+            
+            
+            
+%             indim=0;
+%             clear f
+            frameshere=frames(1:blocksize);
+            images=imloader.getmanyimages(frameshere);
+            
+            for k=2:numblocks
+                indh=(k-1)*blocksize+1:min(k*blocksize,length(frames));
+                framesold=frameshere;
+                frameshere=frames(indh);
+                f=parfeval(parp,@imloader.getmanyimages,1,frameshere);
+                for l=1:length(images)
+                    datout=interfaces.WorkflowData;
+                    datout.data=images{l};
+                    datout.frame=framesold(l);
+                    datout.ID=id;
+                    id=id+1;
+                    obj.output(datout)  
                 end
-                datout.data=image;
-
-                datout.frame=imloader.currentImageNumber;
-                datout.ID=id;
-                id=id+1;
-                obj.output(datout)
-                th=tic;
-                image=imloader.readNext;
-      
-                
+                images=fetchOutputs(f);
+            
+                    
+                    
+%                 if SMAP_stopnow
+%                     break;
+%                 end
+%                 oldindim=indim+1;
+%                 tic
+%                 for l=1:blocksize
+%                     indim=indim+1;
+%                     if indim>length(frames)
+%                         indim=indim-1;
+%                         break
+%                     end
+%                     f(indim)=parfeval(parp,@imloader.getimage,1,frames(indim));
+%                 end
+%                 tread=toc
+%                 tic
+%                 for l2=oldindim:indim
+%                     [idx,img]=fetchNext(f);
+%                     
+%                     datout=interfaces.WorkflowData;
+%                     datout.data=img;
+%                     datout.frame=frames(idx);
+%                     datout.ID=id;
+%                     id=id+1;
+%                     obj.output(datout)
+%                     
+% %                     figure(88)
+% %                     imagesc(img)
+% %                     waitforbuttonpress
+% %                     imall{frames(idx)}=img;
+%                 end
+%             tfit=toc
                 
                 %display
-                if mod(datout.frame,10)==0
-                    obj.setPar('loc_currentframe',struct('frame',datout.frame,'image',image));
+
+                    obj.setPar('loc_currentframe',struct('frame',datout.frame,'image',datout.data));
                     if p.onlineanalysis
                         
                         totalf=imloader.metadata.numberOfFrames-obj.framestart;
@@ -117,13 +153,22 @@ classdef TifLoader<interfaces.WorkflowModule
                     statuss=['frame ' int2str(datout.frame-obj.framestart) ' of ' int2str(totalf) ...
                         '. Time: ' num2str(elapsed,'%4.0f') ' of ' num2str(totaltime,'%4.0f') 's'];
                     obj.status(statuss);
-                end
-                tall=tall+toc(th);
+                
+                
             end
+            framesold=frameshere;
+                for l=1:length(images)
+                    datout=interfaces.WorkflowData;
+                    datout.data=images{l};
+                    datout.frame=framesold(l);
+                    datout.ID=id;
+                    id=id+1;
+                    obj.output(datout)  
+                end
             
-            obj.setPar('tiffloader_loadingtime',tall);
+            obj.setPar('tiffloader_loadingtime',0);
             dateof=interfaces.WorkflowData;
-            dateof.frame=imloader.currentImageNumber+1;
+            dateof.frame=datout.frame+1;
             dateof.ID=id;
             dateof.eof=true;
             obj.output(dateof)
@@ -140,19 +185,19 @@ classdef TifLoader<interfaces.WorkflowModule
             end
 %             end
 % obj.imloader.metadata
-            p=obj.getGuiParameters;
+%             p=obj.getGuiParameters;
             fileinf=obj.imloader.metadata;
-            if p.padedges
-%                 locsettings=obj.getPar('loc_cameraSettings');
-                roisize=13;
-                dr=ceil((roisize-1)/2);
-                fileinf.roi(1:2)=fileinf.roi(1:2)-dr;
-                fileinf.roi(3:4)=fileinf.roi(3:4)+2*dr;
-%                 fileinf.Width=fileinf.Width+2*dr;
-%                 fileinf.Height=fileinf.Height+2*dr;
-%                 obj.setPar('loc_cameraSettings',locsettings);
-                obj.edgesize=dr;
-            end
+%             if p.padedges
+% %                 locsettings=obj.getPar('loc_cameraSettings');
+%                 roisize=13;
+%                 dr=ceil((roisize-1)/2);
+%                 fileinf.roi(1:2)=fileinf.roi(1:2)-dr;
+%                 fileinf.roi(3:4)=fileinf.roi(3:4)+2*dr;
+% %                 fileinf.Width=fileinf.Width+2*dr;
+% %                 fileinf.Height=fileinf.Height+2*dr;
+% %                 obj.setPar('loc_cameraSettings',locsettings);
+%                 obj.edgesize=dr;
+%             end
             obj.setPar('loc_fileinfo',fileinf);
 % 
             obj.guihandles.tiffile.String=obj.imloader.file;
@@ -226,11 +271,17 @@ pard.framestop.position=[4.2,2.7];
 pard.framestop.Width=0.7;
 pard.framestop.Optional=true;
 
-pard.padedges.object=struct('Style','checkbox','String','Pad edges','Value',0,'Callback',@obj.loadedges);
-pard.padedges.position=[4.2,3.5];
-pard.padedges.Width=1;
-pard.padedges.Optional=true;
-pard.padedges.TooltipString='Pad edges with minimum values to allow detection of localizations close to edges. Usually not necessary.';
+
+pard.parallel_blocksizet.object=struct('Style','text','String','blocksize');
+pard.parallel_blocksizet.position=[4.2,3.5];
+pard.parallel_blocksizet.Width=1;
+pard.parallel_blocksizet.Optional=true;
+
+pard.parallel_blocksize.object=struct('Style','edit','String','50');
+pard.parallel_blocksize.position=[4.2,4.5];
+pard.parallel_blocksize.Width=.5;
+pard.parallel_blocksize.Optional=true;
+pard.parallel_blocksize.TooltipString='Images loaded at once. Updates only in between.';
 % pard.locdata_empty.object=struct('Style','checkbox','String','Empty localizations','Value',1);
 % pard.locdata_empty.position=[4.2,3.5];
 % pard.locdata_empty.Width=1.5;

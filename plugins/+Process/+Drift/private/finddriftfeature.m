@@ -17,15 +17,15 @@ function [drift,driftinfo]=finddriftfeature(pos,par)
 
 %copyright: Jonas Ries, EMBL, jonas.ries@embl.de
 
-results_ax1=initaxis(par.resultstabgroup,'cross-correlations');
-results_ax3=initaxis(par.resultstabgroup,'normalized cross-correlations');
+results_ax1=initaxis(par.resultstabgroup,'CC');
+results_ax3=initaxis(par.resultstabgroup,'normalized CC');
 
 %here: rather from par, from channel range. Make sure it does not get
 %displaced. Fill in outside.
 
 
-lastframe=par.framestop;
-firstframe=par.framestart;
+lastframe=round(par.framestop);
+firstframe=round(par.framestart);
 numframes=lastframe-firstframe+1;
 
 %% calculate movie and FFT of movie
@@ -84,8 +84,9 @@ if length(dx)>9
     sdxm=robustMean(sdx);
     sdym=robustMean(sdy);
     indgx=sdx<5*sdxm;
-    indgy=sdx<5*sdym;
-else
+    indgy=sdy<5*sdym;
+end
+if length(dx)<=9||sum(indgx)<9||sum(indgy)<9
     sdx=std(ddxplot,0,2); %std for each time point, used for interpolation
     sdy=std(ddyplot,1,2);
     indgx=true(size(dx));
@@ -121,7 +122,7 @@ wy=1./sdy.^2;
 [dyt,py] = csaps(double(cfit1(indgy)),double(dy(indgy)),[],double(ctrue),wy(indgy)) ;
 
 framesall=(1:par.maxframeall)-firstframe+1;
-binend=3*binframes/2;
+binend=floor(1*binframes/2);
 % dxtt=zeros((par.maxframeall),1);dytt=dxtt;
 dxtt=dxt;
 dxtt(1:firstframe-1+binframes/2)=dxtt(firstframe-1+binframes/2);
@@ -134,7 +135,7 @@ dytt(1:firstframe-1+binframes/2)=dytt(firstframe-1+binframes/2);
 dytt(lastframe+1-binend:end)=dytt(lastframe+1-binend);
 
 
-results_ax2=initaxis(par.resultstabgroup,'drift vs frame');
+results_ax2=initaxis(par.resultstabgroup,'dxy/frame');
 
 subplot(1,2,1)
 hold off
@@ -172,7 +173,7 @@ driftinfo.dxt=dxtt;
 driftinfo.dyt=dytt;
 driftinfo.binframes=cfit1;
 %
-initaxis(par.resultstabgroup,'drift vs frame  final');
+initaxis(par.resultstabgroup,'dxy/frame final');
 
 hold off
 plot(cfit1,dx,'x',framesall,dxtt,'k')
@@ -201,7 +202,7 @@ drift.y=dytt;
 
 function Fmovier=makemovie %calculate fourier transforms of images
 %     posr.x=pos.xnm;posr.y=pos.ynm;
-    binframes=2*ceil(numframes/timepoints/2);
+    binframes=2*ceil(numframes/timepoints/2+1);
     frameranges=[firstframe:binframes:lastframe lastframe] ;  
     Fmovier=zeros(nfftexp,nfftexp,timepoints,'single');
     for k=1:timepoints
@@ -218,10 +219,11 @@ end
 function [ddx, ddy,errx,erry]= finddisplacements2 % find displacements
 s=size(Fmovier);
 dnumframesh =s(3);
-ddx=zeros(dnumframesh);ddy=zeros(dnumframesh);
+ddx=zeros(dnumframesh-1);ddy=zeros(dnumframesh-1);
 errx=ddx;
 erry=ddy;
 % fhold=imagesc(1,'Parent',results_ax1);
+timerh=tic;
 for k=1:dnumframesh-1
     
     for l=k+1:dnumframesh
@@ -233,7 +235,8 @@ for k=1:dnumframesh-1
         ddx(l,k)=-dxh; ddy(l,k)=-dyh;
         errx(l,k)=errx(k,l);erry(l,k)=erry(k,l);
     
-    if isfield(par,'showresults')&&par.showresults
+    if isfield(par,'showresults') && par.showresults && toc(timerh)>0.5
+        timerh=tic;
         fhold=imagesc(outim,'Parent',results_ax1);
         imagesc(outimnorm,'Parent',results_ax3)
         results_ax3.Title.String=num2str(k/dnumframesh+(l-k)/dnumframesh^2);

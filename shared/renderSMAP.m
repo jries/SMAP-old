@@ -6,7 +6,7 @@ if nargin==0
     imageo={'ch_filelist','sr_pixrec','sr_axes','sr_pos','sr_size','rendermode','render_colormode',...
                 'renderfield','colorfield_min','colorfield_max','groupcheck','lut','shiftxy_min','shiftxy_max'...
                 'mingaussnm','mingausspix','gaussfac','sr_sizeRecPix','shift','displayLocsInd','cam_pixelsize_nm','remout',...
-                'rangex','rangey','intensitycoding'};
+                'rangex','rangey','intensitycoding','sr_layersseparate','sr_layerson'};
     return          
 end
 
@@ -58,6 +58,11 @@ if nargin<4||isempty(indin)
     indin=true(length(locsh.(fn{1})),1);
 end
     
+if isfield(p,'sr_layersseparate')&&~isempty(p.sr_layersseparate)&&p.sr_layersseparate
+    if isfield(p,'sr_size')&&~isempty(p.sr_size)&&isfield(p,'sr_layerson')
+        p.sr_size(1)=p.sr_size(1)/sum(p.sr_layerson);
+    end
+end
     
 if ~isfield(locsh,'x')||isempty(locsh.x)
 %     length(locsh.xnm)
@@ -137,12 +142,27 @@ switch lower(p.rendermode.selection)
      
                     tpar=transparency.parameter;
                 case 3
-                    pos.sx(1)=transparency.parameter;
-                    pos.sy(1)=pos.sx(1);
+                    if isfield(locsh,'ballradius')
+                        pos.sx=locsh.ballradius(indin);
+                    else
+                      pos.sx(:)=transparency.parameter(2);
+                    end
+                     pos.sy=pos.sx;
       
                     tpar=transparency.parameter;
             end
            
+        end
+        if isfield(locsh,'perspective')
+            if isfield(pos,'sx')
+                pos.sx=pos.sx.*locsh.perspective(indin);
+            end
+            if isfield(pos,'sy')
+                pos.sx=pos.sy.*locsh.perspective(indin);
+            end
+            if isfield(pos,'s')
+                pos.sx=pos.s.*locsh.perspective(indin);
+            end
         end
     case 'dl'
         if ~isfield(p,'cam_pixelsize_nm')

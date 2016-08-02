@@ -33,7 +33,7 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
             if obj.guiselector.show
                 posh=obj.handle.Position;
                 if isempty(obj.guiselector.position)
-                    pos(1:2)=posh(1:2)+posh(3:4)-[23,22];
+                    pos(1:2)=0*posh(1:2)+posh(3:4)-[23,22];
                     pos(3:4)=[20,20];
                 else
                     pos=obj.guiselector.position;
@@ -44,16 +44,20 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
             end
             
             if obj.processorgui && ~isempty(obj.handle)
+                vis='on';
+            else
+                vis='off';
+            end
                 hpos=obj.handle.Position;
                 vrim=obj.guiPar.Vrim;
                 obj.guihandles.showresults=uicontrol(obj.handle,'Position',[obj.guiPar.FieldWidth*2, hpos(4)-vrim+20,120,20],...
                     'FontSize',obj.guiPar.fontsize,'Style','checkbox', 'String', 'Show results',...
-                    'Value',obj.showresults,'Callback',{@showresults_callback,obj});
+                    'Value',obj.showresults,'Callback',{@showresults_callback,obj},'Visible',vis);
                 obj.guihandles.processgo_b=uicontrol(obj.handle,'Position',[obj.guiPar.FieldWidth*3, hpos(4)-vrim+20,100,50],...
-                    'Style','pushbutton','String','Run','FontSize',obj.guiPar.fontsize*1.5,'Callback',{@processgo_callback,obj});
+                    'Style','pushbutton','String','Run','FontSize',obj.guiPar.fontsize*1.5,'Callback',{@processgo_callback,obj},'Visible',vis);
                 obj.guihandles.info=uicontrol(obj.handle,'Position',[obj.guiPar.FieldWidth*2, hpos(4)-vrim+50,100,25],...
-                    'Style','pushbutton','String','Info','FontSize',obj.guiPar.fontsize,'Callback',{@info_callback,obj});
-            end
+                    'Style','pushbutton','String','Info','FontSize',obj.guiPar.fontsize,'Callback',{@info_callback,obj},'Visible',vis);
+            
         end
         function setvisibility(obj,name)
             %shows and hides the GUI. called from module selector

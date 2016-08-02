@@ -33,8 +33,8 @@ wobbleMatrixUniqueM=wobbleMatrixUnique;
 wobbleMatrixUniqueM(:,1)=-wobbleMatrixUniqueM(:,1);
 wobbleMatrixUniqueM(:,2)=-wobbleMatrixUniqueM(:,2);
 csvwrite(fullfile(pa,[fi, '_Minus.csv']), wobbleMatrixUniqueM);
-saveas(gcf,fullfile(pa,'XY wobble result.fig'));
-saveas(gcf,fullfile(pa,'XY wobble result.png'));
+saveas(gcf,fullfile(pa,[fi '_XY wobble result.fig']));
+saveas(gcf,fullfile(pa,[fi '_XY wobble result.png']));
 
 %------------------------------------------------------------------------
 

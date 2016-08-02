@@ -115,7 +115,7 @@ if p.checkphot
 else
     pr=0.99;
 end
-hphot=plothist(phot,pr,[],0,ax1);
+[hphot,mmax]=plothist(phot,pr,[],0,ax1);
 sphot={'Photons'};
 phot1=1000;
 phot2=3000;
@@ -130,8 +130,10 @@ for k=datrange
     sphot{end+1}=['N'  ' = ' num2str(Nloc(k)/1000,'%5.0f') 'k'];
     sphot{end+1}=['<P'  '> = ' num2str(meanphot(k),'%5.0f')];
     sphot{end+1}=['r'  ' = ' num2str(N1(k)/N2(k),'%5.2f')];
-    dat(k)=fitexpphot(hphot{k},[],ploton);
-    sphot{end+1}=(['\mu'  ' = ' num2str(dat(k).mu,'%5.0f')]);   
+%     dat(k)=fitexpphot(hphot{k},[],ploton);
+    dat(k)=meanexphere(phot{k},hphot{k},[],ax1,mmax{k});
+    
+    sphot{end+1}=(['Pexp'  ' = ' num2str(dat(k).mu,'%5.0f')]);   
 end
 stat.photons.Nloc=Nloc;
 stat.photons.meanphot=meanphot;
@@ -166,13 +168,16 @@ end
 
 %lifetime
 lifetime=getFieldAsVector(locs,'numberInGroup');
-hlifet=plothist(lifetime,0.99,1,0,ax3);
+[hlifet,mmax]=plothist(lifetime,0.999,1,0,ax3);
+ ax3.NextPlot='add';
 slt={'lifetime'};
 for k=datrange
     slt{end+1}='';
     slt{end+1}=[num2str(k) '.' modetxt{k} ];
-    dat(k)=fitexpphot(hlifet{k},2,ploton);
-    slt{end+1}=(['\mu'  ' = ' num2str(dat(k).mu,3)]);
+%     dat(k)=fitexpphot(hlifet{k},2,ploton);
+    dat(k)=meanexphere(lifetime{k},hlifet{k},1,ax3,mmax{k});
+    slt{end+1}=(['texp'  ' = ' num2str(dat(k).mu,3)]);
+    slt{end+1}=(['mean'  ' = ' num2str(mean(lifetime{k}))]);
     stat.lifetime.mu(k)=dat(k).mu;
 end
 
@@ -199,6 +204,9 @@ sls={txt};
 for k=1:length(datrange)
     sls{end+1}='';
     sls{end+1}=[num2str(datrange(k)) '.' modetxt{datrange(k)} ];
+    if isempty(hz{datrange(k)})
+        continue
+    end
     [~,ind]=max(hz{datrange(k)}.h);
     mx=hz{datrange(k)}.n(ind);    
     sls{end+1}=['max: ' num2str(mx,3)];
@@ -275,7 +283,7 @@ else %use all values, plot for unconnected and connected
     datrange=1:2;
 end
 
-function his=plothist(v,quantile,dphot,hmin,ax)
+function [his,mmo]=plothist(v,quantile,dphot,hmin,ax)
 his=[];
 for k=1:length(v)
     if length(quantile)==1
@@ -294,7 +302,8 @@ if qmax==qmin
     qmax=qmin+1;
 end
 lmax=max(l);
-qfac=log10(lmax)-1;
+% qfac=log10(lmax)-1-1;
+qfac=5;
 
 if nargin==2||isempty(dphot)
 dphot=(10^ceil(log10(qmax/qfac)))/100;
@@ -321,6 +330,7 @@ for k=1:length(v)
         hold on
         end
         slegend{end+1}=num2str(k);
+        mmo{k}=mmax;
     end
 end
 if ~isempty(ax)
@@ -348,6 +358,33 @@ if ploton
     plot(xout(fitr),expforfit(pf,xout(fitr)),'k--')
 end
 dat.mu=pf(2);
+else
+    dat.mu=0;  
+end
+
+function dat=meanexphere(v,hin,fitstart,ax,fac)
+h=double(hin.h);
+xout=double(hin.n);
+if length(h)>1
+    [mmax,mi]=max(h(1:end-1)); 
+    halft=find(h(mi:end)<mmax/2,1,'first')+mi;
+if isempty(halft)
+    halft=ceil(length(h)/2);
+end
+if nargin<2||isempty(fitstart)
+    fitstart=ceil(mi*1.2);
+end
+fitr=fitstart:min(length(h));
+% fitr=fitstart:min(halft*5,length(h));
+dq=hin.n(2)-hin.n(1);
+rangev=[hin.n(fitr(1)) hin.n(fitr(end))];
+% if ploton
+%     ax=gca;
+% else
+%     ax=[];
+% end
+ax.NextPlot='add';
+dat.mu=meanexp(v,dq,rangev,ax,fac);
 else
     dat.mu=0;  
 end

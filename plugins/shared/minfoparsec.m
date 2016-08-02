@@ -84,7 +84,11 @@ end
 info.comments=getvald(minfo,'Comment','');
 
 %PI position
-info.PIz=str2double(getvald(minfo,c.PiezoZ{indnames},''));
+if isfield(c,'PiezoZ')
+    info.PIz=str2double(getvald(minfo,c.PiezoZ{indnames},''));
+else
+    info.PIz=0;
+end
 % catch
 %     disp('metadata could not be parsed')
 % end

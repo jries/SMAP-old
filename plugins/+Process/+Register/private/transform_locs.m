@@ -15,10 +15,10 @@ else
         ind=ind&filter.locprecnm;
     end
     if isfield(filter,'PSFxnm')
-        ind=ind&filter.locprecnm;
+        ind=ind&filter.PSFxnm;
     end
     if isfield(filter,'frame')
-        ind=ind&filter.locprecnm;
+        ind=ind&filter.frame;
     end
     ind=ind&locref.filenumber==p.dataselect.Value;
 %     indref=ind;
@@ -40,33 +40,39 @@ loctarget.x=loctarget.xnm;
 loctarget.y=loctarget.ynm;
 loctT=loctarget;
 % file=locData.files.file(p.layer1_.ch_filelist.Value);
+roinm=p.currentfileinfo.pixsize*1000*p.currentfileinfo.roi;
 
 chipsizenm=p.currentfileinfo.pixsize*1000*[p.currentfileinfo.Width p.currentfileinfo.Height]; 
 facsize=ones(2,1);
-separator=chipsizenm;
+% separator=chipsizenm;
+separator=roinm(1:2)+roinm(3:4);
 switch p.targetpos.selection
     case 'top'
         dy=-chipsizenm(2)/2;
         dx=0;
-        separator(2)=chipsizenm(2)/2;
+%         separator(2)=chipsizenm(2)/2;
+        separator(2)=roinm(2)+roinm(4)/2;
         indtarget=indtarget&loctarget.ynm<separator(2);
         indref=indref&locref.ynm>=separator(2);
     case 'bottom'
         dy=chipsizenm(2)/2;
         dx=0;
-        separator(2)=chipsizenm(2)/2;
+%         separator(2)=chipsizenm(2)/2;
+        separator(2)=roinm(2)+roinm(4)/2;
         indtarget=indtarget&loctarget.ynm>separator(2);
         indref=indref&locref.ynm<=separator(2);
     case 'left'
         dx=-chipsizenm(1)/2;
         dy=0;
-        separator(1)=chipsizenm(1)/2;
+%         separator(1)=chipsizenm(1)/2;
+        separator(1)=roinm(1)+roinm(3)/2;
         indtarget=indtarget&loctarget.xnm<separator(1);
         indref=indref&locref.xnm>=separator(1);
     case 'right'
         dx=chipsizenm(1)/2;
         dy=0;
-        separator(1)=chipsizenm(1)/2;
+%         separator(1)=chipsizenm(1)/2;
+        separator(1)=roinm(1)+roinm(3)/2;
         indtarget=loctarget.xnm>separator(1);
         indtarget=indtarget&loctarget.xnm>separator(1);
         indref=indref&locref.xnm<=separator(1);

@@ -1,5 +1,5 @@
 function txt=struct2txt(p,prefix)
-if isstruct(p)
+if isstruct(p)||isobject(p)
     txt={};
     fn=fieldnames(p);
     for k=1:length(fn)
@@ -12,23 +12,24 @@ if isstruct(p)
 else
     if iscell(p)
         to=p{1};
-        if isnumeric(to)
+        if isnumeric(to)||islogical(to)
             to=num2str(to);
         end
         for k=2:length(p)
             th=p{k};
-            if isnumeric(th)
+            if isnumeric(th)||islogical(th)
                 th=num2str(th);
             end
             to=[to ',' th];
         end
         p=to;
     end
-    if isnumeric(p)
+    if isnumeric(p)||islogical(p)
         p=num2str(p);
     end
     if ~isempty(p)
-    txt={[prefix '=' p(1,:)]};
+        tx=p(1,:);
+    txt={[prefix '=' tx]};
     else
         txt={[prefix '=']};
     end

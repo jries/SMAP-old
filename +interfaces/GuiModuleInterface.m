@@ -228,9 +228,16 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                 phere=p;
                 h=obj.guihandles;
                 for k=1:length(fn)
-                    if isfield(h,fn{k})&&isprop(h.(fn{k}),'Style')&&~strcmp(h.(fn{k}).Style,'text')&&~any(ismember(obj.excludeFromSave,fn))
-                        hs=obj.value2handle(phere.(fn{k}),h.(fn{k}));
+                    if isfield(h,fn{k})&&isprop(h.(fn{k}),'Style')&&~strcmp(h.(fn{k}).Style,'text')&&~any(ismember(obj.excludeFromSave,fn))                        
+                        hs=obj.value2handle(phere.(fn{k}),h.(fn{k}));                      
+                        if (strcmp(h.(fn{k}).Style,'popupmenu'))
+                            if (iscell(hs.String)&&hs.Value>length(hs.String)||(~iscell(hs.String)))
+                                hs.Value=1;
+                            end
+                            
+                        end
                         h.(fn{k})=copyfields(h.(fn{k}),hs);
+                        
                     end
                 end
                 

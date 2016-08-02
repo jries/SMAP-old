@@ -18,9 +18,9 @@ else
     indg=[];
 end
 saveloc=locData.savelocs([],indg); % BETA , maybe problematic with more than 1 file: this will save only displayed loicalizations
-if ~isempty(locData.SE)
-    saveloc.siteexplorer=locData.SE.save;
-end
+% if ~isempty(locData.SE)
+%     saveloc.siteexplorer=locData.SE.save;
+% end
 rg=p.mainGui; 
 parameters=rg.saveParameters;
 fileformat.name='sml';

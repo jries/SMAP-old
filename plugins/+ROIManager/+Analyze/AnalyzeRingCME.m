@@ -152,8 +152,17 @@ results.ac=getFieldAsVector(sites,imfitfields{:},'profiles1','thetaAC');
 if isfield(sites(1).evaluation.CME2DRing.circfit,'profiles2')
     results.rdensity1=getFieldAsVector(sites,imfitfields{:},'profiles1','rdensity');
     results.rdensity2=getFieldAsVector(sites,imfitfields{:},'profiles2','rdensity');
+    rall=cell2mat(results.rdensity1');
+    stdr=std(rall,1);
+    results.rdensitystd1=stdr;
+    rall=cell2mat(results.rdensity2');
+    stdr=std(rall,1);
+    results.rdensitystd2=stdr;
 else
     results.rdensity1=getFieldAsVector(sites,imfitfields{:},'profiles1','rdensity');
+    rall=cell2mat(results.rdensity1');
+    stdr=std(rall,1);
+    results.rdensitystd1=stdr;
 end
 results.rdensityn=getFieldAsVector(sites,imfitfields{:},'profiles1','rn');
 results.acthetan=getFieldAsVector(sites,imfitfields{:},'profiles1','thetan');
