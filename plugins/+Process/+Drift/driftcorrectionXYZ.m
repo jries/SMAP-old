@@ -57,7 +57,8 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                 end
                 obj.locData.regroup;
             else
-                locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','fov','grouping',groupcheck);
+                locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'layer',1);
+%                  locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','fov','grouping',groupcheck);
                 if length(locs.xnm)<100
                     locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','all');
                 end
