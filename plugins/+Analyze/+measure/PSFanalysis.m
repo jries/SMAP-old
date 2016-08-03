@@ -38,12 +38,21 @@ file=locData.files.file(1).name;
 fd=[file(1:end-8) '/'];
 allf=dir([fd '*.tif']);
 if isempty(allf)||~exist([fd allf(1).name],'file')
-    [~,fd]=uigetfile([fileparts(file) filesep '*.tif'],'select raw image');
+    [fi,fd]=uigetfile([fileparts(file) filesep '*.tif'],'select raw image');
     allf=dir([fd '*.tif']);
 end
 l=length(allf);
-img=mytiffreadgeneral([fd allf(1).name],1:l);
 
+imageloader=imageloaderAll([fd fi]);
+img=imageloader.getmanyimages(1:imageloader.metadata.numberOfFrames,'mat');
+numberofframes=imageloader.metadata.numberOfFrames;
+% imageloader.close;
+% img=zeros(imageloader.metadata.Width,imageloader.metadata.Height,imageloader.metadata.numberOfFrames
+% % img2=permute(img1,[2 1]);
+% img3=cell2mat(img1);
+% img4=reshape(img3,imageloader.metadata.numberOfFrames,imageloader.metadata.Height,imageloader.metadata.Width);
+% % img=mytiffreadgeneral([fd allf(1).name],1:l);
+% img=permute(img4,[2 3 1]);
 [~,filen]=fileparts(file);
 %
 offset=min(img(:));
@@ -110,7 +119,7 @@ ylabel('intensity')
 
 subplot(3,3,2)
 nind0=mz-allzdist*4:allzdist:mz+allzdist*4;
-nind0(nind0<1)=1;nind0(nind0>l)=l;
+nind0(nind0<1)=1;nind0(nind0>numberofframes)=numberofframes;
 nind=ones(9,1);
 nind(1:length(nind0))=nind0;
 % size(smallim)
