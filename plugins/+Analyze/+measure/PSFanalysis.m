@@ -29,7 +29,7 @@ end
 
 
 function analyze_PSF(locData,p) %analyze PSF 
-allzdist=3;
+
 % allzstart=1;
 DZ=p.dz/1000;
 fileinfo=locData.files.file(1).info;
@@ -84,6 +84,10 @@ maxf=min(mz+window,ssm(3));
 smallim=smallim(:,:,minf:maxf);
 
 ssm=size(smallim);
+
+allzdist=round(ssm(3)/9);
+
+
 [~,ind]=max(smallim(:));
 [mx,my,mz]=ind2sub(size(smallim),ind);
 
@@ -119,7 +123,7 @@ ylabel('intensity')
 
 subplot(3,3,2)
 nind0=mz-allzdist*4:allzdist:mz+allzdist*4;
-nind0(nind0<1)=1;nind0(nind0>numberofframes)=numberofframes;
+nind0(nind0<1)=1;nind0(nind0>ssm(3))=ssm(3);
 nind=ones(9,1);
 nind(1:length(nind0))=nind0;
 % size(smallim)
