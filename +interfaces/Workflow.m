@@ -441,7 +441,7 @@ classdef Workflow<interfaces.DialogProcessor
         function fieldvisibility(obj,varargin)
             for k=1:obj.numberOfModules
                 mh=obj.modules{k}.module;
-                mh.simplegui=obj.simplegui;
+%                 mh.simplegui=obj.simplegui;
                 mh.fieldvisibility(varargin{:});
             end
         end

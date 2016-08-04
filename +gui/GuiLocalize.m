@@ -159,6 +159,11 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
 %             obj.setPar('loc_previewframe',round(pf));
             obj.guihandles.previewframeslider.SliderStep=[ceil(nf/50) ceil(nf/50)*10]/nf;
         end
+        
+        function setglobalguistate(obj,a,b)
+            setglobalguistate@interfaces.GuiModuleInterface(obj,a,b);
+            obj.guihandles.wfsimple.Value=obj.simplegui;
+        end
     end
 end
 function wfinfo_callback(~,~,obj)

@@ -188,18 +188,20 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             undo.makeGui();
             obj.children.undo=undo;
             
+             if isfield(guimodules,'GuiParameters')
+                
+                obj.setGuiParameters(guimodules.GuiParameters,true);
+                
+             end
+            
 
-            if isfield(guimodules,'globalGuiState')&&~isempty(guimodules.globalGuiState)
+            if  isfield(guimodules,'globalGuiState')&&~isempty(guimodules.globalGuiState)
                 obj.setPar('globalGuiState',guimodules.globalGuiState);
             else
                 obj.setPar('globalGuiState','a');
             end
             
-            if isfield(guimodules,'GuiParameters')
-                
-                obj.setGuiParameters(guimodules.GuiParameters,true);
-                
-            end
+
             
             obj.status('all initialized')
             drawnow  
