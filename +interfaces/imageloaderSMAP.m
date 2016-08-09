@@ -29,9 +29,19 @@ classdef imageloaderSMAP<handle
         function setImageNumber(obj,number)
             obj.currentImageNumber=number;
         end
-        function images=getmanyimages(obj,numbers)
-            for k=length(numbers):-1:1
-                images{k}=obj.getimage(numbers(k));
+        function images=getmanyimages(obj,numbers,format)
+            if nargin<3
+                format='cell';
+            end
+            switch format
+                case 'cell'
+                    for k=length(numbers):-1:1
+                        images{k}=obj.getimage(numbers(k));
+                    end
+                case 'mat'
+                    for k=length(numbers):-1:1
+                        images(:,:,k)=obj.getimage(numbers(k));
+                    end
             end
             
         end
