@@ -276,7 +276,8 @@ if isa(hroi,'imroi')&&isvalid(hroi)
 %         indg=abs(xr)<lw&abs(yr)<len;
         indb=abs(xr)>lw|abs(yr)>len;
         indg=~indb;
-        xr(indb)=0;yr(indb)=0;
+%         xr(indb)=[];yr(indb)=[];
+%         xr(indb)=0;yr(indb)=0;
 %         xr=xr.*indg;
 %         yr=yr.*indg;
         
