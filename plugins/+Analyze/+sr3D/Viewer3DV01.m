@@ -370,8 +370,8 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                          pr=getstereosettings(pr,1);
                          layer1(k).images=renderplotlayer(pr,1);
                          %same intensity scaling
-                         pr.imax=layer1(k).images.finalImages.imax;
-                         obj.currentimage.imax(k)=pr.imax;
+                         pr.imax_min=layer1(k).images.finalImages.imax;
+                         obj.currentimage.imax(k)=pr.imax_min;
                          pr.imaxtoggle=0;
                          pr=getstereosettings(pr,2);
                          layer2(k).images=renderplotlayer(pr,2);

@@ -489,7 +489,7 @@ dr=par(5);
 if length(par)>5
     sigma=par(6);
 end
-sigma2=sigma/sqrt(2);
+sigma2=sigma*sqrt(2);
 % dr=10;
 
 R=sqrt((X-x).^2+(Y-y).^2);
