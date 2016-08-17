@@ -77,7 +77,7 @@ classdef EvaluateIntensity<interfaces.WorkflowModule
                 end
 
             end
-            obj.intensities=[];
+            obj.intensities=single(0);
         end
         function dato=run(obj,data,p) %
 
@@ -91,14 +91,14 @@ classdef EvaluateIntensity<interfaces.WorkflowModule
                 loc=data{3}.data;
                 s=size(img);
                 numl=s(3)/2;
-                memincrease=1e4;  
+                memincrease=1e5;  
                 useevaluators=obj.useevaluators;
-                intensities=obj.intensities;
+%                 intensities=obj.intensities;
                 evaluators=obj.evaluators;
                 loccounter=obj.loccounter;
-                s=size(intensities);
+                s=size(obj.intensities);
                 if loccounter>s(1)-memincrease/4;
-                    intensities(loccounter+memincrease,length(obj.fields))=single(0);
+                    obj.intensities(loccounter+memincrease,length(obj.fields))=single(0);
                 end
                 
 %                 for k=numl:-1:1
@@ -110,17 +110,18 @@ classdef EvaluateIntensity<interfaces.WorkflowModule
                     
                     if useevaluators(1)
                         out1=evaluators{1}.evaluate(img,bg);
-                        
-                        intensities(loccounter+1:loccounter+numl,inds:inds+so1-1)=out1(1:numl,:);
+                        out1p=out1(1:numl,:);
+                        obj.intensities(loccounter+1:loccounter+numl,inds:inds+so1-1)=out1p;
                          inds=inds+so1;
-                        intensities(loccounter+1:loccounter+numl,inds:inds+so1-1)=out1(numl+1:end,:);
+                         out1p=out1(numl+1:end,:);
+                        obj.intensities(loccounter+1:loccounter+numl,inds:inds+so1-1)=out1p;
                         inds=inds+so1;
                     end
                     if useevaluators(2)
                         out2=evaluators{2}.evaluate(img,bg,loc.dx,loc.dy,loc.PSFxpix,loc.PSFypix);
-                        intensities(loccounter+1:loccounter+numl,inds:inds+so2-1)=out2(1:numl,:);
+                        obj.intensities(loccounter+1:loccounter+numl,inds:inds+so2-1)=out2(1:numl,:);
                         inds=inds+so2;
-                        intensities(loccounter+1:loccounter+numl,inds:inds+so2-1)=out2(numl+1:end,:);
+                       obj. intensities(loccounter+1:loccounter+numl,inds:inds+so2-1)=out2(numl+1:end,:);
 %                         inds=inds+so2;
                         
 %                         intensities(loccounter+k,inds:inds+length(out)-1)=out;
@@ -132,7 +133,7 @@ classdef EvaluateIntensity<interfaces.WorkflowModule
                 loccounter=loccounter+numl;
                 
                 obj.useevaluators=useevaluators;
-                obj.intensities=intensities;
+%                 obj.intensities=intensities;
                 obj.evaluators=evaluators;
                 obj.loccounter=loccounter;
                 dato=[];
