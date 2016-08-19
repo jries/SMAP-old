@@ -389,6 +389,7 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
 %                 obj.locData.setFilter(filternew,k)
                 
                     rawimage=renderSMAP(obj.locData,pr,k);
+                    
                     obj.locData.setFilter(filterold,k);
                     layers(k).images.finalImages=drawerSMAP(rawimage,pr);
                     layers(k).images.rawimage=rawimage;

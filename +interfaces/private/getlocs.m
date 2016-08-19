@@ -181,7 +181,15 @@ else
             sr_size=locData.getPar('sr_size');
             indpos=locs.xnm>pos(1)-sr_size(1) & locs.xnm<pos(1)+sr_size(1) & locs.ynm>pos(2)-sr_size(2) & locs.ynm<pos(2)+sr_size(2);
         otherwise %numerical position vector
-           disp('getlocs: position description not valid')
+            %pos(1) pos(2) size(1) size(2)
+            if isnumeric(p.position)
+                pos=p.position(1:2);
+                sr_size=p.position(3:4);
+                indpos=locs.xnm>pos(1)-sr_size(1) & locs.xnm<pos(1)+sr_size(1) & locs.ynm>pos(2)-sr_size(2) & locs.ynm<pos(2)+sr_size(2);
+            else
+            
+                disp('getlocs: position description not valid')
+            end
     end
 end
 

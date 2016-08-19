@@ -196,6 +196,7 @@ end
 
 function cellaxclick(data,action,obj)
 pos=action.IntersectionPoint*1000;
+pos(3)=0;
 if action.Button==3
     obj.SE.currentcell.pos=pos;
     obj.SE.currentcell.image=[];

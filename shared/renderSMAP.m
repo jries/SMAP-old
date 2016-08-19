@@ -47,7 +47,13 @@ end
 imageo.istiff=0;
 if isa(locs,'interfaces.LocalizationData')
 %        locsh=locs.getloc({'x','y','sx','sy','c','s',p.renderfield.selection},'layer',layer,'position','default');
-    locsh=locs.getloc({'xnm','ynm','znm','x','y','locprecnm','sx','sy','PSFxnm','c','s','intensity_render','phot','numberInGroup',p.renderfield.selection},'layer',layer,'position','default');
+%     locsh=locs.getloc({'xnm','ynm','znm','x','y','locprecnm','sx','sy','PSFxnm','c','s','intensity_render','phot','numberInGroup',p.renderfield.selection},'layer',layer,'position','default');
+    if isfield(p,'sr_size') && isfield(p,'sr_pos')
+        posh=[p.sr_pos(1) p.sr_pos(2) p.sr_size(1)*2 p.sr_size(2)*2];
+    else
+        posh='default';
+    end
+    locsh=locs.getloc({'xnm','ynm','znm','x','y','locprecnm','sx','sy','PSFxnm','c','s','intensity_render','phot','numberInGroup',p.renderfield.selection},'layer',layer,'position',posh);
 else
     locsh=locs;
 end
