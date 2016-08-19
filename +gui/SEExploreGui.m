@@ -3,6 +3,7 @@ classdef SEExploreGui<interfaces.SEProcessor
         hlines
         infostruct
         anglehandle
+        sideviewax
     end
     methods
         function obj=SEExploreGui(varargin)   
@@ -196,7 +197,7 @@ end
 
 function cellaxclick(data,action,obj)
 pos=action.IntersectionPoint*1000;
-pos(3)=0;
+ pos(3)=0;
 if action.Button==3
     obj.SE.currentcell.pos=pos;
     obj.SE.currentcell.image=[];
@@ -226,7 +227,7 @@ if action.Button==3
         pos=posr;
     end
     
-    obj.SE.currentsite.pos=pos;
+    obj.SE.currentsite.pos(1:2)=pos(1:2);
         obj.SE.updateSite;
 %     end
 %     obj.SE.plotsite(obj.SE.currentsite,obj.guihandles.siteax,obj.guihandles.cellax);
@@ -365,7 +366,19 @@ if vold>0&&site.info.cell>0&&obj.SE.cells(vold).ID~=site.info.cell
 %     obj.SE.plotcell(obj.SE.currentcell,obj.guihandles.cellax,obj.guihandles.fileax);
 %     obj.SE.plotfile(obj.SE.currentcell.info.filenumber,obj.guihandles.fileax);
 end
-obj.SE.plotsite(site,obj.guihandles.siteax,obj.guihandles.cellax);
+if obj.getPar('se_drawsideview')
+    if isempty(obj.sideviewax)||~isvalid(obj.sideviewax)
+        f=figure;
+        obj.sideviewax=gca;
+        obj.sideviewax.NextPlot='replacechildren';
+        obj.sideviewax.ButtonDownFcn={@sideview_click,obj};
+    end
+    axz=obj.sideviewax;
+else
+    axz=[];
+end
+        
+obj.SE.plotsite(site,obj.guihandles.siteax,obj.guihandles.cellax,axz);
 obj.guihandles.angle.String=num2str(pos2angle((obj.SE.currentsite.annotation.rotationpos.pos)),'%2.1f');
 if sum(obj.SE.currentsite.annotation.rotationpos.pos(:).^2)~=0
     anglebutton_callback(0,0,obj)
@@ -387,6 +400,16 @@ obj.SE.currentsite.image.layers=[];
 obj.SE.currentsite.image.image=single(obj.SE.currentsite.image.image);
 %plot info
 plotinfo(obj,site)
+end
+
+function sideview_click(hax,dat,obj)
+site=obj.SE.currentsite;
+pos=dat.IntersectionPoint;
+site.pos(3)=pos(2)*1000;
+site.image=[];
+plotsite(obj,site)
+
+
 end
 
 function plotinfo(obj,site)

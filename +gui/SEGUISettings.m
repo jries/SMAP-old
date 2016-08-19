@@ -144,5 +144,5 @@ pard.showSE.position=[9,1];
 pard.showSE.Height=2;
 pard.showSE.Width=1.5;
 
-pard.outputParameters={'se_sitefov','se_cellfov','se_sitepixelsize','se_cellpixelsize','se_siteroi','se_drawboxes','se_rotate','se_imax','se_imaxcheck'};
+pard.outputParameters={'se_sitefov','se_cellfov','se_sitepixelsize','se_cellpixelsize','se_siteroi','se_drawboxes','se_rotate','se_imax','se_imaxcheck','se_dz','se_drawsideview'};
 end
