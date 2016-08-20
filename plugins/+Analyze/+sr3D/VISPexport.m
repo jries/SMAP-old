@@ -12,7 +12,7 @@ classdef VISPexport<interfaces.DialogProcessor
         end
         
         function out=run(obj,p)
-            locs=obj.locData.getloc({'xnm','ynm','znm','locprecznm','locprecnm','phot','frame'},'position','roi');
+           
             [path,f]=fileparts(obj.locData.files.file(1).name);
             switch p.vispformat.selection
                 case '2D'
@@ -27,8 +27,9 @@ classdef VISPexport<interfaces.DialogProcessor
             [f,path]=uiputfile([path filesep f '.' ext]);
             [~,fx]=fileparts(f);
             facfwhm=2.3;
-            for k=1:5
+            for k=1:length(p.sr_layerson)
                 if p.sr_layerson(k)
+                     locs=obj.locData.getloc({'xnm','ynm','znm','locprecznm','locprecnm','phot','frame'},'position','roi','layer',k);
                     a=1;
                     switch p.vispformat.selection
                         
