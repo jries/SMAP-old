@@ -77,7 +77,7 @@ classdef GuiPluginWindow< interfaces.GuiModuleInterface & interfaces.LocDataInte
 %                     ht.units='normalized';
                     obj.guihandles.(['tab_' name])=ht;
 %                     if isstruct(obj.guiplugins.(name))
-                    if ~isfield(obj.guiplugins.(name),'module')    
+                    if isstruct(obj.guiplugins.(name))&&~isfield(obj.guiplugins.(name),'module')    
                         pluging=gui.GuiPluginGroup(obj.guihandles.(['tab_' name]),obj.P);
                         pluging.guiplugins=obj.guiplugins.(name);
                         pluging.maindir={obj.maindir,name};
@@ -87,7 +87,7 @@ classdef GuiPluginWindow< interfaces.GuiModuleInterface & interfaces.LocDataInte
 %                         end
                         pluging.makeGui();
                     else
-                        file=obj.guiplugins.(name).module;
+                        file=obj.guiplugins.(name);
                         pluging=makewf(obj,name,file);
                     end
                     obj.children.(name)=pluging;
@@ -125,6 +125,14 @@ switch callobj.Label
             obj.guiplugins.(name)=[path  file];
            addplugingroup(obj,name)
             guimodules.(obj.maindir).(name).module={[path  file]}; 
+        else
+            answ=inputdlg('Name of workflow','add empty workflow?');
+            if ~isempty(answ)
+                name=answ{1};
+                obj.guiplugins.(name)=name;
+                addplugingroup(obj,name);
+                guimodules.(obj.maindir).(name).module={name}; 
+            end
         end
     case {'move left','move right'}
         selected=obj.guihandles.(obj.maindir).SelectedTab;
@@ -160,15 +168,18 @@ function module=makewf(obj,name, file)
 %         obj.guihandles.(['tab_' name])=uitab(obj.guihandles.(obj.maindir),'Title',name);
          module=interfaces.Workflow;
          module.processorgui=false;
-         module.handle=obj.guihandles.(['tab_' name]);
+         hpanel=uipanel(obj.guihandles.(['tab_' name]),'Position',[0 0 1 0.85]);
+         module.handle=hpanel;%obj.guihandles.(['tab_' name]);
         module.attachPar(obj.P);
         module.attachLocData(obj.locData);
-        p.Vrim=40;
-        p.Xrim=4;
-        module.setGuiAppearence(p)
+%         p.Vrim=40;
+%         p.Xrim=4;
+%         module.setGuiAppearence(p)
         module.makeGui;
         module.guihandles.showresults.Value=1;
+        if exist(file,'file')
         module.load([file]);
+        end
 %         obj.children.(['tab_' name])=module;
 
 end

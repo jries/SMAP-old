@@ -42,7 +42,8 @@ classdef FRCresolution<interfaces.DialogProcessor
             
             plot([0 qmax],[0 0],'k')
             hold on
-            plot(linspace(0,qmax*sqrt(2), length(frc_curve)), frc_curve,'-')
+            plot(linspace(0,qmax, length(frc_curve)), frc_curve,'-')
+%             plot(linspace(0,qmax*sqrt(2), length(frc_curve)), frc_curve,'-')
             plot([0 qmax],[1/7 1/7],'m')
             plot(1/(FRC_resolution),1/7,'rx')
             plot(1/(FRC_resolution)*[1 1],[-0.2 1/7],'r')

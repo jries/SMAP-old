@@ -212,7 +212,7 @@ classdef Workflow<interfaces.DialogProcessor
             
         end
         function run(obj,tag)
-            if nargin<2||~ischar(tag)
+            if nargin<2||~ischar(tag)||isempty(tag)
                 tag=obj.startmodule;
             end
             obj.connectModules;
