@@ -76,8 +76,15 @@ pard.checkphot.object=struct('String','use manual photon range','Style','checkbo
 pard.checkphot.position=[3,1];
 pard.checkphot.Width=2;
 
-pard.photrange.object=struct('String','0','Style','edit');
+pard.photrange.object=struct('String','150 10000','Style','edit');
 pard.photrange.position=[3,3];
+
+pard.checklifetime.object=struct('String','use manual lifetime range','Style','checkbox','Value',0);
+pard.checklifetime.position=[4,1];
+pard.checklifetime.Width=2;
+
+pard.lifetimerange.object=struct('String','1 30','Style','edit');
+pard.lifetimerange.position=[4,3];
 
 pard.plugininfo.name='Statistics';
 pard.plugininfo.description=sprintf(['Locstatistics calculates all kind of statistics for localization data.\n'...
