@@ -175,7 +175,7 @@ end
 %lifetime
 lifetime=getFieldAsVector(locs,'numberInGroup');
 lifetimeall=lifetime;
-if p.checklifetime
+if isfield(p,'checklifetime')&&p.checklifetime
     for k=datrange
         lifetime{k}(lifetime{k}<p.lifetimerange(1))=[];
         if length(p.lifetimerange)>1
