@@ -137,6 +137,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
             end
 
         end
+       
     end
 end
 

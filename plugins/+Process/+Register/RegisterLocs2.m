@@ -21,7 +21,16 @@ classdef RegisterLocs2<interfaces.DialogProcessor
             end
             p.isz=obj.isz;
             p.register_parameters=obj.register_parameters;
+            
             obj.transformation=transform_locs(obj.locData,p);
+            if obj.processorgui==false %run from WF
+                f=obj.locData.files.file(1).name;
+                fn=strrep(f,'_sml.mat','_T.mat');
+                   obj.guihandles.Tfile.String=[ fn];
+                   transformation=obj.transformation; 
+                   save([fn],'transformation');
+                   obj.setPar('transformationfile',[fn]);
+            end
             out=[];
         end
         function pard=guidef(obj)

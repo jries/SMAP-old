@@ -181,7 +181,15 @@ else
             sr_size=locData.getPar('sr_size');
             indpos=locs.xnm>pos(1)-sr_size(1) & locs.xnm<pos(1)+sr_size(1) & locs.ynm>pos(2)-sr_size(2) & locs.ynm<pos(2)+sr_size(2);
         otherwise %numerical position vector
-           disp('getlocs: position description not valid')
+            %pos(1) pos(2) size(1) size(2)
+            if isnumeric(p.position)
+                pos=p.position(1:2);
+                sr_size=p.position(3:4);
+                indpos=locs.xnm>pos(1)-sr_size(1) & locs.xnm<pos(1)+sr_size(1) & locs.ynm>pos(2)-sr_size(2) & locs.ynm<pos(2)+sr_size(2);
+            else
+            
+                disp('getlocs: position description not valid')
+            end
     end
 end
 
@@ -197,6 +205,7 @@ else
 end
 
 indcombined=indfilter&indpos&indwithin;
+% indf=find(indcombined);
 
 if isempty(p.fields)||any(strcmpi(p.fields,'all'))
     p.fields=fieldnames(locs);
@@ -205,7 +214,11 @@ end
  for k=1:length(p.fields)
      field=p.fields{k};
      if isfield(locs,field)
-        locsout.(field)=locs.(field)(indcombined);
+         vh=(locs.(field));
+         
+%          vh3=vh(indf);
+         vh2=vh(indcombined);
+        locsout.(field)=vh2;
      elseif strcmp(p.fields{k},'ingrouped')
             locsout.(p.fields{k})=getindices(locData,indcombined,1);
      elseif strcmp(p.fields{k},'inungrouped')
@@ -276,7 +289,8 @@ if isa(hroi,'imroi')&&isvalid(hroi)
 %         indg=abs(xr)<lw&abs(yr)<len;
         indb=abs(xr)>lw|abs(yr)>len;
         indg=~indb;
-        xr(indb)=0;yr(indb)=0;
+%         xr(indb)=[];yr(indb)=[];
+%         xr(indb)=0;yr(indb)=0;
 %         xr=xr.*indg;
 %         yr=yr.*indg;
         

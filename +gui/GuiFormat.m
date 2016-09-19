@@ -449,8 +449,7 @@ function paro=formatpardialog(callobj,event,obj)
     {'Custom image size';'customcheck'},[false true],...
     {'Imagesize (pixel)','imsize'},'1000, 2000',...
     'separator',' ',...
-     {'New Figure window';'newfig'},[false true],...
-      {'figure number';'fignumber'},130);
+     {'Layers next to each other';'layerssep'},[false ]);
 
 if strcmpi(button,'ok')
     obj.setPar('sr_imsizecheck',settings.customcheck);
@@ -459,10 +458,10 @@ if strcmpi(button,'ok')
         settings.imsize=str2num(settings.imsize);
     end
     obj.setPar('sr_imagesize',(settings.imsize));
-    
-    if settings.newfig
-        obj.setPar('sr_axes',obj.makesrfigure((settings.fignumber)));
-    end
+    obj.setPar('sr_layersseparate',settings.layerssep);
+%     if settings.newfig
+%         obj.setPar('sr_axes',obj.makesrfigure((settings.fignumber)));
+%     end
     obj.updateFormatParameters;
 else
     paro=[];

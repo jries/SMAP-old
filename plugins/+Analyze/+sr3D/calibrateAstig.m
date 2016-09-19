@@ -65,8 +65,8 @@ midp=z(indz0);
 % 
 % midpreal=(z(ix)+z(iy))/2;
 % 
-% indframez0=find(p.framez0<=framet,1,'first');
-% midp=zt(indframez0);
+indframez0=find(p.framez0<=framet,1,'first');
+midp=zt(indframez0);
 % 
 z=z-midp;zt=zt-midp;
 
@@ -146,7 +146,8 @@ plot(z,sy,'bo')
 
 mpf=midpreal-midp;
 % parx= [d sx0 sy0 Ax Ay Bx By g mp]
-startp=[    0.3    1.0    1.0000  0   0        0         0  0.307   -mpf];
+startp=[    0.3    1.0    1.0000  0   0        0         0  -0.307   -mpf];
+% startp=[    0.3    1.0    1.0000  0   0        0         0  0.307   -mpf];
 
 fitp=lsqnonlin(@sbothfromsigmaerr,startp,[],[],[],[z z],[sx sy],B0);
 

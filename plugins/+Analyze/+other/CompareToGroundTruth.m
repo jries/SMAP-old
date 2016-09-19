@@ -13,7 +13,7 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
             if ~exist(path,'dir')
                 path='settings';
             end
-            filenew=fullfile(path,[file '_temp.csv']);
+            filenew=fullfile(path,['F_' file '_temp.csv']);
             
             lochere=obj.locData.copy;
             if p.shiftpix

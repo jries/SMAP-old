@@ -55,10 +55,19 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             h.wfinfo=uicontrol(obj.handle,'Style','pushbutton','String','Info','Position',[450+dhx, l2,50, h2],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@wfinfo_callback,obj});
             h.wfinfo.TooltipString=sprintf('Show information about current workflow.');  
+            
+            h.wfcontext=uicontextmenu(getParentFigure(obj.handle));
+            uimenu(h.wfcontext,'label','Info on workflow','Callback',{@wfinfo_callback,obj});
+            uimenu(h.wfcontext,'label','Change workflow','Callback',{@wfload_callback,obj});
+            uimenu(h.wfcontext,'label','Save workflow settings','Callback',{@savepar_callback,obj});
             h.wfname=uicontrol(obj.handle,'Style','text','String','x','Position',[10, l2, 350 h2],...
-                'FontSize',obj.guiPar.fontsize,'HorizontalAlignment','left');            
+                'FontSize',obj.guiPar.fontsize,'HorizontalAlignment','left');    
+            h.wfname.UIContextMenu=h.wfcontext;
+            h.wfname.TooltipString='Name of current workflow. Right-click for context menu: info, change workflow, save current workflow settings';
              h.wfload=uicontrol(obj.handle,'Style','pushbutton','String','Change','Position',[370+dhx, l2, 80 h2],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@wfload_callback,obj});
+            %h.savepar=uicontrol(obj.handle,'Style','pushbutton','String','Save settings','Position',[290+dhx, l2, 80 h2],...
+            %    'FontSize',obj.guiPar.fontsize,'Callback',{@savepar_callback,obj});
             
             h.wfsimple=uicontrol(obj.handle,'Style','togglebutton','String','-','Position',[500+dhx, l2+dhg,17+dhgx, h2-2*dhg],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@wfsimplegui_callback,obj});
@@ -103,7 +112,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             if isempty(par)
                 warndlg('cannot find settings file for fit workflow. Please set in menu SMAP/Preferences')
             end
-            wffile=par.all.file;
+            wffile=findsettingsfile(par.all.file);
             [~,wfname]=fileparts(wffile);
             h.wfname.String=['Workflow: ' wfname];
             
@@ -150,6 +159,11 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
 %             obj.setPar('loc_previewframe',round(pf));
             obj.guihandles.previewframeslider.SliderStep=[ceil(nf/50) ceil(nf/50)*10]/nf;
         end
+        
+        function setglobalguistate(obj,a,b)
+            setglobalguistate@interfaces.GuiModuleInterface(obj,a,b);
+            obj.guihandles.wfsimple.Value=obj.simplegui;
+        end
     end
 end
 function wfinfo_callback(~,~,obj)
@@ -165,7 +179,7 @@ obj.status('load workflow *.txt file');
 drawnow
 settingsfile=obj.getGlobalSetting('mainLocalizeWFFile');
 [f,p]=uigetfile(settingsfile,'Select workflow *.txt file');
-if ~isempty(f)
+if f
     settingsfilen=[p filesep f];
     obj.setGlobalSetting('mainLocalizeWFFile',settingsfilen);
     obj.mainworkflow.clear;
@@ -320,4 +334,9 @@ if ~isempty(obj.batchfile)
 end
 batchprocessor.attachLocData(obj.locData);
 batchprocessor.makeGui;
+end
+
+function savepar_callback(a,b,obj)
+wf=obj.mainworkflow;
+wf.save;
 end

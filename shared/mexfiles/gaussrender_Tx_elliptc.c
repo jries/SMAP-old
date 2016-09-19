@@ -40,8 +40,8 @@ Gsizegauss=(Gx-1)/2; /**/
 
 for(k=0;k<numlocs;k++)
     {
-    dnx=roiks*sigmax[0]+1;
-    dny=roiks*sigmay[0]+1;
+    dnx=roiks*sigmax[k]+1;
+    dny=roiks*sigmay[k]+1;
     
     xr=xpix[k]+0.5;
     yr=ypix[k]+0.5;
@@ -63,10 +63,10 @@ for(k=0;k<numlocs;k++)
         }
         for(xax=-dnx;xax<=dnx;xax++)
             {
-            xt=(xax-dx)*Gsigma/sigmax[0]+Gsizegauss+0.5; /* careful: indexing moves from 1 to zero. How to take this into account??? minus 1. seems to be right. wrong in matlab?*/
+            xt=(xax-dx)*Gsigma/sigmax[k]+Gsizegauss+0.5; /* careful: indexing moves from 1 to zero. How to take this into account??? minus 1. seems to be right. wrong in matlab?*/
             for(yax=-dny;yax<=dny;yax++)
                 {
-                yt=(yax-dy)*Gsigma/sigmay[0]+Gsizegauss+0.5;
+                yt=(yax-dy)*Gsigma/sigmay[k]+Gsizegauss+0.5;
                 xp=xr+xax; 
                 yp=yr+yax;
                 if(xp>=0&&xp<srec[0]&&yp>=0&&yp<srec[1]&&xt>=0&&xt<Gx&&yt>=0&&yt<Gx)

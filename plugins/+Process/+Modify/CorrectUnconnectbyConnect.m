@@ -21,6 +21,8 @@ classdef CorrectUnconnectbyConnect<interfaces.DialogProcessor
                     obj.locData.loc.ynm(inds(idx2))=lg.ynm(k);
                     if isfield(obj.locData.loc,'znm')
                         obj.locData.loc.znm(inds(idx2))=lg.znm(k);
+                    end
+                    if isfield(obj.locData.loc,'locprecznm')
                         obj.locData.loc.locprecznm(inds(idx2))=lg.locprecznm(k);
                     end
                     obj.locData.loc.locprecnm(inds(idx2))=lg.locprecnm(k);

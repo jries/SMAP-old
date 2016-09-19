@@ -11,9 +11,9 @@ classdef Connect2Unconnect<interfaces.DialogProcessor
                    disp('if problems, tell Jonas')
                    indunc=obj.locData.loc.channel==p.channel;
                    indcon=obj.locData.grouploc.channel==p.channel;
-                   obj.locData.removeind(indunc);
+                   obj.locData.removelocs(indunc);
                    loccopy=obj.locData.copy;
-                   loccopy.removeind(~indcon,'grouploc');
+                   loccopy.removelocs(~indcon,'grouploc');
                    loccopy.loc=loccopy.grouploc;
                    obj.locData.addLocData(loccopy);
                    obj.locData.regroup;

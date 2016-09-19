@@ -43,12 +43,27 @@ ylabel('dr/rout')
 
 subplot(3,4,10)
 % plot(mean(cat(3,rdensity{:}),3))
-rdist=results.sumrdensityn(2)-results.sumrdensityn(1);
-rnh=(0:length(results.sumrdensity1)-1)*rdist;
+       hold off
+       rdist=results.sumrdensityn(2)-results.sumrdensityn(1);
+       rnh=(0:length(results.sumrdensity1)-1)*rdist;
+if isfield(results, 'rdensity1')
+    rall=cell2mat(results.rdensity1');
+    stdr=std(rall,1);
+    mr=mean(rall,1);
+
+       fill([rnh(2:end),rnh(end:-1:2)],[mr(2:end)-stdr(2:end),mr(end:-1:2)+stdr(end:-1:2)],'c')
+        hold on
+    plot(rnh(2:end),mr(2:end)+stdr(2:end),rnh(2:end),mr(2:end)-stdr(2:end))
+ 
+
+end
+
+
 plot(rnh,results.sumrdensity1/results.numsites,rnh,results.sumrdensity2/results.numsites)
 xlabel('radius (nm)')
 ylabel('density')
 title('radial density')
+
 
 subplot(3,4,2)
 % hori=histogram(ro);

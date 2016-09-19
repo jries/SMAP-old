@@ -18,14 +18,24 @@ classdef metadataSMAP<handle
         numberOfFrames=0;
         pix2phot=[];
         basefile;
+        assigned
     end
     
     methods
+        function  obj=metadataSMAP
+            fn=(properties(obj));
+            for k=1:length(fn)
+                obj.assigned.(fn{k})=false;
+            end
+            obj.assigned.roi=true;
+        end
         function roi=get.roi(obj)
             if isempty(obj.roi)
                 roi=[0 0 obj.Width obj.Height];
+%                 obj.assigned.roi=true;
             else
                 roi=obj.roi;
+                
             end
         end
         function cv=get.pix2phot(obj)
@@ -36,6 +46,7 @@ classdef metadataSMAP<handle
                     cv=obj.conversion;
                 end
                 obj.pix2phot=cv;
+%                 obj.assigned.pix2phot=true;
             else
                 cv=obj.pix2phot;
             end
@@ -47,6 +58,9 @@ classdef metadataSMAP<handle
             obj.roi=roi;
             obj.Width=roi(3);
             obj.Height=roi(4);
+            obj.assigned.roi=true;
+            obj.assigned.Width=true;
+            obj.assigned.Height=true;
         end
     end
     

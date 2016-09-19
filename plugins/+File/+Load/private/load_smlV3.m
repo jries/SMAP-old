@@ -61,6 +61,9 @@ function [locData,parameters,siteexplorer]=load_smlV3(filedat)
         if isfield(saveloc,'history')
             locData.history=saveloc.history;
         end
+        if isfield(saveloc,'fitparameters')
+            locData.history{1}.children.fitparamters=saveloc.fitparameters;
+        end
     end
     if isfield(filedat,'parameters')
         parameters=filedat.parameters;

@@ -332,11 +332,13 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             ph.rangex=rx;
             
             if group(1)
-                [loc,indu,sortind]=getlocrot('ungrouped','inlayeru');                
+                [loc,indu,sortind]=getlocrot('ungrouped','inlayeru');  
+               
             end
             
             if group(2)
                 [locg,indg,sortindg]=getlocrot('grouped','inlayerg');
+%                 locg.ballradius=0*locg.xnmline+p.transparencypar(2);
             end
            
             if sum(indg)==0&&sum(indu)==0
@@ -348,8 +350,10 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             switch p.transparencymode.Value
                 case 1 %MIP
                 case 2 %transparent
-                    transparency.parameter=p.transparencypar/ph.sr_pixrec(1)^2*10;
+                    transparency.parameter=p.transparencypar(1)/ph.sr_pixrec(1)^2*10;
                 case 3 %balls
+                    transparency.parameter=[p.transparencypar(1)/ph.sr_pixrec(1)^2*10 p.transparencypar(2)];
+                    
             end
             
             ph.sr_axes=[];
@@ -366,8 +370,8 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                          pr=getstereosettings(pr,1);
                          layer1(k).images=renderplotlayer(pr,1);
                          %same intensity scaling
-                         pr.imax=layer1(k).images.finalImages.imax;
-                         obj.currentimage.imax(k)=pr.imax;
+                         pr.imax_min=layer1(k).images.finalImages.imax;
+                         obj.currentimage.imax(k)=pr.imax_min;
                          pr.imaxtoggle=0;
                          pr=getstereosettings(pr,2);
                          layer2(k).images=renderplotlayer(pr,2);
@@ -467,8 +471,18 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             end
             function [loc,indu,sortind]=getlocrot(grouping,inlayer)
 
-                [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},inlayer,'numberInGroup','phot'},'position','roi','grouping',grouping,'layer',layerson);             
-                [yrot,depth]=rotcoord(loc.znm-zmean,loc.ynmline,p.theta);
+                [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},inlayer,'numberInGroup','phot'},'position','roi','grouping',grouping,'layer',layerson);   
+                if strcmp(p.animatemode.selection,'Translate')&&strcmp(p.raxis.selection,'vertical')
+                    thetaoffset=pi/2;
+%                     induf=find(indu);
+                    indz=(loc.znm>p.zpos-p.zdist/2 & loc.znm<=p.zpos+p.zdist/2);
+                    indu(indu)=indz;
+                    loc=copystructReduce(loc,indz);
+       
+                else
+                    thetaoffset=0;
+                end
+                [yrot,depth]=rotcoord(loc.znm-zmean,loc.ynmline,p.theta+thetaoffset);
                 [sortdepth,sortind]=sort(-depth);
                 sortdepth=depth(sortind);
 %                 sortdepth=sortdepth-max(sortdepth); %reference point on plane
@@ -486,6 +500,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     xe1=eyenm;xe2=-eyenm;
                     x=loc.xnmline(sortind);
                     y=yrot(sortind)+zmean;
+                    if length(p.transparencypar)<2
+                        p.transparencypar(2)=5;
+                    end
                if stereo   
                     loc.x1=(x-xe1)./(1+sortdepth/dplanenm)+xe1;
                     loc.x2=(x-xe2)./(1+sortdepth/dplanenm)+xe2;
@@ -494,9 +511,20 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 elseif strcmp(p.stereo.selection,'perspective')
                     loc.x=(x)./(1+sortdepth/dplanemm);
                     loc.y=(y)./(1+sortdepth/dplanemm);
+                    maxr=4;
+                    minr=0.1;
+                    radius=1./(1+sortdepth/dplanemm);
+                    radius(radius<0)=0;
+                    radius=min(radius,maxr);
+                    loc.perspective=radius;
+                    loc.ballradius=0*loc.x+p.transparencypar(2);
+                    loc.intensity_render=radius.^2;
+%                     loc.locprecnm=loc.locprecnm.*radius;
+%                     loc.locprecznm=loc.locprecznm.*radius;
                 else
                     loc.x=x;
                     loc.y=y;
+                    loc.ballradius=0*loc.x+p.transparencypar(2);
                 end
     
                 
@@ -520,7 +548,10 @@ classdef Viewer3DV01<interfaces.DialogProcessor
 
         end
         
-            function rotate_callback(obj,button,b)
+        function rotate_callback(obj,button,b,savemovie)
+            if nargin<4
+                savemovie=[];
+            end
             global SMAP_stopnow
             bh=obj.guihandles.rotateb;
             if bh.Value
@@ -528,91 +559,230 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             else
                 bh.FontWeight='normal';
             end
-             p=obj.getGuiParameters;
-            switch p.raxis.selection
-                case 'vertical'
-                    roih=obj.getPar('sr_roihandle');
-                    
-                    while bh.Value &&~SMAP_stopnow && strcmp(p.raxis.selection,obj.getSingleGuiParameter('raxis').selection)
-                        pos=roih.getPosition;
-                        posr=rotpos(pos,obj.getSingleGuiParameter('dangle')*pi/180);
-                        roih.setPosition(posr);
+            p=obj.getGuiParameters;
+            roih=obj.getPar('sr_roihandle');
+            
+            %initialize movie
+            if ~isempty(savemovie)
+                indframe=savemovie.frames;
+                            s=size(obj.currentimage.image);
+                if length(s)==2
+                    s(3)=1;
+                end
+                outim=zeros(s(1),s(2),s(3),savemovie.frames);
+                 obj.redraw;
+            end
+                
+           
+            while bh.Value && ~SMAP_stopnow && strcmp(p.raxis.selection,obj.getSingleGuiParameter('raxis').selection) && (isempty(savemovie)||indframe>0)
+                if ~isempty(savemovie)
+                    outim(:,:,:,savemovie.frames-indframe+1)=obj.currentimage.image;
+                    indframe=indframe-1;
+                end
+                
+                switch p.animatemode.selection
+                    case 'Rotate'
+                        switch p.raxis.selection
+                            case 'vertical'
+                                    pos=roih.getPosition;
+                                    posr=rotpos(pos,obj.getSingleGuiParameter('dangle')*pi/180);
+                                    roih.setPosition(posr);           
+                            case 'horizontal'
+                                    theta=obj.getSingleGuiParameter('theta');
+                                    theta=theta-obj.getSingleGuiParameter('dangle')*pi/180;
+                                    theta=mod(theta,2*pi);                       
+                                    obj.setGuiParameters(struct('theta',theta));
+                                    obj.redraw;   
+                        end
+                    case 'Translate'
+                       switch p.raxis.selection
+                           
+                            case 'vertical'
+                                zpos=obj.getSingleGuiParameter('zpos');
+                                dz=obj.getSingleGuiParameter('dangle');
+                                zrange=obj.getSingleGuiParameter('anglerange');
+                                znew=zpos+dz;
+                                if znew>zrange(2)
+                                    znew=zrange(1);
+                                end
+                                if znew<zrange(1);
+                                    znew=zrange(2);
+                                end
+                                obj.setGuiParameters(struct('zpos',znew));
+                                obj.redraw;
+%                                     pos=roih.getPosition;
+%                                     roivec=pos(2,:)-pos(1,:);
+                                    
+%                                     posr=rotpos(pos,obj.getSingleGuiParameter('dangle')*pi/180);
+%                                     roih.setPosition(posr);           
+                            case 'horizontal'
+                                
+                                    xpos=obj.getSingleGuiParameter('zpos');
+                                    step=obj.getSingleGuiParameter('dangle');
+                                    xrange=obj.getSingleGuiParameter('anglerange');
+                                    
+                                  
+                                    if xpos+step>xrange(2)
+%                                         xnew=xrange(1);
+                                        step=-(xrange(2)-xrange(1));
+                                        xnew=xpos+step;
+                                    
+                                    elseif xpos+step<xrange(1);
+%                                         xnew=xrange(2);
+                                        step=(xrange(2)-xrange(1));
+                                        xnew=xpos+step;
+                                    else
+                                        xnew=xpos+step;
+                                    end
+                                    obj.setGuiParameters(struct('zpos',xnew));
+                                    
+                                    pos=roih.getPosition;
+                                    roivec=pos(2,:)-pos(1,:);
+                                    roivecp(2)=roivec(1);
+                                    roivecp(1)=-roivec(2);
+                                    roivec=roivecp/norm(roivecp);
+                                    
+                                    pos(1,:)=pos(1,:)+step*roivec/1000;
+                                    pos(2,:)=pos(2,:)+step*roivec/1000;
+%                                     posz=pos+roivec/norm(roivec)*obj.getSingleGuiParameter('dangle');
+                                    roih.setPosition(pos);
+%                                     theta=obj.getSingleGuiParameter('theta');
+%                                     theta=theta-obj.getSingleGuiParameter('dangle')*pi/180;
+%                                     theta=mod(theta,2*pi);                       
+%                                     obj.setGuiParameters(struct('theta',theta));
+%                                     obj.redraw;   
+                        end
+                end
+            end
+            if ~isempty(savemovie)
+                options.color=true;
+                options.message=true;
+                options.comp='lzw';
 
-                    end           
-                case 'horizontal'
-                    while bh.Value &&~SMAP_stopnow && strcmp(p.raxis.selection,obj.getSingleGuiParameter('raxis').selection)
-                        theta=obj.getSingleGuiParameter('theta');
-                        theta=theta-obj.getSingleGuiParameter('dangle')*pi/180;
-                        theta=mod(theta,2*pi);                       
-                        obj.setGuiParameters(struct('theta',theta));
-                        obj.redraw;
-                    end   
+                imout=uint8(outim*(2^8-1));
+                saveastiff(imout,savemovie.file,options)
             end
             
+            obj.recpar={};
             if  ~ strcmp(p.raxis.selection,obj.getSingleGuiParameter('raxis').selection)
                 rotate_callback(obj,button,b)
-            end            
+            end 
+            
         end
         function savemovie_callback(obj,a,b)
-            global SMAP_stopnow
             [path,fo]=fileparts(obj.locData.files.file(1).name);
             [file,path]=uiputfile([path filesep fo '.tif']);
             if ~file
                 return
             end
+            savemovie.file=[path file];
+            
+            
             p=obj.getGuiParameters(false,true);
-            if length(p.anglerange)==1
-                p.anglerange(2)=p.anglerange(1);
-                p.anglerange(1)=0;
-            end
-            if p.dangle<0
-                angles=(p.anglerange(2):p.dangle:p.anglerange(1))*pi/180;
-            else
-                angles=(p.anglerange(1):p.dangle:p.anglerange(2))*pi/180;
-            end
-            s=size(obj.currentimage.image);
-            if length(s)==2
-                s(3)=1;
-            end
-            outim=zeros(s(1),s(2),s(3),length(angles));
+            savemovie.frames=ceil((p.anglerange(2)-p.anglerange(1))/p.dangle);
+            
             obj.redraw;
             for k=1:length(obj.currentimage.imax)
                 obj.recpar{k}.imaxtoggle=false;
-                obj.recpar{k}.imax=obj.currentimage.imax(k);
+                obj.recpar{k}.imax_min=obj.currentimage.imax(k);
             end
-
-            switch p.raxis.selection
-                case 'vertical'
-                    roih=obj.getPar('sr_roihandle');
-                    pos=roih.getPosition;
-                    for k=1:length(angles) 
-                        posr=rotpos(pos,angles(k));
-                        roih.setPosition(posr);
-                        outim(:,:,:,k)=obj.currentimage.image;
-                        drawnow
-                        if SMAP_stopnow
-                            break
+            
+            %initialize
+            switch p.animatemode.selection
+                    case 'Rotate'
+                        switch p.raxis.selection
+                            case 'vertical'          
+                            case 'horizontal'
+                                theta=p.anglerange(1)*pi/180;                      
+                                obj.setGuiParameters(struct('theta',theta));  
                         end
-                    end
-
-                case 'horizontal'  
-                    for k=1:length(angles) 
-                        obj.setGuiParameters(struct('theta',angles(k)));
-                        obj.redraw;
-                        outim(:,:,:,k)=obj.currentimage.image;
-                        drawnow
-                        if SMAP_stopnow
-                            break
+                    case 'Translate'
+                       switch p.raxis.selection                           
+                            case 'vertical'
+                                znew=p.anglerange(1);
+                                obj.setGuiParameters(struct('zpos',znew));          
+                            case 'horizontal'
+                                xnew=p.anglerange(1);
+                                obj.setGuiParameters(struct('zpos',xnew));
+                                xpos=p.zpos;
+                                step=xnew-xpos;
+                                roih=obj.getPar('sr_roihandle');
+                                pos=roih.getPosition;
+                                roivec=pos(2,:)-pos(1,:);
+                                roivecp(2)=roivec(1);
+                                roivecp(1)=-roivec(2);
+                                roivec=roivecp/norm(roivecp);
+                                pos(1,:)=pos(1,:)+step*roivec/1000;
+                                pos(2,:)=pos(2,:)+step*roivec/1000;
+                                roih.setPosition(pos); 
                         end
-                    end    
-            end
-            options.color=true;
-            options.message=true;
-            options.comp='lzw';
-
-            imout=uint8(outim*(2^8-1));
-            saveastiff(imout,[path,file],options)
+            end           
+            button=obj.guihandles.rotateb;
+            button.Value=1;
+            obj.rotate_callback(0,0,savemovie)
             obj.recpar={};
+            button.Value=0;
+            
+            
+%             global SMAP_stopnow
+%             [path,fo]=fileparts(obj.locData.files.file(1).name);
+%             [file,path]=uiputfile([path filesep fo '.tif']);
+%             if ~file
+%                 return
+%             end
+%             p=obj.getGuiParameters(false,true);
+%             if length(p.anglerange)==1
+%                 p.anglerange(2)=p.anglerange(1);
+%                 p.anglerange(1)=0;
+%             end
+%             if p.dangle<0
+%                 angles=(p.anglerange(2):p.dangle:p.anglerange(1))*pi/180;
+%             else
+%                 angles=(p.anglerange(1):p.dangle:p.anglerange(2))*pi/180;
+%             end
+%             s=size(obj.currentimage.image);
+%             if length(s)==2
+%                 s(3)=1;
+%             end
+%             outim=zeros(s(1),s(2),s(3),length(angles));
+%             obj.redraw;
+%             for k=1:length(obj.currentimage.imax)
+%                 obj.recpar{k}.imaxtoggle=false;
+%                 obj.recpar{k}.imax=obj.currentimage.imax(k);
+%             end
+% 
+%             switch p.raxis.selection
+%                 case 'vertical'
+%                     roih=obj.getPar('sr_roihandle');
+%                     pos=roih.getPosition;
+%                     for k=1:length(angles) 
+%                         posr=rotpos(pos,angles(k));
+%                         roih.setPosition(posr);
+%                         outim(:,:,:,k)=obj.currentimage.image;
+%                         drawnow
+%                         if SMAP_stopnow
+%                             break
+%                         end
+%                     end
+% 
+%                 case 'horizontal'  
+%                     for k=1:length(angles) 
+%                         obj.setGuiParameters(struct('theta',angles(k)));
+%                         obj.redraw;
+%                         outim(:,:,:,k)=obj.currentimage.image;
+%                         drawnow
+%                         if SMAP_stopnow
+%                             break
+%                         end
+%                     end    
+%             end
+%             options.color=true;
+%             options.message=true;
+%             options.comp='lzw';
+% 
+%             imout=uint8(outim*(2^8-1));
+%             saveastiff(imout,[path,file],options)
+%             obj.recpar={};
         end
         
         function resetazimuth(obj, a,b)
@@ -653,10 +823,13 @@ end
 end
 
 function pard=guidef(obj)
-pard.text2.object=struct('String','zmin','Style','text');
-pard.text2.position=[1,1];
-pard.text3.object=struct('String','zmax','Style','text');
-pard.text3.position=[2,1];
+pard.text2.object=struct('String','zmin/zmax','Style','text');
+pard.text2.position=[2,1];
+pard.text2.Width=0.6;
+% pard.text3.object=struct('String','zmax','Style','text');
+% pard.text3.position=[2,2];
+% pard.text3.Width=0.3;
+
 pard.setpixelsize.object=struct('String','set pixelsize (x z): ','Style','checkbox','Value',1);
 pard.setpixelsize.position=[4,1];
 pard.setpixelsize.Width=1.5;
@@ -671,7 +844,7 @@ pard.thetat.Width=1.1;
 pard.thetat.TooltipString='Push to set polar angle to zero';
 
 pard.zmin.object=struct('Style','edit','String','-400'); 
-pard.zmin.position=[1,2.1];
+pard.zmin.position=[2,1.6];
 pard.zmin.Width=0.5;
 pard.zmax.object=struct('Style','edit','String','400'); 
 pard.zmax.position=[2,2.1];
@@ -690,37 +863,61 @@ pard.pixrecset.position=[4,2.1];
 pard.pixrecset.Width=0.5;
 
 pard.showcontrols.object=struct('String','Show Controls','Style','pushbutton','Callback',@obj.showpanel_callback);
-pard.showcontrols.position=[1,3];
-pard.showcontrols.Width=2;
+pard.showcontrols.position=[1,1];
+pard.showcontrols.Width=1.6;
 pard.showcontrols.TooltipString='opens control panel to move, rotate, zoom';
 
-pard.rotateb.object=struct('String','Rotate','Style','togglebutton','Callback',@obj.rotate_callback);
-pard.rotateb.position=[2,3];
-pard.rotateb.TooltipString='Start continuous rotation';
+pard.rotateb.object=struct('String','Animate','Style','togglebutton','Callback',@obj.rotate_callback);
+pard.rotateb.position=[1,3];
+pard.rotateb.TooltipString='Start continuous animation';
+
+pard.animatemode.object=struct('String',{{'Rotate','Translate'}},'Style','popupmenu');
+pard.animatemode.position=[1,4];
+pard.animatemode.TooltipString='Select rotation or translation';
 
 pard.raxis.object=struct('String',{{'horizontal','vertical'}},'Style','popupmenu');%,'Callback',@obj.axischange_callback);
-pard.raxis.position=[3,3];
-pard.raxis.TooltipString='axis for continuous rotation';
+pard.raxis.position=[2,4];
+pard.raxis.TooltipString='axis for continuous rotation / direction of translation';
 
 pard.danglet.object=struct('String','step','Style','text');
-pard.danglet.position=[3,4];
+pard.danglet.position=[3,3];
 pard.danglet.Width=0.5;
 pard.danglet.TooltipString='step in angle between frames of continuous rotation';
 
 pard.dangle.object=struct('String','3','Style','edit');
-pard.dangle.position=[3,4.5];
+pard.dangle.position=[3,3.5];
 pard.dangle.Width=0.5;
 pard.dangle.TooltipString=pard.danglet.TooltipString;
 
+pard.zpost.object=struct('String','position','Style','text');
+pard.zpost.position=[3,4];
+pard.zpost.Width=0.5;
+pard.zpost.TooltipString='slice thickness (nm) for z-movie';
+
+pard.zpos.object=struct('String','0','Style','edit');
+pard.zpos.position=[3,4.5];
+pard.zpos.Width=0.5;
+pard.zpos.TooltipString=pard.danglet.TooltipString;
+
+pard.zdistt.object=struct('String','dz','Style','text');
+pard.zdistt.position=[5,4];
+pard.zdistt.Width=0.5;
+pard.zdistt.TooltipString='slice thickness (nm) for z-movie';
+
+pard.zdist.object=struct('String','10','Style','edit');
+pard.zdist.position=[5,4.5];
+pard.zdist.Width=0.5;
+pard.zdist.TooltipString=pard.danglet.TooltipString;
+
 pard.savemovie.object=struct('String','save movie','Style','pushbutton','Callback',@obj.savemovie_callback);
-pard.savemovie.position=[4,3];
+pard.savemovie.position=[2,3];
 pard.savemovie.TooltipString='Save rotating movie. Uses min - max angle';
 
-pard.tx.object=struct('String','min max angle (deg)','Style','text');
-pard.tx.position=[5,3];
-pard.tx.TooltipString='start and stop angle for saving. Uses step from above';
+pard.tx.object=struct('String','min max','Style','text');
+pard.tx.position=[4,3];
+pard.tx.TooltipString='start and stop angle/position. Uses step from above';
 pard.anglerange.object=struct('String','0 360','Style','edit');
-pard.anglerange.position=[5,4];
+pard.anglerange.position=[4,4];
 pard.anglerange.TooltipString=pard.tx.TooltipString;
 
 pard.stereo.object=struct('Style','popupmenu','String',{{'no stereo','perspective','anaglyphs (color)','free-view','cross-eyed','goggles'}}); 
@@ -737,19 +934,19 @@ pard.monitorpmm.TooltipString='Size of a monitor pixel in nm. Used to calculate 
 pard.tx2.TooltipString=pard.monitorpmm.TooltipString;
 
 pard.tx3.object=struct('String','d plane','Style','text');
-pard.tx3.position=[7,3];
+pard.tx3.position=[8,1];
 pard.tx3.Width=.6;
 pard.dplanemm.object=struct('Style','edit','String','1000');  
-pard.dplanemm.position=[7,3.6];
+pard.dplanemm.position=[8,1.6];
 pard.dplanemm.Width=.4;
 pard.dplanemm.TooltipString='Distance to plane of reconstruction. Smaller values result in stronger 3D effect';
 pard.tx3.TooltipString=pard.dplanemm.TooltipString;
 
 pard.tx4.object=struct('String','Mag','Style','text');
-pard.tx4.position=[7,4];
+pard.tx4.position=[8,2];
 pard.tx4.Width=.6;
 pard.stereomagnification.object=struct('Style','edit','String','2');  
-pard.stereomagnification.position=[7,4.6];
+pard.stereomagnification.position=[8,2.6];
 pard.stereomagnification.Width=.4;
 pard.stereomagnification.TooltipString='Used only for side-by-side reconstructions of left and right image. You can adjust the magnification with this paramter';
 pard.tx4.TooltipString=pard.stereomagnification.TooltipString;

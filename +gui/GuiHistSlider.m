@@ -91,6 +91,9 @@ classdef GuiHistSlider< interfaces.LayerInterface
                         end
                     otherwise
                         obj.guihandles.field.String=fieldh;
+%                         if sfield{2}==sfield{3}
+%                             sfield{2}=sfield{2}-1;
+%                         end
                         obj.guihandles.vmin.String=num2str(sfield{2});
                         obj.guihandles.vmax.String=num2str(sfield{3});
                 end
@@ -134,8 +137,12 @@ classdef GuiHistSlider< interfaces.LayerInterface
                 obj.histogram=restorestruc.histogram;        
             elseif isfield(obj.locData.loc,fieldh)
                     v=double(obj.locData.loc.(fieldh)(obj.locData.loc.filenumber==filenumber));
+                    v(isinf(v))=[];
                     q=getquantile(v);
-                    
+                    if q(2)==q(1)
+                        q(1)=q(1)-1;
+                        q(2)=q(2)+1;
+                    end
 %                     obj.data.quantile=q;
                     obj.guihandles.lockrange.Value=0;
 %                     obj.guihandles.autoupdate.Value=0;

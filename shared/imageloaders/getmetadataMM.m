@@ -11,14 +11,21 @@ info=getimageinfo(obj.file);
              obj.metadata.numberOfFrames=info.numberOfFrames;
              obj.metadata.basefile=info.basefile;
             obj.metadata=copyfields(obj.metadata,md);
+            fn=fieldnames(md);
+            for k=1:length(fn)
+                obj.metadata.assigned.(fn{k})=true;
+            end
             obj.metadata.allmetadata=copyfields(info,md);
+             obj.metadata.assigned.allmetadata=true;
 %             obj.metadata.camerainfo=copyfields(obj.metadata.camerainfo,md);
             %determine if EM is used
             switch md.port
                 case {'Conventional','Normal'}
                     obj.metadata.EMon=false;
+                    obj.metadata.assigned.EMon=true;
                 case {'Electron Multiplying', 'EM','Multiplication Gain'}
                     obj.metadata.EMon=true;
+                    obj.metadata.assigned.EMon=true;
                 otherwise 
                     md.port
                     obj.metadata.EMon=true;      

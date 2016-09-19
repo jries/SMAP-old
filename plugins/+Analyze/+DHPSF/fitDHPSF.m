@@ -25,7 +25,7 @@ classdef fitDHPSF<interfaces.DialogProcessor
         pfit=thresholdf.thresholdparameters;
         pfit.dataFile=p.dhpsf_datafile;
         pfit.peakThreshold=pfit.Thresholds/10000;
-        
+         pfit.peakThreshold= pfit.peakThreshold*.75;
         %remove
 %         pfit.EMgain=300;
         pfit.framerange=p.framerange;
@@ -38,9 +38,9 @@ classdef fitDHPSF<interfaces.DialogProcessor
                     pfit.minDistBetweenSMs = 7.5*160/pfit.nmPerPixel;
 
                     pfit.calBeadIdx=1; %later: change
-        tic            
+        tfit=tic      ;      
         totalPSF =f_fitSMs(obj,pfit);
-        timefit=toc;
+        timefit=toc(tfit)
         goodFit = totalPSF(:,17)>0;
 %         totalPSF=totalPSF(goodFit,:);
         
@@ -51,13 +51,13 @@ classdef fitDHPSF<interfaces.DialogProcessor
 %             'x fid-corrected (nm),y fid-corrected (nm), z fid-corrected (nm),'...
 %             'photons detected,mean background photons\n']);
                        fprintf(fid, ['frame num,molecule num,x (nm),y (nm),z (nm),' ...
-            'photons detected,mean background photons\n']);
+            'photons detected,mean background photons,fitflag\n']);
         fclose(fid);
 
 
         
         
-        dlmwrite(csvfile,totalPSF(goodFit,[1 2 25 26 27  21 15]), '-append');
+        dlmwrite(csvfile,totalPSF(:,[1 2 25 26 27  21 15 17]), '-append');
                     out=totalPSF;
 
            

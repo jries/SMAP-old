@@ -31,7 +31,7 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                     
                     locs=lochere.getloc({'frame','xnm','ynm','znm'},'position','all','grouping',groupcheck);
                     p.maxframeall=max(lochere.loc.frame);
-                    p.framestart=1;
+                    p.framestart=min(lochere.loc.frame);
                     p.framestop=p.maxframeall;
                     [drift,driftinfo,fieldc]=getxyzdrift(locs,p);
                     
@@ -57,12 +57,14 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                 end
                 obj.locData.regroup;
             else
-                locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','fov','grouping',groupcheck);
+                locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'layer',1);
+%                  locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','fov','grouping',groupcheck);
                 if length(locs.xnm)<100
                     locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','all');
                 end
                 p.maxframeall=max(locs.frame);
                 p.framestart=p.layer1_.frame_min;
+                p.framestart=max(min(locs.frame),(p.layer1_.frame_min));
                 p.framestop=min(p.layer1_.frame_max,p.maxframeall);
                 [drift,driftinfo,fieldc]=getxyzdrift(locs,p);
                 locsall=copyfields([],obj.locData.loc,{fieldc{:},'frame','filenumber'});

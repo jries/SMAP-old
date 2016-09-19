@@ -192,6 +192,9 @@ classdef Workflow<interfaces.DialogProcessor
             obj.fieldvisibility;
         end
         function save(obj,fn)
+            if nargin<2
+                fn=obj.pluginpath;
+            end
             for k=1:length(obj.modules)
                 mk=obj.modules{k};
                 modules(k).tag=mk.tag;
@@ -209,7 +212,7 @@ classdef Workflow<interfaces.DialogProcessor
             
         end
         function run(obj,tag)
-            if nargin<2||~ischar(tag)
+            if nargin<2||~ischar(tag)||isempty(tag)
                 tag=obj.startmodule;
             end
             obj.connectModules;
@@ -438,7 +441,7 @@ classdef Workflow<interfaces.DialogProcessor
         function fieldvisibility(obj,varargin)
             for k=1:obj.numberOfModules
                 mh=obj.modules{k}.module;
-                mh.simplegui=obj.simplegui;
+%                 mh.simplegui=obj.simplegui;
                 mh.fieldvisibility(varargin{:});
             end
         end

@@ -1,6 +1,7 @@
 classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
     properties
         numberOfLayers=1;
+        multilayerfig;
     end
 
     methods
@@ -99,10 +100,30 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             pk=obj.getLayerParameters(1,displayerSMAP);
 %             displayer.setParameters(pk);
             [finalImage,sr_imagehandle]=displayerSMAP(obj.locData.layer,pk);
+            
+
 %             [finalImage,sr_imagehandle]=displayer.displayImage(obj.locData.layer);
             obj.setPar('sr_imagehandle',sr_imagehandle);
             obj.setPar('sr_image',finalImage);
              guiformat.roiset(proi);
+             
+            sep=obj.getPar('sr_layersseparate');
+%             if ~isempty(sep)&&sep
+%                 if isempty(obj.multilayerfig)||~isvalid(obj.multilayerfig)
+%                     obj.multilayerfig=figure;
+%                 else
+%                     figure(obj.multilayerfig)
+%                 end
+%                 onlayer=find(obj.getPar('sr_layerson'));
+%                 numl=length(onlayer);
+%                 for k=1:numl
+%                     subplot(1,numl,k)
+%                     thisim=obj.locData.layer(onlayer(k)).images.finalImages;
+%                     imagesc(thisim.rangex,thisim.rangey,thisim.image);
+%                     axis equal
+%                     
+%                 end
+%             end
             obj.status('display done');
         end
         

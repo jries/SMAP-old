@@ -77,7 +77,10 @@ classdef fitterGUI<interfaces.WorkflowModule
                     obj.children.(fn{k}).fieldvisibility(varargin{:});
             end
         end
-        
+%         function setGuiParameters(obj,varargin)
+%             setGuiParameters@interfaces.WorkflowModule(obj,varargin{:});
+%             
+%         end
 
     end
 end

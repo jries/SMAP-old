@@ -70,6 +70,7 @@ classdef GuiChannel< interfaces.LayerInterface
             h.render_colormode.Callback={@render_colormode_callback,obj}; 
             h.renderfield.Callback={@renderfield_callback,obj};  
             h.default_button.Callback=@obj.default_callback;
+            h.defaultsave_button.Callback=@obj.default_callback;
             h.externalrender.Callback={@renderpar_callback,obj};
             
             guimodules=obj.getPar('menu_plugins');
@@ -258,15 +259,15 @@ classdef GuiChannel< interfaces.LayerInterface
             obj.selectedField_callback;
         end
         
-        function default_callback(obj,a,b)
+        function default_callback(obj,callobj,b)
             deffile=[ pwd '/settings/temp/Channel_default.mat'];
             fh=getParentFigure(obj.handle);
             modifiers = get(fh,'currentModifier');
-            if ismember('shift',modifiers);
+            if ismember('shift',modifiers)||strcmpi(callobj.String,'save');
                 %save
                 defaultChannelParameters=obj.getGuiParameters;
                 globalParameters=obj.getLayerParameters(obj.layer);
-                globalParameters=rmfield(globalParameters,{'mainGuihandle','mainGui','loc_outputfig','filterpanel','ov_axes','guiFormat','sr_image','sr_imagehandle','sr_figurehandle','sr_axes'});
+                globalParameters=myrmfield(globalParameters,{'mainGuihandle','mainGui','loc_outputfig','filterpanel','ov_axes','guiFormat','sr_image','sr_imagehandle','sr_figurehandle','sr_axes'});
                 save(deffile,'defaultChannelParameters','globalParameters');
                 disp('default parameters saved.');
                 obj.status('default parameters saved.');
@@ -373,6 +374,7 @@ end
 p=obj.getSingleGuiParameter('renderfield');
 field=p.selection;
 v=obj.locData.getloc(field,'layer',obj.layer).(field);
+if ~isempty(v)
 obj.locData.loc.colorfield=obj.locData.loc.(field);
 obj.locData.grouploc.colorfield=obj.locData.grouploc.(field);
 q=myquantilefast(v,[0.01,0.99]);
@@ -384,6 +386,7 @@ obj.colorrange.maxcall(p.Value)=maxv;
 obj.guihandles.colorfield_min.String=num2str(minv);
 obj.guihandles.colorfield_max.String=num2str(maxv);
 % render_colormode_callback(object,0,obj)      
+end
 obj.updateLayerField('render_colormode');
 obj.updateLayerField('renderfield');
 obj.updateLayerField('colorfield_min');
@@ -835,10 +838,15 @@ pard.shiftxy_max.Optional=true;
 
 
 pard.default_button.object=struct('Style','pushbutton','String','Default');
-pard.default_button.position=[8,4];
-pard.default_button.Width=1;
-pard.default_button.TooltipString='Reset to default. Click with shift to save default.';
+pard.default_button.position=[8.5,4];
+pard.default_button.Width=.6;
+pard.default_button.TooltipString='Reset to default. ';
 pard.default_button.Optional=true;
+pard.defaultsave_button.object=struct('Style','pushbutton','String','Save');
+pard.defaultsave_button.position=[8.5,4.6];
+pard.defaultsave_button.Width=.4;
+pard.defaultsave_button.TooltipString='Save default. ';
+pard.defaultsave_button.Optional=true;
 %%%put in again
 % pard.layercolorz.object=struct('Style','checkbox','String','layers same c/z');
 % pard.layercolorz.position=[7,3.8];

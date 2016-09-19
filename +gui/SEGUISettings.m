@@ -67,34 +67,53 @@ end
 function pard=guidef
 
 pard.text3.object=struct('String','FoV (nm)','Style','text');
-pard.text3.position=[1,2];
-pard.text4.object=struct('String','pixelsize (nm)','Style','text');
-pard.text4.position=[1,3];
+pard.text3.position=[1,2.25];
+pard.text3.Width=.75;
+
+
 pard.text5.object=struct('String','ROI (nm)','Style','text');
-pard.text5.position=[1,4];
+pard.text5.position=[1,3.0];
+pard.text5.Width=.75;
+
+pard.textdz.object=struct('String','dz (nm)','Style','text');
+pard.textdz.position=[1,3.75];
+pard.textdz.Width=.75;
+
+pard.text4.object=struct('String','pixelsize (nm)','Style','text');
+pard.text4.position=[1,1.5];
+pard.text4.Width=.75;
 
 pard.text1.object=struct('String','Site','Style','text');
 pard.text1.position=[2,1];
-
+pard.text1.Width=0.5;
 pard.text2.object=struct('String','Cell','Style','text');
 pard.text2.position=[3,1];
-
+pard.text2.Width=0.5;
 % pard.text6.object=struct('String','File','Style','text');
 % pard.text6.position=[4,1];
 
 pard.se_sitefov.object=struct('Style','edit','String',500); 
-pard.se_sitefov.position=[2,2];
+pard.se_sitefov.position=[2,2.25];
+pard.se_sitefov.Width=0.75;
 pard.se_cellfov.object=struct('Style','edit','String',5000); 
-pard.se_cellfov.position=[3,2];
+pard.se_cellfov.position=[3,2.25];
+pard.se_cellfov.Width=0.75;
 pard.se_sitepixelsize.object=struct('Style','edit','String',3); 
-pard.se_sitepixelsize.position=[2,3];
+pard.se_sitepixelsize.position=[2,1.5];
+pard.se_sitepixelsize.Width=0.75;
 pard.se_cellpixelsize.object=struct('Style','edit','String',10); 
-pard.se_cellpixelsize.position=[3,3];
+pard.se_cellpixelsize.position=[3,1.5];
+pard.se_cellpixelsize.Width=0.75;
 % pard.filepixelsize.object=struct('Style','edit','String',1); 
 % pard.filepixelsize.position=[4,3];
 
 pard.se_siteroi.object=struct('Style','edit','String',300); 
-pard.se_siteroi.position=[2,4];
+pard.se_siteroi.position=[2,3.0];
+pard.se_siteroi.Width=0.75;
+
+pard.se_dz.object=struct('Style','edit','String',1000); 
+pard.se_dz.position=[2,3.75];
+pard.se_dz.Width=0.75;
 
 pard.se_imaxcheck.object=struct('Style','checkbox','String','Set Imax for sites to: [ch1 ch2 ...]','Value',0);
 pard.se_imaxcheck.position=[5,1];
@@ -107,8 +126,12 @@ pard.se_rotate.object=struct('Style','checkbox','String','rotate','Value',0);
 pard.se_rotate.position=[6,1];
 % pard.autouptdate.object=struct('Style','checkbox','String','auto update','Value',0);
 % pard.autouptdate.position=[6,2];
-pard.se_drawboxes.object=struct('Style','checkbox','String','draw boxes','Value',0);
+pard.se_drawboxes.object=struct('Style','checkbox','String','draw boxes','Value',1);
 pard.se_drawboxes.position=[6,2];
+
+pard.se_drawsideview.object=struct('Style','checkbox','String','draw sideview','Value',1);
+pard.se_drawsideview.position=[6,3];
+
 
 pard.redrawall.object=struct('Style','pushbutton','String','redraw all','Value',0);
 pard.redrawall.position=[8.5,4];
@@ -121,5 +144,5 @@ pard.showSE.position=[9,1];
 pard.showSE.Height=2;
 pard.showSE.Width=1.5;
 
-pard.outputParameters={'se_sitefov','se_cellfov','se_sitepixelsize','se_cellpixelsize','se_siteroi','se_drawboxes','se_rotate','se_imax','se_imaxcheck'};
+pard.outputParameters={'se_sitefov','se_cellfov','se_sitepixelsize','se_cellpixelsize','se_siteroi','se_drawboxes','se_rotate','se_imax','se_imaxcheck','se_dz','se_drawsideview'};
 end

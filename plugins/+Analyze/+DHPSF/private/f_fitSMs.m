@@ -185,7 +185,7 @@ for stack = 1:length(dataFile)
         
     end
     
-    
+    timecount=tic;
     %% Identify frames to analyze
 %     frameNum = 1;
 %     
@@ -210,9 +210,10 @@ for stack = 1:length(dataFile)
 %     end
     
     %% do template matching
-    
+    if ploton
     scrsz = get(0,'ScreenSize');
     hSMFits=figure('Position',[(scrsz(3)-1280)/2 (scrsz(4)-720)/2 1280 720],'color','w');
+    end
     totalPSFfits = zeros(20000, 6+18+3);
     numPSFfits = 0;
     startTime = tic;
@@ -546,6 +547,10 @@ for stack = 1:length(dataFile)
         end
         %M(a) = getframe(h);
         %imwrite(frame2im(M),'test_output.tif','tif','WriteMode','append');
+        if toc(timecount)>1
+        obj.status(['frame processed: ' num2str(a) ' of ' num2str(numFrames)]); drawnow;
+        timecount=tic;
+        end
     end
     elapsedTime = toc(startTime);
     totalPSFfits = totalPSFfits(1:numPSFfits,:);
@@ -556,7 +561,9 @@ for stack = 1:length(dataFile)
         sprintf('There were %d frames in which the peakImg matrix contained complex numbers or NaNs. See log file "peakImg log.txt" for more details',logFlag)
         logFlag = 0;
     end
+    if ploton
     close(hSMFits)
+    end
     fps = length(frames)/elapsedTime
     moleculesPerSec = numPSFfits/elapsedTime
     %movie2avi(M,'output_v1.avi','fps',10,'Compression','FFDS');

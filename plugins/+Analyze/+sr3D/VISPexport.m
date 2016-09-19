@@ -7,17 +7,43 @@ classdef VISPexport<interfaces.DialogProcessor
         end
         function pard=guidef(obj)
             pard.plugininfo.type='ProcessorPlugin';
+            pard.vispformat.object=struct('Style','popupmenu','String',{{'2D','2D LP','3D','3D LP'}},'Value',3);
+            pard.vispformat.position=[1,1];
         end
+        
         function out=run(obj,p)
-            locs=obj.locData.getloc({'xnm','ynm','znm','locprecznm','locprecnm','phot','frame'},'position','roi');
+           
             [path,f]=fileparts(obj.locData.files.file(1).name);
-            [f,path]=uiputfile([path filesep f '.3dlp']);
+            switch p.vispformat.selection
+                case '2D'
+                    ext='2d';
+                case '2D LP'
+                    ext='2dlp';
+                case '3D'
+                    ext='3d';
+                case '3D LP'  
+                    ext='3dlp';
+            end
+            [f,path]=uiputfile([path filesep f '.' ext]);
             [~,fx]=fileparts(f);
             facfwhm=2.3;
-            for k=1:5
+            for k=1:length(p.sr_layerson)
                 if p.sr_layerson(k)
-                    fout=[path filesep fx '_l' num2str(k) '.3dlp'];
-                    outmatrix=[locs.xnm-mean(locs.xnm) locs.ynm-mean(locs.ynm) locs.znm locs.locprecnm*facfwhm locs.locprecnm*facfwhm locs.locprecznm*facfwhm   locs.phot locs.frame];
+                     locs=obj.locData.getloc({'xnm','ynm','znm','locprecznm','locprecnm','phot','frame'},'position','roi','layer',k);
+                    a=1;
+                    switch p.vispformat.selection
+                        
+                        case '2D'
+                            outmatrix=[locs.xnm-a*mean(locs.xnm) locs.ynm-a*mean(locs.ynm) locs.phot locs.frame];
+                        case '2D LP'
+                            outmatrix=[locs.xnm-a*mean(locs.xnm) locs.ynm-a*mean(locs.ynm) locs.locprecnm*facfwhm locs.locprecnm*facfwhm locs.phot locs.frame];
+                        case '3D'
+                            outmatrix=[locs.xnm-a*mean(locs.xnm) locs.ynm-a*mean(locs.ynm) locs.znm locs.phot locs.frame];
+                        case '3D LP'  
+                            outmatrix=[locs.xnm-a*mean(locs.xnm) locs.ynm-a*mean(locs.ynm) locs.znm locs.locprecnm*facfwhm locs.locprecnm*facfwhm locs.locprecznm*facfwhm   locs.phot locs.frame];
+                    end
+                    
+                    fout=[path filesep fx '_l' num2str(k) '.' ext];
                     dlmwrite(fout,outmatrix,'delimiter','\t')
                 end
             end          

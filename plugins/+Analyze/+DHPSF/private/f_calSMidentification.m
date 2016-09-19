@@ -277,7 +277,7 @@ for stack = 1:length(dataFile)
             clear templateInfo tempX tempY temp xIdx yIdx;
 
         else
-            templateFrames = templateFrames';
+            templateFrames = round( templateFrames');
             numTemplates = size(templateFrames,1);
             templateColors = jet(numTemplates);
             templateLocs = zeros(numTemplates,5);
