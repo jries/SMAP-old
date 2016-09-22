@@ -72,6 +72,7 @@ classdef GuiChannel< interfaces.LayerInterface
             h.default_button.Callback=@obj.default_callback;
             h.defaultsave_button.Callback=@obj.default_callback;
             h.externalrender.Callback={@renderpar_callback,obj};
+            h.copyalllayers_button.Callback={@copyalllayer_callback,obj};
             
             guimodules=obj.getPar('menu_plugins');
             fn=fieldnames(guimodules.Analyze.render);
@@ -323,7 +324,56 @@ obj.updateLayerField('imaxtoggle');
 obj.updateLayerField('imax_min');
 end
 
+function copyalllayer_callback(object,data,obj)
+phere=obj.getGuiParameters;
+thislayer=obj.layer;
+numlayers=obj.getPar('numberOfLayers');
+mainGui=obj.getPar('mainGui');
+guirender=mainGui.children.guiRender.children;
+thisgui=guirender.(['Layer' num2str(thislayer)]);
 
+thisfield=thisgui.children.histgui.getGuiParameters.field;
+filtertable=thisgui.children.filterTableGui.getGuiParameters;
+
+fn=fieldnames(obj.P.par);
+indlh=(strfind(fn,['layer' num2str(thislayer) '_'],'ForceCellOutput',true));
+indfield=~cellfun(@isempty,indlh);
+layerhfields=fn(indfield);
+
+filterh=obj.locData.layer(thislayer).filter;
+gfilterh=obj.locData.layer(thislayer).groupfilter;
+
+for k=1:numlayers
+    if k==thislayer
+        continue
+    end
+    %copy GUI
+    guilayer=guirender.(['Layer' num2str(k)]);
+    guilayer.setGuiParameters(phere);
+    
+    layergui=guirender.(['Layer' num2str(k)]);
+    %copy gui parameters
+    for l=1:length(layerhfields)
+        newfield=strrep(layerhfields{l},['layer' num2str(thislayer) '_'],['layer' num2str(k) '_']);
+        pp=obj.getPar(layerhfields{l});
+        obj.setPar(newfield,pp);
+%         obj.P.par.(newfield).content=obj.P.par.(layerhfields{l}).content; %keep callbacks etc 
+    end
+    
+    %update filtertable
+    
+    layergui.children.filterTableGui.setGuiParameters(filtertable);
+    %update histslider
+%     layergui.children.histgui.selectedField_callback(thisfield);
+    
+    %copy filter
+    obj.locData.layer(k).filter=filterh;
+    obj.locData.layer(k).groupfilter=gfilterh;
+    
+
+end
+
+end
 
 function render_colormode_callback(object,data,obj)
 p=obj.getAllParameters;
@@ -431,7 +481,7 @@ case 'Other'
     
 otherwise
     layerp=obj.getPar(obj.layerprefix);
-    par=renderpardialog(layerp);
+    [par,settings]=renderpardialog(layerp);
     if ~isempty(par)
        layerp=copyfields(layerp,par);
        obj.setPar(obj.layerprefix,layerp)       
@@ -439,7 +489,7 @@ otherwise
            nl=obj.getPar('numberOfLayers');
            for k=1:nl
                layerp=obj.getPar('','layer',k);
-               layerp.rec_addpar=par;
+               layerp=copyfields(layerp,settings);
                obj.setPar('',layerp,'layer',k)
            end
        end
@@ -572,7 +622,7 @@ end
 
 
 
-function paro=renderpardialog(par,default)
+function [paro,settings]=renderpardialog(par,default)
 if nargin==0 || isempty(par)
     par.mingaussnm=3;
     par.mingausspix=.7;
@@ -672,7 +722,7 @@ pard.parbutton.Width=w3;
 pard.parbutton.TooltipString='Additional render paramters';
 pard.parbutton.Optional=true;
 
-pard.colortxt.object=struct('Style','text','String','Color:');
+pard.colortxt.object=struct('Style','text','String','Colormode:');
 pard.colortxt.position=[4,p1];
 pard.colortxt.Width=w1;  
 pard.colortxt.TooltipString='how to render image. DL is diffraction limited';
@@ -835,7 +885,11 @@ pard.shiftxy_max.Width=.5;
 pard.shiftxy_max.TooltipString=pard.shiftxyb.TooltipString;
 pard.shiftxy_max.Optional=true;
 
-
+pard.copyalllayers_button.object=struct('Style','pushbutton','String','-> all L');
+pard.copyalllayers_button.position=[8.5,3.4];
+pard.copyalllayers_button.Width=.6;
+pard.copyalllayers_button.TooltipString='Copy these parameters to all layers';
+pard.copyalllayers_button.Optional=true;
 
 pard.default_button.object=struct('Style','pushbutton','String','Default');
 pard.default_button.position=[8.5,4];
