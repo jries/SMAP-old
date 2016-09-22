@@ -86,9 +86,9 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                 fn=fieldnames(h);
                 for k=1:length(fn)
                     vh=obj.getSingleGuiParameter(fn{k},onlyedit);  
-                    if ~isempty(vh)
+%                     if ~isempty(vh)
                             p.(fn{k})=vh;             
-                    end
+%                     end
                 end
             end
             psave=obj.propertiesToSave;
