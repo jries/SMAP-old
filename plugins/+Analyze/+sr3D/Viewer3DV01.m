@@ -389,7 +389,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                         srim=srim1;
                         srim.image=srim1.image+srim2.image;
                     case {4,5}
-                        srim=assembleSideviews(srim2,srim1,p);
+                        srim=assembleSideviews(srim1,srim2,p);
                     case {6}
                         srim=assembleSideviews(srim1,srim2,p);
                 end
