@@ -1,10 +1,15 @@
 function locdat=fitloc2locdata(obj,locs,indin)
 fieldsremove={'xerrpix','yerrpix','PSFxpix','PSFypix','xpix','ypix'};
+keeptype={'frame','filenumber'};
 fn=fieldnames(locs);
 keepfields=setdiff(fn,fieldsremove);
 
 for k=1:length(keepfields)
+    if any(strcmp(keepfields{k},keeptype))
     locdat.(keepfields{k})=locs.(keepfields{k})(indin);
+    else
+        locdat.(keepfields{k})=single(locs.(keepfields{k})(indin));
+    end
 end
 
 pixelsize=obj.fileinfo.pixsize*1000;
