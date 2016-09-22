@@ -50,6 +50,7 @@ filenumber=obj.locData.files.filenumberEnd;
 switch mode
     case 'sml'
         [templocData,GUIsettings,siteexplorer]=load_smlV3(filedat);
+        obj.setPar('lastSMLFile',file);
     case 'fitpos'
         templocData=loadfitposV2(filedat);
         GUIsettings=[];
