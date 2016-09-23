@@ -47,6 +47,7 @@ epsl=log(eps);
 B0=double(~p.B0);
 initaxis(p.resultstabgroup,'select range');
 plot(framet,epsl,'ro')
+ylabel('log(eps)')
 % hold on
 % plot(framet,syt,'bo')
 % hold off
@@ -75,7 +76,9 @@ hold on
 
 plot(z,epslr,'ro')
 
-
+fitp=fit(epslr,z,'poly5');
+zpl=fitp(epslr);
+plot(zpl,epslr);
 
 % fitp=lsqnonlin(@sbothfromsigmaerr,startp,[],[],[],[z z],[sx sy],B0);
 
@@ -87,7 +90,8 @@ plot(zt,bplot(1)+bplot(2)*zt)
 ttxt=sprintf([num2str(b(1)) '\t' num2str(b(2))]);
 title(ttxt)
 %zpar=[sigma0x,Ax,Ay,Bx,By,gamma,d,sigma0y)
-outforfit=b;
+outforfit.linear=b;
+outforfit.polynomial=fitp;
 button = questdlg('Is the fit good?','3D astigmatism bead calibration','Refit','Save','Cancel','Refit') ;
 switch button
     case 'Refit'
