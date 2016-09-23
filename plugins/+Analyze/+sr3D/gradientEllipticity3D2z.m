@@ -31,7 +31,7 @@ classdef gradientEllipticity3D2z<interfaces.DialogProcessor
                     
                     
             end
-            obj.locData.loc.znm=-z*1000*p.refractiveIndexMismatch;
+            obj.locData.loc.znm=z*1000*p.refractiveIndexMismatch;
             obj.locData.regroup;
             obj.setPar('locFields',fieldnames(obj.locData.loc))
         end

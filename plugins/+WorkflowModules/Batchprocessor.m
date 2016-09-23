@@ -187,11 +187,11 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
                 imf=findimageindir(p.filelist.selection,p);
                 unprocessed=setdiff(imf,obj.filesprocessed);
                 if ~isempty(unprocessed)
-                thisfile=unprocessed{1};
-                obj.guihandles.status.String=['fitting ' thisfile];drawnow;
-                disp(['fitting ' thisfile]);
-                 obj.processtiff(thisfile);
-                obj.filesprocessed{end+1}=thisfile;
+                    thisfile=unprocessed{1};
+                    obj.guihandles.status.String=['fitting ' thisfile];drawnow;
+                    disp(['fitting ' thisfile]);
+                     obj.processtiff(thisfile);
+                    obj.filesprocessed{end+1}=thisfile;
                 else
                     obj.guihandles.status.String=['no file foiund. waiting '];drawnow; 
                     pause(1)
