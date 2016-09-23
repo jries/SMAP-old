@@ -63,7 +63,13 @@ if lenfiles<number
 else
     thisfile=[separate.path filesep obj.separatefiles{number}];
 end
-image=myimread(thisfile,separate.fmt_s);     
+try
+    image=myimread(thisfile,separate.fmt_s);     
+catch err
+    pause(1)
+    disp('error encountered rading image, try again');
+    image=myimread(thisfile,separate.fmt_s);     
+end
 end
 
 function newfile=generateFileName(oldfile, oldfilenumber,indfbar,newfilenumber)
