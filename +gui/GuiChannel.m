@@ -532,14 +532,14 @@ otherwise
     if ~isempty(par)
        layerp=copyfields(layerp,par);
        obj.setPar(obj.layerprefix,layerp)       
-       if par.copyall
-           nl=obj.getPar('numberOfLayers');
-           for k=1:nl
-               layerp=obj.getPar('','layer',k);
-               layerp=copyfields(layerp,settings);
-               obj.setPar('',layerp,'layer',k)
-           end
-       end
+%        if par.copyall
+%            nl=obj.getPar('numberOfLayers');
+%            for k=1:nl
+%                layerp=obj.getPar('','layer',k);
+%                layerp=copyfields(layerp,settings);
+%                obj.setPar('',layerp,'layer',k)
+%            end
+%        end
     end
 end
 end

@@ -289,16 +289,29 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
 end
 
 function scroll_wheel(a,eventdata,obj)
-vs=eventdata.VerticalScrollCount;
-if vs>0
-    eventcase=1;
-else
-    eventcase=2;
+persistent timercount 
+% if isempty(totalscroll)
+%     totalscroll=0;
+% end
+mint=0.01;
+% totalscroll=1+totalscroll;
+if isempty(timercount)||toc(timercount)>mint
+    vs=eventdata.VerticalScrollCount;
+    if vs>0
+        eventcase=1;
+    else
+        eventcase=2;
+    end
+    format_callback(0,0,obj,eventcase)
+%     totalscroll=0;
 end
-format_callback(0,0,obj,eventcase)
+timercount=tic;
 end
 
 function format_callback(handle,action,obj,eventcase)
+% if nargin<5
+%     totalscroll=1;
+% end
 h=obj.guihandles;
 pixrec=str2num(get(h.pixrec,'String'));
 switch eventcase
