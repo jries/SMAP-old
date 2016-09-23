@@ -167,14 +167,17 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             if nargin<2           
                 fignumber=obj.getPar('sr_figurenumber');
             end
-
+            clf(fignumber);
+            hf=figure(fignumber);
 
             pos=obj.getPar('mainGuihandle').Position;
             scrsz = get(groot,'ScreenSize');  
             posim=abs([pos(3)+pos(1)+10 pos(2) max(1,min(pos(4),scrsz(3)-pos(3)-pos(1)-30)), max(1,pos(4)-30)]);
-            clf(fignumber);
-            hf=figure(fignumber);
-            set(hf,'Units','pixels','Position', posim);
+            if posim(3)>200 && posim(4)>200 %too small
+                set(hf,'Units','pixels','Position', posim);
+            end
+
+            
             hg.hsr=hf;
             
 %             set(hg.hsr,'Units','pixels','Position', posim)

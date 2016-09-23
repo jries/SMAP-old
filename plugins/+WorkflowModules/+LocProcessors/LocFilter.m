@@ -27,7 +27,7 @@ classdef LocFilter<interfaces.WorkflowModule;
                 disp('no localizations found')
                 return
             end
-            indin=true(length(locs.frame),1);
+            indin=true(size(locs.frame));
 %             if ~isempty(locs)
                 %locprec
                 if p.check_locprec && isfield(locs,'xerrpix')
