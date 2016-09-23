@@ -25,10 +25,11 @@ classdef WorkflowFitter<interfaces.WorkflowModule
         end
         function prerun(obj,p)
             global fitterstackinfo fitterimagestack fitterbgstack
+            obj.numberInBlock=1; %round(5500*100/roisize^2);
             obj.fitinit;
             roisize=obj.getPar('loc_ROIsize');
 %             obj.numberInBlock=round(5500*100/roisize^2);
-            obj.numberInBlock=1; %round(5500*100/roisize^2);
+            
 %             disp(['number in block: ' num2str(obj.numberInBlock)]);
             obj.stackind=0;
             
