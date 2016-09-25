@@ -17,13 +17,20 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             %constructor. calls .clear to initialize 
             obj.clear;
         end
+%         function set.loc(obj,value)
+%             obj.loc=value;
+%         end
+%         function loc=get.loc(obj)
+%             loc=obj.loc;
+%         end
         function clear(obj,part)
             %initializes properties to empty fields, sets files property to
             %no files
             if nargin<2||strcmpi(part,'all')
             obj.loc=[];
             obj.grouploc=[];
-             obj.layer=[];
+             obj.layer.filter=[];
+             obj.layer.groupfilter=[];
             obj.files.filenumberEnd=0;
             obj.files.file=[];    
             obj.history={};

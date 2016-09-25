@@ -51,24 +51,56 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
              p.name=obj.parent.pluginpath;
              obj.locData.addhistory(p);
               obj.localtimervalue=tic;
+              obj.run(); %clear
         end
         function output=run(obj,data,p)
+            persistent templocs numlocs
+            if nargin<2
+                templocs=[];numlocs=[];
+                return
+            end
+            
             output=[];
             if obj.getPar('loc_preview')||~obj.getSingleGuiParameter('update_check')
                 return
             end
             locs=data.data;%get;
             
-            if ~isempty(locs)&& ~data.eof
+            if ~isempty(locs)&&~isempty(locs.frame)
                 maxfitdist=5;
                 indin=abs(locs.xpix-locs.peakfindx)<maxfitdist & abs(locs.ypix-locs.peakfindy)<maxfitdist;
-                locdat=interfaces.LocalizationData;
-                locdat.loc=fitloc2locdata(obj,locs,indin);
-                obj.locDatatemp.addLocData(locdat);
-
+               
+%                 locdat=interfaces.LocalizationData;
+%                 locdat.loc=fitloc2locdata(obj,locs,indin);
+%                 obj.locDatatemp.addLocData(locdat);
+                fn=fieldnames(locs);
+                if isempty(templocs)
+                    for k=1:length(fn)
+                        templocs.(fn{k})=locs.(fn{k})(indin);
+                    end
+                    numlocs=length(templocs.(fn{1}));
+                else
+                    newlocs=length(locs.(fn{1}));
+                    if numlocs+newlocs>length(templocs.(fn{1}))
+                        newlen=min(1000,2*(numlocs+length(locs.(fn{1}))));
+                        for k=1:length(fn)
+                            templocs.(fn{k})(newlen)=0;
+                        end
+                    end
+                    for k=1:length(fn)
+                        templocs.(fn{k})(numlocs+1:numlocs+sum(indin))=locs.(fn{k})(indin);
+                    end
+                    numlocs=numlocs+sum(indin);
+                end
                 if toc(obj.localtimervalue)>obj.getSingleGuiParameter('loc_updatetime')||data.eof 
-                    obj.locData.addLocData(obj.locDatatemp); %Careful: does this add it many time? need to intialize obj.locDatatemp?
-                   initGuiAfterLoad(obj,false);  %resets the view always! 
+                    locdat=interfaces.LocalizationData;
+                    locdat.loc=fitloc2locdata(obj,templocs,1:numlocs);
+%                     obj.locDatatemp.addLocData(locdat);
+                    templocs=[];
+                    numlocs=[];
+                    
+                    obj.locData.addLocData(locdat); %Careful: does this add it many time? need to intialize obj.locDatatemp?
+                    initGuiAfterLoad(obj,false);  %resets the view always! 
                     notify(obj.P,'sr_render')
                     drawnow
                     obj.localtimervalue=tic;

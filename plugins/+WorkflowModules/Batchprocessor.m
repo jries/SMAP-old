@@ -217,12 +217,15 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
         function processtiff(obj,tiffile)
             p=obj.getGuiParameters;
             wf=interfaces.Workflow([],obj.P);
-            wf.attachLocData(obj.locData);
+            ld=interfaces.LocalizationData;
+            ld.attachPar(obj.P);
+            wf.attachLocData(ld);
             wf.makeGui;
             wf.load(p.mainbatchfile);
             wf.module(wf.startmodule).addFile(tiffile);
             wf.run;
             delete(wf)
+            delete(ld)
         end
         
         function processtiffromWF(obj,wffile)

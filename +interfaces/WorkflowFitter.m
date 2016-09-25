@@ -5,6 +5,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
         stackind
         numberInBlock=0;
         newID=1;
+        fittedlocs=0;
     end
     methods
 
@@ -32,7 +33,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
             
 %             disp(['number in block: ' num2str(obj.numberInBlock)]);
             obj.stackind=0;
-            
+            obj.fittedlocs=0;
             fitterimagestack=zeros(roisize,roisize,obj.numberInBlock,'single');
             if obj.inputChannels==2
                 fitterbgstack=fitterimagestack;
@@ -55,7 +56,8 @@ classdef WorkflowFitter<interfaces.WorkflowModule
         end
         function out=run(obj,data,p)  
             
-            global fitterimagestack fitterstackinfo fitterbgstack
+            global fitterimagestack fitterstackinfo fitterbgstack 
+            persistent reporttimer
             out=[];
             passbg=(obj.inputChannels==2);%~isempty(fitterbgstack);
             fninfo=fieldnames(fitterstackinfo);
@@ -67,6 +69,10 @@ classdef WorkflowFitter<interfaces.WorkflowModule
                 eof=data{1}.eof;
                 
             end
+            
+            if isempty(reporttimer)
+                reporttimer=tic;
+            end
             if ~isempty(dstruc)&&~isempty(dstruc.img)       
                  imgstack=dstruc.img;
                  
@@ -76,6 +82,11 @@ classdef WorkflowFitter<interfaces.WorkflowModule
                      s(3)=1;
                  end                 
                  
+                 obj.fittedlocs=s(3)+obj.fittedlocs;
+                 if toc(reporttimer)>2
+                     obj.setPar('fittedLocs',obj.fittedlocs);
+                     reporttimer=tic;
+                 end
                 
                 if passbg
                     bgstack=data{2}.data.img;
@@ -151,6 +162,8 @@ classdef WorkflowFitter<interfaces.WorkflowModule
 
 
                     outputlocs(obj,locs,fitterstackinfo,obj.newID,true);
+                else
+                    outputlocs(obj,[],[],obj.newID,true);
                 end
             end
 
