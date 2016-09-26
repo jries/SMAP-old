@@ -3,6 +3,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
         mainbatchfile
         onlinebatch=false;
         filesprocessed={};
+        dirsprocessed={};
     end
     properties
 
@@ -111,9 +112,10 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
             end
             obj.guihandles.filelist.String={path}; 
             obj.onlinebatch=true;
-            imf=findimageindir(path,p);
-            disp(imf)
+%             imf=findimageindir(path,p);
+%             disp(imf)
              obj.filesprocessed={};
+             obj.dirsprocessed={};
             %warnign: clears list (if list is full)
             %select directory: display, what files have been found
             %go: check if is only directory.
@@ -184,10 +186,11 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
                 end
             end
             while obj.guihandles.stop.Value==0
-                imf=findimageindir(p.filelist.selection,p);
-                unprocessed=setdiff(imf,obj.filesprocessed);
-                if ~isempty(unprocessed)
-                    thisfile=unprocessed{1};
+                imf=findunprocessed(p.filelist.selection,p,obj.dirsprocessed);
+%                 imf=findimageindir(p.filelist.selection,p);
+%                 unprocessed=setdiff(imf,obj.filesprocessed);
+                if ~isempty(imf)
+                    thisfile=imf;
                     obj.guihandles.status.String=['fitting ' thisfile];drawnow;
                     disp(['fitting ' thisfile]);
                      obj.processtiff(thisfile);
@@ -243,6 +246,32 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
 
 end
 
+function img=findunprocessed(path,p,dirlist)
+img='';
+searchstr=p.adddir_mask;
+mintiffs=p.adddir_minimages;
+files=dir([path filesep searchstr]);
+for k=1:length(files)
+    if files(k).isdir 
+        if ~isempty(intersect(files(k).name,dirlist))
+            continue
+        end
+            
+        tiffiles=(dir([path filesep files(k).name filesep '*.tif']));
+        addpathh='';
+        if isempty(tiffiles)
+            tiffiles=(dir([path filesep files(k).name filesep 'Pos0' filesep '*.tif']));
+            addpathh=['Pos0' filesep];
+        end
+        if length(tiffiles)>mintiffs
+            img=[path filesep files(k).name filesep addpathh tiffiles(1).name];
+            return
+        end
+    end 
+%     p.hstatus.String=['directory ' num2str(k) ' of ' num2str(length(files))];
+%     drawnow;
+end
+end
 function img=findimageindir(path,p)
 img={};
 files=dir([path filesep '*.tif']);
