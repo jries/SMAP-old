@@ -8,6 +8,8 @@ function io=imageloaderAll(file)
                imloader=@imageloaderMMsingle;
            elseif ~isempty(dir([path filesep '*metadata.txt']))
                 imloader=@imageloaderMMstack;
+           elseif ~isempty(strfind(file,'img_'))
+               imloader=@imageloaderMMsingle;
            else
                imloader=@imageloaderOME;
            end
