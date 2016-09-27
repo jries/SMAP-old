@@ -254,7 +254,7 @@ mintiffs=p.adddir_minimages;
 files=dir([path filesep searchstr]);
 for k=1:length(files)
     if files(k).isdir 
-        if ~isempty(intersect(files(k).name,dirlist))
+        if ~isempty(strfind(dirlist,files(k).name))
             continue
         end
             
