@@ -195,6 +195,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
                     disp(['fitting ' thisfile]);
                      obj.processtiff(thisfile);
                     obj.filesprocessed{end+1}=thisfile;
+                    obj.dirsprocessed{end+1}=fileparts(thisfile);
                 else
                     obj.guihandles.status.String=['no file foiund. waiting '];drawnow; 
                     pause(1)
