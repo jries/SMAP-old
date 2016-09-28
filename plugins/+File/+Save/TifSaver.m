@@ -65,6 +65,7 @@ for k=1:length(p.sr_layerson)
         txt=[txt 'grouping: ' num2str(p.([lp '_']).groupcheck) '\n'];
         txt=[txt 'quantile/Imax: ' num2str(p.([lp '_']).imax_min) '\n'];
         txt=[txt 'color range: \t' num2str(p.([lp '_']).colorfield_min) ' : \t' num2str(p.([lp '_']).colorfield_max) '\n'];
+        txt=[txt 'remove outside c-range: ' num2str(p.([lp '_']).remout) '\n'];
         if strcmp(p.([lp '_']).renderfield.selection,'field')
             txt=[txt 'render field: ' (p.([lp '_']).render_colormode.selection) '\n'];
         end
