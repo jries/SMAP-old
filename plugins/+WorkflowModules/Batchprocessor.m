@@ -12,7 +12,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
         function obj=Batchprocessor(varargin)
             obj@interfaces.GuiModuleInterface(varargin{:})
             if isempty(obj.handle)||~isvalid(obj.handle)
-                obj.handle=figure('Units','normalized','Units','pixels','Position',[150,200,900,300],'Name','Batch','NumberTitle','off');
+                obj.handle=figure('Units','normalized','Units','pixels','Position',[150,200,900,330],'Name','Batch','NumberTitle','off');
                 delete(obj.handle.Children);
             end
         end
@@ -186,7 +186,10 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
                 end
             end
             while obj.guihandles.stop.Value==0
-                imf=findunprocessed(p.filelist.selection,p,obj.dirsprocessed);
+                checksml=p.omitsml;
+%                 profile on
+                imf=findunprocessed(p.filelist.selection,p,obj.dirsprocessed,checksml)
+%                 profile viewer
 %                 imf=findimageindir(p.filelist.selection,p);
 %                 unprocessed=setdiff(imf,obj.filesprocessed);
                 if ~isempty(imf)
@@ -221,7 +224,8 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
         function processtiff(obj,tiffile)
             p=obj.getGuiParameters;
             wf=interfaces.Workflow([],obj.P);
-            ld=interfaces.LocalizationData;
+%             ld=interfaces.LocalizationData;
+            ld=obj.locData;
             ld.attachPar(obj.P);
             wf.attachLocData(ld);
             wf.makeGui;
@@ -229,7 +233,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
             wf.module(wf.startmodule).addFile(tiffile);
             wf.run;
             delete(wf)
-            delete(ld)
+%             delete(ld)
         end
         
         function processtiffromWF(obj,wffile)
@@ -247,17 +251,24 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
 
 end
 
-function img=findunprocessed(path,p,dirlist)
+function img=findunprocessed(path,p,dirlist,checksml)
 img='';
 searchstr=p.adddir_mask;
 mintiffs=p.adddir_minimages;
 files=dir([path filesep searchstr]);
+matfiles=dir([path filesep '*_sml.mat']);
+matfilesc={matfiles(:).name};
 for k=1:length(files)
     if files(k).isdir 
-        if ~isempty(strfind(dirlist,files(k).name))
+        if myisstrfind(dirlist, files(k).name)% isempty(strfind(dirlist,files(k).name))
             continue
         end
-            
+        if strcmp(files(k).name,'.')||strcmp(files(k).name,'..')
+            continue
+        end
+        if checksml&&myisstrfind(matfilesc,files(k).name)
+            continue
+        end
         tiffiles=(dir([path filesep files(k).name filesep '*.tif']));
         addpathh='';
         if isempty(tiffiles)
@@ -313,8 +324,8 @@ end
 
 function pard=guidef(obj)
 pard.filelist.object=struct('Style','listbox');%,'Callback',@obj.moduleselect_callback);
-pard.filelist.position=[10,1];
-pard.filelist.Height=8;
+pard.filelist.position=[11,1];
+pard.filelist.Height=9;
 pard.filelist.Width=3;
 
 pard.mainbatchfile.object=struct('Style','edit','String','x://*_batch.mat');
@@ -349,12 +360,18 @@ pard.adddir_minimages.object=struct('Style','edit','String','10');
 pard.adddir_minimages.position=[7,4.5];
 pard.adddir_minimages.Width=.5;
 
+
+pard.omitsml.object=struct('Style','checkbox','String','skip if .sml exist','Value',1);
+pard.omitsml.position=[8,4];
+pard.omitsml.Width=1;
+
+
 pard.remove_button.object=struct('Style','pushbutton','String','remove','Callback',@obj.removeb_callback);
-pard.remove_button.position=[8,4];
+pard.remove_button.position=[9,4];
 pard.remove_button.Width=1;
 
 pard.process_button.object=struct('Style','pushbutton','String','Batch process','Callback',@obj.processb_callback);
-pard.process_button.position=[10,4];
+pard.process_button.position=[11,4];
 pard.process_button.Height=2;
 
 pard.useforall.object=struct('Style','checkbox','String','use for all','Value',0);
@@ -362,12 +379,12 @@ pard.useforall.position=[2,4];
 pard.useforall.Height=1;
 
 pard.status.object=struct('Style','text','String','status','Value',0);
-pard.status.position=[11.5,1];
+pard.status.position=[12.5,1];
 pard.status.Width=3.5;
 
 
 pard.stop.object=struct('Style','togglebutton','String','stop','Value',0);
-pard.stop.position=[11.5,4.5];
+pard.stop.position=[12.5,4.5];
 pard.stop.Width=.5;
 
 pard.plugininfo.type='ProcessorPlugin'; 

@@ -73,15 +73,18 @@ classdef LocSaver<interfaces.WorkflowModule;
                 else
                     newlocs=length(locs.(fn{1}));
                     if numlocs+newlocs>length(templocs.(fn{1}))
-                        newlen=min(1000,2*(numlocs+length(locs.(fn{1}))));
+                        newlen=max(1000,2*(numlocs+length(locs.(fn{1}))));
                         for k=1:length(fn)
                             templocs.(fn{k})(newlen)=0;
                         end
                     end
+                    sindin=sum(indin);
+%                     if sindin>0
                     for k=1:length(fn)
-                        templocs.(fn{k})(numlocs+1:numlocs+sum(indin))=locs.(fn{k})(indin);
+                        templocs.(fn{k})(numlocs+1:numlocs+sindin)=locs.(fn{k})(indin);
                     end
-                    numlocs=numlocs+sum(indin);
+%                     end
+                    numlocs=numlocs+sindin;
                 end
                 if locs.frame(end)>obj.index && obj.numsaved<obj.saveframes
                     obj.numsaved=obj.numsaved+1;

@@ -69,7 +69,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
             if ~isempty(locs)&&~isempty(locs.frame)
                 maxfitdist=5;
                 indin=abs(locs.xpix-locs.peakfindx)<maxfitdist & abs(locs.ypix-locs.peakfindy)<maxfitdist;
-               
+
 %                 locdat=interfaces.LocalizationData;
 %                 locdat.loc=fitloc2locdata(obj,locs,indin);
 %                 obj.locDatatemp.addLocData(locdat);
@@ -82,15 +82,18 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
                 else
                     newlocs=length(locs.(fn{1}));
                     if numlocs+newlocs>length(templocs.(fn{1}))
-                        newlen=min(1000,2*(numlocs+length(locs.(fn{1}))));
+                        newlen=max(1000,2*(numlocs+length(locs.(fn{1}))));
                         for k=1:length(fn)
                             templocs.(fn{k})(newlen)=0;
                         end
                     end
+                    sindin=sum(indin);
+%                     if sindin>0
                     for k=1:length(fn)
-                        templocs.(fn{k})(numlocs+1:numlocs+sum(indin))=locs.(fn{k})(indin);
+                        templocs.(fn{k})(numlocs+1:numlocs+sindin)=locs.(fn{k})(indin);
                     end
-                    numlocs=numlocs+sum(indin);
+%                     end
+                    numlocs=numlocs+sindin;
                 end
                 if toc(obj.localtimervalue)>obj.getSingleGuiParameter('loc_updatetime')||data.eof 
                     locdat=interfaces.LocalizationData;
