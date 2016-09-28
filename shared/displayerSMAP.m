@@ -155,8 +155,9 @@ if nargin<3
 end
    lennm=10^floor(log10(sim(2)*pixrec*0.7*fac));
    lenpix=round(lennm/pixrec);
+   thickness=max(2,round(sim(2)/200));
    if lenpix<sim(2)-12&&sim(1)>4
-   imin(end-4:end-1,end-11-lenpix:end-9,:)=0;
-   imin(end-3:end-2,end-10-lenpix:end-10,:)=1;
+   imin(end-thickness-2:end-1,end-11-lenpix:end-9,:)=0;
+   imin(end-thickness-1:end-2,end-10-lenpix:end-10,:)=1;
    end
 end
