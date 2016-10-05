@@ -316,6 +316,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             saveloc.loc=obj.(locext);
             saveloc.file=obj.files.file;
             saveloc.history=obj.history;
+            
             fieldsremove={'original_channel','groupindex','numberInGroup','colorfield'};
             saveloc.loc=myrmfield(saveloc.loc,fieldsremove);
             if nargin>2&&~isempty(goodind)
@@ -330,6 +331,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             if ~isempty(obj.SE)
                 saveloc.siteexplorer=obj.SE.save;
             end
+            saveloc=concentratefilelist(saveloc);
             if nargin>1&&~isempty(filename)
                 save(filename,'saveloc','-v7.3')
             end
