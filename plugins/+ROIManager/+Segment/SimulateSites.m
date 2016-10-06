@@ -97,6 +97,19 @@ switch ext
             txt='on';
             tif='off';            
         end
+    case '.m'
+        cf=pwd;
+        cd(p)
+        [~,fh]=fileparts(f);
+        l=eval(fh);
+        cd(cf);
+        if isfield(l,'image')
+            txt='off';
+            tif='on';
+        else
+            txt='on';
+            tif='off';            
+        end
 end
 
 obj.guihandles.labeling_efficiency.Visible=txt;
@@ -136,7 +149,12 @@ switch ext
             locsall=copyfields([],l,{'x','y','z'});
         end
     case '.m'
-        l=eval(p.coordinatefile);
+        cf=pwd;
+        [ph,fh]=fileparts(p.coordinatefile);
+        cd(ph)
+        l=eval(fh);
+        cd(cf);
+%         l=eval(p.coordinatefile);
         if isfield(l,'image')
             image=l.image;
         else
