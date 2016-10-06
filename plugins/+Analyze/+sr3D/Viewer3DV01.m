@@ -141,7 +141,12 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     dir=6;
                 case {'0'}
                     dir=0;   
-               
+                case 32 %space bar: rotate
+                     obj.guihandles.rotateb.Value=~ obj.guihandles.rotateb.Value;
+                    if obj.guihandles.rotateb.Value
+                        obj.rotate_callback;
+                    end
+                    return
                 otherwise 
                     switch data.Key
                         case 'comma'
@@ -578,8 +583,11 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                  obj.redraw;
             end
                 
-           
+           obj.axis.Parent.CurrentCharacter='x';
             while bh.Value && ~SMAP_stopnow && strcmp(p.raxis.selection,obj.getSingleGuiParameter('raxis').selection) && (isempty(savemovie)||indframe>0)
+                if obj.axis.Parent.CurrentCharacter==32
+                    bh.Value=0;
+                end
                 if ~isempty(savemovie)
                     outim(:,:,:,savemovie.frames-indframe+1)=obj.currentimage.image;
                     indframe=indframe-1;
@@ -658,6 +666,8 @@ classdef Viewer3DV01<interfaces.DialogProcessor
 %                                     obj.redraw;   
                         end
                 end
+                
+%                 pause(0.01)
             end
             if ~isempty(savemovie)
                 options.color=true;
