@@ -33,6 +33,9 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
                 reporttext='GPUgaussMLEv2_CUDA75';                
             end
             
+            roisize=obj.getPar('loc_ROIsize');
+            obj.numberInBlock=round(5500*100/roisize^2);
+            
             disp(reporttext)
             if exist('err','var')&&exist('err2','var')
                 err

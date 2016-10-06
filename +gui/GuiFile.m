@@ -71,7 +71,7 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.addSynchronization('filelist_long',obj.guihandles.filelist_long,'String');
             obj.addSynchronization('autosavecheck',obj.guihandles.autosavecheck,'Value',{@autosavecheck_callback,0,0,obj});
             %make file menu
-            makefilemenu(obj);
+%             makefilemenu(obj);
             
             f=getParentFigure(obj.handle);
             c=uicontextmenu(f);

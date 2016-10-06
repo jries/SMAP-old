@@ -194,11 +194,12 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 
              end
             
-
-            if  isfield(guimodules,'globalGuiState')&&~isempty(guimodules.globalGuiState)
-                obj.setPar('globalGuiState',guimodules.globalGuiState);
+            cb=hmenu.hsimplegui.Callback;
+            if  isfield(guimodules,'globalGuiState')&&~isempty(guimodules.globalGuiState)&& strcmp(guimodules.globalGuiState,'s')
+                feval(cb{1},struct('Checked','off'),0,cb{2})
+                
             else
-                obj.setPar('globalGuiState','a');
+                feval(cb{1},struct('Checked','on'),0,cb{2})
             end
             
 

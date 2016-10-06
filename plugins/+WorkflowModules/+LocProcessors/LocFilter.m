@@ -23,11 +23,14 @@ classdef LocFilter<interfaces.WorkflowModule;
         function output=run(obj,data,p)
             output=[];
             locs=data.data;%get;
-            if isempty(locs)
+            if data.eof&&isempty(locs)
+                output=data;
+                return
+            elseif isempty(locs)
                 disp('no localizations found')
                 return
             end
-            indin=true(length(locs.frame),1);
+            indin=true(size(locs.frame));
 %             if ~isempty(locs)
                 %locprec
                 if p.check_locprec && isfield(locs,'xerrpix')
@@ -70,10 +73,10 @@ classdef LocFilter<interfaces.WorkflowModule;
                     indin=indin&indinh;
                 end 
                 
-                fn=fieldnames(locs);
-                for k=1:length(fn)
-                    locsout.(fn{k})=locs.(fn{k})(indin);
-                end
+%                 fn=fieldnames(locs);
+%                 for k=1:length(fn)
+%                     locsout.(fn{k})=locs.(fn{k})(indin);
+%                 end
                 %LL
                 if p.check_LL && isfield(locs,'logLikelihood')
                     ll=-locs.logLikelihood;

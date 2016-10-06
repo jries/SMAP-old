@@ -1,16 +1,19 @@
-function [pout,hsmap]=makePluginMenu(obj,handle)
+function [pout,h]=makePluginMenu(obj,handle)
 hsmap=uimenu(handle,'Label','SMAP');
-hinfo=uimenu(hsmap,'Label','About SMAP...','Callback',@info_callback);
+h.hsmap=hsmap;
+h.hinfo=uimenu(hsmap,'Label','About SMAP...','Callback',@info_callback);
 
-hglobalSettings=uimenu(hsmap,'Label','Preferences...','Separator','on','Callback',{@globalsettings_callback,obj});
-savegui=uimenu(hsmap,'Label','Save GUI appearence','Callback',{@savegui_callback,obj});
-loadgui=uimenu(hsmap,'Label','Load GUI appearence','Callback',{@loadgui_callback,obj});
+h.hglobalSettings=uimenu(hsmap,'Label','Preferences...','Separator','on','Callback',{@globalsettings_callback,obj});
+h.savegui=uimenu(hsmap,'Label','Save GUI appearence','Callback',{@savegui_callback,obj});
+h.loadgui=uimenu(hsmap,'Label','Load GUI appearence','Callback',{@loadgui_callback,obj});
 
 
-hrename=uimenu(hsmap,'Label','Rename window','Separator','on','Callback',{@renamewindow_callback,obj});
+h.hrename=uimenu(hsmap,'Label','Rename window','Separator','on','Callback',{@renamewindow_callback,obj});
 
-hsimplegui=uimenu(hsmap,'Label','Hide advanced controls','Callback',{@simplegui_callback,obj});
-hexit=uimenu(hsmap,'Label','Quit SMAP','Callback',{@exit_callback,obj});
+h.hsimplegui=uimenu(hsmap,'Label','Hide advanced controls','Callback',{@simplegui_callback,obj});
+% obj.addSynchronization('globalGuiState',[],'String',{@changeglobalGuiState,obj});
+
+h.hexit=uimenu(hsmap,'Label','Quit SMAP','Callback',{@exit_callback,obj});
 
 
 
@@ -61,8 +64,14 @@ p=readstruct(gfile,{},true);
         makecustommenu(obj.handle,p,obj)
     end
 end 
+
+
+
 end
 
+% function changeglobalGuiState(state)
+% disp('change')
+% end
 function makecustommenu(handle,p,obj)
     fn=fieldnames(p);
     fn=setdiff(fn,{'module','position','name'});

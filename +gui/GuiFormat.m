@@ -167,14 +167,17 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             if nargin<2           
                 fignumber=obj.getPar('sr_figurenumber');
             end
-
+            clf(fignumber);
+            hf=figure(fignumber);
 
             pos=obj.getPar('mainGuihandle').Position;
             scrsz = get(groot,'ScreenSize');  
             posim=abs([pos(3)+pos(1)+10 pos(2) max(1,min(pos(4),scrsz(3)-pos(3)-pos(1)-30)), max(1,pos(4)-30)]);
-            clf(fignumber);
-            hf=figure(fignumber);
-            set(hf,'Units','pixels','Position', posim);
+            if posim(3)>200 && posim(4)>200 %too small
+                set(hf,'Units','pixels','Position', posim);
+            end
+
+            
             hg.hsr=hf;
             
 %             set(hg.hsr,'Units','pixels','Position', posim)
@@ -289,16 +292,29 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
 end
 
 function scroll_wheel(a,eventdata,obj)
-vs=eventdata.VerticalScrollCount;
-if vs>0
-    eventcase=1;
-else
-    eventcase=2;
+persistent timercount 
+% if isempty(totalscroll)
+%     totalscroll=0;
+% end
+mint=0.01;
+% totalscroll=1+totalscroll;
+if isempty(timercount)||toc(timercount)>mint
+    vs=eventdata.VerticalScrollCount;
+    if vs>0
+        eventcase=1;
+    else
+        eventcase=2;
+    end
+    format_callback(0,0,obj,eventcase)
+%     totalscroll=0;
 end
-format_callback(0,0,obj,eventcase)
+timercount=tic;
 end
 
 function format_callback(handle,action,obj,eventcase)
+% if nargin<5
+%     totalscroll=1;
+% end
 h=obj.guihandles;
 pixrec=str2num(get(h.pixrec,'String'));
 switch eventcase
@@ -446,6 +462,7 @@ function paro=formatpardialog(callobj,event,obj)
     'Description', 'SR format parameters',... 
     'title'      , 'Par',... 
     'Pixelsize',{'1x1','2x2','3x3','4x4'},...
+    {'thickness of colorbar (pix)','colorbarthickness'},4,...
     {'Custom image size';'customcheck'},[false true],...
     {'Imagesize (pixel)','imsize'},'1000, 2000',...
     'separator',' ',...
@@ -459,6 +476,7 @@ if strcmpi(button,'ok')
     end
     obj.setPar('sr_imagesize',(settings.imsize));
     obj.setPar('sr_layersseparate',settings.layerssep);
+    obj.setPar('sr_colorbarthickness',settings.colorbarthickness);
 %     if settings.newfig
 %         obj.setPar('sr_axes',obj.makesrfigure((settings.fignumber)));
 %     end

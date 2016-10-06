@@ -205,6 +205,7 @@ else
 end
 
 indcombined=indfilter&indpos&indwithin;
+% indf=find(indcombined);
 
 if isempty(p.fields)||any(strcmpi(p.fields,'all'))
     p.fields=fieldnames(locs);
@@ -213,7 +214,11 @@ end
  for k=1:length(p.fields)
      field=p.fields{k};
      if isfield(locs,field)
-        locsout.(field)=locs.(field)(indcombined);
+         vh=(locs.(field));
+         
+%          vh3=vh(indf);
+         vh2=vh(indcombined);
+        locsout.(field)=vh2;
      elseif strcmp(p.fields{k},'ingrouped')
             locsout.(p.fields{k})=getindices(locData,indcombined,1);
      elseif strcmp(p.fields{k},'inungrouped')

@@ -30,6 +30,12 @@ classdef VISPexport<interfaces.DialogProcessor
             for k=1:length(p.sr_layerson)
                 if p.sr_layerson(k)
                      locs=obj.locData.getloc({'xnm','ynm','znm','locprecznm','locprecnm','phot','frame'},'position','roi','layer',k);
+                     if isempty(locs.locprecznm)
+                         locs.locprecznm=0*locs.xnm+1;
+                     end
+                     if isempty(locs.locprecnm)
+                         locs.locprecnm=0*locs.xnm+1;
+                     end
                     a=1;
                     switch p.vispformat.selection
                         

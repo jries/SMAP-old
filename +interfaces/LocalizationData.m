@@ -17,13 +17,21 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             %constructor. calls .clear to initialize 
             obj.clear;
         end
+%         function set.loc(obj,value)
+%             obj.loc=value;
+%         end
+%         function loc=get.loc(obj)
+%             loc=obj.loc;
+%         end
         function clear(obj,part)
             %initializes properties to empty fields, sets files property to
             %no files
             if nargin<2||strcmpi(part,'all')
             obj.loc=[];
             obj.grouploc=[];
-             obj.layer=[];
+            obj.layer=[];
+             obj.layer.filter=[];
+             obj.layer.groupfilter=[];
             obj.files.filenumberEnd=0;
             obj.files.file=[];    
             obj.history={};
@@ -52,7 +60,8 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             obj.files.file(obj.files.filenumberEnd)=filenew;
             end
             if isempty(obj.loc)
-            locs=struct('frame',[],'xnm',[],'ynm',[],'channel',[],'locprecnm',[],'filenumber',[]);
+                emp=zeros(0,1);
+            locs=struct('frame',double(emp),'xnm',single(emp),'ynm',single(emp),'channel',single(emp),'locprecnm',single(emp),'filenumber',single(emp));
             obj.loc=locs;
             obj.grouploc=locs;
             end
@@ -90,7 +99,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                 l2=length(value);
 %                 v1=obj.loc;
 %                 value=[obj.loc.(name);real(value)];
-                obj.loc.(name)(l1+1:l1+l2)=value;
+                obj.loc.(name)(l1+1:l1+l2,1)=value;
             else
                 obj.setloc(name,value)
             end
@@ -307,6 +316,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             saveloc.loc=obj.(locext);
             saveloc.file=obj.files.file;
             saveloc.history=obj.history;
+            
             fieldsremove={'original_channel','groupindex','numberInGroup','colorfield'};
             saveloc.loc=myrmfield(saveloc.loc,fieldsremove);
             if nargin>2&&~isempty(goodind)
@@ -321,6 +331,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             if ~isempty(obj.SE)
                 saveloc.siteexplorer=obj.SE.save;
             end
+            saveloc=concentratefilelist(saveloc);
             if nargin>1&&~isempty(filename)
                 save(filename,'saveloc','-v7.3')
             end
@@ -346,6 +357,11 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             else
                 loch=locData;
             end
+            if ~isfield(loch,'filenumber')||all(loch.filenumber<1)
+                fn=fieldnames(loch);
+                loch.filenumber=obj.files.filenumberEnd+0*loch.(fn{1});
+            end
+            
             fn2=fieldnames(loch);
             lennew=length(loch.(fn2{1}));
             if ~isempty(obj.loc)

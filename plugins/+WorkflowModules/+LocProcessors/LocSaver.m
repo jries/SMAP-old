@@ -48,33 +48,80 @@ classdef LocSaver<interfaces.WorkflowModule;
              
              obj.fileinfo=obj.getPar('loc_cameraSettings');    %not used?  
              obj.timer=tic;
+             obj.run(); %clear variables;
         end
         function output=run(obj,data,p)
+            persistent templocs numlocs
+            if nargin<2
+                templocs=[];numlocs=[];
+                return
+            end
             output=[];
             if obj.getPar('loc_preview')
                 return
             end
             locs=data.data;%get;
-            
             if ~isempty(locs)&&~isempty(locs.frame)
                 maxfitdist=5;
                 indin=abs(locs.xpix-locs.peakfindx)<maxfitdist & abs(locs.ypix-locs.peakfindy)<maxfitdist;
-                locdat=interfaces.LocalizationData;
-                locdat.loc=fitloc2locdata(obj,locs,indin);
-                obj.locDatatemp.addLocData(locdat);
-                    if locs.frame(end)>obj.index && obj.numsaved<obj.saveframes
-                        obj.numsaved=obj.numsaved+1;
-                        obj.index=obj.index+obj.deltaframes;
-                        if isempty(obj.frames)
-                            obj.frames=obj.getPar('loc_currentframe');
-                        else
-                            obj.frames(obj.numsaved)=obj.getPar('loc_currentframe');
+                fn=fieldnames(locs);
+                if isempty(templocs)
+                    for k=1:length(fn)
+                        templocs.(fn{k})=locs.(fn{k})(indin);
+                    end
+                    numlocs=length(templocs.(fn{1}));
+                else
+                    newlocs=length(locs.(fn{1}));
+                    if numlocs+newlocs>length(templocs.(fn{1}))
+                        newlen=max(1000,2*(numlocs+length(locs.(fn{1}))));
+                        for k=1:length(fn)
+                            templocs.(fn{k})(newlen)=0;
                         end
                     end
+                    sindin=sum(indin);
+%                     if sindin>0
+                    for k=1:length(fn)
+                        templocs.(fn{k})(numlocs+1:numlocs+sindin)=locs.(fn{k})(indin);
+                    end
+%                     end
+                    numlocs=numlocs+sindin;
+                end
+                if locs.frame(end)>obj.index && obj.numsaved<obj.saveframes
+                    obj.numsaved=obj.numsaved+1;
+                    obj.index=obj.index+obj.deltaframes;
+                    if isempty(obj.frames)
+                        obj.frames=obj.getPar('loc_currentframe');
+                    else
+                        obj.frames(obj.numsaved)=obj.getPar('loc_currentframe');
+                    end
+                end
             end
             
+            
+            
+%             if 0 % ~isempty(locs)&&~isempty(locs.frame)
+%                 maxfitdist=5;
+%                 indin=abs(locs.xpix-locs.peakfindx)<maxfitdist & abs(locs.ypix-locs.peakfindy)<maxfitdist;
+%                 locdat=interfaces.LocalizationData;
+%                 locdat.loc=fitloc2locdata(obj,locs,indin);
+%                 obj.locDatatemp.addLocData(locdat);
+% %                 delete(locdat)
+%                     if locs.frame(end)>obj.index && obj.numsaved<obj.saveframes
+%                         obj.numsaved=obj.numsaved+1;
+%                         obj.index=obj.index+obj.deltaframes;
+%                         if isempty(obj.frames)
+%                             obj.frames=obj.getPar('loc_currentframe');
+%                         else
+%                             obj.frames(obj.numsaved)=obj.getPar('loc_currentframe');
+%                         end
+%                     end
+%             end
+            
             if data.eof %save locs
-
+                locdat=interfaces.LocalizationData;
+                locdat.loc=fitloc2locdata(obj,templocs,1:numlocs);
+                obj.locDatatemp.addLocData(locdat);
+                
                 filenameold=obj.locDatatemp.files.file(1).name;
                 filename=filenameold;
                 ind=2;

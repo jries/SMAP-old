@@ -414,7 +414,11 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
                    
                     posh=[pr.sr_pos(1) pr.sr_pos(2) pr.sr_size(1)*2 pr.sr_size(2)*2];
                     locz=obj.locData.getloc({'xnm','ynm','znm','locprecnm','locprecznm','PSFxnm','intensity_render','phot','numberInGroup',pr.renderfield.selection},'layer',k,'position',posh);
+                    if strcmpi('tiff', pr.rendermode.selection)
+                        rawimage=renderSMAP(obj.locData,pr,k);
+                    else
                     rawimage=renderSMAP(locz,pr,k);
+                    end
 %                      rawimage=renderSMAP(obj.locData,pr,k);
                     
                     if ~isempty(locz.znm)&&nargout>1

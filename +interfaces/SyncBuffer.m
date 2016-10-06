@@ -23,11 +23,15 @@ classdef SyncBuffer<handle
                     
 %                      compi=intersect(comp,comp2);
                     if length(comp)>=length(comp2)
-                        comp=unique(comp(ismember(comp,comp2)));
+%                         comp=unique(comp(ismember(comp,comp2)));
+                        comp=myunique(comp(ismember(comp,comp2)));
                     else
-                        comp=unique(comp2(ismember(comp2,comp)));
+%                         comp=unique(comp2(ismember(comp2,comp)));
+                        comp=myunique(comp2(ismember(comp2,comp)));
                     end
-                    
+%                     if ~isempty(comp)&&comp~=compx
+%                         disp('wrong')
+%                     end
                     
 %                     lm=min(length(comp),length(comp2));
 %                     c1=comp(1:lm);c2=comp2(1:lm);

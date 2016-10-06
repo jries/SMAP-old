@@ -366,7 +366,7 @@ if vold>0&&site.info.cell>0&&obj.SE.cells(vold).ID~=site.info.cell
 %     obj.SE.plotcell(obj.SE.currentcell,obj.guihandles.cellax,obj.guihandles.fileax);
 %     obj.SE.plotfile(obj.SE.currentcell.info.filenumber,obj.guihandles.fileax);
 end
-if obj.getPar('se_drawsideview')
+if obj.getPar('se_drawsideview')&&isfield(obj.locData.loc,'znm')
     if isempty(obj.sideviewax)||~isvalid(obj.sideviewax)
         f=figure;
         obj.sideviewax=gca;

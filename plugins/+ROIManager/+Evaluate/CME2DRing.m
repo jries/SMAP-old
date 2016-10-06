@@ -153,7 +153,7 @@ if p.dualchannel
 
         out.circfit=circfit;
         out.imfit=imfit;
-        out.imfit.image=outim;
+        out.imfit.image=single(outim);
         return
 
     end

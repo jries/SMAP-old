@@ -8,16 +8,27 @@ classdef SpatialFilterLocs<interfaces.DialogProcessor
             out=[];
             obj.setPar('undoModule','SpatialFilterLocs');
             notify(obj.P,'backup4undo');
-            locs = obj.locData.loc;
-            indin=find(locs.filenumber==p.dataselect.Value);
+            if p.dataselectall
+                filenumber=unique(obj.locData.loc.filenumber);
+            else
+                filenumber=p.dataselect.Value;
+            end
+%             locs = obj.locData.loc;
+            for fi=1:length(filenumber)
+            [locs,indinb]=obj.locData.getloc({'xnm','ynm',p.locfield.selection},'layer',1,'position','all','filenumber',filenumber(fi),'grouping','ungrouped');
+%             indin=find(locs.filenumber==p.dataselect.Value);
+            indin=find(indinb);
+            [xnm,sortind]=sort(locs.xnm);
+            ynm=locs.ynm(sortind);
+            value=locs.(p.locfield.selection)(sortind);
+%                         [xnm,sortind]=sort(locs.xnm(indin));
+%             ynm=locs.ynm(indin(sortind));
+%             value=locs.(p.locfield.selection)(indin(sortind));
             
-            [xnm,sortind]=sort(locs.xnm(indin));
-            ynm=locs.ynm(indin(sortind));
-            value=locs.(p.locfield.selection)(indin(sortind));
             dist=p.spatialscale;
             ind1=1;
             ind2=1;
-            outval=zeros(size(indin));
+            outval=zeros(size(indinb));
             
             switch p.filter.selection
                 case 'mean'
@@ -65,6 +76,7 @@ classdef SpatialFilterLocs<interfaces.DialogProcessor
                 else
                  obj.locData.setloc(p.resultfield,outval);
                 end
+            end
                  obj.locData.filter(p.resultfield)
                  obj.locData.regroup;
                  obj.setPar('locFields',fieldnames(obj.locData.loc))
@@ -77,7 +89,7 @@ classdef SpatialFilterLocs<interfaces.DialogProcessor
         function locfield_callback(obj,a,b)
             p=obj.getGuiParameters;
             field=p.locfield.selection;
-            obj.guihandles.resultfield.String=[field '_filtered'];
+            obj.guihandles.resultfield.String=[field '_' p.filter.selection];
             
         end
     end
@@ -124,6 +136,10 @@ pard.dataselect.object=struct('Style','popupmenu','String','File');
 pard.dataselect.position=[1,1];
 pard.dataselect.object.TooltipString='choose localization file data set';
 
+
+pard.dataselectall.object=struct('Style','checkbox','String','all','Value',1);
+pard.dataselectall.position=[1,2];
+pard.dataselectall.object.TooltipString='apply on all';
 
 
 pard.syncParameters={{'filelist_short','dataselect',{'String'}},{'locFields','locfield',{'String'}}};

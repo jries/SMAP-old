@@ -160,7 +160,13 @@ for k=datrange
     end
     slp{end+1}=['median: ' num2str(median(locp{k}),3)];
     stat.locprec.median(k)=median(locp{k});
-    indrise=find(hlocp{k}.h>1/2,1,'first');
+    %risng edge
+    
+    
+    [~,indrise1]=find(hlocp{k}.h>0.2,1,'first');
+    indrise1=min(4*indrise1,length(hlocp{k}.h));
+    imaxx=max(hlocp{k}.h(1:indrise1));
+    indrise=find(hlocp{k}.h>imaxx/2,1,'first');
     risingedge=hlocp{k}.n(indrise);
     stat.locprec.rising(k)=risingedge;
     slp{end+1}=['rising: ' num2str(risingedge,3)];
@@ -168,16 +174,31 @@ end
 
 %lifetime
 lifetime=getFieldAsVector(locs,'numberInGroup');
-[hlifet,mmax]=plothist(lifetime,0.999,1,0,ax3);
+lifetimeall=lifetime;
+if isfield(p,'checklifetime')&&p.checklifetime
+    for k=datrange
+        lifetime{k}(lifetime{k}<p.lifetimerange(1))=[];
+        if length(p.lifetimerange)>1
+             lifetime{k}(lifetime{k}>p.lifetimerange(2))=[];
+        end
+    end
+    plr=p.lifetimerange;
+else
+    plr=0.995;
+end
+
+
+[hlifet,mmax]=plothist(lifetime,plr,1,0,ax3);
  ax3.NextPlot='add';
 slt={'lifetime'};
 for k=datrange
     slt{end+1}='';
     slt{end+1}=[num2str(k) '.' modetxt{k} ];
 %     dat(k)=fitexpphot(hlifet{k},2,ploton);
-    dat(k)=meanexphere(lifetime{k},hlifet{k},1,ax3,mmax{k});
+    dat(k)=meanexphere(lifetime{k},hlifet{k},[],ax3,mmax{k});
     slt{end+1}=(['texp'  ' = ' num2str(dat(k).mu,3)]);
     slt{end+1}=(['mean'  ' = ' num2str(mean(lifetime{k}))]);
+    slt{end+1}=(['meanall'  ' = ' num2str(mean(lifetimeall{k}))]);
     stat.lifetime.mu(k)=dat(k).mu;
 end
 
@@ -372,7 +393,7 @@ if isempty(halft)
     halft=ceil(length(h)/2);
 end
 if nargin<2||isempty(fitstart)
-    fitstart=ceil(mi*1.2);
+    fitstart=ceil(mi*1.0);
 end
 fitr=fitstart:min(length(h));
 % fitr=fitstart:min(halft*5,length(h));

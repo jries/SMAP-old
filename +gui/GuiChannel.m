@@ -4,6 +4,8 @@ classdef GuiChannel< interfaces.LayerInterface
         colorrange
         quantilestore=-4;
         imax
+        synchronizedFields
+        rec_addpar = {'mingaussnm','mingausspix','gaussfac','par.gamma'};
     end
     methods
         function obj=GuiChannel(varargin)
@@ -72,12 +74,14 @@ classdef GuiChannel< interfaces.LayerInterface
             h.default_button.Callback=@obj.default_callback;
             h.defaultsave_button.Callback=@obj.default_callback;
             h.externalrender.Callback={@renderpar_callback,obj};
+            h.copyalllayers_button.Callback={@copyalllayer_callback,obj};
             
             guimodules=obj.getPar('menu_plugins');
             fn=fieldnames(guimodules.Analyze.render);
             h.externalrender.String=[{'Select'},fn];
             
             cfields={ 'colorfield','String', 'locprecnm','znm','PSFxnm','locprecznm','frame','shiftxy'};
+            obj.synchronizedFields={ 'colorfield', 'locprecnm','znm','PSFxnm','locprecznm','frame','shiftxy'};
             for k=1:length(cfields)
                  h.([cfields{k} 'b']).Callback={@obj.updatefields_callback,cfields{k}};
                  h.([cfields{k} '_min']).Callback={@obj.updatefields_callback,cfields{k}};
@@ -154,7 +158,7 @@ classdef GuiChannel< interfaces.LayerInterface
             if nargin<2 %update all
                 layerp=obj.getPar(obj.layerprefix);
             	p=obj.getAllParameters;
-                layerp=copyfields(layerp,p);
+                layerp=copyfields(layerp,p,fieldnames(layerp));
                 obj.setPar(obj.layerprefix,layerp);
                 fn=obj.guihandles.ch_filelist.Value;
                 sf={'filenumber',fn,fn,true};
@@ -265,21 +269,33 @@ classdef GuiChannel< interfaces.LayerInterface
             modifiers = get(fh,'currentModifier');
             if ismember('shift',modifiers)||strcmpi(callobj.String,'save');
                 %save
-                defaultChannelParameters=obj.getGuiParameters;
-                globalParameters=obj.getLayerParameters(obj.layer);
-                globalParameters=myrmfield(globalParameters,{'mainGuihandle','mainGui','loc_outputfig','filterpanel','ov_axes','guiFormat','sr_image','sr_imagehandle','sr_figurehandle','sr_axes'});
-                save(deffile,'defaultChannelParameters','globalParameters');
+                defaultChannelParameters=getChannelParameters(obj);
+                
+%                 sdfdy
+%                 defaultChannelParameters=obj.getGuiParameters;
+%                 globalParameters=obj.getLayerParameters(obj.layer);
+%                 globalParameters=myrmfield(globalParameters,{'guimodules','mainGuihandle','mainGui','loc_outputfig','filterpanel','ov_axes','guiFormat',...
+%                     'sr_image','sr_imagehandle','sr_figurehandle','sr_axes','ROI_lineannotation_handle_1','ROI_lineannotation_handle_2'});
+% %                 save(deffile,'defaultChannelParameters','globalParameters');
+                save(deffile,'defaultChannelParameters');
                 disp('default parameters saved.');
                 obj.status('default parameters saved.');
             else
                 if exist(deffile,'file')
                     l=load(deffile);
                     p=l.defaultChannelParameters;
+                    
                     p=rmfield(p,{'ch_filelist','render_colormode','renderfield'});
-                    obj.setGuiParameters(p);
+                    setChannelParameters(obj,p);
+                    
+%                     obj.setGuiParameters(p);
                     obj.status('default parameters restored.');
                     %update
-                    obj.updateLayerField; 
+%                     obj.updateLayerField; 
+                    
+                    %update filter table
+                    %filter again
+                    
                 else
                     disp('no default configuration found at: /settings/temp/Channel_default.mat')
                 end
@@ -305,6 +321,34 @@ classdef GuiChannel< interfaces.LayerInterface
     end
 end
 
+
+function p=getChannelParameters(obj)
+p=obj.getGuiParameters;
+p2=obj.getLayerParameters(obj.layer);
+p=copyfields(p,p2,obj.rec_addpar);
+end
+
+function setChannelParameters(obj,p)
+obj.setGuiParameters(p);
+obj.updateLayerField;
+%copy additional paramters
+layerp=obj.getPar(obj.layerprefix);
+layerp=copyfields(layerp,p);
+obj.setPar(obj.layerprefix,layerp,obj.rec_addpar) 
+guirender=obj.getPar('mainGui').children.guiRender.children;
+thisgui=guirender.(['Layer' num2str(obj.layer)]);
+
+thisfield=thisgui.children.histgui.getGuiParameters.field;
+syncf=setdiff(obj.synchronizedFields,thisfield);
+for k=1:length(syncf)
+    updatefields_callback(obj,0, 0, syncf{k},[])
+%     obj.setPar(obj.synchronizedFields{k})
+end
+updatefields_callback(obj,0, 0, thisfield,[])
+
+%refilter?
+end
+
 function imaxtoggle_callback(object,data,obj)
 if(object.Value)
     object.String='quantile';
@@ -323,7 +367,60 @@ obj.updateLayerField('imaxtoggle');
 obj.updateLayerField('imax_min');
 end
 
+function copyalllayer_callback(object,data,obj)
+phere=getChannelParameters(obj);
 
+thislayer=obj.layer;
+numlayers=obj.getPar('numberOfLayers');
+mainGui=obj.getPar('mainGui');
+guirender=mainGui.children.guiRender.children;
+% thisgui=guirender.(['Layer' num2str(thislayer)]);
+% 
+% thisfield=thisgui.children.histgui.getGuiParameters.field;
+% filtertable=thisgui.children.filterTableGui.getGuiParameters;
+% 
+% fn=fieldnames(obj.P.par);
+% indlh=(strfind(fn,['layer' num2str(thislayer) '_'],'ForceCellOutput',true));
+% indfield=~cellfun(@isempty,indlh);
+% layerhfields=fn(indfield);
+% 
+% filterh=obj.locData.layer(thislayer).filter;
+% gfilterh=obj.locData.layer(thislayer).groupfilter;
+
+for k=1:numlayers
+    if k==thislayer
+        continue
+    end
+%     %copy GUI
+    guilayer=guirender.(['Layer' num2str(k)]);
+    setChannelParameters(guilayer,phere);
+%     guilayer.setGuiParameters(phere);
+%     
+%     layergui=guirender.(['Layer' num2str(k)]);
+%     %copy gui parameters
+%     for l=1:length(layerhfields)
+%         newfield=strrep(layerhfields{l},['layer' num2str(thislayer) '_'],['layer' num2str(k) '_']);
+%         pp=obj.getPar(layerhfields{l});
+%         obj.setPar(newfield,pp);
+% %         obj.P.par.(newfield).content=obj.P.par.(layerhfields{l}).content; %keep callbacks etc 
+%     end
+%     
+%     %replace by guilayer.updateLayerField??
+%     
+%     %update filtertable
+%     
+%     layergui.children.filterTableGui.setGuiParameters(filtertable);
+%     %update histslider
+% %     layergui.children.histgui.selectedField_callback(thisfield);
+%     
+%     %copy filter
+%     obj.locData.layer(k).filter=filterh;
+%     obj.locData.layer(k).groupfilter=gfilterh;
+    
+
+end
+
+end
 
 function render_colormode_callback(object,data,obj)
 p=obj.getAllParameters;
@@ -374,6 +471,7 @@ end
 p=obj.getSingleGuiParameter('renderfield');
 field=p.selection;
 v=obj.locData.getloc(field,'layer',obj.layer).(field);
+if ~isempty(v)
 obj.locData.loc.colorfield=obj.locData.loc.(field);
 obj.locData.grouploc.colorfield=obj.locData.grouploc.(field);
 q=myquantilefast(v,[0.01,0.99]);
@@ -385,6 +483,7 @@ obj.colorrange.maxcall(p.Value)=maxv;
 obj.guihandles.colorfield_min.String=num2str(minv);
 obj.guihandles.colorfield_max.String=num2str(maxv);
 % render_colormode_callback(object,0,obj)      
+end
 obj.updateLayerField('render_colormode');
 obj.updateLayerField('renderfield');
 obj.updateLayerField('colorfield_min');
@@ -429,18 +528,18 @@ case 'Other'
     
 otherwise
     layerp=obj.getPar(obj.layerprefix);
-    par=renderpardialog(layerp);
+    [par,settings]=renderpardialog(layerp);
     if ~isempty(par)
        layerp=copyfields(layerp,par);
        obj.setPar(obj.layerprefix,layerp)       
-       if par.copyall
-           nl=obj.getPar('numberOfLayers');
-           for k=1:nl
-               layerp=obj.getPar('','layer',k);
-               layerp.rec_addpar=par;
-               obj.setPar('',layerp,'layer',k)
-           end
-       end
+%        if par.copyall
+%            nl=obj.getPar('numberOfLayers');
+%            for k=1:nl
+%                layerp=obj.getPar('','layer',k);
+%                layerp=copyfields(layerp,settings);
+%                obj.setPar('',layerp,'layer',k)
+%            end
+%        end
     end
 end
 end
@@ -570,7 +669,7 @@ end
 
 
 
-function paro=renderpardialog(par,default)
+function [paro,settings]=renderpardialog(par,default)
 if nargin==0 || isempty(par)
     par.mingaussnm=3;
     par.mingausspix=.7;
@@ -585,8 +684,8 @@ if nargin<2||~default
     {'min sigma Gauss (nm)';'mingaussnm'}, par.mingaussnm,...
     {'min sigma Gauss (pix)';'mingausspix'}, par.mingausspix,...
     {'factor Gauss';'gaussfac'}, par.gaussfac,...
-    {'gamma image';'gamma'}, par.gamma,...
- {'copy to all cahnnels';'copyall'},false);
+    {'gamma image';'gamma'}, par.gamma); %,...
+%  {'copy to all cahnnels';'copyall'},false);
 
 if strcmpi(button,'ok')
     par=addFields(par,settings);
@@ -597,6 +696,7 @@ end
 else
     paro=par;
 end
+paro.copyall=false;
 end
 
 
@@ -655,13 +755,13 @@ pard.externalrender.TooltipString='External renderer';
 pard.intensitytxt.object=struct('Style','text','String','Intensity:');
 pard.intensitytxt.position=[3,p1];
 pard.intensitytxt.Width=w1;  
-pard.intensitytxt.TooltipString='how to render image. DL is diffraction limited';
+pard.intensitytxt.TooltipString='How to normalize every localization: normal: Integral=1, photons: total photons, blinks: number of connected localizations';
 pard.intensitytxt.Optional=true;
 
 pard.intensitycoding.object=struct('Style','popupmenu','String',{{'normal','photons','blinks'}});
 pard.intensitycoding.position=[3,p2];
 pard.intensitycoding.Width=w2;
-pard.intensitycoding.TooltipString='Intensity of each localization';
+pard.intensitycoding.TooltipString=pard.intensitytxt.TooltipString;
 pard.intensitycoding.Optional=true;
 
 pard.parbutton.object=struct('Style','pushbutton','String','render par');
@@ -670,15 +770,17 @@ pard.parbutton.Width=w3;
 pard.parbutton.TooltipString='Additional render paramters';
 pard.parbutton.Optional=true;
 
-pard.colortxt.object=struct('Style','text','String','Color:');
+pard.colortxt.object=struct('Style','text','String','Colormode:');
 pard.colortxt.position=[4,p1];
 pard.colortxt.Width=w1;  
-pard.colortxt.TooltipString='how to render image. DL is diffraction limited';
+
 
 pard.render_colormode.object=struct('Style','popupmenu','String',{obj.guiPar.srmodes}); 
 pard.render_colormode.position=[4,p2];
 pard.render_colormode.Width=w2;
 pard.render_colormode.TooltipString=sprintf('normal: intensity coded, z: z color coded, \n param: select field which to color code');
+
+pard.colortxt.TooltipString=pard.render_colormode.TooltipString;
 
 pard.renderfield.object=struct('Style','popupmenu','String','field');            
 pard.renderfield.position=[4,p3];
@@ -833,7 +935,11 @@ pard.shiftxy_max.Width=.5;
 pard.shiftxy_max.TooltipString=pard.shiftxyb.TooltipString;
 pard.shiftxy_max.Optional=true;
 
-
+pard.copyalllayers_button.object=struct('Style','pushbutton','String','-> all L');
+pard.copyalllayers_button.position=[8.5,3.4];
+pard.copyalllayers_button.Width=.6;
+pard.copyalllayers_button.TooltipString='Copy these parameters to all layers';
+pard.copyalllayers_button.Optional=true;
 
 pard.default_button.object=struct('Style','pushbutton','String','Default');
 pard.default_button.position=[8.5,4];

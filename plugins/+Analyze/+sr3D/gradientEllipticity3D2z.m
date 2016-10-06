@@ -19,12 +19,21 @@ classdef gradientEllipticity3D2z<interfaces.DialogProcessor
             end
             epsl=log(locs.gradient3Dellipticity);
             
-            b=p.fitpol;
-            z=b(1)+b(2)*epsl;
-            obj.locData.loc.znm=-z*1000*p.refractiveIndexMismatch;
+            switch p.fitmode.selection
+                case 'Linear fit'
+                    b=p.fitpol;
+                    z=b(1)+b(2)*epsl;
+
+                otherwise
+                    l=load(p.calfile);
+                    fitp=l.outforfit.polynomial;
+                    z=fitp(epsl);
+                    
+                    
+            end
+            obj.locData.loc.znm=z*1000*p.refractiveIndexMismatch;
             obj.locData.regroup;
             obj.setPar('locFields',fieldnames(obj.locData.loc))
-            
         end
         function pard=guidef(obj)
             pard=guidef;
@@ -38,13 +47,17 @@ fn=obj.guihandles.calfile.String;
 [f,p]=uigetfile(fn);
 if f
 l=load([p f]);
-txt=sprintf([num2str(l.outforfit(1)) '\t' num2str(l.outforfit(2))]); 
+txt=sprintf([num2str(l.outforfit.linear(1)) '\t' num2str(l.outforfit.linear(2))]); 
 obj.setPar('fit_gradient3Dellipticity',(txt))
 obj.guihandles.calfile.String=[p f];
 end
 end
 
 function pard=guidef
+
+pard.fitmode.object=struct('String',{{'Polynomial fit from file', 'Linear fit'}},'Style','popupmenu');
+pard.fitmode.position=[1,1];
+pard.fitmode.Width=2;
 
 pard.pol_check.object=struct('String','linear fit:','Style','text');
 pard.pol_check.position=[2,1];
@@ -55,10 +68,11 @@ pard.fitpol.object=struct('Style','edit','String','-.055 .35');
 pard.fitpol.position=[2,2];
 pard.fitpol.Width=2;
 
-pard.t1.object=struct('Style','edit','String','refractive Index Mismatch factor (<=1)'); 
+pard.t1.object=struct('Style','text','String','refractive Index Mismatch factor (<=1)'); 
 pard.t1.position=[3,1];
+pard.t1.Width=2;
 pard.refractiveIndexMismatch.object=struct('Style','edit','String','.8'); 
-pard.refractiveIndexMismatch.position=[3,2];
+pard.refractiveIndexMismatch.position=[3,3];
 
 pard.calfile.object=struct('Style','edit','String','settings/cal_3DAcal.mat');
 pard.calfile.position=[4,1];

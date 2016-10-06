@@ -51,7 +51,9 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                     else
                         fnn=strrep(fn,'fitpos','driftc_sml');
                     end
-                    lochere.savelocs(fnn); 
+                    if p.save_dc
+                        lochere.savelocs(fnn); 
+                    end
                     obj.locData.loc.xnm(~badind)=lochere.loc.xnm;
                     obj.locData.loc.ynm(~badind)=lochere.loc.ynm;
                 end
@@ -62,7 +64,7 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                 if length(locs.xnm)<100
                     locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','all');
                 end
-                p.maxframeall=max(locs.frame);
+                p.maxframeall=max(obj.locData.loc.frame);
                 p.framestart=p.layer1_.frame_min;
                 p.framestart=max(min(locs.frame),(p.layer1_.frame_min));
                 p.framestop=min(p.layer1_.frame_max,p.maxframeall);
@@ -84,7 +86,9 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                     fnn=strrep(fn,'fitpos','driftc_sml');
                 end
 %                 fnn=strrep(fn,'_sml','_driftc_sml');
-                obj.locData.savelocs(fnn);   
+                if p.save_dc
+                    obj.locData.savelocs(fnn); 
+                end
                 obj.locData.regroup;
                 
             end
@@ -105,7 +109,8 @@ if p.correctxy
     drift=copyfields(drift,driftxy,{'x','y'});
 end
 if ~isempty(locs.znm)&&p.correctz
-    [driftz,driftinfoz]=finddriftfeatureZ(locs,p);
+    locsnew=copyfields(locs,applydriftcorrection(drift,locs),{'xnm','ynm'});
+    [driftz,driftinfoz]=finddriftfeatureZ(locsnew,p);
     drift=copyfields(drift,driftz,'z');
      driftinfo=copyfields(driftinfo,driftinfoz);
      fieldc={'xnm','ynm','znm'};
@@ -222,6 +227,11 @@ pard.drift_individual.object=struct('String','correct every file individually','
 pard.drift_individual.position=[8,1];
 pard.drift_individual.Width=2;
 pard.drift_individual.Optional=true;
+
+pard.save_dc.object=struct('String','Save driftcorrected SML','Style','checkbox','Value',1);
+pard.save_dc.position=[8,3];
+pard.save_dc.Width=2;
+pard.save_dc.Optional=true;
 
 pard.plugininfo.name='drift correctiom X,Y,Z';
 pard.plugininfo.type='ProcessorPlugin';
