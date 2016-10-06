@@ -330,20 +330,20 @@ classdef Viewer3DV01<interfaces.DialogProcessor
            
             ph.sr_roihandle=obj.getPar('sr_roihandle');       
             ph.rangex=rx;
-            
-            if group(1)
-                [loc,indu,sortind]=getlocrot('ungrouped','inlayeru');  
-               
-            end
-            
-            if group(2)
-                [locg,indg,sortindg]=getlocrot('grouped','inlayerg');
-%                 locg.ballradius=0*locg.xnmline+p.transparencypar(2);
-            end
-           
-            if sum(indg)==0&&sum(indu)==0
-                return
-            end
+%             
+%             if group(1)
+%                 [loc,indu,sortind]=getlocrot('ungrouped','inlayeru');  
+%                
+%             end
+%             
+%             if group(2)
+%                 [locg,indg,sortindg]=getlocrot('grouped','inlayerg');
+% %                 locg.ballradius=0*locg.xnmline+p.transparencypar(2);
+%             end
+%            
+%             if sum(indg)==0&&sum(indu)==0
+%                 return
+%             end
             %transparency
             transparency.parameter=p.transparencypar;
             transparency.mode=p.transparencymode.Value;
@@ -366,6 +366,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                         rp=[];
                     end
                      pr=copyfields(copyfields(copyfields(p,pl),ph),rp);
+                     loc=getlocrot(k,pl); 
                      if stereo
                          pr=getstereosettings(pr,1);
                          layer1(k).images=renderplotlayer(pr,1);
@@ -449,29 +450,33 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             end
             function images=renderplotlayer(pr,stereochannel)
                 if stereochannel>0
-                    if pr.groupcheck
-                        locg.x=locg.(['x' num2str(stereochannel)]);
-                    else
+%                     if pr.groupcheck
+%                         locg.x=locg.(['x' num2str(stereochannel)]);
+%                     else
                         loc.x=loc.(['x' num2str(stereochannel)]);
-                    end
+%                     end
                 end
-                 if pr.groupcheck
-                        ind=find(layerson==k);
-                        indroi=locg.inlayerg{ind};
-                        indh=(indroi(indg));
-                        images.srimage=renderSMAP(locg,pr,k,indh(sortindg),transparency);
-                 else 
-                     ind=find(layerson==k);
-                     indroi=loc.inlayeru{ind};
-                     indh=(indroi(indu));
-                     images.srimage=renderSMAP(loc,pr,k,indh(sortind),transparency);
-                 end
+                pr.shiftxy_min=0;
+                pr.shiftxy_max=0;
+                indin=true(length(loc.x),1);
+%                  if pr.groupcheck
+%                         ind=find(layerson==k);
+%                         indroi=locg.inlayerg{ind};
+%                         indh=(indroi(indg));
+%                         images.srimage=renderSMAP(locg,pr,k,indh(sortindg),transparency);
+%                  else 
+%                      ind=find(layerson==k);
+%                      indroi=loc.inlayeru{ind};
+%                      indh=(indroi(indu));
+                     images.srimage=renderSMAP(loc,pr,k,indin,transparency);
+%                  end
                 images.finalImages=drawerSMAP(images.srimage,pr);        
                 
             end
-            function [loc,indu,sortind]=getlocrot(grouping,inlayer)
+            function [loc,indu,sortind]=getlocrot(layer,pl)
 
-                [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},inlayer,'numberInGroup','phot'},'position','roi','grouping',grouping,'layer',layerson);   
+                [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},'numberInGroup','phot'},...
+                    'position','roi','layer',layer,'shiftxy',[pl.shiftxy_min,pl.shiftxy_max]);   
                 if strcmp(p.animatemode.selection,'Translate')&&strcmp(p.raxis.selection,'vertical')
                     thetaoffset=pi/2;
 %                     induf=find(indu);

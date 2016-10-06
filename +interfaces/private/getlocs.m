@@ -17,6 +17,7 @@ function [locsout,indcombined,hroio]=getlocs(locData,fields,varargin)
 
 %'removeFilter': cell array of filter names to remove 
 %'within', indices which localizations to consider.
+%'shiftxy', shifts x and y for xnmline by specified vector
 
  p=roiparser(varargin); 
 if ischar(fields)
@@ -167,7 +168,7 @@ else
         case {'all','default'}
             indpos=true(size(locs.xnm));
         case 'roi'
-            [indpos,hroio,strucout]=getinroi(locData,locs.xnm,locs.ynm);
+            [indpos,hroio,strucout]=getinroi(locData,locs.xnm,locs.ynm,p.shiftxy);
             if isfield(strucout,'xnmline')
 %                 locs.xnmline=zeros(size(locs.xnm));
 %                 locs.ynmline=zeros(size(locs.ynm));
@@ -267,7 +268,7 @@ function ind=grouped2ungrouped(obj,indcombined)
 ind=indcombined(obj.loc.groupindex);
 end
 
-function [indg,hroio,strucout]=getinroi(obj,vx,vy)
+function [indg,hroio,strucout]=getinroi(obj,vx,vy,shiftxy)
 %obj=locData
 hroi=obj.getPar('sr_roihandle');
 % hroi=obj.parameters.roihandle;
@@ -282,7 +283,7 @@ if isa(hroi,'imroi')&&isvalid(hroi)
 
         len=sqrt(sum(dpol.^2))*1000/2;
         midp=mean(pol,1)*1000;
-        [xr,yr]=rotcoord(vx-midp(1),vy-midp(2),alpha);
+        [xr,yr]=rotcoord(vx-midp(1)+shiftxy(1),vy-midp(2)+shiftxy(2),alpha);
 %         xs=vx-midp(1);ys=vy-midp(2);
 %         xr=xs*cos(alpha)+ys*sin(alpha);
 %         yr=ys*cos(alpha)-xs*sin(alpha);
@@ -337,6 +338,7 @@ addParameter(p,'filenumber',[],@isnumeric);
 addParameter(p,'position','default');
 addParameter(p,'removeFilter',{});
 addParameter(p,'within',[]);
+addParameter(p,'shiftxy',[0,0]);
 parse(p,args{:});
 pres=p.Results;
 if ~isempty(fieldnames(p.Unmatched))
