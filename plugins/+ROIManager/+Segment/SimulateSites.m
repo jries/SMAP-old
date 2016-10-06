@@ -13,11 +13,12 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
            p.maxframe=100000;
            locs=locsfrompos(posreappear,p);
            locst=singlelocs(locs);
-           figure(88);plot(locst.xnm,locst.ynm,'+',locst.xnm_gt,locst.ynm_gt,'o')
+%            figure(88);plot(locst.xnm,locst.ynm,'+',locst.xnm_gt,locst.ynm_gt,'o')
            obj.locData.addfile(['simulated_' num2str(obj.locData.files.filenumberEnd)]);
            obj.locData.addLocData(locst);
            obj.locData.sort('filenumber','frame');
            initGuiAfterLoad(obj);
+           
            
            se=obj.locData.SE;
            cell=interfaces.SEsites;
@@ -32,9 +33,14 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
                thissite.info.filenumber=cell.info.filenumber;
                 % thissite.cellnumber=sitepar.currentcell.number;
         %         thissite.number=sitepar.sitelist.cellnumber+1;
-                se.addSite(thissite)
+                se.addSite(thissite);
            end
-            
+           try
+           se.processors.preview.updateFilelist;
+           se.processors.preview.updateCelllist;
+           se.processors.preview.updateSitelist; 
+           catch
+           end
           out=[];
         end
         function pard=guidef(obj)
@@ -97,36 +103,96 @@ obj.guihandles.labeling_efficiency.Visible=txt;
 obj.guihandles.t_labelingefficiency.Visible=txt;
 obj.guihandles.tif_density.Visible=tif;
 obj.guihandles.tif_numbermode.Visible=tif;
+obj.guihandles.tif_imagesizet.Visible=tif;
+obj.guihandles.tif_imagesize.Visible=tif;
 end
 
 function [locs,possites]=getlabels(obj,p)
 [~,~,ext]=fileparts(p.coordinatefile);
+image=[];
+locsall=[];
 switch ext
     case {'.txt','.csv'}
-        
+        plocs=readtable(p.coordinatefile);
+        plocsa=table2array(plocs);
+        locsall.x=plocsa(:,1);
+        locsall.y=plocsa(:,2);
+        if size(plocsa,2)>2
+            locsall.z=plocsa(:,3);
+        end
+        locsall=copyfields(locsall,plocs,{'x','y','z'});
     case {'.tif','.png'}
-        locs=getlabelstiff(obj,p);
-        return
+%         locs=getlabelstiff(obj,p);
+        image=imread(p.coordinatefile);
+        img=sum(image,3)/size(image,3); %binarize
+        image=double(img)/255;
+        
     case '.mat'
         l=load(p.coordinatefile);
-        locsall=copyfields([],l,{'x','y'});
+        
+        if isfield(l,'image')
+            image=l.image;
+        else
+            locsall=copyfields([],l,{'x','y','z'});
+        end
+    case '.m'
+        l=eval(p.coordinatefile);
+        if isfield(l,'image')
+            image=l.image;
+        else
+            locsall=copyfields([],l,{'x','y','z'});
+        end
+    otherwise
+        display('file not identified selected')
+        return
 end
 
-numberofrows=10;
-distsites=p.se_sitefov;
 
+distsites=p.se_sitefov;
+numberofrows=ceil(64000/p.se_sitefov);
 % numeroflines=ceil(p.numberofsites/numberofrows);
 for k=p.numberofsites:-1:1
     xh=mod(k-1,numberofrows);
     yh=ceil(k/numberofrows);
-    
-    locs(k)=labelremove(locsall,p.labeling_efficiency);
+    if ~isempty(image)
+        locs(k)=locsfromimage(image,p);
+    else
+        locs(k)=labelremove(locsall,p.labeling_efficiency);
+    end
     numlocs=length(locs(k).x);
     locs(k).x=reshape(locs(k).x,numlocs,1)+xh*distsites;
     locs(k).y=reshape(locs(k).y,numlocs,1)+yh*distsites;
     possites(k).x=xh*distsites;
     possites(k).y=yh*distsites;
 end
+end
+
+
+function locs=locsfromimage(image,p)
+
+if p.tif_numbermode.Value==1
+    density=p.tif_density;
+else
+    %calcualte density from number of locs
+%     pdensity=mean(image(:))/(p.tif_imagesize/1000)^2;
+    density=p.tif_density/mean(image(:))/(p.tif_imagesize/1000)^2;
+end
+numtot=round(density*(p.tif_imagesize/1000)^2);
+
+x=rand(numtot,1);
+y=rand(numtot,1);
+
+
+xpix=ceil(x*size(image,1));
+ypix=ceil(y*size(image,2));
+linind=sub2ind(size(image),xpix,ypix);
+keep=image(linind)>rand(numtot,1);
+
+locs.x=(x(keep)-0.5)*p.tif_imagesize;
+locs.y=(y(keep)-0.5)*p.tif_imagesize;
+% pixf=size(image,1)/(p.tif_imagesize/1000);
+% densitypixel=density/pixf^2;
+
 end
 
 function locs=labelremove(locin,p)
@@ -194,13 +260,21 @@ pard.coordinatefile.Width=3;
 pard.load_button.object=struct('String','Load','Style','pushbutton','Callback',{{@load_callback,obj}});
 pard.load_button.position=[1,4];
 
-pard.tif_numbermode.object=struct('String',{{'Density (locs/um^2)','Number of locs'}},'Style','popupmenu');
-pard.tif_numbermode.Width=2;
+pard.tif_numbermode.object=struct('String',{{'Density (labels/um^2)','Number of labels'}},'Style','popupmenu');
+pard.tif_numbermode.Width=1.5;
 pard.tif_numbermode.position=[2,1];
 
 pard.tif_density.object=struct('String','100','Style','edit');
-pard.tif_density.position=[2,3];
+pard.tif_density.position=[2,2.5];
+pard.tif_density.Width=0.5;
 
+pard.tif_imagesizet.object=struct('String','Image width (nm)','Style','text');
+pard.tif_imagesizet.Width=1.5;
+pard.tif_imagesizet.position=[2,3];
+
+pard.tif_imagesize.object=struct('String','300','Style','edit');
+pard.tif_imagesize.position=[2,4.5];
+pard.tif_imagesize.Width=0.5;
 
 pard.t_labelingefficiency.object=struct('String','Labeling efficiency','Style','text');
 pard.t_labelingefficiency.position=[3,1];
@@ -210,7 +284,7 @@ pard.labeling_efficiency.object=struct('String','.5','Style','edit');
 pard.labeling_efficiency.Width=1;
 pard.labeling_efficiency.position=[3,3];
 
-pard.t2.object=struct('String','mean number of re-activations','Style','text');
+pard.t2.object=struct('String','mean re-activations','Style','text');
 pard.t2.position=[4,1];
 pard.t2.Width=1.5;
 
