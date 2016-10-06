@@ -571,7 +571,7 @@ else
 %     controlVisibility(hgui,fh,'on')
     zh={'znmb','znm_min','znm_max','locprecznmb','locprecznm_min','locprecznm_max'};
     znoth={'PSFxnmb','PSFxnm_min','PSFxnm_max'};
-    znm=obj.locData.getloc({'znm'},'position','all');
+    znm=obj.locData.getloc({'znm'},'layer',obj.layer,'position','all');
     
     if ~isempty(znm)&&~isempty(znm.znm)&&any(znm.znm~=0)
         obj.fieldvisibility('on',zh);
