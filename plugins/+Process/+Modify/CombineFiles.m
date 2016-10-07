@@ -39,6 +39,8 @@ classdef CombineFiles<interfaces.DialogProcessor
             %remove second file.
             obj.locData.files.file(fnt)=[];
             obj.locData.files.filenumberEnd=obj.locData.files.filenumberEnd-1;
+            %clear SE
+            obj.locData.SE.removeFile(fnt);
             %update filelist
             obj.locData.regroup;
             initGuiAfterLoad(obj)
@@ -57,7 +59,9 @@ f2=p.file2.selection;
 re='[^_]*';
 [i1,i2]=regexp(f1,re);
 for k=1:length(i1)
-    f2=regexprep(f2,f1(i1(k):i2(k)),'');
+    if i2(k)-i1(k)>2
+    f2=strrep(f2,f1(i1(k):i2(k)),'');
+    end
 end
 
 fo=['C' num2str(p.channel2) '_' f2 'C' num2str(p.channel1) '_' f1];
