@@ -17,7 +17,7 @@ function [locsout,indcombined,hroio]=getlocs(locData,fields,varargin)
 
 %'removeFilter': cell array of filter names to remove 
 %'within', indices which localizations to consider.
-%'shiftxy', shifts x and y for xnmline by specified vector
+%'shiftxy', shifts x, y  and z by specified vector
 
  p=roiparser(varargin); 
 if ischar(fields)
@@ -169,14 +169,16 @@ else
             indpos=true(size(locs.xnm));
         case 'roi'
             [indpos,hroio,strucout]=getinroi(locData,locs.xnm,locs.ynm,p.shiftxy);
+            
             if isfield(strucout,'xnmline')
+                p.shiftxy(1:2)=0;
 %                 locs.xnmline=zeros(size(locs.xnm));
 %                 locs.ynmline=zeros(size(locs.ynm));
 %                 locs.xnmline(indpos)=strucout.xnmline;
 %                 locs.ynmline(indpos)=strucout.ynmline;
                locs.xnmline=strucout.xnmline;
                locs.ynmline=strucout.ynmline;
-            end
+            end 
         case 'fov'
             pos=locData.getPar('sr_pos');
             sr_size=locData.getPar('sr_size');
@@ -215,7 +217,7 @@ end
  for k=1:length(p.fields)
      field=p.fields{k};
      if isfield(locs,field)
-         vh=(locs.(field));
+         vh=addshift(locs.(field),field,p.shiftxy);
          
 %          vh3=vh(indf);
          vh2=vh(indcombined);
@@ -240,6 +242,24 @@ end
  end            
 
  
+end
+
+function out=addshift(in,field,shift)
+out=in;
+switch field
+    case 'xnm'
+        if shift(1)~=0
+            out=in+shift(1);
+        end
+    case 'ynm'
+        if shift(2)~=0
+            out=in+shift(1);
+        end
+    case 'znm'
+        if length(shift)>2&&shift(3)~=0
+            out=in+shift(1);
+        end      
+end
 end
 function ind=getindices(obj,indcombined,isgrouped)
     if isgrouped
@@ -338,7 +358,7 @@ addParameter(p,'filenumber',[],@isnumeric);
 addParameter(p,'position','default');
 addParameter(p,'removeFilter',{});
 addParameter(p,'within',[]);
-addParameter(p,'shiftxy',[0,0]);
+addParameter(p,'shiftxy',[0,0,0]);
 parse(p,args{:});
 pres=p.Results;
 if ~isempty(fieldnames(p.Unmatched))

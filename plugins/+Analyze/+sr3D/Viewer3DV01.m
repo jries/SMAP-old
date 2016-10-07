@@ -481,7 +481,8 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             function [loc,indu,sortind]=getlocrot(layer,pl)
 
                 [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},'numberInGroup','phot'},...
-                    'position','roi','layer',layer,'shiftxy',[pl.shiftxy_min,pl.shiftxy_max]);   
+                    'position','roi','layer',layer,'shiftxy',[pl.shiftxy_min,pl.shiftxy_max,pl.shiftxy_z]);   
+                loc.znm=loc.znm+pl.shiftxy_z;
                 if strcmp(p.animatemode.selection,'Translate')&&strcmp(p.raxis.selection,'vertical')
                     thetaoffset=pi/2;
 %                     induf=find(indu);

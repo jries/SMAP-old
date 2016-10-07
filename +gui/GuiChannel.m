@@ -569,7 +569,7 @@ if strcmp(p.rendermode.selection,'tiff')||strcmp(p.rendermode.selection,'raw') %
 else
     obj.fieldvisibility('on',fh);
 %     controlVisibility(hgui,fh,'on')
-    zh={'znmb','znm_min','znm_max','locprecznmb','locprecznm_min','locprecznm_max'};
+    zh={'znmb','znm_min','znm_max','locprecznmb','locprecznm_min','locprecznm_max','shiftxy_z'};
     znoth={'PSFxnmb','PSFxnm_min','PSFxnm_max'};
     znm=obj.locData.getloc({'znm'},'layer',obj.layer,'position','all');
     
@@ -918,7 +918,7 @@ pard.frame_max.position=[6,4.5];
 pard.frame_max.Width=.5;
 pard.frame_max.Optional=true;
 
-pard.shiftxyb.object=struct('Style','pushbutton','String','shift x,y');
+pard.shiftxyb.object=struct('Style','pushbutton','String','shift xyz');
 pard.shiftxyb.position=[7,3.4];
 pard.shiftxyb.Width=.6;
 pard.shiftxyb.TooltipString='Shift reconstructed image by this value (nm). Useful to correct for chromatic aberrations.';
@@ -926,14 +926,20 @@ pard.shiftxyb.Optional=true;
 
 pard.shiftxy_min.object=struct('Style','edit','String','0');
 pard.shiftxy_min.position=[7,4];
-pard.shiftxy_min.Width=.5;
+pard.shiftxy_min.Width=1/3;
 pard.shiftxy_min.TooltipString=pard.shiftxyb.TooltipString;
 pard.shiftxy_min.Optional=true;
 pard.shiftxy_max.object=struct('Style','edit','String','0');
-pard.shiftxy_max.position=[7,4.5];
-pard.shiftxy_max.Width=.5;
+pard.shiftxy_max.position=[7,4+1/3];
+pard.shiftxy_max.Width=1/3;
 pard.shiftxy_max.TooltipString=pard.shiftxyb.TooltipString;
 pard.shiftxy_max.Optional=true;
+
+pard.shiftxy_z.object=struct('Style','edit','String','0');
+pard.shiftxy_z.position=[7,5-1/3];
+pard.shiftxy_z.Width=1/3;
+pard.shiftxy_z.TooltipString=pard.shiftxyb.TooltipString;
+pard.shiftxy_z.Optional=true;
 
 pard.copyalllayers_button.object=struct('Style','pushbutton','String','-> all L');
 pard.copyalllayers_button.position=[8.5,3.4];
