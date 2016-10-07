@@ -61,7 +61,7 @@ colormap  hot
 h = imfreehand;
 bw=createMask(h);
 bw(1,:)=false;bw(:,1)=false;
-pf=file.image.parameters.pixrec;
+pf=file.image.parameters.sr_pixrec;
 sf=size(file.image.image);
 end
 % end
