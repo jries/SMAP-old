@@ -24,10 +24,10 @@ pard.t1.position=[1,1];
 pard.cutoff.object=struct('String','.04','Style','edit');
 pard.cutoff.position=[1,2];
 
-pard.t2.object=struct('String','sigmaNMS','Style','text');
-pard.t2.position=[2,1];
-pard.sigmaNMS.object=struct('String','5','Style','edit');
-pard.sigmaNMS.position=[2,2];
+% pard.t2.object=struct('String','sigmaNMS','Style','text');
+% pard.t2.position=[2,1];
+% pard.sigmaNMS.object=struct('String','5','Style','edit');
+% pard.sigmaNMS.position=[2,2];
 pard.t3.object=struct('String','diameterNPC','Style','text');
 pard.t3.position=[3,1];
 pard.diameterNPC.object=struct('String','110','Style','edit');
@@ -69,7 +69,7 @@ end
 %%
 
 cutoff=p.cutoff;
-sigmaNMS=p.sigmaNMS;
+sigmaNMS=3;%p.sigmaNMS;
 diameterNPC=p.diameterNPC; %nm
 rim=p.rim; %nm
 
@@ -79,9 +79,9 @@ cells=se.cells;
 pixrec=cells(1).image.parameters.sr_pixrec;
 
 %make kernel for ring filter
-rRingO=double((diameterNPC/2+rim)/pixrec)
+rRingO=double((diameterNPC/2+rim)/pixrec);
 hfilterO=fspecial('disk',rRingO);
- rRingI=double(max(1,(diameterNPC/2-rim)/pixrec))
+ rRingI=double(max(1,(diameterNPC/2-rim)/pixrec));
 hfilterI=fspecial('disk',rRingI);
 
 si=size(hfilterI);
@@ -106,7 +106,10 @@ for cn=1:length(cells)
     cell=cells(cn);
 %     srim=sum(double(cell.image.image),3);
     srim=cell.image.layers(1).images.rawimage.image;
-    srims=size(srim);
+    for k=2:length(cell.image.layers)
+        srim=srim+cell.image.layers(k).images.rawimage.image;
+    end
+%     srims=size(srim);
 
 
 
