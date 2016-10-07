@@ -233,6 +233,9 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
                 
 %                  display('draw site')
     %             p1=obj.locData.parameters;
+                if length(site.pos)<3
+                    site.pos(3)=0;
+                end
                 p1.sr_pos=site.pos;
                 p1.sr_size=ones(2,1)*obj.getPar('se_sitefov')/2;
                 p1.sr_pixrec=obj.getPar('se_sitepixelsize');
@@ -426,7 +429,13 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
                         locz.sx=locz.locprecnm;locz.sy=locz.locprecznm;
                         prz=pr;
                         prz.normalizeFoV=[];
-                        prz.sr_pos(2)=prz.sr_pos(3);prz.sr_size(2)=prz.sr_size(3);
+                        if length(prz.sr_pos)<3
+                            prz.sr_pos(2)=0;
+                        else
+                            
+                            prz.sr_pos(2)=prz.sr_pos(3);
+                        end
+                        prz.sr_size(2)=prz.sr_size(3);
                         rawimagez=renderSMAP(locz,prz,k);
                         layersz(k).images.finalImages=drawerSMAP(rawimagez,prz);
                         plotz=true;

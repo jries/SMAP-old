@@ -119,8 +119,8 @@ for cn=1:length(cells)
     % imfI=imfilter(imsrrem,hfilterI);
     imfD=imfilter(sqrt(srim),h);
 
-    hfilterGauss=fspecial('gauss',21,5);
-    hfilterGauss2=fspecial('gauss',50,1.5*rRingO);
+    hfilterGauss=fspecial('gauss',21,max(1,0.7*rRingO));
+    hfilterGauss2=fspecial('gauss',51,max(2,2*rRingO));
     srimf=imfilter(imfD,hfilterGauss)-imfilter(imfD,hfilterGauss2);
 % srimf=imfD;
 %     h=fspecial('gaussian',2*sigma,sigma);
@@ -180,7 +180,7 @@ ysite=ysite(indgood);
 
     for k=1:length(xsite)
         thissite=interfaces.SEsites;
-        thissite.pos=[xsite(k) ysite(k)];
+        thissite.pos=[xsite(k) ysite(k) 0];
         thissite.info.cell=cell.ID;
         thissite.info.filenumber=cell.info.filenumber;
         % thissite.cellnumber=sitepar.currentcell.number;
