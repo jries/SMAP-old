@@ -383,7 +383,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                          layer2(k).images=renderplotlayer(pr,2);
                      else
                         layer(k).images=renderplotlayer(pr,0);
+                        if ~isempty(layer(k).images.finalImages.imax)
                         obj.currentimage.imax(k)=layer(k).images.finalImages.imax;
+                        end
                      end
                 end
             end
