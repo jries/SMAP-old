@@ -56,6 +56,9 @@ end
 if sum(isfinite(data(:))) < 4
     warning('ROBUSTMEAN:INSUFFICIENTDATA',...
         'Less than 4 data points!')
+    if isempty(dim)
+        dim=1;
+    end
     finalMean = nanmean(data,dim);
     stdSample = NaN(size(finalMean));
     inlierIdx = find(isfinite(data));
