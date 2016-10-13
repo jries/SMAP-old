@@ -12,7 +12,8 @@ function [locsout,indcombined,hroio]=getlocs(locData,fields,varargin)
 %'channels': double vector of channels
 %'filenumber': double vector of filenumbers
 %'position': 'all' (default),'roi','fov': position filter
-%'position': vector: [centerx, centery, widhtx widthy]
+%'position': vector: [centerx, centery, widhtx widthy] or [centerx,
+%centery,radius] for circular ROI
 %'layer': double number or vector of layers.
 
 %'removeFilter': cell array of filter names to remove 
@@ -160,9 +161,16 @@ end
  end
      
 if isnumeric(p.position)
-     pos=p.position(1:2);
+    pos=p.position(1:2);
+    if length(p.position)==4
         sr_size=p.position(3:4)/2;
         indpos=locs.xnm>pos(1)-sr_size(1) & locs.xnm<pos(1)+sr_size(1) & locs.ynm>pos(2)-sr_size(2) & locs.ynm<pos(2)+sr_size(2);
+    elseif length(p.position)==3
+        indpos=(locs.xnm-pos(1)).^2+(locs.ynm-pos(2)).^2<=p.position(3)^2;
+        
+    else
+        disp('wrong position parameter');
+    end
 else
     switch p.position
         case {'all','default'}
