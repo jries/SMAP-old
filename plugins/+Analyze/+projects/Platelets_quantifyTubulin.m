@@ -182,9 +182,9 @@ ylabel(ax2,'number of microtubules')
 
 
 if p.userroi
-    outside=mtangle<max(mtangle)/10;
+    outside=mtangle<max(mtangle)/8;
 else
-    outside=1;
+    outside=false(size(mtangle));
 end
 thetafraction= sum(~outside)/length(outside);
 
@@ -268,6 +268,12 @@ while exist([po filesep fn num2str(k) '.pdf'],'file')
 end
 fno=[po filesep fn num2str(k) '.pdf'];
 export_fig(gcf,fno,'-pdf');
+
+
+results={locsummeanr,mttotlenum,fitp(1),axs(1),axs(2),mean(mtangle(1:end-1)),mean(mtangle(~outside)),thetafraction};
+%calibration:locs / um, total MT length (um), radius, long axis, short
+%axis, mean number of MT per turn (from MT(phi)), mean number of MT per turn averaged over ROI only, fraction of angles in
+%ROI.
 end
 
 function outputfileb_callback(a,b,obj)

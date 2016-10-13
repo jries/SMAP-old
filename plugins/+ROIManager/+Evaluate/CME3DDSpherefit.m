@@ -1,4 +1,4 @@
-classdef CME3DDSpherefit<interfaces.SEEvaluationProcessor
+2583.8	68.1999	1104.6641	1140.7446	1076.3313	10.3653	0	classdef CME3DDSpherefit<interfaces.SEEvaluationProcessor
     properties
         savedevals
     end
