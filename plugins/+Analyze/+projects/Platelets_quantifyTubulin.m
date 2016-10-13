@@ -9,7 +9,12 @@ classdef Platelets_quantifyTubulin<interfaces.DialogProcessor
             obj.inputParameters={'sr_layerson','linewidth_roi','znm_min','znm_max','sr_pixrec','sr_pos','sr_size'};
             obj.showresults=true;
         end
-        
+%         function initGui(obj)
+%             lp=obj.guihandles.loclist.Position
+%             obj.guihandles.loclist.delete;
+%             h=uitable('Position',lp,'ColumnEditable',true,'ColumnName',[],'RowName',[]);
+%             d=cell(100,1)
+%         end
         function out=run(obj,p)           
             results=evalplatelet(obj,p);
             out.clipboard=results;
@@ -41,19 +46,20 @@ obj.guihandles.loclist.String=lls;
 end
 
 function remove_callback(a,b,obj,rem)
-p=obj.getSingleGuiParameter('loclist');
-if rem
-lls=p.String;
-lls(p.Value)=[];
-obj.calibrationlines(p.Value)=[];
-else
-    lls={''};
+% p=obj.guihandles.loclist;
+% if rem
+% lls=p.String;
+% lls(p.Value)=[];
+% obj.calibrationlines(p.Value)=[];
+% else
+%     lls={''};
     obj.calibrationlines=[];
-end
-p.String=lls;
-p.Value=max(min(p.Value,length(lls)),1);
+    obj.guihandles.loclist.String={''};
+% end
+% p.String=lls;
+% p.Value=max(min(p.Value,length(lls)),1);
 
-obj.setGuiParameters(struct('loclist',p));
+% obj.setGuiParameters(struct('loclist',p));
 end
 
 function results=evalplatelet(obj,p)
@@ -110,7 +116,7 @@ inring=bwf(linind);
 locsinring=sum(inring);
 
 % determine average number of locs/mt/um
-lls=p.loclist.String;
+lls=p.loclist;
 locsum=cellfun(@str2num,lls);
 locsummean=mean(locsum);
 locsummeanr=robustMean(locsum);
@@ -194,7 +200,7 @@ title(['total MT length (um): ' num2str(mttotlenum) ', fraction fitted: ' num2st
 
 ovax=obj.getPar('ov_axes');
 ovaxh=ovax.copy;
-f=figure('Position',[132 644 500 750]);
+f=figure('Position',[50 100 500 750]);
 subplot(3,2,1);
 axh=gca;
 ovaxh.Parent=f;
@@ -286,20 +292,42 @@ if f
     obj.setGuiParameters(struct('outputfile',[p f]));
 end
 end
+function loclist_callback(a,b,obj)
+locsstored=[obj.calibrationlines(:).locsperum];
+call=obj.calibrationlines;
+used=false(size(call));
+locslist=(obj.guihandles.loclist.String);
+for k=1:length(locslist)
+    locsum=str2double(locslist{k});
+    ind=find((round(locsum)==round(locsstored)&~used));
+    if ~isempty(ind) %already in list
+        used(ind(1))=true;
+    else %pasted: new data
+        call(end+1)=struct('pos',zeros(2),'locsperum',locsum,'string',num2str(locsum));
+        used(end+1)=true;
+        locsstored(end+1)=locsum;
+    end
+    
+end
+
+call(~used)=[];
+obj.guihandles.loclist.String={call(:).string};
+obj.calibrationlines=call;
+end
 
 function pard=guidef(obj)
 pard.addmt.object=struct('String','add single MT (locs/um)','Style','pushbutton','Callback',{{@addmt_callback,obj}});
 pard.addmt.position=[1,1];
 pard.addmt.Width=1.5;
 
-pard.loclist.object=struct('String',{{''}},'Style','listbox');
+pard.loclist.object=struct('String',{{''}},'Style','edit','Max',100,'Callback',{{@loclist_callback,obj}});
 pard.loclist.position=[4,1];
 pard.loclist.Width=1.5;
 pard.loclist.Height=3;
 
-pard.remove.object=struct('String','remove','Style','pushbutton','Callback',{{@remove_callback,obj,1}});
-pard.remove.position=[5,1];
-pard.remove.Width=.75;
+% pard.remove.object=struct('String','remove','Style','pushbutton','Callback',{{@remove_callback,obj,1}});
+% pard.remove.position=[5,1];
+% pard.remove.Width=.75;
 
 pard.clear.object=struct('String','clear','Style','pushbutton','Callback',{{@remove_callback,obj,0}});
 pard.clear.position=[5,1.75];

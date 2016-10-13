@@ -214,7 +214,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                         end
 %                         v=str2num(st);
 %                         testv=str2double(st(1));
-                        if ~((st(1)>='0'&&st(1)<='9') || st(1)=='-' || st(1)=='I' || st(1)=='i' || st(1)=='.')
+                        if iscell(st)|| (~((st(1)>='0'&&st(1)<='9') || st(1)=='-' || st(1)=='I' || st(1)=='i' || st(1)=='.'))
                             par=hfn.String;
                         else
                             v=str2double(st);
