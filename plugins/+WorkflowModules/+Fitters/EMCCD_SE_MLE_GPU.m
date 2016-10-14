@@ -208,7 +208,7 @@ switch fitmode
       
     otherwise
         roisize=11;
-        iterations=100;
+        iterations=200;
 end
 
 obj.setPar('loc_ROIsize',roisize);

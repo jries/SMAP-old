@@ -15,13 +15,15 @@ classdef calibrateAstig<interfaces.DialogProcessor
             if isfield(obj.locData.loc,'gradient3Dellipticity')
                 locs=obj.locData.getloc({'frame','gradient3Dellipticity'},'layer',1,'position','roi','removeFilter',{'PSFxnm','PSFynm'});
                 p.fileout=obj.locData.files(1).file.name;
-                out=calibrategradient3D(locs,p)  ;  
+                out=calibrategradient3D(locs,p,obj)  ;  
                 obj.setPar('fit_gradient3Dellipticity',(out))
             elseif isfield(obj.locData.loc,'PSFynm')
                 locs=obj.locData.getloc({'frame','PSFxnm','PSFynm'},'layer',1,'position','roi','removeFilter',{'PSFxnm','PSFynm'});
 
                 p.fileout=obj.locData.files(1).file.name;
-                calibrateAstig3D(locs,p)         
+
+                   
+                calibrateAstig3D(locs,p,obj)         
             else
                 error('no 3D data found')
             end
@@ -38,7 +40,7 @@ classdef calibrateAstig<interfaces.DialogProcessor
 end
 
 
-function ttxt=calibrategradient3D(locs,p)  
+function ttxt=calibrategradient3D(locs,p,obj)  
 global zt 
 framet=double(locs.frame);
 zt=framet*p.dz/1000;
@@ -101,12 +103,13 @@ switch button
         [f,p]=uiputfile(fn);
         if f
             save([p f],'outforfit')
+            obj.setPar('cal3D_file',[p f]);
         end
 end
 end
 
 
-function calibrateAstig3D(locs,p)
+function calibrateAstig3D(locs,p,obj)
 global zt sxf syf
 sxt=double(locs.PSFxnm)/p.cam_pixelsize_nm;syt=double(locs.PSFynm)/p.cam_pixelsize_nm;framet=double(locs.frame);
 % if p.reverse
@@ -123,6 +126,7 @@ plot(framet,sxt,'ro')
 hold on
 plot(framet,syt,'bo')
 hold off
+
 title('select range (two points)')
 [indi,y]=ginput(2);
 
@@ -148,6 +152,12 @@ plot(zt,syt,'b.')
 plot(z,sx,'ro')
 plot(z,sy,'bo')
 
+splinex=fit(zt,sxt,'smoothingspline');
+spliney=fit(zt,syt,'smoothingspline');
+outspline.x=splinex;
+outspline.y=spliney;
+plot(zt,splinex(zt),zt,spliney(zt))
+
 mpf=midpreal-midp;
 % parx= [d sx0 sy0 Ax Ay Bx By g mp]
 startp=[    0.3    1.0    1.0000  0   0        0         0  -0.307   -mpf];
@@ -162,7 +172,7 @@ fpy=fitp([1 3 5 7 8 9]);
 fpy(5)=-fpy(5);
 syf=sigmafromz(fpy,zt,B0);
 plot(zt,syf,'k')
-hold off
+% hold off
 axis tight
 ylabel('PSFx,PSFy')
 
@@ -170,19 +180,34 @@ ylabel('PSFx,PSFy')
 outforfit=real(fitp([2 4 5 6 7 8 1 3]));
 % initaxis(p.resultstabgroup,'sx^2-sy^2');
 outsx2sy2=fitsx2sy2(sx,sy,z,1);
+
+p.zall=zt;
+
+
+
+hold off
 % outsx2sy2=obj.outsx2sy2;
 button = questdlg('Is the fit good?','3D astigmatism bead calibration','Refit','Save','Cancel','Refit') ;
 switch button
     case 'Refit'
         calibrateAstig3D(locs,p)
     case 'Save'
+        % %spline calibration
+        if p.spline
+            outspline.s2z=gets2z(outspline.x,outspline.y,p);
+        end
         fn=[p.fileout(1:end-4) '_3DAcal.mat'];
         [f,p]=uiputfile(fn);
         if f
-            save([p f],'outforfit','outsx2sy2')
+            save([p f],'outforfit','outsx2sy2','outspline')
+            
+            obj.setPar('cal3D_file',[p f]);
         end
 end
 end
+
+
+
 function s=sigmafromz(par,z,B0)
 % global gamma
 % parx= [d sx0 Ax Bx g mp]
@@ -190,6 +215,70 @@ s0=par(2);d=par(1);A=par(3);B=par(4)*B0;g=par(5);mp=par(6);
 
 s=s0*sqrt(1+(z-g+mp).^2/d^2+A*(z-g+mp).^3/d^3+B*(z-g+mp).^4/d^4);
 end
+
+function out=gets2z(splinex,spliney,p)
+s=p.spline_srange(1): p.spline_ds:p.spline_srange(2);
+zmat=zeros(length(s));
+dmat=zeros(length(s));
+h=waitbar(0,'calcualte lookup table');
+for k=1:length(s)
+    waitbar(k/length(s),h,['calcualte lookup table... ' num2str(k/length(s)*100) '%']);
+    for l=1:length(s)
+        [zmat(l,k),dmat(l,k)]=zfromspline(s(k),s(l),splinex,spliney,[p.zall(1) p.zall(end)]);
+    end
+end
+delete(h);
+
+z=p.zall(1):0.01:p.zall(end);
+ax=initaxis(p.resultstabgroup,'z');
+imagesc(s,s,zmat)
+colorbar(ax)
+hold on;
+plot(splinex(z),spliney(z),'w')
+hold off;
+ax2=initaxis(p.resultstabgroup,'d');
+imagesc(s,s,dmat)
+colorbar(ax2)
+hold on;
+plot(splinex(z),spliney(z),'w')
+hold off;
+
+out.z=zmat;
+out.d=dmat;
+out.s=s;
+out.smin=s(1);
+out.smax=s(end);
+out.ds=s(2)-s(1);
+out.zrange=[p.zall(1) p.zall(end)];
+end
+
+function [z,d]=zfromspline(sx,sy,splinex,spliney,zrange)
+% zt=[-.5 0 .5];
+% zt=0;
+% for k=length(zt):-1:1
+%     zh(k)=fminsearch(@distsplinerr,zt(k),[],sx,sy,splinex,spliney);
+%     dh(k)=distspline(zh(k),sx,sy,splinex,spliney);
+% end
+% [d,indm]=min(dh);
+% z=zh(indm);
+
+z=fminbnd(@distsplinerr,zrange(1),zrange(end),[],sx,sy,splinex,spliney,true);
+ d=distspline(z,sx,sy,splinex,spliney,false);
+end
+
+function d=distspline(z,sx,sy,splinex,spliney,sq)
+if sq
+    d=((sqrt(sx)-sqrt(splinex(z))).^2+(sqrt(sy)-sqrt(spliney(z))).^2);
+else
+    d=sqrt(((sx)-(splinex(z))).^2+((sy)-(spliney(z))).^2);
+end
+% 
+
+end
+function err= distsplinerr(z,sx,sy,splinex,spliney,sq)
+err=sum(distspline(z,sx,sy,splinex,spliney,sq));
+end
+
 
 
 function s=sbothfromsigma(par,z,B0)
@@ -261,6 +350,22 @@ pard.framez0.position=[4,2.5];
 
 pard.B0.object=struct('String','set B = 0','Style','checkbox','Value',0);
 pard.B0.position=[5,1];
+
+pard.spline.object=struct('String','spline interpolation','Style','checkbox','Value',0);
+pard.spline.position=[6,1];
+pard.spline.Width=2;
+
+pard.spline_sranget.object=struct('String','PSF range (min/max)','Style','text');
+pard.spline_sranget.position=[7,1];
+pard.spline_sranget.Width=1.3;
+pard.spline_srange.object=struct('String','0 3.5','Style','edit');
+pard.spline_srange.position=[7,2.3];
+pard.spline_srange.Width=.7;
+
+pard.spline_dst.object=struct('String','Delta PSF','Style','text');
+pard.spline_dst.position=[7,3];
+pard.spline_ds.object=struct('String','0.01','Style','edit');
+pard.spline_ds.position=[7,4];
 
 % pard.reverse.object=struct('String','reverse z axis','Style','checkbox','Value',0);
 % pard.reverse.position=[4,3.5];
