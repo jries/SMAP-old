@@ -1,18 +1,31 @@
 function [zas,zn]=stackas2z(sx,sy,z,n,ploton)
-wind=0;
+wind=4;
 windn=15;
 
 %     [~,nxind]=max(n);
-    [~,nxind]=min((sx+sy)./n);
+%     [~,nxind]=min((sx+sy)./n);
+    [~,nindx]=min((sx)./n);
+    [~,nindy]=min((sy)./n);
+    nxind=round((nindx+nindy)/2);
+    
     fstartn=max(nxind-windn,1);fstopn=min(nxind+windn,length(n));
-    [sminx,sxindx]=min(sx(fstartn:fstopn));
-    [sminy,sxindy]=min(sy(fstartn:fstopn));
-    sxindx=sxindx+fstartn-1;
-    sxindy=sxindy+fstartn-1;
-    fstart=max(min(sxindx-wind,sxindy-wind),1);fstop=min(max(sxindx+wind,sxindy+wind),length(n));
+%     [sminx,sxindx]=min(sx(fstartn:fstopn));
+%     [sminy,sxindy]=min(sy(fstartn:fstopn));
+%     sxindx=sxindx+fstartn-1;
+%     sxindy=sxindy+fstartn-1;
+%     sxind=mean(sxindx,sxindy);
+    
+    indx1=find(sx(fstartn:fstopn)>sy(fstartn:fstopn),1,'first')+fstartn-1;
+    indx2=find(sy(fstartn:fstopn)>sx(fstartn:fstopn),1,'first')+fstartn-1;
+    sxind=max(indx1,indx2)-1;
+    fstart=max(sxind-wind,1);
+    fstop=min(sxind+wind,length(n));
+    
+%     fstart=max(min(sxindx-wind,sxindy-wind),1);
+%     fstop=min(max(sxindx+wind,sxindy+wind),length(n));
     sxfit=sx(fstart:fstop);syfit=sy(fstart:fstop);
     x=z(fstart:fstop);
-    if sminx<200
+    if 1%sminx<200
     
     warning('off')
     [psx,S] = polyfit(x,sxfit,2);
