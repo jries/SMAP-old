@@ -12,14 +12,14 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
         end
         function out=run(obj,p)
             out=[];
-            locsall=obj.locData.getloc({'frame','xnm','ynm','PSFxnm','PSFynm','filenumber','phot'},'position','roi','layer',1,'removeFilter','filenumber');
+            locsall=obj.locData.getloc({'frame','xnm','ynm','PSFxnm','PSFynm','filenumber','phot'},'position','all','layer',1,'removeFilter','filenumber');
 %             locsall=obj.locData.getloc('frame','xnm','ynm','PSFxnm','PSFynm','filenumber','phot');
             if isempty(locsall.PSFynm)
                 error('no PSFy found')
             end
             locsall.PSFxpix=locsall.PSFxnm/p.cam_pixelsize_nm;
             locsall.PSFypix=locsall.PSFynm/p.cam_pixelsize_nm;
-            locsall.zfnm=locsall.frame*p.dz/1000;
+            locsall.zfnm=locsall.frame*p.dz;
             
             initaxis(p.resultstabgroup,'found beads');
             numfiles=max(locsall.filenumber);
@@ -62,14 +62,23 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
             % if on glass: correct position based on average, not taking
             % into account position. This might create errors. change
             % later?
+            zrangeall=[min(locsall.frame) max(locsall.frame)].*p.dz;
             if p.beaddistribution.Value==1 %glass
-                zf1=robustMean([bead([bead(:).filenumber]==1).ztrue]);
-                for k=2:max([bead(:).filenumber])
+                f1ind=find([bead(:).filenumber]==1);
+                zf1=robustMean([bead(f1ind).ztrue]);
+                if p.ztoframet
+                    zpos=p.ztoframe.*p.dz;
+                else
+                    zpos=zf1;
+                end
+                zrangeall=zrangeall-zpos;
+                for k=1:max([bead(:).filenumber])
                         bi=find([bead(:).filenumber]==k);
                         dzh=robustMean([bead(bi).ztrue])-zf1;
                         for b=1:length(bi)
-                            bead(b).ztrue=bead(b).ztrue-dzh;
-                            bead(b).zfnm=bead(b).zfnm-dzh;
+                            bead(b).ztrue=bead(b).ztrue-dzh-zpos;
+                            bead(b).zfnm=bead(b).zfnm-dzh-zpos;
+                            bead(b).zrangeall=zrangeall;
                         end
                 end
             end
@@ -87,7 +96,7 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
                 Yrange(2)=p.Ymax*p.cam_pixelsize_nm;
             end
             if length(Zrange)==1
-                Zrange(2)=p.Zmax*p.cam_pixelsize_nm;
+                Zrange(2)=p.Zmax;
             end
             
             for X=1:length(Xrange)-1
@@ -109,7 +118,8 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
                 end
             end
             sp=[SXY(:).spline];
-            zt=0:0.1:2;figure(88);hold off;for k=1:numel(sp), plot(zt,sp(k).x(zt),zt,sp(k).y(zt));hold on;end
+            zt=zrangeall(1):0.01:zrangeall(2);
+            figure(88);hold off;for k=1:numel(sp), plot(zt,sp(k).x(zt),zt,sp(k).y(zt));hold on;end
 
             %if in gel: make Z.dependent curves
             
@@ -187,10 +197,12 @@ indgood=minSx<mSx+2*smSx & minSy<mSy+2*smSy & phot<mp+2*sp;
 if sum(indgood)==0
     indgood=true(size(minSx));
 end
-
+correctindividual=0; %there seems to be no tilt or similar
+if correctindividual
 zm=robustMean([b(:).ztrue]);
 for k=1:length(b)
     b(k).zfnm=b(k).zfnm-b(k).ztrue+zm;
+end
 end
 
 z=vertcat(b(indgood).zfnm);
@@ -226,7 +238,7 @@ syg=vertcat(b(indgood2).PSFypix);
 splinex2=getspline(sxg,zg,1./(sxg-splinex(zg)).^2);
 spliney2=getspline(syg,zg,1./(syg-spliney(zg)).^2);
 
-zt=0:0.01:2;
+zt=b(1).zrangeall(1):0.01:b(1).zrangeall(2);
 for k=1:length(b)
     if indgood(k)
     plot(b(k).zfnm,b(k).PSFxpix,'*')
@@ -246,7 +258,8 @@ function spline=getspline(S,z,w)
 
 % 
 [zs,zind]=sort(z);Ss=S(zind);ws=w(zind);
-spline=fit(zs,Ss,'smoothingspline','Weights',ws,'SmoothingParam',0.99); %weigh smaller more
+spline=fit(zs,Ss,'smoothingspline','Weights',ws,'Normalize','on','SmoothingParam',0.98); 
+% spline=fit(zs,Ss,'smoothingspline','Weights',ws,'SmoothingParam',0.99); %weigh smaller more
 % [spline,a,b]=fit(zs,Ss,'smoothingspline','Weights',ws); %weigh smaller more
 % ds=Ss-spline(zs);
 % spline2=fit(zs,Ss,'smoothingspline','Weights',1./ds.^2); %weigh smaller more
@@ -344,7 +357,7 @@ beadnum=locs.beadnum(indf&indbead);
 dff=df(indf&indbead);
 
 zbead=ztrue(beadnum);
-zcorr=zbead-dff*p.dz/1000;
+zcorr=zbead-dff*p.dz;
 % 
 %  recgui.initaxis(p.resultstabgroup,'calibration curve')
 % plot(zcorr,sx,'.',zcorr,sy,'.')
@@ -374,7 +387,7 @@ end
 function calibrateAstig3D(locs,p)
 global zt sxf syf
 sxt=double(locs.PSFxnm)/p.cam_pixelsize_nm;syt=double(locs.PSFynm)/p.cam_pixelsize_nm;framet=double(locs.frame);
-zt=framet*p.dz/1000;
+zt=framet*p.dz;
 
 B0=double(~p.B0);
 
@@ -395,7 +408,7 @@ rangef=round(max(min(indi))):round(min(max(indi)));
 range=find(framet>=rangef(1),1,'first'):find(framet<=rangef(end),1,'last');
 
 sx=sxt(range);sy=syt(range);frame=framet(range);
-z=frame*p.dz/1000;
+z=frame*p.dz;
 
 
 
@@ -607,6 +620,13 @@ pard.ztoframe.object=struct('String','21','Style','edit');
 pard.ztoframe.position=[3,2];
 pard.ztoframe.Width=.5;
 
+
+pard.zrangeuset.object=struct('String','zrange to use (nm)','Style','text');
+pard.zrangeuset.position=[4,1];
+pard.zrangeuset.Width=1;
+pard.zrangeuse.object=struct('String','-500 1000','Style','edit');
+pard.zrangeuse.position=[4,2];
+pard.zrangeuse.Width=.5;
 % pard.savebutton.object=struct('String','save','Style','pushbutton');
 % pard.savebutton.position=[7,3];
 pard.inputParameters={'cam_pixelsize_nm'};
