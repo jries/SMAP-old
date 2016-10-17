@@ -188,14 +188,16 @@ if sum(indgood)==0
     indgood=true(size(minSx));
 end
 
+zm=robustMean([b(:).ztrue]);
 for k=1:length(b)
-    b(k).zfnm=b(k).zfnm-b(k).ztrue;
+    b(k).zfnm=b(k).zfnm-b(k).ztrue+zm;
 end
 
 z=vertcat(b(indgood).zfnm);
 splinex=getspline(vertcat(b(indgood).PSFxpix),z,1./vertcat(b(indgood).PSFxpix));
 spliney=getspline(vertcat(b(indgood).PSFypix),z,1./vertcat(b(indgood).PSFypix));
 
+figure(88);plot(z,vertcat(b(indgood).PSFxpix),'.')
 %how good does it fit with spline?
 figure(99)
 hold off
@@ -227,9 +229,9 @@ spliney2=getspline(syg,zg,1./(syg-spliney(zg)).^2);
 zt=0:0.01:2;
 for k=1:length(b)
     if indgood(k)
-    plot(b(k).zfnm,b(k).PSFxpix,'.')
+    plot(b(k).zfnm,b(k).PSFxpix,'*')
     
-    plot(b(k).zfnm,b(k).PSFypix,'.')
+    plot(b(k).zfnm,b(k).PSFypix,'*')
     end
 end
 
@@ -241,9 +243,11 @@ drawnow
 s.x=splinex2;s.y=spliney2;
 end
 function spline=getspline(S,z,w)
-spline=fit(z,S,'smoothingspline','Weights',w); %weigh smaller more
+
 % 
-% [zs,zind]=sort(z);Ss=S(zind);
+[zs,zind]=sort(z);Ss=S(zind);ws=w(zind);
+spline=fit(zs,Ss,'smoothingspline','Weights',ws,'SmoothingParam',0.99); %weigh smaller more
+% [spline,a,b]=fit(zs,Ss,'smoothingspline','Weights',ws); %weigh smaller more
 % ds=Ss-spline(zs);
 % spline2=fit(zs,Ss,'smoothingspline','Weights',1./ds.^2); %weigh smaller more
 end
