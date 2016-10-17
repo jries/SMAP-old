@@ -56,7 +56,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             out=[];
             obj.addSynchronization('sr_roiposition',[],[],{@obj.redraw});
             
-            if isempty(obj.axis)||~isvalid(obj.axis)
+            if isempty(obj.axis)||isstruct(obj.axis)||~isvalid(obj.axis)
                 figure;
                 obj.axis=gca;
             end
@@ -285,7 +285,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         
         
         function redraw(obj)
-                if isempty(obj.axis)||~isvalid(obj.axis)
+                if isempty(obj.axis)||isstruct(obj.axis)||~isvalid(obj.axis)
                     return
                 end
             roih=obj.getPar('sr_roihandle');
