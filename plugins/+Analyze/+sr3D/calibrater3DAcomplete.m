@@ -19,9 +19,11 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
             end
             locsall.PSFxpix=locsall.PSFxnm/p.cam_pixelsize_nm;
             locsall.PSFypix=locsall.PSFynm/p.cam_pixelsize_nm;
+            locsall.zfnm=locsall.frame*p.dz/1000;
+            
             initaxis(p.resultstabgroup,'found beads');
             numfiles=max(locsall.filenumber);
-            maxd=p.cam_pixelsize_nm*5;
+            maxd=p.cam_pixelsize_nm*2;
             locsall.beadnum=zeros(size(locsall.xnm));
             for k=1:numfiles
                 indf=locsall.filenumber==k;
@@ -30,50 +32,140 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
                 beadn=beadnum>0;
                 locsall.beadnum(indf&beadn)=beadnum(beadn)+max(locsall.beadnum);
             end
-            [ztrue,I0]=getTrueZ(locsall,p);
+            
+            %make bead structure
+            
+%             [ztrue,I0]=getTrueZ(locsall,p);
+             initaxis(p.resultstabgroup,'get true z')
+            for k=max(locsall.beadnum):-1:1
+                thisbead=(locsall.beadnum==k);
+                bead(k).PSFxpix=double(locsall.PSFxpix(thisbead));
+                bead(k).PSFypix=double(locsall.PSFypix(thisbead));
+                bead(k).phot=double(locsall.phot(thisbead));
+                bead(k).xpos=median(double(locsall.xnm(thisbead)));
+                bead(k).ypos=median(double(locsall.ynm(thisbead)));
+                bead(k).filenumber=double(locsall.filenumber(find(thisbead,1)));
+                bead(k).numlocs=sum(thisbead);
+                bead(k).frame=double(locsall.frame(thisbead));
+                bead(k).zfnm=double(locsall.zfnm(thisbead));
+                %derived properties
+                bead(k).ztrue=stackas2z(bead(k).PSFxpix,bead(k).PSFypix,bead(k).zfnm,bead(k).phot,p.showresults);
+                
+                indz0=find(bead(k).zfnm>bead(k).ztrue,1);
+                rangez0=indz0-15:indz0+15;rangez0(rangez0<1)=1;rangez0(rangez0>length(bead(k).zfnm))=length(bead(k).zfnm);
+                bead(k).minSx=min(bead(k).PSFxpix(rangez0));
+                bead(k).minSy=min(bead(k).PSFypix(rangez0));
+%                 ztrue(k);
+                bead(k).I0=max(bead(k).phot);
+            end
+            
+            % if on glass: correct position based on average, not taking
+            % into account position. This might create errors. change
+            % later?
+            if p.beaddistribution.Value==1 %glass
+                zf1=robustMean([bead([bead(:).filenumber]==1).ztrue]);
+                for k=2:max([bead(:).filenumber])
+                        bi=find([bead(:).filenumber]==k);
+                        dzh=robustMean([bead(bi).ztrue])-zf1;
+                        for b=1:length(bi)
+                            bead(b).ztrue=bead(b).ztrue-dzh;
+                            bead(b).zfnm=bead(b).zfnm-dzh;
+                        end
+                end
+            end
+            
+            %sort beads according to X,Y
+            
+            Xrange=[ p.Xmin:p.Xd:p.Xmax].*p.cam_pixelsize_nm;
+            Yrange=[p.Ymin:p.Xd:p.Ymax].*p.cam_pixelsize_nm;
+            Zrange=p.Zmin:p.Zd:p.Zmax;
+            
+            if length(Xrange)==1
+                Xrange(2)=p.Xmax*p.cam_pixelsize_nm;
+            end
+            if length(Yrange)==1
+                Yrange(2)=p.Ymax*p.cam_pixelsize_nm;
+            end
+            if length(Zrange)==1
+                Zrange(2)=p.Zmax*p.cam_pixelsize_nm;
+            end
+            
+            for X=1:length(Xrange)-1
+                for Y=1:length(Yrange)-1
+                    indh=[bead(:).xpos]>Xrange(X)&[bead(:).xpos]<Xrange(X+1)&[bead(:).ypos]>Yrange(Y)&[bead(:).ypos]<Yrange(Y+1);
+                    if sum(indh)==0
+                        continue
+                    end
+                    if p.beaddistribution.Value==1
+                        Z=1;
+                        SXY(X,Y,Z).spline=getcleanspline(bead(indh));
+                    else %get gel curves
+                        splinez=getcleangel(bead(indh),p);
+                        for Z=1:length(splinez)
+                            SXY(X,Y,Z).spline=splinez(Z);
+                        end
+                        SXY(X,Y,Z).bead=bead(indh);
+                    end 
+                end
+            end
+            sp=[SXY(:).spline];
+            zt=0:0.1:2;figure(88);hold off;for k=1:numel(sp), plot(zt,sp(k).x(zt),zt,sp(k).y(zt));hold on;end
+
+            %if in gel: make Z.dependent curves
+            
+            % calculate average curves 
+            
+            %remove some curves based on intensity, deviation from average
+            %Sxy
+            
+            %recalculate average curves
+            
+            %calculate LUT
+%             calculate sx.^2-sy.^2 
+            
 %             zglass=min(ztrue)
-            if p.check_glasspos
-                zglass=p.cal_glasspos*p.dz/1000;
-            else
-                zs=sort(ztrue(~isnan(ztrue)));
-                zglass=mean(zs(1:3));
-            end
-            ztrue=ztrue-zglass;
-            title(['zglass = ' num2str(zglass)])
-            
-            B0=double(~p.B0);
-            
-            frame=(p.cal_fstart+p.cal_fstop)/2;
-            [sx,sy,zcorr]=getCalibrationCurve(locsall,ztrue,frame,p);
-            initaxis(p.resultstabgroup,'calibration curve fit');
-
-            fitp=fitCalibrationCurve(sx./p.cam_pixelsize_nm,sy/p.cam_pixelsize_nm,zcorr,frame*p.dz/1000-zglass,B0,p.cal_zrange/2);          
-            obj.outforfit=real(fitp([2 4 5 6 7 8 1 3]));
-            drawnow
-%             obj.cal3D.zglass=zglass;
-            allframes=p.cal_fstart:p.cal_deltaf:p.cal_fstop;
-            
-
-            initaxis(p.resultstabgroup,'sx2-sy2');
-            obj.outsx2sy2=fitsx2sy2(sx/p.cam_pixelsize_nm,sy/p.cam_pixelsize_nm,zcorr,frame*p.dz/1000-zglass,p.cal_zrange/2);
-            
-%             recgui.initaxis(p.resultstabgroup,'sx-sy');
-%             plot(zcorr,sx-sy,'.')
-        
-            for k=1:length(allframes)
-                    initaxis(p.resultstabgroup,['c' num2str(k)]);
-                obj.cal3D(k).zglass=zglass;
-                frame=allframes(k);
-                [sx,sy,zcorr]=getCalibrationCurve(locsall,ztrue,frame,p);
-%                 recgui.initaxis(p.resultstabgroup,'calibration curve fit');
-                fitp=fitCalibrationCurve(sx./p.cam_pixelsize_nm,sy/p.cam_pixelsize_nm,zcorr,frame*p.dz/1000-zglass,B0,p.cal_zrange/2);          
-                obj.cal3D(k).fit=real(fitp([2 4 5 6 7 8 1 3]));
-                obj.cal3D(k).midpoint=-fitp(9);
-                obj.cal3D(k).sx2sy2=fitsx2sy2(sx./p.cam_pixelsize_nm,sy./p.cam_pixelsize_nm,zcorr,frame*p.dz/1000-zglass,p.cal_zrange/2);
-                
-                drawnow
-                
-            end
+%             if p.check_glassposb
+%                 zglass=p.cal_glasspos*p.dz/1000;
+%             else
+%                 zs=sort(ztrue(~isnan(ztrue)));
+%                 zglass=mean(zs(1:3));
+%             end
+%             ztrue=ztrue-zglass;
+%             title(['zglass = ' num2str(zglass)])
+%             
+%             B0=double(~p.B0);
+%             
+%             frame=(p.cal_fstart+p.cal_fstop)/2;
+%             [sx,sy,zcorr]=getCalibrationCurve(locsall,ztrue,frame,p);
+%             initaxis(p.resultstabgroup,'calibration curve fit');
+% 
+%             fitp=fitCalibrationCurve(sx./p.cam_pixelsize_nm,sy/p.cam_pixelsize_nm,zcorr,frame*p.dz/1000-zglass,B0,p.cal_zrange/2);          
+%             obj.outforfit=real(fitp([2 4 5 6 7 8 1 3]));
+%             drawnow
+% %             obj.cal3D.zglass=zglass;
+%             allframes=p.cal_fstart:p.cal_deltaf:p.cal_fstop;
+%             
+% 
+%             initaxis(p.resultstabgroup,'sx2-sy2');
+%             obj.outsx2sy2=fitsx2sy2(sx/p.cam_pixelsize_nm,sy/p.cam_pixelsize_nm,zcorr,frame*p.dz/1000-zglass,p.cal_zrange/2);
+%             
+% %             recgui.initaxis(p.resultstabgroup,'sx-sy');
+% %             plot(zcorr,sx-sy,'.')
+%         
+%             for k=1:length(allframes)
+%                     initaxis(p.resultstabgroup,['c' num2str(k)]);
+%                 obj.cal3D(k).zglass=zglass;
+%                 frame=allframes(k);
+%                 [sx,sy,zcorr]=getCalibrationCurve(locsall,ztrue,frame,p);
+% %                 recgui.initaxis(p.resultstabgroup,'calibration curve fit');
+%                 fitp=fitCalibrationCurve(sx./p.cam_pixelsize_nm,sy/p.cam_pixelsize_nm,zcorr,frame*p.dz/1000-zglass,B0,p.cal_zrange/2);          
+%                 obj.cal3D(k).fit=real(fitp([2 4 5 6 7 8 1 3]));
+%                 obj.cal3D(k).midpoint=-fitp(9);
+%                 obj.cal3D(k).sx2sy2=fitsx2sy2(sx./p.cam_pixelsize_nm,sy./p.cam_pixelsize_nm,zcorr,frame*p.dz/1000-zglass,p.cal_zrange/2);
+%                 
+%                 drawnow
+%                 
+%             end
             
         end
         function pard=guidef(obj)
@@ -81,83 +173,158 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
         end
     end
 end
+function s=getcleanspline(b)
 
-function savecalfile(a,b,obj)
-fn=[obj.locData.files.file(1).name(1:end-4) '_3DAcal.mat'];
-[f,p]=uiputfile(fn);
-if f
-    outforfit=obj.outforfit;
-    cal3D=obj.cal3D;
-    outsx2sy2=obj.outsx2sy2;
-    save([p f],'outforfit','cal3D','outsx2sy2')
+%filter based on Sx, Sy and phot
+minSx=[b(:).minSx];
+minSy=[b(:).minSy];
+[mSx,smSx]=robustMean(minSx);
+[mSy,smSy]=robustMean(minSy);
+phot=[b(:).I0];
+[mp,sp]=robustMean(phot);
+indgood=minSx<mSx+2*smSx & minSy<mSy+2*smSy & phot<mp+2*sp;
+
+if sum(indgood)==0
+    indgood=true(size(minSx));
 end
+
+for k=1:length(b)
+    b(k).zfnm=b(k).zfnm-b(k).ztrue;
 end
 
-function fitpsx=fitsx2sy2(sx,sy,zcorr,framez,zrange)
+z=vertcat(b(indgood).zfnm);
+splinex=getspline(vertcat(b(indgood).PSFxpix),z,1./vertcat(b(indgood).PSFxpix));
+spliney=getspline(vertcat(b(indgood).PSFypix),z,1./vertcat(b(indgood).PSFypix));
 
-indf=abs(zcorr-framez)<zrange;
-if sum(indf)>5
-fitpsx=fit(sx(indf).^2-sy(indf).^2,zcorr(indf),'poly3','Robust','LAR');
-
-% fitpsx=polyfit(zcorr,sx.^2-sy.^2,4);
-plot(sx.^2-sy.^2,zcorr,'r.')
-hold on
-plot(sx(indf).^2-sy(indf).^2,zcorr(indf),'b.')
-
-sxsort=sort(sx.^2-sy.^2);
-zsort=feval(fitpsx,sxsort);
-
-plot(sxsort,zsort,'k')
-% plot(zcorr,polyval(fitpsx,zcorr),'.')
+%how good does it fit with spline?
+figure(99)
 hold off
-xlim([-6 6])
-else
-    fitpsx=zeros(2,1);
-end
+for k=length(b):-1:1
+    w=(b(k).phot).^2;
+%     w=1;
+    errh=(b(k).PSFxpix-splinex(b(k).zfnm)).^2.*w+(b(k).PSFypix-spliney(b(k).zfnm)).^2.*w;
+    err(k)=sqrt(sum(errh)/sum(w));
+    plot(b(k).zfnm,b(k).PSFxpix,'k.')
+    hold on
+    plot(b(k).zfnm,b(k).PSFypix,'k.')
+%     plot(b(k).zfnm,w/max(w))
+    
 end
 
-function fitp=fitCalibrationCurve(sx,sy,z,framez,B0,zrange,startp)
-if isempty(sx)
-    fitp=zeros(9,1);
-else
-if nargin<7
-    startp=[    0.3    1.0    1.0000  0   0        0         0  0.307   -framez];
+%  
+[em,es]=robustMean(err);
+indgood2=indgood&err<em+2*es;
+if sum(indgood2)==0
+    indgood2=indgood;
 end
-indf=abs(z-framez)<zrange;
-fitp=lsqnonlin(@sbothfromsigmaerr,startp,[],[],[],[z(indf) z(indf)],[sx(indf) sy(indf)],B0);
-fitp=real(fitp);
+zg=vertcat(b(indgood2).zfnm);
+sxg=vertcat(b(indgood2).PSFxpix);
+syg=vertcat(b(indgood2).PSFypix);
 
-subplot('Position',[0.05,0.65,.9,.3])
-plot(z,sx,'c.',z,sy,'m.')
-hold on;
-plot(z(indf),sx(indf),'b.',z(indf),sy(indf),'r.')
-sxf=sigmafromz(fitp([1 2 4 6 8 9]),z,B0);
-plot(z,sxf,'k.')
-fpy=fitp([1 3 5 7 8 9]);
-fpy(5)=-fpy(5);
-syf=sigmafromz(fpy,z,B0);
-plot(z,syf,'k.')
-hold off
-title(num2str(fitp(:)',2))
-ylim([0 max(max(sxf),max(syf))])
+splinex2=getspline(sxg,zg,1./(sxg-splinex(zg)).^2);
+spliney2=getspline(syg,zg,1./(syg-spliney(zg)).^2);
 
-subplot('Position',[0.05,0.45,.9,.15])
-plot(z(indf),sx(indf)-sxf(indf),'b.')
-hold on
-plot(z(indf),0*sy(indf),'k.')
-hold off
-ylim([-1 1]*.7)
-
-subplot('Position',[0.05,0.25,.9,.15])
-plot(z(indf),sy(indf)-syf(indf),'r.')
-hold on
-plot(z(indf),0*sy(indf),'k.')
-hold off
-ylim([-1 1]*.7)
-
-subplot('Position',[0.05,0.05,.9,.15])
+zt=0:0.01:2;
+for k=1:length(b)
+    if indgood(k)
+    plot(b(k).zfnm,b(k).PSFxpix,'.')
+    
+    plot(b(k).zfnm,b(k).PSFypix,'.')
+    end
 end
+
+plot(zt,splinex2(zt),'k')
+plot(zt,spliney2(zt),'k')
+plot(zt,splinex(zt),'r')
+plot(zt,spliney(zt),'r')
+drawnow
+s.x=splinex2;s.y=spliney2;
 end
+function spline=getspline(S,z,w)
+spline=fit(z,S,'smoothingspline','Weights',w); %weigh smaller more
+% 
+% [zs,zind]=sort(z);Ss=S(zind);
+% ds=Ss-spline(zs);
+% spline2=fit(zs,Ss,'smoothingspline','Weights',1./ds.^2); %weigh smaller more
+end
+
+% 
+% function savecalfile(a,b,obj)
+% fn=[obj.locData.files.file(1).name(1:end-4) '_3DAcal.mat'];
+% [f,p]=uiputfile(fn);
+% if f
+%     outforfit=obj.outforfit;
+%     cal3D=obj.cal3D;
+%     outsx2sy2=obj.outsx2sy2;
+%     save([p f],'outforfit','cal3D','outsx2sy2')
+% end
+% end
+% 
+% function fitpsx=fitsx2sy2(sx,sy,zcorr,framez,zrange)
+% 
+% indf=abs(zcorr-framez)<zrange;
+% if sum(indf)>5
+% fitpsx=fit(sx(indf).^2-sy(indf).^2,zcorr(indf),'poly3','Robust','LAR');
+% 
+% % fitpsx=polyfit(zcorr,sx.^2-sy.^2,4);
+% plot(sx.^2-sy.^2,zcorr,'r.')
+% hold on
+% plot(sx(indf).^2-sy(indf).^2,zcorr(indf),'b.')
+% 
+% sxsort=sort(sx.^2-sy.^2);
+% zsort=feval(fitpsx,sxsort);
+% 
+% plot(sxsort,zsort,'k')
+% % plot(zcorr,polyval(fitpsx,zcorr),'.')
+% hold off
+% xlim([-6 6])
+% else
+%     fitpsx=zeros(2,1);
+% end
+% end
+
+% function fitp=fitCalibrationCurve(sx,sy,z,framez,B0,zrange,startp)
+% if isempty(sx)
+%     fitp=zeros(9,1);
+% else
+% if nargin<7
+%     startp=[    0.3    1.0    1.0000  0   0        0         0  0.307   -framez];
+% end
+% indf=abs(z-framez)<zrange;
+% fitp=lsqnonlin(@sbothfromsigmaerr,startp,[],[],[],[z(indf) z(indf)],[sx(indf) sy(indf)],B0);
+% fitp=real(fitp);
+% 
+% subplot('Position',[0.05,0.65,.9,.3])
+% plot(z,sx,'c.',z,sy,'m.')
+% hold on;
+% plot(z(indf),sx(indf),'b.',z(indf),sy(indf),'r.')
+% sxf=sigmafromz(fitp([1 2 4 6 8 9]),z,B0);
+% plot(z,sxf,'k.')
+% fpy=fitp([1 3 5 7 8 9]);
+% fpy(5)=-fpy(5);
+% syf=sigmafromz(fpy,z,B0);
+% plot(z,syf,'k.')
+% hold off
+% title(num2str(fitp(:)',2))
+% ylim([0 max(max(sxf),max(syf))])
+% 
+% subplot('Position',[0.05,0.45,.9,.15])
+% plot(z(indf),sx(indf)-sxf(indf),'b.')
+% hold on
+% plot(z(indf),0*sy(indf),'k.')
+% hold off
+% ylim([-1 1]*.7)
+% 
+% subplot('Position',[0.05,0.25,.9,.15])
+% plot(z(indf),sy(indf)-syf(indf),'r.')
+% hold on
+% plot(z(indf),0*sy(indf),'k.')
+% hold off
+% ylim([-1 1]*.7)
+% 
+% subplot('Position',[0.05,0.05,.9,.15])
+% end
+% end
 function [sx,sy,zcorr]=getCalibrationCurve(locs,ztrue,frame,p)
 frameregion=p.cal_framerange/2;        
 
@@ -182,23 +349,23 @@ indg=~isnan(zcorr);
 zcorr=zcorr(indg);sx=sx(indg);sy=sy(indg);
 end
 
-function [z,I0]=getTrueZ(locs,p)
-mmax=max(locs.beadnum);
-z=zeros(mmax,1);
-I0=zeros(mmax,1);
- initaxis(p.resultstabgroup,'get true z')
-
-for k=1:mmax
-    ind=locs.beadnum==k;
-    zf=locs.frame(ind)*p.dz/1000;
-    [zas,zn]=stackas2z(locs.PSFxpix(ind),locs.PSFypix(ind),zf,locs.phot(ind),p.showresults);
-    z(k)=zas;
-    I0(k)=max(locs.phot(ind));
-%     waitforbuttonpress
-end
- w=warning('off');
- warning(w);
-end
+% function [z,I0]=getTrueZ(locs,p)
+% mmax=max(locs.beadnum);
+% z=zeros(mmax,1);
+% I0=zeros(mmax,1);
+%  initaxis(p.resultstabgroup,'get true z')
+% 
+% for k=1:mmax
+%     ind=locs.beadnum==k;
+% %     zf=locs.frame(ind)*p.dz/1000;
+%     [zas,zn]=stackas2z(locs.PSFxpix(ind),locs.PSFypix(ind),locs.zfnm(ind),locs.phot(ind),p.showresults);
+%     z(k)=zas;
+%     I0(k)=max(locs.phot(ind));
+% %     waitforbuttonpress
+% end
+%  w=warning('off');
+%  warning(w);
+% end
 
 function calibrateAstig3D(locs,p)
 global zt sxf syf
