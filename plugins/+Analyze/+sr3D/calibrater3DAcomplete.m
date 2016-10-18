@@ -30,13 +30,14 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
                 beadlocs(k)=getBeadLocs(locsall.xnm(indf),locsall.ynm(indf),p);
                 [beadnum,numlocs]=associatelocs(beadlocs(k).x,beadlocs(k).y,locsall.xnm(indf),locsall.ynm(indf),maxd);
                 beadn=beadnum>0;
-                locsall.beadnum(indf&beadn)=beadnum(beadn)+max(locsall.beadnum);
+                indff=find(indf);
+                locsall.beadnum(indff(beadn))=beadnum(beadn)+max(locsall.beadnum);
             end
             
             %make bead structure
             
 %             [ztrue,I0]=getTrueZ(locsall,p);
-             initaxis(p.resultstabgroup,'get true z')
+%              initaxis(p.resultstabgroup,'get true z')
             for k=max(locsall.beadnum):-1:1
                 thisbead=(locsall.beadnum==k);
                 bead(k).PSFxpix=double(locsall.PSFxpix(thisbead));
@@ -49,12 +50,17 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
                 bead(k).frame=double(locsall.frame(thisbead));
                 bead(k).zfnm=double(locsall.zfnm(thisbead));
                 %derived properties
-                bead(k).ztrue=stackas2z(bead(k).PSFxpix,bead(k).PSFypix,bead(k).zfnm,bead(k).phot,p.showresults);
-                
+                bead(k).ztrue=stackas2z(bead(k).PSFxpix,bead(k).PSFypix,bead(k).zfnm,bead(k).phot,0);
+%                 bead(k).ztrue
                 indz0=find(bead(k).zfnm>bead(k).ztrue,1);
                 rangez0=indz0-15:indz0+15;rangez0(rangez0<1)=1;rangez0(rangez0>length(bead(k).zfnm))=length(bead(k).zfnm);
+                if isempty(rangez0)
+                bead(k).minSx=NaN;
+                bead(k).minSy=NaN;
+                else
                 bead(k).minSx=min(bead(k).PSFxpix(rangez0));
-                bead(k).minSy=min(bead(k).PSFypix(rangez0));
+                bead(k).minSy=min(bead(k).PSFypix(rangez0));                    
+                end
 %                 ztrue(k);
                 bead(k).I0=max(bead(k).phot);
             end
@@ -76,9 +82,10 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
                         bi=find([bead(:).filenumber]==k);
                         dzh=robustMean([bead(bi).ztrue])-zf1;
                         for b=1:length(bi)
-                            bead(b).ztrue=bead(b).ztrue-dzh-zpos;
-                            bead(b).zfnm=bead(b).zfnm-dzh-zpos;
-                            bead(b).zrangeall=zrangeall;
+%                             dzh+zpos
+                            bead(bi(b)).ztrue=bead(bi(b)).ztrue-dzh-zpos;
+                            bead(bi(b)).zfnm=bead(bi(b)).zfnm-dzh-zpos;
+                            bead(bi(b)).zrangeall=zrangeall;
                         end
                 end
             end
@@ -105,22 +112,66 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
                     if sum(indh)==0
                         continue
                     end
+                    bh=cleanupbeads(bead(indh),p);
                     if p.beaddistribution.Value==1
                         Z=1;
-                        SXY(X,Y,Z).spline=getcleanspline(bead(indh));
+                        
+                        [SXY(X,Y,Z).spline,indg]=getcleanspline(bh,p);
+                        bh=bh(indg);
+                        SXY(X,Y,Z).Sx2_Sy2=cal_Sx2_Sy2(bh,SXY(X,Y,Z).spline,p);
+                        SXY(X,Y,Z).fitzpar=cal_fitzpar(bh,p,SXY(X,Y,Z).spline.maxmaxrange);
+                        SXY(X,Y,Z).splineLUT=cal_splineLUT(SXY(X,Y,Z).spline);
                     else %get gel curves
                         splinez=getcleangel(bead(indh),p);
                         for Z=1:length(splinez)
                             SXY(X,Y,Z).spline=splinez(Z);
                         end
-                        SXY(X,Y,Z).bead=bead(indh);
+                        
                     end 
+                    SXY(X,Y,Z).bead=bh;
                 end
             end
             sp=[SXY(:).spline];
-            zt=zrangeall(1):0.01:zrangeall(2);
-            figure(88);hold off;for k=1:numel(sp), plot(zt,sp(k).x(zt),zt,sp(k).y(zt));hold on;end
+%             zt=zrangeall(1):0.01:zrangeall(2);
+            z0=zf1-zpos;
+            zt=z0+p.zrangeuse(1):0.01:z0+p.zrangeuse(2);
+            ax=initaxis(p.resultstabgroup,'splines');
+            hold off;for k=1:numel(sp), plot(zt,sp(k).x(zt),zt,sp(k).y(zt));hold on;end
+            ylim([1 5])
+            
+            sp={SXY(:).Sx2_Sy2};
+            ax=initaxis(p.resultstabgroup,'sx^2-sy^2');
+            s=-30:0.5:30;
 
+            ylim(ax,[0 5])
+            
+            hold off;
+            for k=1:numel(sp)
+                if ~isempty(sp{k})
+                plot(sp{k}(s),s);hold on;
+                end
+            end
+            xlabel(ax,'z')
+            ylabel(ax,'Sx^2-Sy^2')
+            
+            sp={SXY(:).fitzpar};
+            ax=initaxis(p.resultstabgroup,'z fit');
+            hold off
+            xlabel(ax,'z')
+            ylabel(ax,'Sx, Sy')
+            ylim(ax,[0 5])
+            
+            hold off;
+            for k=1:numel(sp)
+                if ~isempty(sp{k})
+                    [sx,sy]=getsxfromzfitpar(zt,sp{k},z0) 
+                    plot(ax,zt,sx,zt,sy)
+                    hold on
+                end
+            end
+         
+            
+            
             %if in gel: make Z.dependent curves
             
             % calculate average curves 
@@ -131,6 +182,7 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
             %recalculate average curves
             
             %calculate LUT
+            
 %             calculate sx.^2-sy.^2 
             
 %             zglass=min(ztrue)
@@ -183,33 +235,78 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
         end
     end
 end
-function s=getcleanspline(b)
 
+function fitzpar=cal_fitzpar(b,p,zrange)
+ z=vertcat(b(:).zfnm);
+Sx=vertcat(b(:).PSFxpix);
+Sy=vertcat(b(:).PSFypix);
+% zrange=spline.maxmaxrange;
+zrange=zrange+[300 -300];
+midpoint=robustMean([b(:).ztrue]);
+figure(44);ax=gca;hold off;
+fitzpar=getzfitpar(Sx,Sy,z,zrange,midpoint,ax);
+
+end
+
+function splineLUT=cal_splineLUT(spline)
+splineLUT=[];
+end
+
+function sxp=cal_Sx2_Sy2(b,spline,p)
+
+
+ z=vertcat(b(:).zfnm);
+Sx=vertcat(b(:).PSFxpix);
+Sy=vertcat(b(:).PSFypix);
+figure(88)
+hold off
+sxp=fitsx2sy2(Sx,Sy,z,spline.maxmaxrange,gca);
+end
+
+function bo=cleanupbeads(b,p)
 %filter based on Sx, Sy and phot
 minSx=[b(:).minSx];
 minSy=[b(:).minSy];
+% zfnm=[b(:).zfnm];
 [mSx,smSx]=robustMean(minSx);
 [mSy,smSy]=robustMean(minSy);
 phot=[b(:).I0];
 [mp,sp]=robustMean(phot);
-indgood=minSx<mSx+2*smSx & minSy<mSy+2*smSy & phot<mp+2*sp;
+ztrue=[b(:).ztrue];
+indgood=minSx<mSx+2*smSx & minSy<mSy+2*smSy & phot<mp+2*sp&~isnan(minSx)&~isnan(minSy)&imag(ztrue)==0;
+indgood=indgood&ztrue>-10000 &ztrue<30000;
 
 if sum(indgood)==0
     indgood=true(size(minSx));
 end
-correctindividual=0; %there seems to be no tilt or similar
-if correctindividual
+% correctindividual=0; %there seems to be no tilt or similar
+% 
+% if correctindividual
+%     
+%     for k=1:length(b)
+%         b(k).zfnm=b(k).zfnm-b(k).ztrue+zm;
+%     end
+% end
+
+bo=b(indgood);
+end
+function [s,indgood2]=getcleanspline(b,p)
+
 zm=robustMean([b(:).ztrue]);
-for k=1:length(b)
-    b(k).zfnm=b(k).zfnm-b(k).ztrue+zm;
-end
-end
 
-z=vertcat(b(indgood).zfnm);
-splinex=getspline(vertcat(b(indgood).PSFxpix),z,1./vertcat(b(indgood).PSFxpix));
-spliney=getspline(vertcat(b(indgood).PSFypix),z,1./vertcat(b(indgood).PSFypix));
 
-figure(88);plot(z,vertcat(b(indgood).PSFxpix),'.')
+ z=vertcat(b(:).zfnm);
+Sx=vertcat(b(:).PSFxpix);
+Sy=vertcat(b(:).PSFypix);
+indz=z>zm+p.zrangeuse(1)&z<zm+p.zrangeuse(2);
+z=z(indz);
+Sx=Sx(indz);
+Sy=Sy(indz);
+
+splinex=getspline(Sx,z,1./Sx);
+spliney=getspline(Sy,z,1./Sy);
+
+% figure(88);plot(z,Sx,'.')
 %how good does it fit with spline?
 figure(99)
 hold off
@@ -218,32 +315,38 @@ for k=length(b):-1:1
 %     w=1;
     errh=(b(k).PSFxpix-splinex(b(k).zfnm)).^2.*w+(b(k).PSFypix-spliney(b(k).zfnm)).^2.*w;
     err(k)=sqrt(sum(errh)/sum(w));
-    plot(b(k).zfnm,b(k).PSFxpix,'k.')
+    plot(b(k).zfnm,b(k).PSFxpix,'y.')
     hold on
-    plot(b(k).zfnm,b(k).PSFypix,'k.')
+    plot(b(k).zfnm,b(k).PSFypix,'y.')
 %     plot(b(k).zfnm,w/max(w))
     
 end
 
 %  
 [em,es]=robustMean(err);
-indgood2=indgood&err<em+2*es;
+indgood2=err<em+2*es;
 if sum(indgood2)==0
-    indgood2=indgood;
+    indgood2=true(size(z));
 end
 zg=vertcat(b(indgood2).zfnm);
+indz=zg>zm+p.zrangeuse(1)&zg<zm+p.zrangeuse(2);
+zg=zg(indz);
 sxg=vertcat(b(indgood2).PSFxpix);
 syg=vertcat(b(indgood2).PSFypix);
+sxg=sxg(indz);
+syg=syg(indz);
 
 splinex2=getspline(sxg,zg,1./(sxg-splinex(zg)).^2);
 spliney2=getspline(syg,zg,1./(syg-spliney(zg)).^2);
 
-zt=b(1).zrangeall(1):0.01:b(1).zrangeall(2);
+% zt=b(1).zrangeall(1):0.01:b(1).zrangeall(2);
+zt=min(zg):0.01:max(zg);
+
 for k=1:length(b)
-    if indgood(k)
-    plot(b(k).zfnm,b(k).PSFxpix,'*')
+    if indgood2(k)
+    plot(b(k).zfnm,b(k).PSFxpix,'.')
     
-    plot(b(k).zfnm,b(k).PSFypix,'*')
+    plot(b(k).zfnm,b(k).PSFypix,'.')
     end
 end
 
@@ -253,12 +356,28 @@ plot(zt,splinex(zt),'r')
 plot(zt,spliney(zt),'r')
 drawnow
 s.x=splinex2;s.y=spliney2;
+s.zrange=[zt(1) zt(end)];
+
+
+zr=s.zrange(1):0.01:s.zrange(2);
+midp=round(length(zr)/2);
+
+[~,ind1x]=max(s.x(zr(1:midp)));
+[~,ind1y]=max(s.y(zr(1:midp)));
+[~,ind2x]=max(s.x(zr(midp:end)));
+[~,ind2y]=max(s.y(zr(midp:end)));
+
+z1=max(zr(ind1x),zr(ind1y));
+z2=min(zr(ind2x+midp-1),zr(ind2y+midp-1));
+
+s.maxmaxrange=[z1 z2];
 end
 function spline=getspline(S,z,w)
 
 % 
 [zs,zind]=sort(z);Ss=S(zind);ws=w(zind);
-spline=fit(zs,Ss,'smoothingspline','Weights',ws,'Normalize','on','SmoothingParam',0.98); 
+spline=fit(zs,Ss,'smoothingspline','Weights',ws,'Normalize','on','SmoothingParam',0.96); 
+% spline=fit(zs,Ss,'smoothingspline','Weights',ws,'Normalize','on'); 
 % spline=fit(zs,Ss,'smoothingspline','Weights',ws,'SmoothingParam',0.99); %weigh smaller more
 % [spline,a,b]=fit(zs,Ss,'smoothingspline','Weights',ws); %weigh smaller more
 % ds=Ss-spline(zs);
@@ -624,7 +743,7 @@ pard.ztoframe.Width=.5;
 pard.zrangeuset.object=struct('String','zrange to use (nm)','Style','text');
 pard.zrangeuset.position=[4,1];
 pard.zrangeuset.Width=1;
-pard.zrangeuse.object=struct('String','-500 1000','Style','edit');
+pard.zrangeuse.object=struct('String','-1000 1000','Style','edit');
 pard.zrangeuse.position=[4,2];
 pard.zrangeuse.Width=.5;
 % pard.savebutton.object=struct('String','save','Style','pushbutton');

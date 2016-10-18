@@ -57,6 +57,9 @@ windn=15;
         d=abs(ro-mp);
         [~,mi]=min(d);
         zas=ro(mi);
+        if ~(imag(zas)==0)
+            zas=NaN;
+        end
 %         if fstart<=ro(1)<=fstop
 %             zas(k)=ro(1);
 %         else
