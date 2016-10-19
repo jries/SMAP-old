@@ -29,7 +29,8 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                     lochere.regroup;
                     lochere.loc.filenumber=lochere.loc.filenumber*0+1;
                     
-                    locs=lochere.getloc({'frame','xnm','ynm','znm'},'position','all','grouping',groupcheck);
+%                     locs=lochere.getloc({'frame','xnm','ynm','znm'},'position','all','grouping',groupcheck);
+                     locs=lochere.getloc({'frame','xnm','ynm','znm'},'position','all','grouping',groupcheck,'layer',1,'removeFilter',{'filenumber'});
                     p.maxframeall=max(lochere.loc.frame);
                     p.framestart=min(lochere.loc.frame);
                     p.framestop=p.maxframeall;
@@ -60,7 +61,7 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                 locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'layer',1);
 %                  locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','fov','grouping',groupcheck);
                 if length(locs.xnm)<100
-                    locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','all');
+                    locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','all','grouping',groupcheck);
                 end
                 p.maxframeall=max(obj.locData.loc.frame);
                 p.framestart=p.layer1_.frame_min;
