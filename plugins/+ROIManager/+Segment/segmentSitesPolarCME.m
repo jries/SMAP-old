@@ -106,7 +106,7 @@ struce2 = strel('disk',1);
     
 for kc=rangec
     cell=se.cells(kc);
-    locs=locData.getloc({'xnm','ynm'},'layer',1,'position',[cell.pos(1:2) p.se_cellfov p.se_cellfov],'filenumber',cell.info.filenumber);
+    locs=locData.getloc({'xnm','ynm'},'layer',1,'position',[cell.pos(1:2) p.se_cellfov/2 ],'filenumber',cell.info.filenumber);
     rangex=[cell.pos(1)-p.se_cellfov/2 , cell.pos(1)+p.se_cellfov/2 ];
     rangey=[cell.pos(2)-p.se_cellfov/2 , cell.pos(2)+p.se_cellfov/2 ];
     imh=(myhist2(locs.xnm,locs.ynm,pr,pr, rangex,rangey))';
