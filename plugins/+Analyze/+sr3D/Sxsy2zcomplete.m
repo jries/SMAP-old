@@ -39,8 +39,9 @@ classdef Sxsy2zcomplete<interfaces.DialogProcessor
                     switch p.zcalibmode.Value
                         case 1 %spline lut
                             [zh,d]=zfromSXSYLut(SXYh.splineLUT,sxpix,sypix);
-                            [zh2]=horzcat(zh,zfromSXSYLut(SXYh.splineLUT,sxpix+d,sypix+d),zfromSXSYLut(SXYh.splineLUT,sxpix-d,sypix-d),...
-                                zfromSXSYLut(SXYh.splineLUT,sxpix+d,sypix-d),zfromSXSYLut(SXYh.splineLUT,sxpix-d,sypix+d));
+                            d2=d/sqrt(2);
+                            [zh2]=horzcat(zh,zfromSXSYLut(SXYh.splineLUT,sxpix+d2,sypix+d2),zfromSXSYLut(SXYh.splineLUT,sxpix-d2,sypix-d2),...
+                                zfromSXSYLut(SXYh.splineLUT,sxpix+d2,sypix-d2),zfromSXSYLut(SXYh.splineLUT,sxpix-d2,sypix+d2));
                             dzall(indh)=std(zh2,[],2);
                             
                             dall(indh)=d;
@@ -58,8 +59,8 @@ classdef Sxsy2zcomplete<interfaces.DialogProcessor
             
             switch p.zcalibmode.Value
                 case 1 %spline lut
-                    obj.locData.loc.zfromPSFdistance=dall;
-                    locprecnmz=sqrt(obj.locData.loc.locprecnm*2.5+dall.^2/4);
+                    obj.locData.loc.zfromPSFdistance=single(dall);
+                    locprecnmz=sqrt((obj.locData.loc.locprecnm*2.5).^2+dzall.^2/4);
                 case 2 %sx2-sy2
                     locprecnmz=obj.locData.loc.locprecnm*2.5;
             end
@@ -73,8 +74,8 @@ classdef Sxsy2zcomplete<interfaces.DialogProcessor
                 locprecnmz(isinf(locprecnmz))=p.setsz;
             end
           
-            obj.locData.loc.znm=znm;
-            obj.locData.loc.locprecnmz=locprecnmz;
+            obj.locData.loc.znm=single(znm);
+            obj.locData.loc.locprecnmz=single(locprecnmz);
             obj.locData.regroup;
             obj.setPar('locFields',fieldnames(obj.locData.loc))
      
