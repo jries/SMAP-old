@@ -1,4 +1,4 @@
-function zfit=getzfitpar(sx,sy,znm,zrange,midpoint,ax)
+function zfit=getzfitpar(sx,sy,znm,zrange,midpoint,B0,ax)
 
 % mpf=midpreal-midp;
 % parx= [d sx0 sy0 Ax Ay Bx By g mp]
@@ -11,11 +11,11 @@ sy=sy(ind);
 znm=znm(ind);
 z=znm/1000;
 
-B0=false;
+% B0=false;
 fitp=lsqnonlin(@sbothfromsigmaerr,startp,[],[],[],[z z],[sx sy],B0);
 
 zt=min(z):0.01:max(z);
-if nargin>5
+if nargin>6
     
     
 %     sxfs=sigmafromz(startp([1 2 4 6 8 9]),zt,B0);

@@ -216,68 +216,9 @@ s0=par(2);d=par(1);A=par(3);B=par(4)*B0;g=par(5);mp=par(6);
 s=s0*sqrt(1+(z-g+mp).^2/d^2+A*(z-g+mp).^3/d^3+B*(z-g+mp).^4/d^4);
 end
 
-function out=gets2z(splinex,spliney,p)
-s=p.spline_srange(1): p.spline_ds:p.spline_srange(2);
-zmat=zeros(length(s));
-dmat=zeros(length(s));
-h=waitbar(0,'calcualte lookup table');
-for k=1:length(s)
-    waitbar(k/length(s),h,['calcualte lookup table... ' num2str(k/length(s)*100) '%']);
-    for l=1:length(s)
-        [zmat(l,k),dmat(l,k)]=zfromspline(s(k),s(l),splinex,spliney,[p.zall(1) p.zall(end)]);
-    end
-end
-delete(h);
 
-z=p.zall(1):0.01:p.zall(end);
-ax=initaxis(p.resultstabgroup,'z');
-imagesc(s,s,zmat)
-colorbar(ax)
-hold on;
-plot(splinex(z),spliney(z),'w')
-hold off;
-ax2=initaxis(p.resultstabgroup,'d');
-imagesc(s,s,dmat)
-colorbar(ax2)
-hold on;
-plot(splinex(z),spliney(z),'w')
-hold off;
 
-out.z=zmat;
-out.d=dmat;
-out.s=s;
-out.smin=s(1);
-out.smax=s(end);
-out.ds=s(2)-s(1);
-out.zrange=[p.zall(1) p.zall(end)];
-end
 
-function [z,d]=zfromspline(sx,sy,splinex,spliney,zrange)
-% zt=[-.5 0 .5];
-% zt=0;
-% for k=length(zt):-1:1
-%     zh(k)=fminsearch(@distsplinerr,zt(k),[],sx,sy,splinex,spliney);
-%     dh(k)=distspline(zh(k),sx,sy,splinex,spliney);
-% end
-% [d,indm]=min(dh);
-% z=zh(indm);
-
-z=fminbnd(@distsplinerr,zrange(1),zrange(end),[],sx,sy,splinex,spliney,true);
- d=distspline(z,sx,sy,splinex,spliney,false);
-end
-
-function d=distspline(z,sx,sy,splinex,spliney,sq)
-if sq
-    d=((sqrt(sx)-sqrt(splinex(z))).^2+(sqrt(sy)-sqrt(spliney(z))).^2);
-else
-    d=sqrt(((sx)-(splinex(z))).^2+((sy)-(spliney(z))).^2);
-end
-% 
-
-end
-function err= distsplinerr(z,sx,sy,splinex,spliney,sq)
-err=sum(distspline(z,sx,sy,splinex,spliney,sq));
-end
 
 
 
