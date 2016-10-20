@@ -201,7 +201,20 @@ switch fitmode
         ton={'PSFx0','tPSFx0'};
 end
 
+switch fitmode
+    case {1,2}
+        roisize=7;
+        iterations=50;
+      
+    otherwise
+        roisize=11;
+        iterations=200;
+end
+
+obj.setPar('loc_ROIsize',roisize);
+
 obj.fieldvisibility('on',ton,'off',toff);
+obj.setGuiParameters(struct('iterations',iterations));
 % for k=1:length(ton)
 %     
 %     obj.guihandles.(ton{k}).Visible='on';

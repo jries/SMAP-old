@@ -39,6 +39,7 @@ classdef LocSaver<interfaces.WorkflowModule;
 %             obj.frames=struct('image',[],'frame',[]);
             obj.frames=[];
             obj.locDatatemp=interfaces.LocalizationData;
+            obj.locDatatemp.addfile;
             obj.filenumber=1;
              obj.locDatatemp.files.file=locsaveFileinfo(obj);  
              p=obj.parent.getGuiParameters(true,true);

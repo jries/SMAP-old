@@ -118,6 +118,10 @@ end
 
 
 function imout=addcolorbar(imin,lut,layer,thickness)
+if isempty(imin)
+    imout=imin;
+    return
+end
 s=size(imin);
 if layer==1||layer==3
     l=s(1);

@@ -256,7 +256,9 @@ function fit=triplegaussfit(img,rangex,rangey,startp,fixp)
 dx=rangex(end)-rangex(1);
 meanposx=mean(rangex); meanposy=mean(rangey);
 
-n=1;
+% change n to determine how far 2nd and 3rd Gaussians can move outside, n
+% is maximum distance from center in [ROI size]s
+n=.5;
 lb=[0 0 meanposx-n*dx meanposy-n*dx 150 0 0 meanposx-n*dx meanposy-n*dx  150];ub=[inf inf meanposx+n*dx meanposy+n*dx  750 inf inf meanposx+n*dx meanposy+n*dx 750];
 fit=lsqnonlin(@triplegaussforfiterr,double(startp),lb,ub,[],double(img),X,Y,fixp);
 
@@ -290,7 +292,7 @@ end
 
 function fit=doublegaussfit2(img,rangex,rangey,startp,fixp)
 [X,Y]=meshgrid(double(rangex),double(rangey));
-dx=(rangex(2)-rangex(1))/3;
+dx=(rangex(2)-rangex(1))/4;
 lb=[0 0 -inf -inf 150 0 rangex(1)+dx rangey(1)+dx];ub=[inf inf inf inf 750 inf rangex(end)-dx rangey(end)-dx];
 fit=lsqnonlin(@dgaussforfiterr2,double(startp),lb,ub,[],double(img),X,Y,fixp);
 

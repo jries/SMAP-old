@@ -28,15 +28,20 @@ classdef CameraConverter<interfaces.WorkflowModule
             obj.outputParameters={'loc_cameraSettings'};
            obj.addSynchronization('loc_fileinfo',[],[],@obj.setmetadata)
         end
-        function setmetadata(obj)
+        function setmetadata(obj,overwrite)
+            if nargin<2
+                overwrite=false;
+            end
             md=obj.loc_cameraSettings;
             obj.loc_cameraSettings=interfaces.metadataSMAP;
             obj.loc_cameraSettings=copyfields(obj.loc_cameraSettings,md);
-            settings=obj.getPar('loc_fileinfo');
-            fn=fieldnames(settings);
-            for k=1:length(fn)
-                if settings.assigned.(fn{k})
-                    obj.loc_cameraSettings.(fn{k})=settings.(fn{k});
+            if ~overwrite
+                settings=obj.getPar('loc_fileinfo');
+                fn=fieldnames(settings);
+                for k=1:length(fn)
+                    if settings.assigned.(fn{k})
+                        obj.loc_cameraSettings.(fn{k})=settings.(fn{k});
+                    end
                 end
             end
             obj.setPar('loc_cameraSettings',obj.loc_cameraSettings);
@@ -75,6 +80,9 @@ classdef CameraConverter<interfaces.WorkflowModule
                 return
             end
             pc=obj.loc_cameraSettings;
+            if ~pc.EMon
+                pc.emgain=1;
+            end
             offset=pc.offset;
             adu2phot=(pc.conversion/pc.emgain);
             imphot=single((data.data-offset))*adu2phot;
@@ -146,7 +154,7 @@ if ~isempty(answer)
         end
     end
 %     obj.setPar('loc_cameraSettings',obj.loc_cameraSettings);
-obj.setmetadata;
+obj.setmetadata(true);
 %     if obj.loc_cameraSettings.EMon
 %         obj.EMexcessNoise=2;
 %     else

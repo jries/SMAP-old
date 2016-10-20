@@ -115,6 +115,9 @@ pard.text.position=[1,1];
 pard.loc_ROIsize.object=struct('Style','edit','String','7');
 pard.loc_ROIsize.position=[2,1];
 pard.loc_ROIsize.TooltipString=sprintf('Size (pixels) of regions around each peak candidate which are used for fitting. \n Depends on fitter. Use larger ROIs for 3D data.');
+
+pard.syncParameters={{'loc_ROIsize','loc_ROIsize',{'String'}}};
+
 pard.plugininfo.type='WorkflowModule'; 
 pard.plugininfo.description='This plugin cuts out regions of interest of a defined size around the candidate positions and passes these on to the fitter';
 end
