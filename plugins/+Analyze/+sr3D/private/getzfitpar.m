@@ -2,9 +2,11 @@ function zfit=getzfitpar(sx,sy,znm,zrange,midpoint,B0,ax)
 
 % mpf=midpreal-midp;
 % parx= [d sx0 sy0 Ax Ay Bx By g mp]
-startp=[    0.3    1.0    1.0000  0   0        0         0  -0.307   -midpoint/1000];
+startp=[    0.3    1.0    1.0000  0   0        0         0  0.307   -midpoint/1000];
 % startp=[    0.3    1.0    1.0000  0   0        0         0  0.307   -mpf];
 
+startp(2)=myquantile(sx,0.01);startp(3)=myquantile(sy,0.01);
+% startp(3)=1.5;
 ind=znm>zrange(1)&znm<zrange(2);
 sx=sx(ind);
 sy=sy(ind);
@@ -12,21 +14,26 @@ znm=znm(ind);
 z=znm/1000;
 
 % B0=false;
-fitp=lsqnonlin(@sbothfromsigmaerr,startp,[],[],[],[z z],[sx sy],B0);
+fitp=lsqnonlin(@sbothfromsigmaerr,startp,[],[],[],[z z],[sx sy],0);
+if B0
+fitp=lsqnonlin(@sbothfromsigmaerr,fitp,[],[],[],[z z],[sx sy],true);
+end
 
 zt=min(z):0.01:max(z);
 if nargin>6
     
     
-%     sxfs=sigmafromz(startp([1 2 4 6 8 9]),zt,B0);
+    sxfs=sigmafromz(startp([1 2 4 6 8 9]),zt,B0);
 sxf=sigmafromz(fitp([1 2 4 6 8 9]),zt,B0);
-
+startpy=startp([1 3 5 7 8 9]);
+startpy(5)=-startpy(5);
+syfs=sigmafromz(startpy,zt,B0);
 
 plot(ax,z,sx,'r.')
 hold on
 plot(ax,z,sy,'r.')
 plot(ax,zt,sxf,'k')
-% plot(ax,zt,sxfs,'g')
+plot(ax,zt,sxfs,'c',zt,syfs,'g')
 fpy=fitp([1 3 5 7 8 9]);
 fpy(5)=-fpy(5);
 syf=sigmafromz(fpy,zt,B0);
