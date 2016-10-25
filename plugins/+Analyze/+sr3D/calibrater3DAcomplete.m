@@ -14,7 +14,7 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
             out=[];
             
             
-            locsall=obj.locData.getloc({'frame','xnm','ynm','PSFxnm','PSFynm','filenumber','phot'},'position','all','layer',1,'removeFilter','filenumber');
+            locsall=obj.locData.getloc({'frame','xnm','ynm','PSFxnm','PSFynm','filenumber','phot'},'position','all','layer',1,'removeFilter','filenumber','grouping','ungrouped');
 %             locsall=obj.locData.getloc('frame','xnm','ynm','PSFxnm','PSFynm','filenumber','phot');
             if isempty(locsall.PSFynm)
                 error('no PSFy found')
@@ -103,13 +103,13 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
                             bead(bi(b)).zrangeall=zrangeall;
                         end
                 end
-                p.ztruepos=zpos;
+                p.ztruepos=zf1-zpos; 
                 p.Zval=[0 0];
             else
                 %make absolute with respect to coverslip. Either from GUI
                 %or from finding smallest ztrue. Assume: approx same stack
                 %z position (rest taken care of by ztrue)
-                zshift=0;
+%                 zshift=0;
                 ztrue=[bead(:).ztrue];
                 zGlass=quantile(ztrue,0.02);
                 for k=1:length(bead)
@@ -228,7 +228,8 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
             sp=[SXY(:).spline];
 %             zt=zrangeall(1):0.01:zrangeall(2);
 %             z0=zf1-zpos;
-            z0=zshift;
+%             z0=zshift;
+            z0=0;
             zt=z0+p.zrangeuse(1):0.01:z0+p.zrangeuse(2);
 
             
@@ -277,7 +278,7 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
             for k=1:numel(SXY)
                 sxa=vertcat(SXY(k).curve(:).PSFxpix);
                 sya=vertcat(SXY(k).curve(:).PSFypix);
-                za=vertcat(SXY(k).curve(:).zfnm);
+                za=vertcat(SXY(k).curve(:).zcorr);
                 
                 if ~isempty(SXY(k).splineLUT)
                     zha=zfromSXSYLut(SXY(k).splineLUT,sxa,sya);
@@ -419,7 +420,7 @@ minSy=[b(:).minSy];
 phot=[b(:).I0];
 [mp,sp]=robustMean(phot);
 ztrue=[b(:).ztrue];
-indgood=minSx<mSx+2*smSx & minSy<mSy+2*smSy & phot<mp+2*sp&~isnan(minSx)&~isnan(minSy)&imag(ztrue)==0;
+indgood=minSx<mSx+2*smSx & minSy<mSy+2*smSy & phot<mp+2*sp & phot>mp/3 &~isnan(minSx)&~isnan(minSy)&imag(ztrue)==0;
 indgood=indgood&ztrue>-10000 &ztrue<30000;
 
 if sum(indgood)==0

@@ -497,6 +497,8 @@ elseif ~p.roishow %if restore and not show: dont do anything
 end
 delete(obj.roihandle)
 sr_axes=obj.getPar('sr_axes');
+xlim=sr_axes.XLim;
+ylim=sr_axes.YLim;
 switch roimode
     case {1,'imrect'}
         h=imrect(sr_axes,roiposition);
@@ -528,6 +530,8 @@ if ~isempty(h)
     obj.setPar('sr_roihandle',obj.roihandle);
     obj.linecallback(obj.roihandle.getPosition)
 end
+sr_axes.XLim=xlim;
+sr_axes.YLim=ylim;
 end
 
 function resetview_callback(oject,data,obj)
