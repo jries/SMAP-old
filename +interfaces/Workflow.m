@@ -191,9 +191,18 @@ classdef Workflow<interfaces.DialogProcessor
             end
             obj.fieldvisibility;
         end
-        function save(obj,fn)
-            if nargin<2
+        function save(obj,fn,descriptiononly)
+            if nargin<2||isempty(fn)
                 fn=obj.pluginpath;
+            end
+            if nargin<3
+                descriptiononly=false;
+            end
+            if descriptiononly
+                load(fn);
+                description=obj.description;
+                save(fn,'modules','parameters','startmodule','fileformat','description');
+                return
             end
             for k=1:length(obj.modules)
                 mk=obj.modules{k};
@@ -420,7 +429,7 @@ classdef Workflow<interfaces.DialogProcessor
             hplugin=uicontrol('Style','edit','units','normalized','Position',[0 0.1 1 .55],'String',txt,'Max',100,'Parent',f,'HorizontalAlignment','left');
             b2=uicontrol('Style','pushbutton','units','normalized','Position',[0.75 0 .25 .1],'String','Cancel','Callback',{@buttoncallback},'Parent',f);
             if edit
-                b1=uicontrol('Style','pushbutton','units','normalized','Position',[0 0 .25 .1],'String','Accept changes','Parent',f,'Callback',{@buttoncallback});
+                b1=uicontrol('Style','pushbutton','units','normalized','Position',[0 0 .25 .1],'String','Save changes','Parent',f,'Callback',{@buttoncallback});
             else
 %                 he.Enable='inactive';
             end    
@@ -428,6 +437,7 @@ classdef Workflow<interfaces.DialogProcessor
             function buttoncallback(object,b)
                 if ~strcmp(object.String,'Cancel')
                     obj.description=he.String;
+                    obj.save;
                 end
                 close(f)
             end  

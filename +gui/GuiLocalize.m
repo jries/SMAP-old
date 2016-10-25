@@ -181,7 +181,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
 end
 function wfinfo_callback(~,~,obj)
 obj.mainworkflow.graph;
-obj.mainworkflow.showinfo(false);
+obj.mainworkflow.showinfo(true);
 % if ~isempty(obj.mainworkflow.info.description)
 % msgbox(obj.mainworkflow.info.description,obj.mainworkflow.info.name)
 % end
