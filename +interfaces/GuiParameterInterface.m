@@ -384,7 +384,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                     cb=hstruc(k).changecallback;
                     callobj=hstruc(k).obj;
                     if ~isvalid(callobj) %object has been deleted
-                        badstruck(k)=true;
+                        badstruc(k)=true;
                     else
                         if ~isa(obj,class(hstruc(k).obj))&& isvalid(callobj.handle) %or ==? of identical object, in case of copy??
                             feval(cb{:})
