@@ -408,6 +408,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             him=imagesc(srim.rangex*1000,srim.rangey*1000,srim.image,'Parent',ax);
              ax.HitTest='on';
             ax.PickableParts='all';
+            ax.YDir='normal';
             him.PickableParts='none';
             if  p.stereo.Value==5 %goggles
                 axis(ax,'off')

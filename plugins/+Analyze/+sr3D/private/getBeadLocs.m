@@ -3,8 +3,8 @@ pos.x=x;
 pos.y=y;
 % dx=p.camPixSizeNm;
 dx=p.cam_pixelsize_nm;
-rangex=dx*round([min(pos.x) max(pos.x)+dx]/dx);
-rangey=dx*round([min(pos.y) max(pos.y)+dx]/dx);
+rangex=dx*round([min(pos.x)-5*dx max(pos.x)+5*dx]/dx);
+rangey=dx*round([min(pos.y)-5*dx max(pos.y)+5*dx]/dx);
 
 
 im=histrender(pos,rangex,rangey,dx,dx);

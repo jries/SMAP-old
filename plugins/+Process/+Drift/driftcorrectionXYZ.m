@@ -110,7 +110,12 @@ if p.correctxy
     drift=copyfields(drift,driftxy,{'x','y'});
 end
 if ~isempty(locs.znm)&&p.correctz
-    locsnew=copyfields(locs,applydriftcorrection(drift,locs),{'xnm','ynm'});
+    if p.correctxy
+        locsnew=copyfields(locs,applydriftcorrection(drift,locs),{'xnm','ynm'});
+    else
+        locsnew=locs;
+        drift=[];
+    end
     [driftz,driftinfoz]=finddriftfeatureZ(locsnew,p);
     drift=copyfields(drift,driftz,'z');
      driftinfo=copyfields(driftinfo,driftinfoz);
