@@ -6,6 +6,9 @@ classdef WorkflowFitter<interfaces.WorkflowModule
         numberInBlock=0;
         newID=1;
         fittedlocs=0;
+        spatial3Dcal=false;
+        spatialXrange=[-inf inf];
+        spatialYrange=[-inf inf];
     end
     methods
 
@@ -30,21 +33,36 @@ classdef WorkflowFitter<interfaces.WorkflowModule
             obj.fitinit;
             roisize=obj.getPar('loc_ROIsize');
 %             obj.numberInBlock=round(5500*100/roisize^2);
-            
+            numx=length(obj.spatialXrange)-1;
+            numy=length(obj.spatialYrange)-1;
 %             disp(['number in block: ' num2str(obj.numberInBlock)]);
-            obj.stackind=0;
+            obj.stackind=zeros(numx,numy);
             obj.fittedlocs=0;
-            fitterimagestack=zeros(roisize,roisize,obj.numberInBlock,'single');
+%             if obj.spatial3Dcal
+            fitterstackinfo=[];
+                for X=numx:-1:1
+                    for Y=numy:-1:1
+                        fitterimagestack{X,Y}=zeros(roisize,roisize,obj.numberInBlock,'single');
+                        fitterstackinfo{X,Y}.x=zeros(obj.numberInBlock,1,'single');
+                        fitterstackinfo{X,Y}.y=zeros(obj.numberInBlock,1,'single');
+                        fitterstackinfo{X,Y}.frame=zeros(obj.numberInBlock,1,'double');
+%                         fitterstackinfo{X,Y}.X=X;
+%                         fitterstackinfo{X,Y}.Y=Y;
+                    end
+                end
+                       
+%             else
+%                 fitterimagestack{1,1}=zeros(roisize,roisize,obj.numberInBlock,'single');
+%             end
             if obj.inputChannels==2
                 fitterbgstack=fitterimagestack;
             else
                 fitterbgstack=[];
             end
+            
 %             infos=struct('x',0,'y',0,'frame',0);
 %             fitterstackinfo=infos;
-            fitterstackinfo.x=zeros(obj.numberInBlock,1,'single');
-            fitterstackinfo.y=zeros(obj.numberInBlock,1,'single');
-            fitterstackinfo.frame=zeros(obj.numberInBlock,1,'double');
+
             obj.fitinit;
             
             
@@ -60,7 +78,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
             persistent reporttimer
             out=[];
             passbg=(obj.inputChannels==2);%~isempty(fitterbgstack);
-            fninfo=fieldnames(fitterstackinfo);
+            fninfo=fieldnames(fitterstackinfo{1});
             if ~iscell(data) 
                 dstruc=data.data;
                 eof=data.eof;
@@ -73,6 +91,10 @@ classdef WorkflowFitter<interfaces.WorkflowModule
             if isempty(reporttimer)
                 reporttimer=tic;
             end
+            
+            xrange=obj.spatialXrange;
+            yrange=obj.spatialYrange;
+            
             if ~isempty(dstruc)&&~isempty(dstruc.img)       
                  imgstack=dstruc.img;
                  
@@ -93,78 +115,115 @@ classdef WorkflowFitter<interfaces.WorkflowModule
                 end
                 
                 numberInBlockh=obj.numberInBlock;
+                
+                stackindh=obj.stackind;%pointer to last element
+                stackindh=stackindh+1; %new pointer
+                 
+                
+                for X=1:length(xrange)-1
+                    for Y=1:length(yrange)-1
+                        if obj.spatial3Dcal&&numberInBlockh>1  %later: dont rearrange, but use instack pointer.
+                            inblock=find(stackinf.x>=xrange(X) & stackinf.x<=xrange(X+1) & stackinf.y>=yrange(Y) & stackinf.y<=yrange(Y+1)); 
+                        else
+                            inblock=1:length(stackinf.x);
+                        end
+                        fitstack
+%                         if eof
+%                             fiteof
+%                         end
+                    end
+                end
+            end
+            if eof
+             for X=1:length(xrange)-1
+                for Y=1:length(yrange)-1   
+                    fiteof
+                end
+             end
+            
+            outputlocs(obj,[],[],obj.newID,true);
+            end
+            
+            function fitstack
                 if numberInBlockh>1 %make blocks
-                 stackindh=obj.stackind;%pointer to last element
-                 stackindh=stackindh+1; %new pointer
-                 
+%                  sh=size(imgstack);
+%                  if length(sh)==2
+%                      sh(3)=1;
+%                  end
+
                  %avoid loop
-                 imagesleft=s(3);
+                 imagesleft=length(inblock);
                  startinstack=1;
-                 
-                 newstackind=stackindh+imagesleft-1;
+
+                 newstackind=stackindh(X,Y)+imagesleft-1;
                  while newstackind>numberInBlockh
-                     imagestowrite=numberInBlockh-stackindh+1;
-                     
+                     imagestowrite=numberInBlockh-stackindh(X,Y)+1;
+
                      %images
-                     fitterimagestack(:,:,stackindh:end)=imgstack(:,:,startinstack:startinstack+imagestowrite-1);
+                     fitterimagestack{X,Y}(:,:,stackindh(X,Y):end)=imgstack(:,:,inblock(startinstack:startinstack+imagestowrite-1));
                      if passbg %background
-                        fitterbgstack(:,:,stackindh:end)=bgstack(:,:,startinstack:startinstack+imagestowrite-1);
+                        fitterbgstack{X,Y}(:,:,stackindh(X,Y):end)=bgstack(:,:,inblock(startinstack:startinstack+imagestowrite-1));
                      end
                      for fsi=1:length(fninfo) %stackinfor
-                        fitterstackinfo.(fninfo{fsi})(stackindh:end)=stackinf.(fninfo{fsi})(startinstack:startinstack+imagestowrite-1);
+                        fitterstackinfo{X,Y}.(fninfo{fsi})(stackindh(X,Y):end)=stackinf.(fninfo{fsi})(inblock(startinstack:startinstack+imagestowrite-1));
                      end
-                     
+
                      %do fitting
+                     stackinfoout=copyfields(fitterstackinfo{X,Y},struct('X',X,'Y',Y));
                      if passbg
-                        locs=obj.fit(fitterimagestack,fitterbgstack,fitterstackinfo);
+                        locs=obj.fit(fitterimagestack{X,Y},fitterbgstack{X,Y},stackinfoout);
                      else
-                         locs=obj.fit(fitterimagestack,fitterstackinfo);
+                         locs=obj.fit(fitterimagestack{X,Y},stackinfoout);
                      end
-                     outputlocs(obj,locs,fitterstackinfo,obj.newID,eof);
+                     outputlocs(obj,locs,fitterstackinfo{X,Y},obj.newID,false);
                      obj.newID=obj.newID+1;
-                     
+
                      imagesleft=imagesleft-imagestowrite;                   
                      startinstack=startinstack+imagestowrite;         
-                     stackindh=1;
+                     stackindh(X,Y)=1;
                      newstackind=imagesleft;
                  end
-                 fitterimagestack(:,:,stackindh:stackindh+imagesleft-1)=imgstack(:,:,startinstack:end);
+                 fitterimagestack{X,Y}(:,:,stackindh(X,Y):stackindh(X,Y)+imagesleft-1)=imgstack(:,:,inblock(startinstack:end));
                  if passbg
-                    fitterbgstack(:,:,stackindh:stackindh+imagesleft-1)=bgstack(:,:,startinstack:end);
+                    fitterbgstack{X,Y}(:,:,stackindh(X,Y):stackindh(X,Y)+imagesleft-1)=bgstack(:,:,inblock(startinstack:end));
                  end
                  for fsi=1:length(fninfo) %stackinfor
-                        fitterstackinfo.(fninfo{fsi})(stackindh:stackindh+imagesleft-1)=stackinf.(fninfo{fsi})(startinstack:end);
+                        fitterstackinfo{X,Y}.(fninfo{fsi})(stackindh(X,Y):stackindh(X,Y)+imagesleft-1)=stackinf.(fninfo{fsi})(inblock(startinstack:end));
                  end
-                 obj.stackind=stackindh+imagesleft-1;
-                 
+                 obj.stackind(X,Y)=stackindh(X,Y)+imagesleft-1;
+
                 else %go framewise
                      if passbg
                         locs=obj.fit(imgstack,bgstack,stackinf);
                      else
                         locs=obj.fit(imgstack,stackinf);
                      end
-                     outputlocs(obj,locs,stackinf,obj.newID,eof);
+                     outputlocs(obj,locs,stackinf,obj.newID,false);
                      obj.newID=obj.newID+1;
                 end
+                
             end
             
-            
-            if eof
-                if obj.numberInBlock>1
-                    for fsi=1:length(fninfo) %stackinfor
-                        fitterstackinfo.(fninfo{fsi})=fitterstackinfo.(fninfo{fsi})(1:obj.stackind);
-                    end
-                    if passbg
-                        locs=obj.fit(fitterimagestack(:,:,1:obj.stackind),fitterbgstack(:,:,1:obj.stackind),fitterstackinfo);
-                    else
-                        locs=obj.fit(fitterimagestack(:,:,1:obj.stackind),fitterstackinfo);
-                    end
+            function fiteof
+%                 if eof
+                    if obj.numberInBlock>1
+                        for fsi=1:length(fninfo) %stackinfor
+                            fitterstackinfo{X,Y}.(fninfo{fsi})=fitterstackinfo{X,Y}.(fninfo{fsi})(1:obj.stackind);
+                        end
+                        stackinfoout=copyfields(fitterstackinfo{X,Y},struct('X',X,'Y',Y));
+                        if passbg
+                            locs=obj.fit(fitterimagestack{X,Y}(:,:,1:obj.stackind(X,Y)),fitterbgstack{X,Y}(:,:,1:obj.stackind(X,Y)),stackinfoout);
+                        else
+                            locs=obj.fit(fitterimagestack{X,Y}(:,:,1:obj.stackind(X,Y)),stackinfoout);
+                        end
 
 
-                    outputlocs(obj,locs,fitterstackinfo,obj.newID,true);
-                else
-                    outputlocs(obj,[],[],obj.newID,true);
-                end
+                        outputlocs(obj,locs,fitterstackinfo{X,Y},obj.newID,false);
+                        obj.newID=obj.newID+1;
+%                     else
+%                         outputlocs(obj,[],[],obj.newID,true);
+                    end
+%                 end
             end
 
         end

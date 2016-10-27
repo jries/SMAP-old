@@ -13,6 +13,8 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
             pard=guidef;
         end
         function fitinit(obj)
+            obj.fitpar=getfitpar(obj);
+            % check if x,y, then initialize range etc
             obj.fitfunction = @obj.nofound;
             disp('checking cuda version')
             reporttext='GPU fit function did not run. Possibly the wrong CUDA version is installed.';
@@ -67,7 +69,8 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
             end
            try %%for test set to 0: no fitting
                if obj.fitpar.fitmode==3
-                    zpar=[fitpar.zpar(:)];
+                   X=stackinfo.X;Y=stackinfo.Y;
+                    zpar=[fitpar.zpar{X,Y}(:)];
 %                     (ii{1},data,PSFSigma,iterations,fittype,Ax,Ay,Bx,By,gamma,d,PSFy0);
 %                     [P CRLB LogL]=fitter.gaussmlev2_cuda70_newz(imstack,zpar(1),p.iterations,p.fitmode,zpar(2),zpar(3),zpar(4),zpar(5),zpar(6),zpar(7),zpar(8));
 %                     [P CRLB LogL]=fitter.GPU_MLE_Lidke_55(imstack,zpar(1),p.iterations,p.fitmode,zpar(2),zpar(3),zpar(4)*0,zpar(5)*0,zpar(6),zpar(7),zpar(8));
@@ -145,10 +148,11 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
             obj.guihandles.loadcal.Callback={@loadcall_callback,obj};
 
         end
-        function prerun(obj,p)
-            prerun@interfaces.WorkflowFitter(obj);
-            obj.fitpar=getfitpar(obj);         
-        end
+%         function prerun(obj,p)
+%             obj.fitpar=getfitpar(obj);   
+%             prerun@interfaces.WorkflowFitter(obj);
+%                   
+%         end
         
             
     end
@@ -174,7 +178,29 @@ if fitpar.fitmode==3
         disp('obj. position not implemented yet')
     else
         fitpar.objPos=p.objPos;
-        fitpar.zpar=cal.outforfit;
+        if isfield(cal,'outforfit')
+            fitpar.zpar=cal.outforfit;
+        else
+            s=size(cal.SXY);
+            for X=1:s(1)
+                for Y=1:s(2)
+                    zpar{X,Y}=cal.SXY(X,Y).fitzpar;
+                end
+            end
+            fitpar.zpar=zpar;
+            if size(cal.SXY,3)>1
+                obj.spatial3Dcal=true;
+            else
+                obj.spatial3Dcal=false;
+            end
+            xr=cal.SXY(1,1).Xrangeall;
+            xr(1)=-inf;xr(end)=inf;
+            yr=cal.SXY(1,1).Yrangeall;
+            yr(1)=-inf;yr(end)=inf;
+            obj.spatialXrange=xr;
+            obj.spatialYrange=yr;
+                
+        end
         fitpar.refractive_index_mismatch=p.refractive_index_mismatch;
     end
     

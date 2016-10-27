@@ -119,10 +119,11 @@ classdef LocSaver<interfaces.WorkflowModule;
 %             end
             
             if data.eof %save locs
-                locdat=interfaces.LocalizationData;
-                locdat.loc=fitloc2locdata(obj,templocs,1:numlocs);
-                obj.locDatatemp.addLocData(locdat);
-                
+                if ~isempty(templocs)
+                    locdat=interfaces.LocalizationData;
+                    locdat.loc=fitloc2locdata(obj,templocs,1:numlocs);
+                    obj.locDatatemp.addLocData(locdat);
+                end
                 filenameold=obj.locDatatemp.files.file(1).name;
                 filename=filenameold;
                 ind=2;

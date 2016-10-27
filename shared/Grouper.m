@@ -101,6 +101,8 @@ classdef Grouper< interfaces.LocDataInterface
                 weights=1./(obj.locData.getloc('locprecnm').locprecnm);
                 if isempty(weights)
                     weights=ones(size(obj.locData.loc.(fn2{1})));  
+                else
+                    weights(isinf(weights))=1;
                 end
                 for k=1:length(fn2)
                     if isfield(obj.combinemodes,fn2{k})
