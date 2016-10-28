@@ -18,7 +18,7 @@ end
 [status,message]=system('git status');
 if status==0
     ind=find(message==10);
-    disp(['git: ' message(1:ind(4))]);
+    disp(['git: ' message(1:ind(min(4,length(ind))))]);
 end
 
  
