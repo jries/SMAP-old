@@ -162,7 +162,12 @@ function loadcall_callback(a,b,obj)
 p=obj.getAllParameters;
 [f,p]=uigetfile(p.cal_3Dfile);
 if f
+    l=load([p f]);
+    if ~isfield(l,'outforfit') || ~isfield(l,'SXY')
+        msgbox('no 3D data recognized. Select other file.');
+    end
     obj.setGuiParameters(struct('cal_3Dfile',[p f]));
+    
 end
 end
 

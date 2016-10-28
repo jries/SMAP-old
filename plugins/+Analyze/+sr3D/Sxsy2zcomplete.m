@@ -91,6 +91,10 @@ function loadcalfile(a,b,obj)
 fn=obj.guihandles.calfile.String;
 [f,p]=uigetfile(fn);
 if f
+    l=load([p f]);
+    if ~isfield(l,'outforfit') || ~isfield(l,'SXY')
+        msgbox('no 3D data recognized. Select other file.');
+    end
 %     load([p f])
 %     if exist('cal3D','var')
 %         obj.cal3D=cal3D;

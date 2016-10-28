@@ -67,6 +67,10 @@ classdef RegisterLocs2<interfaces.DialogProcessor
             fn=obj.guihandles.Tfile.String;
             [f,path]=uigetfile(fn,'Open transformation file _T.mat');
             if f
+                Tload=load([path f]);
+                if ~isfield(Tload,'transformation')
+                    msgbox('could not find transformation in file. Load other file?')
+                end
                 obj.guihandles.Tfile.String=[path f];
                 obj.guihandles.useT.Value=1;
                 obj.setPar('transformationfile',[path f]);
