@@ -26,10 +26,10 @@ classdef RegisterLocs2<interfaces.DialogProcessor
             if obj.processorgui==false %run from WF
                 f=obj.locData.files.file(1).name;
                 fn=strrep(f,'_sml.mat','_T.mat');
-                   obj.guihandles.Tfile.String=[ fn];
+                   obj.guihandles.Tfile.String=fn;
                    transformation=obj.transformation; 
-                   save([fn],'transformation');
-                   obj.setPar('transformationfile',[fn]);
+                   save(fn,'transformation');
+                   obj.setPar('transformationfile',fn);
             end
             out=[];
         end
@@ -51,7 +51,9 @@ classdef RegisterLocs2<interfaces.DialogProcessor
             if isempty(obj.transformation)
                 errordlg('first calculate a transformation')
             else
-                fn=obj.guihandles.Tfile.String;
+                 f=obj.locData.files.file(1).name;
+                fn=strrep(f,'_sml.mat','_T.mat');
+%                 fn=obj.guihandles.Tfile.String;
                 [f,path]=uiputfile(fn,'Save last transformation as transformation file _T.mat');
                 if f
                     obj.guihandles.Tfile.String=[path f];

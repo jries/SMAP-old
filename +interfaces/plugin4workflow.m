@@ -23,12 +23,31 @@ classdef plugin4workflow<interfaces.WorkflowModule
             thisplugin.makeGui;
             
             obj.subplugin=thisplugin;
+            obj.children.(thisplugin.pluginpath{end})=thisplugin;
 
         end
         function prerun(obj,p)
-            p=obj.getGuiParameters;
-           
+%             p=obj.getGuiParameters;
+            module=obj.subplugin;
+            if isa(module, 'interfaces.DialogProcessor')
+                try
+                module.prerun;
+                catch
+%                     disp('no pre run')
+                end
+            elseif isa(module, 'interfaces.GuiModuleInterface')
+                disp('no dialog processor. implement with run')
+            end
         end
+        function sethandle(obj,h)
+            obj.handle=h;
+            obj.subplugin.handle=h;
+        end
+%         function set.handle(obj,newhandle)
+%             obj.handle=newhandle;
+%             obj.subplugin.handle=newhandle;
+%         end
+
         function out=run(obj,data,p)
             out=[];
             if ~data.eof
@@ -40,6 +59,10 @@ classdef plugin4workflow<interfaces.WorkflowModule
             module=obj.subplugin;
             if isa(module, 'interfaces.DialogProcessor')
                 module.processgo;
+                try 
+                    module.postrun;
+                catch
+                end
             elseif isa(module, 'interfaces.GuiModuleInterface')
                 disp('no dialog processor. implement with run')
             end

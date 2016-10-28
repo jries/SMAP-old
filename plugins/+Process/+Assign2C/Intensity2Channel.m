@@ -8,6 +8,10 @@ classdef Intensity2Channel<interfaces.DialogProcessor
         
         function out=run(obj,p)
             out=[];
+            if obj.processorgui==false || p.assignfield1.Value==1%run from WF
+                p.assignfield1.selection='fit_n2';
+                p.assignfield2.selection='fit_n1';
+            end
             loc=get_intensity2ch(obj.locData.loc,p);
             obj.locData.loc=copyfields(obj.locData.loc,loc);
             obj.locData.regroup;

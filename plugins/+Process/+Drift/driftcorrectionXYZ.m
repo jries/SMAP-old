@@ -10,6 +10,9 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
         
         function out=run(obj,p)
             out=[];
+            if ~p.correctxy & ~p.correctz
+                return
+            end
             %batch: many sml files loaded:
                 %do it per file, save only file.
                 %locData.copy, remove other filenames from .loc, .grouploc,

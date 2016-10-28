@@ -543,8 +543,11 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
            %returns an info structure. With defaults if empty.
             info=obj.plugininfo;
             if isempty(info)||~isfield(info,'name')
-               
+               try
                 name=obj.pluginpath{end};
+               catch
+                   name=obj.subpluginpath{end};
+               end
                 [~,file]=fileparts(name);
                 if ~isempty(file)
                     name=file;

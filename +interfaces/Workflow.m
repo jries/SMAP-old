@@ -138,7 +138,7 @@ classdef Workflow<interfaces.DialogProcessor
             obj.clear;
             obj.makeGui;
             loaded=load(fn);
-            for k=1:length(loaded.modules);
+            for k=1:length(loaded.modules)
                 m=loaded.modules(k);
                 obj.addModule(m.path,m.tag,'input',m.inputmodules);
             end
@@ -160,6 +160,7 @@ classdef Workflow<interfaces.DialogProcessor
                 end
                 fn=fieldnames(pGui); 
                 for k=1:length(fn)
+                   
                     if isfield(pGui.(fn{k}),'handle')
 %                         fn{k}
 % %                         idx=obj.tag2index(fn{k})
@@ -169,7 +170,8 @@ classdef Workflow<interfaces.DialogProcessor
                         if isempty(modh)
                             continue
                         end
-                        modh.handle=pGui.(fn{k}).handle;
+%                         modh.handle=pGui.(fn{k}).handle;
+                        modh.sethandle(pGui.(fn{k}).handle);
                     end 
                     p=pGui.(fn{k});
                     p=copyfields(p,pall);
