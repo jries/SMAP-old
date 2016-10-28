@@ -37,6 +37,17 @@ classdef Get2CIntImagesWF<interfaces.DialogProcessor
             try
                 tiffile=obj.locData.files.file(1).info.allmetadata.filename;
                 if ~exist(tiffile,'file')
+                    disp('Get2CIntImagesWF ine 40: check if it works')
+                    tiffile=strrep(tiffile,'\','/');
+                    ind=strfind(tiffile,'/');
+                    for k=1:length(ind)
+                        tiffileh=[tiffile(1:ind(k)) '_b_' tiffile(ind(k)+1:end)];
+                        if exist(tiffileh,'file')
+                            tiffile=tiffileh;
+                        end
+                    end
+                end
+                if ~exist(tiffile,'file')
                     tiffile=[];
                 end
             catch err
