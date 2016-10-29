@@ -11,6 +11,11 @@ classdef TifSaver<interfaces.DialogProcessor
             fn=p.filelist_long.selection;
             [path,file]=fileparts(fn);
             of=[path filesep file p2.img_ext.selection];
+            ind=2;
+            while exist(of,'file')
+                of=[path filesep file '_' num2str(ind) p2.img_ext.selection];
+                ind=ind+1;
+            end
             txt=filterpar(obj,p);
             serchstr={['*' p2.img_ext.selection];['*' strjoin(p2.img_ext.String,';*')]};
             [f,path]=uiputfile(serchstr,'select output file for image', of);
