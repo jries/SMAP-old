@@ -13,6 +13,10 @@ classdef Intensity2Channel<interfaces.DialogProcessor
                 p.assignfield2.selection='fit_n1';
             end
             loc=get_intensity2ch(obj.locData.loc,p);
+            if p.combineunassigned
+                loc.channel(loc.channel==3)=1;
+                loc.channel(loc.channel==4)=2;
+            end
             obj.locData.loc=copyfields(obj.locData.loc,loc);
             obj.locData.regroup;
 %             
@@ -23,6 +27,7 @@ classdef Intensity2Channel<interfaces.DialogProcessor
         function initGui(obj)
             obj.addSynchronization('locFields',[],[],@obj.updateLocFields)
             obj.addSynchronization('filelist_short',obj.guihandles.dataselect,'String')
+            obj.updateLocFields;
         end
 
         function updateLocFields(obj)
@@ -105,5 +110,9 @@ pard.assignfield2.position=[5,2];
 
 pard.assignfield1.object.TooltipString='choose which field to use for splitting';
 pard.assignfield2.object.TooltipString=pard.assignfield1.object.TooltipString;
+
+pard.combineunassigned.object=struct('String','Associate unassiged locs','Style','checkbox','Value',true);
+pard.combineunassigned.position=[7,1];
+pard.combineunassigned.Width=2;
 pard.plugininfo.type='ProcessorPlugin';
 end
