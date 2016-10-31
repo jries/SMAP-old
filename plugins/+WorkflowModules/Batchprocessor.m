@@ -215,6 +215,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
             wf.attachLocData(obj.locData);
             wf.makeGui;
             wf.load(wffile);
+            disp(mytextsplit(wf.description));
             %workflow: recover tiff file and start
             tiffile=wf.module(wf.startmodule).getGuiParameters.tiffile;
             wf.module(wf.startmodule).addFile(tiffile);
@@ -231,6 +232,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
             wf.makeGui;
             wf.load(p.mainbatchfile);
             wf.module(wf.startmodule).addFile(tiffile);
+            disp(mytextsplit(wf.description));
             wf.run;
             delete(wf)
 %             delete(ld)
