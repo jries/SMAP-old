@@ -254,8 +254,8 @@ function locs=locsfromposi(locsi,p)
     a=100;
     PSF=100;
     sa=PSF+a/12;
-    
-    indin=phot>10;
+    phot(phot<10)=10;
+    indin=phot>=10;
     numlocs=sum(indin);
     %MOrtensen
     locprecnm=sqrt(sa^2./phot.*(16/9+8*pi*sa^2*p.background^2./phot/a^2));

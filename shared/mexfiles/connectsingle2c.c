@@ -59,8 +59,8 @@ void  cs(double *list, double *x, double *y, double *frames,double dX,long dT,mw
         } 
     
         
-        frtest=frames[testentry];
-        
+//         frtest=frames[testentry];
+        frtest=frh+1;
         
         //find first entry with fitting x in frame
         while((x[testentry]<xh-dX) && (frames[testentry]==frtest) && (testentry<=lenx-1)) 
