@@ -163,7 +163,7 @@ p=obj.getAllParameters;
 [f,p]=uigetfile(p.cal_3Dfile);
 if f
     l=load([p f]);
-    if ~isfield(l,'outforfit') || ~isfield(l,'SXY')
+    if ~isfield(l,'outforfit') && ~isfield(l,'SXY')
         msgbox('no 3D data recognized. Select other file.');
     end
     obj.setGuiParameters(struct('cal_3Dfile',[p f]));
@@ -184,7 +184,7 @@ if fitpar.fitmode==3
     else
         fitpar.objPos=p.objPos;
         if isfield(cal,'outforfit')
-            fitpar.zpar=cal.outforfit;
+            fitpar.zpar{1,1}=cal.outforfit;
         else
             s=size(cal.SXY);
             for X=1:s(1)
