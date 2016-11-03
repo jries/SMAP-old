@@ -27,10 +27,21 @@ classdef NPCLabelingQuantify<interfaces.SEEvaluationProcessor
 end
 
 function pard=guidef
-% pard.layer.object=struct('Style','popupmenu','String','layer1|layer2');
-% pard.layer.position=[1,1];
-% pard.layer.Width=2;
+pard.Rt.object=struct('Style','text','String','R (nm):');
+pard.Rt.position=[1,1];
+pard.Rt.Width=1;
 
+pard.R.object=struct('Style','edit','String','50');
+pard.R.position=[1,2];
+pard.R.Width=1;
+
+pard.dRt.object=struct('Style','text','String','dR:');
+pard.dRt.position=[1,3];
+pard.dRt.Width=1;
+
+pard.dR.object=struct('Style','edit','String','20');
+pard.dR.position=[1,4];
+pard.dR.Width=1;
 % pard.dualchannel.object=struct('Style','checkbox','String','dual channel','Value',0);
 % pard.dualchannel.position=[2,1];
 % pard.dualchannel.Width=2;
@@ -59,18 +70,23 @@ end
 
 
 function out=runintern(obj,p)
+R=p.R;
+dR=p.dR;
 
 locs=obj.getLocs({'xnm','ynm','xnm_gt','ynm_gt','locprecnm'},'layer',1,'size',p.se_siteroi);
-locsall=obj.getLocs({'xnm','ynm','xnm_gt','ynm_gt','locprecnm'},'size',p.se_siteroi);
-xm=locs.xnm-obj.site.pos(1);
-ym=locs.ynm-obj.site.pos(2);
+
+
+% xm=locs.xnm-obj.site.pos(1);
+% ym=locs.ynm-obj.site.pos(2);
+[x0,y0]=fitposring(locs.xnm,locs.ynm,R);
+xm=locs.xnm-x0;
+ym=locs.ynm-y0;
 
 
 step=2*pi/8;
 
 [tha,rhoa]=cart2pol(xm,ym);
-R=50;
-dR=30;
+
 
 minlp=step*R*.4;
 % minlp=inf;
@@ -78,8 +94,6 @@ inr=rhoa>R-dR&rhoa<R+dR;
 inr=inr&locs.locprecnm<minlp;
 th=tha(inr);rho=rhoa(inr);
 
-[th_gt,rho_gt]=cart2pol(locsall.xnm_gt(:)-obj.site.pos(1),locsall.ynm_gt(:)-obj.site.pos(2));
-[th_gtf,rho_gtf]=cart2pol(locs.xnm_gt(inr)-obj.site.pos(1),locs.ynm_gt(inr)-obj.site.pos(2));
 
 % find rotation
 locptheta=locs.locprecnm(inr)./rho;
@@ -149,30 +163,41 @@ numfound2=8-sum(fs2);
 % histogram(dth/step,30)
 % subplot(3,1,2)
 % plot(dth,dstep,'+')
-tg=sort(th_gt);tg(end+1)=tg(1)+2*pi;
-tgf=sort(th_gtf);tgf(end+1)=tgf(1)+2*pi;
-numlocs=sum(diff(tg)>step*.7);
-numlocsf=sum(diff(tgf)>step*.7);
 
-out.numcornersfiltered=numlocsf;
-out.numcorners=numlocs;
+
+
 out.numfoundint=numfound;
 out.numfoundrat=numfound2;
 out.numbercornerassined=numbercornerassined;
 out.rotation=(mdt);
 
+if ~isempty(locs.xnm_gt)
+    locsall=obj.getLocs({'xnm','ynm','xnm_gt','ynm_gt','locprecnm'},'size',p.se_siteroi);
+    [th_gt,rho_gt]=cart2pol(locsall.xnm_gt(:)-x0,locsall.ynm_gt(:)-y0);
+    [th_gtf,rho_gtf]=cart2pol(locs.xnm_gt(inr)-x0,locs.ynm_gt(inr)-y0);
+    tg=sort(th_gt);tg(end+1)=tg(1)+2*pi;
+    tgf=sort(th_gtf);tgf(end+1)=tgf(1)+2*pi;
+    numlocs=sum(diff(tg)>step*.7);
+    numlocsf=sum(diff(tgf)>step*.7);
+    out.numcornersfiltered=numlocsf;
+    out.numcorners=numlocs;
+else
+    numlocsf=0;
+end
 if obj.display
 figure(188);
 subplot(3,1,1);bar(numberincorners);
-title(((mdt))/pi*180)
+title(['theta=' num2str(((mdt))/pi*180) ', pos=' num2str(x0-obj.site.pos(1)) ,',' num2str(y0-obj.site.pos(2))])
 subplot(3,1,2);histogram(dthplot,-step/2:pi/64:step/2);
 
 subplot(3,1,3)
-plot(locs.xnm(inr),locs.ynm(inr),'x',locsall.xnm_gt,locsall.ynm_gt,'ro',locs.xnm_gt(inr),locs.ynm_gt(inr),'r*')
-
-axis equal
-
-title(['corners: ' int2str(numlocsf) ', found: ' int2str(numfound) ', fractional: ' num2str(numfound2,3), ', assigned: ' ,int2str(numbercornerassined)])
+plot(locs.xnm(inr),locs.ynm(inr),'x')
+if ~isempty(locs.xnm_gt)
+    plot(locs.xnm(inr),locs.ynm(inr),'x',locsall.xnm_gt,locsall.ynm_gt,'ro',locs.xnm_gt(inr),locs.ynm_gt(inr),'r*')
+end
+   axis equal
+    title(['corners: ' int2str(numlocsf) ', found: ' int2str(numfound) ', fractional: ' num2str(numfound2,3), ', assigned: ' ,int2str(numbercornerassined)])
+    
 end
 end
 

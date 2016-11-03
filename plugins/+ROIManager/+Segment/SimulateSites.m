@@ -5,6 +5,7 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
         function obj=SimulateSites(varargin)        
                 obj@interfaces.DialogProcessor(varargin{:});
             obj.inputParameters={'se_sitefov','se_cellpixelsize','se_siteroi'};
+            obj.history=true;
         end
         
         function out=run(obj,p)  
@@ -39,6 +40,9 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
            se.processors.preview.updateFilelist;
            se.processors.preview.updateCelllist;
            se.processors.preview.updateSitelist; 
+           se.currentsite=se.site(1);
+           se.currentcell=se.cells(1);
+           se.currentfile=se.files(1);
            catch
            end
           out=[];
@@ -179,30 +183,41 @@ for k=numberofsites:-1:1
     xh=mod(k-1,numberofrows);
     yh=ceil(k/numberofrows);
     if ~isempty(image)
-        locs(k)=locsfromimage(image,p);
+        locsh=locsfromimage(image,p);
     else
-        locs(k)=labelremove(locsall,p.labeling_efficiency);
+        locsh=labelremove(locsall,p.labeling_efficiency);
     end
 
-    numlocs=length(locs(k).x);
-    locs(k).x=reshape(locs(k).x,numlocs,1);
-    locs(k).y=reshape(locs(k).y,numlocs,1);
+    numlocs=length(locsh.x);
+    locsh.x=reshape(locsh.x,numlocs,1);
+    locsh.y=reshape(locsh.y,numlocs,1);
     if p.randomrot
         angle=2*pi*rand(1);
-        [locs(k).x,locs(k).y]=rotcoord(locs(k).x,locs(k).y,angle);
+        [locsh.x,locsh.y]=rotcoord(locsh.x,locsh.y,angle);
+    else
+        angle=0;
     end
     
     if p.randomxy 
         dx=(rand(1)-.5)*p.randomxyd*2;dy=(rand(1)-.5)*p.randomxyd*2;
-        locs(k).x=locs(k).x+dx;
-        locs(k).y=locs(k).y+dy;
+        locsh.x=locsh.x+dx;
+        locsh.y=locsh.y+dy;
+    else
+        dx=0;
+        dy=0;
     end
     
-    locs(k).x=locs(k).x+xh*distsites;
-    locs(k).y=locs(k).y+yh*distsites;
+    locs(k).x=locsh.x+xh*distsites;
+    locs(k).y=locsh.y+yh*distsites;
+    locs(k).angle=angle*ones(size(locsh.x));
+    locs(k).dx_gt=dx*ones(size(locsh.x));
+    locs(k).dy_gt=dy*ones(size(locsh.x));
         
     possites(k).x=xh*distsites;
     possites(k).y=yh*distsites;
+%     figure(89);plot(locs(k).x,locs(k).y,'*')
+%     waitforbuttonpress
+    
 end
 end
 
@@ -288,6 +303,10 @@ function locs=locsfromposi(locsi,p)
     locs.ynm=single(locsi.y(indin)+randn(numlocs,1).*locprecnm(indin));
     locs.xnm_gt=single(locsi.x(indin));
     locs.ynm_gt=single(locsi.y(indin));
+    locs.dxnm_gt=single(locsi.dx_gt(indin));
+    locs.dynm_gt=single(locsi.dy_gt(indin));
+    locs.angle=single(locsi.angle(indin));
+      
 end
 function pard=guidef(obj)
 
