@@ -165,11 +165,17 @@ switch ext
         return
 end
 
-
 distsites=p.se_sitefov;
-numberofrows=ceil(64000/p.se_sitefov);
+if length(p.numberofsites)>1
+    numberofrows=p.numberofsites(2);
+    numberofsites=p.numberofsites(1)*p.numberofsites(2);
+else
+    numberofrows=ceil(32000/p.se_sitefov);
+    numberofsites=p.numberofsites;
+end
+
 % numeroflines=ceil(p.numberofsites/numberofrows);
-for k=p.numberofsites:-1:1
+for k=numberofsites:-1:1
     xh=mod(k-1,numberofrows);
     yh=ceil(k/numberofrows);
     if ~isempty(image)
@@ -177,9 +183,24 @@ for k=p.numberofsites:-1:1
     else
         locs(k)=labelremove(locsall,p.labeling_efficiency);
     end
+
     numlocs=length(locs(k).x);
-    locs(k).x=reshape(locs(k).x,numlocs,1)+xh*distsites;
-    locs(k).y=reshape(locs(k).y,numlocs,1)+yh*distsites;
+    locs(k).x=reshape(locs(k).x,numlocs,1);
+    locs(k).y=reshape(locs(k).y,numlocs,1);
+    if p.randomrot
+        angle=2*pi*rand(1);
+        [locs(k).x,locs(k).y]=rotcoord(locs(k).x,locs(k).y,angle);
+    end
+    
+    if p.randomxy 
+        dx=(rand(1)-.5)*p.randomxyd*2;dy=(rand(1)-.5)*p.randomxyd*2;
+        locs(k).x=locs(k).x+dx;
+        locs(k).y=locs(k).y+dy;
+    end
+    
+    locs(k).x=locs(k).x+xh*distsites;
+    locs(k).y=locs(k).y+yh*distsites;
+        
     possites(k).x=xh*distsites;
     possites(k).y=yh*distsites;
 end
@@ -330,7 +351,7 @@ pard.t5.object=struct('String','BG per pixel (photons)','Style','text');
 pard.t5.position=[5,3];
 pard.t5.Width=1.5;
 
-pard.background.object=struct('String','50','Style','edit');
+pard.background.object=struct('String','20','Style','edit');
 pard.background.Width=.5;
 pard.background.position=[5,4.5];
 
@@ -338,9 +359,21 @@ pard.t6.object=struct('String','Number of sites','Style','text');
 pard.t6.position=[7,1];
 pard.t6.Width=1.5;
 
-pard.numberofsites.object=struct('String','100','Style','edit');
+pard.randomrot.object=struct('String','Random rotation','Style','checkbox');
+pard.randomrot.Width=1;
+pard.randomrot.position=[7,1];
+
+pard.randomxy.object=struct('String','Random position (nm):','Style','checkbox');
+pard.randomxy.Width=1;
+pard.randomxy.position=[7,2];
+
+pard.randomxyd.object=struct('String','20','Style','edit');
+pard.randomxyd.Width=1;
+pard.randomxyd.position=[7,3];
+
+pard.numberofsites.object=struct('String','5 5','Style','edit');
 pard.numberofsites.Width=.5;
-pard.numberofsites.position=[7,2.5];
+pard.numberofsites.position=[8,2.5];
 
 pard.plugininfo.type='ROI_Analyze';
 end
