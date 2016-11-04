@@ -26,7 +26,11 @@ for k=length(p):-1:1
         v{k}=vh;
     end
     catch err
-        v=[];
+    if isarray
+        v(k)=NaN;
+    else
+        v{k}=NaN;
+    end
     end
 
 end

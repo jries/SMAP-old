@@ -9,38 +9,41 @@ numbercornerassined=getFieldAsVector(se.sites,fields{:},'numbercornerassined');
 nb=0:8;
     figure(89);
     
-    subplot(3,2,1)
+    subplot(3,3,1)
     hold off
     hi=hist(numfoundint,nb);
     bar(nb,hi)
     hold on
     pf=fithist(hi,nb);
-    title(pf)
-    subplot(3,2,2)
+    title(['int: ' num2str(pf,2)])
+    
+    axis tight
+    subplot(3,3,2)
     hold off
     hr=hist(numfoundrat,nb);
     bar(nb,hr)
     hold on
     pf=fithist(hr,nb);
-    title(pf)
+    title(['rat: ' num2str(pf,2)])
     
-    subplot(3,2,3)
+    axis tight
+    subplot(3,3,3)
     hold off
     ha=hist(numbercornerassined,nb);
     bar(nb,ha)
     hold on
     pf=fithist(ha,nb);
-    
-    title(pf)
+    title(['assign: ' num2str(pf,2)])
+   axis tight
    
-    subplot(3,2,4)
+    subplot(3,3,4)
     hold off
     hall=hi+hr+ha;
     bar(nb,hall)
     hold on
     pf=fithist(hall,nb);
-    title(pf)
-   
+    title(['all: ' num2str(pf,2)])
+    axis tight
     
     
 if isfield(se.sites(1).evaluation.NPCLabelingQuantify,'numcornersfiltered') %not from simulation
@@ -48,7 +51,7 @@ if isfield(se.sites(1).evaluation.NPCLabelingQuantify,'numcornersfiltered') %not
     numcornersunf=getFieldAsVector(se.sites,fields{:},'numcorners');
     
     
-    subplot(3,2,5)
+    subplot(3,3,5)
     hold off
     hnc=hist(numcornersunf,nb);
     bar(nb,hnc)
@@ -57,9 +60,9 @@ if isfield(se.sites(1).evaluation.NPCLabelingQuantify,'numcornersfiltered') %not
 %     
 %     hh=clusterfromlabeling(nb,8,2,.4)*sum(hnc);
 %     plot(nb,hh)
-    title(pf)
-    
-    subplot(3,2,[6])
+    title(['true: ' num2str(pf,2)])
+    axis tight
+    subplot(3,3,[7,8,9])
     plot(numfoundint-numcorners)
     hold on
     plot(numfoundrat-numcorners)
@@ -88,6 +91,7 @@ x=n(3:end)';
 % clusterfromlabeling(x,corners,rings,.5)
 ft=fittype('a*clusterfromlabeling(x,corners,rings,p)','problem',{'corners','rings'});
 f=fit(x,hi(3:end)',ft,'problem',{corners, rings},'Lower',[0 0.01],'Upper',[inf .99],'Start',[shi .3]);
-plot(x,f(x))
+plot(0:8,f(0:8),'-g')
+plot(x,f(x),'-*r')
 pf=f.p;
 end
