@@ -396,6 +396,11 @@ end
 obj.SE.processors.annotation.sitechange(obj.SE.currentsite);
 obj.SE.processors.eval.evaluate(obj.SE.currentsite);
 obj.SE.currentsite.image.composite=[];
+% l=obj.SE.currentsite.image.layers;
+% for k=length(l):-1:1
+%     obj.SE.currentsite.image.imax=l(k).images.finalImages.imax;
+% end
+
 obj.SE.currentsite.image.layers=[];
 obj.SE.currentsite.image.image=single(obj.SE.currentsite.image.image);
 %plot info

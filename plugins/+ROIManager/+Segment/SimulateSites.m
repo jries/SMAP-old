@@ -311,7 +311,7 @@ end
 function pard=guidef(obj)
 
 % 
-pard.coordinatefile.object=struct('String','','Style','edit');
+pard.coordinatefile.object=struct('String','plugins/+ROIManager/+Segment/hidden/MakeNPCCoordinates.m','Style','edit');
 pard.coordinatefile.position=[1,1];
 pard.coordinatefile.Width=3;
 

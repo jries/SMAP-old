@@ -7,7 +7,7 @@ classdef SEGUISettings< interfaces.SEProcessor
             obj@interfaces.SEProcessor(varargin{:})    
         end
         function pard=guidef(obj)
-            pard=guidef;
+            pard=guidef(obj);
         end
         function initGui(obj)
             initGui@interfaces.SEProcessor(obj);
@@ -31,7 +31,7 @@ if obj.getPar('autosavecheck')==0
         obj.setPar('autosavecheck',1);
     end
 end
-if data.Value
+if 1
     if isempty(obj.SEpreview)||~isvalid(obj.SEpreview.handle)
         pfig=figure(205);
         delete(pfig.Children)
@@ -64,7 +64,13 @@ obj.SEpreview.clearall;
 end
 end
 
-function pard=guidef
+function setcurrent(a,b,obj,what)
+imax=obj.SE.(['current' what]).image.imax;
+obj.setPar(['se_imax_' what],imax(:));
+obj.guihandles.(['se_imax_' what]).String=num2str(imax(:)',2);
+end
+
+function pard=guidef(obj)
 
 pard.text3.object=struct('String','FoV (nm)','Style','text');
 pard.text3.position=[1,2.25];
@@ -115,34 +121,48 @@ pard.se_dz.object=struct('Style','edit','String',1000);
 pard.se_dz.position=[2,3.75];
 pard.se_dz.Width=0.75;
 
-pard.se_imaxcheck.object=struct('Style','checkbox','String','Set Imax for sites to: [ch1 ch2 ...]','Value',0);
-pard.se_imaxcheck.position=[5,1];
-pard.se_imaxcheck.Width=2;
+pard.se_imaxcheck_site.object=struct('Style','checkbox','String','Set Imax for sites to: [ch1 ch2 ...]','Value',0);
+pard.se_imaxcheck_site.position=[5,1];
+pard.se_imaxcheck_site.Width=2;
 
-pard.se_imax.object=struct('Style','edit','String','10','Value',1);
-pard.se_imax.position=[5,3];
+pard.se_imax_site.object=struct('Style','edit','String','1','Value',1);
+pard.se_imax_site.position=[5,3];
+
+pard.se_imax_site_current.object=struct('Style','pushbutton','String','<- Current','Callback',{{@setcurrent,obj,'site'}});
+pard.se_imax_site_current.position=[5,4];
+
+pard.se_imaxcheck_cell.object=struct('Style','checkbox','String','Set Imax for cells to: [ch1 ch2 ...]','Value',0);
+pard.se_imaxcheck_cell.position=[6,1];
+pard.se_imaxcheck_cell.Width=2;
+
+pard.se_imax_cell.object=struct('Style','edit','String','1','Value',1);
+pard.se_imax_cell.position=[6,3];
+
+pard.se_imax_cell_current.object=struct('Style','pushbutton','String','<- Current','Callback',{{@setcurrent,obj,'cell'}});
+pard.se_imax_cell_current.position=[6,4];
+
 
 pard.se_rotate.object=struct('Style','checkbox','String','rotate','Value',0);
-pard.se_rotate.position=[6,1];
+pard.se_rotate.position=[8,1];
 % pard.autouptdate.object=struct('Style','checkbox','String','auto update','Value',0);
 % pard.autouptdate.position=[6,2];
 pard.se_drawboxes.object=struct('Style','checkbox','String','draw boxes','Value',1);
-pard.se_drawboxes.position=[6,2];
+pard.se_drawboxes.position=[8,2];
 
 pard.se_drawsideview.object=struct('Style','checkbox','String','draw sideview','Value',1);
-pard.se_drawsideview.position=[6,3];
+pard.se_drawsideview.position=[8,3];
 
 
 pard.redrawall.object=struct('Style','pushbutton','String','redraw all','Value',0);
-pard.redrawall.position=[8.5,4];
+pard.redrawall.position=[10.5,4];
 
 pard.clearall.object=struct('Style','pushbutton','String','clear all','Value',0);
 pard.clearall.position=[4,4];
 
-pard.showSE.object=struct('Style','togglebutton','String','show ROI manager','Value',0);
-pard.showSE.position=[9,1];
+pard.showSE.object=struct('Style','pushbutton','String','show ROI manager','Value',0);
+pard.showSE.position=[11,1];
 pard.showSE.Height=2;
 pard.showSE.Width=1.5;
 
-pard.outputParameters={'se_sitefov','se_cellfov','se_sitepixelsize','se_cellpixelsize','se_siteroi','se_drawboxes','se_rotate','se_imax','se_imaxcheck','se_dz','se_drawsideview'};
+pard.outputParameters={'se_sitefov','se_cellfov','se_sitepixelsize','se_cellpixelsize','se_siteroi','se_drawboxes','se_rotate','se_imax_site','se_imaxcheck_cell','se_imax_cell','se_imaxcheck_site','se_dz','se_drawsideview'};
 end

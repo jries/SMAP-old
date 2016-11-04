@@ -251,15 +251,15 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
                  p1.rotationangle=0;
                 end
 
-                if obj.getPar('se_imaxcheck')
+                if obj.getPar('se_imaxcheck_site')
                     p1.imaxtoggle=false;
-                    imax=obj.getPar('se_imax');
+                    imax=obj.getPar('se_imax_site');
 
                     for k=1:length(imax)
-                        pl{k}.imax=imax(k);
+                        pl{k}.imax_min=imax(k);
                     end
                     for k=length(imax)+1:obj.getPar('numberOfLayers')
-                        pl{k}.imax=imax(1);
+                        pl{k}.imax_min=imax(1);
                     end
                 else
                     pl=[];
@@ -310,9 +310,24 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
                 p1.rotationangle=0;
                 p1.normalizeFoV=[];
                 
-                image=obj.plotobject(p1,cell.info.filenumber);%filenumber
+                if obj.getPar('se_imaxcheck_cell')
+                    p1.imaxtoggle=false;
+                    imax=obj.getPar('se_imax_cell');
+
+                    for k=1:length(imax)
+                        pl{k}.imax_min=imax(k);
+                    end
+                    for k=length(imax)+1:obj.getPar('numberOfLayers')
+                        pl{k}.imax_min=imax(1);
+                    end
+                else
+                    pl=[];
+                end
+                
+                
+                image=obj.plotobject(p1,cell.info.filenumber,pl);%filenumber
                 image.image=single(image.image);
-                cell.image=copyfields([],image,{'image','rangex','rangey','parameters','layers'});
+                cell.image=copyfields([],image,{'image','rangex','rangey','parameters','layers','imax'});
              end
             displayimage(cell.image,hax)
             
@@ -378,6 +393,7 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
                players={players};
            end
           plotz=false;
+          imax=zeros(numlayers,1);
            for k=1:numlayers
 %                 pr=obj.getLayerParameters(k, obj.processors.renderer.inputParameters);   
 %                 pd=obj.getLayerParameters(k, obj.processors.drawer.inputParameters); 
@@ -443,6 +459,7 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
                     
                     obj.locData.setFilter(filterold,k);
                     layers(k).images.finalImages=drawerSMAP(rawimage,pr);
+                    imax(k)=layers(k).images.finalImages.imax;
                     layers(k).images.rawimage=rawimage;
 %                      obj.processors.displayer.setParameters(pr);
                     layers(k).images.renderimages=displayerSMAP(layers(k),pr);
@@ -455,6 +472,7 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
            image.parameters=pr;
            image.parameters.layerparameters=players;
            image.layers=layers;
+           image.imax=imax;
            
            if plotz
                imagez=displayerSMAP(layersz,prz);
