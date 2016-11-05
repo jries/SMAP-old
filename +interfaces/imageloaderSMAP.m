@@ -11,9 +11,14 @@ classdef imageloaderSMAP<handle
     methods
        function obj=imageloaderSMAP(varargin)
            obj.metadata=interfaces.metadataSMAP;
+           if nargin>1
+                obj.updatemetadata(varargin{2});
+           end
+%            obj.getPar
             if nargin>0
                 obj.open(varargin{1});
             end
+
         end
     end
     methods (Abstract=true)
@@ -44,6 +49,14 @@ classdef imageloaderSMAP<handle
                     end
             end
             
+        end
+        function updatemetadata(obj, md)
+            if isempty(md)
+                return;
+            end
+            fn=fieldnames(md);fn2=properties(obj.metadata);
+           fna=intersect(fn,fn2);
+           obj.metadata=copyfields(obj.metadata,md,fna);
         end
     end
     

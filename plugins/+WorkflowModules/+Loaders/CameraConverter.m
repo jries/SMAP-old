@@ -10,11 +10,17 @@ classdef CameraConverter<interfaces.WorkflowModule
         calibrategain=false;
         calibratecounter
         calibrateimages
+        offset
+        adu2phot
     end
     methods
         function obj=CameraConverter(varargin)
             obj@interfaces.WorkflowModule(varargin{:})
             obj.loc_cameraSettings=interfaces.metadataSMAP;
+            fn=fieldnames(obj.loc_cameraSettingsStructure);
+            for k=1:length(fn)
+                obj.loc_cameraSettings.assigned.(fn{k})=false;
+            end
             obj.propertiesToSave={'loc_cameraSettings'};
         end
         function pard=guidef(obj)
@@ -46,14 +52,36 @@ classdef CameraConverter<interfaces.WorkflowModule
             end
             obj.setPar('loc_cameraSettings',obj.loc_cameraSettings);
             obj.setPar('EMon',obj.loc_cameraSettings.EMon);
+            obj.updatefileinfo;
 %             if obj.loc_cameraSettings.EMon
 %             	obj.EMexcessNoise=2;
 %             else
 %                 obj.EMexcessNoise=1;
 %             end
         end
+        function setcamerasettings(obj,fi)
+            fn=fieldnames(fi);
+            fn2=properties(obj.loc_cameraSettings);
+            fna=intersect(fn,fn2);
+            for k=1:length(fna)
+                obj.loc_cameraSettings.(fna{k})=fi.(fna{k});
+            end
+        end
+        function updatefileinfo(obj)
+           fi=obj.getPar('loc_fileinfo');
+           md2=obj.loc_cameraSettings;
+           fn=fieldnames(fi);fn2=properties(md2);
+           fna=intersect(fn,fn2);
+           fi=copyfields(fi,md2,fna);
+           obj.setPar('loc_fileinfo',fi);
+        end
         function prerun(obj,p)
-           
+            pc=obj.loc_cameraSettings;
+            if ~pc.EMon
+                pc.emgain=1;
+            end
+            obj.offset=pc.offset;
+            obj.adu2phot=(pc.conversion/pc.emgain);
         end
         function datao=run(obj,data,p)
             
@@ -79,49 +107,13 @@ classdef CameraConverter<interfaces.WorkflowModule
                 
                 return
             end
-            pc=obj.loc_cameraSettings;
-            if ~pc.EMon
-                pc.emgain=1;
-            end
-            offset=pc.offset;
-            adu2phot=(pc.conversion/pc.emgain);
-            imphot=single((data.data-offset))*adu2phot;
+           
+            imphot=single((data.data-obj.offset))*obj.adu2phot;
                datao=data;
                datao.data=imphot;  
         end
         
-        function readmetadata(obj,file)
-            dagl
-             p=obj.getGuiParameters;
-             p.metadatafile=fiele;
-%             if ~isfield(p,'metadatafile')
-%                 return
-%             end
-            camcalib=readtable(obj.calfile);
-            fid=fopen(p.metadatafile);
-            if fid>0
-                minfo=fread(fid,[1,100000],'*char');
-                fclose(fid);
-                metadata=minfoparsec(minfo,camcalib);
-                obj.status('metadata updated');drawnow;
-            else 
-                obj.status('no metadata found, using previous metadata. ');drawnow;
-                metadata=[];
-            end
-            if ~isempty(metadata) %otherwise: keep default
-                obj.loc_cameraSettings=copyfields(obj.loc_cameraSettings,metadata);%,fieldnames(obj.loc_cameraSettings));
-            else
-                %default settings
-            end
-            
-            if strcmp(obj.loc_cameraSettings.port,'Conventional')|| strcmp(obj.loc_cameraSettings.port,'Normal') %still valid?
-                emexcess=1;
-            else
-                emexcess=2;
-            end
-            obj.EMexcessNoise=emexcess;
-            obj.updateObjectParameters;
-        end
+       
     end
 end
 
@@ -140,9 +132,14 @@ fn=fieldnames(obj.loc_cameraSettingsStructure);
 %     obj.loc_cameraSettings.comment='no comments';
 % end
 %XXX
-for k=1:length(fn)
+fi=obj.getPar('loc_fileinfo');
+for k=length(fn):-1:1
     fields{k}=fn{k};
-    defAns{k}=num2str(obj.loc_cameraSettings.(fn{k}));
+    if isfield(fi,fn{k})
+        defAns{k}=num2str(fi.(fn{k}));
+    else
+        defAns{k}=num2str(obj.loc_cameraSettings.(fn{k}));
+    end
 end
 answer=inputdlg(fields,'Acquisition settings',1,defAns);
 if ~isempty(answer)
@@ -165,25 +162,36 @@ end
 end
 
 function loadmetadata_callback(a,b,obj)
-disp('under construction')
-return
-[f,p]=uigetfile('*.*','Select metadata.txt, tif or _sml.mat');
+
+% return
+finf=obj.getPar('loc_fileinfo');
+if ~isempty(finf)
+    ft=[(finf.basefile) filesep '*.*'];
+else
+    ft='*.*';
+end
+
+[f,p]=uigetfile(ft,'Select metadata.txt, tif or _sml.mat');
 [~,~,ext ]=fileparts(f);
 switch ext
     case '.mat'
-        
+        l=load([p f]);
+        metadata=l.saveloc.file(1).info;
+
     case '.tif'
-        imloader=imageLoader([p f]);
-        metafile=imloader.info.metafile;
-        par.metadatafile=metafile;
-        obj.setGuiParameters(par);
-        obj.updateGui;
+        imloader=imageloaderAll([p f],finf);
+        metadata=imloader.metadata;
+        metadata.allmetadata=metadata;
+
     case '.txt'
         par.metadatafile=[p f];
         obj.setGuiParameters(par);
-        obj.updateGui;
+        obj.updateGui;       
+        metadata=getmetadataMMtxt([p f]); 
 end
-obj.readmetadata;
+        obj.setcamerasettings(metadata);
+        obj.updatefileinfo;
+% obj.readmetadata;
 end
 
 % function parseMetatdata(obj)
@@ -219,10 +227,10 @@ pard.loadmetadata.object=struct('Style','pushbutton','String','Load metadata');
 pard.loadmetadata.position=[2,1];
 pard.loadmetadata.TooltipString=sprintf('Load micromanager Metadata.txt file.');
 pard.loadmetadata.Optional=true;
-pard.calibrate.object=struct('Style','pushbutton','String','auto calibration');
-pard.calibrate.position=[2,2];
-pard.calibrate.TooltipString=sprintf('calibrate gain and offset from images (from simpleSTORM)');
-pard.calibrate.Optional=true;
+% pard.calibrate.object=struct('Style','pushbutton','String','auto calibration');
+% pard.calibrate.position=[2,2];
+% pard.calibrate.TooltipString=sprintf('calibrate gain and offset from images (from simpleSTORM)');
+% pard.calibrate.Optional=true;
 
 pard.camparbutton.object=struct('Style','pushbutton','String','set Cam Parameters');
 pard.camparbutton.position=[2,3.5];

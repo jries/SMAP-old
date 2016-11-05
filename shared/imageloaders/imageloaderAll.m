@@ -1,6 +1,7 @@
-function io=imageloaderAll(file)
+function io=imageloaderAll(varargin)
 % imageloaderAll selects the right image loader based on the presence of
 % metadata.
+file=varargin{1};
    [path,~,ext]=fileparts(file);
 %    info=imfinfo(file);Tiff
    switch ext
@@ -21,7 +22,7 @@ function io=imageloaderAll(file)
        otherwise
            imloader=@imageloaderOME;
    end    
-   io=imloader(file);
+   io=imloader(varargin{:});
 end
 
 function numf=countfiles(file)
