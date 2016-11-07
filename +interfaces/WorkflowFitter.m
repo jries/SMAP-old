@@ -29,41 +29,42 @@ classdef WorkflowFitter<interfaces.WorkflowModule
         end
         function prerun(obj,p)
             global fitterstackinfo fitterimagestack fitterbgstack
+            fitterstackinfo=[];
 %             obj.numberInBlock=1; %round(5500*100/roisize^2);
             obj.fitinit;
-            roisize=obj.getPar('loc_ROIsize');
-%             obj.numberInBlock=round(5500*100/roisize^2);
-            numx=length(obj.spatialXrange)-1;
-            numy=length(obj.spatialYrange)-1;
-%             disp(['number in block: ' num2str(obj.numberInBlock)]);
-            obj.stackind=zeros(numx,numy);
-            obj.fittedlocs=0;
-%             if obj.spatial3Dcal
-            fitterstackinfo=[];
-                for X=numx:-1:1
-                    for Y=numy:-1:1
-                        fitterimagestack{X,Y}=zeros(roisize,roisize,obj.numberInBlock,'single');
-                        fitterstackinfo{X,Y}.x=zeros(obj.numberInBlock,1,'single');
-                        fitterstackinfo{X,Y}.y=zeros(obj.numberInBlock,1,'single');
-                        fitterstackinfo{X,Y}.frame=zeros(obj.numberInBlock,1,'double');
-%                         fitterstackinfo{X,Y}.X=X;
-%                         fitterstackinfo{X,Y}.Y=Y;
-                    end
-                end
-                       
+%             roisize=obj.getPar('loc_ROIsize');
+% %             obj.numberInBlock=round(5500*100/roisize^2);
+%             numx=length(obj.spatialXrange)-1;
+%             numy=length(obj.spatialYrange)-1;
+% %             disp(['number in block: ' num2str(obj.numberInBlock)]);
+%             obj.stackind=zeros(numx,numy);
+%             obj.fittedlocs=0;
+% %             if obj.spatial3Dcal
+%             fitterstackinfo=[];
+%                 for X=numx:-1:1
+%                     for Y=numy:-1:1
+%                         fitterimagestack{X,Y}=zeros(roisize,roisize,obj.numberInBlock,'single');
+%                         fitterstackinfo{X,Y}.x=zeros(obj.numberInBlock,1,'single');
+%                         fitterstackinfo{X,Y}.y=zeros(obj.numberInBlock,1,'single');
+%                         fitterstackinfo{X,Y}.frame=zeros(obj.numberInBlock,1,'double');
+% %                         fitterstackinfo{X,Y}.X=X;
+% %                         fitterstackinfo{X,Y}.Y=Y;
+%                     end
+%                 end
+%                        
+% %             else
+% %                 fitterimagestack{1,1}=zeros(roisize,roisize,obj.numberInBlock,'single');
+% %             end
+%             if obj.inputChannels==2
+%                 fitterbgstack=fitterimagestack;
 %             else
-%                 fitterimagestack{1,1}=zeros(roisize,roisize,obj.numberInBlock,'single');
+%                 fitterbgstack=[];
 %             end
-            if obj.inputChannels==2
-                fitterbgstack=fitterimagestack;
-            else
-                fitterbgstack=[];
-            end
             
 %             infos=struct('x',0,'y',0,'frame',0);
 %             fitterstackinfo=infos;
 
-            obj.fitinit;
+%             obj.fitinit;
             
             
             
@@ -75,6 +76,11 @@ classdef WorkflowFitter<interfaces.WorkflowModule
         function out=run(obj,data,p)  
             
             global fitterimagestack fitterstackinfo fitterbgstack 
+            
+            if isempty(fitterstackinfo)
+                initstacks(obj)
+            end
+            
             persistent reporttimer
             out=[];
             passbg=(obj.inputChannels==2);%~isempty(fitterbgstack);
@@ -229,6 +235,39 @@ classdef WorkflowFitter<interfaces.WorkflowModule
         end
        
     end
+end
+
+function initstacks(obj)
+global fitterstackinfo fitterimagestack fitterbgstack
+
+ roisize=obj.getPar('loc_ROIsize');
+%             obj.numberInBlock=round(5500*100/roisize^2);
+            numx=length(obj.spatialXrange)-1;
+            numy=length(obj.spatialYrange)-1;
+%             disp(['number in block: ' num2str(obj.numberInBlock)]);
+            obj.stackind=zeros(numx,numy);
+            obj.fittedlocs=0;
+%             if obj.spatial3Dcal
+            fitterstackinfo=[];
+                for X=numx:-1:1
+                    for Y=numy:-1:1
+                        fitterimagestack{X,Y}=zeros(roisize,roisize,obj.numberInBlock,'single');
+                        fitterstackinfo{X,Y}.x=zeros(obj.numberInBlock,1,'single');
+                        fitterstackinfo{X,Y}.y=zeros(obj.numberInBlock,1,'single');
+                        fitterstackinfo{X,Y}.frame=zeros(obj.numberInBlock,1,'double');
+%                         fitterstackinfo{X,Y}.X=X;
+%                         fitterstackinfo{X,Y}.Y=Y;
+                    end
+                end
+                       
+%             else
+%                 fitterimagestack{1,1}=zeros(roisize,roisize,obj.numberInBlock,'single');
+%             end
+            if obj.inputChannels==2
+                fitterbgstack=fitterimagestack;
+            else
+                fitterbgstack=[];
+            end
 end
 
 function outputlocs(obj,locs,stackinfo,tag,eof)

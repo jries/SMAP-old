@@ -23,6 +23,7 @@ classdef RoiCutterWF<interfaces.WorkflowModule
             p=obj.getAllParameters;
             obj.loc_ROIsize=p.loc_ROIsize;
             obj.preview=obj.getPar('loc_preview');
+            obj.setPar('loc_ROIsize',p.loc_ROIsize);
            
         end
         function outputdat=run(obj,data,p)
