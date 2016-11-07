@@ -71,14 +71,16 @@ function md=getMetaLif(reader)
 cm=reader.getCoreMetadataList;
 cm1=cm.get(1);
 sm=cm1.seriesMetadata;
-md.emgain=sm.get('ProcessingHistory|ATLCameraSettingDefinition|EMGainValue');
-md.conversion=sm.get('ProcessingHistory|ATLCameraSettingDefinition|GainValue');
-md.EMon=sm.get('ProcessingHistory|ATLCameraSettingDefinition|CanDoEMGain');
+md.emgain=str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|EMGainValue'));
+md.conversion=str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|GainValue'));
+md.EMon=str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|CanDoEMGain'));
 % k=sm.keys;
 % while k.hasNext
 %     kh=k.nextElement
 %     disp([kh ',' sm.get(kh)])
+
 % end
+
 end
 
 function meta=getMetaNd2(m)
