@@ -204,6 +204,7 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
                         SXY(X,Y,Z).Yrange=[Yrange(Y) ,Yrange(Y+1)];
                         SXY(X,Y,Z).Zrange=[Zrange(Z), Zrange(Z+1)];
                         SXY(X,Y,Z).Zoffset=p.ztruepos+mean(SXY(X,Y,Z).Zrange);
+                        SXY(X,Y,Z).legend=[num2str(X) num2str(Y) num2str(Z)];
                     end
                 end
             end
@@ -211,11 +212,13 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
             %plot results
             axes(axbeadss)
             sp=SXY(:);
+            legends={SXY(:).legend};
             for k=1:numel(sp)
                 if ~isempty(sp(k).curve)
                     xpos=vertcat(sp(k).curve(:).xpos);
                     ypos=vertcat(sp(k).curve(:).ypos);
                 plot(xpos,ypos,'k.');hold on;
+                text(mean(sp(k).Xrange),mean(sp(k).Yrange),sp(k).legend)
                 end
             end
             for k=1:length(Xrange)
@@ -225,6 +228,7 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
                 line([Xrange(1),Xrange(end)],[Yrange(k) Yrange(k)])
             end
             
+            
             sp=[SXY(:).spline];
 %             zt=zrangeall(1):0.01:zrangeall(2);
 %             z0=zf1-zpos;
@@ -232,11 +236,18 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
             z0=0;
             zt=z0+p.zrangeuse(1):0.01:z0+p.zrangeuse(2);
 
-            
+            linecolors=lines(length(sp));
             axes(axsplines)
-            hold off;for k=1:numel(sp), plot(axsplines,zt,sp(k).x(zt),zt,sp(k).y(zt));hold on;end
-            ylim([0 5])
+            hold off;
             
+            for k=1:numel(sp)
+                pl2(k)=plot(axsplines,zt,sp(k).x(zt),'Color',linecolors(k,:));
+                hold on;
+                plot(axsplines,zt,sp(k).y(zt),'Color',linecolors(k,:));
+                
+            end
+            ylim([0 5])
+            legend(pl2,legends);
             
             sp={SXY(:).Sx2_Sy2};
             s=-30:0.5:30;
@@ -250,7 +261,7 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
             xlabel(axsxsys,'z')
             ylabel(axsxsys,'Sx^2-Sy^2')
             xlim(axsxsys,p.zrangeuse)
-            
+            legend(legends);
             sp={SXY(:).fitzpar};
             
             axes(axzfits)
@@ -260,15 +271,20 @@ classdef calibrater3DAcomplete<interfaces.DialogProcessor
             ylim(axzfits,[0 5])
             
             hold off;
+%             nleg={};
+            pl=[];
             for k=1:numel(sp)
                 if ~isempty(sp{k})
                     [sx,sy]=getsxfromzfitpar(zt,sp{k},z0); 
-                    plot(axzfits,zt,sx,zt,sy)
-                    hold on
+                    pl(k)=plot(axzfits,zt,sx,'Color',linecolors(k,:));
+                     hold on
+                    plot(axzfits,zt,sy,'Color',linecolors(k,:))
+                   
+%                     nleg{k}=num2str(k);
                 end
             end
             
-            
+            legend(pl,legends);
             %cross check and validate with bead positions
 %             axes(axzlut);
             
@@ -420,6 +436,7 @@ minSy=[b(:).minSy];
 phot=[b(:).I0];
 [mp,sp]=robustMean(phot);
 ztrue=[b(:).ztrue];
+% indgood=minSx<mSx+2*smSx & minSy<mSy+2*smSy &~isnan(minSx)&~isnan(minSy)&imag(ztrue)==0;
 indgood=minSx<mSx+2*smSx & minSy<mSy+2*smSy & phot<mp+2*sp & phot>mp/3 &~isnan(minSx)&~isnan(minSy)&imag(ztrue)==0;
 indgood=indgood&ztrue>-10000 &ztrue<30000;
 
@@ -491,7 +508,7 @@ end
 if isnan(es), es=em; end
 % if isnan(es2), es2=em2; end
 % if isnan(es3), es3=em3; end
-indgood2=err<em+2*es & err2+err3<.1;
+indgood2=err<em+2*es & err2+err3<.15;
 if sum(indgood2)==0
     indgood2=true(length(b),1);
 end
