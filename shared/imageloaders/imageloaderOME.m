@@ -38,6 +38,9 @@ switch ext
     case '.nd2' %Nikon
         meta=getMetaNd2(globalmeta);
         fn=fieldnames(meta);
+    case '.lif'
+        meta=getMetaLif(reader);
+        fn=fieldnames(meta);
     otherwise
         meta=[];
 end
@@ -53,8 +56,9 @@ obj.metadata.Width=double(omemeta.getPixelsSizeX(0).getValue());
 obj.metadata.Height=double(omemeta.getPixelsSizeY(0).getValue());
 obj.metadata.numberOfFrames=max(double(omemeta.getPixelsSizeT(0).getValue()),double(omemeta.getPixelsSizeZ(0).getValue()));
 obj.metadata.basefile=[ph filesep fh];
+obj.metadata.roi=[0 0 obj.metadata.Width obj.metadata.Height];
 
-fn=[fn {'Width','Height','numberOfFrames','basefile'}];
+fn=[makehorz(fn) makehorz({'Width','Height','numberOfFrames','basefile'})];
 
 for k=1:length(fn)
     obj.metadata.assigned.(fn{k})=true;
@@ -62,12 +66,27 @@ end
 metao=obj.metadata;
 end
 
+function md=getMetaLif(reader)
+
+cm=reader.getCoreMetadataList;
+cm1=cm.get(1);
+sm=cm1.seriesMetadata;
+md.emgain=sm.get('ProcessingHistory|ATLCameraSettingDefinition|EMGainValue');
+md.conversion=sm.get('ProcessingHistory|ATLCameraSettingDefinition|GainValue');
+md.EMon=sm.get('ProcessingHistory|ATLCameraSettingDefinition|CanDoEMGain');
+% k=sm.keys;
+% while k.hasNext
+%     kh=k.nextElement
+%     disp([kh ',' sm.get(kh)])
+% end
+end
+
 function meta=getMetaNd2(m)
 
 %CameraUniqueName, Conversion Gain, Vertical Shift Speed, Readout Speed
 searchstr={'exposure','Exposure:','emgain','Multiplier:'};
     str=m.get('sSpecSettings'); %
-    for k=1:2:length(searchstr);
+    for k=1:2:length(searchstr)
         ind=strfind(str,searchstr{k+1})+length(searchstr{k+1});
         ind2=ind+1;
         while str(ind2)>='0'&& str(ind2)<='9'

@@ -21,7 +21,7 @@ nb=0:8;
     subplot(3,3,2)
     hold off
     hr=hist(numfoundrat,nb);
-    bar(nb,hr)
+    bar(nb,hr)<
     hold on
     pf=fithist(hr,nb);
     title(['rat: ' num2str(pf,2)])
