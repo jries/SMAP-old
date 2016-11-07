@@ -31,12 +31,12 @@ end
 function metao=getmetadataome(obj)
 reader=obj.reader;
 omemeta=reader.getMetadataStore;
-globalmeta=reader.getGlobalMetadata;
+
 [ph,fh,ext]=fileparts(obj.file);
 fn={};
 switch ext
     case '.nd2' %Nikon
-        meta=getMetaNd2(globalmeta);
+        meta=getMetaNd2(reader);
         fn=fieldnames(meta);
     case '.lif'
         meta=getMetaLif(reader);
@@ -74,30 +74,31 @@ sm=cm1.seriesMetadata;
 md.emgain=str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|EMGainValue'));
 md.conversion=str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|GainValue'));
 md.EMon=str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|CanDoEMGain'));
-% k=sm.keys;
-% while k.hasNext
-%     kh=k.nextElement
-%     disp([kh ',' sm.get(kh)])
+md.exposure=1000*str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|WideFieldChannelConfigurator|SameExposureTime'));
+md.timediff=md.exposure;
 
-% end
+k=sm.keys;
+ind=1;
+while k.hasNext
+    kh=k.nextElement;
+    allmd{ind}=([kh ',' sm.get(kh)]);
+    ind=ind+1;
 
 end
+md.allmetadata.omeLif=allmd;
+end
 
-function meta=getMetaNd2(m)
+function meta=getMetaNd2(reader)
 
-%CameraUniqueName, Conversion Gain, Vertical Shift Speed, Readout Speed
-searchstr={'exposure','Exposure:','emgain','Multiplier:'};
-    str=m.get('sSpecSettings'); %
-    for k=1:2:length(searchstr)
-        ind=strfind(str,searchstr{k+1})+length(searchstr{k+1});
-        ind2=ind+1;
-        while str(ind2)>='0'&& str(ind2)<='9'
-            ind2=ind2+1;
-        end
-        meta.(searchstr{k})=double(str2num(str(ind:ind2-1)));
-    end
+
+m=reader.getGlobalMetadata;
+
+
     meta.EMon=str2num(m.get('EnableGainMultiplier'));
-    
+    meta.exposure= str2num(m.get('Exposure'));
+    meta.emgain=str2num(m.get('GainMultiplier'));
+    meta.conversion=str2num(m.get('ConversionGain'));
+    meta.timediff=meta.exposure;
 end
 
 
