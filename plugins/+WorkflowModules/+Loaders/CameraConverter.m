@@ -178,16 +178,17 @@ switch ext
         l=load([p f]);
         metadata=l.saveloc.file(1).info;
 
-    case '.tif'
-        imloader=imageloaderAll([p f],finf);
-        metadata=imloader.metadata;
-        metadata.allmetadata=metadata;
+
 
     case '.txt'
         par.metadatafile=[p f];
         obj.setGuiParameters(par);
         obj.updateGui;       
         metadata=getmetadataMMtxt([p f]); 
+    otherwise
+        imloader=imageloaderAll([p f],finf);
+        metadata=imloader.metadata;
+        metadata.allmetadata=metadata;
 end
         obj.setcamerasettings(metadata);
         obj.updatefileinfo;
