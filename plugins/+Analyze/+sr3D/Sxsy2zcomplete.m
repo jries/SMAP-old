@@ -33,6 +33,10 @@ classdef Sxsy2zcomplete<interfaces.DialogProcessor
             for X=1:s(1)
                 for Y=1:s(2)
                     SXYh=SXY(X,Y);
+                    if SXYh.Xrange(1)==SXYh.Xrangeall(1), SXYh.Xrange(1)=-inf;end
+                    if SXYh.Xrange(end)==SXYh.Xrangeall(end), SXYh.Xrange(end)=inf;end
+                    if SXYh.Yrange(1)==SXYh.Yrangeall(1), SXYh.Yrange(1)=-inf;end
+                    if SXYh.Yrange(end)==SXYh.Yrangeall(end), SXYh.Yrange(end)=inf;end
                     indh=locs.xnm>SXYh.Xrange(1)&locs.xnm<SXYh.Xrange(2)&locs.ynm>SXYh.Yrange(1)&locs.ynm<SXYh.Yrange(2);
                     sxpix=locs.PSFxnm(indh)./p.cam_pixelsize_nm;
                     sypix=locs.PSFynm(indh)./p.cam_pixelsize_nm;
@@ -92,7 +96,7 @@ fn=obj.guihandles.calfile.String;
 [f,p]=uigetfile(fn);
 if f
     l=load([p f]);
-    if ~isfield(l,'outforfit') || ~isfield(l,'SXY')
+    if ~isfield(l,'outforfit') && ~isfield(l,'SXY')
         msgbox('no 3D data recognized. Select other file.');
     end
 %     load([p f])
