@@ -178,7 +178,7 @@ fitpar.fitmode=p.fitmode.Value;
 if fitpar.fitmode==3
     calfile=p.cal_3Dfile;
     cal=load(calfile);
-    if p.useObjPos
+    if 0% p.useObjPos
         
         disp('obj. position not implemented yet')
     else
@@ -187,9 +187,15 @@ if fitpar.fitmode==3
             fitpar.zpar{1,1}=cal.outforfit;
         else
             s=size(cal.SXY);
+            Z=1;
+            if p.useObjPos
+                zr=cal.SXY(1).Zrangeall;
+                zr(1)=[];zr(end)=inf;
+                Z=find(p.objPos<=zr,1,'first');
+            end
             for X=1:s(1)
                 for Y=1:s(2)
-                    zpar{X,Y}=cal.SXY(X,Y).fitzpar;
+                    zpar{X,Y}=cal.SXY(X,Y,Z).fitzpar;
                 end
             end
             fitpar.zpar=zpar;
