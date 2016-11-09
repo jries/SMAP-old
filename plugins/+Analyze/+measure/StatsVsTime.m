@@ -16,7 +16,7 @@ classdef StatsVsTime<interfaces.DialogProcessor
             else
                 position='all';
             end
-            usefields={{'photons','Nloc'},{'photons','mu'},{'lifetime','mu'},{'background','mean'},{'PSFxnm','max'},{'frames','falloff'},{'locprec','max'},{'locprec','rising'}};
+            usefields={{'photons','Nloc'},{'photons','mu'},{'lifetime','mu'},{'background','max'},{'PSFxnm','max'},{'frames','falloff'},{'locprec','max'},{'locprec','rising'}};
             layers=find(p.sr_layerson);            
             
             switch p.timefield.selection
@@ -177,15 +177,15 @@ classdef StatsVsTime<interfaces.DialogProcessor
             
              ax4=obj.initaxis('BG');
             hold off
-            plot(ax4,filns,ps.background.mean{1})
-            plot(axall,filns,ps.background.mean{1}/max(ps.background.mean{1}))
+            plot(ax4,filns,ps.background.max{1})
+            plot(axall,filns,ps.background.max{1}/max(ps.background.max{1}))
             for k=2:length(locs)
             hold on
-            plot(ax4,filns,ps.background.mean{k})
-            plot(axall,filns,ps.background.mean{k}/max(ps.background.mean{k}))
+            plot(ax4,filns,ps.background.max{k})
+            plot(axall,filns,ps.background.max{k}/max(ps.background.max{k}))
             end
             xlabel(xl)
-            ylabel('mean background')
+            ylabel('max background')
             legend(modetxt)
 
             if isfield(ps,'PSFxnm')

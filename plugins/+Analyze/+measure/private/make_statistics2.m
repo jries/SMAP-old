@@ -223,6 +223,7 @@ for k=datrange
     maxbg=hbg{k}.n(mind);
     slb{end+1}=['max: ' num2str(maxbg,'%5.0f')];
     stat.background.mean(k)=mbg;
+    stat.background.max(k)=maxbg;
 end
 
 %z/sigma
