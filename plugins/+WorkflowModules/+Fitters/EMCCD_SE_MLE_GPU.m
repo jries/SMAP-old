@@ -123,7 +123,7 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
 %                     sx=locs.PSFx;
                     locs.PSFypix=locs.PSFxpix;
                 case 3
-                    locs.znm=(P(:,5)+obj.fitpar.objPos*v1)*1000*fitpar.refractive_index_mismatch;
+                    locs.znm=(P(:,5)*1000+obj.fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
                     locs.zerr=sqrt(CRLB(:,5))*1000*fitpar.refractive_index_mismatch;
                     [locs.PSFxpix,locs.PSFypix]=zpar2sigma(locs.znm/1000,zpar);
                     
