@@ -76,20 +76,12 @@ pard.tphot.object=struct('String','photon range:','Style','text');
 pard.tphot.position=[3,1];
 pard.tphot.Width=1.5;
 
-% pard.checkphot.object=struct('String','restrict','Style','checkbox','Value',0);
-% pard.checkphot.position=[3,3.5];
-% pard.checkphot.Width=1;
-
 pard.photrange.object=struct('String','800 10000','Style','edit');
 pard.photrange.position=[3,2.5];
 
 pard.tlt.object=struct('String','lifetime range (frames):','Style','text');
 pard.tlt.position=[4,1];
 pard.tlt.Width=1.5;
-
-% pard.checklifetime.object=struct('String','restrict','Style','checkbox','Value',0);
-% pard.checklifetime.position=[4,3.5];
-% pard.checklifetime.Width=1;
 
 pard.lifetimerange.object=struct('String','1 30','Style','edit');
 pard.lifetimerange.position=[4,2.5];
