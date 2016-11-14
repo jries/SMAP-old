@@ -1,7 +1,7 @@
 function [locsout,possites]=simulatelocs(p)
            [poslabels,possites]=getlabels(p);
-           p.maxframe=100000;
-           posreappear=reappear(poslabels,p.blinks,p.maxframe);
+%            p.maxframe=100000;
+           posreappear=reappear(poslabels,p.blinks,p.maxframes);
            
 %            p.lifetime=2;
            photonsperframe=p.photons/p.lifetime;

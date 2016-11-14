@@ -376,8 +376,10 @@ pard.background.object=struct('String','20','Style','edit');
 pard.background.Width=.5;
 pard.background.position=[5,4.5];
 
+
+
 pard.t6.object=struct('String','Number of sites','Style','text');
-pard.t6.position=[7,1];
+pard.t6.position=[8,1];
 pard.t6.Width=1.5;
 
 pard.randomrot.object=struct('String','Random rotation','Style','checkbox');
@@ -395,6 +397,16 @@ pard.randomxyd.position=[7,3];
 pard.numberofsites.object=struct('String','5 5','Style','edit');
 pard.numberofsites.Width=.5;
 pard.numberofsites.position=[8,2.5];
+
+
+pard.t7.object=struct('String','number of frames','Style','text');
+pard.t7.position=[8,3];
+pard.t7.Width=1.5;
+
+pard.maxframes.object=struct('String','10000','Style','edit');
+pard.maxframes.Width=.5;
+pard.maxframes.position=[8,4.5];
+
 
 pard.plugininfo.type='ROI_Analyze';
 end
