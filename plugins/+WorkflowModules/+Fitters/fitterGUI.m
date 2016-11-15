@@ -19,7 +19,7 @@ classdef fitterGUI<interfaces.WorkflowModule
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
             obj.guihandles.fitterlist.Callback={@fitterlist_callback,obj};
-            obj.setInputChannels(2,'frame');
+            obj.setInputChannels(obj.inputChannels,'frame');
             obj.loadfitters;
 %            obj.guihandles.camparbutton.Callback={@camparbutton_callback,obj};
         end
