@@ -5,6 +5,7 @@ classdef workflowstarter<interfaces.WorkflowModule
         function obj=workflowstarter(varargin)
             obj@interfaces.WorkflowModule(varargin{:})
             obj.inputChannels=0;
+            obj.isstartmodule=true;
         end
 
         function initGui(obj)

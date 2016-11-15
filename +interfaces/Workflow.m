@@ -234,6 +234,7 @@ classdef Workflow<interfaces.DialogProcessor
             obj.module(tag).initialize;
             p=obj.module(tag).getAllParameters;
             data=interfaces.WorkflowData;
+            data.eof=true;
             obj.module(tag).run(data,p);
         end
         function info=info(obj)

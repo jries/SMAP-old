@@ -1,5 +1,7 @@
 classdef SimulateCameraImages<interfaces.DialogProcessor
     properties
+        locs
+        par
     end
     methods
         function obj=SimulateCameraImages(varargin)        
@@ -9,44 +11,10 @@ classdef SimulateCameraImages<interfaces.DialogProcessor
         end
         
         function out=run(obj,p)  
-          switch p.simulationsource.Value
-              case 1 %current locs
-                  locs=obj.locData.getloc({'xnm','ynm','znm','xnm_gt','ynm_gt','frame','phot'},'position','roi','layer',1);
-                  if ~isempty(locs.xnm_gt)
-                        locs.x=locs.xnm_gt;
-                        locs.y=locs.ynm_gt;
-                  else
-                      locs.x=locs.xnm;
-                      locs.y=locs.ynm;
-                  end
-              case 2 
-                  disp('not implemented')
-              case 3
-                  disp('not implemented')
-          end
-          
-          if p.autorange
-              p.xrange=[min(locs.x)-1000 max(locs.x)+1000];
-              p.yrange=[min(locs.y)-1000 max(locs.y)+1000];
-              p.frames=[min(locs.frame) max(locs.frame)];
-          end
-          
-          allframes=max(1,p.frames(1)):min(p.frames(end),max(locs.frame));
-          
-          if ~p.usecam
-              p.EMon=false;
-              p.conversion=1; 
-              p.offset=0;
-              p.emgain=0;
-              
-          end
-          if p.emgain==0
-                  p.EMon=false;
-              else
-                  p.EMon=true;
-          end
-              
-          if obj.processorgui    
+            if obj.processorgui  
+                [locs,p]=storelocs(obj,p);
+           
+                allframes=max(1,p.frames(1)):min(p.frames(end),max(locs.frame));
               [f,path]=uiputfile('*.tif');
               if f
                 [img,simulpar]=simulatecamera(locs,p,allframes);
@@ -68,15 +36,28 @@ classdef SimulateCameraImages<interfaces.DialogProcessor
              
              
           elseif ~isempty(obj.parent)
+                p=obj.par;   
+                 if obj.getPar('loc_preview')
+                allframes=max(1,obj.getPar('loc_previewframe'));    
+                 else
+                allframes=max(1,p.frames(1)):min(p.frames(end),max(obj.locs.frame));
+                 end
+              %inti
+%               filestruct=initfile('simulation');
+%               obj.setPar('loc_fileinfo',filestruct);
+              
               for k=1:length(allframes)
                   data=interfaces.WorkflowData;
-                  data.ID=allframes(k);
-                  [img,simulpar]=simulatecamera(locs,p,allframes(k));
+                  data.frame=allframes(k);
+                  data.ID=k;
+                  [img,simulpar]=simulatecamera(obj.locs,p,allframes(k));
                   data.data=img;
                   obj.parent.output(data);
               end
+              data=interfaces.WorkflowData;
               data.eof=true;
-              data.data=[];
+              data.ID=k+1;
+              data.frame=allframes(end)+1;
               obj.parent.output(data);
           end
         out=[];
@@ -84,10 +65,68 @@ classdef SimulateCameraImages<interfaces.DialogProcessor
         function pard=guidef(obj)
             pard=guidef(obj);
         end
+        
+        function prerun(obj)
+            if  obj.getPar('loc_preview')
+                f='';path='';
+            else
+            [f , path]=uiputfile('simulation');
+            end
+            filestruct=initfile([path f]);
+            p=obj.getAllParameters;
+            [obj.locs,p]=storelocs(obj,p);
+            [~,par]=simulatecamera(obj.locs,p,1);
+            filestruct.info=interfaces.metadataSMAP;
+            filestruct.info.pixsize=p.pixelsize/1000;
+           filestruct.info.Width=par.sizex;
+           filestruct.info.Height=par.sizey;
+           filestruct.info.offset=par.offset;
+           filestruct.info.emgain=par.emgain;
+           filestruct.info.conversion=par.conversion;
+           filestruct.info.basefile=[path f];
+           filestruct.info.numberOfFrames=max(obj.locs.frames);
+           obj.par=par;
+           obj.setPar('loc_fileinfo',filestruct.info);
+        end
     end
 end
 
+function [locs,p]=storelocs(obj,p)
+  switch p.simulationsource.Value
+      case 1 %current locs
+          locs=obj.locData.getloc({'xnm','ynm','znm','xnm_gt','ynm_gt','frame','phot'},'position','roi','layer',1);
+          if ~isempty(locs.xnm_gt)
+                locs.x=locs.xnm_gt;
+                locs.y=locs.ynm_gt;
+          else
+              locs.x=locs.xnm;
+              locs.y=locs.ynm;
+          end
+      case 2 
+          disp('not implemented')
+      case 3
+          disp('not implemented')
+  end
 
+    if p.autorange
+      p.xrange=[min(locs.x)-1000 max(locs.x)+1000];
+      p.yrange=[min(locs.y)-1000 max(locs.y)+1000];
+      p.frames=[min(locs.frame) max(locs.frame)];
+    end
+     if ~p.usecam
+          p.EMon=false;
+          p.conversion=1; 
+          p.offset=0;
+          p.emgain=0;
+
+      end
+      if p.emgain==0
+              p.EMon=false;
+          else
+              p.EMon=true;
+      end
+
+end
 
 function pard=guidef(obj)
 

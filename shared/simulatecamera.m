@@ -2,7 +2,7 @@ function [img,simulpar]=simulatecamera(locs,p,frames)
 %locs.x locs.y locs.z locs.frames locs.phot
 %p.xrange p.yrange p.pixelsize p.bg p.psfmode p.calfile
 %p.EMon
-simulpar=p;
+
 % p.xrange=[0 20000];p.yrange=[0 20000];p.pixelsize=100;
 % p.xrange=[min(locs.x)-1000 max(locs.x)+1000];
 % p.yrange=[min(locs.y)-1000 max(locs.y)+1000];
@@ -13,6 +13,11 @@ simulpar=p;
 p.sizex=ceil((p.xrange(2)-p.xrange(1))/p.pixelsize);
 p.sizey=ceil((p.yrange(2)-p.yrange(1))/p.pixelsize);
 im0=zeros(p.sizex,p.sizey,'single');
+if isempty(locs)
+    simulpar=p;
+    img=[];
+    return
+end
 %assume frames sorted, otherwise sort
 if nargin<3
     frames=min(locs.frame):max(locs.frame);
@@ -54,7 +59,7 @@ for k=1:length(frames)
     
     
 end
-
+simulpar=p;
 end
 
 function imo=phot2adu(imin,p)
