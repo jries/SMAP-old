@@ -21,6 +21,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
         guihandles %handles to gui objects are stored here. ONLY flat structure. All handles should be added, otherwise they will not be resized etc.
         simplegui=false;
         guiselector=struct('position',[],'show',false);
+       
     end
     methods
          function obj=GuiModuleInterface(varargin)

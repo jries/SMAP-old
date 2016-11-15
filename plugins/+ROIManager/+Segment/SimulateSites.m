@@ -37,15 +37,15 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
         %         thissite.number=sitepar.sitelist.cellnumber+1;
                 se.addSite(thissite);
            end
-%            try
+            try
            se.processors.preview.updateFilelist;
            se.processors.preview.updateCelllist;
            se.processors.preview.updateSitelist; 
            se.currentsite=se.sites(1);
            se.currentcell=se.cells(1);
            se.currentfile=se.files(1);
-%            catch
-%            end
+           catch
+           end
           out=[];
         end
         function pard=guidef(obj)

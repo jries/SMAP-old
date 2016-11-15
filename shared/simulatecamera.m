@@ -2,11 +2,13 @@ function [img,simulpar]=simulatecamera(locs,p,frames)
 %locs.x locs.y locs.z locs.frames locs.phot
 %p.xrange p.yrange p.pixelsize p.bg p.psfmode p.calfile
 %p.EMon
-p.xrange=[0 20000];p.yrange=[0 20000];p.pixelsize=100;
-p.xrange=[min(locs.x)-1000 max(locs.x)+1000];
-p.yrange=[min(locs.y)-1000 max(locs.y)+1000];
-p.EMon=0;
-p.offset=100; p.conversion=5; p.emgain=100;
+simulpar=p;
+% p.xrange=[0 20000];p.yrange=[0 20000];p.pixelsize=100;
+% p.xrange=[min(locs.x)-1000 max(locs.x)+1000];
+% p.yrange=[min(locs.y)-1000 max(locs.y)+1000];
+% p.EMon=0;
+% p.offset=100; p.conversion=5; p.emgain=100;
+% p.background=10;
 
 p.sizex=ceil((p.xrange(2)-p.xrange(1))/p.pixelsize);
 p.sizey=ceil((p.yrange(2)-p.yrange(1))/p.pixelsize);
@@ -41,7 +43,7 @@ for k=1:length(frames)
     else
         imh=im0;
     end
-    imh2=addbg(imh,3);
+    imh2=addbg(imh,p.background);
     imh3=int2phot(imh2,p.EMon);   
     imh4=phot2adu(imh3,p);
     img(:,:,k)=imh4;

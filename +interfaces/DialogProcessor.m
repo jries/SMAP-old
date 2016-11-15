@@ -7,6 +7,7 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
         processorgui=true; %switch. true if process button etc are to be rendered. false if called externally (for workflow)
         showresults=false; % defined state for results
         history=false;
+         parent; %encapsulating object, e.g. used to call methods in plugin4workflow from plugin directly
 %         moduleinfo;
     end
     properties (SetAccess = private, GetAccess = private)
