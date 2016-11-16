@@ -12,8 +12,8 @@ coords=Npixels/2-1+rand([Nfits 2])+[0*ones(Nfits,1) zeros(Nfits,1)];
 [out] = finitegausspsf(Npixels,PSFsigma,Nphotons,bg,coords);
 
 %   Corrupt with Poisson noise 
-data=single(noise(out,'poisson',1)); %requires DipImage
-%data = poissrnd(out); %requires statistics toolbox
+% data=single(noise(out,'poisson',1)); %requires DipImage
+data = single(poissrnd(out)); %requires statistics toolbox
 %   Can look at data (DipImage)
 %dipshow(permute(data,[2 1 3])); %dipimage permuted 1st two dimensions
 

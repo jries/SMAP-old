@@ -85,6 +85,7 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
                disp('gaussmlev2_cuda50 did not work')
                P=zeros(s(3),15);LogL=zeros(s(3),1);CRLB=P;
            end
+
            
            v1=ones(s(3),1,'single');
            

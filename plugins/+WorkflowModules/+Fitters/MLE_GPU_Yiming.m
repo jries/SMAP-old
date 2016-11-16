@@ -21,7 +21,7 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             img=zeros(7,'single');img(3,3)=1;
             a50=0;a75=0;
             try 
-                fitp=GPUmleFit_LM(img,1,10,1);
+                fitp=GPUmleFit_LM(img,1,10,1,0);
                 obj.fitpar.fitfunction=@GPUmleFit_LM;
                  reporttext='GPUmleFit_LM works';
 %                 a50=gaussmlev2_cuda50(img,1,10,1);
@@ -64,58 +64,8 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
                 obj.fitpar.zparhere=[obj.fitpar.zpar{X,Y}(:)];
             end
             out=fitwrapper(imstack,obj.fitpar);
-            
-           v1=ones(s(3),1,'single');
+            locs=fit2locs(out,stackinfo,obj.fitpar,imstack);
            
-           dn=ceil((s(1)-1)/2)*v1;
-           
-            shiftx=0;%-0.5; %deviation from ground truth
-             shifty=0;%-0.5;
-             posx=stackinfo.x+shiftx;
-             posy=stackinfo.y+shifty;
-%            posx=stackinfo.x;
-%            posy=stackinfo.y;
-           frame=stackinfo.frame;
-           locs.xpix=P(:,2)-dn+posx;
-           locs.ypix=P(:,1)-dn+posy;
-           locs.phot=P(:,3)*EMexcess;
-           locs.bg=P(:,4)*EMexcess;
-           locs.frame=frame;
-           
-           locs.xerrpix=sqrt(CRLB(:,2));
-           locs.yerrpix=sqrt(CRLB(:,1));
-           locs.photerr=sqrt(CRLB(:,3))*EMexcess;
-           locs.bgerr=sqrt(CRLB(:,4))*EMexcess;
-           locs.logLikelihood=LogL;
-           
-           locs.peakfindx=posx;
-           locs.peakfindy=posy;
-
-            switch obj.fitpar.fitmode
-                case 1 %sx not fitted
-                    sx=fitpar.PSFx0*v1;
-                    locs.PSFxpix=0*locs.xpix+sx;
-                    locs.PSFypix=locs.PSFxpix;
-                case 2 % sx free
-                    locs.PSFxpix=P(:,5);
-                    locs.PSFxerr=sqrt(CRLB(:,5));
-%                     sx=locs.PSFx;
-                    locs.PSFypix=locs.PSFxpix;
-                case 3
-                    locs.znm=(P(:,5)*1000+obj.fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
-                    locs.zerr=sqrt(CRLB(:,5))*1000*fitpar.refractive_index_mismatch;
-                    [locs.PSFxpix,locs.PSFypix]=zpar2sigma(locs.znm/1000,zpar);
-                    
-
-                case 4  %sx,sy
-                    
-                    locs.PSFxpix=P(:,5);
-                    locs.PSFxerr=sqrt(CRLB(:,5));
-                    locs.PSFypix=P(:,6);
-                    locs.PSFyerr=sqrt(CRLB(:,6));  
-%                     sx=locs.PSFx;
-            end
-            locs.locpthompson=sqrt((locs.PSFxpix.*locs.PSFypix+1/12*v1)./( locs.phot/EMexcess)+8*pi*(locs.PSFxpix.*locs.PSFypix).^2.* locs.bg./( locs.phot/EMexcess).^2);
             
         end
 
@@ -137,6 +87,77 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
     end
 end
 
+function locs=fit2locs(results,stackinfo,fitpar,image)
+numl=size(results.P,1);
+
+v1=ones(numl,1,'single');
+s=size(image);          
+dn=ceil((s(1)-1)/2)*v1;
+
+shiftx=0;%-0.5; %deviation from ground truth
+shifty=0;%-0.5;
+posx=stackinfo.x+shiftx;
+posy=stackinfo.y+shifty;
+frame=stackinfo.frame;
+P=results.P;
+EMexcess=fitpar.EMexcessNoise;
+CRLB=results.CRLB;
+LogL=results.LogL;
+           CRLB(isnan(CRLB))= 0; %XXXXXXXXX
+           LogL(isnan(LogL))= 0; %XXXXXXXXX
+           CRLB((CRLB)<0)= 0; %XXXXXXXXX
+           LogL((LogL)<0)= 0; %XXXXXXXXX
+           
+           
+locs.xpix=P(:,2)-dn+posx;
+locs.ypix=P(:,1)-dn+posy;
+locs.phot=P(:,3)*EMexcess;
+locs.bg=P(:,4)*EMexcess;
+locs.frame=frame;
+
+locs.xerrpix=sqrt(CRLB(:,2));
+locs.yerrpix=sqrt(CRLB(:,1));
+locs.photerr=sqrt(CRLB(:,3))*EMexcess;
+locs.bgerr=sqrt(CRLB(:,4))*EMexcess;
+locs.logLikelihood=LogL;
+
+locs.peakfindx=posx;
+locs.peakfindy=posy;
+
+switch fitpar.fitmode
+    case 1 %sx not fitted
+        sx=fitpar.PSFx0*v1;
+        locs.PSFxpix=0*locs.xpix+sx;
+        locs.PSFypix=locs.PSFxpix;
+    case 2 % sx free
+        locs.PSFxpix=P(:,5);
+        locs.PSFxerr=sqrt(CRLB(:,5));
+%                     sx=locs.PSFx;
+        locs.PSFypix=locs.PSFxpix;
+    case 3
+        locs.znm=(P(:,5)*1000+fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
+        locs.zerr=sqrt(CRLB(:,5))*1000*fitpar.refractive_index_mismatch;
+        [locs.PSFxpix,locs.PSFypix]=zpar2sigma(locs.znm/1000,fitpar.zparhere);
+
+
+    case 4  %sx,sy
+
+        locs.PSFxpix=P(:,5);
+        locs.PSFxerr=sqrt(CRLB(:,5));
+        locs.PSFypix=P(:,6);
+        locs.PSFyerr=sqrt(CRLB(:,6));  
+    case 5
+        
+        locs.znm=(P(:,5)*1000+fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
+        locs.zerr=sqrt(CRLB(:,5))*1000*fitpar.refractive_index_mismatch;
+        
+         sx=100*v1;
+        locs.PSFxpix=sx;
+        locs.PSFypix=sx;
+end
+locs.locpthompson=sqrt((locs.PSFxpix.*locs.PSFypix+1/12*v1)./( locs.phot/EMexcess)+8*pi*(locs.PSFxpix.*locs.PSFypix).^2.* locs.bg./( locs.phot/EMexcess).^2);
+end
+
 function out=fitwrapper(imstack,fitpar)
 s=size(imstack);
 if length(s)==2 
@@ -151,28 +172,28 @@ EMexcess=fitpar.EMexcessNoise;
 if isempty(EMexcess)
     EMexcess=1;
 end
-arguments{1}=imstack/EMexcess;
+arguments{1}=single(imstack/EMexcess);
 arguments{3}=fitpar.iterations;
 arguments{4}=fitpar.fitmode;
 arguments{5}=fitpar.issCMOS;
-try   
-    switch p.fitmode
+% try   
+    switch fitpar.fitmode
         case {1,2,4} %fix
             arguments{2}=fitpar.PSFx0;
 %         case 2 %free
         case 3 %z
-            arguments{2}=fitpar.zhere(1);
-            arguments{6:12}=num2cell(fitmode.zparhere(2:8));
+            arguments{2}=fitpar.zparhere(1);
+            arguments(6:12)=num2cell(fitpar.zparhere(2:8));
 %         case 4 %sx sy
         case 5 %spline   
-            arguments{2}=fitpar.splinecoefficients;
+            arguments{2}=single(fitpar.splinecoefficients);
     end
     
     [P CRLB LogL]=fitpar.fitfunction(arguments{:});
-catch
-   disp('gaussmlev2_cuda50 did not work')
-   P=zeros(s(3),15);LogL=zeros(s(3),1);CRLB=P;
-end
+% catch
+%    disp('gaussmlev2_cuda50 did not work')
+%    P=zeros(s(3),15);LogL=zeros(s(3),1);CRLB=P;
+% end
 
 out.P=P;
 out.CRLB=CRLB;
@@ -237,6 +258,10 @@ if fitpar.fitmode==3
         fitpar.refractive_index_mismatch=p.refractive_index_mismatch;
     end
     
+elseif fitpar.fitmode==5
+    calfile=p.cal_3Dfile;
+    cal=load(calfile);
+    fitpar.splinecoefficients=cal.coeff;
 else
     fitpar.PSFx0=p.PSFx0;
 end
