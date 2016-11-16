@@ -153,7 +153,7 @@ if p.dualchannel
 
         out.circfit=circfit;
         out.imfit=imfit;
-        out.imfit.image=outim;
+        out.imfit.image=single(outim);
         return
 
     end
@@ -229,15 +229,28 @@ end
 
 function out=imgfit(p,xm,ym,locs,circfit,hf,hf2)
 roisize=p.se_siteroi/2;
- posf.x=xm;posf.y=ym;posf.s=locs.locprecnm*p.(['layer' num2str(p.layer.Value) '_']).gaussfac*p.gaussfac_imfit(p.layer.Value);
+ posf.x=xm;posf.y=ym;
+ posf.s=locs.locprecnm*p.(['layer' num2str(p.layer.Value) '_']).gaussfac*p.gaussfac_imfit(p.layer.Value);
+ ming=max(p.(['layer' num2str(p.layer.Value) '_']).mingaussnm,p.(['layer' num2str(p.layer.Value) '_']).mingausspix*p.se_sitepixelsize) 	;
+ posf.s(posf.s<ming)=ming;
  range=[-roisize roisize];
  pixels=p.se_sitepixelsize;
  img=double(gaussrender(posf,range, range, pixels, pixels));
 
+ ming2=max(ming,median(posf.s));
+% max( max(gaussrender(struct('x',0,'y',0,'s',ming),[-10 10], [-10 10], pixels, pixels)))
+ 
+% THRESHOLD for the fit, any intensity values above co are saturated for
+% the fit
+% co=1/(2*pi*ming2^2/pixels^2)*4; % uses minimum gaussian setting
+% co=myquantilefast(img,.95)*3; % uses 95th quantile of intensities
+% img(img>co)=co;
+%
+ 
 %  qim=myquantile(img(:),.95);
 %  img(img>qim)=qim;
 startdr=30;
-maxradius=75;
+maxradius=100;
  [X,Y]=meshgrid(-roisize+pixels/2:pixels:roisize);
   startpc=circfit;
  if startpc.r1>maxradius
@@ -266,6 +279,9 @@ maxradius=75;
 %   imagesc(vertcat(img.^2,imfit.^2,img.^2-imfit.^2),'Parent',hf)
 %     imagesc(vertcat(horzcat(img,imfit),horzcat(imstart,img-imfit)),'Parent',hf)
 range2=[-roisize 3*roisize];
+
+% I0=2*pi*sigma^2/pixels^2;
+
 imres=imgf.^p.exponent-imfit.^p.exponent;
 imres=imres/max(imres(:));
 imgf=imgf/max(imgf(:));

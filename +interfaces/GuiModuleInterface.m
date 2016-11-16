@@ -21,6 +21,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
         guihandles %handles to gui objects are stored here. ONLY flat structure. All handles should be added, otherwise they will not be resized etc.
         simplegui=false;
         guiselector=struct('position',[],'show',false);
+       
     end
     methods
          function obj=GuiModuleInterface(varargin)
@@ -86,9 +87,9 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                 fn=fieldnames(h);
                 for k=1:length(fn)
                     vh=obj.getSingleGuiParameter(fn{k},onlyedit);  
-                    if ~isempty(vh)
+%                     if ~isempty(vh)
                             p.(fn{k})=vh;             
-                    end
+%                     end
                 end
             end
             psave=obj.propertiesToSave;
@@ -543,8 +544,11 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
            %returns an info structure. With defaults if empty.
             info=obj.plugininfo;
             if isempty(info)||~isfield(info,'name')
-               
+               try
                 name=obj.pluginpath{end};
+               catch
+                   name=obj.subpluginpath{end};
+               end
                 [~,file]=fileparts(name);
                 if ~isempty(file)
                     name=file;

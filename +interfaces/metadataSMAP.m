@@ -25,9 +25,9 @@ classdef metadataSMAP<handle
         function  obj=metadataSMAP
             fn=(properties(obj));
             for k=1:length(fn)
-                obj.assigned.(fn{k})=false;
+                obj.assigned.(fn{k})=true;
             end
-            obj.assigned.roi=true;
+%             obj.assigned.roi=true;
         end
         function roi=get.roi(obj)
             if isempty(obj.roi)
@@ -52,7 +52,7 @@ classdef metadataSMAP<handle
             end
         end
         function set.roi(obj,roi)
-            if isempty(roi)
+            if length(roi)<4
                 return
             end
             obj.roi=roi;

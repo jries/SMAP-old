@@ -33,8 +33,31 @@ classdef Get2CIntImagesWF<interfaces.DialogProcessor
             fo=strrep(file.name,'_sml.mat','_dc_sml.mat');
 
             path=fileparts(file.name); %rather in top class, pass on
-            [filen, path]=uigetfile([path filesep '*.tif'],file.name);
-            tiffile=[path filen];
+            %search for tiff images
+            try
+                tiffile=obj.locData.files.file(1).info.allmetadata.filename;
+                if ~exist(tiffile,'file')
+                    disp('Get2CIntImagesWF ine 40: check if it works')
+                    tiffile=strrep(tiffile,'\','/');
+                    ind=strfind(tiffile,'/');
+                    for k=1:length(ind)
+                        tiffileh=[tiffile(1:ind(k)) '_b_' tiffile(ind(k)+1:end)];
+                        if exist(tiffileh,'file')
+                            tiffile=tiffileh;
+                        end
+                    end
+                end
+                if ~exist(tiffile,'file')
+                    tiffile=[];
+                end
+            catch err
+                tiffile=[];
+            end
+            
+            if isempty(tiffile)
+                [filen, path]=uigetfile([path filesep '*.tif'],file.name);
+                tiffile=[path filen];
+            end
 %             tiffile='/Users/ries/Documents/Data/3Ddc/MTActin/02_MT680_phalloidin647_1/img_000039971_Default_000.tif';
             wf.module('TifLoader').addFile(tiffile);
 

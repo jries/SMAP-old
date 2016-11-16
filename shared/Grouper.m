@@ -50,6 +50,7 @@ classdef Grouper< interfaces.LocDataInterface
             
             maxactive=10000;
             list=connectsingle2c(double(x(indsort)),double(y(indsort)),double(frame(indsort)),double(dx),int32(dt),int32(maxactive));
+%             listm=connectsingle2mat(double(x(indsort)),double(y(indsort)),double(frame(indsort)),double(dx),int32(dt),int32(maxactive));
             numbers=1:sm(1);
             indold=numbers(indsort);
             [~,indback]=sort(indold);
@@ -101,6 +102,8 @@ classdef Grouper< interfaces.LocDataInterface
                 weights=1./(obj.locData.getloc('locprecnm').locprecnm);
                 if isempty(weights)
                     weights=ones(size(obj.locData.loc.(fn2{1})));  
+                else
+                    weights(isinf(weights))=1;
                 end
                 for k=1:length(fn2)
                     if isfield(obj.combinemodes,fn2{k})

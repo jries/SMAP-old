@@ -37,13 +37,14 @@ a=cf.a*exp(cf.b);
 c=cf.c*exp(cf.d);
 e=cf.e*exp(cf.f);
 meanfitpar=(a*(cf.b-1)/cf.b^2+c*(cf.d-1)/cf.d^2+e*(cf.f-1)/cf.f^2)/(a/cf.b+c/cf.d+e/cf.f);
-meanfitpar=(meanfitpar+meanfitpar2)/2
+meanfitpar=(meanfitpar+meanfitpar2)/2;
 
 rh=dq/2:dq:rangev(end)+dq;
+rh=rangev(1):dq:rangev(end)+dq;
 v=cf(rh);
-meanfitpar=sum(v.*rh')/sum(v)
+meanfitpar=sum(v.*rh')/sum(v);
 
-if nargin>3&&~isempty(ax)
+if nargin>3&&~isempty(ax)&&ishandle(ax)
 %     axis(ax);
 %     hold off
 % plot(nh,h);

@@ -27,8 +27,10 @@ classdef TifLoader<interfaces.WorkflowModule
                 obj.status('TifLoader: localization file not found')
                  error('TifLoader: localization file not found')
             end
-%             obj.imloader=imageLoader(p.tiffile);     
-            obj.imloader=imageloaderAll(p.tiffile);     
+%             obj.imloader=imageLoader(p.tiffile);  
+            if ~isempty(obj.imloader)
+                obj.imloader=imageloaderAll(p.tiffile,obj.getPar('loc_fileinfo')); 
+            end
             obj.imloader.onlineAnalysis=p.onlineanalysis;
             obj.imloader.waittime=p.onlineanalysiswaittime;
             obj.imloader.setImageNumber(p.framestart-1);
@@ -114,8 +116,11 @@ classdef TifLoader<interfaces.WorkflowModule
                         elapsed=toc(obj.timerfitstart);
                         totaltime=elapsed/(datout.frame-obj.framestart+1)*totalf;
                     end
+                    
+                    numlocs=obj.getPar('fittedLocs');
+
                     statuss=['frame ' int2str(datout.frame-obj.framestart) ' of ' int2str(totalf) ...
-                        '. Time: ' num2str(elapsed,'%4.0f') ' of ' num2str(totaltime,'%4.0f') 's'];
+                        '. Time: ' num2str(elapsed,'%4.0f') ' of ' num2str(totaltime,'%4.0f') 's. ' num2str(numlocs,'%6.0f') ' locs.'];
                     obj.status(statuss);
                 end
                 tall=tall+toc(th);
@@ -133,9 +138,9 @@ classdef TifLoader<interfaces.WorkflowModule
 %         if 1
 %         else
                 
-            obj.imloader=imageloaderAll(file);
+            obj.imloader=imageloaderAll(file,obj.getPar('loc_fileinfo'));
 %             if ~isempty(obj.imloader.info.metafile)
-            if ~isempty(obj.imloader.metadata.allmetadata) 
+            if ~isempty(obj.imloader.metadata.allmetadata)&&isfield(obj.imloader.metadata.allmetadata,'metafile')
              obj.setPar('loc_metadatafile',obj.imloader.metadata.allmetadata.metafile);
             end
 %             end

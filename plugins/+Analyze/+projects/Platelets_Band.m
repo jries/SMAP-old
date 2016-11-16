@@ -2,16 +2,18 @@ classdef Platelets_Band<interfaces.DialogProcessor
     methods
         function obj=Platelets_Band(varargin)        
             obj@interfaces.DialogProcessor(varargin{:}) ;
-            obj.inputParameters={'mingaussnm','mingausspix','gaussfac','pixrec','sr_layerson'};
+            obj.inputParameters={'layer1_','sr_pixrec','sr_layerson'};
 
         end
         
         function out=run(obj,p)
           
 %             notify(obj.locData,'updateParameters');
-            obj.setParameters(obj.locData.parameters);
-            obj.setParameters(obj.locData.layer(1).parameters.rec_addpar)
-            p=copyfields(obj.getGuiParameters.par,p);
+%             obj.setParameters(obj.locData.parameters);
+%             obj.setParameters(obj.locData.layer(1).parameters.rec_addpar)
+%             p=copyfields(obj.getGuiParameters.par,p);
+            
+%             p=copyfields(pl,p);
             [locs1,~,hroi]=obj.locData.getloc({'xnm','ynm','znm','locprecznm','locprecnm'},'layer',1,'position','roi');
             p.posRoi=hroi.getPosition*1000;
             p.file=obj.locData.files.file(1).name;
@@ -39,9 +41,9 @@ function reconstruct_sideband(locs1,locs2,p)
 locs1=getPol(locs1,p);
 dtheta=2*pi/p.numberOfThetas;
 thetas=-pi:dtheta:pi+p.numoverlap*dtheta;
-p.range=[0 p.posRoi(4)/2];
+p.range=[0 (p.posRoi(4)-p.posRoi(3))/2];
 rangez=[p.zmin p.zmax];
-ax1=recgui.initaxis(p.resultstabgroup,'sideview');
+ax1=initaxis(p.resultstabgroup,'sideview');
 
 locs1.xnmline=locs1.rho;
 srall=sideview_reconstruct(locs1,p);
@@ -53,10 +55,10 @@ pos.y=locs1.ynm;
 pos.sx=locs1.locprecnm;
 pos.sy=locs1.locprecnm;
 
-rangex=[p.posRoi(1) p.posRoi(1)+p.posRoi(3)];
-rangey=[p.posRoi(2) p.posRoi(2)+p.posRoi(4)];
+rangex=[p.posRoi(1) p.posRoi(2)];
+rangey=[p.posRoi(3) p.posRoi(4)];
 
-syim=gaussrender_ellipt(pos,rangex, rangey, p.pixrec, p.pixrec);
+syim=gaussrender_ellipt(pos,rangex, rangey, p.sr_pixrec, p.sr_pixrec);
 syimfit=imresize(syim,[sim(1),NaN]);
 syimfit=syimfit/myquantile(syimfit(:),0.995)*max(srall(:))/p.numberOfThetas*p.numoverlap*2;
 sxy=size(syimfit);
@@ -156,8 +158,8 @@ end
 end
 
 function locs=getPol(locs,p)
-    midp(2)=p.posRoi(2)+p.posRoi(4)/2;
-    midp(1)=p.posRoi(1)+p.posRoi(3)/2;
+    midp(2)=(p.posRoi(3)+p.posRoi(4))/2;
+    midp(1)=(p.posRoi(1)+p.posRoi(2))/2;
     
     x=(locs.xnm-midp(1));
     y=(locs.ynm-midp(2));
@@ -168,7 +170,7 @@ function locs=getPol(locs,p)
 end
 
 function srimxz=sideview_reconstruct(locs,p)
-gf=p.gaussfac;
+gf=p.layer1_.gaussfac;
 % figure(222)
 pos.x=locs.xnmline;
 pos.y=locs.znm;
@@ -177,12 +179,12 @@ rangex=p.range;
 rangey=[p.zmin p.zmax];
 
 if p.pixauto
-pixelsx=p.pixrec;pixelsy=p.pixrec;
+pixelsx=p.sr_pixrec;pixelsy=p.sr_pixrec;
 else
     pixelsx=p.pixrecset;pixelsy=p.pixrecset;
 end
     
-ming=max(p.mingausspix*pixelsx,p.mingaussnm);
+ming=max(p.layer1_.mingausspix*pixelsx,p.layer1_.mingaussnm);
 pos.sx=max(locs.locprecnm*gf,ming);
 pos.sy=max(locs.locprecznm*gf,ming);
 

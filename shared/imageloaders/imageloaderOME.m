@@ -31,13 +31,24 @@ end
 function metao=getmetadataome(obj)
 reader=obj.reader;
 omemeta=reader.getMetadataStore;
-globalmeta=reader.getGlobalMetadata;
+
 [ph,fh,ext]=fileparts(obj.file);
 fn={};
 switch ext
     case '.nd2' %Nikon
-        meta=getMetaNd2(globalmeta);
+        meta=getMetaNd2(reader);
         fn=fieldnames(meta);
+    case '.lif'
+        meta=getMetaLif(reader);
+        fn=fieldnames(meta);
+        %determine series
+        seri=reader.getSeriesCount;
+        for k=seri:-1:1
+            reader.setSeries(k-1);
+            numim(k)=reader.getImageCount;
+        end
+        [~,largseries]=max(numim);
+        reader.setSeries(largseries-1);
     otherwise
         meta=[];
 end
@@ -53,8 +64,9 @@ obj.metadata.Width=double(omemeta.getPixelsSizeX(0).getValue());
 obj.metadata.Height=double(omemeta.getPixelsSizeY(0).getValue());
 obj.metadata.numberOfFrames=max(double(omemeta.getPixelsSizeT(0).getValue()),double(omemeta.getPixelsSizeZ(0).getValue()));
 obj.metadata.basefile=[ph filesep fh];
+obj.metadata.roi=[0 0 obj.metadata.Width obj.metadata.Height];
 
-fn=[fn {'Width','Height','numberOfFrames','basefile'}];
+fn=[makehorz(fn) makehorz({'Width','Height','numberOfFrames','basefile'})];
 
 for k=1:length(fn)
     obj.metadata.assigned.(fn{k})=true;
@@ -62,21 +74,39 @@ end
 metao=obj.metadata;
 end
 
-function meta=getMetaNd2(m)
+function md=getMetaLif(reader)
 
-%CameraUniqueName, Conversion Gain, Vertical Shift Speed, Readout Speed
-searchstr={'exposure','Exposure:','emgain','Multiplier:'};
-    str=m.get('sSpecSettings'); %
-    for k=1:2:length(searchstr);
-        ind=strfind(str,searchstr{k+1})+length(searchstr{k+1});
-        ind2=ind+1;
-        while str(ind2)>='0'&& str(ind2)<='9'
-            ind2=ind2+1;
-        end
-        meta.(searchstr{k})=double(str2num(str(ind:ind2-1)));
-    end
+cm=reader.getCoreMetadataList;
+cm1=cm.get(1);
+sm=cm1.seriesMetadata;
+md.emgain=str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|EMGainValue'));
+md.conversion=str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|GainValue'));
+md.EMon=str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|CanDoEMGain'));
+md.exposure=1000*str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|WideFieldChannelConfigurator|SameExposureTime'));
+md.timediff=md.exposure;
+
+k=sm.keys;
+ind=1;
+while k.hasNext
+    kh=k.nextElement;
+    allmd{ind}=([kh ',' sm.get(kh)]);
+    ind=ind+1;
+
+end
+md.allmetadata.omeLif=allmd;
+end
+
+function meta=getMetaNd2(reader)
+
+
+m=reader.getGlobalMetadata;
+
+
     meta.EMon=str2num(m.get('EnableGainMultiplier'));
-    
+    meta.exposure= str2num(m.get('Exposure'));
+    meta.emgain=str2num(m.get('GainMultiplier'));
+    meta.conversion=str2num(m.get('ConversionGain'));
+    meta.timediff=meta.exposure;
 end
 
 

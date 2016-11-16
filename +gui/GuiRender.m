@@ -98,6 +98,10 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
 %             displayer=Displayer(obj.locData);
 %             pk=obj.getLayerParameters(1,displayer.inputParameters);
             pk=obj.getLayerParameters(1,displayerSMAP);
+            cs=obj.getPar('sr_colorbarthickness');
+            if ~isempty(cs)
+                pk.sr_colorbarthickness=cs;
+            end
 %             displayer.setParameters(pk);
             [finalImage,sr_imagehandle]=displayerSMAP(obj.locData.layer,pk);
             

@@ -198,8 +198,11 @@ transform.findTransform(locref.x(iAa),locref.y(iAa),loctarget.x(iBa),loctarget.y
  ax3=initaxis(p.resultstabgroup,'hist');
  hist(dx,50)
 
+ rr=rand(1000,1);
+ ra=ceil(rr*length(iBa));
+  rb=ceil(rr*length(nb));
  ax4=initaxis(p.resultstabgroup,'locs');
- plot(loctarget.x(iBa),loctarget.y(iBa),'.',loctarget.x(nb),loctarget.y(nb),'r.')
+ plot(loctarget.x(iBa(ra)),loctarget.y(iBa(ra)),'.',loctarget.x(nb(rb)),loctarget.y(nb(rb)),'r.')
  
 transform.tinfo.targetpos=p.targetpos.selection;
 transform.tinfo.separator=separator;

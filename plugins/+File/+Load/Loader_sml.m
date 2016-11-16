@@ -9,6 +9,9 @@ classdef Loader_sml<interfaces.DialogProcessor;
             if nargin<4
                 mode=getfilemode(file);
             end
+            if isempty(p)
+                p.updateGuiPar=false;
+            end
             loadfile(obj,p,file,mode);
         end
         function run(obj,p)
@@ -20,6 +23,9 @@ classdef Loader_sml<interfaces.DialogProcessor;
             pard=guidef;
         end
         function clear(obj,file,isadd)
+            if nargin<3
+                isadd=false;
+            end
             if isadd 
                 obj.locData.clear('filter');
             else
@@ -50,6 +56,7 @@ filenumber=obj.locData.files.filenumberEnd;
 switch mode
     case 'sml'
         [templocData,GUIsettings,siteexplorer]=load_smlV3(filedat);
+        obj.setPar('lastSMLFile',file);
     case 'fitpos'
         templocData=loadfitposV2(filedat);
         GUIsettings=[];

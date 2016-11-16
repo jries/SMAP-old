@@ -117,9 +117,18 @@ end
 
 function co=getdynamiccutoff(maxima,factor)
 ps=[.2 .5 .8];
+if size(maxima,1)<10
+    if isempty(maxima)
+        co=0;
+    else
+        co=mean(maxima(:,3))*factor;
+    end
+else
+    
 qs=myquantilefast(maxima(:,3),ps);
 slope=(qs(3)-qs(1))/(ps(3)-ps(1));
 co=qs(2)+slope*0.5*2*factor;
+end
 end
 
 function pard=guidef

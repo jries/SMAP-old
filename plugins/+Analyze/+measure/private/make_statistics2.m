@@ -43,9 +43,9 @@ else
     ax5=initaxis(p.resultstabgroup,txt);
     ax5.Position(3)=0.55;
     if zexist
-        ax6=initaxis(p.resultstabgroup,['error ' txt]);
+        ax6=initaxis(p.resultstabgroup,['err ' txt]);
         ax6.Position(3)=0.55;
-        ax7=initaxis(p.resultstabgroup,['error ' txt ' vs ' txt]);
+        ax7=initaxis(p.resultstabgroup,['err(' txt ')']);
         ax7.Position(3)=0.55;
     end
 
@@ -59,8 +59,8 @@ datrange=1:length(locs);
 slegend={};
 % look at frames
 for k=datrange
-    slegend{end+1}=[modetxt{k} num2str(datrange(k))];
-    slegend{end+1}='';
+    slegend{k}=[modetxt{k} num2str(datrange(k))];
+%     slegend{end+1}='';
     frames=locs{k}.frame;
     mf=max(frames);
     [hfr,n]=hist(frames,10);
@@ -91,11 +91,11 @@ if ploton
     axf=initaxis(p.resultstabgroup,'frames');
     hold off
     for k=datrange
-        plot(axf,stat.frames.histogram(k).n,stat.frames.histogram(k).h)
+        plothf(k)=plot(axf,stat.frames.histogram(k).n,stat.frames.histogram(k).h);
         hold on
         plot(axf,ones(2,1)*stat.frames.falloff(k),[0,max(stat.frames.histogram(k).h)])
     end
-    legend(axf,slegend);
+    legend(plothf,slegend);
 end
 
 %photon stats
@@ -104,34 +104,37 @@ if isempty(phot{1})
     errdlg('no localizations in selected region')
     error('no localizations in selected region')
 end
-if p.checkphot
-    for k=datrange
-        phot{k}(phot{k}<p.photrange(1))=[];
-        if length(p.photrange)>1
-             phot{k}(phot{k}>p.photrange(2))=[];
-        end
-    end
-    pr=p.photrange;
-else
+% if p.checkphot
+%     for k=datrange
+%         phot{k}(phot{k}<p.photrange(1))=[];
+%         if length(p.photrange)>1
+%              phot{k}(phot{k}>p.photrange(2))=[];
+%         end
+%     end
+%     pr=p.photrange;
+% else
     pr=0.99;
-end
+% end
 [hphot,mmax]=plothist(phot,pr,[],0,ax1);
 sphot={'Photons'};
-phot1=1000;
-phot2=3000;
+% phot1=1000;
+% phot2=3000;
 for k=datrange
     sphot{end+1}='';
     sphot{end+1}=[num2str(k) '.' modetxt{k} ];
     Nloc(k)=length(phot{k});
     meanphot(k)=mean(phot{k});
-    N1(k)=sum(phot{k}>phot1);
-    N2(k)=sum(phot{k}>phot2);
+%     N1(k)=sum(phot{k}>phot1);
+%     N2(k)=sum(phot{k}>phot2);
+    inrange=phot{k}>p.photrange(1)&phot{k}<p.photrange(2);
+    meanphotrange(k)=mean(phot{k}(inrange));
     
     sphot{end+1}=['N'  ' = ' num2str(Nloc(k)/1000,'%5.0f') 'k'];
-    sphot{end+1}=['<P'  '> = ' num2str(meanphot(k),'%5.0f')];
-    sphot{end+1}=['r'  ' = ' num2str(N1(k)/N2(k),'%5.2f')];
+    sphot{end+1}=['<P_all'  '> = ' num2str(meanphot(k),'%5.0f')];
+    sphot{end+1}=['<P_range'  '> = ' num2str(meanphotrange(k),'%5.0f')];
+%     sphot{end+1}=['r'  ' = ' num2str(N1(k)/N2(k),'%5.2f')];
 %     dat(k)=fitexpphot(hphot{k},[],ploton);
-    dat(k)=meanexphere(phot{k},hphot{k},[],ax1,mmax{k});
+    dat(k)=meanexphere(phot{k}(inrange),hphot{k},p.photrange,ax1,mmax{k});
     
     sphot{end+1}=(['Pexp'  ' = ' num2str(dat(k).mu,'%5.0f')]);   
 end
@@ -154,30 +157,55 @@ for k=datrange
     smx=hlocp{k}.n(ind);
     stat.locprec.max(k)=smx;
     slp{end+1}=['max: ' num2str(smx,3)];
-    hf=mylognpdf(hlocp{k}.n,px(1),px(2))*sum(hlocp{k}.h)*(hlocp{k}.n(2)-hlocp{k}.n(1));
-    if ploton
-    plot(hlocp{k}.n,hf/max(hlocp{k}.h),'k:')
-    end
+%     hf=mylognpdf(hlocp{k}.n,px(1),px(2))*sum(hlocp{k}.h)*(hlocp{k}.n(2)-hlocp{k}.n(1));
+%     if ploton
+%     plot(hlocp{k}.n,hf/max(hlocp{k}.h),'k:')
+%     end
     slp{end+1}=['median: ' num2str(median(locp{k}),3)];
     stat.locprec.median(k)=median(locp{k});
-    indrise=find(hlocp{k}.h>1/2,1,'first');
+    %risng edge
+    
+    
+    [~,indrise1]=find(hlocp{k}.h>0.2,1,'first');
+    indrise1=min(4*indrise1,length(hlocp{k}.h));
+    imaxx=max(hlocp{k}.h(1:indrise1));
+    indrise=find(hlocp{k}.h>imaxx/2,1,'first');
     risingedge=hlocp{k}.n(indrise);
     stat.locprec.rising(k)=risingedge;
     slp{end+1}=['rising: ' num2str(risingedge,3)];
+    
+    geom=geomean(loch);
+    slp{end+1}=['geomean: ' num2str(geom,3)];
 end
 
 %lifetime
 lifetime=getFieldAsVector(locs,'numberInGroup');
-[hlifet,mmax]=plothist(lifetime,0.999,1,0,ax3);
+% lifetimeall=lifetime;
+% if isfield(p,'checklifetime')&&p.checklifetime
+%     for k=datrange
+%         lifetime{k}(lifetime{k}<p.lifetimerange(1))=[];
+%         if length(p.lifetimerange)>1
+%              lifetime{k}(lifetime{k}>p.lifetimerange(2))=[];
+%         end
+%     end
+%     plr=p.lifetimerange;
+% else
+    plr=0.995;
+% end
+
+
+[hlifet,mmax]=plothist(lifetime,plr,1,0,ax3);
  ax3.NextPlot='add';
 slt={'lifetime'};
 for k=datrange
+    inrange=lifetime{k}>p.lifetimerange(1)&lifetime{k}<p.lifetimerange(2);
     slt{end+1}='';
     slt{end+1}=[num2str(k) '.' modetxt{k} ];
 %     dat(k)=fitexpphot(hlifet{k},2,ploton);
-    dat(k)=meanexphere(lifetime{k},hlifet{k},1,ax3,mmax{k});
+    dat(k)=meanexphere(lifetime{k},hlifet{k},p.lifetimerange,ax3,mmax{k});
     slt{end+1}=(['texp'  ' = ' num2str(dat(k).mu,3)]);
-    slt{end+1}=(['mean'  ' = ' num2str(mean(lifetime{k}))]);
+    slt{end+1}=(['meanrange'  ' = ' num2str(mean(lifetime{k}(inrange)),3)]);
+    slt{end+1}=(['meanall'  ' = ' num2str(mean(lifetime{k}),3)]);
     stat.lifetime.mu(k)=dat(k).mu;
 end
 
@@ -189,7 +217,11 @@ for k=datrange
     slb{end+1}='';
     slb{end+1}=[num2str(k) '.' modetxt{k} ];
     mbg=mean(bg{k});
-    slb{end+1}=['BG: ' num2str(mbg,'%5.0f')];
+    slb{end+1}=['mean: ' num2str(mbg,'%5.0f')];
+    [~,mind]=max(hbg{k}.h);
+    
+    maxbg=hbg{k}.n(mind);
+    slb{end+1}=['max: ' num2str(maxbg,'%5.0f')];
     stat.background.mean(k)=mbg;
 end
 
@@ -362,30 +394,42 @@ else
     dat.mu=0;  
 end
 
-function dat=meanexphere(v,hin,fitstart,ax,fac)
-h=double(hin.h);
-xout=double(hin.n);
-if length(h)>1
-    [mmax,mi]=max(h(1:end-1)); 
-    halft=find(h(mi:end)<mmax/2,1,'first')+mi;
-if isempty(halft)
-    halft=ceil(length(h)/2);
+function dat=meanexphere(v,hin,fitrange,ax,fac)
+try
+    h=double(hin.h);
+   [mmax,mi]=max(h(1:end-1)); 
+   xout=double(hin.n);
+   maxpos=xout(mi);
+if nargin<2||isempty(fitrange)
+    
+    
+    if length(h)>1
+        
+        halft=find(h(mi:end)<mmax/2,1,'first')+mi;
+    if isempty(halft)
+        halft=ceil(length(h)/2);
+    end
+    fitstartind=ceil(mi*1.0);
+    fitrange(1)=hin.n(fitstartind);
+    fitrange(2)=hin.n(end);
+    end
 end
-if nargin<2||isempty(fitstart)
-    fitstart=ceil(mi*1.2);
+if length(fitrange)<2
+    fitrange(2)=myquantilefast(v,.99,10000);
 end
-fitr=fitstart:min(length(h));
-% fitr=fitstart:min(halft*5,length(h));
+fitrange(1)=max(fitrange(1),maxpos);
+% fitr=fitstart:min(length(h));
+% % fitr=fitstart:min(halft*5,length(h));
 dq=hin.n(2)-hin.n(1);
-rangev=[hin.n(fitr(1)) hin.n(fitr(end))];
+% rangev=[hin.n(fitr(1)) hin.n(fitr(end))];
 % if ploton
 %     ax=gca;
 % else
 %     ax=[];
 % end
 ax.NextPlot='add';
-dat.mu=meanexp(v,dq,rangev,ax,fac);
-else
+dat.mu=meanexp(v,dq,fitrange,ax,fac);
+catch
     dat.mu=0;  
 end
 

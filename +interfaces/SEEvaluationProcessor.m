@@ -81,8 +81,13 @@ classdef SEEvaluationProcessor<interfaces.GuiModuleInterface & interfaces.LocDat
             if isempty(p.position) %no position specified, that is the usual case
 
                 pos=obj.site.pos;
+                if ~isempty(p.size)
+                    fovsize=p.size(1);
+                end
                 posgetloc=[pos(1), pos(2), fovsize, fovsize];
                 parameters=[parameters {'position', posgetloc}];
+            else
+                pos=p.position;
             end
             locsh=obj.locData.getloc(fields,parameters{:},'removeFilter',{'filenumber'});
             

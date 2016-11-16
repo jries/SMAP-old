@@ -11,6 +11,11 @@ classdef TifSaver<interfaces.DialogProcessor
             fn=p.filelist_long.selection;
             [path,file]=fileparts(fn);
             of=[path filesep file p2.img_ext.selection];
+            ind=2;
+            while exist(of,'file')
+                of=[path filesep file '_' num2str(ind) p2.img_ext.selection];
+                ind=ind+1;
+            end
             txt=filterpar(obj,p);
             serchstr={['*' p2.img_ext.selection];['*' strjoin(p2.img_ext.String,';*')]};
             [f,path]=uiputfile(serchstr,'select output file for image', of);
@@ -65,6 +70,7 @@ for k=1:length(p.sr_layerson)
         txt=[txt 'grouping: ' num2str(p.([lp '_']).groupcheck) '\n'];
         txt=[txt 'quantile/Imax: ' num2str(p.([lp '_']).imax_min) '\n'];
         txt=[txt 'color range: \t' num2str(p.([lp '_']).colorfield_min) ' : \t' num2str(p.([lp '_']).colorfield_max) '\n'];
+        txt=[txt 'remove outside c-range: ' num2str(p.([lp '_']).remout) '\n'];
         if strcmp(p.([lp '_']).renderfield.selection,'field')
             txt=[txt 'render field: ' (p.([lp '_']).render_colormode.selection) '\n'];
         end

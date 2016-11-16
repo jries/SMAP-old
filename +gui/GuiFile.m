@@ -71,14 +71,14 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.addSynchronization('filelist_long',obj.guihandles.filelist_long,'String');
             obj.addSynchronization('autosavecheck',obj.guihandles.autosavecheck,'Value',{@autosavecheck_callback,0,0,obj});
             %make file menu
-            makefilemenu(obj);
+%             makefilemenu(obj);
             
             f=getParentFigure(obj.handle);
             c=uicontextmenu(f);
             obj.guihandles.filelist_long.UIContextMenu=c;
             m1 = uimenu(c,'Label','info','Callback',{@menu_callback,obj});
             m1 = uimenu(c,'Label','remove','Callback',{@menu_callback,obj});
-            
+            m1 = uimenu(c,'Label','clear','Callback',{@menu_callback,obj});
         end
      
         function loadbutton_callback(obj, handle,actiondata,isadd,pfad,f)
@@ -319,6 +319,11 @@ switch menuobj.Label
             listdlg('ListString',texta,'ListSize',[800,800]);
     case 'remove'
         obj.remove_callback;
+    case 'clear'
+        obj.locData.clear;
+        fl={''};
+        obj.setPar('filelist_long',fl,'String');
+        obj.setPar('filelist_short',fl,'String');
 
 end
 end

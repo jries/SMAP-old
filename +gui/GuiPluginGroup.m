@@ -26,6 +26,7 @@ classdef GuiPluginGroup< interfaces.GuiModuleInterface & interfaces.LocDataInter
 %                        [~, name]=fileparts(obj.guiplugins.module);
 %                         obj.makeplugin(name,{obj.guiplugins.module},0);
 %                     else
+                        
                         allplugins=fieldnames(obj.guiplugins);
                          allplugins=setdiff(allplugins,{'position','name','module'});
                          posm=[];
@@ -144,7 +145,7 @@ classdef GuiPluginGroup< interfaces.GuiModuleInterface & interfaces.LocDataInter
             thisplugin.makeGui;
             if isworkflow
                 pluginpath
-                thisplugin.load(pluginpath)
+                thisplugin.load(pluginpath{1})
             end
             
             
@@ -200,7 +201,7 @@ guimodules=obj.getPar('guimodules');
 switch callobj.Label
     case 'add plugin'
         plugins=obj.getPar('menu_plugins');
-        types={'ProcessorPlugin'};
+        types={'ProcessorPlugin','ROI_Analyze'};
         pg=browsefields(plugins,{},2,0,true,types);
         
         if isempty(pg)

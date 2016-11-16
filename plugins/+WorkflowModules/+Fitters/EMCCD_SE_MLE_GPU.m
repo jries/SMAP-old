@@ -13,6 +13,8 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
             pard=guidef;
         end
         function fitinit(obj)
+            obj.fitpar=getfitpar(obj);
+            % check if x,y, then initialize range etc
             obj.fitfunction = @obj.nofound;
             disp('checking cuda version')
             reporttext='GPU fit function did not run. Possibly the wrong CUDA version is installed.';
@@ -32,6 +34,9 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
                 obj.fitfunction=@GPUgaussMLEv2_CUDA75;
                 reporttext='GPUgaussMLEv2_CUDA75';                
             end
+            
+            roisize=obj.getPar('loc_ROIsize');
+            obj.numberInBlock=round(5500*100/roisize^2);
             
             disp(reporttext)
             if exist('err','var')&&exist('err2','var')
@@ -64,7 +69,8 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
             end
            try %%for test set to 0: no fitting
                if obj.fitpar.fitmode==3
-                    zpar=[fitpar.zpar(:)];
+                   X=stackinfo.X;Y=stackinfo.Y;
+                    zpar=[fitpar.zpar{X,Y}(:)];
 %                     (ii{1},data,PSFSigma,iterations,fittype,Ax,Ay,Bx,By,gamma,d,PSFy0);
 %                     [P CRLB LogL]=fitter.gaussmlev2_cuda70_newz(imstack,zpar(1),p.iterations,p.fitmode,zpar(2),zpar(3),zpar(4),zpar(5),zpar(6),zpar(7),zpar(8));
 %                     [P CRLB LogL]=fitter.GPU_MLE_Lidke_55(imstack,zpar(1),p.iterations,p.fitmode,zpar(2),zpar(3),zpar(4)*0,zpar(5)*0,zpar(6),zpar(7),zpar(8));
@@ -117,7 +123,7 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
 %                     sx=locs.PSFx;
                     locs.PSFypix=locs.PSFxpix;
                 case 3
-                    locs.znm=(P(:,5)+obj.fitpar.objPos*v1)*1000*fitpar.refractive_index_mismatch;
+                    locs.znm=(P(:,5)*1000+obj.fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
                     locs.zerr=sqrt(CRLB(:,5))*1000*fitpar.refractive_index_mismatch;
                     [locs.PSFxpix,locs.PSFypix]=zpar2sigma(locs.znm/1000,zpar);
                     
@@ -142,10 +148,11 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
             obj.guihandles.loadcal.Callback={@loadcall_callback,obj};
 
         end
-        function prerun(obj,p)
-            prerun@interfaces.WorkflowFitter(obj);
-            obj.fitpar=getfitpar(obj);         
-        end
+%         function prerun(obj,p)
+%             obj.fitpar=getfitpar(obj);   
+%             prerun@interfaces.WorkflowFitter(obj);
+%                   
+%         end
         
             
     end
@@ -155,7 +162,12 @@ function loadcall_callback(a,b,obj)
 p=obj.getAllParameters;
 [f,p]=uigetfile(p.cal_3Dfile);
 if f
+    l=load([p f]);
+    if ~isfield(l,'outforfit') && ~isfield(l,'SXY')
+        msgbox('no 3D data recognized. Select other file.');
+    end
     obj.setGuiParameters(struct('cal_3Dfile',[p f]));
+    
 end
 end
 
@@ -166,12 +178,40 @@ fitpar.fitmode=p.fitmode.Value;
 if fitpar.fitmode==3
     calfile=p.cal_3Dfile;
     cal=load(calfile);
-    if p.useObjPos
+    if 0% p.useObjPos
         
         disp('obj. position not implemented yet')
     else
         fitpar.objPos=p.objPos;
-        fitpar.zpar=cal.outforfit;
+        if isfield(cal,'outforfit')
+            fitpar.zpar{1,1}=cal.outforfit;
+        else
+            s=size(cal.SXY);
+            Z=1;
+            if p.useObjPos
+                zr=cal.SXY(1).Zrangeall;
+                zr(1)=[];zr(end)=inf;
+                Z=find(p.objPos<=zr,1,'first');
+            end
+            for X=1:s(1)
+                for Y=1:s(2)
+                    zpar{X,Y}=cal.SXY(X,Y,Z).fitzpar;
+                end
+            end
+            fitpar.zpar=zpar;
+            if size(cal.SXY,3)>1
+                obj.spatial3Dcal=true;
+            else
+                obj.spatial3Dcal=false;
+            end
+            xr=cal.SXY(1,1).Xrangeall;
+            xr(1)=-inf;xr(end)=inf;
+            yr=cal.SXY(1,1).Yrangeall;
+            yr(1)=-inf;yr(end)=inf;
+            obj.spatialXrange=xr;
+            obj.spatialYrange=yr;
+                
+        end
         fitpar.refractive_index_mismatch=p.refractive_index_mismatch;
     end
     
@@ -198,7 +238,20 @@ switch fitmode
         ton={'PSFx0','tPSFx0'};
 end
 
+switch fitmode
+    case {1,2}
+        roisize=7;
+        iterations=50;
+      
+    otherwise
+        roisize=11;
+        iterations=200;
+end
+
+obj.setPar('loc_ROIsize',roisize);
+
 obj.fieldvisibility('on',ton,'off',toff);
+obj.setGuiParameters(struct('iterations',iterations));
 % for k=1:length(ton)
 %     
 %     obj.guihandles.(ton{k}).Visible='on';

@@ -56,7 +56,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             out=[];
             obj.addSynchronization('sr_roiposition',[],[],{@obj.redraw});
             
-            if isempty(obj.axis)||~isvalid(obj.axis)
+            if isempty(obj.axis)||isstruct(obj.axis)||~isvalid(obj.axis)
                 figure;
                 obj.axis=gca;
             end
@@ -141,7 +141,12 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     dir=6;
                 case {'0'}
                     dir=0;   
-               
+                case 32 %space bar: rotate
+                     obj.guihandles.rotateb.Value=~ obj.guihandles.rotateb.Value;
+                    if obj.guihandles.rotateb.Value
+                        obj.rotate_callback;
+                    end
+                    return
                 otherwise 
                     switch data.Key
                         case 'comma'
@@ -280,7 +285,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         
         
         function redraw(obj)
-                if isempty(obj.axis)||~isvalid(obj.axis)
+                if isempty(obj.axis)||isstruct(obj.axis)||~isvalid(obj.axis)
                     return
                 end
             roih=obj.getPar('sr_roihandle');
@@ -330,20 +335,20 @@ classdef Viewer3DV01<interfaces.DialogProcessor
            
             ph.sr_roihandle=obj.getPar('sr_roihandle');       
             ph.rangex=rx;
-            
-            if group(1)
-                [loc,indu,sortind]=getlocrot('ungrouped','inlayeru');  
-               
-            end
-            
-            if group(2)
-                [locg,indg,sortindg]=getlocrot('grouped','inlayerg');
-%                 locg.ballradius=0*locg.xnmline+p.transparencypar(2);
-            end
-           
-            if sum(indg)==0&&sum(indu)==0
-                return
-            end
+%             
+%             if group(1)
+%                 [loc,indu,sortind]=getlocrot('ungrouped','inlayeru');  
+%                
+%             end
+%             
+%             if group(2)
+%                 [locg,indg,sortindg]=getlocrot('grouped','inlayerg');
+% %                 locg.ballradius=0*locg.xnmline+p.transparencypar(2);
+%             end
+%            
+%             if sum(indg)==0&&sum(indu)==0
+%                 return
+%             end
             %transparency
             transparency.parameter=p.transparencypar;
             transparency.mode=p.transparencymode.Value;
@@ -366,6 +371,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                         rp=[];
                     end
                      pr=copyfields(copyfields(copyfields(p,pl),ph),rp);
+                     loc=getlocrot(k,pl); 
                      if stereo
                          pr=getstereosettings(pr,1);
                          layer1(k).images=renderplotlayer(pr,1);
@@ -377,7 +383,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                          layer2(k).images=renderplotlayer(pr,2);
                      else
                         layer(k).images=renderplotlayer(pr,0);
+                        if ~isempty(layer(k).images.finalImages.imax)
                         obj.currentimage.imax(k)=layer(k).images.finalImages.imax;
+                        end
                      end
                 end
             end
@@ -389,7 +397,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                         srim=srim1;
                         srim.image=srim1.image+srim2.image;
                     case {4,5}
-                        srim=assembleSideviews(srim2,srim1,p);
+                        srim=assembleSideviews(srim1,srim2,p);
                     case {6}
                         srim=assembleSideviews(srim1,srim2,p);
                 end
@@ -400,6 +408,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             him=imagesc(srim.rangex*1000,srim.rangey*1000,srim.image,'Parent',ax);
              ax.HitTest='on';
             ax.PickableParts='all';
+            ax.YDir='normal';
             him.PickableParts='none';
             if  p.stereo.Value==5 %goggles
                 axis(ax,'off')
@@ -449,29 +458,34 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             end
             function images=renderplotlayer(pr,stereochannel)
                 if stereochannel>0
-                    if pr.groupcheck
-                        locg.x=locg.(['x' num2str(stereochannel)]);
-                    else
+%                     if pr.groupcheck
+%                         locg.x=locg.(['x' num2str(stereochannel)]);
+%                     else
                         loc.x=loc.(['x' num2str(stereochannel)]);
-                    end
+%                     end
                 end
-                 if pr.groupcheck
-                        ind=find(layerson==k);
-                        indroi=locg.inlayerg{ind};
-                        indh=(indroi(indg));
-                        images.srimage=renderSMAP(locg,pr,k,indh(sortindg),transparency);
-                 else 
-                     ind=find(layerson==k);
-                     indroi=loc.inlayeru{ind};
-                     indh=(indroi(indu));
-                     images.srimage=renderSMAP(loc,pr,k,indh(sortind),transparency);
-                 end
+                pr.shiftxy_min=0;
+                pr.shiftxy_max=0;
+                indin=true(length(loc.x),1);
+%                  if pr.groupcheck
+%                         ind=find(layerson==k);
+%                         indroi=locg.inlayerg{ind};
+%                         indh=(indroi(indg));
+%                         images.srimage=renderSMAP(locg,pr,k,indh(sortindg),transparency);
+%                  else 
+%                      ind=find(layerson==k);
+%                      indroi=loc.inlayeru{ind};
+%                      indh=(indroi(indu));
+                     images.srimage=renderSMAP(loc,pr,k,indin,transparency);
+%                  end
                 images.finalImages=drawerSMAP(images.srimage,pr);        
                 
             end
-            function [loc,indu,sortind]=getlocrot(grouping,inlayer)
+            function [loc,indu,sortind]=getlocrot(layer,pl)
 
-                [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},inlayer,'numberInGroup','phot'},'position','roi','grouping',grouping,'layer',layerson);   
+                [loc,indu]=locCopy.getloc({'xnmline','ynmline','znm','locprecnm','locprecznm',renderfield{:},'numberInGroup','phot'},...
+                    'position','roi','layer',layer,'shiftxy',[pl.shiftxy_min,pl.shiftxy_max,pl.shiftxy_z]);   
+                loc.znm=loc.znm+pl.shiftxy_z;
                 if strcmp(p.animatemode.selection,'Translate')&&strcmp(p.raxis.selection,'vertical')
                     thetaoffset=pi/2;
 %                     induf=find(indu);
@@ -573,8 +587,11 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                  obj.redraw;
             end
                 
-           
+           obj.axis.Parent.CurrentCharacter='x';
             while bh.Value && ~SMAP_stopnow && strcmp(p.raxis.selection,obj.getSingleGuiParameter('raxis').selection) && (isempty(savemovie)||indframe>0)
+                if obj.axis.Parent.CurrentCharacter==32
+                    bh.Value=0;
+                end
                 if ~isempty(savemovie)
                     outim(:,:,:,savemovie.frames-indframe+1)=obj.currentimage.image;
                     indframe=indframe-1;
@@ -653,6 +670,8 @@ classdef Viewer3DV01<interfaces.DialogProcessor
 %                                     obj.redraw;   
                         end
                 end
+                
+%                 pause(0.01)
             end
             if ~isempty(savemovie)
                 options.color=true;

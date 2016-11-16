@@ -123,6 +123,8 @@ switch ext
         fall=myfastdir(p, [searchstr '*.tif']);
         end
         info.files=fall;
+        
+        
         info.path=p;
         inds=strfind(p,filesep);
         if strcmp(p(inds(end)+1:end-1),'Pos')
