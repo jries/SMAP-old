@@ -23,6 +23,7 @@ iterations=20;
 
 %   Fit and calculate speed
 [P CRLB LL]=GPUmleFit_LM(data,PSFsigma,50,4,0);
+% [P CRLB LL]=GPUmleFit_LM(data,PSFsigma,iter,fitt,EMon);
 
 %   Although it is recommended to call through gaussmlev2
 %   specific implementations can be used and tested:

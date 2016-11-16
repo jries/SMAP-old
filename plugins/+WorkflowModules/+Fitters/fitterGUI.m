@@ -9,6 +9,7 @@ classdef fitterGUI<interfaces.WorkflowModule
             obj.inputChannels=2; %1: image. 2: background image
             
             obj.outputParameters={'bg_dx','bg_dt','subtractbg'};
+            obj.excludeFromSave={'fitterlist'};
         end
         function pard=guidef(obj)
             pard=guidef(obj);
@@ -42,7 +43,7 @@ classdef fitterGUI<interfaces.WorkflowModule
         
         function loadfitters(obj)
             t1=obj.plugininfo.description;
-            fitnames={'EMCCD_SE_MLE_GPU','RadialSymmetry2D','RadialSymmetry3D'};
+            fitnames={'EMCCD_SE_MLE_GPU','RadialSymmetry2D','RadialSymmetry3D','MLE_GPU_Yiming'};
             obj.guihandles.fitterlist.String=fitnames;
             p=obj.guiPar;
             p.Vrim=00;
