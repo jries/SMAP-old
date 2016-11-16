@@ -8,14 +8,17 @@ classdef SimulateCameraImages<interfaces.DialogProcessor
                 obj@interfaces.DialogProcessor(varargin{:});
 %             obj.inputParameters={'se_sitefov','se_cellpixelsize','se_siteroi'};
             obj.history=true;
+            obj.showresults=true;
         end
         
         function out=run(obj,p)  
-            if obj.processorgui  
-                [locs,p]=storelocs(obj,p);
-           
-                allframes=max(1,p.frames(1)):min(p.frames(end),max(locs.frame));
-              [f,path]=uiputfile('*.tif');
+          if obj.processorgui  
+              [locs,p]=storelocs(obj,p);
+
+              allframes=max(1,p.frames(1)):min(p.frames(end),max(locs.frame));
+              path=fileparts(obj.getPar('lastSMLFile'));
+         
+              [f,path]=uiputfile([path filesep '*.tif']);
               if f
                 [img,simulpar]=simulatecamera(locs,p,allframes);
                 imout=uint16(img);
@@ -23,9 +26,10 @@ classdef SimulateCameraImages<interfaces.DialogProcessor
                  pixelSize = ome.units.quantity.Length(java.lang.Double(p.pixelsize/1000), ome.units.UNITS.MICROM);
                  metadata.setPixelsPhysicalSizeX(pixelSize, 0);
                  metadata.setPixelsPhysicalSizeY(pixelSize, 0);
-                 metadata.setDetectorAmplificationGain(java.lang.Double(p.emgain),0,0);
-                 metadata.setDetectorOffset(java.lang.Double(p.offset),0,0);
-                 metadata.setDetectorGain(java.lang.Double(p.conversion),0,0);
+                 p.plotaxis=obj.initaxis('camera image');
+%                  metadata.setDetectorAmplificationGain(java.lang.Double(p.emgain),0,0);
+%                  metadata.setDetectorOffset(java.lang.Double(p.offset),0,0);
+%                  metadata.setDetectorGain(java.lang.Double(p.conversion),0,0);
 %                  bfsave(imout,[path f],'XYTCZ','metadata',metadata);
                  if exist([path f],'file')
                      delete([path f]);
@@ -38,9 +42,9 @@ classdef SimulateCameraImages<interfaces.DialogProcessor
           elseif ~isempty(obj.parent)
                 p=obj.par;   
                  if obj.getPar('loc_preview')
-                allframes=max(1,obj.getPar('loc_previewframe'));    
+                    allframes=max(1,obj.getPar('loc_previewframe'));    
                  else
-                allframes=max(1,p.frames(1)):min(p.frames(end),max(obj.locs.frame));
+                    allframes=max(1,p.frames(1)):min(p.frames(end),max(obj.locs.frame));
                  end
               %inti
 %               filestruct=initfile('simulation');
@@ -95,19 +99,27 @@ function [locs,p]=storelocs(obj,p)
   switch p.simulationsource.Value
       case 1 %current locs
           locs=obj.locData.getloc({'xnm','ynm','znm','xnm_gt','ynm_gt','frame','phot'},'position','roi','layer',1);
-          if ~isempty(locs.xnm_gt)
-                locs.x=locs.xnm_gt;
-                locs.y=locs.ynm_gt;
-          else
-              locs.x=locs.xnm;
-              locs.y=locs.ynm;
+
+      case 2 %load localizations
+          path=fileparts(obj.getPar('lastSMLFile'));
+          [f,path]=uigetfile([path filesep '*.mat']);
+          if ~f
+              return
           end
-      case 2 
-          disp('not implemented')
+          l=load([path f]);
+          locs=l.saveloc.loc;
       case 3
           disp('not implemented')
   end
-
+  
+  if isfield(locs,'xnm_gt') && ~isempty(locs.xnm_gt)
+        locs.x=locs.xnm_gt;
+        locs.y=locs.ynm_gt;
+  else
+      locs.x=locs.xnm;
+      locs.y=locs.ynm;
+  end
+          
     if p.autorange
       p.xrange=[min(locs.x)-1000 max(locs.x)+1000];
       p.yrange=[min(locs.y)-1000 max(locs.y)+1000];
