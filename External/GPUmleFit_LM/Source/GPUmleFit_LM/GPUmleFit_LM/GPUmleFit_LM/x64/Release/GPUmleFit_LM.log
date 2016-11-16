@@ -1,0 +1,225 @@
+﻿Build started 16.11.2016 10:28:30.
+     1>Project "D:\Yiming\code\test\GPUmleFit_LM\GPUmleFit_LM\GPUmleFit_LM\GPUmleFit_LM.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "x64\Release\GPUmleFit_LM.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       AddCudaCompileDeps:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\cl.exe /E /nologo /showIncludes /TP /D__CUDACC__ /D_WINDLL /D_UNICODE /DUNICODE /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\include" /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\bin" /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\include" /I. /FIcuda_runtime.h /c D:\Yiming\code\test\GPUmleFit_LM\GPUmleFit_LM\GPUmleFit_LM\GPUmleFit_LM_EMCCD.cu 
+       AddCudaCompileDeps:
+       Skipping target "AddCudaCompileDeps" because all output files are up-to-date with respect to the input files.
+       AddCudaCompilePropsDeps:
+       Skipping target "AddCudaCompilePropsDeps" because all output files are up-to-date with respect to the input files.
+       AddCudaCompilePropsDeps:
+       Skipping target "AddCudaCompilePropsDeps" because all output files are up-to-date with respect to the input files.
+       CudaBuild:
+         Compiling CUDA source file GPUmleFit_LM_EMCCD.cu...
+         cmd.exe /C "C:\Users\ries group\AppData\Local\Temp\tmpee0e5efa8bac434d8dd7fb687699d23b.cmd"
+         "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\bin\nvcc.exe" -gencode=arch=compute_20,code=\"sm_20,compute_20\" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env --cl-version 2010 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -D_WINDLL -D_UNICODE -DUNICODE -Xcompiler "/EHsc /W3 /nologo /O2 /Zi  /MD  " -o x64\Release\GPUmleFit_LM_EMCCD.cu.obj "D:\Yiming\code\test\GPUmleFit_LM\GPUmleFit_LM\GPUmleFit_LM\GPUmleFit_LM_EMCCD.cu"
+         
+         D:\Yiming\code\test\GPUmleFit_LM\GPUmleFit_LM\GPUmleFit_LM>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\bin\nvcc.exe" -gencode=arch=compute_20,code=\"sm_20,compute_20\" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env --cl-version 2010 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64"  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\include"     --keep-dir x64\Release -maxrregcount=0  --machine 64 --compile -cudart static     -D_WINDLL -D_UNICODE -DUNICODE -Xcompiler "/EHsc /W3 /nologo /O2 /Zi  /MD  " -o x64\Release\GPUmleFit_LM_EMCCD.cu.obj "D:\Yiming\code\test\GPUmleFit_LM\GPUmleFit_LM\GPUmleFit_LM\GPUmleFit_LM_EMCCD.cu" 
+     1>d:\yiming\code\test\gpumlefit_lm\gpumlefit_lm\gpumlefit_lm\GPUgaussLib.cuh(215): warning : specifiers after comma between declarations are nonstandard
+         
+     1>d:\yiming\code\test\gpumlefit_lm\gpumlefit_lm\gpumlefit_lm\GPUgaussLib.cuh(233): warning : specifiers after comma between declarations are nonstandard
+         
+     1>d:\yiming\code\test\gpumlefit_lm\gpumlefit_lm\gpumlefit_lm\GPUgaussLib.cuh(320): warning : specifiers after comma between declarations are nonstandard
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(29): warning : variable "PSFy" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(29): warning : variable "PSFx" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(34): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(45): warning : variable "temp" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(253): warning : variable "PSFy" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(253): warning : variable "PSFx" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(258): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(269): warning : variable "temp" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(496): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(507): warning : variable "temp" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(716): warning : variable "PSFy" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(716): warning : variable "PSFx" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(721): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(732): warning : variable "temp" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(937): warning : variable "xi" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(937): warning : variable "yi" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(948): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(962): warning : variable "delta_ddxf" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(962): warning : variable "delta_ddyf" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(962): warning : variable "delta_ddzf" was declared but never referenced
+         
+     1>d:\yiming\code\test\gpumlefit_lm\gpumlefit_lm\gpumlefit_lm\GPUgaussLib.cuh(215): warning : specifiers after comma between declarations are nonstandard
+         
+     1>d:\yiming\code\test\gpumlefit_lm\gpumlefit_lm\gpumlefit_lm\GPUgaussLib.cuh(233): warning : specifiers after comma between declarations are nonstandard
+         
+     1>d:\yiming\code\test\gpumlefit_lm\gpumlefit_lm\gpumlefit_lm\GPUgaussLib.cuh(320): warning : specifiers after comma between declarations are nonstandard
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(29): warning : variable "PSFy" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(29): warning : variable "PSFx" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(34): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(45): warning : variable "temp" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(253): warning : variable "PSFy" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(253): warning : variable "PSFx" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(258): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(269): warning : variable "temp" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(496): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(507): warning : variable "temp" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(716): warning : variable "PSFy" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(716): warning : variable "PSFx" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(721): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(732): warning : variable "temp" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(937): warning : variable "xi" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(937): warning : variable "yi" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(948): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(962): warning : variable "delta_ddxf" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(962): warning : variable "delta_ddyf" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(962): warning : variable "delta_ddzf" was declared but never referenced
+         
+     1>d:\yiming\code\test\gpumlefit_lm\gpumlefit_lm\gpumlefit_lm\GPUgaussLib.cuh(215): warning : specifiers after comma between declarations are nonstandard
+         
+     1>d:\yiming\code\test\gpumlefit_lm\gpumlefit_lm\gpumlefit_lm\GPUgaussLib.cuh(233): warning : specifiers after comma between declarations are nonstandard
+         
+     1>d:\yiming\code\test\gpumlefit_lm\gpumlefit_lm\gpumlefit_lm\GPUgaussLib.cuh(320): warning : specifiers after comma between declarations are nonstandard
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(29): warning : variable "PSFy" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(29): warning : variable "PSFx" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(34): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(45): warning : variable "temp" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(253): warning : variable "PSFy" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(253): warning : variable "PSFx" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(258): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(269): warning : variable "temp" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(496): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(507): warning : variable "temp" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(716): warning : variable "PSFy" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(716): warning : variable "PSFx" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(721): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(732): warning : variable "temp" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(937): warning : variable "xi" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(937): warning : variable "yi" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(948): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(962): warning : variable "delta_ddxf" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(962): warning : variable "delta_ddyf" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(962): warning : variable "delta_ddzf" was declared but never referenced
+         
+     1>d:\yiming\code\test\gpumlefit_lm\gpumlefit_lm\gpumlefit_lm\GPUgaussLib.cuh(215): warning : specifiers after comma between declarations are nonstandard
+         
+     1>d:\yiming\code\test\gpumlefit_lm\gpumlefit_lm\gpumlefit_lm\GPUgaussLib.cuh(233): warning : specifiers after comma between declarations are nonstandard
+         
+     1>d:\yiming\code\test\gpumlefit_lm\gpumlefit_lm\gpumlefit_lm\GPUgaussLib.cuh(320): warning : specifiers after comma between declarations are nonstandard
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(29): warning : variable "PSFy" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(29): warning : variable "PSFx" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(34): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(45): warning : variable "temp" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(253): warning : variable "PSFy" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(253): warning : variable "PSFx" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(258): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(269): warning : variable "temp" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(496): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(507): warning : variable "temp" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(716): warning : variable "PSFy" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(716): warning : variable "PSFx" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(721): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(732): warning : variable "temp" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(937): warning : variable "xi" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(937): warning : variable "yi" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(948): warning : variable "oldUpdate" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(962): warning : variable "delta_ddxf" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(962): warning : variable "delta_ddyf" was declared but never referenced
+         
+     1>D:/Yiming/code/test/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM/GPUmleFit_LM_EMCCD.cu(962): warning : variable "delta_ddzf" was declared but never referenced
+         
+         GPUmleFit_LM_EMCCD.cu
+       CudaBuild:
+       Skipping target "CudaBuild" because all output files are up-to-date with respect to the input files.
+       ClCompile:
+         All outputs are up-to-date.
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"D:\Yiming\code\test\GPUmleFit_LM\GPUmleFit_LM\x64\Release\GPUmleFit_LM.mexw64" /NOLOGO /LIBPATH:"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v7.0\lib\x64" cudart.lib libmex.lib libmat.lib libmx.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /DEF:"matlab.def" /MANIFEST /ManifestFile:"x64\Release\GPUmleFit_LM.mexw64.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"D:\Yiming\code\test\GPUmleFit_LM\GPUmleFit_LM\x64\Release\GPUmleFit_LM.pdb" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\Yiming\code\test\GPUmleFit_LM\GPUmleFit_LM\x64\Release\GPUmleFit_LM.lib" /MACHINE:X64 /DLL x64\Release\GPUmleFit_LM_EMCCD.cu.obj
+         x64\Release\wrapper.cu.obj
+         x64\Release\mexFunction.obj
+            Creating library D:\Yiming\code\test\GPUmleFit_LM\GPUmleFit_LM\x64\Release\GPUmleFit_LM.lib and object D:\Yiming\code\test\GPUmleFit_LM\GPUmleFit_LM\x64\Release\GPUmleFit_LM.exp
+         Generating code
+         Finished generating code
+         GPUmleFit_LM.vcxproj -> D:\Yiming\code\test\GPUmleFit_LM\GPUmleFit_LM\x64\Release\GPUmleFit_LM.mexw64
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"D:\Yiming\code\test\GPUmleFit_LM\GPUmleFit_LM\x64\Release\GPUmleFit_LM.mexw64;#2" /manifest x64\Release\GPUmleFit_LM.mexw64.intermediate.manifest
+       FinalizeBuildStatus:
+         Deleting file "x64\Release\GPUmleFit_LM.unsuccessfulbuild".
+         Touching "x64\Release\GPUmleFit_LM.lastbuildstate".
+     1>Done Building Project "D:\Yiming\code\test\GPUmleFit_LM\GPUmleFit_LM\GPUmleFit_LM\GPUmleFit_LM.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:12.90

@@ -41,6 +41,14 @@ switch ext
     case '.lif'
         meta=getMetaLif(reader);
         fn=fieldnames(meta);
+        %determine series
+        seri=reader.getSeriesCount;
+        for k=seri:-1:1
+            reader.setSeries(k-1);
+            numim(k)=reader.getImageCount;
+        end
+        [~,largseries]=max(numim);
+        reader.setSeries(largseries-1);
     otherwise
         meta=[];
 end

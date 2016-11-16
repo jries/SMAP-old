@@ -7,11 +7,13 @@ classdef plugin4workflow<interfaces.WorkflowModule
         function obj=plugin4workflow(varargin)
             obj@interfaces.WorkflowModule(varargin{:})
             obj.inputChannels=1;
+            obj.isstartmodule=true;
         end
 
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
             thisplugin=plugin(obj.subpluginpath{:});
+            thisplugin.parent=obj;
             thisplugin.handle=obj.handle;
             thisplugin.attachLocData(obj.locData);
             thisplugin.attachPar(obj.P);
@@ -66,7 +68,11 @@ classdef plugin4workflow<interfaces.WorkflowModule
             elseif isa(module, 'interfaces.GuiModuleInterface')
                 disp('no dialog processor. implement with run')
             end
-            obj.output(data)
+            try
+                obj.output(data)
+            catch err
+                
+            end
         end
 
         
