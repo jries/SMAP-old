@@ -10,8 +10,8 @@ function [img,simulpar]=simulatecamera(locs,p,frames)
 % p.offset=100; p.conversion=5; p.emgain=100;
 % p.background=10;
 
-p.sizex=ceil((p.xrange(2)-p.xrange(1))/p.pixelsize);
-p.sizey=ceil((p.yrange(2)-p.yrange(1))/p.pixelsize);
+p.sizex=round((p.xrange(2)-p.xrange(1))/p.pixelsize);
+p.sizey=round((p.yrange(2)-p.yrange(1))/p.pixelsize);
 im0=zeros(p.sizex,p.sizey,'single');
 if isempty(locs)
     simulpar=p;
@@ -52,9 +52,13 @@ for k=1:length(frames)
     imh3=int2phot(imh2,p.EMon);   
     imh4=phot2adu(imh3,p);
     img(:,:,k)=imh4;
-%     figure(88);
-%     imagesc([ imh4])
-%     colorbar
+    
+    if isfield(p,'plotaxis') &&isvalid(p.plotaxis)
+        figure(88);
+        imagesc([ imh4],'Parent',p.plotaxis)
+        colorbar
+        drawnow
+    end
 %     waitforbuttonpress;
     
     
