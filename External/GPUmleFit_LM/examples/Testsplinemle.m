@@ -61,7 +61,7 @@ end
 outputtemp = repmat(output,1,1,1000);
 outputtemp=single(noise(outputtemp,'poisson',1));
 
-[P_Spline_sim CRLB LL]=GPUmleFit_LM(single(outputtemp(:,:,1:5000)),single(coeff),50,5,0);
+[P_Spline_sim CRLB LL]=GPUmleFit_LM(single(outputtemp(:,:,1:10000)),single(coeff),50,5,0);
 
 resultfit = [P_Spline_sim(:,1:2) P_Spline_sim(:,5)];
 resultsim = [coordsxy coordsz];
