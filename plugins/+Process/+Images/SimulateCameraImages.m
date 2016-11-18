@@ -33,9 +33,9 @@ classdef SimulateCameraImages<interfaces.DialogProcessor
                  metadata.setPixelsPhysicalSizeX(pixelSize, 0);
                  metadata.setPixelsPhysicalSizeY(pixelSize, 0);
 %                  
-%                  metadata.setDetectorAmplificationGain(java.lang.Double(p.emgain),0,0);
-%                  metadata.setDetectorOffset(java.lang.Double(p.offset),0,0);
-%                  metadata.setDetectorGain(java.lang.Double(p.conversion),0,0);
+                 metadata.setDetectorAmplificationGain(java.lang.Double(p.emgain),0,0);
+                 metadata.setDetectorOffset(java.lang.Double(p.offset),0,0);
+                 metadata.setDetectorGain(java.lang.Double(p.conversion),0,0);
 %                  bfsave(imout,[path f],'XYTCZ','metadata',metadata);
                  if exist([path f],'file')
                      delete([path f]);

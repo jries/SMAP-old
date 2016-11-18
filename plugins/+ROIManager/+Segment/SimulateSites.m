@@ -48,7 +48,21 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
            se.currentcell=se.cells(1);
            se.currentfile=se.files(1);
            catch
-           end
+            end
+           
+            if p.savenow
+                lastsml=obj.getPar('lastSMLFile');
+                if ~isempty(lastsml)
+                    path=fileparts(lastsml);
+                else
+                    path='';
+                end
+               [file,path]= uiputfile([path filesep obj.locData.files.file(1).name]);
+               if file
+                    obj.locData.savelocs([path file])
+                    obj.setPar('lastSMLFile',[path file]);
+               end
+            end
           out=[];
         end
         function pard=guidef(obj)
@@ -410,6 +424,8 @@ pard.maxframes.object=struct('String','10000','Style','edit');
 pard.maxframes.Width=.5;
 pard.maxframes.position=[8,4.5];
 
-
+pard.savenow.object=struct('String','auto save','Style','checkbox');
+pard.savenow.Width=1;
+pard.savenow.position=[1,4];
 pard.plugininfo.type='ROI_Analyze';
 end

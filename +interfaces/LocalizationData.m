@@ -333,6 +333,10 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             end
             saveloc=concentratefilelist(saveloc);
             if nargin>1&&~isempty(filename)
+                if isempty(strfind(filename,'_sml.mat'))
+                    [path,file]=fileparts(filename);
+                    filename=[path filesep file '_sml.mat'];
+                end
                 save(filename,'saveloc','-v7.3')
             end
         end
