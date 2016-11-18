@@ -42,7 +42,7 @@ srec(2)=round((my(2)-my(1))/pixrec);
 
 % srim= histrender(posr,mx, my, pixrec, pixrec);
 
-nfftexp=2^ceil(log2(max(srec))); %for fft use power of 2
+nfftexp=2^ceil(log2(max(max(srec),256))); %for fft use power of 2
 noff=nfftexp/2+1; 
 disp('make movie')
 Fmovier=makemovie;  %calculate fourier transforms of reconstructed images
@@ -251,7 +251,7 @@ end
 function [x,y,outim,outimnorm,errx,erry]=findmaximumgauss(img,window)
 s=size(img);
 win=maxdrift/pixrec; %maxdrift
-cent=round(s(1)/2-win:s(1)/2+win);
+cent=round(max(1,s(1)/2-win):min(s(1)/2+win,s(1)));
 imfm=img(cent,cent);
 imfm=filter2(ones(5)/5^2,imfm); %filter a little for better maximum search
 [inten,ind]=max(imfm(:)); %determine pixel with maximum intensity to center roi for fitting
