@@ -16,17 +16,23 @@ classdef SimulateCameraImages<interfaces.DialogProcessor
               [locs,p]=storelocs(obj,p);
 
               allframes=max(1,p.frames(1)):min(p.frames(end),max(locs.frame));
-              path=fileparts(obj.getPar('lastSMLFile'));
+              lastsml=obj.getPar('lastSMLFile');
+              if ~isempty(lastsml)
+                path=fileparts(lastsml);
+              else
+                  path='';
+              end
          
               [f,path]=uiputfile([path filesep '*.tif']);
               if f
+                  p.plotaxis=obj.initaxis('camera image');
                 [img,simulpar]=simulatecamera(locs,p,allframes);
                 imout=uint16(img);
                  metadata = createMinimalOMEXMLMetadata(imout);
                  pixelSize = ome.units.quantity.Length(java.lang.Double(p.pixelsize/1000), ome.units.UNITS.MICROM);
                  metadata.setPixelsPhysicalSizeX(pixelSize, 0);
                  metadata.setPixelsPhysicalSizeY(pixelSize, 0);
-                 p.plotaxis=obj.initaxis('camera image');
+%                  
 %                  metadata.setDetectorAmplificationGain(java.lang.Double(p.emgain),0,0);
 %                  metadata.setDetectorOffset(java.lang.Double(p.offset),0,0);
 %                  metadata.setDetectorGain(java.lang.Double(p.conversion),0,0);
@@ -109,7 +115,19 @@ function [locs,p]=storelocs(obj,p)
           l=load([path f]);
           locs=l.saveloc.loc;
       case 3
-          disp('not implemented')
+          sim=ROIManager.Segment.SimulateSites;
+          sim.attachPar(obj.P);
+             sim.handle=figure('MenuBar','none','Toolbar','none','Name','simulate locs');
+    p.Xrim=10;
+    p.Vrim=100;
+    sim.setGuiAppearence(p)
+    sim.makeGui;
+    disp('close simulate localization gui after caluclating localizations')
+    waitfor(sim.handle)
+    locs=sim.locData.loc;
+%           sim.attachLocData(obj.locData);
+          
+          
   end
   
   if isfield(locs,'xnm_gt') && ~isempty(locs.xnm_gt)

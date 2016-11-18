@@ -19,6 +19,7 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
            obj.locData.addfile(['simulated_' num2str(obj.locData.files.filenumberEnd)]);
            obj.locData.addLocData(locst);
            obj.locData.sort('filenumber','frame');
+           try
            initGuiAfterLoad(obj);
            
            
@@ -36,6 +37,8 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
                 % thissite.cellnumber=sitepar.currentcell.number;
         %         thissite.number=sitepar.sitelist.cellnumber+1;
                 se.addSite(thissite);
+           end
+           catch 
            end
             try
            se.processors.preview.updateFilelist;

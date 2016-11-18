@@ -28,7 +28,10 @@ numlocs=length(locs.x);
 locs.s=zeros(numlocs,1)+100;
 img=zeros(p.sizex,p.sizey,length(frames),'single');
 ind1=1;
+
+hwb=waitbar(0,'calcualting camera images');
 for k=1:length(frames)
+    waitbar(k/length(frames),hwb);
     while ind1<=numlocs&&locs.frame(ind1)<frames(k)
         ind1=ind1+1;
     end
@@ -54,15 +57,16 @@ for k=1:length(frames)
     img(:,:,k)=imh4;
     
     if isfield(p,'plotaxis') &&isvalid(p.plotaxis)
-        figure(88);
+       
         imagesc([ imh4],'Parent',p.plotaxis)
-        colorbar
+        colorbar('peer',p.plotaxis)
         drawnow
     end
 %     waitforbuttonpress;
     
     
 end
+close(hwb)
 simulpar=p;
 end
 
