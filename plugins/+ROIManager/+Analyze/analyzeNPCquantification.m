@@ -85,12 +85,12 @@ function pf=fithist(hi,n)
 shi=sum(hi);
 % hi=hi/shi;
 
-corners=8;rings=2;
+corners=8;rings=4;
 % x=(0:corners)';
 x=n(3:end)';
 % clusterfromlabeling(x,corners,rings,.5)
 ft=fittype('a*clusterfromlabeling(x,corners,rings,p)','problem',{'corners','rings'});
-f=fit(x,hi(3:end)',ft,'problem',{corners, rings},'Lower',[0 0.01],'Upper',[inf .99],'Start',[shi .3]);
+f=fit(x,hi(3:end)',ft,'problem',{corners, rings},'Lower',[0 0.01],'Upper',[inf .99],'Start',[shi .1]);
 plot(0:8,f(0:8),'-g')
 plot(x,f(x),'-*r')
 pf=f.p;

@@ -331,10 +331,10 @@ function pard=guidef(obj)
 % 
 pard.coordinatefile.object=struct('String','plugins/+ROIManager/+Segment/hidden/MakeNPCCoordinates.m','Style','edit');
 pard.coordinatefile.position=[1,1];
-pard.coordinatefile.Width=3;
+pard.coordinatefile.Width=2;
 
 pard.load_button.object=struct('String','Load','Style','pushbutton','Callback',{{@load_callback,obj}});
-pard.load_button.position=[1,4];
+pard.load_button.position=[1,3];
 
 pard.tif_numbermode.object=struct('String',{{'Density (labels/um^2)','Number of labels'}},'Style','popupmenu');
 pard.tif_numbermode.Width=1.5;
