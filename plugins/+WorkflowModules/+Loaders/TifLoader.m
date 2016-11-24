@@ -143,6 +143,8 @@ classdef TifLoader<interfaces.WorkflowModule
             if ~isempty(obj.imloader.metadata.allmetadata)&&isfield(obj.imloader.metadata.allmetadata,'metafile')
              obj.setPar('loc_metadatafile',obj.imloader.metadata.allmetadata.metafile);
             end
+            allmd=obj.imloader.metadata.allmetadata;
+            warnmissingmeta(allmd);
 %             end
 % obj.imloader.metadata
             p=obj.getGuiParameters;
@@ -191,6 +193,16 @@ fe=bfGetFileExtensions;
 if f
     obj.addFile([path f]);
 end  
+end
+
+function warnmissingmeta(md)
+expected={'emgain','conversion','offset','port','pixsize'};
+missing=setdiff(expected,fieldnames(md));
+if isempty(missing)
+    return
+end
+str={'essential metadata missing (set manually in camera settings): ', missing{:}};
+warndlg(str)
 end
 
 function pard=guidef(obj)

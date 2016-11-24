@@ -1,4 +1,5 @@
 function mdo=getmetadataMM(obj)
+obj.metadata.allmetadata=[];
 info=getimageinfo(obj.file);
              obj.metadata.numberOfFrames=info.numberOfFrames;
              obj.metadata.basefile=info.basefile;
