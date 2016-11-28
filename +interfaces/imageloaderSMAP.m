@@ -38,6 +38,9 @@ classdef imageloaderSMAP<handle
             if nargin<3
                 format='cell';
             end
+            if isempty(numbers)
+                numbers=1:obj.metadata.numberOfFrames;
+            end
             switch format
                 case 'cell'
                     for k=length(numbers):-1:1

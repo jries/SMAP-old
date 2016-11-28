@@ -147,9 +147,10 @@ switch fitpar.fitmode
         locs.PSFypix=P(:,6);
         locs.PSFyerr=sqrt(CRLB(:,6));  
     case 5
-        
-        locs.znm=(P(:,5)*1000+fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
-        locs.zerr=sqrt(CRLB(:,5))*1000*fitpar.refractive_index_mismatch;
+        %         locs.znm=(P(:,5)*1000+fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
+        locs.znm=((P(:,5)-fitpar.z0)*fitpar.dz)*fitpar.refractive_index_mismatch;
+        locs.zerr=sqrt(CRLB(:,5))*fitpar.dz*fitpar.refractive_index_mismatch;
+%         [locs.PSFxpix,locs.PSFypix]=zpar2sigma(locs.znm/1000,fitpar.zparhere);
         
          sx=100*v1;
         locs.PSFxpix=sx;
@@ -261,7 +262,12 @@ if fitpar.fitmode==3
 elseif fitpar.fitmode==5
     calfile=p.cal_3Dfile;
     cal=load(calfile);
-    fitpar.splinecoefficients=cal.coeff;
+    fitpar.splinecoefficients=single(cal.coeff*4);
+    fitpar.z0=cal.z0;
+    fitpar.dz=cal.dz; 
+    fitpar.refractive_index_mismatch=p.refractive_index_mismatch;
+    fitpar.objPos=p.objPos;
+    
 else
     fitpar.PSFx0=p.PSFx0;
 end
