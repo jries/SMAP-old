@@ -152,6 +152,8 @@ pard.se_drawboxes.position=[8,2];
 pard.se_drawsideview.object=struct('Style','checkbox','String','draw sideview','Value',1);
 pard.se_drawsideview.position=[8,3];
 
+% pard.se_keeptempimgs.object=struct('Style','checkbox','String','keep temp imgs','Value',0);
+% pard.se_keeptempimgs.position=[8,4];
 
 pard.redrawall.object=struct('Style','pushbutton','String','redraw all','Value',0);
 pard.redrawall.position=[10.5,4];
