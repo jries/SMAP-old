@@ -53,8 +53,8 @@ classdef RegisterImages<interfaces.DialogProcessor
                 end
                 tfile=p.dataselect.Value==obj.locData.loc.filenumber;
                 tch=tch&tfile;
-                obj.locData.loc.xnm(tch)=obj.locData.loc.xnm(tch)-dx;
-                obj.locData.loc.ynm(tch)=obj.locData.loc.ynm(tch)-dy;
+                obj.locData.loc.xnm(tch)=obj.locData.loc.xnm(tch)+dx;
+                obj.locData.loc.ynm(tch)=obj.locData.loc.ynm(tch)+dy;
                 obj.locData.regroup;
             else
 
