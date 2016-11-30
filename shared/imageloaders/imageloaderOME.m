@@ -5,6 +5,7 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
     properties
         calfile='settings/CameraCalibration.xls';
         reader
+        seriesnumber
     end
     
     methods
@@ -34,6 +35,7 @@ omemeta=reader.getMetadataStore;
 
 [ph,fh,ext]=fileparts(obj.file);
 fn={};
+indseries=0;
 switch ext
     case '.nd2' %Nikon
         meta=getMetaNd2(reader);
@@ -43,12 +45,31 @@ switch ext
         fn=fieldnames(meta);
         %determine series
         seri=reader.getSeriesCount;
+        ind=1;
+        series=[];
+        message={};
         for k=seri:-1:1
             reader.setSeries(k-1);
             numim(k)=reader.getImageCount;
+            if numim(k)>1
+                series(ind)=k;
+                message{ind}=['S' num2str(k) ', ' num2str(numim(k)) ' frames'];
+                ind=ind+1;
+            end
         end
-        [~,largseries]=max(numim);
-        reader.setSeries(largseries-1);
+        if ind>2
+            if isempty(obj.seriesnumber)
+                selected=listdlg('ListString',message,'SelectionMode','single','Name','Select data set');
+                largeseries=series(selected);
+                 obj.seriesnumber=largeseries;
+            else
+                largeseries=obj.seriesnumber;
+            end
+        else
+            [~,largeseries]=max(numim);
+        end
+        reader.setSeries(largeseries-1);
+        indseries=largeseries-1;
     otherwise
         meta=[];
 end
@@ -60,9 +81,9 @@ catch
 end
 obj.metadata=copyfields(obj.metadata,meta);
 obj.metadata=copyfields(obj.metadata,m2);
-obj.metadata.Width=double(omemeta.getPixelsSizeX(0).getValue());
-obj.metadata.Height=double(omemeta.getPixelsSizeY(0).getValue());
-obj.metadata.numberOfFrames=max(double(omemeta.getPixelsSizeT(0).getValue()),double(omemeta.getPixelsSizeZ(0).getValue()));
+obj.metadata.Width=double(omemeta.getPixelsSizeX(indseries).getValue());
+obj.metadata.Height=double(omemeta.getPixelsSizeY(indseries).getValue());
+obj.metadata.numberOfFrames=max(double(omemeta.getPixelsSizeT(indseries).getValue()),double(omemeta.getPixelsSizeZ(indseries).getValue()));
 obj.metadata.basefile=[ph filesep fh];
 obj.metadata.roi=[0 0 obj.metadata.Width obj.metadata.Height];
 
@@ -79,11 +100,22 @@ function md=getMetaLif(reader)
 cm=reader.getCoreMetadataList;
 cm1=cm.get(1);
 sm=cm1.seriesMetadata;
-md.emgain=str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|EMGainValue'));
-md.conversion=str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|GainValue'));
-md.EMon=str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|CanDoEMGain'));
-md.exposure=1000*str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|WideFieldChannelConfigurator|SameExposureTime'));
+% md.emgain=str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|EMGainValue'));
+% md.conversion=str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|GainValue'));
+% md.EMon=str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|CanDoEMGain'));
+% md.exposure=1000*str2double(sm.get('ProcessingHistory|ATLCameraSettingDefinition|WideFieldChannelConfigurator|SameExposureTime'));
+md.emgain=str2double(sm.get('ATLCameraSettingDefinition|EMGainValue'));
+md.conversion=str2double(sm.get('ATLCameraSettingDefinition|GainValue'));
+md.EMon=str2double(sm.get('ATLCameraSettingDefinition|CanDoEMGain'));
+md.exposure=1000*str2double(sm.get('ATLCameraSettingDefinition|WideFieldChannelConfigurator|SameExposureTime'));
 md.timediff=md.exposure;
+
+fn=fieldnames(md);
+for k=1:length(fn)
+    if isnan(md.(fn{k}))
+        md=rmfield(md,fn{k});
+    end
+end
 
 k=sm.keys;
 ind=1;

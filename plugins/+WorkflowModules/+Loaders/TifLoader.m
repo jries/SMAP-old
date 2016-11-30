@@ -28,7 +28,7 @@ classdef TifLoader<interfaces.WorkflowModule
                  error('TifLoader: localization file not found')
             end
 %             obj.imloader=imageLoader(p.tiffile);  
-            if ~isempty(obj.imloader)
+            if isempty(obj.imloader)
                 obj.imloader=imageloaderAll(p.tiffile,obj.getPar('loc_fileinfo')); 
             end
             obj.imloader.onlineAnalysis=p.onlineanalysis;
@@ -143,7 +143,7 @@ classdef TifLoader<interfaces.WorkflowModule
             if ~isempty(obj.imloader.metadata.allmetadata)&&isfield(obj.imloader.metadata.allmetadata,'metafile')
              obj.setPar('loc_metadatafile',obj.imloader.metadata.allmetadata.metafile);
             end
-            allmd=obj.imloader.metadata.allmetadata;
+            allmd=obj.imloader.metadata;
             warnmissingmeta(allmd);
 %             end
 % obj.imloader.metadata
@@ -196,7 +196,7 @@ end
 end
 
 function warnmissingmeta(md)
-expected={'emgain','conversion','offset','port','pixsize'};
+expected={'emgain','conversion','offset','EMon','pixsize'};
 missing=setdiff(expected,fieldnames(md));
 if isempty(missing)
     return
