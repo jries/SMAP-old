@@ -144,17 +144,21 @@ t1s=getval(minfo,indt);
 t=str2double(t1s(3:end-1));
 
 function txt=getval(minfo,index,sep1,sep2)
+if isempty(index)
+    txt='';
+    return
+end
 if nargin==2
     sep1='"';
     sep2='"';
 end
 
-while minfo(index)~=sep1
+while index<length(minfo)&& minfo(index)~=sep1
     index=index+1;
 end
 i1=index+1;
 index=index+1;
-while minfo(index)~=sep2
+while index<length(minfo) && minfo(index)~=sep2
     index=index+1;
 end
 txt=minfo(i1:index-1);
