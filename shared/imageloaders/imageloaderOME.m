@@ -6,6 +6,7 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
         calfile='settings/CameraCalibration.xls';
         reader
         seriesnumber
+        allmetadatatags
     end
     
     methods
@@ -24,6 +25,41 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
         end
         function image=getimage(obj,frame)
             image=readstack(obj,frame);
+        end
+        
+        function allmd=getmetadatatags(obj)
+        [ph,fh,ext]=fileparts(obj.file);
+        switch ext
+            case '.nd2' %Nikon
+            case '.lif'
+                cm=obj.reader.getCoreMetadataList;
+                cm1=cm.get(1);
+                sm=cm1.seriesMetadata;
+                k=sm.keys;
+                ind=1;
+                while k.hasNext
+                    kh=k.nextElement;
+                    allmd(ind,1:2)={kh ,sm.get(kh)};
+                    ind=ind+1;
+                end
+                allome=getmetadatatagsome(obj);
+                allmd=vertcat(allmd,allome);
+                obj.allmetadatatags=allmd;
+                
+        end
+        end
+        
+        function val=gettag(obj,tag)
+            if isempty(obj.allmetadatatags)
+                obj.getmetadatatags;
+            end
+            ind=find(strcmp(obj.allmetadatatags(:,1),tag),1,'first');
+            if ~isempty(ind)
+                val=obj.allmetadatatags{ind,2};
+            else
+                val=[];
+            end
+          
         end
 
     end
@@ -61,9 +97,9 @@ switch ext
             if isempty(obj.seriesnumber)
                 selected=listdlg('ListString',message,'SelectionMode','single','Name','Select data set');
                 largeseries=series(selected);
-                 obj.seriesnumber=largeseries;
+                 obj.seriesnumber=largeseries-1;
             else
-                largeseries=obj.seriesnumber;
+                largeseries=obj.seriesnumber+1;
             end
         else
             [~,largeseries]=max(numim);
@@ -74,7 +110,7 @@ switch ext
         meta=[];
 end
 try
-m2.pixsize=double(omemeta.getPixelsPhysicalSizeX(0).value());
+m2.pixsize=double(omemeta.getPixelsPhysicalSizeX(indseries).value());
 fn=[fn fieldnames(m2)];
 catch
     m2=[];
@@ -128,12 +164,19 @@ end
 md.allmetadata.omeLif=allmd;
 end
 
+
+
+function allmd=getmetadatatagsome(obj)
+    omemeta=obj.reader.getMetadataStore;
+    allmd(1,:)={'getPixelsPhysicalSizeX',double(omemeta.getPixelsPhysicalSizeX(obj.seriesnumber).value())};
+    allmd(2,:)={'getPixelsSizeX',double(omemeta.getPixelsSizeX(obj.seriesnumber).getValue())};
+    allmd(3,:)={'getPixelsSizeY',double(omemeta.getPixelsSizeY(obj.seriesnumber).getValue())};
+    allmd(4,:)={'getPixelsSizeT',double(omemeta.getPixelsSizeT(obj.seriesnumber).getValue())};
+    allmd(5,:)={'getPixelsSizeZ',double(omemeta.getPixelsSizeZ(obj.seriesnumber).getValue())};   
+end
+
 function meta=getMetaNd2(reader)
-
-
-m=reader.getGlobalMetadata;
-
-
+    m=reader.getGlobalMetadata;
     meta.EMon=str2num(m.get('EnableGainMultiplier'));
     meta.exposure= str2num(m.get('Exposure'));
     meta.emgain=str2num(m.get('GainMultiplier'));
@@ -151,3 +194,4 @@ function image=readstack(obj,imagenumber)
        image=[];
    end
 end
+
