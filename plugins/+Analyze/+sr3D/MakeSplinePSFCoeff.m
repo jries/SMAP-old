@@ -39,8 +39,16 @@ classdef MakeSplinePSFCoeff<interfaces.DialogProcessor
             end
             
             [file,path]=uigetfile(deffile,'Select bead z stack data');
-            imloader=imageloaderAll([path file],'mat');
-            img=imloader.getmanyimages([]);
+            imloader=imageloaderAll([path file]);
+            img=imloader.getmanyimages([],'mat');
+            s=size(img);
+            stdx=zeros(s(3),1);
+            for k=1:s(3)
+                imh=img(:,:,k);
+                stdx(k)=std(double(imh(:)));
+            end
+            
+            
 %             locs=obj.locData.getlocs({'xnm','frame','ynm'},'position','roi','layer',1);
             %locs.xnm, locs.frame, locs.ynm contain data from all
             %localizations in roi, or if no roi is defined in field of
@@ -48,6 +56,9 @@ classdef MakeSplinePSFCoeff<interfaces.DialogProcessor
             
             %create some output:
             axis1=obj.initaxis('axisname');
+            plot(axis1,stdx)
+            [~,fmax]=max(stdx);
+            title(fmax)
 %             plot(locs.xnm,locs.ynm,'.','Parent',axis1);
             
             %set a global parameter
@@ -87,6 +98,8 @@ classdef MakeSplinePSFCoeff<interfaces.DialogProcessor
             pard.dz.position=[1,2];
             pard.dz.Width=1;
             pard.dz.TooltipString=sprintf('you can define a tooltip string. \n This tip is displayed when you hover the mouse on the control');
+            
+            pard.text2.object = 
             
 %             pard.guiobject2.object=struct('String','string','Style','pushbutton','Callback',{{@callbackfunction,obj,'additonal parameter'}});
 %             pard.guiobject2.position=[2,1];
