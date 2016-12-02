@@ -1,12 +1,15 @@
-function [par,cam]=getCameraCalibration(imloader,l)
-if nargin<2
-file='settings/cameras.mat';
-if ~exist(file,'file')
-    warndlg('camera calibration file settings/camera.mat not found')
-    par=[];
-    cam=[];
+function [par,cam]=getCameraCalibration(imloader,l,silent)
+if nargin<3
+    silent=false;
 end
-l=load(file);
+if nargin<2||isempty(l)
+    file='settings/cameras.mat';
+    if ~exist(file,'file')
+        askforcameramanager(imloader,'camera calibration file settings/camera.mat not found. Create new file with Camera Manager?',silent)
+        par=[];
+        cam=[];
+    end
+    l=load(file);
 end
 val=[];
 for cam=1:length(l.cameras)
@@ -17,6 +20,7 @@ for cam=1:length(l.cameras)
     end
 end
 if isempty(val)
+    askforcameramanager(imloader,'Camera not recognized. Create new camera with Camera Manager?',silent)
     cam=[];
     par=[];
     return
@@ -43,7 +47,7 @@ if ~isempty(strcmp(partable(:,2),'state dependent'))
     end
     state=find(found);  
     if isempty(state)
-        warndlg('State of the camera could not be determined. Please use the CameraSelector to define proper state.')
+        askforcameramanager(imloader,'State of the camera could not be determined. Please use the CameraManager to define proper state. Create new state with Camera Manager now?',silent)
     end
 end
 for k=1:s(1)
@@ -68,5 +72,18 @@ for k=1:s(1)
 end
 if isempty(par.roi)
     par.roi=[0 0 par.Width par.Height];
+end
+end
+
+function askforcameramanager(imloader,message,silent)
+if silent
+    disp(message)
+    return
+end
+answ=questdlg(message,'Open Camera Manager now?');
+if strcmp(answ,'Yes')
+    camm=CameraManager;
+    camm.imloader=imloader;
+    camm.loadimages;
 end
 end
