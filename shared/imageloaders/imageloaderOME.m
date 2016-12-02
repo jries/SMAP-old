@@ -5,7 +5,7 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
     properties
         calfile='settings/CameraCalibration.xls';
         reader
-        seriesnumber
+        seriesnumber=0;
         allmetadatatags
     end
     

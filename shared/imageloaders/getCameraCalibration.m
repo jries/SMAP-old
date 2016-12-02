@@ -1,9 +1,11 @@
 function [par,cam]=getCameraCalibration(imloader)
 file='settings/cameras.mat';
 l=load(file);
+val=[];
 for cam=1:length(l.cameras)
-    val=imloader.gettag(l.cameras(cam).ID.tag);
-    if ~isempty(val)
+    valh=imloader.gettag(l.cameras(cam).ID.tag);
+    if ~isempty(val)&&strcmp(val,l.cameras(cam).ID.value)        
+        val=valh;
         break
     end
 end
@@ -24,11 +26,13 @@ for k=1:s(1)
             X=imloader.gettag(partable{k,4});
 
     end
-    whos X
     if ~isempty(partable{k,6})&&ischar(X)
         X=eval(partable{k,6});
     end
     par.(partable{k,1})=X;
     
+end
+if isempty(par.roi)
+    par.roi=[0 0 par.Width par.Height];
 end
 end
