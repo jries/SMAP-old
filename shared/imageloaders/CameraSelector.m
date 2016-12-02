@@ -9,6 +9,7 @@ classdef CameraSelector<handle
         guihandles
         currentcam=1;
         currentstate=1;
+        lastcamtableselected=[];
     end
     
     methods
@@ -40,9 +41,9 @@ if isempty(obj.handle)||~isvalid(obj.handle)
      delete(obj.handle.Children);
 end
 %load images
-hp=uicontrol('Style','pushbutton','String','Load images','Position',[posbutton height-50,buttonwidth,lineheight],'Callback',{@loadimages,obj});
-
-hp=uicontrol('Style','pushbutton','String','Save','Position',[posbutton height-80,buttonwidth,lineheight],'Callback',{@savecameras,obj});
+hp=uicontrol('Style','pushbutton','String','Load images','Position',[posbutton height-40,buttonwidth,lineheight],'Callback',{@loadimages,obj});
+hp=uicontrol('Style','pushbutton','String','test','Position',[posbutton height-65,buttonwidth,lineheight],'Callback',{@testcal,obj});
+hp=uicontrol('Style','pushbutton','String','Save','Position',[posbutton height-90,buttonwidth,lineheight],'Callback',{@savecameras,obj});
 
 
 tcam=uitable(obj.handle,'Position',[10 height-lineheight*3.5 width-200,lineheight*3]);
@@ -50,9 +51,12 @@ tcam.ColumnName={'Camera Name','ID field','ID'};
 tcam.Data={'Cam1','Cam_ID','001'};
 wh=tcam.Position(3);
 tcam.ColumnWidth={'auto',wh*.5,wh*.3};
-tcam.CellSelectionCallback={@cellselect_cam,obj,2,3};
+tcam.CellSelectionCallback={@cellselect,obj,'cam'};
 tcam.ColumnEditable=[ true false true];
 
+hc=uicontextmenu(obj.handle);
+hui=uimenu('Parent',hc,'Label','remove','Callback',{@uimenucallback,obj});
+tcam.UIContextMenu=hc;
 tpar=uitable(obj.handle,'Position',[10 height-lineheight*13-10 width-40,lineheight*9.5]);
 tpar.ColumnName={'Parameter','mode','fixvalue','metafield','Value','conversion','Converted'};
 
@@ -66,23 +70,26 @@ dat=intpartable;
 wh=tpar.Position(3);
 tpar.ColumnWidth={'auto','auto','auto',wh*.25,'auto',wh*.2,'auto'};
 tpar.CellSelectionCallback={@cellselect,obj,'par'};
-tpar.CellEditCallback={@celledit,obj};
+tpar.CellEditCallback={@celledit,obj,'par'};
 tpar.ColumnFormat={'char',{'fix','metadata','state dependent'},'char','char','char','char','char'};
 tpar.ColumnEditable=[false true true false false true false];
 tpar.Data=dat;
 
 
-tstates=uicontrol('Style','listbox','String','State 1','Position',[10 30 width*.2,lineheight*4],'Callback',{@statecallback,obj});
-tstatesadd=uicontrol('Style','pushbutton','String','add','Position',[10 lineheight*3+60 width*.08,lineheight],'Callback',{@stateadd,obj,1});
-tstatesrem=uicontrol('Style','pushbutton','String','rem','Position',[width*.12 lineheight*3+60 width*0.08,lineheight],'Callback',{@stateadd,obj,2});
-uicontrol('Style','text','String','State defining parameters','Position',[width*.25 lineheight*3+60 width*.2,lineheight])
+tstates=uicontrol('Style','listbox','String',{'State 1'},'Position',[10 30 width*.15,lineheight*4],'Callback',{@statecallback,obj});
+tstatesadd=uicontrol('Style','pushbutton','String','add','Position',[10 lineheight*3+60 width*.06,lineheight],'Callback',{@stateadd,obj,'add'});
+tstatesrem=uicontrol('Style','pushbutton','String','rem','Position',[width*.09+10 lineheight*3+60 width*0.06,lineheight],'Callback',{@stateadd,obj,'rem'});
+uicontrol('Style','text','String','State defining parameters','Position',[width*.2 lineheight*3+60 width*.2,lineheight])
 
-tdef=uitable(obj.handle,'Position',[width*.25 30 width*.25,lineheight*4]);
+tdef=uitable(obj.handle,'Position',[width*.18 30 width*.5,lineheight*4]);
 tdef.ColumnName={'Meta Field','Value'};
 tdef.Data={'select','';'select','';'select','';'select',''};
 tdef.CellSelectionCallback={@cellselect,obj,'def'};
+wh=tdef.Position(3);
+tdef.ColumnWidth={wh*.55,wh*.35};
+tdef.ColumnEditable=[false true];
 
-tval=uitable(obj.handle,'Position',[width*.7 30 width*.25,lineheight*5]);
+tval=uitable(obj.handle,'Position',[width*.7 30 width-40-width*.7,lineheight*5]);
 tval.ColumnName={'Parameter','Value'};
 tval.ColumnEditable=[false true];
 tval.Data=tpar.Data(:,[1 3]);
@@ -91,17 +98,35 @@ tval.Data=tpar.Data(:,[1 3]);
 
 obj.guihandles.camtable=tcam;
 obj.guihandles.partable=tpar;
+obj.guihandles.statelist=tstates;
+obj.guihandles.statedeftable=tdef;
 obj.guihandles.statevaltable=tval;
 
-
+tables2prop(obj);
 showpartable(obj);
 
-obj.cameras(1).par=tpar.Data;
-obj.cameras(1).ID=struct('name',tcam.Data{1,1},'tag',tcam.Data{1,2},'value',tcam.Data{1,3});
+% obj.cameras(1).par=tpar.Data;
+% obj.cameras(1).ID=struct('name',tcam.Data{1,1},'tag',tcam.Data{1,2},'value',tcam.Data{1,3});
+% statestruct=struct('statelist',{tstates.String},'defpar',{tdef.Data},'par',{tval.Data});
+% obj.cameras(1).state(1)=statestruct;
 loadcameras(obj);
 end
 
-function celledit(table,data,obj)
+function celledit(table,data,obj,tname)
+switch tname
+    case 'cam'
+%         obj.cameras(obj.currentcam).par=obj.guihandles.partable.Data;
+%         obj.guihandles.partable.Data=obj.cameras(data.Indices(1)).par;
+%         obj.currentcam=data.Indices(1);
+    case 'par'
+        if data.Indices(2)==2
+            showpartable(obj);
+        end
+    case 'def'
+%         indtag=1;
+%         indval=2;
+%         tab=obj.guihandles.statedeftable;
+end
 end
 
 function showpartable(obj)
@@ -114,27 +139,52 @@ col=ones(size(tval,1),3)*.7;
 indg=strcmp(dat(:,2),'state dependent');
 col(indg,:)=1;
 obj.guihandles.statevaltable.BackgroundColor=col;
-obj.guihandles.statevaltable.Data=dat;
+% obj.guihandles.statevaltable.Data=dat;
 end
 
 function loadcameras(obj)
 file='settings/cameras.mat';
+if ~exist(file,'file')
+    return
+end
 l=load(file);
 obj.cameras=l.cameras;
 obj.guihandles.camtable.Data=l.camtab;
-obj.guihandles.partable.Data=l.cameras(1).par;
+prop2table(obj);
+showpartable(obj);
+% obj.guihandles.partable.Data=l.cameras(1).par;
+% 
+% obj.guihandles.statedeftable.Data=l.cameras(1).state(1).defpar;
+% obj.guihandles.statevaltable.Data=l.cameras(1).state(1).par;
+% obj.guihandles.statelist.String=l.cameras(1).state(1).statelist;
 end
 
 function savecameras(a,b,obj)
 file='settings/cameras.mat';
+tables2prop(obj);
+camtab=obj.guihandles.camtable.Data;
+cameras=obj.cameras;
+save(file,'cameras','camtab')
+end
+
+function tables2prop(obj)
 cameras=obj.cameras;
 cameras(obj.currentcam).par=obj.guihandles.partable.Data;
+cameras(obj.currentcam).state(obj.currentstate)=struct('statelist',{obj.guihandles.statelist.String},...
+    'defpar',{obj.guihandles.statedeftable.Data},'par',{obj.guihandles.statevaltable.Data});
 camtab=obj.guihandles.camtable.Data;
 s=size(camtab);
 for k=1:s(1)
     cameras(k).ID=struct('name',camtab{k,1},'tag',camtab{k,2},'value',camtab{k,3});
 end
-save(file,'cameras','camtab')
+obj.cameras=cameras;
+end
+
+function prop2table(obj)
+obj.guihandles.partable.Data=obj.cameras(obj.currentcam).par;
+obj.guihandles.statelist.Value=obj.currentstate;
+obj.guihandles.statedeftable.Data=obj.cameras(obj.currentcam).state(obj.currentstate).defpar;
+obj.guihandles.statevaltable.Data=obj.cameras(obj.currentcam).state(obj.currentstate).par;
 end
 
 function t=intpartable
@@ -154,51 +204,76 @@ for k=1:size(t,1)
 end
 end
 
-function cellselect_cam(table,data,obj,indtag,indval)
+% function cellselect_cam(table,data,obj,indtag,indval)
+% if isempty(data.Indices)
+%     return
+% end
+% if data.Indices(2)==indtag
+%     ma=obj.imloader.getmetadatatags;
+%      tag = gettag(ma);
+%      if ~isempty(tag)
+%         table.Data(data.Indices(1),[indtag indval])=tag;
+%      end
+% end
+% obj.cameras(obj.currentcam).par=obj.guihandles.partable.Data;
+% obj.guihandles.partable.Data=obj.cameras(data.Indices(1)).par;
+% obj.currentcam=data.Indices(1);
+% end
+
+function cellselect(table,data,obj,tname)
 if isempty(data.Indices)
     return
 end
-if data.Indices(2)==indtag
-    ma=obj.imloader.getmetadatatags;
-     tag = gettag(ma);
-     if ~isempty(tag)
-        table.Data(data.Indices(1),[indtag indval])=tag;
-     end
-end
-obj.cameras(obj.currentcam).par=obj.guihandles.partable.Data;
-obj.guihandles.partable.Data=obj.cameras(data.Indices(1)).par;
-obj.currentcam=data.Indices(1);
-end
-
-function cellselect(table,data,obj,tname)
 switch tname
+    case 'cam'
+        indtag=2;
+        indval=3;
     case 'par'
         indtag=4;
         indval=5;
-        tab=1;
     case 'def'
         indtag=1;
         indval=2;
-        tab=2;
-end
-
-if isempty(data.Indices)
-    return
 end
 
 if data.Indices(2)==indtag
+    if isempty(obj.imloader)
+        warndlg('please load images before assigning fields')
+        return     
+    end
     ma=obj.imloader.getmetadatatags;
      tag = gettag(ma);
      if ~isempty(tag)
         table.Data(data.Indices(1),[indtag indval])=tag;
-        X=tag{2};
-        if size(table.Data,2)>2
+        
+        if strcmp(tname,'par')
+            X=tag{2};
             if ~isempty(table.Data{data.Indices(1),6})&&~isempty(X)
                 X=eval(table.Data{data.Indices(1),6});
             end
-        table.Data{data.Indices(1),7}=X;
+            if isnumeric(X) && length(X)>1
+                X=num2str(X);
+            end
+            table.Data{data.Indices(1),7}=X;
         end
      end
+end
+
+
+switch tname
+    case 'cam'
+        obj.cameras(obj.currentcam).par=obj.guihandles.partable.Data;
+        obj.guihandles.partable.Data=obj.cameras(data.Indices(1)).par;
+        obj.currentcam=data.Indices(1);
+        obj.lastcamtableselected=data.Indices;
+    case 'par'
+%         if data.Indices(2)==2
+%             showpartable(obj);
+%         end
+    case 'def'
+        indtag=1;
+        indval=2;
+        tab=obj.guihandles.statedeftable;
 end
 
 end
@@ -251,11 +326,43 @@ obj.guihandles.camtable.Data=dat;
 obj.cameras(l)=obj.cameras(1);
 obj.cameras(l).par=intpartable;
 obj.cameras(l).ID=struct('name','new','tag','select','value','');
-cellselect_cam(obj.guihandles.camtable,struct('Indices',[l,1]),obj,0,0);
+cellselect(obj.guihandles.camtable,struct('Indices',[l,1]),obj,'cam');
 end
 
-function statecallback(a,b,obj)
+function statecallback(object,data,obj)
+newstate=object.Value;
+tables2prop(obj);
+obj.currentstate=newstate;
+prop2table(obj);
 end
 
 function stateadd(a,b,obj,addrem)
+switch addrem
+    case 'add'
+        states=obj.guihandles.statelist.String;
+        l=length(obj.cameras(obj.currentcam));
+        states{l+1}=['State ' num2str(l+1)];
+        obj.cameras(obj.currentcam).state(l+1)=obj.cameras(obj.currentcam).state(l);
+        obj.guihandles.statelist.String=states;
+        obj.guihandles.statelist.Value=l+1;
+    case 'rem'
+end
+end
+
+function uimenucallback(object, data, obj)
+if isempty(obj.lastcamtableselected)
+    return
+end
+if length(obj.cameras)==1
+    warning('at least one camera required. You can overwrite the values')
+    return
+end
+obj.cameras(obj.lastcamtableselected(1))=[];
+prop2table(obj);
+end
+
+function testcal(a,b,obj)
+tables2prop(obj);
+p=getCameraCalibration(obj.imloader,obj);
+p
 end

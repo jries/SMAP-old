@@ -7,6 +7,7 @@ classdef imageloaderSMAP<handle
         onlineAnalysis=false;
         waittime=5;
         currentImageNumber;
+        allmetadatatags;
     end
     methods
        function obj=imageloaderSMAP(varargin)
@@ -25,6 +26,7 @@ classdef imageloaderSMAP<handle
         open(obj,filename);
         md=getmetadata(obj);
         image=getimage(obj,frame);
+        allmd=getmetadatatags(obj)
     end
     methods
         function image=readNext(obj)
@@ -60,6 +62,19 @@ classdef imageloaderSMAP<handle
             fn=fieldnames(md);fn2=properties(obj.metadata);
            fna=intersect(fn,fn2);
            obj.metadata=copyfields(obj.metadata,md,fna);
+        end
+        
+        function val=gettag(obj,tag)
+            if isempty(obj.allmetadatatags)
+                obj.allmetadatatags=obj.getmetadatatags;
+            end
+            ind=find(strcmp(obj.allmetadatatags(:,1),tag),1,'first');
+            if ~isempty(ind)
+                val=obj.allmetadatatags{ind,2};
+            else
+                val=[];
+            end
+          
         end
     end
     

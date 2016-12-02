@@ -6,7 +6,7 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
         calfile='settings/CameraCalibration.xls';
         reader
         seriesnumber=0;
-        allmetadatatags
+%         allmetadatatags
     end
     
     methods
@@ -49,18 +49,6 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
         end
         end
         
-        function val=gettag(obj,tag)
-            if isempty(obj.allmetadatatags)
-                obj.getmetadatatags;
-            end
-            ind=find(strcmp(obj.allmetadatatags(:,1),tag),1,'first');
-            if ~isempty(ind)
-                val=obj.allmetadatatags{ind,2};
-            else
-                val=[];
-            end
-          
-        end
 
     end
     

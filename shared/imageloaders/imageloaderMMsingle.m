@@ -22,8 +22,11 @@ classdef imageloaderMMsingle<interfaces.imageloaderSMAP
             obj.separate.fmt_s=imformats('tif');
         end
         function mdo=getmetadata(obj)
-            mdo=getmetadataMM(obj);
-             
+            mdo=getmetadataMM(obj);            
+        end
+        function allmd=getmetadatatags(obj)
+            metafile=[fileparts(obj.file) filesep 'metadata.txt'];
+            allmd=getmetadataMMnew(metafile);
         end
         function image=getimage(obj,frame)
             image=readseparate(obj,frame);
