@@ -24,7 +24,7 @@ classdef imageloaderSMAP<handle
     end
     methods (Abstract=true)
         open(obj,filename);
-        md=getmetadata(obj);
+%         md=getmetadata(obj);
         image=getimage(obj,frame);
         allmd=getmetadatatags(obj)
     end
@@ -75,6 +75,26 @@ classdef imageloaderSMAP<handle
                 val=[];
             end
           
+        end
+        
+        function metao=getmetadata(obj)
+            metao=getmetadatacam(obj);
+        end
+        function metao=getmetadatacam(obj)
+            md=getCameraCalibration(obj);
+            if isempty(md)
+                metao=[];
+                return
+            end
+            fn=fieldnames(md);
+            for k=1:length(fn)
+                if ~isempty(md.(fn{k}))&&isprop(obj.metadata,fn{k})
+                    obj.metadata.(fn{k})=md.(fn{k});
+                    obj.metadata.assigned.(fn{k})=true;
+                end
+            end
+            obj.metadata.allmetadata=obj.allmetadatatags;
+        metao=obj.metadata;
         end
     end
     

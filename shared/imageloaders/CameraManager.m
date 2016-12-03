@@ -20,12 +20,25 @@ classdef CameraManager<handle
             if nargin > 1
                 obj.imloader=imageloaderAll(file);
             end
-                [par,cam]=getCameraCalibration(obj.imloader,[],true);
+                [par,cam,state]=getCameraCalibration(obj.imloader,[],true);
                 if isempty(cam)
                     answ=questdlg('camera not found. Create new camera?');
                     if strcmp(answ,'Yes')
                         createnewcamera(obj);
                     end
+                else
+                    obj.currentcam=cam;
+                    prop2table(obj);
+                end
+                
+                if isempty(state)
+                    answ=questdlg('State not recognized. Create new state?');
+                    if strcmp(answ,'Yes')
+                        stateadd(0,0,obj,'add')
+                    end
+                else
+                    obj.currentstate=state;
+                    prop2table(obj);
                 end
         end
     end
@@ -57,7 +70,9 @@ tcam.CellSelectionCallback={@cellselect,obj,'cam'};
 tcam.ColumnEditable=[ true false true];
 
 hc=uicontextmenu(obj.handle);
+hui=uimenu('Parent',hc,'Label','add','Callback',{@uimenucallback,obj});
 hui=uimenu('Parent',hc,'Label','remove','Callback',{@uimenucallback,obj});
+
 tcam.UIContextMenu=hc;
 tpar=uitable(obj.handle,'Position',[10 height-lineheight*13-10 width-40,lineheight*9.5]);
 tpar.ColumnName={'Parameter','mode','fixvalue','metafield','Value','conversion','Converted'};
@@ -187,6 +202,18 @@ obj.guihandles.partable.Data=obj.cameras(obj.currentcam).par;
 obj.guihandles.statelist.Value=obj.currentstate;
 obj.guihandles.statedeftable.Data=obj.cameras(obj.currentcam).state(obj.currentstate).defpar;
 obj.guihandles.statevaltable.Data=obj.cameras(obj.currentcam).state(obj.currentstate).par;
+
+cams=obj.cameras;
+for k=1:length(cams)
+    data{k,1}=cams(k).ID.name;
+    data{k,2}=cams(k).ID.tag;
+    data{k,3}=cams(k).ID.value;
+end
+
+obj.guihandles.camtable.Data=data;
+col=ones(size(data,1),3);
+col(obj.currentcam,1)=.3;
+obj.guihandles.camtable.BackgroundColor=col;
 end
 
 function t=intpartable
@@ -258,6 +285,7 @@ if data.Indices(2)==indtag
             end
             table.Data{data.Indices(1),7}=X;
         end
+        tables2prop(obj);
      end
 end
 
@@ -265,9 +293,11 @@ end
 switch tname
     case 'cam'
         obj.cameras(obj.currentcam).par=obj.guihandles.partable.Data;
-        obj.guihandles.partable.Data=obj.cameras(data.Indices(1)).par;
+%         obj.guihandles.partable.Data=obj.cameras(data.Indices(1)).par;
         obj.currentcam=data.Indices(1);
         obj.lastcamtableselected=data.Indices;
+        prop2table(obj);
+        
     case 'par'
 %         if data.Indices(2)==2
 %             showpartable(obj);
@@ -352,15 +382,22 @@ end
 end
 
 function uimenucallback(object, data, obj)
-if isempty(obj.lastcamtableselected)
-    return
+switch object.Label
+    case 'remove'
+        if isempty(obj.lastcamtableselected)
+            return
+        end
+        if length(obj.cameras)==1
+            warning('at least one camera required. You can overwrite the values')
+            return
+        end
+        tables2prop(obj);
+        obj.cameras(obj.lastcamtableselected(1))=[];
+        obj.currentcam=1;
+        prop2table(obj);
+    case 'add'
+        createnewcamera(obj);
 end
-if length(obj.cameras)==1
-    warning('at least one camera required. You can overwrite the values')
-    return
-end
-obj.cameras(obj.lastcamtableselected(1))=[];
-prop2table(obj);
 end
 
 function testcal(a,b,obj)

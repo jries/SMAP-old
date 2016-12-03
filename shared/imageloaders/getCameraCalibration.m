@@ -1,15 +1,24 @@
-function [par,cam]=getCameraCalibration(imloader,l,silent)
+function [par,cam,state]=getCameraCalibration(imloader,l,silent)
 if nargin<3
     silent=false;
 end
+par=[];
+cam=[];
+state=[];
+argin{1}=imloader;argin{3}=silent;
 if nargin<2||isempty(l)
+    argin{2}=[];
     file='settings/cameras.mat';
     if ~exist(file,'file')
-        askforcameramanager(imloader,'camera calibration file settings/camera.mat not found. Create new file with Camera Manager?',silent)
-        par=[];
-        cam=[];
+%         l=[];
+        [par,cam,state]=askforcameramanager(imloader,'camera calibration file settings/camera.mat not found. Create new file with Camera Manager?',silent,argin);
+        return
+%         [par,cam]=getCameraCalibration(imloader,[],silent);
     end
     l=load(file);
+    argin{2}=l;
+else
+    argin{2}=l;
 end
 val=[];
 for cam=1:length(l.cameras)
@@ -20,10 +29,12 @@ for cam=1:length(l.cameras)
     end
 end
 if isempty(val)
-    askforcameramanager(imloader,'Camera not recognized. Create new camera with Camera Manager?',silent)
-    cam=[];
-    par=[];
-    return
+    [par,cam,state]=askforcameramanager(imloader,'Camera not recognized. Create new camera with Camera Manager?',silent,argin);
+%     if ~isempty(cam)
+        return;
+%     else
+%         cam=1;
+%     end
 end
 partable=l.cameras(cam).par;
 s=size(partable);
@@ -39,7 +50,7 @@ if ~isempty(strcmp(partable(:,2),'state dependent'))
             end
             valh=imloader.gettag(deftab{k2,1});
             if ~strcmp(valh,deftab{k2,2})
-                found(l)=false;
+                found(k)=false;
                 break
             end
                 
@@ -47,7 +58,11 @@ if ~isempty(strcmp(partable(:,2),'state dependent'))
     end
     state=find(found);  
     if isempty(state)
-        askforcameramanager(imloader,'State of the camera could not be determined. Please use the CameraManager to define proper state. Create new state with Camera Manager now?',silent)
+%         askforcameramanager(imloader,'State of the camera could not be determined. Please use the CameraManager to define proper state. Create new state with Camera Manager now?',silent)
+            [par,cam,state]=askforcameramanager(imloader,'State of the camera could not be determined. Please use the CameraManager to define proper state. Create new state with Camera Manager now?',silent,argin);
+            if ~isempty(par)
+                return;
+            end
     end
 end
 for k=1:s(1)
@@ -56,7 +71,7 @@ for k=1:s(1)
             X=partable{k,3};
         case 'state dependent'
             if isempty(state)
-                X='';
+                X=[];
             else
                 X=l.cameras(cam).state(state).par{k,2}; 
             end
@@ -73,17 +88,23 @@ end
 if isempty(par.roi)
     par.roi=[0 0 par.Width par.Height];
 end
-end
 
-function askforcameramanager(imloader,message,silent)
+
+function [paro,camo,stateo]=askforcameramanager(imloader,message,silent,argin)
+paro=par;camo=cam;stateo=state;
 if silent
     disp(message)
     return
 end
 answ=questdlg(message,'Open Camera Manager now?');
 if strcmp(answ,'Yes')
+    disp('close Camera Manager when done');
     camm=CameraManager;
     camm.imloader=imloader;
     camm.loadimages;
+    waitfor(camm.handle)
+    argin{2}=[];
+    [paro,camo,stateo]=getCameraCalibration(argin{:});
+end
 end
 end

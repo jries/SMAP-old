@@ -7,6 +7,7 @@ h.hglobalSettings=uimenu(hsmap,'Label','Preferences...','Separator','on','Callba
 h.savegui=uimenu(hsmap,'Label','Save GUI appearence','Callback',{@savegui_callback,obj});
 h.loadgui=uimenu(hsmap,'Label','Load GUI appearence','Callback',{@loadgui_callback,obj});
 
+h.cameraManager=uimenu(hsmap,'Label','Camera Manager','Callback',{@cameramanager_callback,obj});
 
 h.hrename=uimenu(hsmap,'Label','Rename window','Separator','on','Callback',{@renamewindow_callback,obj});
 
@@ -202,4 +203,8 @@ if f
     writestruct([p f],guimodules);
     obj.setGlobalSetting('guiPluginConfigFile',[p f]);
 end
+end
+
+function cameramanager_callback(a,b,obj)
+CameraManager;
 end

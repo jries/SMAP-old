@@ -19,10 +19,11 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
             md=obj.getmetadata;
             
         end
-        function mdo=getmetadata(obj)
-            mdo=getmetadataome(obj);
-             
-        end
+%         function mdo=getmetadata(obj)
+% %             mdo=getmetadataome(obj);
+%             mdo=getmetadatacam(obj);
+%              
+%         end
         function image=getimage(obj,frame)
             image=readstack(obj,frame);
         end
@@ -31,25 +32,41 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
         [ph,fh,ext]=fileparts(obj.file);
         switch ext
             case '.nd2' %Nikon
+                sm=obj.reader.getGlobalMetadata;
+                exclude={'X position for position','Y position for position','Z position for position','PFS Status #','PFS Offset #'};
+                
             case '.lif'
+                exclude={};
                 cm=obj.reader.getCoreMetadataList;
                 cm1=cm.get(1);
                 sm=cm1.seriesMetadata;
+        end
+                
+               
                 k=sm.keys;
                 ind=1;
+                
                 while k.hasNext
                     kh=k.nextElement;
-                    allmd(ind,1:2)={kh ,sm.get(kh)};
-                    ind=ind+1;
+                    if ~any(strncmp(exclude,kh,10))
+                        try
+                            v=sm.get(kh);
+                            if ~isempty(v)
+                                allmd(ind,1:2)={kh ,v};
+                                ind=ind+1;
+                            end
+                        catch
+                        end
+                     
+                    end
                 end
                 allome=getmetadatatagsome(obj);
                 allmd=vertcat(allmd,allome);
                 obj.allmetadatatags=allmd;
                 
-        end
+        
         end
         
-
     end
     
 end
@@ -118,6 +135,9 @@ for k=1:length(fn)
 end
 metao=obj.metadata;
 end
+
+
+
 
 function md=getMetaLif(reader)
 
