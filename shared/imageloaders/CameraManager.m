@@ -47,12 +47,14 @@ end
 
 function makeGui(obj)
 width=800;
-height=500;
+height=550;
 lineheight=25;
 posbutton=width*.8;
 buttonwidth=width*.15;
 if isempty(obj.handle)||~isvalid(obj.handle)
      obj.handle=figure('Units','normalized','Units','pixels','Position',[150,200,width,height],'Name','CameraSelector','NumberTitle','off');
+     obj.handle.ToolBar='none';
+     obj.handle.MenuBar='none';
      delete(obj.handle.Children);
 end
 %load images
@@ -61,11 +63,11 @@ hp=uicontrol('Style','pushbutton','String','test','Position',[posbutton height-6
 hp=uicontrol('Style','pushbutton','String','Save','Position',[posbutton height-90,buttonwidth,lineheight],'Callback',{@savecameras,obj});
 
 
-tcam=uitable(obj.handle,'Position',[10 height-lineheight*3.5 width-200,lineheight*3]);
+tcam=uitable(obj.handle,'Position',[10 height-lineheight*4 width-200,lineheight*3.5]);
 tcam.ColumnName={'Camera Name','ID field','ID'};
 tcam.Data={'Cam1','Cam_ID','001'};
 wh=tcam.Position(3);
-tcam.ColumnWidth={'auto',wh*.5,wh*.3};
+tcam.ColumnWidth={'auto',wh*.5,wh*.27};
 tcam.CellSelectionCallback={@cellselect,obj,'cam'};
 tcam.ColumnEditable=[ true false true];
 
@@ -74,7 +76,7 @@ hui=uimenu('Parent',hc,'Label','add','Callback',{@uimenucallback,obj});
 hui=uimenu('Parent',hc,'Label','remove','Callback',{@uimenucallback,obj});
 
 tcam.UIContextMenu=hc;
-tpar=uitable(obj.handle,'Position',[10 height-lineheight*13-10 width-40,lineheight*9.5]);
+tpar=uitable(obj.handle,'Position',[10 height-lineheight*13-30 width-40,lineheight*9.5]);
 tpar.ColumnName={'Parameter','mode','fixvalue','metafield','Value','conversion','Converted'};
 
 % parnames={'EMon','pixelsize','conversion','emgain','offset','roi','exposure','timediff','comment'};
@@ -93,12 +95,15 @@ tpar.ColumnEditable=[false true true false false true false];
 tpar.Data=dat;
 
 
-tstates=uicontrol('Style','listbox','String',{'State 1'},'Position',[10 30 width*.15,lineheight*4],'Callback',{@statecallback,obj});
-tstatesadd=uicontrol('Style','pushbutton','String','add','Position',[10 lineheight*3+60 width*.06,lineheight],'Callback',{@stateadd,obj,'add'});
-tstatesrem=uicontrol('Style','pushbutton','String','rem','Position',[width*.09+10 lineheight*3+60 width*0.06,lineheight],'Callback',{@stateadd,obj,'rem'});
-uicontrol('Style','text','String','State defining parameters','Position',[width*.2 lineheight*3+60 width*.2,lineheight])
+tstates=uicontrol('Style','listbox','String',{'State 1'},'Position',[10 50 width*.15,lineheight*4],'Callback',{@statecallback,obj});
+tstatesadd=uicontrol('Style','pushbutton','String','add','Position',[10 lineheight*3+80 width*.06,lineheight],'Callback',{@stateadd,obj,'add'});
+tstatesrem=uicontrol('Style','pushbutton','String','rem','Position',[width*.09+10 lineheight*3+80 width*0.06,lineheight],'Callback',{@stateadd,obj,'rem'});
+uicontrol('Style','text','String','State defining parameters','Position',[width*.2 lineheight*3+80 width*.2,lineheight])
+tstatesrem=uicontrol('Style','pushbutton','String','close','Position',[posbutton 15 buttonwidth,lineheight],'Callback',{@close_callback,obj});
 
-tdef=uitable(obj.handle,'Position',[width*.18 30 width*.5,lineheight*4]);
+
+
+tdef=uitable(obj.handle,'Position',[width*.18 50 width*.5,lineheight*4]);
 tdef.ColumnName={'Meta Field','Value'};
 tdef.Data={'select','';'select','';'select','';'select',''};
 tdef.CellSelectionCallback={@cellselect,obj,'def'};
@@ -106,7 +111,7 @@ wh=tdef.Position(3);
 tdef.ColumnWidth={wh*.55,wh*.35};
 tdef.ColumnEditable=[false true];
 
-tval=uitable(obj.handle,'Position',[width*.7 30 width-40-width*.7,lineheight*5]);
+tval=uitable(obj.handle,'Position',[width*.7 50 width-40-width*.7,lineheight*5]);
 tval.ColumnName={'Parameter','Value'};
 tval.ColumnEditable=[false true];
 tval.Data=tpar.Data(:,[1 3]);
@@ -404,4 +409,8 @@ function testcal(a,b,obj)
 tables2prop(obj);
 p=getCameraCalibration(obj.imloader,obj,true);
 p
+end
+
+function close_callback(a,b,obj)
+close(obj.handle)
 end

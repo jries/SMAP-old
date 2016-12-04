@@ -1,9 +1,15 @@
-function mdo=getmetadataMMnew(metafile)
-            fid=fopen(metafile);
-            if fid<=0
-                mdo=[];
-                return
-            end
+function mdinf=getmetadataMMnew(file)
+info=getimageinfo(file);
+mdinf(1,1:2)={'numberOfFrames info',info.numberOfFrames};
+mdinf(end+1,1:2)={'Widht info',info.Width};
+mdinf(end+1,1:2)={'Height info',info.Height};
+mdinf(end+1,1:2)={'format info',info.format};
+mdinf(end+1,1:2)={'number name range info',num2str(info.numberNameRange)};
+metafile=info.metafile;
+
+        fid=fopen(metafile);
+        if fid>0
+
             
             
             minfo=fread(fid,[1,100000],'*char');
@@ -44,8 +50,10 @@ function mdo=getmetadataMMnew(metafile)
             ind3=strfind(str,'-');
             str2=str(ind3(end)+1:end);
             numberOfFrames=str2double(str2)+1;
-            mdo(end+1,:)={'numberOfFrames direct',num2str(numberOfFrames)};
+            mdo(end+1,:)={'numberOfFrames frame key',num2str(numberOfFrames)};
+            mdinf=vertcat(mdinf,mdo);
+        end
              %sort
-             [~,inds]=sortrows(mdo,1);
-             mdo=mdo(inds,:);
+             [~,inds]=sortrows(mdinf,1);
+             mdinf=mdinf(inds,:);
 end
