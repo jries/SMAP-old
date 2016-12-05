@@ -35,7 +35,7 @@ switch ext
             
             firstfile= dir(info.filename);
             firstfile.name=[basepath filesep firstfile.name];
-            allfiles=[firstfile allfs ];
+            allfiles=vertcat(firstfile,allfs);
         else
             infoim=imfinfo(file);
             if length(infoim)>1
@@ -49,7 +49,7 @@ switch ext
             allfiles(1).numberOfFrames=numberOfFrames;
             end
         end
-        if isstack
+        if  isstack
             info.basefile=basefile;
             
             
@@ -80,6 +80,7 @@ switch ext
                 numberOfFrames=0;
                 for k=1:length(allfiles)              
                     th=Tiff(allfiles(k).name,'r');
+%                     numframes=getImagesInTiff(allfiles(k).name);
                     desc=th.getTag('ImageDescription');
                     ind=strfindfast(desc,'SizeT=',1,1);
                     if ~isempty(ind)

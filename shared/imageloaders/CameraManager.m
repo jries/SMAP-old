@@ -31,7 +31,7 @@ classdef CameraManager<handle
                     prop2table(obj);
                 end
                 
-                if isempty(state)
+                if isempty(state)&&~isempty(cam)
                     answ=questdlg('State not recognized. Create new state?');
                     if strcmp(answ,'Yes')
                         stateadd(0,0,obj,'add')

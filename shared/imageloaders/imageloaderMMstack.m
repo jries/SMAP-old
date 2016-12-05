@@ -19,15 +19,17 @@ classdef imageloaderMMstack<interfaces.imageloaderSMAP
             warning('off','MATLAB:imagesci:tiffmexutils:libtiffWarning')
             obj.stack.tiffh=Tiff(obj.file,'r');
         end
-        function mdo=getmetadata(obj)
-            mdo=getmetadataMM(obj);
-             
-        end
+%         function mdo=getmetadata(obj)
+%             mdo=getmetadataMM(obj);
+%              
+%         end
         function image=getimage(obj,frame)
             image=readstack(obj,frame);
         end
         function updatestack(obj,info)
-            numframes=[info.allfiles(1:end-1).numberOfFrames];
+            
+            info=getimageinfo(obj.file);
+             numframes=[info.allfiles(1:end-1).numberOfFrames];
             obj.stack.imageoffset=cumsum([0 numframes]);
             obj.stack.lastimage=cumsum([info.allfiles(1:end).numberOfFrames]);
             obj.stack.files={info.allfiles(:).name};
@@ -39,6 +41,10 @@ classdef imageloaderMMstack<interfaces.imageloaderSMAP
                 filenumberc=length(obj.stack.lastimage);
             end
             imagenumber=frame-obj.stack.imageoffset(filenumberc);
+        end
+        function allmd=getmetadatatags(obj)
+%             metafile=[fileparts(obj.file) filesep 'metadata.txt'];
+            allmd=getmetadataMMnew(obj.file);
         end
     end
     

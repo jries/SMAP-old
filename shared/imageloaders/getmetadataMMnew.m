@@ -4,7 +4,9 @@ mdinf(1,1:2)={'numberOfFrames info',info.numberOfFrames};
 mdinf(end+1,1:2)={'Widht info',info.Width};
 mdinf(end+1,1:2)={'Height info',info.Height};
 mdinf(end+1,1:2)={'format info',info.format};
-mdinf(end+1,1:2)={'number name range info',num2str(info.numberNameRange)};
+if isfield(info,'numberNameRange')
+    mdinf(end+1,1:2)={'number name range info',num2str(info.numberNameRange)};
+end
 metafile=info.metafile;
 
         fid=fopen(metafile);
@@ -47,9 +49,10 @@ metafile=info.metafile;
 
             ind2=strfindfast(minfo2,'"',ind);
             str=minfo2(ind:ind2-1);
-            ind3=strfind(str,'-');
-            str2=str(ind3(end)+1:end);
-            numberOfFrames=str2double(str2)+1;
+            numberOfFrames=max(cell2mat(textscan(str,'%f','delimiter','-')));
+%             ind3=strfind(str,'-');
+%             str2=str(ind3(end)+1:end);
+%             numberOfFrames=str2double(str2)+1;
             mdo(end+1,:)={'numberOfFrames frame key',num2str(numberOfFrames)};
             mdinf=vertcat(mdinf,mdo);
         end

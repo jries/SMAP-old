@@ -29,6 +29,7 @@ for cam=1:length(l.cameras)
     end
 end
 if isempty(val)
+    cam=[];
     [par,cam,state]=askforcameramanager(imloader,'Camera not recognized. Create new camera with Camera Manager?',silent,argin);
 %     if ~isempty(cam)
         return;
@@ -56,7 +57,7 @@ if ~isempty(strcmp(partable(:,2),'state dependent'))
                 
         end
     end
-    state=find(found);  
+    state=find(found,1,'first');  
     if isempty(state)
 %         askforcameramanager(imloader,'State of the camera could not be determined. Please use the CameraManager to define proper state. Create new state with Camera Manager now?',silent)
             [par,cam,state]=askforcameramanager(imloader,'State of the camera could not be determined. Please use the CameraManager to define proper state. Create new state with Camera Manager now?',silent,argin);
