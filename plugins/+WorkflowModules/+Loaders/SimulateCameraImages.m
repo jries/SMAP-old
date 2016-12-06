@@ -133,6 +133,9 @@ obj.setPar('loc_fileinfo',filestruct.info);
 % filestruct.info.numberOfFrames=max(obj.locs.frame);
 end
 
+function psfpar_callback(a,b,obj)
+end
+
 function pard=guidef(obj)
 
 % 
@@ -144,74 +147,85 @@ pard.getlocalizations.object=struct('String','get Localizations','Style','pushbu
 pard.getlocalizations.position=[1,3];
 pard.getlocalizations.Width=2;
 
+pard.psfmodel.object=struct('String',{{'Symmetric Gaussian','Astigmatig Gaussian','Spline'}},'Style','popupmenu');
+pard.psfmodel.position=[2,1];
+pard.psfmodel.Width=2;
+
+pard.getpsfpar.object=struct('String','PSF Parameters','Style','pushbutton','Callback',{{@psfpar_callback,obj}});
+pard.getpsfpar.position=[2,3];
+pard.getpsfpar.Width=2;
+
+lp=3;
 pard.t1.object=struct('String','Pixelsize (nm)','Style','text');
-pard.t1.position=[2,1];
+pard.t1.position=[lp,1];
 pard.t1.Width=0.7;
 
 pard.pixelsize.object=struct('String','100','Style','edit');
-pard.pixelsize.position=[2,1.7];
+pard.pixelsize.position=[lp,1.7];
 pard.pixelsize.Width=0.3;
 
 pard.t4.object=struct('String','Background','Style','text');
-pard.t4.position=[2,2];
+pard.t4.position=[lp,2];
 pard.t4.Width=0.7;
 pard.background.object=struct('String','20','Style','edit');
 pard.background.Width=.3;
-pard.background.position=[2,2.7];
+pard.background.position=[lp,2.7];
 
 
+la=5;
 pard.autorange.object=struct('String','auto','Style','checkbox','Value',1);
-pard.autorange.position=[3,1];
+pard.autorange.position=[la,1];
 pard.autorange.Width=0.5;
 
 pard.t2.object=struct('String','X range','Style','text');
-pard.t2.position=[3,1.5];
+pard.t2.position=[la,1.5];
 pard.t2.Width=0.5;
 
 pard.xrange.object=struct('String','0 50000','Style','edit');
-pard.xrange.position=[3,2];
+pard.xrange.position=[la,2];
 pard.xrange.Width=0.5;
 
 pard.t3.object=struct('String','Y range','Style','text');
-pard.t3.position=[3,2.5];
+pard.t3.position=[la,2.5];
 pard.t3.Width=0.5;
 
 pard.yrange.object=struct('String','0 50000','Style','edit');
-pard.yrange.position=[3,3];
+pard.yrange.position=[la,3];
 pard.yrange.Width=0.5;
 
 pard.tf.object=struct('String','Frames','Style','text');
-pard.tf.position=[3,3.5];
+pard.tf.position=[la,3.5];
 pard.tf.Width=0.5;
 
 pard.frames.object=struct('String','1 inf','Style','edit');
 pard.frames.Width=.5;
-pard.frames.position=[3,4];
+pard.frames.position=[la,4];
 
+lu=6;
 pard.usecam.object=struct('String','Use camera units','Style','checkbox','Value',1);
-pard.usecam.position=[4,1];
+pard.usecam.position=[lu,1];
 pard.usecam.Width=1.5;
 
 pard.t5.object=struct('String','EM gain (0=off)','Style','text');
-pard.t5.position=[4,2.5];
+pard.t5.position=[lu,2.5];
 pard.t5.Width=.5;
 pard.emgain.object=struct('String','100','Style','edit');
 pard.emgain.Width=.3;
-pard.emgain.position=[4,3];
+pard.emgain.position=[lu,3];
 
 pard.t6.object=struct('String','Conversion','Style','text');
-pard.t6.position=[4,3.3];
+pard.t6.position=[lu,3.3];
 pard.t6.Width=.7;
 pard.conversion.object=struct('String','5','Style','edit');
 pard.conversion.Width=.3;
-pard.conversion.position=[4,4];
+pard.conversion.position=[lu,4];
 
 pard.t7.object=struct('String','Offset','Style','text');
-pard.t7.position=[4,4.3];
+pard.t7.position=[lu,4.3];
 pard.t7.Width=0.4;
 pard.offset.object=struct('String','100','Style','edit');
 pard.offset.Width=.3;
-pard.offset.position=[4,4.7];
+pard.offset.position=[lu,4.7];
 
 % pard.save.object=struct('String','Save','Style','checkbox');
 % pard.save.Width=1;

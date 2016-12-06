@@ -216,16 +216,16 @@ end
 
 function pard=guidef
 
-pard.text.object=struct('Style','text','String','Acquisition parameters');
+pard.text.object=struct('Style','text','String','Acquisition parameters:');
 pard.text.position=[1,1];
-pard.text.Width=3;
+pard.text.Width=1.5;
 pard.text.Optional=true;
 % pard.metadatafile.object=struct('Style','edit','String',' ');
 % pard.metadatafile.position=[2,1];
 % pard.metadatafile.Width=4;
 % pard.metadatafile.Optional=true;
 pard.loadmetadata.object=struct('Style','pushbutton','String','Load metadata');
-pard.loadmetadata.position=[2,1];
+pard.loadmetadata.position=[1,2.5];
 pard.loadmetadata.TooltipString=sprintf('Load micromanager Metadata.txt file.');
 pard.loadmetadata.Optional=true;
 % pard.calibrate.object=struct('Style','pushbutton','String','auto calibration');
@@ -234,7 +234,7 @@ pard.loadmetadata.Optional=true;
 % pard.calibrate.Optional=true;
 
 pard.camparbutton.object=struct('Style','pushbutton','String','set Cam Parameters');
-pard.camparbutton.position=[2,3.5];
+pard.camparbutton.position=[1,3.5];
 pard.camparbutton.Width=1.5;
 pard.camparbutton.TooltipString=sprintf('Edit camera acquisition parameters.');
 pard.plugininfo.type='WorkflowModule'; 

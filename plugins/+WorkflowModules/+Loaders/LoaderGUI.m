@@ -50,14 +50,15 @@ classdef LoaderGUI<interfaces.WorkflowModule
             poslist=obj.guihandles.loaderlist.Position;
             hpos=obj.handle.Position;
             panelpos(1)=poslist(1);
-            panelpos(2)=poslist(2)-poslist(4)*5;
+            panelpos(2)=poslist(2)-poslist(4)*6.5;
             panelpos(3)=hpos(3)-poslist(1)*2;
-            panelpos(4)=poslist(4)*5;
+            panelpos(4)=poslist(4)*6.5;
             ip={};
             for k=1:length(loadernames)
                 loader=plugin('WorkflowModules','Loaders',loadernames{k});
                 loader.attachPar(obj.P);
                 hp=uipanel(obj.handle,'Units','pixels','Position',panelpos,'Visible','off');
+                hp.Units='normalized';
                 loader.handle=hp;
                 loader.setGuiAppearence(p);
                 loader.simplegui=obj.simplegui;
