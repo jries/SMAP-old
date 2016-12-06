@@ -54,6 +54,7 @@ metafile=info.metafile;
 %             str2=str(ind3(end)+1:end);
 %             numberOfFrames=str2double(str2)+1;
             mdo(end+1,:)={'numberOfFrames frame key',num2str(numberOfFrames)};
+            mdo(end+1,:)={'frames direct',num2str(numberOfFrames)};
             mdinf=vertcat(mdinf,mdo);
         end
              %sort

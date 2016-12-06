@@ -7,13 +7,15 @@ file=varargin{1};
    switch ext
        case '.tif'
            if exist([path filesep 'metadata.txt'],'file')
+               imloader=@imageloaderMM;
                if countfiles(file)>1
                    imloader=@imageloaderMMsingle;
                else
-                   imloader=@imageloaderMMstack;
+                   imloader=@imageloaderMM;
                end
            elseif ~isempty(dir([path filesep '*metadata.txt']))
-                imloader=@imageloaderMMstack;
+                imloader=@imageloaderMM;
+%                 imloader=@imageloaderMMstack;
            elseif countfiles(file)>1000
                imloader=@imageloaderMMsingle;
            else
