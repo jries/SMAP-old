@@ -1,4 +1,4 @@
-classdef imageloaderSMAP<handle
+classdef imageloaderSMAP<interfaces.GuiParameterInterface
     %imageloaderSMAP Superclass for image loader classes
     
     properties
@@ -12,8 +12,13 @@ classdef imageloaderSMAP<handle
     methods
        function obj=imageloaderSMAP(varargin)
            obj.metadata=interfaces.metadataSMAP;
+           if nargin>2
+               obj.P=varargin{3};
+           end
            if nargin>1
+               if ~isempty(varargin{2})
                 obj.updatemetadata(varargin{2});
+               end
            end
 %            obj.getPar
             if nargin>0
