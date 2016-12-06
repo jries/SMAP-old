@@ -9,7 +9,7 @@ if isempty(mij) %open fiji
     else
         fijipath='/Applications/Fiji.app/scripts';
     end
-    obj.createGlobalSetting('fijipath','Directories','The directory of /Fiji/scripts:',struct('Style','dir','String',fijipath))
+    obj.createGlobalSetting('fijipath','Directories2','The directory of /Fiji/scripts:',struct('Style','dir','String',fijipath))
     fijipath=obj.getGlobalSetting('fijipath');  
     if ~exist(fijipath,'dir')
         mij=[];
