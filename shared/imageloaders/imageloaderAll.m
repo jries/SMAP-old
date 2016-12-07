@@ -7,8 +7,8 @@ file=varargin{1};
    switch ext
        case '.tif'
            if exist([path filesep 'metadata.txt'],'file')
-               imloader=@imageloaderMM;
-               if countfiles(file)>1
+%                imloader=@imageloaderMM;
+               if countfiles(file)>20
                    imloader=@imageloaderMMsingle;
                else
                    imloader=@imageloaderMM;
