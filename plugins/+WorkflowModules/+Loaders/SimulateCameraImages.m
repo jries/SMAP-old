@@ -46,7 +46,7 @@ classdef SimulateCameraImages<interfaces.WorkflowModule
             if  obj.getPar('loc_preview')
                 f='';path='';
             else
-                [f , path]=uiputfile('simulation');
+                [f , path]=uiputfile('simulationfit_sml.mat');
             end
             filestruct=initfile([path f]);
             p=obj.getAllParameters;
@@ -58,7 +58,10 @@ classdef SimulateCameraImages<interfaces.WorkflowModule
             end
             obj.par=copyfields(obj.par,p);
             [~,par]=simulatecamera(obj.locs,obj.par,1,obj.PSF);
-            
+            xrp=round(par.xrange/par.pixelsize);
+            yrp=round(par.xrange/par.pixelsize);
+            filestruct.info.roi=[xrp(1) yrp(1) xrp(2)-xrp(1)+1 yrp(2)-yrp(1)+1];
+            [xrp(1) yrp(1) xrp(2)-xrp(1)+1 yrp(2)-yrp(1)+1]
             filestruct.info=interfaces.metadataSMAP;
             filestruct.info.pixsize=p.pixelsize/1000;
            filestruct.info.Width=par.sizex;
@@ -68,6 +71,7 @@ classdef SimulateCameraImages<interfaces.WorkflowModule
            filestruct.info.conversion=par.conversion;
            filestruct.info.basefile=[path f];
            filestruct.info.numberOfFrames=max(obj.locs.frame);
+           filestruct.info.assigned.roi=true;
            obj.par=par;
            obj.setPar('loc_fileinfo',filestruct.info);
         end
