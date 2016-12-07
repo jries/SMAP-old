@@ -155,7 +155,13 @@ for k=numberofsites:-1:1
     end
     
     if p.randomxy 
-        dx=(rand(1)-.5)*p.randomxyd*2;dy=(rand(1)-.5)*p.randomxyd*2;dz=(rand(1)-.5)*p.randomxyd*2;
+        if length(p.randomxyd)==1
+            zspread=p.randomxyd;
+        else
+            zspread=p.randomdxyd(2);
+            p.randomdxyd=p.randomdxyd(1);
+        end
+        dx=(rand(1)-.5)*p.randomxyd*2;dy=(rand(1)-.5)*p.randomxyd*2;dz=(rand(1)-.5)*zspread*2;
         locsh.x=locsh.x+dx;
         locsh.y=locsh.y+dy;
         locsh.z=locsh.z+dz;

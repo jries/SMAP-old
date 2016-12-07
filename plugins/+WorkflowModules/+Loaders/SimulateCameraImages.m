@@ -48,7 +48,8 @@ classdef SimulateCameraImages<interfaces.WorkflowModule
             else
                 [f , path]=uiputfile('simulationfit_sml.mat');
             end
-            filestruct=initfile([path f]);
+%             filestruct=initfile([path f]);
+%             info=filestruct.info;
             p=obj.getAllParameters;
 %             [obj.locs,p]=storelocs(obj,p);
             if p.autorange
@@ -57,23 +58,36 @@ classdef SimulateCameraImages<interfaces.WorkflowModule
                       p.yrange=[min(obj.locs.ynm)-rim max(obj.locs.ynm)+rim]; 
             end
             obj.par=copyfields(obj.par,p);
-            [~,par]=simulatecamera(obj.locs,obj.par,1,obj.PSF);
+            par=obj.par;
             xrp=round(par.xrange/par.pixelsize);
             yrp=round(par.xrange/par.pixelsize);
-            filestruct.info.roi=[xrp(1) yrp(1) xrp(2)-xrp(1)+1 yrp(2)-yrp(1)+1];
-            [xrp(1) yrp(1) xrp(2)-xrp(1)+1 yrp(2)-yrp(1)+1]
-            filestruct.info=interfaces.metadataSMAP;
-            filestruct.info.pixsize=p.pixelsize/1000;
-           filestruct.info.Width=par.sizex;
-           filestruct.info.Height=par.sizey;
-           filestruct.info.offset=par.offset;
-           filestruct.info.emgain=par.emgain;
-           filestruct.info.conversion=par.conversion;
-           filestruct.info.basefile=[path f];
-           filestruct.info.numberOfFrames=max(obj.locs.frame);
-           filestruct.info.assigned.roi=true;
+            info=interfaces.metadataSMAP;
+            info.roi=[xrp(1) yrp(1) xrp(2)-xrp(1)+1 yrp(2)-yrp(1)+1];
+%             [xrp(1) yrp(1) xrp(2)-xrp(1)+1 yrp(2)-yrp(1)+1]
+            
+            info.pixsize=p.pixelsize/1000;
+           
+            if p.usecam
+               info.offset=par.offset;
+               info.emgain=par.emgain;
+               info.conversion=par.conversion;
+               info.EMon=true;
+            else
+                info.offset=0;
+               info.emgain=1;
+               info.conversion=1;
+               info.EMon=false;
+           end
+           info.basefile=[path f];
+           info.numberOfFrames=max(obj.locs.frame);
+           info.assigned.roi=true;
+           
+           obj.setPar('loc_fileinfo',info);
+           obj.par=copyfields(obj.par,info,{'offset','emgain','conversion','EMon'});
+           [~,par]=simulatecamera(obj.locs,obj.par,1,obj.PSF);
+%            filestruct.info.Width=par.sizex;
+%            filestruct.info.Height=par.sizey;
            obj.par=par;
-           obj.setPar('loc_fileinfo',filestruct.info);
         end
     end
 end
@@ -124,12 +138,12 @@ function [locs,p]=storelocs(obj,p)
           p.EMon=false;
           p.conversion=1; 
           p.offset=0;
-          p.emgain=0;
+          p.emgain=1;
 
       end
       if p.emgain==0
               p.EMon=false;
-          else
+      else
               p.EMon=true;
       end
 
@@ -217,27 +231,27 @@ pard.getlocalizations.Width=2;
 % pard.psfmodel.Width=2;
 
 pard.getpsfpar.object=struct('String','PSF model','Style','pushbutton','Callback',{{@psfpar_callback,obj}});
-pard.getpsfpar.position=[2,3];
+pard.getpsfpar.position=[2,2];
 pard.getpsfpar.Width=2;
 
 lp=3;
 pard.t1.object=struct('String','Pixelsize (nm)','Style','text');
-pard.t1.position=[lp,1];
+pard.t1.position=[lp,3];
 pard.t1.Width=0.7;
 
 pard.pixelsize.object=struct('String','100','Style','edit');
-pard.pixelsize.position=[lp,1.7];
+pard.pixelsize.position=[lp,3.7];
 pard.pixelsize.Width=0.3;
 
 pard.t4.object=struct('String','Background','Style','text');
-pard.t4.position=[lp,2];
+pard.t4.position=[lp,4];
 pard.t4.Width=0.7;
 pard.background.object=struct('String','20','Style','edit');
 pard.background.Width=.3;
-pard.background.position=[lp,2.7];
+pard.background.position=[lp,4.7];
 
 
-la=5;
+la=4;
 pard.autorange.object=struct('String','auto','Style','checkbox','Value',1);
 pard.autorange.position=[la,1];
 pard.autorange.Width=0.5;
@@ -266,7 +280,7 @@ pard.frames.object=struct('String','1 inf','Style','edit');
 pard.frames.Width=.5;
 pard.frames.position=[la,4];
 
-lu=6;
+lu=5;
 pard.usecam.object=struct('String','Use camera units','Style','checkbox','Value',1);
 pard.usecam.position=[lu,1];
 pard.usecam.Width=1.5;

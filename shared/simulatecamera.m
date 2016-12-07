@@ -71,6 +71,10 @@ simulpar=p;
 end
 
 function imo=phot2adu(imin,p)
+if ~p.usecam
+    imo=imin;
+    return;
+end
 if ~p.EMon
     emgain=1;
 else

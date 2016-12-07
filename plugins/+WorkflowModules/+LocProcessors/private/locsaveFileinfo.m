@@ -3,7 +3,12 @@ filestruct=initfile;
 % tifs=struct('image',[],'info',[]);
 finfo=prop2struct(obj.getPar('loc_fileinfo'));
 sfile=finfo.basefile;
-filename=[sfile '_sml.mat'];  
+if isempty(strfind(sfile,'_sml.mat'))
+    [~,sfile]=fileparts(sfile);
+    filename=[sfile '_sml.mat']; 
+else
+    filename=sfile;
+end
 infost=prop2struct(obj.getPar('loc_cameraSettings'));
 infost=copyfields(infost,finfo);
 

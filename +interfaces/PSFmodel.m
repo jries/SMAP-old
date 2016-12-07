@@ -42,7 +42,7 @@ classdef PSFmodel<interfaces.GuiModuleInterface
                 ryh=yr+1:yr+roipix;ryh=max(ryh,1);ryh=min(ryh,sy+roipix);
                 imgh(rxh,ryh)=imgh(rxh,ryh)+imh;      
             end
-            img=imgh(roipixh+1:end-roipixh-1,roipixh+1:end-roipixh-1)';
+            img=imgh(roipixh+2:end-roipixh,roipixh+2:end-roipixh)';
         end
     end
 end
