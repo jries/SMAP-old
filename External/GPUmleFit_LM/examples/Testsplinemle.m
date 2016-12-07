@@ -1,6 +1,7 @@
 clear all
 
 load('matlab161027.mat')
+coeff=single(coeff);
 
 Nfits = 100;
 Nphotons = 500;
@@ -15,6 +16,7 @@ spline_xsize = size(coeff,1);
 spline_ysize = size(coeff,2);
 spline_zsize = size(coeff,3);
 off = ((spline_xsize+1)-2*Npixels)/2;
+
 
 for kk = 1:Nfits
     xcenter = coordsxy(kk,1);
@@ -55,6 +57,7 @@ for kk = 1:Nfits
             
         end
     end
+
     kk
     
 end

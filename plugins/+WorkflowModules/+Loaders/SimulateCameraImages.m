@@ -3,6 +3,7 @@ classdef SimulateCameraImages<interfaces.WorkflowModule
         locs
 %         simulpar
         par
+        PSF
        
     end
     methods
@@ -24,9 +25,10 @@ classdef SimulateCameraImages<interfaces.WorkflowModule
                   data=interfaces.WorkflowData;
                   data.frame=allframes(k);
                   data.ID=k;
-                  [img,simulpar]=simulatecamera(obj.locs,p,allframes(k));
+                  [img,simulpar]=simulatecamera(obj.locs,p,allframes(k),obj.PSF);
                   data.data=img;
                   obj.output(data);
+                  obj.status(['simulating camera image frame ' num2str(k)]);
               end
               data=interfaces.WorkflowData;
               data.eof=true;
@@ -49,7 +51,14 @@ classdef SimulateCameraImages<interfaces.WorkflowModule
             filestruct=initfile([path f]);
             p=obj.getAllParameters;
 %             [obj.locs,p]=storelocs(obj,p);
-            [~,par]=simulatecamera(obj.locs,obj.par,1);
+            if p.autorange
+                      rim=1000;
+                      p.xrange=[min(obj.locs.xnm)-rim max(obj.locs.xnm)+rim]; 
+                      p.yrange=[min(obj.locs.ynm)-rim max(obj.locs.ynm)+rim]; 
+            end
+            obj.par=copyfields(obj.par,p);
+            [~,par]=simulatecamera(obj.locs,obj.par,1,obj.PSF);
+            
             filestruct.info=interfaces.metadataSMAP;
             filestruct.info.pixsize=p.pixelsize/1000;
            filestruct.info.Width=par.sizex;
@@ -81,14 +90,14 @@ function [locs,p]=storelocs(obj,p)
       case 3
           sim=ROIManager.Segment.SimulateSites;
           sim.attachPar(obj.P);
-             sim.handle=figure('MenuBar','none','Toolbar','none','Name','simulate locs');
-    p.Xrim=10;
-    p.Vrim=100;
-    sim.setGuiAppearence(p)
-    sim.makeGui;
-    disp('close simulate localization gui after caluclating localizations')
-    waitfor(sim.handle)
-    locs=sim.locData.loc;
+          sim.handle=figure('MenuBar','none','Toolbar','none','Name','simulate locs');
+            p.Xrim=10;
+            p.Vrim=100;
+            sim.setGuiAppearence(p)
+            sim.makeGui;
+            disp('close simulate localization gui after caluclating localizations')
+            waitfor(sim.handle)
+            locs=sim.locData.loc;
 %           sim.attachLocData(obj.locData);
           
           
@@ -134,7 +143,59 @@ obj.setPar('loc_fileinfo',filestruct.info);
 end
 
 function psfpar_callback(a,b,obj)
+persistent model;
+if isempty(model)
+mg=GaussPSF();
+model{1}=mg;
+ms=splinePSF();
+model{2}=ms;
 end
+f=figure('MenuBar','none','Toolbar','none','Name','PSF model parameters');
+pos=f.Position;
+uicontrol(f,'String','Ok','Position',[010,10,75,25],'Callback',@closebutton)
+hmodel=uicontrol(f,'String',{'Gaussian','Spline'},'Style','popupmenu','Position',[10,pos(4)-30,275,25],'Callback',@selectmodel);
+
+pos(2)=30;pos(4)=pos(4)-60;
+hp(1)=uipanel(f,'Position',[0 0.1 1 .8]);
+model{1}.handle=hp(1);model{1}.makeGui;
+if ~isempty(model{1}.guipar)
+    model{1}.setGuiParameters(model{1}.guipar);
+end
+
+hp(2)=uipanel(f,'Position',[0 0.1 1 .8],'Visible','off');
+model{2}.handle=hp(2);model{2}.makeGui;
+if ~isempty(model{2}.guipar)
+    model{2}.setGuiParameters(model{2}.guipar);
+end
+
+
+% model=obj.getSingleGuiParameter('psfmodel');
+% switch model.selection
+%     case 'Spline'
+%         modelf=@splinePSF;
+% end
+% 
+% mo=modelf();
+% mo.handle=f;
+% mo.makeGui;
+waitfor(f)
+    function closebutton(a,b)
+        model{hmodel.Value}.guipar=model{hmodel.Value}.getGuiParameters;
+        obj.PSF=model{hmodel.Value};
+        
+        close(f)
+    end
+    function selectmodel(a,b)
+        switch a.Value
+            case 1
+                hp(1).Visible='on';hp(2).Visible='off';
+            case 2
+                hp(2).Visible='on';hp(1).Visible='off';
+        end
+    end
+
+end
+
 
 function pard=guidef(obj)
 
@@ -147,11 +208,11 @@ pard.getlocalizations.object=struct('String','get Localizations','Style','pushbu
 pard.getlocalizations.position=[1,3];
 pard.getlocalizations.Width=2;
 
-pard.psfmodel.object=struct('String',{{'Symmetric Gaussian','Astigmatig Gaussian','Spline'}},'Style','popupmenu');
-pard.psfmodel.position=[2,1];
-pard.psfmodel.Width=2;
+% pard.psfmodel.object=struct('String',{{'Symmetric Gaussian','Astigmatig Gaussian','Spline'}},'Style','popupmenu');
+% pard.psfmodel.position=[2,1];
+% pard.psfmodel.Width=2;
 
-pard.getpsfpar.object=struct('String','PSF Parameters','Style','pushbutton','Callback',{{@psfpar_callback,obj}});
+pard.getpsfpar.object=struct('String','PSF model','Style','pushbutton','Callback',{{@psfpar_callback,obj}});
 pard.getpsfpar.position=[2,3];
 pard.getpsfpar.Width=2;
 

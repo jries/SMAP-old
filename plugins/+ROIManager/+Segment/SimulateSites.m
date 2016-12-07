@@ -16,6 +16,9 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
 %            locs=locsfrompos(posreappear,p);
 %            locst=singlelocs(locs);
 %            figure(88);plot(locst.xnm,locst.ynm,'+',locst.xnm_gt,locst.ynm_gt,'o')
+           if ~p.savez
+               locst=rmfield(locst,{'znm','znm_gt'});
+           end
            obj.locData.addfile(['simulated_' num2str(obj.locData.files.filenumberEnd)]);
            obj.locData.addLocData(locst);
            obj.locData.sort('filenumber','frame');
@@ -381,7 +384,7 @@ pard.t4.object=struct('String','mean number photons','Style','text');
 pard.t4.position=[5,1];
 pard.t4.Width=1.5;
 
-pard.photons.object=struct('String','1000','Style','edit');
+pard.photons.object=struct('String','2000','Style','edit');
 pard.photons.Width=.5;
 pard.photons.position=[5,2.5];
 
@@ -404,12 +407,16 @@ pard.randomrot.Width=1;
 pard.randomrot.position=[7,1];
 
 pard.randomxy.object=struct('String','Random position (nm):','Style','checkbox');
-pard.randomxy.Width=1;
+pard.randomxy.Width=1.5;
 pard.randomxy.position=[7,2];
 
 pard.randomxyd.object=struct('String','20','Style','edit');
-pard.randomxyd.Width=1;
-pard.randomxyd.position=[7,3];
+pard.randomxyd.Width=.5;
+pard.randomxyd.position=[7,3.5];
+
+pard.savez.object=struct('String','save z','Style','checkbox','Value',1);
+pard.savez.Width=1;
+pard.savez.position=[7,4.];
 
 pard.numberofsites.object=struct('String','5 5','Style','edit');
 pard.numberofsites.Width=.5;
@@ -420,7 +427,7 @@ pard.t7.object=struct('String','number of frames','Style','text');
 pard.t7.position=[8,3];
 pard.t7.Width=1.5;
 
-pard.maxframes.object=struct('String','10000','Style','edit');
+pard.maxframes.object=struct('String','3000','Style','edit');
 pard.maxframes.Width=.5;
 pard.maxframes.position=[8,4.5];
 

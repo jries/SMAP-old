@@ -116,8 +116,15 @@ switch ext
         display('file not identified selected')
         return
 end
+if ~isfield(locsall,'z')
+    locsall.z=0*locsall.x;
+end
 
+if isempty(p.se_sitefov)
+    p.se_sitefov=500;
+end
 distsites=p.se_sitefov;
+
 if length(p.numberofsites)>1
     numberofrows=p.numberofsites(2);
     numberofsites=p.numberofsites(1)*p.numberofsites(2);
@@ -128,7 +135,7 @@ end
 
 % numeroflines=ceil(p.numberofsites/numberofrows);
 for k=numberofsites:-1:1
-    xh=mod(k-1,numberofrows);
+    xh=mod(k-1,numberofrows)+1;
     yh=ceil(k/numberofrows);
     if ~isempty(image)
         locsh=locsfromimage(image,p);
@@ -139,6 +146,7 @@ for k=numberofsites:-1:1
     numlocs=length(locsh.x);
     locsh.x=reshape(locsh.x,numlocs,1);
     locsh.y=reshape(locsh.y,numlocs,1);
+    locsh.z=reshape(locsh.z,numlocs,1);
     if p.randomrot
         angle=2*pi*rand(1);
         [locsh.x,locsh.y]=rotcoord(locsh.x,locsh.y,angle);
@@ -147,20 +155,24 @@ for k=numberofsites:-1:1
     end
     
     if p.randomxy 
-        dx=(rand(1)-.5)*p.randomxyd*2;dy=(rand(1)-.5)*p.randomxyd*2;
+        dx=(rand(1)-.5)*p.randomxyd*2;dy=(rand(1)-.5)*p.randomxyd*2;dz=(rand(1)-.5)*p.randomxyd*2;
         locsh.x=locsh.x+dx;
         locsh.y=locsh.y+dy;
+        locsh.z=locsh.z+dz;
     else
         dx=0;
         dy=0;
+        dz=0;
     end
     
     locs(k).x=locsh.x+xh*distsites;
     locs(k).y=locsh.y+yh*distsites;
+    locs(k).z=locsh.z;
     locs(k).angle=angle*ones(size(locsh.x));
     locs(k).dx_gt=dx*ones(size(locsh.x));
     locs(k).dy_gt=dy*ones(size(locsh.x));
-        
+    locs(k).dz_gt=dz*ones(size(locsh.x));
+    
     possites(k).x=xh*distsites;
     possites(k).y=yh*distsites;
 %     figure(89);plot(locs(k).x,locs(k).y,'*')
@@ -256,10 +268,13 @@ function locs=locsfromposi(locsi,p)
 %     locs.frame=double(ceil(rand(numlocs,1)*p.maxframe));
     locs.xnm=single(locsi.x(indin)+randn(numlocs,1).*locprecnm(indin));
     locs.ynm=single(locsi.y(indin)+randn(numlocs,1).*locprecnm(indin));
+    locs.znm=single(locsi.z(indin)+randn(numlocs,1).*locprecnm(indin)*3);
     locs.xnm_gt=single(locsi.x(indin));
     locs.ynm_gt=single(locsi.y(indin));
+    locs.znm_gt=single(locsi.z(indin));
     locs.dxnm_gt=single(locsi.dx_gt(indin));
     locs.dynm_gt=single(locsi.dy_gt(indin));
+    locs.dznm_gt=single(locsi.dz_gt(indin));
     locs.angle=single(locsi.angle(indin));
     locs.frame=single(locsi.frame(indin));
       

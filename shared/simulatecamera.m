@@ -1,4 +1,4 @@
-function [img,simulpar]=simulatecamera(locs,p,frames)
+function [img,simulpar]=simulatecamera(locs,p,frames,psf)
 %locs.x locs.y locs.z locs.frames locs.phot
 %p.xrange p.yrange p.pixelsize p.bg p.psfmode p.calfile
 %p.EMon
@@ -12,7 +12,7 @@ function [img,simulpar]=simulatecamera(locs,p,frames)
 
 p.sizex=round((p.xrange(2)-p.xrange(1))/p.pixelsize);
 p.sizey=round((p.yrange(2)-p.yrange(1))/p.pixelsize);
-im0=zeros(p.sizex,p.sizey,'single');
+im0=zeros(p.sizey,p.sizex,'single');
 if isempty(locs)
     simulpar=p;
     img=[];
@@ -26,12 +26,12 @@ end
 numlocs=length(locs.x);
 %2D in focus
 locs.s=zeros(numlocs,1)+100;
-img=zeros(p.sizex,p.sizey,length(frames),'single');
+img=zeros(p.sizey,p.sizex,length(frames),'single');
 ind1=1;
 
-hwb=waitbar(0,'calcualting camera images');
+% hwb=waitbar(0,'calcualting camera images');
 for k=1:length(frames)
-    waitbar(k/length(frames),hwb);
+%     waitbar(k/length(frames),hwb);
     while ind1<=numlocs&&locs.frame(ind1)<frames(k)
         ind1=ind1+1;
     end
@@ -47,7 +47,7 @@ for k=1:length(frames)
     end
     
     if ~isempty(range)
-        imh=psfimage(locs,range,p);
+        imh=psfimage(locs,range,p,psf);
     else
         imh=im0;
     end
@@ -66,7 +66,7 @@ for k=1:length(frames)
     
     
 end
-close(hwb)
+% close(hwb)
 simulpar=p;
 end
 
@@ -79,12 +79,39 @@ end
 imo=imin*emgain/p.conversion+p.offset;
 end
 
-function img=psfimage(locs,range,p)
+function img=psfimage(locs,range,p,psf)
 locsh.x=locs.x(range);
 locsh.y=locs.y(range);
 locsh.s=locs.s(range);
 locsh.N=locs.phot(range);
-[img,nlocs,Gc]=gaussrender(locsh,p.xrange, p.yrange, p.pixelsize, p.pixelsize);
+locsh.z=locs.znm(range);
+
+% switch p.psfmodel.selection
+%     case 'Symmetric Gaussian'
+%         [img,nlocs,Gc]=gaussrender(locsh,p.xrange, p.yrange, p.pixelsize, p.pixelsize);        
+%     case 'Astigmatig Gaussian'
+%     case 'Spline'
+        img=psf.render(locsh,p.xrange,p.yrange,p.pixelsize,p.pixelsize);
+%         sx=p.sizex;sy=p.sizey;
+%         xh=(locsh.x-p.xrange(1))/p.pixelsize;yh=(locsh.y-p.yrange(1))/p.pixelsize;
+%         zh=locsh.z;
+%         imh=psf.PSF(0,0,0);
+%         roipix=size(imh,1);
+%         roipixh=floor(roipix/2);
+%         
+%         
+%         imgh=zeros(sx+roipix,sy+roipix);
+%         
+%         for k=1:length(xh)
+%             xr=round(xh(k)); yr=round(yh(k));
+%             imh=psf.PSF(xh(k)-xr,yh(k)-yr,zh(k));
+%             rxh=xr+1:xr+roipix;
+%             ryh=yr+1:yr+roipix;
+%             imgh(rxh,ryh)=imgh(rxh,ryh)+imh*locsh.N(k);      
+%         end
+%         img=imgh(roipixh+1:end-roipixh-1,roipixh+1:end-roipixh-1);
+% end
+
 end
 
 function imh2=addbg(imh,bg)
