@@ -32,7 +32,7 @@ range=n1:n2;
 x=n(range)';
 % clusterfromlabeling(x,corners,rings,.5)
 ft=fittype('a*clusterfromlabeling(x,corners,rings,p)','problem',{'corners','rings'});
-f=fit(x,hi(range)',ft,'problem',{corners, rings},'Lower',[0 0.01],'Upper',[inf .99],'Start',[shi .1]);
+f=fit(x,hi(range)',ft,'problem',{corners, rings},'Lower',[0 0.01],'Upper',[inf .99],'Start',[shi .4]);
 plot(n,f(n),'-g')
 plot(x,f(x),'-*r')
 pf=f.p;
@@ -173,7 +173,7 @@ if p.copy2page
     axt.Parent=f;
     subplot(3,3,7,axt)
     
-    if exist(ax6,'var')
+    if exist('ax6','var')
         axt=ax6.copy;
     axt.Parent=f;
     subplot(3,3,8,axt) 
