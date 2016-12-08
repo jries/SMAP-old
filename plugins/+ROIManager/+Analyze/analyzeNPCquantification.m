@@ -1,8 +1,8 @@
-classdef AnalyzeNPCquantification<interfaces.DialogProcessor&interfaces.SEProcessor
+classdef analyzeNPCquantification<interfaces.DialogProcessor&interfaces.SEProcessor
     properties
     end
     methods
-        function obj=AnalyzeNPCquantification(varargin)        
+        function obj=analyzeNPCquantification(varargin)        
             obj@interfaces.DialogProcessor(varargin{:});
             obj.inputParameters={};
             obj.showresults=true;

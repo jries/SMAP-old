@@ -1,4 +1,10 @@
 classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
+    %SimulateSites is a localization based simulation engine for SMAP. It
+    %uses as an input a list of localizations, a matlab function that
+    %returns coordiantes or an image which defines a 2D structure. It
+    %returns simulated localizations to SMAP using a realistic model for the
+    %photophysics of the dye. Simulated structures are added to the
+    %RoiManager
     properties
     end
     methods
@@ -12,12 +18,6 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
         end
         function out=run(obj,p)  
             [locst,possites]=simulatelocs(p);
-%            [poslabels,possites]=getlabels(obj,p);
-%            posreappear=reappear(poslabels,p.blinks);
-%            p.maxframe=100000;
-%            locs=locsfrompos(posreappear,p);
-%            locst=singlelocs(locs);
-%            figure(88);plot(locst.xnm,locst.ynm,'+',locst.xnm_gt,locst.ynm_gt,'o')
            if ~p.savez
                locst=rmfield(locst,{'znm','znm_gt'});
            end
@@ -26,8 +26,6 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
            obj.locData.sort('filenumber','frame');
            try
            initGuiAfterLoad(obj);
-           
-           
            se=obj.locData.SE;
            cell=interfaces.SEsites;
            cell.pos=[mean(locst.xnm) mean(locst.ynm)];
@@ -141,9 +139,11 @@ function pard=guidef(obj)
 pard.coordinatefile.object=struct('String','plugins/+ROIManager/+Segment/hidden/MakeNPCCoordinates.m','Style','edit');
 pard.coordinatefile.position=[1,1];
 pard.coordinatefile.Width=3;
+pard.coordinatefile.TooltipString=sprintf('.txt or .csv file with coordinates, .tif or .png file in which the pixel values are a \n measure for the concentration of the labels or a matlab function that \n returns the position of the lables in form of a structure with the fields .x .y .z');
 
 pard.load_button.object=struct('String','Load','Style','pushbutton','Callback',{{@load_callback,obj}});
 pard.load_button.position=[1,4];
+pard.load_button.TooltipString=pard.coordinatefile.TooltipString;
 
 pard.tif_numbermode.object=struct('String',{{'Density (labels/um^2)','Number of labels'}},'Style','popupmenu');
 pard.tif_numbermode.Width=1.5;
@@ -203,7 +203,6 @@ pard.background.Width=.5;
 pard.background.position=[5,4.5];
 
 
-
 pard.t6.object=struct('String','Number of sites','Style','text');
 pard.t6.position=[8,1];
 pard.t6.Width=1.5;
@@ -241,4 +240,10 @@ pard.savenow.object=struct('String',{{'No saving','Save ground truth','Save simu
 pard.savenow.Width=2;
 pard.savenow.position=[2,1];
 pard.plugininfo.type='ROI_Analyze';
+
+pard.plugininfo.description=sprintf(['SimulateSites is a localization based simulation engine for SMAP. It \n'...
+    'uses as an input a list of localizations, a matlab function that\n'...
+    'returns coordiantes or an image which defines a 2D structure. It \n'...
+    'returns simulated localizations to SMAP using a realistic model for the \n'...
+    'photophysics of the dye. Simulated structures are added to the RoiManager']);
 end

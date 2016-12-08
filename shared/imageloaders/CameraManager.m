@@ -62,7 +62,7 @@ end
 %load images
 hp=uicontrol('Style','pushbutton','String','Load images','Position',[posbutton height-40,buttonwidth,lineheight],'Callback',{@loadimages,obj});
 hp=uicontrol('Style','pushbutton','String','test','Position',[posbutton height-65,buttonwidth,lineheight],'Callback',{@testcal,obj});
-hp=uicontrol('Style','pushbutton','String','Save','Position',[posbutton height-90,buttonwidth,lineheight],'Callback',{@savecameras,obj});
+% hp=uicontrol('Style','pushbutton','String','Save','Position',[posbutton height-90,buttonwidth,lineheight],'Callback',{@savecameras,obj});
 
 
 tcam=uitable(obj.handle,'Position',[10 height-lineheight*4 width-200,lineheight*3.5]);
@@ -102,7 +102,9 @@ tstatesadd=uicontrol('Style','pushbutton','String','add','Position',[10 lineheig
 tstatesrem=uicontrol('Style','pushbutton','String','rem','Position',[width*.09+10 lineheight*3+80 width*0.06,lineheight],'Callback',{@stateadd,obj,'rem'});
 uicontrol('Style','text','String','State defining parameters','Position',[width*.2 lineheight*3+80 width*.2,lineheight])
 tstatesrem=uicontrol('Style','pushbutton','String','close','Position',[posbutton 15 buttonwidth,lineheight],'Callback',{@close_callback,obj});
+hp=uicontrol('Style','pushbutton','String','Save','Position',[posbutton-buttonwidth-15, 15,buttonwidth,lineheight],'Callback',{@savecameras,obj});
 
+hp=uicontrol('Style','pushbutton','String','Calibrate Camera','Position',[15, 15,buttonwidth*1.2,lineheight],'Callback',{@calibrate_cameras,obj});
 
 
 tdef=uitable(obj.handle,'Position',[width*.18 50 width*.5,lineheight*4]);
@@ -420,4 +422,8 @@ end
 
 function close_callback(a,b,obj)
 close(obj.handle)
+end
+
+function calibrate_cameras(a,b,obj)
+%display info on how to calibrate cameras.
 end
