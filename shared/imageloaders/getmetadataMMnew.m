@@ -41,6 +41,9 @@ metafile=info.metafile;
             
             %manual
              ind=strfindfast(minfo,'"ROI": [',1);
+             if isempty(ind)
+                 ind=strfindfast(minfo,'"ROI": "',1);
+             end
              troi=textscan(minfo(ind+10:ind+100),'%d','delimiter',',');
              mdo(end+1,:)={'ROI direct',num2str(troi{:}')};
 
@@ -53,8 +56,12 @@ metafile=info.metafile;
 %             ind3=strfind(str,'-');
 %             str2=str(ind3(end)+1:end);
 %             numberOfFrames=str2double(str2)+1;
-            mdo(end+1,:)={'numberOfFrames frame key',num2str(numberOfFrames)};
-            mdo(end+1,:)={'frames direct',num2str(numberOfFrames)};
+            mdo(end+1,:)={'numberOfFrames frame key',num2str(numberOfFrames+1)};
+            
+            dd=myfastdir(fileparts(file), 'img_*.tif');
+            numberoffiles=length(dd);
+            
+            mdo(end+1,:)={'frames direct',num2str(max(numberoffiles,numberOfFrames+1))};
             mdinf=vertcat(mdinf,mdo);
         end
              %sort

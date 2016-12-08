@@ -34,15 +34,19 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
             case '.nd2' %Nikon
                 sm=obj.reader.getGlobalMetadata;
                 exclude={'X position for position','Y position for position','Z position for position','PFS Status #','PFS Offset #'};
-                
+                parselist=true;
             case '.lif'
                 exclude={};
                 cm=obj.reader.getCoreMetadataList;
-                cm1=cm.get(1);
+                cm1=cm.get(0);
                 sm=cm1.seriesMetadata;
+                parselist=true;
+            case '.tif'
+                parselist=false;
+                
         end
                 
-               
+        if parselist       
                 k=sm.keys;
                 ind=1;
                 
@@ -62,14 +66,36 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
                 end
                 allome=getmetadatatagsome(obj);
                 allmd=vertcat(allmd,allome);
-                obj.allmetadatatags=allmd;
-                
-        
+        else
+            allmd=[];
+        end
+        allcore=getallcoremtadata(obj.reader.getCoreMetadataList);
+        allmd=vertcat(allmd,allcore);
+        obj.allmetadatatags=allmd;
         end
         
     end
     
 end
+
+function out=getallcoremtadata(cm)
+sm=cm.get(0);
+list={'sizeX','sizeY','sizeZ','sizeC','sizeT','pixelType','bitsPerPixel','imageCount','dimensionOrder'};
+for k=1:length(list)
+    try
+        out{k,1}=list{k};
+        v=(sm.(list{k}));
+        if isnumeric(v)
+            v=num2str(v);
+        else
+            v=char(v);
+        end
+        out{k,2}=v;
+    end
+end
+end
+% out(1,1:2)={'sizeX',sm.sizeX
+% end
 function metao=getmetadataome(obj)
 reader=obj.reader;
 omemeta=reader.getMetadataStore;

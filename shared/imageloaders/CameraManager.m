@@ -10,6 +10,7 @@ classdef CameraManager<handle
         currentcam=1;
         currentstate=1;
         lastcamtableselected=[];
+        defaultpath;
     end
     
     methods
@@ -28,6 +29,7 @@ classdef CameraManager<handle
                     end
                 else
                     obj.currentcam=cam;
+                    
                     prop2table(obj);
                 end
                 
@@ -347,8 +349,13 @@ end
 
 
 function loadimages(a,b,obj)
-
-[file path]=uigetfile('*.*');
+ph=obj.defaultpath;
+if ~isempty(ph)
+    ph=[fileparts(ph) filesep];
+else
+    ph='';
+end
+[file path]=uigetfile([ph '*.*']);
 if file
     obj.loadimages([path file]);
 % obj.imloader=imageloaderAll([path file]);

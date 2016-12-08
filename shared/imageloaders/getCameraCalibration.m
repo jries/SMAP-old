@@ -30,12 +30,21 @@ for cam=1:length(l.cameras)
 end
 if isempty(val)
     cam=[];
-    [par,cam,state]=askforcameramanager(imloader,'Camera not recognized. Create new camera with Camera Manager?',silent,argin);
-%     if ~isempty(cam)
+    
+    if ~silent
+        answ=questdlg('Camera not recognized. Use default camera?');
+    end
+    if silent||strcmp(answ,'Yes')  
+        camnames=getFieldAsVector(l.cameras,'ID','name');
+        cam=find(strcmp(camnames,'Default'));
+        state=1;
+        if isempty(cam)&~silent
+            errordlg('create Default camera with Camera Manager')
+        end    
+    else    
+        [par,cam,state]=askforcameramanager(imloader,'Camera not recognized. Create new camera with Camera Manager?',silent,argin);
         return;
-%     else
-%         cam=1;
-%     end
+    end
 end
 partable=l.cameras(cam).par;
 s=size(partable);

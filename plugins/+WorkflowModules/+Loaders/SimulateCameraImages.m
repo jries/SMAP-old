@@ -31,7 +31,7 @@ classdef SimulateCameraImages<interfaces.WorkflowModule
                   data.ID=k;
                   [img,simulpar]=simulatecamera(obj.locs,p,allframes(k),obj.PSF);
                   data.data=img;
-                  if p.savetiffs &~obj.getPar('loc_preview')
+                  if p.savetiffs &&~obj.getPar('loc_preview')
                       if isempty(allimgs)
                           sim=size(img);
                           allimgs=zeros(sim(1),sim(2),length(allframes),'single');
@@ -47,7 +47,7 @@ classdef SimulateCameraImages<interfaces.WorkflowModule
               data.ID=k+1;
               data.frame=allframes(end)+1;
               obj.output(data);
-              if p.savetiffs &~obj.getPar('loc_preview')
+              if p.savetiffs &&~obj.getPar('loc_preview')
                   saveim=uint16(allimgs);
                   pathh=fileparts(obj.getPar('loc_fileinfo').basefile);
                   [f,path]=uiputfile([pathh filesep 'simulation.tif']);

@@ -206,5 +206,9 @@ end
 end
 
 function cameramanager_callback(a,b,obj)
-CameraManager;
+c=CameraManager;
+p=obj.getPar('loc_fileinfo');
+if ~isempty(p)
+c.defaultpath=p.basefile;
+end
 end
