@@ -56,8 +56,8 @@ classdef metadataSMAP<handle
                 return
             end
             obj.roi=roi;
-            obj.Width=roi(3);
-            obj.Height=roi(4);
+            obj.Width=round(roi(3));
+            obj.Height=round(roi(4));
             obj.assigned.roi=true;
             obj.assigned.Width=true;
             obj.assigned.Height=true;

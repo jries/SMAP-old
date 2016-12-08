@@ -16,7 +16,7 @@ classdef GaussPSF<interfaces.PSFmodel
             locs.sx=p.analytical(1).*sqrt(1+((locs.z+p.analytical(3))/p.analytical(2)).^2);
             locs.sy=p.analytical(1).*sqrt(1+((locs.z-p.analytical(3))/p.analytical(2)).^2);
             
-            img=gaussrender_ellipt(locs,xrange+pixelsizex/2,yrange+pixelsizey/2,pixelsizex,pixelsizey);
+            img=gaussrender_ellipt(locs,xrange+0*pixelsizex/2,yrange+0*pixelsizey/2,pixelsizex,pixelsizey);
             
         end
         function img=PSF(obj,locs)
