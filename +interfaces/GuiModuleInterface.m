@@ -37,7 +37,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
             
             %PC-Mac differences
             if ispc
-                 guiPar.fontsize=11;
+                 guiPar.fontsize=10;
                  guiPar.FieldHeight=26;
                  guiPar.tabsize1=[0    -1  546 342];
                  guiPar.tabsize2=[0    -1  540 311];    

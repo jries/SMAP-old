@@ -46,7 +46,13 @@ classdef SimulateCameraImages<interfaces.WorkflowModule
             if  obj.getPar('loc_preview')
                 f='';path='';
             else
-                pin=fileparts(obj.getPar('last_SMLFile'));
+                lf=obj.getPar('last_SMLFile');
+                if ~isempty(lf)
+                pin=fileparts(lf);
+                else
+                    pin=pwd;
+                end
+                
                 [f , path]=uiputfile([pin filesep 'simulationfit_sml.mat']);
             end
 %             filestruct=initfile([path f]);

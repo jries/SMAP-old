@@ -11,7 +11,7 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
                 % do something with grouping? at least warn?
                 lr=obj.locData.getloc({'xnm','ynm','znm','phot'},'layer',p.reflayer.Value);
                 lt=obj.locData.getloc({'xnm','ynm','znm','phot'},'layer',p.targetlayer.Value);
-                [outlayer2D, outlayer3D]=getmatch(lr,lt,p);
+                [outlayer2D, outlayer3D,mr,mt]=getmatch(lr,lt,p);
                 outlayer2D.name='layer2D';
                 outlayer3D.name='layer3D';
             end
@@ -22,7 +22,7 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
             f=ax.Parent;
             delete(ax);
 %             pos=f.Position;pos(1:2)=20;pos(3:4)=pos(3:4)*.9;
-            uit=uitable(f,'Units','normalized','Position',[0 0 1 1]);
+            uit=uitable(f,'Units','normalized','Position',[0 0 1 0.9]);
             uit.Units='pixels';
             uit.Data=table2cell(tab);
             uit.ColumnName=tab.Properties.VariableNames;
@@ -32,6 +32,9 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
               cw{k}=w;
             end
             uit.ColumnWidth=cw;
+            
+            ax=obj.initaxis('z compare gt');
+            plot(ax,lr.znm(mr),lt.znm(mt),'.');
             out=[];
         end
         function pard=guidef(obj)
@@ -40,7 +43,7 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
     end
 end
 
-function [out,out3D]=getmatch(lr,lt,p)
+function [out,out3D,mr,mt]=getmatch(lr,lt,p)
 if length(p.searchradius)==1
     p.searchradius(2)=p.searchradius(1);
 end
@@ -51,8 +54,9 @@ end
     if isfield(lr,'znm')&&~isempty(lr.znm)&&isfield(lt,'znm')&&~isempty(lt.znm)
         dz=lr.znm(mr)-lt.znm(mt);
         inz=abs(dz)<=p.searchradius(2);
-        ur2=vertcat(ur,mr(~inz));
-        ut2=vertcat(ut,mt(~inz));
+        
+        ur2=vertcat(ur',mr(~inz));
+        ut2=vertcat(ut',mt(~inz));
         mr2=mr(inz);
         mt2=mt(inz);
     end

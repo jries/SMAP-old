@@ -39,7 +39,7 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
 %             end
             
             roisize=obj.getPar('loc_ROIsize');
-            obj.numberInBlock=round(5500*100/roisize^2);
+            obj.numberInBlock=round(15500*100/roisize^2);
             
             disp(reporttext)
 %             if exist('err','var')&&exist('err2','var')
