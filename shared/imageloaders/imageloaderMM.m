@@ -1,5 +1,5 @@
 classdef imageloaderMM<interfaces.imageloaderSMAP
-    %imageloaderMM image loader for micromanager single tiff files
+    %imageloaderMM image loader for micromanager  tiff stack files
     %   Detailed explanation goes here
     
     properties
@@ -16,6 +16,8 @@ classdef imageloaderMM<interfaces.imageloaderSMAP
             obj.file=file;
 %             obj.reader=bfGetReader(file);
             md=obj.getmetadata;
+            [p,f]=fileparts(file);
+            obj.metadata.basefile=[p filesep f];
             
         end
         function image=getimage(obj,frame)
