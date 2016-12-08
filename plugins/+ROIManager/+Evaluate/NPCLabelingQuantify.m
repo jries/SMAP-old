@@ -185,19 +185,41 @@ else
     numlocsf=0;
 end
 if obj.display
-figure(188);
-subplot(3,1,1);bar(numberincorners);
-title(['theta=' num2str(((mdt))/pi*180) ', pos=' num2str(x0-obj.site.pos(1)) ,',' num2str(y0-obj.site.pos(2))])
-subplot(3,1,2);histogram(dthplot,-step/2:pi/64:step/2);
+   ax1= obj.setoutput('assigned');
+   bar(ax1,numberincorners);
+   xlabel(ax1,'number of locs per corner assigned');
+   tstr={['corners: ' int2str(numlocsf)  ', assigned: ' ,int2str(numbercornerassined)], ['from gaps: ' int2str(numfound) ', fractional: ' num2str(numfound2,3) ]};
+   title(ax1,tstr)
+   
+   ax3= obj.setoutput('gaps');
+   histogram(ax3,dth/step,0:.1:max(dth/step)+0.1);
+   xlabel(ax3,'length of gap (in units of 2pi/8)');
+    tstr={['corners: ' int2str(numlocsf)  ', from gaps: ' int2str(numfound) ', fractional: ' num2str(numfound2,3) ], ['assigned: ' ,int2str(numbercornerassined)]};
+ title(ax3,tstr)
+ 
+   ax2= obj.setoutput('localizations');
+   plot(ax2,locs.xnm(inr),locs.ynm(inr),'x')
+   if ~isempty(locs.xnm_gt)
+        plot(ax2,locs.xnm(inr),locs.ynm(inr),'x',locsall.xnm_gt,locsall.ynm_gt,'ro',locs.xnm_gt(inr),locs.ynm_gt(inr),'r*')
+   end
+   title(ax2,['theta=' num2str(((mdt))/pi*180) ', pos=' num2str(x0-obj.site.pos(1)) ,',' num2str(y0-obj.site.pos(2))])
+   axis(ax2,'equal')
+end
 
-subplot(3,1,3)
-plot(locs.xnm(inr),locs.ynm(inr),'x')
-if ~isempty(locs.xnm_gt)
-    plot(locs.xnm(inr),locs.ynm(inr),'x',locsall.xnm_gt,locsall.ynm_gt,'ro',locs.xnm_gt(inr),locs.ynm_gt(inr),'r*')
-end
-   axis equal
-    title(['corners: ' int2str(numlocsf) ', found: ' int2str(numfound) ', fractional: ' num2str(numfound2,3), ', assigned: ' ,int2str(numbercornerassined)])
-    
-end
+%    ax3= obj.setoutput('image');
+% figure(188);
+% subplot(3,1,1);bar(numberincorners);
+% title(['theta=' num2str(((mdt))/pi*180) ', pos=' num2str(x0-obj.site.pos(1)) ,',' num2str(y0-obj.site.pos(2))])
+% subplot(3,1,2);histogram(dthplot,-step/2:pi/64:step/2);
+% 
+% subplot(3,1,3)
+% plot(locs.xnm(inr),locs.ynm(inr),'x')
+% if ~isempty(locs.xnm_gt)
+%     plot(locs.xnm(inr),locs.ynm(inr),'x',locsall.xnm_gt,locsall.ynm_gt,'ro',locs.xnm_gt(inr),locs.ynm_gt(inr),'r*')
+% end
+%    axis equal
+%     title(['corners: ' int2str(numlocsf) ', found: ' int2str(numfound) ', fractional: ' num2str(numfound2,3), ', assigned: ' ,int2str(numbercornerassined)])
+%     
+% end
 end
 
