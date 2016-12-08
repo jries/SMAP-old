@@ -1,7 +1,7 @@
 classdef SimulateCameraImages<interfaces.WorkflowModule
     properties
         locs
-%         simulpar
+        simulator
         par
         PSF
        
@@ -13,7 +13,10 @@ classdef SimulateCameraImages<interfaces.WorkflowModule
                 obj.isstartmodule=true;
 
         end
-        
+        function initGui(obj)
+            simulation_callback(obj.guihandles.simulationsource, 0,obj)
+            psfpar_callback(0,0,obj,true)
+        end
         function out=run(obj,data,p)  
                 p=obj.par;   
                  if obj.getPar('loc_preview')
@@ -21,20 +24,38 @@ classdef SimulateCameraImages<interfaces.WorkflowModule
                  else
                     allframes=max(1,p.frames(1)):min(p.frames(end),max(obj.locs.frame));
                  end
+              allimgs=[];
               for k=1:length(allframes)
                   data=interfaces.WorkflowData;
                   data.frame=allframes(k);
                   data.ID=k;
                   [img,simulpar]=simulatecamera(obj.locs,p,allframes(k),obj.PSF);
                   data.data=img;
+                  if p.savetiffs &&~obj.getPar('loc_preview')
+                      if isempty(allimgs)
+                          sim=size(img);
+                          allimgs=zeros(sim(1),sim(2),length(allframes),'single');
+                      end
+                      allimgs(:,:,k)=img;
+                  end
                   obj.output(data);
                   obj.status(['simulating camera image frame ' num2str(k)]);
+                  
               end
               data=interfaces.WorkflowData;
               data.eof=true;
               data.ID=k+1;
               data.frame=allframes(end)+1;
               obj.output(data);
+              if p.savetiffs &&~obj.getPar('loc_preview')
+                  saveim=uint16(allimgs);
+                  pathh=fileparts(obj.getPar('loc_fileinfo').basefile);
+                  [f,path]=uiputfile([pathh filesep 'simulation.tif']);
+                  if f
+                  saveastiff(saveim,[path f])
+                  end
+              end
+              
         out=[];
         end
         
@@ -48,9 +69,14 @@ classdef SimulateCameraImages<interfaces.WorkflowModule
             else
                 lf=obj.getPar('last_SMLFile');
                 if ~isempty(lf)
-                pin=fileparts(lf);
+                    pin=fileparts(lf);
                 else
-                    pin=pwd;
+                    lf=obj.getPar('loc_fileinfo');
+                    if ~isempty(lf.basefile)
+                        pin=fileparts(lf.basefile);
+                    else
+                        pin=pwd;
+                    end
                 end
                 
                 [f , path]=uiputfile([pin filesep 'simulationfit_sml.mat']);
@@ -115,16 +141,16 @@ function [locs,p]=storelocs(obj,p)
           l=load([path f]);
           locs=l.saveloc.loc;
       case 3
-          sim=ROIManager.Segment.SimulateSites;
-          sim.attachPar(obj.P);
-          sim.handle=figure('MenuBar','none','Toolbar','none','Name','simulate locs');
-            p.Xrim=10;
-            p.Vrim=100;
-            sim.setGuiAppearence(p)
-            sim.makeGui;
-            disp('close simulate localization gui after caluclating localizations')
-            waitfor(sim.handle)
-            locs=sim.locData.loc;
+%           sim=ROIManager.Segment.SimulateSites;
+%           sim.attachPar(obj.P);
+%           sim.handle=figure('MenuBar','none','Toolbar','none','Name','simulate locs');
+%             p.Xrim=10;
+%             p.Vrim=100;
+%             sim.setGuiAppearence(p)
+%             sim.makeGui;
+%             disp('close simulate localization gui after caluclating localizations')
+%             waitfor(sim.handle)
+            locs=obj.simulator.locData.loc;
 %           sim.attachLocData(obj.locData);
           
           
@@ -169,7 +195,10 @@ obj.setPar('loc_fileinfo',filestruct.info);
 % filestruct.info.numberOfFrames=max(obj.locs.frame);
 end
 
-function psfpar_callback(a,b,obj)
+function psfpar_callback(a,b,obj,silent)
+if nargin<4
+    silent=false;
+end
 persistent model;
 if isempty(model)
 mg=GaussPSF();
@@ -195,7 +224,9 @@ if ~isempty(model{2}.guipar)
     model{2}.setGuiParameters(model{2}.guipar);
 end
 
-
+if silent
+    closebutton(0,0)
+end
 % model=obj.getSingleGuiParameter('psfmodel');
 % switch model.selection
 %     case 'Spline'
@@ -223,11 +254,27 @@ waitfor(f)
 
 end
 
-
+function simulation_callback(a,b,obj)
+if a.Value==3 %make with simulation plugin
+    if isempty(obj.simulator) 
+        obj.simulator=ROIManager.Segment.SimulateSites;
+        obj.simulator.attachPar(obj.P);
+    end
+    if isempty(obj.simulator.handle)||~isvalid(obj.simulator.handle)
+        obj.simulator.handle=figure('MenuBar','none','Toolbar','none','Name','simulate locs');
+        p.Xrim=10;
+        p.Vrim=100;
+        obj.simulator.setGuiAppearence(p)
+        obj.simulator.makeGui;
+        disp('press get localizations after running the simulator')
+    end
+end
+end
 function pard=guidef(obj)
 
 % 
-pard.simulationsource.object=struct('String',{{'Use current localizations','Load localizations','Make with simulation plugin'}},'Style','popupmenu');
+pard.simulationsource.object=struct('String',{{'Use current localizations','Load localizations','Make with simulation plugin'}},'Style','popupmenu',...
+    'Callback',{{@simulation_callback,obj}});
 pard.simulationsource.position=[1,1];
 pard.simulationsource.Width=2;
 
@@ -244,6 +291,12 @@ pard.getpsfpar.position=[2,2];
 pard.getpsfpar.Width=2;
 
 lp=3;
+
+pard.savetiffs.object=struct('String','Save Tiff files','Style','checkbox','Value',0);
+pard.savetiffs.position=[lp,1];
+pard.savetiffs.Width=1.5;
+
+
 pard.t1.object=struct('String','Pixelsize (nm)','Style','text');
 pard.t1.position=[lp,3];
 pard.t1.Width=0.7;
@@ -292,11 +345,11 @@ pard.frames.position=[la,4];
 lu=5;
 pard.usecam.object=struct('String','Use camera units','Style','checkbox','Value',1);
 pard.usecam.position=[lu,1];
-pard.usecam.Width=1.5;
+pard.usecam.Width=1.3;
 
-pard.t5.object=struct('String','EM gain (0=off)','Style','text');
-pard.t5.position=[lu,2.5];
-pard.t5.Width=.5;
+pard.t5.object=struct('String','EMgain 0=off','Style','text');
+pard.t5.position=[lu,2.2];
+pard.t5.Width=.8;
 pard.emgain.object=struct('String','100','Style','edit');
 pard.emgain.Width=.3;
 pard.emgain.position=[lu,3];

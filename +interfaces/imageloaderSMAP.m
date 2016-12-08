@@ -99,6 +99,9 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
                 end
             end
             obj.metadata.allmetadata=obj.allmetadatatags;
+%             if isempty(obj.metadata.basefile)
+                obj.metadata.basefile=obj.file;
+%             end
         metao=obj.metadata;
         end
     end

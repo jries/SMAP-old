@@ -151,9 +151,9 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
                 nf=obj.getPar('loc_previewframe')+1;
             end
             obj.guihandles.previewframeslider.Min=1;
-            obj.guihandles.previewframeslider.Max=nf;
+            obj.guihandles.previewframeslider.Max=max(nf,1);
             pvf=min(nf,obj.getPar('loc_previewframe'));
-            obj.guihandles.previewframeslider.Value=pvf;
+            obj.guihandles.previewframeslider.Value=max(min(1,pvf),nf);
             obj.setPar('loc_previewframe',pvf)
             obj.guihandles.previewframe.String=num2str(pvf);
 %             obj.setPar('loc_previewframe',round(pf));
