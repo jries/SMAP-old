@@ -83,7 +83,9 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
         end
         
         function metao=getmetadata(obj)
-            metao=getmetadatacam(obj);
+            getmetadatacam(obj);
+             obj.metadata.basefile=getbasefile(obj.file);
+             metao=obj.metadata;   
         end
         function metao=getmetadatacam(obj)
             md=getCameraCalibration(obj);
@@ -100,7 +102,7 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
             end
             obj.metadata.allmetadata=obj.allmetadatatags;
 %             if isempty(obj.metadata.basefile)
-                obj.metadata.basefile=obj.file;
+               
 %             end
         metao=obj.metadata;
         end

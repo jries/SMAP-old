@@ -15,7 +15,8 @@ classdef imageloaderMMsingle<interfaces.imageloaderSMAP
         function open(obj,file)
             obj.file=file;
             info=getimageinfo(file);
-            md=obj.getmetadata;
+            obj.getmetadata;
+            obj.metadata.basefile=info.basefile;
             
             obj.separatefiles=info.files;
             obj.separate.numfiles=info.frames;

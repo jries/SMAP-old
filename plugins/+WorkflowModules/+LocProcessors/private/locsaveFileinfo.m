@@ -3,9 +3,15 @@ filestruct=initfile;
 % tifs=struct('image',[],'info',[]);
 finfo=prop2struct(obj.getPar('loc_fileinfo'));
 sfile=finfo.basefile;
+
+%single image files
+
+
+
+
 if isempty(strfind(sfile,'_sml.mat'))
-    [~,sfile]=fileparts(sfile);
-    filename=[sfile '_sml.mat']; 
+    [path,filen]=fileparts(sfile);
+    filename=[path filesep filen '_sml.mat']; 
 else
     filename=sfile;
 end
