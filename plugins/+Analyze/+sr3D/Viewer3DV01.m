@@ -82,6 +82,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             pard=guidef(obj);
         end
         function mousebutton(obj,src,callbackdata,calltype)
+            
             src.WindowButtonMotionFcn = @motion;
             src.WindowButtonUpFcn = @up;
             disteye=100;
@@ -95,9 +96,12 @@ classdef Viewer3DV01<interfaces.DialogProcessor
      
             oldanglex=atan2(oldpos(1,1),disteye);
             oldangley=atan2(oldpos(1,2),disteye);
-            
+            axposx=obj.axis.XLim;axposy=obj.axis.YLim;
             function motion(src,callbackdata)
                  posh=obj.axis.CurrentPoint;
+                 if (posh(1,1)<axposx(1)||posh(1,1)>axposx(2) || posh(1,2)<axposy(1)||posh(1,2)>axposy(2))
+                     up(src,callbackdata)
+                 end
 %                 vnew=vold+(posh-oldpos)/disteye;
                 
                 newanglex=atan2(posh(1,1),disteye);
