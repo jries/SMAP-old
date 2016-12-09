@@ -13,7 +13,7 @@ if nargin<2||isempty(l)
     file='settings/cameras.mat';
     if ~exist(file,'file')
 %         l=[];
-        [par,cam,state]=askforcameramanager(imloader,'camera calibration file settings/camera.mat not found. Create new file with Camera Manager?',silent,argin);
+        [par,cam,state]=askforcameramanager(imloader,'camera calibration file settings/camera.mat not found. ',silent,argin);
         return
 %         [par,cam]=getCameraCalibration(imloader,[],silent);
     end
@@ -44,7 +44,7 @@ if isempty(val)
             errordlg('create Default camera with Camera Manager')
         end    
     else    
-        [par,cam,state]=askforcameramanager(imloader,'Camera not recognized. Create new camera with Camera Manager?',silent,argin);
+        [par,cam,state]=askforcameramanager(imloader,'Camera not recognized. ',silent,argin);
         return;
     end
 end
@@ -71,7 +71,7 @@ if ~isempty(strcmp(partable(:,2),'state dependent'))
     state=find(found,1,'first');  
     if isempty(state)
 %         askforcameramanager(imloader,'State of the camera could not be determined. Please use the CameraManager to define proper state. Create new state with Camera Manager now?',silent)
-            [par,cam,state]=askforcameramanager(imloader,'State of the camera could not be determined. Please use the CameraManager to define proper state. Create new state with Camera Manager now?',silent,argin);
+            [par,cam,state]=askforcameramanager(imloader,'State of the camera could not be determined. Please use the CameraManager to define proper state.',silent,argin);
             if ~isempty(par)
                 return;
             end
@@ -110,15 +110,16 @@ if silent
     disp(message)
     return
 end
-answ=questdlg(message,'Open Camera Manager now?');
+answ=warndlg(message,'Open Camera Manager now?');
 if strcmp(answ,'Yes')
-    disp('close Camera Manager when done');
-    camm=CameraManager;
-    camm.imloader=imloader;
-    camm.loadimages;
-    waitfor(camm.handle)
-    argin{2}=[];
-    [paro,camo,stateo]=getCameraCalibration(argin{:});
+    disp('please open in camera manager');
+    
+%     camm=CameraManager;
+%     camm.imloader=imloader;
+%     camm.loadimages;
+%     waitfor(camm.handle)
+%     argin{2}=[];
+%     [paro,camo,stateo]=getCameraCalibration(argin{:});
 end
 end
 end

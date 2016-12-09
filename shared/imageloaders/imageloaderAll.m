@@ -8,7 +8,7 @@ file=varargin{1};
        case '.tif'
            if exist([path filesep 'metadata.txt'],'file')
 %                imloader=@imageloaderMM;
-               if countfiles(file)>20
+               if countfiles(file)>1 && ~(any(strfind(file,'MMStack'))||any(strfind(file,'.ome.')))
                    imloader=@imageloaderMMsingle;
                else
                    imloader=@imageloaderMM;

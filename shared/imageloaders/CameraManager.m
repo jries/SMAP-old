@@ -76,6 +76,8 @@ tcam.ColumnEditable=[ true false true];
 hc=uicontextmenu(obj.handle);
 hui=uimenu('Parent',hc,'Label','add','Callback',{@uimenucallback,obj});
 hui=uimenu('Parent',hc,'Label','remove','Callback',{@uimenucallback,obj});
+hui=uimenu('Parent',hc,'Label','move up','Callback',{@uimenucallback,obj});
+hui=uimenu('Parent',hc,'Label','move down','Callback',{@uimenucallback,obj});
 
 tcam.UIContextMenu=hc;
 tpar=uitable(obj.handle,'Position',[10 height-lineheight*13-30 width-40,lineheight*9.5]);
@@ -231,6 +233,7 @@ obj.guihandles.camtable.Data=data;
 col=ones(size(data,1),3);
 col(obj.currentcam,1)=.3;
 obj.guihandles.camtable.BackgroundColor=col;
+showpartable(obj)
 end
 
 function t=intpartable
@@ -369,6 +372,7 @@ end
 [file path]=uigetfile([ph '*.*']);
 if file
     obj.loadimages([path file]);
+    obj.defaultpath=path;
 % obj.imloader=imageloaderAll([path file]);
 end
 end
@@ -394,13 +398,30 @@ end
 function stateadd(a,b,obj,addrem)
 switch addrem
     case 'add'
-        states=obj.guihandles.statelist.String;
-        l=length(obj.cameras(obj.currentcam));
-        states{l+1}=['State ' num2str(l+1)];
-        obj.cameras(obj.currentcam).state(l+1)=obj.cameras(obj.currentcam).state(l);
-        obj.guihandles.statelist.String=states;
-        obj.guihandles.statelist.Value=l+1;
+%         states=obj.guihandles.statelist.String;
+        l=length(obj.cameras(obj.currentcam).state);
+%         states{l+1}=['State ' num2str(l+1)];
+        newstate=obj.cameras(obj.currentcam).state(obj.currentstate);
+        obj.currentstate=l;
+        try
+            for k=1:size(newstate.defpar,1)
+                fieldh=newstate.defpar{k,1};
+                if ~strcmp(fieldh,'select')
+                    v=obj.imloader.gettag(fieldh);
+                    newstate.defpar{k,2}=v;
+                end
+            end
+            
+        end
+        obj.cameras(obj.currentcam).state(l+1)=newstate;
+        obj.currentstate=l+1;
+        prop2table(obj);
+%         obj.guihandles.statelist.String=states;
+%         obj.guihandles.statelist.Value=l+1;
     case 'rem'
+        obj.cameras(obj.currentcam).state(obj.currentstate)=[];
+        obj.currentstate=1;
+        prop2table(obj);
 end
 end
 
@@ -418,9 +439,18 @@ switch object.Label
         obj.cameras(obj.lastcamtableselected(1))=[];
         obj.currentcam=1;
         prop2table(obj);
+        return
     case 'add'
         createnewcamera(obj);
+        return
+    case 'move up'
+       newpos=max(obj.currentcam-1,1);
+    case 'move down'
+        newpos=min(obj.currentcam+1,length(obj.cameras));
 end
+oldpos=obj.currentcam;
+obj.cameras([oldpos newpos])=obj.cameras([newpos oldpos]);
+prop2table(obj);
 end
 
 function testcal(a,b,obj)

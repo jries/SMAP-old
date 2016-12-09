@@ -16,8 +16,12 @@ metafile=info.metafile;
             
             minfo=fread(fid,[1,100000],'*char');
             nread=100000;
-            fseek(fid,-nread,'eof');
-            minfo2=fread(fid,[1,nread],'*char');
+            status=fseek(fid,-nread,'eof');
+            if status==0
+                minfo2=fread(fid,[1,nread],'*char');
+            else
+                minfo2=minfo;
+            end
             fclose(fid);
             tt=textscan(minfo,'%s','delimiter',',');
             t=tt{1};
@@ -52,7 +56,11 @@ metafile=info.metafile;
 
             ind2=strfindfast(minfo2,'"',ind);
             str=minfo2(ind:ind2-1);
+            if isempty(str)
+                numberOfFrames=1;
+            else
             numberOfFrames=max(cell2mat(textscan(str,'%f','delimiter','-')));
+            end
 %             ind3=strfind(str,'-');
 %             str2=str(ind3(end)+1:end);
 %             numberOfFrames=str2double(str2)+1;
