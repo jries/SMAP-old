@@ -123,7 +123,12 @@ switch ext
         
         fall=myfastdir(p, [searchstr '*.tif']);
         end
-        info.files=fall;
+        
+        try
+            info.files=string(fall);
+        catch
+            info.files=fall;
+        end
         
         
         info.path=p;
