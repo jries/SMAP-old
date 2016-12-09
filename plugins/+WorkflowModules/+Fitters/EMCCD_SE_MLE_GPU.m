@@ -27,12 +27,12 @@ classdef EMCCD_SE_MLE_GPU<interfaces.WorkflowFitter
                 a75=GPUgaussMLEv2_CUDA75(img,1,10,1);
             end
             
-            if any(a50~=0)
-                  obj.fitfunction=@gaussmlev2_cuda50;
-                reporttext='gaussmlev2_cuda50';
-            elseif any(a75~=0)
+            if any(a75~=0)
                 obj.fitfunction=@GPUgaussMLEv2_CUDA75;
-                reporttext='GPUgaussMLEv2_CUDA75';                
+                reporttext='GPUgaussMLEv2_CUDA75';  
+            elseif any(a50~=0)
+                  obj.fitfunction=@gaussmlev2_cuda50;
+                reporttext='gaussmlev2_cuda50';                
             end
             
             roisize=obj.getPar('loc_ROIsize');
