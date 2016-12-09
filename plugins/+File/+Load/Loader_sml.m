@@ -113,6 +113,9 @@ if isempty(siteexplorer)||siteexplorer.numberOfFiles==0
         siteexplorer.addFile(templocData.files.file(k).name,templocData.files.file(k).number,templocData.files.file(k).info)
     end
 %     newfilenumbers=1:templocData.files.file(end).number;
+elseif ~p.updateGuiPar %restore parameters only if not already globally restored
+    psites=GUIsettings.children.guiSites;
+    p.mainGui.children.guiSites.setGuiParameters(psites,true);
 end
 se=obj.locData.SE;
    se.addSites(siteexplorer,newfilenumbers, templocData.files.file)
