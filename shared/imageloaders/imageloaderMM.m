@@ -56,6 +56,7 @@ classdef imageloaderMM<interfaces.imageloaderSMAP
 end
 
 function initMM(obj)
+global SMAP_globalsettings
 % dirs={'ij.jar'
 % 'plugins/Micro-Manager/MMAcqEngine.jar'
 % 'plugins/Micro-Manager/MMCoreJ.jar'
@@ -76,9 +77,17 @@ function initMM(obj)
 %     else
 %         MMpath='/Applications/Fiji.app/scripts';
 %     end
-try
+
+if isempty(SMAP_globalsettings)
+    disp('Micro-manager java path not added, as imageloader was not called from SMAP. add manually to javaclasspath');
+end
+try    
 obj.createGlobalSetting('MMpath','Directories2','The directory of Micro-Manager/ in w hich ij.jar is found:',struct('Style','dir','String','MMpath'))
-MMpath=obj.getGlobalSetting('MMpath');  
+MMpath=obj.getGlobalSetting('MMpath'); 
+catch
+    MMpath=SMAP_globalsettings.MMpath.object.String;
+end
+
 if ~exist(MMpath,'dir')       
     errordlg('cannot find Micro-Manager, please select Micro-Manager directory in menu SMAP/Preferences/Directotries2...')
     return
@@ -98,10 +107,9 @@ end
 
 dirs{end+1}=  [MMpath filesep 'ij.jar']; 
 javaaddpath(dirs);
-catch err
-    disp('java path not added, as imageloader was not called from SMAP. add manually to javaclasspath');
+
 end
-end
+
 
 
 function image=readstack(obj,imagenumber)

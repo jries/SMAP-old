@@ -89,7 +89,7 @@ dat=intpartable;
 
 
 wh=tpar.Position(3);
-tpar.ColumnWidth={'auto','auto','auto',wh*.25,'auto',wh*.2,'auto'};
+tpar.ColumnWidth={wh*.12,'auto','auto',wh*.25,'auto',wh*.18,'auto'};
 tpar.CellSelectionCallback={@cellselect,obj,'par'};
 tpar.CellEditCallback={@celledit,obj,'par'};
 tpar.ColumnFormat={'char',{'fix','metadata','state dependent'},'char','char','char','char','char'};
@@ -115,11 +115,13 @@ wh=tdef.Position(3);
 tdef.ColumnWidth={wh*.55,wh*.35};
 tdef.ColumnEditable=[false true];
 
+
 tval=uitable(obj.handle,'Position',[width*.7 50 width-40-width*.7,lineheight*5]);
+wh=tval.Position(3);
 tval.ColumnName={'Parameter','Value'};
 tval.ColumnEditable=[false true];
 tval.Data=tpar.Data(:,[1 3]);
-
+tval.ColumnWidth={wh*.45,wh*.25};
 
 
 obj.guihandles.camtable=tcam;
@@ -219,6 +221,12 @@ for k=1:length(cams)
     data{k,3}=cams(k).ID.value;
 end
 
+nstates=length(obj.cameras(obj.currentcam).state);
+for k=1:nstates
+    statestr{k}=['State ' num2str(k)];
+end
+obj.guihandles.statelist.String=statestr;
+
 obj.guihandles.camtable.Data=data;
 col=ones(size(data,1),3);
 col(obj.currentcam,1)=.3;
@@ -227,7 +235,7 @@ end
 
 function t=intpartable
 t=cell(12,7);
-parnames={'EMon','pixelsize','conversion','emgain','offset','roi','exposure','timediff','comment','numberOfFrames','Width','Height'};
+parnames={'EMon','pixsize','conversion','emgain','offset','roi','exposure','timediff','comment','numberOfFrames','Width','Height'};
 mode={'metadata','fix','state dependent','metadata','state dependent','metadata','metadata','metadata','metadata','metadata','metadata','metadata'};
 default={'true','0.1','1','100','100','','1','1','settings not initialized','0','0','0'};
 conversion={'str2double(X)','str2double(X)','str2double(X)','str2double(X)','str2double(X)','str2num(X)','str2double(X)','str2double(X)','','str2double(X)','str2double(X)','str2double(X)'};
@@ -305,6 +313,7 @@ switch tname
 %         obj.guihandles.partable.Data=obj.cameras(data.Indices(1)).par;
         obj.currentcam=data.Indices(1);
         obj.lastcamtableselected=data.Indices;
+        obj.currentstate=1;
         prop2table(obj);
         
     case 'par'

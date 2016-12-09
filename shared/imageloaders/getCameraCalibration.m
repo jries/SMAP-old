@@ -2,6 +2,8 @@ function [par,cam,state]=getCameraCalibration(imloader,l,silent)
 if nargin<3
     silent=false;
 end
+replacefields={'cam_pixelsize_um','pixsize'};
+
 par=[];
 cam=[];
 state=[];
@@ -98,7 +100,9 @@ end
 if isempty(par.roi)
     par.roi=[0 0 par.Width par.Height];
 end
-
+for k=1:size(replacefields,1)
+    par.(replacefields{k,2})=par.(replacefields{k,1});
+end
 
 function [paro,camo,stateo]=askforcameramanager(imloader,message,silent,argin)
 paro=par;camo=cam;stateo=state;

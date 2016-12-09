@@ -317,16 +317,19 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
 
         end
         function createGlobalSetting(obj,field,category,description,structure)
+            global SMAP_globalsettings
             if ~isfield(obj.P.globalSettings,field) %don't overwrite current settings
                 obj.P.globalSettings.(field).object=structure;
     %             obj.P.globalSettings.(field).name=name;
                 obj.P.globalSettings.(field).category=category;
                 obj.P.globalSettings.(field).description=description;
                 obj.saveGlobalSettings;
+                SMAP_globalsettings=obj.P.globalSettings;
             end
             %save to global parameters
         end
         function setGlobalSetting(obj,field,value)
+            
             h=obj.value2handle(value,obj.P.globalSettings.(field).object);
             obj.P.globalSettings.(field).object=copyfields(obj.P.globalSettings.(field).object,h);
             obj.saveGlobalSettings;
@@ -336,11 +339,15 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             p=obj.handle2value(obj.P.globalSettings.(field).object);
         end
         function saveGlobalSettings(obj)
+            global SMAP_globalsettings
             file=obj.P.globalSettingsFile;
             writestruct(file,obj.P.globalSettings);
+            SMAP_globalsettings=obj.P.globalSettings;
         end
         function loadGlobalSettings(obj)
+            global SMAP_globalsettings
             obj.P.loadGlobalSettings;
+            SMAP_globalsettings=obj.P.globalSettings;
         end
 
     end
