@@ -27,20 +27,13 @@ if strcmpi('raw', p.rendermode.selection) %obj.locData.files.file(p.ch_filelist.
     return
 end
 
-if nargin>3&&isempty(indin)
-    imageo.image=[];
-    imageo.numberOfLocs=0;
-    imageo.istiff=0;
-    imageo.rangex=[];
-    imageo.rangey=[];
-    return
-end
+
 
 if nargin<3||isempty(layer)
     layer=p.layer;
 end
 
-if length(p.sr_pixrec)==1;
+if length(p.sr_pixrec)==1
     p.sr_pixrec(2)=p.sr_pixrec(1);
 end
 
@@ -63,7 +56,16 @@ if nargin<4||isempty(indin)
     fn=fieldnames(locsh);
     indin=true(length(locsh.(fn{1})),1);
 end
-    
+ 
+if nargin>3&&isempty(indin)
+    imageo.image=[];
+    imageo.numberOfLocs=0;
+    imageo.istiff=0;
+    imageo.rangex=[];
+    imageo.rangey=[];
+    return
+end
+
 if isfield(p,'sr_layersseparate')&&~isempty(p.sr_layersseparate)&&p.sr_layersseparate
     if isfield(p,'sr_size')&&~isempty(p.sr_size)&&isfield(p,'sr_layerson')
         p.sr_size(1)=p.sr_size(1)/sum(p.sr_layerson);
@@ -131,12 +133,15 @@ tpar=0;
 switch lower(p.rendermode.selection)
     case {'gauss','other','constgauss'}
         if ~isfield(locsh,'sx') || ~isfield(locsh,'sy') || isempty(locsh.sx)|| isempty(locsh.sy) 
+            sd=[];
             if isfield(locsh,'s')&&~isempty(locsh.s)
                 sd=locsh.s(indin);
-            else
+            elseif isfield(locsh,'locprecnm')&&~isempty(locsh.locprecnm)
                 sd=locsh.locprecnm(indin);
             end
+            if ~isempty(sd)
             pos.s=min(max(sd*p.gaussfac,max(p.mingaussnm,p.mingausspix*p.sr_pixrec(1))),400);
+            end
         else
             pos.sx=max(locsh.sx(indin)*p.gaussfac,max(p.mingaussnm,p.mingausspix*p.sr_pixrec(1)));
             pos.sy=max(locsh.sy(indin)*p.gaussfac,max(p.mingaussnm,p.mingausspix*p.sr_pixrec(2)));

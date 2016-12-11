@@ -118,6 +118,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             end
             function up(src,callbackdata)
                 src.WindowButtonMotionFcn='';
+                src.WindowButtonUpFcn='';
             end
             
         end

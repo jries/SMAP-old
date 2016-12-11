@@ -2,7 +2,9 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
     properties 
         roihandle
         roiposition
+        roicallbackid
         ovboxhandle
+        sraxis
     end
     methods
         function obj=GuiFormat(varargin)
@@ -183,7 +185,8 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
 %             set(hg.hsr,'Units','pixels','Position', posim)
             hg.sr_axes=axes('Parent',hg.hsr);%,'Units','normalized','Position',[0.10 0.09,.7,.83]);
             set(hg.sr_axes,'NextPlot','replacechildren','PickableParts','all','Units','pixels')
-            set(hg.sr_axes,'ButtonDownFcn',{@clickOnSrImage,obj})
+            set(hg.hsr,'WindowButtonDownFcn',{@clickOnSrImageW,obj})
+%             set(hg.sr_axes,'ButtonDownFcn',{@clickOnSrImage,obj})
             obj.setPar('sr_figurehandle',hg.hsr);
             set(hg.hsr,'SizeChangedFcn',{@srSizeChange,obj})
             sr_axes=hg.sr_axes;
@@ -191,6 +194,7 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             hg.hsr.BusyAction='cancel';
             hg.hsr.ButtonDownFcn=@obj.bringGuiToFront;   
             obj.setPar('sr_axes',sr_axes); 
+            obj.sraxis=sr_axes;
             
 
         end
@@ -251,6 +255,9 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             global  roimodecallback 
             persistent lineh
             ax=obj.getPar('sr_axes');
+            f=ax.Parent;
+%             oldbdf=f.WindowButtonDownFcn;
+%             f.WindowButtonDownFcn='';
             if isempty(lineh) || ~isvalid(lineh.text)
                 lineh.handle1=line([0 0],[0 0],'Parent',ax);
                 lineh.handle2=line([0 0],[0 0],'Parent',ax);
@@ -287,6 +294,7 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             end
             obj.setPar('sr_roiposition',pos);
             obj.roiposition=pos;
+%             f.WindowButtonDownFcn=oldbdf;
         end
     end
 end
@@ -364,6 +372,68 @@ figure(hfig);
 notify(obj.P,'sr_render')
 end
 end
+
+function clickOnSrImageW(src, action,obj)
+% obj.checkForSRFigure(0,0);
+if isempty(obj.locData.loc) %no localizations loaded
+    return
+end
+% src.SelectionType
+% src.CurrentObject==obj.sraxis
+if ~(src.CurrentObject==obj.sraxis)
+    return
+end
+
+switch src.SelectionType
+    case 'normal'
+        pos=obj.sraxis.CurrentPoint*1000;
+        oldpos=pos(1,1:2);
+        src.WindowButtonMotionFcn = @motion;
+        src.WindowButtonUpFcn = @up;
+        if ~isempty(obj.roicallbackid)&&~isempty(obj.roihandle)&&isvalid(obj.roihandle)
+            obj.roihandle.removeNewPositionCallback(obj.roicallbackid);
+            obj.roicallbackid=[];
+        end
+         obj.setPar('fastrender',true)
+    case 'open'
+        resetview_callback(0,0,obj)
+    case 'alt'
+        pos=obj.sraxis.CurrentPoint(1,1:2)*1000;
+        updatepos(pos)
+end
+    function motion(src,callbackdata)
+         posh=obj.sraxis.CurrentPoint;
+         newpos=posh(1,1:2)*1000;
+         dpos=newpos-oldpos;
+         srpos=obj.getPar('sr_pos');
+         if sum((dpos).^2)>1
+             posax=srpos(1:2)-dpos;
+             updatepos(posax)
+         end
+    end
+    function up(src,callbackdata)
+        obj.setPar('fastrender',false)
+%         obj.getPar('fastrender')
+%         obj.roicallbackid=obj.roihandle.addNewPositionCallback(@obj.linecallback);
+        src.WindowButtonMotionFcn='';
+        src.WindowButtonUpFcn='';
+        if ~isempty(obj.roihandle)&&isvalid(obj.roihandle)
+         obj.roicallbackid=obj.roihandle.addNewPositionCallback(@obj.linecallback);
+        end
+        updatepos()
+    end
+    function updatepos(posh)
+        if nargin>0
+            
+        obj.setPar('sr_pos',posh);
+        obj.updateFormatParameters;
+        end
+        hfig=obj.getPar('sr_figurehandle');
+        figure(hfig);
+        notify(obj.P,'sr_render')
+    end
+end
+
 
 function srSizeChange(handle, action,obj)
 hf=handle.Position;
@@ -490,13 +560,19 @@ function roi_callback(callobj,data,obj,roimode,roiposition)
 global roimodecallback
 roimodecallback=roimode;
 p=obj.getGuiParameters;
+sr_axes=obj.sraxis;
+f=sr_axes.Parent;
+% oldbdf=f.WindowButtonDownFcn;
+
 if nargin<5
     roiposition=[];
+    f.WindowButtonDownFcn='';
 elseif ~p.roishow %if restore and not show: dont do anything
     return
 end
 delete(obj.roihandle)
-sr_axes=obj.getPar('sr_axes');
+
+
 xlim=sr_axes.XLim;
 ylim=sr_axes.YLim;
 switch roimode
@@ -524,14 +600,16 @@ switch roimode
         obj.roihandle=h;
         obj.setPar('sr_roihandle',obj.roihandle);
 end
+f.WindowButtonDownFcn={@clickOnSrImageW,obj};
 if ~isempty(h)
-    addNewPositionCallback(h,@obj.linecallback);
+    obj.roicallbackid=addNewPositionCallback(h,@obj.linecallback);
     obj.roihandle=h;
     obj.setPar('sr_roihandle',obj.roihandle);
     obj.linecallback(obj.roihandle.getPosition)
 end
 sr_axes.XLim=xlim;
 sr_axes.YLim=ylim;
+
 end
 
 function resetview_callback(oject,data,obj)

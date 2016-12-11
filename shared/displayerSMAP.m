@@ -6,6 +6,8 @@ if nargin==0
     return          
 end
 
+layersnext=isfield(p,'sr_layersseparate')&&~isempty(p.sr_layersseparate)&&p.sr_layersseparate;
+    
 rim=0;
 
 show=0;
@@ -37,7 +39,9 @@ for k=1:length(layers)
              mask=mask+fi.mask;
               txtN=[txtN 'N'  num2str(k) '=' shortnumber(fi.numberOfLocs) ', '];
          end
+         if layersnext
          allnext=horzcat(allnext,fi.image);
+         end
 
         end
     end
@@ -81,7 +85,7 @@ for k=1:min(4,length(layers))
     end
 end
 
-        if isfield(p,'sr_layersseparate')&&~isempty(p.sr_layersseparate)&&p.sr_layersseparate
+        if layersnext
      imfinal=allnext;
      nlayer=sum(p.sr_layerson)-1;
      rangexplot(2)=rangexplot(2)+nlayer*(rangexplot(2)-rangexplot(1));

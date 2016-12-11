@@ -158,17 +158,42 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             extraspace=150;
             pos=obj.getPar('sr_pos');
             sizesr=obj.getPar('sr_size');
-            xmin=pos(1)-sizesr(1)-extraspace;xmax=pos(1)+sizesr(1)+extraspace;
-            ymin=pos(2)-sizesr(2)-extraspace;ymax=pos(2)+sizesr(2)+extraspace;
+%             xmin=pos(1)-sizesr(1)-extraspace;xmax=pos(1)+sizesr(1)+extraspace;
+%             ymin=pos(2)-sizesr(2)-extraspace;ymax=pos(2)+sizesr(2)+extraspace;
 %             renderer=Renderer(obj.locData);
+            isfast=obj.getPar('fastrender');
+          
+            
             for k=1:obj.numberOfLayers
                 pk=obj.getLayerParameters(k,renderSMAP);
 %                 pk=obj.getLayerParameters(k,renderer.inputParameters);
                 if pk.layercheck
-%                     renderer.setParameters(pk);
-                    obj.locData.filter('xnm',k,'minmax',[xmin xmax])
-                    obj.locData.filter('ynm',k,'minmax',[ymin ymax])
-                    obj.locData.filter('channel',k,'inlist',pk.channels) 
+                    indin=[];
+                    if isfast
+%                         pk.sr_pixrec=pk.sr_pixrec*2;
+                        if strcmp(pk.rendermode.selection,'Gauss')
+                            pk.rendermode.selection='constGauss';
+                            pk.rendermode.Value=3;
+                        end
+                            posh=[pk.sr_pos(1) pk.sr_pos(2) pk.sr_size(1)*2 pk.sr_size(2)*2];
+                            fields={'xnm','ynm'};
+                            switch (pk.render_colormode.selection)
+                                case 'z'
+                                    fields{end+1}='znm';
+                                case 'field'
+                                    fields{end+1}=pk.renderfield.selection;
+                            end
+%                             {'xnm','ynm','znm','locprecnm','PSFxnm','phot',pk.renderfield.selection}
+                            locD=obj.locData.getloc(fields,'layer',k,'position',posh);
+                            if length(locD.xnm)>1e5
+                                indin=false(size(locD.xnm));
+                                indin(1:1e5)=true;
+                            end
+                    else
+                        obj.locData.filter('channel',k,'inlist',pk.channels) 
+                        locD=obj.locData;
+                    end
+
                     if strcmp(pk.rendermode.selection,'Other')
                         modules=obj.getPar('rendermodules');
                         if length(modules)<k || isempty(modules{k})
@@ -177,7 +202,7 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                         end
                         lp.layer(k).images.srimage=modules{k}.render(obj.locData,pk);
                     else
-                        lp.layer(k).images.srimage=renderSMAP(obj.locData,pk,k);        
+                        lp.layer(k).images.srimage=renderSMAP(locD,pk,k,indin);        
 %                     lp.layer(k).images.srimage=renderer.render(k);  
                     end
                 end
