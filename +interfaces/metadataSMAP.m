@@ -5,7 +5,7 @@ classdef metadataSMAP<handle
         Width=512;
         Height=512;
         roi=[];
-        camerainfo=struct('camID','','preAmp','','port','','temperature',0,'readoutrate','');
+        camerainfo=[];
         allmetadata=[];
         exposure=1;
         emgain=1;
