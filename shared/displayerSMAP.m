@@ -35,6 +35,9 @@ for k=1:length(layers)
                 imtiff=imtiff+fi.image;
                 tiffthere=1;
          else
+             if ~all(size(imall)==size(fi.image))&&~layersnext
+                 fi.image=imresize(fi.image,size(imall));
+             end
              imall=imall+fi.image;
              mask=mask+fi.mask;
               txtN=[txtN 'N'  num2str(k) '=' shortnumber(fi.numberOfLocs) ', '];
@@ -94,7 +97,7 @@ end
     imfinal=addscalebar(imfinal,p.sr_pixrec(1));
 
     
-    if isfield(p,'sr_axes')&&~isempty(p.sr_axes)&&ishandle(p.sr_axes)
+    if isfield(p,'sr_axes')&&~isempty(p.sr_axes)&&ishandle(p.sr_axes)&&~isempty(rangexplot)&&~isempty(rangeyplot)
         sr_imagehandle=image(rangexplot/1000,rangeyplot/1000,imfinal,'Parent',p.sr_axes,'Pickable','none','HitTest','off');
 %                     plotovim=1;
         title(p.sr_axes,txtN)

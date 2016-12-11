@@ -7,12 +7,16 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
     end
     methods
         function addSynchronization(obj,field,handle,syncmode,changecallback)
-            %add synchronization to global parameters
+             %add synchronization to global parameters
+            %field: globalParameterName
+            %handle: handle to guiobject to be synchronized
             %addSynchronization(parametername,handle to synchronize to,syncmode,changecallback)
             %syncmode='String|Value|otherproperty': what to synchronize
             %changecallback: function handle to function which is called
             %when parameter is changed. This is similar to events and
-            %listeners
+            %listeners.
+            %Instead of calling addSynchronization you can define in
+            %obj.guidef: pard.syncParameters={{'globalParameterName','guiobject2',{'String','Value'},{@changecallback,obj}},...};
             if nargin<5
                 changecallback={};
             end

@@ -117,6 +117,18 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             %'removeFilter': cell array of filter names to remove 
             [locsout,indout,hroi]=getlocs(obj,fields,varargin{:});
         end
+        
+        function im=getimage(obj,layer)
+            if nargin<2
+                im=obj.getPar('sr_image');
+            else
+                if layer>length(obj.layer)
+                    im=[];
+                else
+                    im=obj.layer(layer).images.srimage;
+                end
+            end
+        end
             
         function mask=getRoiMask(obj)
             %returns binary imge of roi: mask=obj.getRoiMask

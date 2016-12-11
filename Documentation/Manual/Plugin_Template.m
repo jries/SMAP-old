@@ -31,7 +31,7 @@ classdef Plugin_Template<interfaces.DialogProcessor
             
             %Get access to the localization data via obj.locData.getlocs (see description there):
             %example:
-            locs=obj.locData.getlocs({'xnm','frame','ynm'},'position','roi','layer',1);
+            locs=obj.locData.getloc({'xnm','frame','ynm'},'position','roi','layer',1);
             %locs.xnm, locs.frame, locs.ynm contain data from all
             %localizations in roi, or if no roi is defined in field of
             %view. But only those, displayed (and filtered) in layer 1.

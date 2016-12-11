@@ -65,10 +65,12 @@ if nargin>3&&isempty(indin)
     imageo.rangey=[];
     return
 end
-
+sizefac=1;
 if isfield(p,'sr_layersseparate')&&~isempty(p.sr_layersseparate)&&p.sr_layersseparate
     if isfield(p,'sr_size')&&~isempty(p.sr_size)&&isfield(p,'sr_layerson')
         p.sr_size(1)=p.sr_size(1)/sum(p.sr_layerson);
+        sizefac=1/sum(p.sr_layerson);
+    else   
     end
 end
     
@@ -233,7 +235,9 @@ rangeyrec=rangeyrec-p.sr_pixrec(end)/2;
 % toc
 if dl
     if isfield(p,'sr_sizeRecPix')
-        newsize=round(p.sr_sizeRecPix([2 1]));
+        spix=p.sr_sizeRecPix([2 1]);
+        spix(2)=spix(2)*sizefac;
+        newsize=round(spix);
         srimage=imresize(srimage,[newsize(1) newsize(2)],'nearest');
 
     end

@@ -5,6 +5,7 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
         roicallbackid
         ovboxhandle
         sraxis
+        timer
     end
     methods
         function obj=GuiFormat(varargin)
@@ -125,21 +126,16 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             lw_callback(0,0,obj)
             obj.updateFormatParameters;
             delete(obj.getPar('sr_figurehandle'))
+            obj.timer=timer('StartDelay',.2)
+            stop(obj.timer);
+            obj.timer.TimerFcn=@obj.rerender;
+     
         end
 
         function loaded_notify(obj,~,~)
             if isempty(obj.locData.loc),return;end
-%             file=obj.locData.files(1).file;
-%             info=file.info;
-%             roi=info.roi;
-%             sr_pos(1)=(roi(1)+roi(3)/2)*info.pixsize*1000;
-%             sr_pos(2)=(roi(2)+roi(4)/2)*info.pixsize*1000;  
-%             sr_size=roi(3:4)*info.pixsize*1000/2;
-%             obj.setPar('sr_pos',sr_pos);
-%             obj.setPar('sr_size',sr_size);
             updateFormatParameters(obj) 
             redrawov_callback(0,0,obj) 
-
         end
         function updateFormatParameters(obj)
             ax=obj.getPar('sr_axes');
@@ -148,7 +144,6 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 obj.setPar('sr_figurenumber',hfg.Number);
                 obj.makesrfigure;
             end
-            pos=obj.getPar('sr_axes').Position;
             pixrec=obj.getPar('sr_pixrec');
             if obj.getPar('sr_imsizecheck')
                 ims=obj.getPar('sr_imagesize');
@@ -156,7 +151,10 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
                     ims=[ims ims];
                 end             
             else
-                ims=pos(3:4)/obj.getPar('sr_pixfactor');       
+                ax=obj.getPar('sr_axes');
+                pos=ax.Position;
+                ims=pos(3:4)/obj.getPar('sr_pixfactor'); 
+                ims=round(ims-0.001);
             end
             obj.setPar('sr_sizeRecPix',ims);
             obj.setPar('sr_size',(ims/2*pixrec));
@@ -178,11 +176,8 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             if posim(3)>200 && posim(4)>200 %too small
                 set(hf,'Units','pixels','Position', posim);
             end
-
-            
             hg.hsr=hf;
-            
-%             set(hg.hsr,'Units','pixels','Position', posim)
+
             hg.sr_axes=axes('Parent',hg.hsr);%,'Units','normalized','Position',[0.10 0.09,.7,.83]);
             set(hg.sr_axes,'NextPlot','replacechildren','PickableParts','all','Units','pixels')
             set(hg.hsr,'WindowButtonDownFcn',{@clickOnSrImageW,obj})
@@ -296,10 +291,14 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.roiposition=pos;
 %             f.WindowButtonDownFcn=oldbdf;
         end
+        function rerender(obj,varargin)
+            notify(obj.P,'sr_render')
+        end
     end
 end
 
 function scroll_wheel(a,eventdata,obj)
+stop(obj.timer)
 persistent timercount 
 % if isempty(totalscroll)
 %     totalscroll=0;
@@ -313,10 +312,13 @@ if isempty(timercount)||toc(timercount)>mint
     else
         eventcase=2;
     end
+    obj.setPar('fastrender',true)
     format_callback(0,0,obj,eventcase)
+    obj.setPar('fastrender',false)
 %     totalscroll=0;
 end
 timercount=tic;
+start(obj.timer);
 end
 
 function format_callback(handle,action,obj,eventcase)
