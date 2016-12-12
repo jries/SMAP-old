@@ -838,7 +838,7 @@ pard.imaxtoggle.Optional=true;
 pard.imax_min.object=struct('Style','edit','String','-3.5');
 pard.imax_min.position=[7,2.2];
 pard.imax_min.Width=.6;
-pard.imax_min.TooltipString='absolut intensity or quantile (0<q<1, typically 0.999) or v for q=1-10^(v), v<0, typically -3.5';
+pard.imax_min.TooltipString=sprintf('absolut intensity or \n quantile of the pixels that are not saturated (0<q<1, typically 0.999) or  \n v for q=1-10^(v), v<0, typically -3.5');
 
 pard.imax_max.object=struct('Style','edit','String','-3.5','Visible','off');
 pard.imax_max.position=[7,2.2];

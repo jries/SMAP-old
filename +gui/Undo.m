@@ -12,6 +12,8 @@ classdef Undo< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 'Position',[0.8,0.002,.07,.03],'Callback',@obj.undo_callback);
              obj.guihandles.undobutton.Units='pixels';
              obj.guihandles.undobutton.Position(4)=28;
+             
+             obj.guihandles.undobutton.TooltipString='Many Plugins backup the localization data before modifying them. The old data can then be restored with Undo';
             addlistener(obj.P,'backup4undo',@obj.backup);
         end
         function backup(obj,event,data) 

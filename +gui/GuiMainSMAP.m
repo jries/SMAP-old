@@ -74,7 +74,14 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             
             
             h.maintab = uitabgroup(handle,'Units','pixels','Position',tabpos);
-            
+            if ispc
+                posmen='tlo';
+                shiftmen=[10 0];
+            else
+                posmen='tli';
+                shiftmen=[10 -10];
+            end
+            makemenuindicator(h.maintab,posmen,shiftmen);
             f=getParentFigure(obj.handle);
             ch=uicontextmenu(f);
             h.maintab.UIContextMenu=ch;
@@ -93,6 +100,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 'Position',[0.9,0.002,.07,.03],'String','Stop','Callback',{@stopnow_callback,obj});
             h.stopnow.Units='pixels';
             h.stopnow.Position(4)=28;
+            h.stopnow.TooltipString='Interrupt execution of certain commands (e.g. fitting). Not implemented for all plugins';
             h.status=uicontrol(handle,'Style','text','Units','normalized',...
                            'String','status','Position',[0 0 .8 0.035]);
             h.status.Units='pixels';

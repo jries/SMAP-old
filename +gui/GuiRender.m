@@ -41,8 +41,17 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             f=getParentFigure(obj.handle);
             c=uicontextmenu(f);
             h.layertab.UIContextMenu=c;
+            
             m1 = uimenu(c,'Label','remove layer','Callback',{@menu_callback,obj});
             m3 = uimenu(c,'Label','add layer','Callback',{@menu_callback,obj});
+            if ispc
+                posmen='tlo';
+                shiftmen=[10 0];
+            else
+                posmen='tli';
+                shiftmen=[10 -10];
+            end
+            makemenuindicator(h.layertab,posmen,shiftmen);
         end
         
         function setGuiParameters(obj,p,setchildren)

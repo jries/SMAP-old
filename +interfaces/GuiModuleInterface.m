@@ -482,6 +482,10 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                                 hg.(remaining{kr})=thisField.(remaining{kr});
                             end
                         end
+                        
+                        if isfield(thisField,'uimenu')
+                            makemenuindicator(hg,thisField.uimenu)
+                        end
 %                         if isfield(thisField,'TooltipString')
 %                             h.TooltipString=thisField.TooltipString;
 %                         end

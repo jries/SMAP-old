@@ -60,9 +60,10 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             uimenu(h.wfcontext,'label','Info on workflow','Callback',{@wfinfo_callback,obj});
             uimenu(h.wfcontext,'label','Change workflow','Callback',{@wfload_callback,obj});
             uimenu(h.wfcontext,'label','Save workflow settings','Callback',{@savepar_callback,obj});
-            h.wfname=uicontrol(obj.handle,'Style','text','String','x','Position',[10, l2, 350 h2],...
+            h.wfname=uicontrol(obj.handle,'Style','text','String','x','Position',[10+10, l2, 350 h2],...
                 'FontSize',obj.guiPar.fontsize,'HorizontalAlignment','left');    
             h.wfname.UIContextMenu=h.wfcontext;
+            makemenuindicator(h.wfname,'lo');
             h.wfname.TooltipString='Name of current workflow. Right-click for context menu: info, change workflow, save current workflow settings';
              h.wfload=uicontrol(obj.handle,'Style','pushbutton','String','Change','Position',[370+dhx, l2, 80 h2],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@wfload_callback,obj});

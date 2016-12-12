@@ -101,7 +101,7 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             h.pref2.TooltipString=h.pref1.TooltipString;
             h.resetview.TooltipString='adjust pixelsize to fit all width or height';
             h.parformat.TooltipString='additional global parameters for rendering';
-            h.redrawov.TooltipString='redraw overview image using the settings of the layer tab: ovim 6';
+            h.redrawov.TooltipString='redraw overview image';
             h.overview_select.TooltipString='toggels between overview image and histogram view';
             h.linewidth_roi.TooltipString='width of the roi when using the line';
             h.roi4.TooltipString='line roi, width set below';
@@ -126,7 +126,7 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             lw_callback(0,0,obj)
             obj.updateFormatParameters;
             delete(obj.getPar('sr_figurehandle'))
-            obj.timer=timer('StartDelay',.2)
+            obj.timer=timer('StartDelay',.2);
             stop(obj.timer);
             obj.timer.TimerFcn=@obj.rerender;
      
@@ -530,15 +530,24 @@ end
 
 
 function paro=formatpardialog(callobj,event,obj)
+persistent settings
+if isempty(settings)
+    settings.customcheck=false;
+    settings.Pixelsize='1x1';
+    settings.imsize='2000 2000';
+    settings.layerssep=false;
+    settings.colorbarthickness=4;
+    settings.customcheck=false;
+end
 [settings, button] = settingsdlg(...
     'Description', 'SR format parameters',... 
     'title'      , 'Par',... 
     'Pixelsize',{'1x1','2x2','3x3','4x4'},...
-    {'thickness of colorbar (pix)','colorbarthickness'},4,...
+    {'thickness of colorbar (pix)','colorbarthickness'},settings.colorbarthickness,...
+    {'Layers next to each other';'layerssep'},[logical(settings.layerssep)],...
     {'Custom image size';'customcheck'},[false true],...
-    {'Imagesize (pixel)','imsize'},'1000, 2000',...
-    'separator',' ',...
-     {'Layers next to each other';'layerssep'},[false ]);
+    {'Imagesize (pixel)','imsize'},num2str(settings.imsize) );
+     
 
 if strcmpi(button,'ok')
     obj.setPar('sr_imsizecheck',settings.customcheck);

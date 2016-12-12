@@ -70,7 +70,12 @@ classdef CameraConverter<interfaces.WorkflowModule
         function updatefileinfo(obj)
            fi=obj.getPar('loc_fileinfo');
            md2=obj.loc_cameraSettings;
-           fn=fieldnames(fi);fn2=properties(md2);
+           if isempty(fi)
+               fn={};
+           else
+           fn=fieldnames(fi);
+           end
+           fn2=properties(md2);
            fna=intersect(fn,fn2);
            fi=copyfields(fi,md2,fna);
            obj.setPar('loc_fileinfo',fi);
@@ -171,7 +176,7 @@ else
     ft='*.*';
 end
 
-[f,p]=uigetfile(ft,'Select metadata.txt, tif or _sml.mat');
+[f,p]=uigetfile(ft,'Select image (e.g. tiff) file or _sml.mat');
 [~,~,ext ]=fileparts(f);
 switch ext
     case '.mat'
@@ -180,14 +185,14 @@ switch ext
 
 
 
-    case '.txt'
-        par.metadatafile=[p f];
-        obj.setGuiParameters(par);
-        obj.updateGui;       
-        metadata=getmetadataMMtxt([p f]); 
+%     case '.txt'
+%         par.metadatafile=[p f];
+%         obj.setGuiParameters(par);
+%         obj.updateGui;       
+%         metadata=getmetadataMMtxt([p f]); 
     otherwise
         imloader=imageloaderAll([p f],finf);
-        metadata=imloader.metadata;
+        metadata=imloader.getmetadata;
         metadata.allmetadata=metadata;
 end
         obj.setcamerasettings(metadata);
@@ -226,7 +231,7 @@ pard.text.Optional=true;
 % pard.metadatafile.Optional=true;
 pard.loadmetadata.object=struct('Style','pushbutton','String','Load metadata');
 pard.loadmetadata.position=[1,2.5];
-pard.loadmetadata.TooltipString=sprintf('Load micromanager Metadata.txt file.');
+pard.loadmetadata.TooltipString=sprintf('Load camera settings metadata from image or _sml.mat file.');
 pard.loadmetadata.Optional=true;
 % pard.calibrate.object=struct('Style','pushbutton','String','auto calibration');
 % pard.calibrate.position=[2,2];

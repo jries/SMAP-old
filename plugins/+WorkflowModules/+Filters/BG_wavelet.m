@@ -95,10 +95,10 @@ pard.loc_wavelet_level.TooltipString=sprintf('Wavelet level for background corre
 pard.loc_wavelet_level.Optional=true;
 
 
-pard.loc_wavelet_refine.object=struct('Style','checkbox','String','Refined background estimation (slower)','Value',0);
+pard.loc_wavelet_refine.object=struct('Style','checkbox','String','Refined background estimation','Value',0);
 pard.loc_wavelet_refine.position=[4,1.3];
 pard.loc_wavelet_refine.Width=2;
-pard.loc_wavelet_refine.TooltipString=sprintf('Iterative refinement of background estimation. \n Slower, only use for high background and when detection of weak fluorophores is necessary.');
+pard.loc_wavelet_refine.TooltipString=sprintf('Iterative refinement of background estimation. \n Slower, use mainly for: \n a) very bright fluorophores (e.g. beads) that otherwise lead to ghost localizatiosn, \n b) for high background and detection of weak fluorophores.');
 pard.loc_wavelet_refine.Optional=true;
 
 
