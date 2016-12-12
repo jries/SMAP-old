@@ -15,7 +15,8 @@ file=varargin{1};
                end
            elseif ~isempty(dir([path filesep '*metadata.txt']))
                 imloader=@imageloaderMM;
-%                 imloader=@imageloaderMMstack;
+           elseif any(strfind(file,'MMStack'))
+                imloader=@imageloaderMM;
            elseif countfiles(file)>1000
                imloader=@imageloaderMMsingle;
            else

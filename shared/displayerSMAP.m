@@ -60,7 +60,7 @@ for k=1:length(layers)
     end
 end
 %make color bars
-if ~exist('imall','var')&&~tiffhere
+if ~exist('imall','var')&&~tiffthere
     imout=[];
     sr_imagehandle=[];
     return

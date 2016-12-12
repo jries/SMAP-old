@@ -24,6 +24,18 @@ classdef imageloaderMM<interfaces.imageloaderSMAP
             image=readstack(obj,frame);
         end
         
+        function image=getimageonline(obj,number)
+            image=obj.getimage(number);
+            if isempty(image)&&obj.onlineAnalysis 
+                    disp('wait')
+                    obj.reader.close;
+%                     delete(obj.reader)
+                    pause(obj.waittime*2)
+                    obj.reader = javaObjectEDT('org.micromanager.acquisition.TaggedImageStorageMultipageTiff',fileparts(obj.file), false, [], false, false, true);
+                    image=obj.getimage(number);
+            end
+        end
+        
         function allmd=getmetadatatags(obj)
             img=obj.reader;
             imgmetadata=img.getImageTags(0,0,0,0);
@@ -113,7 +125,7 @@ end
 
 
 function image=readstack(obj,imagenumber)
-img=obj.reader.getImage(0,0,imagenumber,0);
+img=obj.reader.getImage(0,0,imagenumber-1,0);
 if isempty(img)
     image=[];
     return

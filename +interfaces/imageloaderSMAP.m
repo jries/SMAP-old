@@ -36,8 +36,19 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
     methods
         function image=readNext(obj)
             obj.currentImageNumber=obj.currentImageNumber+1;
-            image=obj.getimage(obj.currentImageNumber);
+            image=obj.getimageonline(obj.currentImageNumber);
         end
+        
+        function image=getimageonline(obj,number)
+            image=obj.getimage(number);
+            if isempty(image)&&obj.onlineAnalysis 
+                    disp('wait')
+                    pause(obj.waittime*2)
+                    image=obj.getimage(number);
+            end
+       
+        end
+        
         function setImageNumber(obj,number)
             obj.currentImageNumber=number;
         end
