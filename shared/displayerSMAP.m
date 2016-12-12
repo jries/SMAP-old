@@ -14,32 +14,42 @@ show=0;
 tiffthere=0;
 txtN='';
 allnext=[];
+
 for k=1:length(layers)
 
     if p.sr_layerson(k)
         if isfield(layers(k),'images') && ~isempty(layers(k).images)
-            if show==0
-                si=size(layers(k).images.finalImages.image);
-                 imall=zeros(si(1)+rim,si(2)+rim,3);
-                 mask=zeros(si(1)+rim,si(2)+rim,3);
-                 imtiff=zeros(si(1)+rim,si(2)+rim,3);
-%                  imref=layers(k).images.finalImages;
-
-                show=1;
-            end
+%             if show==0
+%                 si=size(layers(k).images.finalImages.image);
+%                  imall=zeros(si(1)+rim,si(2)+rim,3);
+%                  mask=zeros(si(1)+rim,si(2)+rim,3);
+%                  imtiff=zeros(si(1)+rim,si(2)+rim,3);
+% %                  imref=layers(k).images.finalImages;
+% 
+%                 show=1;
+%             end
          fi=layers(k).images.finalImages;
          if isempty(fi.image)
              continue
          end
          if fi.istiff==1
+             if exist('imtiff','var')
                 imtiff=imtiff+fi.image;
+             else
+                 imtiff=i.image;
+             end
                 tiffthere=1;
          else
-             if ~all(size(imall)==size(fi.image))&&~layersnext
-                 fi.image=imresize(fi.image,size(imall));
+             if exist('imall','var')
+                 if ~all(size(imall)==size(fi.image))&&~layersnext
+                     fi.image=imresize(fi.image,size(imall));
+                 end
+                 imall=imall+fi.image;
+                 mask=mask+fi.mask;
+             else
+                 imall=fi.image;
+                 mask=fi.mask;
              end
-             imall=imall+fi.image;
-             mask=mask+fi.mask;
               txtN=[txtN 'N'  num2str(k) '=' shortnumber(fi.numberOfLocs) ', '];
          end
          if layersnext
@@ -50,7 +60,7 @@ for k=1:length(layers)
     end
 end
 %make color bars
-if ~show
+if ~exist('imall','var')&&~tiffhere
     imout=[];
     sr_imagehandle=[];
     return

@@ -7,6 +7,8 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         commandfig
         recpar={};
         stereopar
+        locDataL
+        posL=[0,0;0,0];
     end
     methods
         function obj=Viewer3DV01(varargin)        
@@ -54,8 +56,8 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         end
         function out=run(obj,p)
             out=[];
-            obj.addSynchronization('sr_roiposition',[],[],{@obj.redraw});
-            
+            obj.makelocDatacopy;
+            obj.addSynchronization('sr_roiposition',[],[],{@obj.redraw}); 
             if isempty(obj.axis)||isstruct(obj.axis)||~isvalid(obj.axis)
                 figure;
                 obj.axis=gca;
@@ -76,6 +78,33 @@ classdef Viewer3DV01<interfaces.DialogProcessor
 %              set(obj.axis,'PickableParts','all');
              obj.timer=uint64(0);
              obj.redraw
+        end
+        
+        function makelocDatacopy(obj)
+
+            hroi=obj.getPar('sr_roihandle');
+            
+            posrx=hroi.getPosition;
+            len=sum((posrx(2,:)-posrx(1,:)).^2);
+            meanpos=mean(posrx,1);
+           
+            dpos=obj.posL-posrx;
+            dpos(1,:)=-dpos(1,:);
+            if isempty(obj.locDataL)||any(dpos(:)<0)
+                lps=obj.getLayerParameters;
+                for k=length(lps):-1:1
+                    rfields{k}=lps{k}.renderfield.selection;
+                end
+                rfields=horzcat(unique(rfields),{'xnm','ynm','znm','locprecnm','locprecznm','phot'});
+                lenL=len*1;
+                obj.posL=[meanpos(1)-lenL, meanpos(2)-lenL;meanpos(1)+lenL, meanpos(2)+lenL];
+                posLnm=obj.posL*1000;
+                inx=obj.locData.loc.xnm<posLnm(2,1)&obj.locData.loc.xnm>posLnm(1,1);
+                iny=obj.locData.loc.ynm<posLnm(2,2)&obj.locData.loc.ynm>posLnm(1,2);
+%                 sum(inx&iny)
+                
+                 obj.locDataL=obj.locData.copy(rfields,inx&iny);
+            end
         end
 
         function pard=guidef(obj)
@@ -297,9 +326,10 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             if ~isa(roih,'imline')
                 return
             end
+            obj.makelocDatacopy;
             p=obj.getAllParameters;
             stereo=p.stereo.Value>2;
-            locCopy=obj.locData; %maybe not needed
+            locCopy=obj.locDataL; %maybe not needed
             lo=logical(obj.getPar('sr_layerson'));
             layerson=find(lo);
             indg=0;indu=0;
