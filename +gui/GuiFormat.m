@@ -546,7 +546,7 @@ end
     {'thickness of colorbar (pix)','colorbarthickness'},settings.colorbarthickness,...
     {'Layers next to each other';'layerssep'},[logical(settings.layerssep)],...
     {'Custom image size';'customcheck'},[false true],...
-    {'Imagesize (pixel)','imsize'},num2str(settings.imsize) );
+    {'Imagesize (pixel) or magnification (if <20)','imsize'},num2str(settings.imsize) );
      
 
 if strcmpi(button,'ok')
@@ -555,7 +555,22 @@ if strcmpi(button,'ok')
     if ischar(settings.imsize)
         settings.imsize=str2num(settings.imsize);
     end
-    obj.setPar('sr_imagesize',(settings.imsize));
+    if settings.customcheck
+        ims=settings.imsize;
+        if ims(1)<20 %magnification
+            if length(ims)==1
+                ims(2)=ims(1);
+            end
+            imold=obj.getPar('sr_sizeRecPix');
+            imnew=imold.*ims;
+        else
+            imnew=settings.imsize;
+        end
+        obj.setPar('sr_imagesize',imnew);
+        settings.imsize=imnew;
+        pixelsize=obj.getPar('sr_pixrec');
+        obj.setPar('sr_pixrec',pixelsize/ims(1));
+    end
     obj.setPar('sr_layersseparate',settings.layerssep);
     obj.setPar('sr_colorbarthickness',settings.colorbarthickness);
 %     if settings.newfig

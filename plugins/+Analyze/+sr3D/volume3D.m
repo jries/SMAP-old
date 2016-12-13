@@ -71,10 +71,10 @@ for k=1:length(pall)
     pall{k}=copyfields(pall{k},phere);
 end
  phere.imaxtoggle=1;
-  phere.imax=1;
+  phere.imax_min=1;
 imall=TotalRender(lochere,pall,{'xnm','ynm'});
  phere.imaxtoggle=0;
- phere.imax=imall.imax;
+ phere.imax_min=imall.imax;
  
  for k=1:length(pall)
     pall{k}=copyfields(pall{k},p);
