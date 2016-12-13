@@ -379,7 +379,12 @@ pard.filelist_long.object=struct('Style','Listbox','String',{'x://'});
 pard.filelist_long.position=[3,1];
 pard.filelist_long.Width=4;
 pard.filelist_long.Height=3;
-pard.filelist_long.uimenu='itr';
+if ispc
+    psmen={'itr',[-20 -1]};
+else
+    psmen={'itr',[0 0]};
+end
+pard.filelist_long.uimenu=psmen;
 
 % pard.uimenut.object=struct('Style','pushbutton','String','=');
 % pard.uimenut.position=[1,1];

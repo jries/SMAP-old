@@ -75,8 +75,8 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             
             h.maintab = uitabgroup(handle,'Units','pixels','Position',tabpos);
             if ispc
-                posmen='tlo';
-                shiftmen=[10 0];
+                posmen='tri';
+                shiftmen=[-10 -5];
             else
                 posmen='tli';
                 shiftmen=[10 -10];

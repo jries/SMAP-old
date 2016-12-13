@@ -78,7 +78,7 @@ classdef GuiPluginGroup< interfaces.GuiModuleInterface & interfaces.LocDataInter
 %              m8 = uimenu(c,'Label', 'load plugin structure','Callback',{@menu_callback,obj});
 %              m9 = uimenu(c,'Label','save plugin structure','Callback',{@menu_callback,obj});
               m7 = uimenu(c,'Label','detach','Callback',{@menu_callback,obj});
-            makemenuindicator(obj.guihandles.processorselect,'tri');
+            makemenuindicator(obj.guihandles.processorselect,'tri',[-15 -1]);
               
              
             

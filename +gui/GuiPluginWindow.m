@@ -66,8 +66,8 @@ classdef GuiPluginWindow< interfaces.GuiModuleInterface & interfaces.LocDataInte
             m5 = uimenu(c,'Label','move right','Callback',{@menu_callback,obj});
              m6 = uimenu(c,'Label','detach','Callback',{@menu_callback,obj});
             if ispc
-                posmen='tlo';
-                shiftmen=[10 0];
+                posmen='tri';
+                shiftmen=[-10 -5];
             else
                 posmen='tli';
                 shiftmen=[10 -10];
