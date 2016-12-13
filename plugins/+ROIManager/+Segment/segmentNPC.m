@@ -112,12 +112,12 @@ for cn=1:length(cells)
 %     srims=size(srim);
 
 
-
+    srimbw=sum(srim,3);
    
 
     % imfO=imfilter(imsrrem,hfilterO);
     % imfI=imfilter(imsrrem,hfilterI);
-    imfD=imfilter(sqrt(srim),h);
+    imfD=imfilter(sqrt(srimbw),h);
 
     hfilterGauss=fspecial('gauss',21,max(1,0.7*rRingO));
     hfilterGauss2=fspecial('gauss',51,max(2,2*rRingO));

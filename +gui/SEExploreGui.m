@@ -118,6 +118,7 @@ classdef SEExploreGui<interfaces.SEProcessor
         end
         sites=obj.SE.sites;
         for k=1:length(sites)
+            
             obj.guihandles.sitelist.Value=k;   
             obj.status(['redrawall: site ' num2str(k) ' of ' num2str(length(sites))])
             drawnow
@@ -127,6 +128,9 @@ classdef SEExploreGui<interfaces.SEProcessor
             sites(k).image.composite=[];
             sites(k).image.layers=[];
             sites(k).image.image=single(sites(k).image.image);
+            if SMAP_stopnow
+                break
+            end
         end
         obj.SE.currentsite=sites(k);
         obj.status(['redrawall: completed'])
@@ -253,9 +257,9 @@ if obj.SE.currentcell.ID==0
     end
 end
 obj.SE.currentsite.ID=obj.SE.addSite(obj.SE.currentsite);
-obj.guihandles.sitelist.Value=length(obj.guihandles.sitelist.String);
+% obj.guihandles.sitelist.Value=length(obj.guihandles.sitelist.String);
 redraw_sitelist(obj);
-obj.guihandles.sitelist.Value=length(obj.guihandles.sitelist.String);
+% obj.guihandles.sitelist.Value=length(obj.guihandles.sitelist.String);
 plotcell(obj,obj.SE.currentcell);
 end
 
@@ -496,9 +500,11 @@ for k=1:length(ind)
     obj.SE.removeSite(siteID(k));
 end
 redraw_sitelist(obj);
-if obj.guihandles.sitelist.Value>length(obj.guihandles.sitelist.String)
-obj.guihandles.sitelist.Value=length(obj.guihandles.sitelist.String);
-end
+sv=obj.guihandles.sitelist.Value-1;
+sv=min(max(1,sv),length(obj.guihandles.sitelist.String));
+% if obj.guihandles.sitelist.Value>length(obj.guihandles.sitelist.String)
+obj.guihandles.sitelist.Value=sv;
+% end
 end
 
 function removecell_callback(a,b,obj);
