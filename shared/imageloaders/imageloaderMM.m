@@ -17,7 +17,7 @@ classdef imageloaderMM<interfaces.imageloaderSMAP
 %             obj.reader=bfGetReader(file);
             md=obj.getmetadata;
             [p,f]=fileparts(file);
-            obj.metadata.basefile=[p filesep f];
+            obj.metadata.basefile=[p ];
             
         end
         function image=getimage(obj,frame)
