@@ -179,6 +179,7 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 if pk.layercheck
                     indin=[];
                     if isfast
+                        pk.groupcheck=false;
 %                         pk.sr_pixrec=pk.sr_pixrec*2;
                         if strcmp(pk.rendermode.selection,'Gauss')
                             pk.rendermode.selection='constGauss';
@@ -198,9 +199,15 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                                 indin=false(size(locD.xnm));
                                 indin(1:1e5)=true;
                             end
+                            ld=interfaces.LocalizationData;
+                            ld.files=obj.locData.files;
+                            ld.attachPar(obj.P);
+                            ld.loc=locD;
+%                             ld.grouploc=locD;
+                            locDat=ld;
                     else
                         obj.locData.filter('channel',k,'inlist',pk.channels) 
-                        locD=obj.locData;
+                        locDat=obj.locData;
                     end
 
                     if strcmp(pk.rendermode.selection,'Other')
@@ -211,7 +218,7 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                         end
                         lp.layer(k).images.srimage=modules{k}.render(obj.locData,pk);
                     else
-                        lp.layer(k).images.srimage=renderSMAP(locD,pk,k,indin);        
+                        lp.layer(k).images.srimage=renderSMAP(locDat,pk,k);        
 %                     lp.layer(k).images.srimage=renderer.render(k);  
                     end
                 end

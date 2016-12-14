@@ -36,7 +36,7 @@ for k=1:length(layers)
              if exist('imtiff','var')
                 imtiff=imtiff+fi.image;
              else
-                 imtiff=i.image;
+                 imtiff=fi.image;
              end
                 tiffthere=1;
          else

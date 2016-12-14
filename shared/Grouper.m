@@ -55,6 +55,7 @@ classdef Grouper< interfaces.LocDataInterface
             indold=numbers(indsort);
             [~,indback]=sort(indold);
             listback=list(indback);
+            listback(end)=listback(end-1); %FIX connectsingle doesnt assign last loc. Fix later!
             obj.locData.setloc('groupindex',listback)
             
              %number of locs

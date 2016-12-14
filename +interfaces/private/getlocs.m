@@ -90,6 +90,11 @@ end
               grouping=false;
               locs=locData.loc;
           else
+              if isempty(locData.grouploc)
+                     p.grouping='ungrouped';
+                     grouping=false;
+                     locs=locData.loc;
+              else
                group=true;       
                  for k=1:length(p.layer)
                      grouplayer(k)=locData.getPar(['layer' num2str(p.layer(k)) '_groupcheck']);
@@ -104,6 +109,7 @@ end
                      grouping=false;
                      locs=locData.loc;
                  end
+              end
           end
          
  end
