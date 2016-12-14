@@ -284,7 +284,7 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
                 end
             end
             
-            if ishandle(hax)
+            if nargin>2&&ishandle(hax)
              displayimage(site.image,hax);
              plotbox(hax,site.pos,obj.getPar('se_siteroi'));
              plotcirc(hax,site.pos,obj.getPar('se_siteroi'));

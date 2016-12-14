@@ -84,6 +84,9 @@ classdef SEExploreGui<interfaces.SEProcessor
         
         function redrawall(obj,onlysites)
             global SMAP_stopnow
+            if SMAP_stopnow
+                disp('STOP button is activated. Function not executed')
+            end
             if nargin<2
                 onlysites=false;
             end

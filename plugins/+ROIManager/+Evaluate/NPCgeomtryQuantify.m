@@ -53,6 +53,7 @@ locs=obj.getLocs({'xnm','ynm','znm','locprecznm','locprecnm'},'layer',1,'size',p
 dz=5;
 z=-400:dz:400;
 hz=hist(locs.znm,z);
+% hz=hz-mean(hz);
 ac=myxcorr(hz,hz);
 if obj.display
 ax1=obj.setoutput('profile');

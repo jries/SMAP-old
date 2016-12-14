@@ -185,7 +185,7 @@ ysite=ysite(indgood);
         thissite.info.filenumber=cell.info.filenumber;
         % thissite.cellnumber=sitepar.currentcell.number;
 %         thissite.number=sitepar.sitelist.cellnumber+1;
-        se.addSite(thissite)
+        se.addSite(thissite);
 
     end
     else

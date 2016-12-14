@@ -96,7 +96,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     rfields{k}=lps{k}.renderfield.selection;
                 end
                 rfields=horzcat(unique(rfields),{'xnm','ynm','znm','locprecnm','locprecznm','phot'});
-                lenL=len*1;
+                lenL=len*2;
                 obj.posL=[meanpos(1)-lenL, meanpos(2)-lenL;meanpos(1)+lenL, meanpos(2)+lenL];
                 posLnm=obj.posL*1000;
                 inx=obj.locData.loc.xnm<posLnm(2,1)&obj.locData.loc.xnm>posLnm(1,1);
