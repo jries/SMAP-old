@@ -54,7 +54,7 @@ lineheight=25;
 posbutton=width*.8;
 buttonwidth=width*.15;
 if isempty(obj.handle)||~isvalid(obj.handle)
-     obj.handle=figure('Units','normalized','Units','pixels','Position',[150,200,width,height],'Name','CameraSelector','NumberTitle','off');
+     obj.handle=figure('Units','normalized','Units','pixels','Position',[150,200,width,height],'Name','CameraManager','NumberTitle','off');
      obj.handle.ToolBar='none';
      obj.handle.MenuBar='none';
      delete(obj.handle.Children);
@@ -238,7 +238,7 @@ end
 
 function t=intpartable
 t=cell(12,7);
-parnames={'EMon','pixsize','conversion','emgain','offset','roi','exposure','timediff','comment','numberOfFrames','Width','Height'};
+parnames={'EMon','cam_pixelsize_um','conversion','emgain','offset','roi','exposure','timediff','comment','numberOfFrames','Width','Height'};
 mode={'metadata','fix','state dependent','metadata','state dependent','metadata','metadata','metadata','metadata','metadata','metadata','metadata'};
 default={'true','0.1','1','100','100','','1','1','settings not initialized','0','0','0'};
 conversion={'str2double(X)','str2double(X)','str2double(X)','str2double(X)','str2double(X)','str2num(X)','str2double(X)','str2double(X)','','str2double(X)','str2double(X)','str2double(X)'};
