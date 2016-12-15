@@ -1,15 +1,20 @@
 global se
 ac=0*se.sites(1).evaluation.NPCgeomtryQuantify.ac;
 z=se.sites(2).evaluation.NPCgeomtryQuantify.z;
+d=se.sites(1).evaluation.NPCgeomtryQuantify.Gaussfit.d;
 zposall=-300:10:300;
+zposall=0;
 for j=1:length(zposall)
     zpos=zposall(j);
-dzpos=30;
+dzpos=50;
 count=0;
 for k=1:length(se.sites)
+    
     if (se.sites(k).pos(3))<zpos+dzpos && (se.sites(k).pos(3))>zpos-dzpos
     ac=ac+se.sites(k).evaluation.NPCgeomtryQuantify.ac;
+    
     count=count+1;
+    d(count)=abs(se.sites(k).evaluation.NPCgeomtryQuantify.Gaussfit.d);
     end
 end
 ac=ac/count;
@@ -29,7 +34,11 @@ ach=ac(2:l);
 [fitresult, gof] = createFit(zh, ach);
 title(fitresult.b2)
 posm(j)=fitresult.b2;
+
 end
+figure(89)
+hist(d,0:5:200)
+title([median(d),mean(d)])
 figure(88)
 plot(zposall,posm)
 

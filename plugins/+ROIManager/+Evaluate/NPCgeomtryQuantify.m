@@ -51,19 +51,51 @@ end
 function out=runintern(obj,p)
 locs=obj.getLocs({'xnm','ynm','znm','locprecznm','locprecnm'},'layer',1,'size',p.se_siteroi);
 dz=5;
-z=-400:dz:400;
-hz=hist(locs.znm,z);
+z=-200:dz:200;
+hz=hist(locs.znm-obj.site.pos(3),z);
 % hz=hz-mean(hz);
 ac=myxcorr(hz,hz);
-if obj.display
+% if obj.display
 ax1=obj.setoutput('profile');
-plot(ax1,z,hz)
+
+fitresult=createFit(z, hz,ax1)
+title(ax1,fitresult.d)
+% plot(ax1,z,hz)
 ax2=obj.setoutput('correlation');
 plot(ax2,z,ac)
-end
+
+
+% end
 out.ac=ac;
 out.dz=dz;
 out.hist=hz;
 out.z=z;
+out.Gaussfit=fitresult;
 end
 
+
+function [fitresult, gof] = createFit(z, hz,ax)
+
+[xData, yData] = prepareCurveData( z, hz );
+
+% Set up fittype and options.
+ft = fittype( 'a1*exp(-((x-b)/c)^2) + a2*exp(-((x-b-d)/c)^2)', 'independent', 'x', 'dependent', 'y' );
+opts = fitoptions( 'Method', 'NonlinearLeastSquares' );
+opts.Display = 'Off';
+opts.Lower = [0 0 -Inf 0 -Inf];
+opts.StartPoint = [max(hz) max(hz) -50 20 100 ];
+
+% Fit model to data.
+[fitresult, gof] = fit( xData, yData, ft, opts );
+
+axes(ax)
+h = plot(fitresult, xData, yData);
+
+
+legend( h, 'hz vs. z', 'untitled fit 1', 'Location', 'NorthEast' );
+% Label axes
+xlabel z
+ylabel hz
+grid on
+
+end
