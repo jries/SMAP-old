@@ -22,6 +22,7 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
                locst=rmfield(locst,{'znm','znm_gt'});
            end
            obj.locData.addfile(['simulated_' num2str(obj.locData.files.filenumberEnd)]);
+           obj.locData.files.file(end).info.simulationParameters=p;
            obj.locData.addLocData(locst);
            obj.locData.sort('filenumber','frame');
            try
@@ -41,6 +42,7 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
         %         thissite.number=sitepar.sitelist.cellnumber+1;
                 se.addSite(thissite);
            end
+%            obj.setPar('SimulateSitesParameters',p);
            catch 
            end
             try
