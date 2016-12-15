@@ -21,7 +21,15 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
            if ~p.savez
                locst=rmfield(locst,{'znm','znm_gt'});
            end
-           obj.locData.addfile(['simulated_' num2str(obj.locData.files.filenumberEnd)]);
+           
+
+               labels=num2str(p.labeling_efficiency*100,'%2.0f');
+                phots=num2str(p.photons,'%3.0f');
+                blinks=num2str(p.blinks,'%3.0f');
+                filename=['L' labels 'P' phots 'B' blinks];
+           
+           
+           obj.locData.addfile(['simulated_' num2str(obj.locData.files.filenumberEnd) '_' filename]);
            obj.locData.files.file(end).info.simulationParameters=p;
            obj.locData.addLocData(locst);
            obj.locData.sort('filenumber','frame');

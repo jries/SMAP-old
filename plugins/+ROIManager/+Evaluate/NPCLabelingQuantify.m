@@ -15,7 +15,12 @@ classdef NPCLabelingQuantify<interfaces.SEEvaluationProcessor
             out=runintern(obj,p);
             catch err
                 err
-                out=[];
+                    out.numcornersfiltered=0;
+                out.numcorners=0;
+                out.numfoundint=0;
+                out.numfoundrat=0;
+                out.numbercornerassined=0;
+                out.rotation=0;
             end
          
         end

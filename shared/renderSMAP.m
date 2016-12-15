@@ -52,6 +52,8 @@ else
 end
 
 
+
+
 if nargin<4||isempty(indin)
     fn=fieldnames(locsh);
     indin=true(length(locsh.(fn{1})),1);
@@ -230,6 +232,16 @@ end
 rangexrec=rangexrec-p.sr_pixrec(1)/2;
 rangeyrec=rangeyrec-p.sr_pixrec(end)/2;
 
+if (isfield(locs,'xnm') && isempty(locsh.xnm)) || (isfield(locsh,'x') && isempty(locsh.x)) %no data present
+    sx=round((rangexrec(2)-rangexrec(1))/p.sr_pixrec(1));
+    sy=round((rangeyrec(2)-rangeyrec(1))/p.sr_pixrec(2));
+    imageo.image=zeros(sx,sy,'single');
+    imageo.lut=lutall;
+    imageo.rangex=rangex;
+    imageo.rangey=rangey;
+    imageo.numberOfLocs=0;
+    return
+end
 % tic
 [srimage,nlocs]=frender(pos,rangexrec, rangeyrec, p.sr_pixrec(1), p.sr_pixrec(end),lut,[p.colorfield_min p.colorfield_max],tpar);
 % toc
