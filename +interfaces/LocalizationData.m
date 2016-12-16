@@ -349,7 +349,8 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                     [path,file]=fileparts(filename);
                     filename=[path filesep file '_sml.mat'];
                 end
-                save(filename,'saveloc','-v7')
+                out=struct('saveloc',saveloc);
+                saverightversion(filename,out);
 %                 save(filename,'saveloc','-v7.3')
             end
         end

@@ -24,6 +24,7 @@ saveloc=locData.savelocs([],indg); % BETA , maybe problematic with more than 1 f
 rg=p.mainGui; 
 parameters=rg.saveParameters;
 fileformat.name='sml';
-save(file,'saveloc','fileformat','parameters','-v7');
+out=struct('saveloc',saveloc,'fileformat',fileformat,'parameters',parameters);
+saverightversion(file,out);
 % save(file,'saveloc','fileformat','parameters','-v7.3');
 end
