@@ -30,7 +30,7 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
            
            
            obj.locData.addfile(['simulated_' num2str(obj.locData.files.filenumberEnd) '_' filename]);
-           obj.locData.files.file(end).info.simulationParameters=p;
+           obj.locData.files.file(end).info.simulationParameters=obj.getGuiParameters;
            obj.locData.addLocData(locst);
            obj.locData.sort('filenumber','frame');
            try

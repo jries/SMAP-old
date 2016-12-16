@@ -15,7 +15,8 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 set(0,'DefaultUIControlFontSize',12);
             end
             SMAP_stopnow=false;
-            addpath('shared')
+            addpath('shared');
+            addpath(pwd);
             if ~exist(['settings' filesep 'temp'],'dir')
                 mkdir(['settings' filesep 'temp'])
             end

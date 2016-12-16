@@ -232,7 +232,10 @@ end
 rangexrec=rangexrec-p.sr_pixrec(1)/2;
 rangeyrec=rangeyrec-p.sr_pixrec(end)/2;
 
-if (isfield(locs,'xnm') && isempty(locsh.xnm)) || (isfield(locsh,'x') && isempty(locsh.x)) %no data present
+isxnm=isfield(locsh,'xnm') && ~isempty(locsh.xnm);
+isx=isfield(locsh,'x') && ~isempty(locsh.x);
+if ~(isxnm||isx) 
+
     sx=round((rangexrec(2)-rangexrec(1))/p.sr_pixrec(1));
     sy=round((rangeyrec(2)-rangeyrec(1))/p.sr_pixrec(2));
     imageo.image=zeros(sx,sy,'single');
@@ -241,6 +244,7 @@ if (isfield(locs,'xnm') && isempty(locsh.xnm)) || (isfield(locsh,'x') && isempty
     imageo.rangey=rangey;
     imageo.numberOfLocs=0;
     return
+    
 end
 % tic
 [srimage,nlocs]=frender(pos,rangexrec, rangeyrec, p.sr_pixrec(1), p.sr_pixrec(end),lut,[p.colorfield_min p.colorfield_max],tpar);

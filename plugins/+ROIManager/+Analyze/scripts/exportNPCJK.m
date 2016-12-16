@@ -36,9 +36,10 @@ for ff=1:length(se.files)
             r.background(indtab)=se.files(ff).info.simulationParameters.background;
             
             r.filenumber(indtab)=ff;
+            r.ind(indtab)=indtab;
             indtab=indtab+1;
             indim=indim+1;
-            r.ind(indtab)=indtab;
+            
         end
 
     end
@@ -50,7 +51,10 @@ for ff=1:length(se.files)
      
     saveastiff(imall,[p filesep filename]);
 end
-
+fn=fieldnames(r);
+for k=1:length(fn)
+    r.(fn{k})=r.(fn{k})';
+end
 tout=struct2table(r);
 
 % tout=table((1:ls)',r.nlocs,nlocs,corners,filenumber);
