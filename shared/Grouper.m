@@ -55,7 +55,9 @@ classdef Grouper< interfaces.LocDataInterface
             indold=numbers(indsort);
             [~,indback]=sort(indold);
             listback=list(indback);
-            listback(end)=listback(end-1); %FIX connectsingle doesnt assign last loc. Fix later!
+            if listback(end)==0
+            listback(end)=listback(end-1)+1; %FIX connectsingle doesnt assign last loc. Fix later!
+            end            
             obj.locData.setloc('groupindex',listback)
             
              %number of locs
@@ -170,7 +172,7 @@ classdef Grouper< interfaces.LocDataInterface
 
             if mode==2
                 dl=[diff(listsort);1];
-                vwout2=vwsort(dl==1);
+                vwout2=vwsort(dl>0);
 %                 listsort(end)
 %                 sum(dl==1)
             else 

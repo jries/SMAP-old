@@ -2,6 +2,7 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
     properties
         numberOfLayers=1;
         multilayerfig;
+        temproi
     end
 
     methods
@@ -97,7 +98,9 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             
             guiformat=obj.getPar('guiFormat');
             proi=guiformat.roiset;
-            
+            if (proi.isvalid)
+                obj.temproi=proi;
+            end
             
             hfig=obj.getPar('sr_figurehandle');
             if ~isvalid(hfig)
@@ -118,9 +121,16 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
 %             [finalImage,sr_imagehandle]=displayer.displayImage(obj.locData.layer);
             obj.setPar('sr_imagehandle',sr_imagehandle);
             obj.setPar('sr_image',finalImage);
-             guiformat.roiset(proi);
+            rf=obj.getPar('fastrender');
+            if isempty(rf)
+                rf=false;
+            end
+            
+            if ~rf && ~isempty(obj.temproi)
+             guiformat.roiset(obj.temproi);
+            end
              
-            sep=obj.getPar('sr_layersseparate');
+%             sep=obj.getPar('sr_layersseparate');
 %             if ~isempty(sep)&&sep
 %                 if isempty(obj.multilayerfig)||~isvalid(obj.multilayerfig)
 %                     obj.multilayerfig=figure;
