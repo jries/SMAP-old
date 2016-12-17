@@ -430,8 +430,8 @@ end
         obj.setPar('sr_pos',posh);
         obj.updateFormatParameters;
         end
-        hfig=obj.getPar('sr_figurehandle');
-        figure(hfig);
+%         hfig=obj.getPar('sr_figurehandle');
+%         figure(hfig);
         notify(obj.P,'sr_render')
     end
 end

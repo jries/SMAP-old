@@ -94,7 +94,15 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
         end
         
         function display_notify(obj,lp,eventdata)
-            obj.status('display')
+            
+            rf=obj.getPar('fastrender');
+            if isempty(rf)
+                rf=false;
+            end
+            
+%             if ~rf
+%             obj.status('display')
+%             end
             
             guiformat=obj.getPar('guiFormat');
             proi=guiformat.roiset;
@@ -119,11 +127,9 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             
 
 %             [finalImage,sr_imagehandle]=displayer.displayImage(obj.locData.layer);
+            if ~rf
             obj.setPar('sr_imagehandle',sr_imagehandle);
             obj.setPar('sr_image',finalImage);
-            rf=obj.getPar('fastrender');
-            if isempty(rf)
-                rf=false;
             end
             
             if ~rf && ~isempty(obj.temproi)
@@ -147,11 +153,13 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
 %                     
 %                 end
 %             end
-            obj.status('display done');
+%             if ~rf
+%                 obj.status('display done');
+%             end
         end
         
         function draw(obj)
-            obj.status('draw')
+%             obj.status('draw')
             lp=obj.locData;
 %             drawer=Drawer(obj.locData);
             for k=1:obj.numberOfLayers
@@ -163,7 +171,7 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 end
             end
             notify(obj.P,'sr_display')
-            obj.status('draw done')
+%             obj.status('draw done')
         end
         function render_callback(obj,object,eventdata)
             hfig=obj.getPar('sr_figurehandle');
@@ -171,7 +179,7 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.render_notify;
         end
         function render_notify(obj,object,eventdata)
-            obj.status('render')  
+            
 %             drawnow
             lp=obj.locData;
             extraspace=150;
@@ -181,7 +189,12 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
 %             ymin=pos(2)-sizesr(2)-extraspace;ymax=pos(2)+sizesr(2)+extraspace;
 %             renderer=Renderer(obj.locData);
             isfast=obj.getPar('fastrender');
-          
+            if isempty(isfast)
+                isfast=false;
+            end
+            if ~isfast
+            obj.status('render') 
+            end
             
             for k=1:obj.numberOfLayers
                 pk=obj.getLayerParameters(k,renderSMAP);
@@ -205,10 +218,13 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                             end
 %                             {'xnm','ynm','znm','locprecnm','PSFxnm','phot',pk.renderfield.selection}
                             locD=obj.locData.getloc(fields,'layer',k,'position',posh);
-                            if length(locD.xnm)>1e5
-                                indin=false(size(locD.xnm));
-                                indin(1:1e5)=true;
-                            end
+%                             maxlfast=2e5;
+%                             if length(locD.xnm)>maxlfast
+%                                 indin=false(size(locD.xnm));
+%                                 gap=ceil(length(locD.xnm)/maxlfast);
+%                                 indin(1:gap:end)=true;
+%                                 locD=copystructReduce(locD,indin);
+%                             end
                             ld=interfaces.LocalizationData;
                             ld.files=obj.locData.files;
                             ld.attachPar(obj.P);
@@ -234,7 +250,9 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 end
             end
             obj.draw;
-            obj.status('render done')   
+            if ~isfast
+            obj.status('render done')  
+            end
         end
     end
 end
