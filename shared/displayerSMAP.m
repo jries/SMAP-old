@@ -66,8 +66,9 @@ if ~exist('imall','var')&&~tiffthere
     return
 end
 
-
-if tiffthere
+if ~exist('imall','var')
+    imfinal=imtiff;
+elseif tiffthere
     sm=size(mask);
     if min(sm(1:2))>4
         mask(1:4,:,:)=1;
@@ -76,6 +77,10 @@ if tiffthere
         mask(:,end-4:end,:)=1;
     end
     mask(mask>1)=1;
+    if any(size(imtiff) ~=size(imall))
+        sima=size(imall);
+        imtiff=imresize(imtiff,sima(1:2));
+    end
     
     imfinal=mask.*imall+(1-mask).*imtiff;
 else

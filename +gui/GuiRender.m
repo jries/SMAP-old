@@ -200,7 +200,7 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 pk=obj.getLayerParameters(k,renderSMAP);
 %                 pk=obj.getLayerParameters(k,renderer.inputParameters);
                 if pk.layercheck
-                    indin=[];
+%                     indin=[];
                     if isfast
                         pk.groupcheck=false;
 %                         pk.sr_pixrec=pk.sr_pixrec*2;
@@ -210,6 +210,9 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                         end
                             posh=[pk.sr_pos(1) pk.sr_pos(2) pk.sr_size(1)*2 pk.sr_size(2)*2];
                             fields={'xnm','ynm'};
+%                             if strcmp(pk.rendermode.selection,'DL')
+%                                 fields{end+1}='P';
+%                             end
                             switch (pk.render_colormode.selection)
                                 case 'z'
                                     fields{end+1}='znm';
@@ -227,8 +230,10 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
 %                             end
                             ld=interfaces.LocalizationData;
                             ld.files=obj.locData.files;
+                            
                             ld.attachPar(obj.P);
                             ld.loc=locD;
+                            ld.layer(k)=ld.layer(1);
 %                             ld.grouploc=locD;
                             locDat=ld;
                     else
