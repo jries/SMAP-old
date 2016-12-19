@@ -130,9 +130,9 @@ switch ext
             info.files=fall;
         end
         
-        
+         p=strrep(p,'\','/');
         info.path=p;
-        inds=strfind(p,filesep);
+        inds=strfind(info.path,'/');
         if strcmp(p(inds(end)+1:end-1),'Pos')
             info.basefile=p(1:inds(end)-1);
         else
