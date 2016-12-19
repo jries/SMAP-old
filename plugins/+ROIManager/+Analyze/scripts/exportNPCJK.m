@@ -47,7 +47,7 @@ for ff=1:length(se.files)
     labels=num2str(r.plabel(indtab-1)*100,'%2.0f');
     phots=num2str(r.photons(indtab-1),'%3.0f');
     blinks=num2str(r.reactivations(indtab-1),'%3.0f');
-    filename=[f 'L' labels(1:2) 'P' phots 'B' blinks '.tif']
+    filename=[num2str(ff) '_' f 'L' labels(1:2) 'P' phots 'B' blinks '.tif']
      
     saveastiff(imall,[p filesep filename]);
 end

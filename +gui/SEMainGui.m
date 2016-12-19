@@ -1,8 +1,9 @@
 classdef SEMainGui< gui.GuiPluginWindow;
-%     properties
+    properties
+        SEpreview
 %         maindir
 %         plugindir
-%     end
+    end
     methods
         function obj=SEMainGui(varargin)
             obj@gui.GuiPluginWindow(varargin{:})
@@ -61,11 +62,31 @@ classdef SEMainGui< gui.GuiPluginWindow;
             eval.setGuiAppearence(guipar);
             eval.makeGui;
              se.processors.eval=eval;
+            
             obj.children.eval=eval;
             
+            %Explorer GUI
+            obj.make_siteexplorer;
+            
+            se.processors.SEMainGui=obj;
             obj.tabgroup=h.sitetabs;
              makeGui@gui.GuiPluginWindow(obj);
-           
+
+        end
+        
+        function make_siteexplorer(obj)
+            if isempty(obj.SEpreview)||~isvalid(obj.SEpreview.handle)
+                pfig=figure;
+                pfig.Visible='off';
+                delete(pfig.Children)
+                SEpreview=gui.SEExploreGui(pfig,obj.P);
+                obj.locData.SE.processors.preview=SEpreview;
+                SEpreview.attachLocData(obj.locData);
+                SEpreview.attachSE(obj.locData.SE);
+                SEpreview.makeGui;
+                obj.SEpreview=SEpreview;
+                obj.setPar('se_viewer',SEpreview);
+            end
 
         end
     end

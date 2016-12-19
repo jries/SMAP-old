@@ -25,30 +25,37 @@ classdef SEGUISettings< interfaces.SEProcessor
 end
 
 function make_siteexplorer(data,b,obj)
-if obj.getPar('autosavecheck')==0
-    answer=questdlg('autosave is disable. Enable autosave now?');
-    if strcmp(answer,'Yes')
-        obj.setPar('autosavecheck',1);
+structure=struct('Style','checkbox','String','Ask for Auto Check on','Value',1);
+obj.createGlobalSetting('SE_autosavecheck','SiteExplorer','Ask for autosave on when starting ROI manager',structure);
+
+if obj.getGlobalSetting('SE_autosavecheck')
+    if ~obj.getPar('autosavecheck')
+        answer=questdlg('Set autosave settings in Parameters... Autosave is disabled. Enable autosave now?');
+        if strcmp(answer,'Yes')
+            obj.setPar('autosavecheck',1);
+        end
     end
 end
-if 1
-    if isempty(obj.SEpreview)||~isvalid(obj.SEpreview.handle)
-        pfig=figure(205);
-        delete(pfig.Children)
-        SEpreview=gui.SEExploreGui(pfig,obj.P);
-        obj.SE.processors.preview=SEpreview;
-        
-        SEpreview.attachLocData(obj.SE.locData);
-        SEpreview.attachSE(obj.SE);
-        SEpreview.makeGui;
-        obj.SEpreview=SEpreview;
-        obj.setPar('se_viewer',SEpreview);
-    else
-        set(obj.SEpreview.handle,'Visible','on')
+% SEpreview=obj.getPar('se_viewer');
+SEpreview=obj.SE.processors.preview;
+    if isempty(SEpreview)||~isvalid(SEpreview.handle)
+        obj.SE.processors.SEMainGui.make_siteexplorer;
+%         pfig=figure(205);
+%         delete(pfig.Children)  
+%         SEpreview=gui.SEExploreGui(pfig,obj.P);
+%         obj.SE.processors.preview=SEpreview;
+%         
+%         SEpreview.attachLocData(obj.SE.locData);
+%         SEpreview.attachSE(obj.SE);
+%         SEpreview.makeGui;
+%         obj.SEpreview=SEpreview;
+%         obj.setPar('se_viewer',SEpreview);
     end
-elseif ~isempty(obj.SEpreview)&&ishandle(obj.SEpreview.handle)
-    set(obj.SEpreview.handle,'Visible','off')
-end
+        set(SEpreview.handle,'Visible','on')
+    
+% elseif ~isempty(obj.SEpreview)&&ishandle(obj.SEpreview.handle)
+%     set(obj.SEpreview.handle,'Visible','off')
+% end
         
 end
 
