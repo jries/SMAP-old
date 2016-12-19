@@ -14,19 +14,13 @@ classdef SEGUISettings< interfaces.SEProcessor
             set(obj.guihandles.showSE,'Callback',{@make_siteexplorer,obj})
             set(obj.guihandles.redrawall,'Callback',{@redrawall_callback,obj})
             set(obj.guihandles.clearall,'Callback',{@clearall_callback,obj})
-            
-%             addlistener(obj.SE.locData,'loaded',@obj.loaded_notify);
         end
-
-%         function loaded_notify(obj,lb,eventdata)
-%             obj.updateParameters;
-%         end
     end
 end
 
 function make_siteexplorer(data,b,obj)
 structure=struct('Style','checkbox','String','Ask for Auto Check on','Value',1);
-obj.createGlobalSetting('SE_autosavecheck','SiteExplorer','Ask for autosave on when starting ROI manager',structure);
+obj.createGlobalSetting('SE_autosavecheck','ROIManager','Ask for autosave on when starting ROI manager',structure);
 
 if obj.getGlobalSetting('SE_autosavecheck')
     if ~obj.getPar('autosavecheck')
@@ -36,27 +30,13 @@ if obj.getGlobalSetting('SE_autosavecheck')
         end
     end
 end
-% SEpreview=obj.getPar('se_viewer');
+
 SEpreview=obj.SE.processors.preview;
     if isempty(SEpreview)||~isvalid(SEpreview.handle)
         obj.SE.processors.SEMainGui.make_siteexplorer;
-%         pfig=figure(205);
-%         delete(pfig.Children)  
-%         SEpreview=gui.SEExploreGui(pfig,obj.P);
-%         obj.SE.processors.preview=SEpreview;
-%         
-%         SEpreview.attachLocData(obj.SE.locData);
-%         SEpreview.attachSE(obj.SE);
-%         SEpreview.makeGui;
-%         obj.SEpreview=SEpreview;
-%         obj.setPar('se_viewer',SEpreview);
+        SEpreview=obj.SE.processors.preview;
     end
         set(SEpreview.handle,'Visible','on')
-    
-% elseif ~isempty(obj.SEpreview)&&ishandle(obj.SEpreview.handle)
-%     set(obj.SEpreview.handle,'Visible','off')
-% end
-        
 end
 
 function redrawall_callback(a,b,obj)
@@ -151,16 +131,14 @@ pard.se_imax_cell_current.position=[6,4];
 
 pard.se_rotate.object=struct('Style','checkbox','String','rotate','Value',0);
 pard.se_rotate.position=[8,1];
-% pard.autouptdate.object=struct('Style','checkbox','String','auto update','Value',0);
-% pard.autouptdate.position=[6,2];
+
 pard.se_drawboxes.object=struct('Style','checkbox','String','draw boxes','Value',1);
 pard.se_drawboxes.position=[8,2];
 
 pard.se_drawsideview.object=struct('Style','checkbox','String','draw sideview','Value',1);
 pard.se_drawsideview.position=[8,3];
 
-% pard.se_keeptempimgs.object=struct('Style','checkbox','String','keep temp imgs','Value',0);
-% pard.se_keeptempimgs.position=[8,4];
+
 
 pard.redrawall.object=struct('Style','pushbutton','String','redraw all','Value',0);
 pard.redrawall.position=[10.5,4];
