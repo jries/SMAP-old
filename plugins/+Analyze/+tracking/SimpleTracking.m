@@ -17,14 +17,16 @@ classdef SimpleTracking<interfaces.DialogProcessor
 end
 function out=tracki(obj,p)
 [locs,indin]=obj.locData.getloc({'xnm','ynm','znm','locprecnm','locprecznm','phot','frame','track_id'},'layer',1,'position','roi','grouping','ungrouped');
+% locs.xnm=-min(locs.xnm);
+% locs.ynm=-min(locs.ynm);
 if ~isempty(locs.znm)
     xyzt=horzcat(locs.xnm,locs.ynm,locs.znm,locs.frame);
     p.dim=3;
 else
     p.dim=2;
-xyzt=horzcat(locs.xnm,locs.ynm,locs.frame);
+xyzt=double(horzcat(locs.xnm,locs.ynm,locs.frame));
 end
-p.quiet=true;
+p.quiet=false;
 tracks=mytrack(xyzt,p.maxdisp,p);
 llocs.x=locs.xnm;llocs.y=locs.ynm;llocs.frame=locs.frame;
 ltracks.x=tracks(:,1);
@@ -33,7 +35,7 @@ ltracks.frame=tracks(:,end-1);
 [iAa,iBa,nA,nB,nseen]=matchlocsall(llocs,ltracks,0,0,1);
 
 id=tracks(iBa,end);
-if isempty(locs.track_id)
+if 1%isempty(locs.track_id)
     idall=zeros(size(indin),'single');
     minID=0;
 else
@@ -46,6 +48,8 @@ obj.locData.setloc('track_id',idall);
 out=[];
 obj.locData.regroup;
 obj.setPar('locFields',fieldnames(obj.locData.loc))
+% p.mode=1;
+% analyze_SPT(tracks,p);
 end
              
 function pard=guidef
