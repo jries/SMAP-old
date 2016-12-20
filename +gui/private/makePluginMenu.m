@@ -7,20 +7,21 @@ h.hglobalSettings=uimenu(hsmap,'Label','Preferences...','Separator','on','Callba
 h.savegui=uimenu(hsmap,'Label','Save GUI appearence','Callback',{@savegui_callback,obj});
 h.loadgui=uimenu(hsmap,'Label','Load GUI appearence','Callback',{@loadgui_callback,obj});
 
+h.hrename=uimenu(hsmap,'Label','Rename window','Separator','on','Callback',{@renamewindow_callback,obj});
 h.cameraManager=uimenu(hsmap,'Label','Camera Manager','Callback',{@cameramanager_callback,obj});
 
-h.hrename=uimenu(hsmap,'Label','Rename window','Separator','on','Callback',{@renamewindow_callback,obj});
+
 
 h.hsimplegui=uimenu(hsmap,'Label','Hide advanced controls','Callback',{@simplegui_callback,obj});
 % obj.addSynchronization('globalGuiState',[],'String',{@changeglobalGuiState,obj});
 
-h.hexit=uimenu(hsmap,'Label','Quit SMAP','Callback',{@exit_callback,obj});
+h.hexit=uimenu(hsmap,'Label','Quit SMAP','Separator','on','Callback',{@exit_callback,obj});
 
 
 
 hmainplugin=uimenu(handle,'Label','Plugins');
 % hwf=uimenu(handle,'Label','Workflows');
-mwf1=uimenu(hmainplugin,'Label','New workflow','Callback',{@makeplugin,obj,'Workflow'});
+
 obj.loadGlobalSettings;
 % names1={'File','Analyze','Process','Siteexplorer'};
 names1=pluginnames;
@@ -54,10 +55,11 @@ for k=1:length(names1)
         delete(h1(k));
     end
 end
+
+mwf1=uimenu(hmainplugin,'Label','New workflow','Separator','on','Callback',{@makeplugin,obj,'Workflow'});
 %custom menu
 
 
-obj.createGlobalSetting('customMenuFile','Directories','Configuration file for custom menu. Delete path and save to not have any custom menu.',struct('Style','file','String','settings/custommenu.txt'))
 gfile=obj.getGlobalSetting('customMenuFile');
 if exist(gfile,'file')
 p=readstruct(gfile,{},true);

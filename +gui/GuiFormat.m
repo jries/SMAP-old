@@ -625,6 +625,8 @@ switch roimode
         h=[];
         obj.roihandle=h;
         obj.setPar('sr_roihandle',obj.roihandle);
+        mg=obj.getPar('mainGui');
+        mg.children.guiRender.temproi=h;
 end
 f.WindowButtonDownFcn={@clickOnSrImageW,obj};
 if ~isempty(h)

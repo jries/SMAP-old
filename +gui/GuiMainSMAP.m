@@ -21,6 +21,9 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 mkdir(['settings' filesep 'temp'])
             end
             
+             %global settings
+            initglobalsettings(obj);
+            
             makeplugincallfile('plugins');
             
             %add java path
@@ -54,9 +57,6 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.setPar('menu_plugins',pmenu);
    
             
-            
-            %global settings
-            obj.createGlobalSetting('guiPluginConfigFile','Directories','Configuration file for GUI plugin structure. Delete path and save to reset plugins.',struct('Style','file','String','settings/SimpleGui.txt'))
             gfile=obj.getGlobalSetting('guiPluginConfigFile');
             gfile=findsettingsfile(gfile);
             
@@ -70,8 +70,8 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             guimodulespure=myrmfield(guimodules,{'GuiParameters','globalGuiState'});
             obj.setPar('guimodules',guimodulespure);
             
-            object=struct('Style','saveparameter','String','save current gui plugin configuration');
-            obj.createGlobalSetting('guimodules','Directories','',object);
+            
+           
             
             
             h.maintab = uitabgroup(handle,'Units','pixels','Position',tabpos);
@@ -211,7 +211,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 feval(cb{1},struct('Checked','on'),0,cb{2})
             end
             
-
+            
             
             obj.status('all initialized')
             drawnow  

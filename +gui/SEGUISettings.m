@@ -19,8 +19,6 @@ classdef SEGUISettings< interfaces.SEProcessor
 end
 
 function make_siteexplorer(data,b,obj)
-structure=struct('Style','checkbox','String','Ask for Auto Check on','Value',1);
-obj.createGlobalSetting('SE_autosavecheck','ROIManager','Ask for autosave on when starting ROI manager',structure);
 
 if obj.getGlobalSetting('SE_autosavecheck')
     if ~obj.getPar('autosavecheck')

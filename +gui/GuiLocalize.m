@@ -80,7 +80,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
 
             tabsizeh=obj.guiPar.tabsize2;
             tabsizeh(4)=tabsizeh(4)-dh;            
-            obj.createGlobalSetting('mainLocalizeWFFile','Directories','Description file for fitting workflow, e.g. settings/workflows/fit_tif_wavelet.txt',struct('Style','file','String','settings/workflows/fit_tif_wavelet.txt'))
+           
             settingsfile=obj.getGlobalSetting('mainLocalizeWFFile');
             par=readstruct(settingsfile);
             if ~isfield(par,'tab')

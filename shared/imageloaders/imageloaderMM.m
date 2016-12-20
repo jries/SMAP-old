@@ -94,7 +94,7 @@ if isempty(SMAP_globalsettings)
     disp('Micro-manager java path not added, as imageloader was not called from SMAP. add manually to javaclasspath');
 end
 try    
-obj.createGlobalSetting('MMpath','Directories2','The directory of Micro-Manager/ in w hich ij.jar is found:',struct('Style','dir','String','MMpath'))
+
 MMpath=obj.getGlobalSetting('MMpath'); 
 catch
     MMpath=SMAP_globalsettings.MMpath.object.String;

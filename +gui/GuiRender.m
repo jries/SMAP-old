@@ -132,7 +132,7 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.setPar('sr_image',finalImage);
             end
             
-            if ~rf && ~isempty(obj.temproi)
+            if ~rf && ~isempty(obj.temproi)&&obj.temproi.isvalid
              guiformat.roiset(obj.temproi);
             end
              

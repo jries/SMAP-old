@@ -23,8 +23,7 @@ saveloc=locData.savelocs([],indg); % BETA , maybe problematic with more than 1 f
 %     saveloc.siteexplorer=locData.SE.save;
 % end
 
-locData.createGlobalSetting('saveas73','File','Always save localizations as -v7.3 mat file? This might lead to slower loading and saving and larger files, but is compatibel with >2GB files',...
-    struct('Style','checkbox','String','Always use -v7.3','Value',0));
+
 if locData.getGlobalSetting('saveas73')
     version='-v7.3';
 else

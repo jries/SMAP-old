@@ -212,7 +212,8 @@ switch callobj.Label
         obj.guiplugins.(name).module=pluginname;
         obj.makeplugin(name);
         obj.setprocessorlist;
-        obj.guihandles.wrappanel.Children([1 2])=obj.guihandles.wrappanel.Children([2 1]);
+        lc=length(obj.guihandles.wrappanel.Children);
+        obj.guihandles.wrappanel.Children(1:lc)=obj.guihandles.wrappanel.Children([2:lc 1]);
         guimodules.(obj.maindir{1}).(obj.maindir{2}).(name).module=pluginname;
         guimodules.(obj.maindir{1}).(obj.maindir{2}).(name).position=length(obj.plugins.pluginnames);
 %         gm=load(obj.guipluginpath);
