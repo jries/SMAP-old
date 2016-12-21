@@ -358,6 +358,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
     
     methods (Access=private)      
         function setfields(obj,field,handle)
+            global SMAPparameters 
             hstruc=obj.P.par.(field);
             if hstruc(1).isGuiPar
                 for k=1:length(hstruc)
@@ -381,9 +382,10 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             else
                 for k=1:length(hstruc)
                     hstruc(k).content=handle;
-%                     obj.P.par.(field)(k).content=handle;
                 end
-                obj.P.par.(field)=hstruc;
+
+            SMAPparameters.(field)=hstruc; %Hack to improve performance. its the same as:
+%                 obj.P.par.(field)=hstruc;
             end
         end
         

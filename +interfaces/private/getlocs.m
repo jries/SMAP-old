@@ -170,7 +170,8 @@ if isnumeric(p.position)
     pos=p.position(1:2);
     if length(p.position)==4
         sr_size=p.position(3:4)/2;
-        indpos=locs.xnm>pos(1)-sr_size(1) & locs.xnm<pos(1)+sr_size(1) & locs.ynm>pos(2)-sr_size(2) & locs.ynm<pos(2)+sr_size(2);
+%         indpos=locs.xnm>pos(1)-sr_size(1) & locs.xnm<pos(1)+sr_size(1) & locs.ynm>pos(2)-sr_size(2) & locs.ynm<pos(2)+sr_size(2);
+        indpos=abs(locs.xnm-pos(1))<sr_size(1) & abs(locs.ynm-pos(2))<sr_size(2);
     elseif length(p.position)==3
         indpos=(locs.xnm-pos(1)).^2+(locs.ynm-pos(2)).^2<=p.position(3)^2;
         

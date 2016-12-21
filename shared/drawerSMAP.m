@@ -73,7 +73,8 @@ if length(s)==2||s(3)==1
 %     im(im>pmax)=pmax;
 %     im(1)=pmin;
 %     im(2)=pmax;
-
+%     imo1=(ind2rgb(round(double(im)*2^8),lut));
+%     imo2=(ind2rgb(round(im*2^8),lut));
     imo=(ind2rgb(uint8(im*2^8),lut));
 %     whos imo im
 else
