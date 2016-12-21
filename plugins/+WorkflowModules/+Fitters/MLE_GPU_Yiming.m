@@ -46,10 +46,10 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
 %                 err
 %                 err2
 %             end
-            try
-               reset(gpuDevice);
-            catch
-            end
+%             try
+%                reset(gpuDevice);
+%             catch
+%             end
 
         end
         function nofound(obj,varargin)
