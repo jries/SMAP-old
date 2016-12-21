@@ -1,7 +1,6 @@
 classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
     properties
         fitpar
-%         fitfunction
     end
     methods
         function obj=MLE_GPU_Yiming(varargin)
@@ -19,45 +18,20 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             disp('checking cuda fit')
             reporttext='GPU fit function did not run. Possibly the wrong CUDA version is installed.';
             img=zeros(7,'single');img(3,3)=1;
-            a50=0;a75=0;
-            try 
+            try
                 fitp=GPUmleFit_LM(img,1,10,1,0);
                 obj.fitpar.fitfunction=@GPUmleFit_LM;
                  reporttext='GPUmleFit_LM works';
-%                 a50=gaussmlev2_cuda50(img,1,10,1);
             end
-%             try 
-%                 a75=GPUgaussMLEv2_CUDA75(img,1,10,1);
-%             end
-            
-%             if any(a50~=0)
-%                   obj.fitfunction=@gaussmlev2_cuda50;
-%                 reporttext='gaussmlev2_cuda50';
-%             elseif any(a75~=0)
-%                 obj.fitfunction=@GPUgaussMLEv2_CUDA75;
-%                 reporttext='GPUgaussMLEv2_CUDA75';                
-%             end
-            
             roisize=obj.getPar('loc_ROIsize');
-            obj.numberInBlock=round(5500*100/roisize^2);
+            obj.numberInBlock=round(obj.fitpar.roisperfit*100/roisize^2);
             
             disp(reporttext)
-%             if exist('err','var')&&exist('err2','var')
-%                 err
-%                 err2
-%             end
-%             try
-%                reset(gpuDevice);
-%             catch
-%             end
-
         end
         function nofound(obj,varargin)
             disp('fit function not working. Wrong Cuda version?')
         end
-        
 
-        
         function locs=fit(obj,imstack,stackinfo)
             if obj.fitpar.fitmode==3
                 X=stackinfo.X;Y=stackinfo.Y;
@@ -65,11 +39,8 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             end
             out=fitwrapper(imstack,obj.fitpar);
             locs=fit2locs(out,stackinfo,obj.fitpar,imstack);
-           
-            
         end
 
-        
         function initGui(obj)
             initGui@interfaces.WorkflowFitter(obj);
             obj.guihandles.fitmode.Callback={@fitmode_callback,obj};
@@ -77,12 +48,6 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             obj.guihandles.loadcal.Callback={@loadcall_callback,obj};
 
         end
-%         function prerun(obj,p)
-%             obj.fitpar=getfitpar(obj);   
-%             prerun@interfaces.WorkflowFitter(obj);
-%                   
-%         end
-        
             
     end
 end
@@ -191,10 +156,6 @@ arguments{5}=fitpar.issCMOS;
     end
     
     [P CRLB LogL]=fitpar.fitfunction(arguments{:});
-% catch
-%    disp('gaussmlev2_cuda50 did not work')
-%    P=zeros(s(3),15);LogL=zeros(s(3),1);CRLB=P;
-% end
 
 out.P=P;
 out.CRLB=CRLB;
@@ -219,6 +180,7 @@ function fitpar=getfitpar(obj)
 p=obj.getAllParameters;
 fitpar.iterations=p.iterations;
 fitpar.fitmode=p.fitmode.Value;
+fitpar.roisperfit=p.roisperfit;
 if fitpar.fitmode==3
     calfile=p.cal_3Dfile;
     cal=load(calfile);
@@ -277,7 +239,6 @@ else
 fitpar.EMexcessNoise=1;
 end
 fitpar.issCMOS=false;
-% fitpar.EMexcessNoise
 end
 
 function fitmode_callback(a,b,obj)
@@ -306,13 +267,6 @@ obj.setPar('loc_ROIsize',roisize);
 
 obj.fieldvisibility('on',ton,'off',toff);
 obj.setGuiParameters(struct('iterations',iterations));
-% for k=1:length(ton)
-%     
-%     obj.guihandles.(ton{k}).Visible='on';
-% end
-% for k=1:length(toff)
-%     obj.guihandles.(toff{k}).Visible='off';
-% end
 end
 
 function pard=guidef
@@ -330,6 +284,16 @@ pard.iterations.position=[1,4];
 pard.iterations.TooltipString=sprintf('number of iterations for the GPU fitter (typical 50, use 100-250 for ellipt: PSFx PSFy or 3Dz).');
 pard.iterations.Optional=true;
 
+pard.roisperfitt.object=struct('Style','text','String','ROIs per fit:');
+pard.roisperfitt.position=[2,3.3];
+pard.roisperfitt.Width=0.7;
+pard.roisperfitt.Optional=true;
+pard.roisperfit.object=struct('Style','edit','String','5000');
+pard.roisperfit.position=[2,4];
+pard.roisperfit.TooltipString=sprintf('Number of 10 x 10 pixel ROIs passed to GPU for fitting. For other ROI sizes, the number is adjusted accordingly.');
+pard.roisperfit.Optional=true;
+pard.roisperfitt.TooltipString=pard.roisperfit.TooltipString;
+
 pard.tPSFx0.object=struct('Style','text','String','PSFx start (pix)');
 pard.tPSFx0.position=[2,1];
 pard.tPSFx0.Width=1.25;
@@ -342,29 +306,29 @@ pard.PSFx0.TooltipString=sprintf('start value for PSF, or size of PSF when PSF f
 pard.PSFx0.Optional=true;
 
 pard.loadcal.object=struct('Style','pushbutton','String','Load 3D cal');
-pard.loadcal.position=[2,1];
+pard.loadcal.position=[3,1];
 pard.cal_3Dfile.object=struct('Style','edit','String','settings/cal_3DAcal.mat');
-pard.cal_3Dfile.position=[2,2];
+pard.cal_3Dfile.position=[3,2];
 pard.cal_3Dfile.Width=3;
 pard.cal_3Dfile.TooltipString=sprintf('3D calibration file for astigmtic 3D. \n Generate from bead stacks with plugin: Analyze/sr3D/CalibrateAstig');
 
 pard.useObjPos.object=struct('Style','checkbox','String','Use objective position:');
-pard.useObjPos.position=[3,1];
+pard.useObjPos.position=[4,1];
 pard.useObjPos.Width=3;
 pard.useObjPos.Optional=true;
 
 pard.objPos.object=struct('Style','edit','String','0');
-pard.objPos.position=[3,4];
+pard.objPos.position=[4,4];
 pard.objPos.TooltipString=sprintf('Position of the objective above the coverslip (nm, piezo position). \n Only used in combination with CalibrateAstigDeep.');
 pard.objPos.Optional=true;
 
 pard.trefractive_index_mismatch.object=struct('Style','text','String','Refractive Index mismatch factor:');
-pard.trefractive_index_mismatch.position=[4,1];
+pard.trefractive_index_mismatch.position=[5,1];
 pard.trefractive_index_mismatch.Width=3;
 pard.trefractive_index_mismatch.Optional=true;
 
 pard.refractive_index_mismatch.object=struct('Style','edit','String','.72');
-pard.refractive_index_mismatch.position=[4,4];
+pard.refractive_index_mismatch.position=[5,4];
 pard.refractive_index_mismatch.TooltipString=sprintf('Correction factor to take into account the different refracrive indices of immersion oil and buffer. \n This leads to smaller distances inside the sample compared to bead calibration. \n Bead calibration: in piezo positions (nm). \n This factor transforms z positions to real-space z positions. \n For high-NA oil objectives: typical 0.72 (range 0.7-1).');
 pard.refractive_index_mismatch.Optional=true;
 
