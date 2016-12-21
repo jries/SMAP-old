@@ -35,7 +35,7 @@ ltracks.frame=tracks(:,end-1);
 [iAa,iBa,nA,nB,nseen]=matchlocsall(llocs,ltracks,0,0,1);
 
 id=tracks(iBa,end);
-if 1%isempty(locs.track_id)
+if isempty(locs.track_id)
     idall=zeros(size(indin),'single');
     minID=0;
 else
