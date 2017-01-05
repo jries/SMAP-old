@@ -142,7 +142,7 @@ pard.text1.position=[3,1];
 pard.text1.Optional=true;
 pard.text1.Width=1.5;
 
-pard.drift_pixrec.object=struct('String','50','Style','edit');
+pard.drift_pixrec.object=struct('String','150','Style','edit');
 pard.drift_pixrec.position=[3,2.5];
 pard.drift_pixrec.Width=0.5;
 % pard.drift_pixrec.isnumeric=1;
@@ -153,7 +153,7 @@ pard.text2.object=struct('String','Magnification search range','Style','text');
 pard.text2.position=[4,1];
 pard.text2.Optional=true;
 pard.text2.Width=1.5;
-pard.drift_window.object=struct('String','.006','Style','edit');
+pard.drift_window.object=struct('String','.02','Style','edit');
 pard.drift_window.position=[4,2.5];
 % pard.drift_window.isnumeric=1;
 pard.drift_window.object.TooltipString=sprintf('maximum change in magnification from one block to next');
