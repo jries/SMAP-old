@@ -23,8 +23,11 @@ classdef RegisterLocs2<interfaces.DialogProcessor
             p.register_parameters=obj.register_parameters;
             
             obj.transformation=transform_locs(obj.locData,p);
+            
+            fv=p.dataselect.Value;
+            obj.locData.files.file(fv).transform=obj.transformation;
             if obj.processorgui==false %run from WF
-                f=obj.locData.files.file(1).name;
+                f=obj.locData.files.file(fv).name;
                 fn=strrep(f,'_sml.mat','_T.mat');
                    obj.guihandles.Tfile.String=fn;
                    transformation=obj.transformation; 

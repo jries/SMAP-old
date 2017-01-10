@@ -33,6 +33,15 @@ rg=p.mainGui;
 parameters=rg.saveParameters;
 fileformat.name='sml';
 out=struct('saveloc',saveloc,'fileformat',fileformat,'parameters',parameters);
+if isfield(locData.files.file(1),'transformation')
+    for k=length(obj.locData.files.file):-1:1
+        if ~isempty(obj.locData.files.file(end).transformation)
+            out.transformation=locData.files.file(k).transformation;
+            break
+        end
+    end
+    
+end
 v=saverightversion(file,out,version);
 disp(['saved as version ' v])
 % save(file,'saveloc','fileformat','parameters','-v7.3');

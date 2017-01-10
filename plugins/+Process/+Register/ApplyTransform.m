@@ -13,7 +13,7 @@ classdef ApplyTransform<interfaces.DialogProcessor
             out=[];
             obj.setPar('undoModule','ApplyTransform');
             notify(obj.P,'backup4undo');
-            load(p.Tfile)
+            load(p.Tfile,'transformation')
             if ~exist('transformation','var')
                 out.error='selected transformation file does not have a valid transformation';
                 return
@@ -38,13 +38,14 @@ classdef ApplyTransform<interfaces.DialogProcessor
                             tiffn.image=apply_transform_image(tiffs(k).image,transformation,p);
                             tiffn.info.name=strrep(tiffs(k).info.name, '.tif' ,'_T.tif');
                             obj.locData.files.file(filenumbers(f)).tif(end+1)=tiffn;
+                           
                         end
                     end
                 end
                  if p.transformwhat.Value==1||p.transformwhat.Value==2
                     loc=apply_transform_locs(obj.locData.loc,transformation,file,p);
                     obj.locData.loc=copyfields(obj.locData.loc,loc);
-
+                    obj.locData.files.file(filenumbers(f)).transformation=transformation;
                  end
             end
             if p.transformwhat.Value==1||p.transformwhat.Value==2

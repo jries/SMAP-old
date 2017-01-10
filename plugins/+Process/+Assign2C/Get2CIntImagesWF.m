@@ -24,11 +24,12 @@ classdef Get2CIntImagesWF<interfaces.DialogProcessor
             wf.makeGui;
             wf.load(wffile);
             
-            load(p.Tfile)
+            load(p.Tfile,'transformation')
             if ~exist('transformation','var')
                 out.error='selected transformation file does not have a valid transformation';
                 return
             end
+            obj.locData.files.file(p.dataselect.Value).transformation=transformation;
             file=obj.locData.files.file(p.dataselect.Value);
             fo=strrep(file.name,'_sml.mat','_dc_sml.mat');
 
