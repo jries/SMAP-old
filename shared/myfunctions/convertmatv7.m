@@ -10,8 +10,13 @@ for k=1:length(f)
     x=fscanf(fid,'%c',22);
     
     fclose(fid);
+    
     disp([x(1:21)  ': ' path f{k}] )
-    l=load([path f{k}]);
-    v=saverightversion([path 'v7_' f{k}],l);
-    disp([v ': ' path 'v7_' f{k}]);
+    if contains(x,'7.3')
+        l=load([path f{k}]);
+        v=saverightversion([path 'v7_' f{k}],l);
+        disp([v ': ' path 'v7_' f{k}]);
+    end
 end
+
+disp('done')
