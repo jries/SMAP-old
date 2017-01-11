@@ -13,8 +13,8 @@ classdef ApplyTransform<interfaces.DialogProcessor
             out=[];
             obj.setPar('undoModule','ApplyTransform');
             notify(obj.P,'backup4undo');
-            load(p.Tfile,'transformation')
-            if ~exist('transformation','var')
+            transformation=loadtransformation(obj,p.Tfile,p.dataselect.Value);
+            if isempty(transformation)
                 out.error='selected transformation file does not have a valid transformation';
                 return
             end
@@ -65,7 +65,7 @@ classdef ApplyTransform<interfaces.DialogProcessor
             fn=obj.guihandles.Tfile.String;
             [f,path]=uigetfile(fn,'Select transformation file _T.mat');
             if f
-                Tload=load([path f]);
+                Tload=load([path f],'transformation');
                 if ~isfield(Tload,'transformation')
                     msgbox('could not find transformation in file. Load other file?')
                 end

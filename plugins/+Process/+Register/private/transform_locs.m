@@ -83,8 +83,8 @@ switch p.targetpos.selection
 end
 
 if p.useT
-    Tload=load(p.Tfile);
-    Tinitial=Tload.transformation;
+    Tinitial=loadtransformation(obj,p.Tfile,p.dataselect.Value);
+    
     [loctT.x,loctT.y]=Tinitial.transformCoordinatesInv(loctarget.xnm,loctarget.ynm);
     mirrorinfo=Tinitial.tinfo.mirror;
     %     pos=Tinitial.pos;

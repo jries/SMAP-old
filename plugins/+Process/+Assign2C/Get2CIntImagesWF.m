@@ -24,8 +24,8 @@ classdef Get2CIntImagesWF<interfaces.DialogProcessor
             wf.makeGui;
             wf.load(wffile);
             
-            load(p.Tfile,'transformation')
-            if ~exist('transformation','var')
+            transformation=loadtransformation(obj,p.Tfile,p.dataselect.Value);
+            if isempty(transformation)
                 out.error='selected transformation file does not have a valid transformation';
                 return
             end

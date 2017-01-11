@@ -138,8 +138,8 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 obj.status('file loaded')
                 if isfield(obj.locData.files.file(1),'transformation')
                     for k=length(obj.locData.files.file):-1:1
-                        if ~isempty(obj.locData.files.file(end).transformation)
-                            obj.setPar('transformationfile',obj.locData.files.file(k).name);
+                        if ~isempty(obj.locData.files.file(k).transformation)
+                            obj.setPar('transformationfile','internal');
                             break
                         end
                     end

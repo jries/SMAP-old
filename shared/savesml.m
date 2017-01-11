@@ -34,8 +34,8 @@ parameters=rg.saveParameters;
 fileformat.name='sml';
 out=struct('saveloc',saveloc,'fileformat',fileformat,'parameters',parameters);
 if isfield(locData.files.file(1),'transformation')
-    for k=length(obj.locData.files.file):-1:1
-        if ~isempty(obj.locData.files.file(end).transformation)
+    for k=length(locData.files.file):-1:1
+        if ~isempty(locData.files.file(k).transformation)
             out.transformation=locData.files.file(k).transformation;
             break
         end

@@ -9,14 +9,14 @@ classdef Get2CIntLoc<interfaces.DialogProcessor
         
         function out=run(obj,p)
            out=[];
-            tload=load(p.Tfile,'transformation');
-            if ~isfield(tload,'transformation')
+            transformation=loadtransformation(p.Tfile,'transformation',p.dataselect.Value);
+            if isempty(transformation)
                 out.error='selected transformation file does not have a valid transformation';
                 return
             end
             obj.locData.files.file(p.dataselect.Value).transformation=transformation;
             file=obj.locData.files.file(p.dataselect.Value);
-            loc=get2Clocintensities(obj.locData.loc,tload.transformation,file,p);
+            loc=get2Clocintensities(obj.locData.loc,transformation,file,p);
             obj.locData.loc=copyfields(obj.locData.loc,loc);
             obj.locData.regroup;
              obj.setPar('locFields',fieldnames(obj.locData.loc))

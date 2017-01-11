@@ -13,8 +13,8 @@ classdef RegisterLocs2<interfaces.DialogProcessor
         
         function out=run(obj,p)
             if p.useT
-                Tload=load(p.Tfile);
-                if ~isfield(Tload,'transformation')
+                transformation=loadtransformation(obj,p.Tfile,p.dataselect.Value);
+                if isempty(transformation)
                     out.error='selected transformation file does not have a valid transformation. Uncheck use inital T';
                     return 
                 end
