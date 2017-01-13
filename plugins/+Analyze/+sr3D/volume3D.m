@@ -3,6 +3,7 @@ classdef volume3D<interfaces.DialogProcessor
     % corresponding to locprecnm and locprecznm.
     properties
         imagestack
+        imageinfo
     end
     methods
         function obj=volume3D(varargin)        
@@ -57,6 +58,8 @@ else
     pixxy=p.sr_pixrec;
 end
 
+obj.imageinfo.pixelsizex=pixxy;
+obj.imageinfo.pixelsizez=pixz;
 lochere.regroup;
 lochere.filter;
 
@@ -144,6 +147,37 @@ title=obj.getPar('layer1_').ch_filelist.selection;
 openstackinfiji(obj,obj.imagestack,title)
 end
 
+function volumeviewer_callback(a,b,obj)
+imV=squeeze(sum(obj.imagestack,3));
+p=obj.getGuiParameters;
+imV=imV-min(imV(:));
+
+if p.filter3dc
+    
+  sx=p.filter3dv(1)/obj.imageinfo.pixelsizex;
+  ssx=round(5*sx);
+  h=fspecial('gauss',ssx,sx);
+  b=h(round(end/2),:);
+  b=b/sum(b);
+  
+  imVx=filter(b,1,imV,[],1);
+    imVy=filter(b,1,imVx,[],2);
+    
+  sz=p.filter3dv(end)/obj.imageinfo.pixelsizez;
+  ssz=round(3*sz);
+  h=fspecial('gauss',ssz,sz);
+  b=h(round(end/2),:);
+   b=b/sum(b);
+  imV=filter(b,1,imVy,[],3);
+ 
+end
+ imV=imV/max(imV(:));
+% if p.invert
+%     imV=1-imV;
+% end
+volumeViewer(imV);
+end
+
 function pard=guidef(obj)
 pard.text2.object=struct('String','zmin','Style','text');
 pard.text2.position=[2,1];
@@ -173,12 +207,24 @@ pard.sigmazauto.Width=1.5;
 pard.sigmaz.object=struct('Style','edit','String','20'); 
 pard.sigmaz.position=[6,2.5];
 
+
+pard.filter3dc.object=struct('String','3D filter sIgma (nm):','Style','checkbox');
+pard.filter3dc.position=[7,2.5];
+pard.filter3dc.Width=1.5;
+pard.filter3dv.object=struct('Style','edit','String','15'); 
+pard.filter3dv.position=[7,4];
+% pard.invert.object=struct('Style','checkbox','String','invert'); 
+% pard.invert.position=[3,3];
+
 pard.save.object=struct('Style','pushbutton','String','Save','Callback',{{@save_callback,obj}});
 pard.save.position=[2,4];
 
 pard.openfiji.object=struct('Style','pushbutton','String','open in Fiji','Callback',{{@openfiji_callback,obj}});
 pard.openfiji.position=[3,4];
 
+pard.volumeviewer.object=struct('Style','pushbutton','String','Matlab volumeViewer','Callback',{{@volumeviewer_callback,obj}});
+pard.volumeviewer.position=[7,1];
+pard.volumeviewer.Width=1.5;
 
 pard.plugininfo.name='3D volume';
 pard.plugininfo.type='ProcessorPlugin';
