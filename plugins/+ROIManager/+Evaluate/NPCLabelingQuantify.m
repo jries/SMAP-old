@@ -100,8 +100,11 @@ inr=inr&locs.locprecnm<minlp;
 th=tha(inr);rho=rhoa(inr);
 
 
+
 % find rotation
 locptheta=locs.locprecnm(inr)./rho;
+
+out.coordinates=struct('rho',rho,'theta',th,'drho',locs.locprecnm(inr), 'dtheta',locptheta);
 % dth=mod(th,step);
 mdt=cyclicaverage(th,step,1./locptheta.^2);
 if mdt>pi/16
@@ -207,6 +210,7 @@ if obj.display
    if ~isempty(locs.xnm_gt)
         plot(ax2,locs.xnm(inr),locs.ynm(inr),'x',locsall.xnm_gt,locsall.ynm_gt,'ro',locs.xnm_gt(inr),locs.ynm_gt(inr),'r*')
    end
+   circle(x0,y0,R,'Parent',ax2);
    title(ax2,['theta=' num2str(((mdt))/pi*180) ', pos=' num2str(x0-obj.site.pos(1)) ,',' num2str(y0-obj.site.pos(2))])
    axis(ax2,'equal')
 end

@@ -1,4 +1,10 @@
 global se
+
+savetiff=false;
+savecoordinates=true;
+savelist=false;
+savesml=true;
+
 sites=se.sites;
 ls=length(sites);
 s1=sites(1);
@@ -14,7 +20,10 @@ filenumber=zeros(ls,1);
 [~ ,f]=fileparts(f);
 % f='test'
 r=[];
+% rlocs=[];
+rall=[];
     indtab=1;
+    indlocs=1;
 for ff=1:length(se.files)
     indim=1;
     imall=zeros(sim(1),sim(2),ls,'uint8');
@@ -37,8 +46,29 @@ for ff=1:length(se.files)
             
             r.filenumber(indtab)=ff;
             r.ind(indtab)=indtab;
+
+            
+            %full list of localizations
+            if isfield(sh.evaluation.NPCLabelingQuantify,'coordinates')
+            coordinates=sh.evaluation.NPCLabelingQuantify.coordinates;
+            numl=length(coordinates.rho);
+            rangeh=(indlocs:indlocs+numl-1)';
+            rall.rho(rangeh,1)=coordinates.rho;
+            rall.theta(rangeh,1)=coordinates.theta;
+            rall.drho(rangeh,1)=coordinates.drho;
+            rall.dtheta(rangeh,1)=coordinates.dtheta;   
+            rall.ind(rangeh,1)=indtab;
+            rall.cornersfiltered(rangeh,1)=r.cornersfiltered(indtab);
+            
+            rall.labels(rangeh,1)=r.plabel(indtab)*100;
+            rall.blinks(rangeh,1)=r.reactivations(indtab);
+            
+             indlocs=indlocs+numl;
+            end
+            
             indtab=indtab+1;
             indim=indim+1;
+           
             
         end
 
@@ -48,8 +78,9 @@ for ff=1:length(se.files)
     phots=num2str(r.photons(indtab-1),'%3.0f');
     blinks=num2str(r.reactivations(indtab-1),'%3.0f');
     filename=[num2str(ff) '_' f 'L' labels(1:2) 'P' phots 'B' blinks '.tif']
-     
-    saveastiff(imall,[p filesep filename]);
+    if savetiff
+        saveastiff(imall,[p filesep filename]);
+    end
 end
 fn=fieldnames(r);
 for k=1:length(fn)
@@ -61,5 +92,17 @@ tout=struct2table(r);
 
 
 [~,ff]=fileparts(f);
+if savelist
 writetable(tout,[p filesep ff '.csv']);
+end
+
+if savecoordinates
+    tout=struct2table(rall);
+    writetable(tout,[p filesep ff '_c.csv']);
+end
+
+if savesml
+    l=se.locData;
+    l.savelocs([p filesep ff '_sml.mat'])
+end
 % 
