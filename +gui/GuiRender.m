@@ -2,6 +2,7 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
     properties
         numberOfLayers=1;
         multilayerfig;
+        temproi
     end
 
     methods
@@ -41,8 +42,17 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             f=getParentFigure(obj.handle);
             c=uicontextmenu(f);
             h.layertab.UIContextMenu=c;
+            
             m1 = uimenu(c,'Label','remove layer','Callback',{@menu_callback,obj});
             m3 = uimenu(c,'Label','add layer','Callback',{@menu_callback,obj});
+            if ispc
+                posmen='tlo';
+                shiftmen=[10 0];
+            else
+                posmen='tli';
+                shiftmen=[10 -10];
+            end
+            makemenuindicator(h.layertab,posmen,shiftmen);
         end
         
         function setGuiParameters(obj,p,setchildren)
@@ -84,11 +94,21 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
         end
         
         function display_notify(obj,lp,eventdata)
-            obj.status('display')
+            
+            rf=obj.getPar('fastrender');
+            if isempty(rf)
+                rf=false;
+            end
+            
+%             if ~rf
+%             obj.status('display')
+%             end
             
             guiformat=obj.getPar('guiFormat');
             proi=guiformat.roiset;
-            
+            if (proi.isvalid)
+                obj.temproi=proi;
+            end
             
             hfig=obj.getPar('sr_figurehandle');
             if ~isvalid(hfig)
@@ -98,16 +118,25 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
 %             displayer=Displayer(obj.locData);
 %             pk=obj.getLayerParameters(1,displayer.inputParameters);
             pk=obj.getLayerParameters(1,displayerSMAP);
+            cs=obj.getPar('sr_colorbarthickness');
+            if ~isempty(cs)
+                pk.sr_colorbarthickness=cs;
+            end
 %             displayer.setParameters(pk);
             [finalImage,sr_imagehandle]=displayerSMAP(obj.locData.layer,pk);
             
 
 %             [finalImage,sr_imagehandle]=displayer.displayImage(obj.locData.layer);
+            if ~rf
             obj.setPar('sr_imagehandle',sr_imagehandle);
             obj.setPar('sr_image',finalImage);
-             guiformat.roiset(proi);
+            end
+            
+            if ~rf && ~isempty(obj.temproi)&&obj.temproi.isvalid
+             guiformat.roiset(obj.temproi);
+            end
              
-            sep=obj.getPar('sr_layersseparate');
+%             sep=obj.getPar('sr_layersseparate');
 %             if ~isempty(sep)&&sep
 %                 if isempty(obj.multilayerfig)||~isvalid(obj.multilayerfig)
 %                     obj.multilayerfig=figure;
@@ -124,11 +153,13 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
 %                     
 %                 end
 %             end
-            obj.status('display done');
+%             if ~rf
+%                 obj.status('display done');
+%             end
         end
         
         function draw(obj)
-            obj.status('draw')
+%             obj.status('draw')
             lp=obj.locData;
 %             drawer=Drawer(obj.locData);
             for k=1:obj.numberOfLayers
@@ -140,7 +171,7 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 end
             end
             notify(obj.P,'sr_display')
-            obj.status('draw done')
+%             obj.status('draw done')
         end
         function render_callback(obj,object,eventdata)
             hfig=obj.getPar('sr_figurehandle');
@@ -148,23 +179,68 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.render_notify;
         end
         function render_notify(obj,object,eventdata)
-            obj.status('render')  
+            
 %             drawnow
             lp=obj.locData;
             extraspace=150;
             pos=obj.getPar('sr_pos');
             sizesr=obj.getPar('sr_size');
-            xmin=pos(1)-sizesr(1)-extraspace;xmax=pos(1)+sizesr(1)+extraspace;
-            ymin=pos(2)-sizesr(2)-extraspace;ymax=pos(2)+sizesr(2)+extraspace;
+%             xmin=pos(1)-sizesr(1)-extraspace;xmax=pos(1)+sizesr(1)+extraspace;
+%             ymin=pos(2)-sizesr(2)-extraspace;ymax=pos(2)+sizesr(2)+extraspace;
 %             renderer=Renderer(obj.locData);
+            isfast=obj.getPar('fastrender');
+            if isempty(isfast)
+                isfast=false;
+            end
+            if ~isfast
+            obj.status('render') 
+            end
+            
             for k=1:obj.numberOfLayers
                 pk=obj.getLayerParameters(k,renderSMAP);
 %                 pk=obj.getLayerParameters(k,renderer.inputParameters);
                 if pk.layercheck
-%                     renderer.setParameters(pk);
-                    obj.locData.filter('xnm',k,'minmax',[xmin xmax])
-                    obj.locData.filter('ynm',k,'minmax',[ymin ymax])
-                    obj.locData.filter('channel',k,'inlist',pk.channels) 
+%                     indin=[];
+                    if isfast
+                        pk.groupcheck=false;
+%                         pk.sr_pixrec=pk.sr_pixrec*2;
+                        if strcmp(pk.rendermode.selection,'Gauss')
+                            pk.rendermode.selection='constGauss';
+                            pk.rendermode.Value=3;
+                        end
+                            posh=[pk.sr_pos(1) pk.sr_pos(2) pk.sr_size(1)*2 pk.sr_size(2)*2];
+                            fields={'xnm','ynm'};
+%                             if strcmp(pk.rendermode.selection,'DL')
+%                                 fields{end+1}='P';
+%                             end
+                            switch (pk.render_colormode.selection)
+                                case 'z'
+                                    fields{end+1}='znm';
+                                case 'field'
+                                    fields{end+1}=pk.renderfield.selection;
+                            end
+%                             {'xnm','ynm','znm','locprecnm','PSFxnm','phot',pk.renderfield.selection}
+                            locD=obj.locData.getloc(fields,'layer',k,'position',posh);
+%                             maxlfast=2e5;
+%                             if length(locD.xnm)>maxlfast
+%                                 indin=false(size(locD.xnm));
+%                                 gap=ceil(length(locD.xnm)/maxlfast);
+%                                 indin(1:gap:end)=true;
+%                                 locD=copystructReduce(locD,indin);
+%                             end
+                            ld=interfaces.LocalizationData;
+                            ld.files=obj.locData.files;
+                            
+                            ld.attachPar(obj.P);
+                            ld.loc=locD;
+                            ld.layer(k)=ld.layer(1);
+%                             ld.grouploc=locD;
+                            locDat=ld;
+                    else
+                        obj.locData.filter('channel',k,'inlist',pk.channels) 
+                        locDat=obj.locData;
+                    end
+
                     if strcmp(pk.rendermode.selection,'Other')
                         modules=obj.getPar('rendermodules');
                         if length(modules)<k || isempty(modules{k})
@@ -173,13 +249,15 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                         end
                         lp.layer(k).images.srimage=modules{k}.render(obj.locData,pk);
                     else
-                        lp.layer(k).images.srimage=renderSMAP(obj.locData,pk,k);        
+                        lp.layer(k).images.srimage=renderSMAP(locDat,pk,k);        
 %                     lp.layer(k).images.srimage=renderer.render(k);  
                     end
                 end
             end
             obj.draw;
-            obj.status('render done')   
+            if ~isfast
+            obj.status('render done')  
+            end
         end
     end
 end

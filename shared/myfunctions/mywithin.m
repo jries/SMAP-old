@@ -1,4 +1,5 @@
 function ind=mywithin(x,cx,y,cy)
+%c: left, width
 ind=(x>cx(1)&x<cx(1)+cx(2));
 
 if nargin==4

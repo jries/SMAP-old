@@ -9,10 +9,21 @@ switch mode
         fh=@median;
     case 'geomean'
         fh='geomean';
+    case 'std'
+        fh=@std;
     otherwise
         disp('bindata.m: mode not known. try parameter as function handle.')
         fh=mode;
 end
+
+% [xs,sind]=sort(x);
+% x=xs;
+% y=y(sind);
+
+badind=isnan(x)|isnan(y)|isinf(x)|isinf(y);
+x(badind)=[];
+y(badind)=[];
+
 xn=(xx(1:end-1)+xx(2:end))/2;
 xn=[-inf xn inf];
 yy=zeros(size(xx));

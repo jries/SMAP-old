@@ -2,7 +2,10 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
     properties 
         roihandle
         roiposition
+        roicallbackid
         ovboxhandle
+        sraxis
+        timer
     end
     methods
         function obj=GuiFormat(varargin)
@@ -98,7 +101,7 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             h.pref2.TooltipString=h.pref1.TooltipString;
             h.resetview.TooltipString='adjust pixelsize to fit all width or height';
             h.parformat.TooltipString='additional global parameters for rendering';
-            h.redrawov.TooltipString='redraw overview image using the settings of the layer tab: ovim 6';
+            h.redrawov.TooltipString='redraw overview image';
             h.overview_select.TooltipString='toggels between overview image and histogram view';
             h.linewidth_roi.TooltipString='width of the roi when using the line';
             h.roi4.TooltipString='line roi, width set below';
@@ -123,21 +126,16 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             lw_callback(0,0,obj)
             obj.updateFormatParameters;
             delete(obj.getPar('sr_figurehandle'))
+            obj.timer=timer('StartDelay',.2);
+            stop(obj.timer);
+            obj.timer.TimerFcn=@obj.rerender;
+     
         end
 
         function loaded_notify(obj,~,~)
             if isempty(obj.locData.loc),return;end
-%             file=obj.locData.files(1).file;
-%             info=file.info;
-%             roi=info.roi;
-%             sr_pos(1)=(roi(1)+roi(3)/2)*info.pixsize*1000;
-%             sr_pos(2)=(roi(2)+roi(4)/2)*info.pixsize*1000;  
-%             sr_size=roi(3:4)*info.pixsize*1000/2;
-%             obj.setPar('sr_pos',sr_pos);
-%             obj.setPar('sr_size',sr_size);
             updateFormatParameters(obj) 
             redrawov_callback(0,0,obj) 
-
         end
         function updateFormatParameters(obj)
             ax=obj.getPar('sr_axes');
@@ -146,7 +144,6 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 obj.setPar('sr_figurenumber',hfg.Number);
                 obj.makesrfigure;
             end
-            pos=obj.getPar('sr_axes').Position;
             pixrec=obj.getPar('sr_pixrec');
             if obj.getPar('sr_imsizecheck')
                 ims=obj.getPar('sr_imagesize');
@@ -154,7 +151,10 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
                     ims=[ims ims];
                 end             
             else
-                ims=pos(3:4)/obj.getPar('sr_pixfactor');       
+                ax=obj.getPar('sr_axes');
+                pos=ax.Position;
+                ims=pos(3:4)/obj.getPar('sr_pixfactor'); 
+                ims=round(ims-0.001);
             end
             obj.setPar('sr_sizeRecPix',ims);
             obj.setPar('sr_size',(ims/2*pixrec));
@@ -167,20 +167,21 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             if nargin<2           
                 fignumber=obj.getPar('sr_figurenumber');
             end
-
+            clf(fignumber);
+            hf=figure(fignumber);
 
             pos=obj.getPar('mainGuihandle').Position;
             scrsz = get(groot,'ScreenSize');  
             posim=abs([pos(3)+pos(1)+10 pos(2) max(1,min(pos(4),scrsz(3)-pos(3)-pos(1)-30)), max(1,pos(4)-30)]);
-            clf(fignumber);
-            hf=figure(fignumber);
-            set(hf,'Units','pixels','Position', posim);
+            if posim(3)>200 && posim(4)>200 %too small
+                set(hf,'Units','pixels','Position', posim);
+            end
             hg.hsr=hf;
-            
-%             set(hg.hsr,'Units','pixels','Position', posim)
+
             hg.sr_axes=axes('Parent',hg.hsr);%,'Units','normalized','Position',[0.10 0.09,.7,.83]);
             set(hg.sr_axes,'NextPlot','replacechildren','PickableParts','all','Units','pixels')
-            set(hg.sr_axes,'ButtonDownFcn',{@clickOnSrImage,obj})
+            set(hg.hsr,'WindowButtonDownFcn',{@clickOnSrImageW,obj})
+%             set(hg.sr_axes,'ButtonDownFcn',{@clickOnSrImage,obj})
             obj.setPar('sr_figurehandle',hg.hsr);
             set(hg.hsr,'SizeChangedFcn',{@srSizeChange,obj})
             sr_axes=hg.sr_axes;
@@ -188,6 +189,7 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             hg.hsr.BusyAction='cancel';
             hg.hsr.ButtonDownFcn=@obj.bringGuiToFront;   
             obj.setPar('sr_axes',sr_axes); 
+            obj.sraxis=sr_axes;
             
 
         end
@@ -248,6 +250,9 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             global  roimodecallback 
             persistent lineh
             ax=obj.getPar('sr_axes');
+            f=ax.Parent;
+%             oldbdf=f.WindowButtonDownFcn;
+%             f.WindowButtonDownFcn='';
             if isempty(lineh) || ~isvalid(lineh.text)
                 lineh.handle1=line([0 0],[0 0],'Parent',ax);
                 lineh.handle2=line([0 0],[0 0],'Parent',ax);
@@ -284,21 +289,42 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             end
             obj.setPar('sr_roiposition',pos);
             obj.roiposition=pos;
+%             f.WindowButtonDownFcn=oldbdf;
+        end
+        function rerender(obj,varargin)
+            notify(obj.P,'sr_render')
         end
     end
 end
 
 function scroll_wheel(a,eventdata,obj)
-vs=eventdata.VerticalScrollCount;
-if vs>0
-    eventcase=1;
-else
-    eventcase=2;
+stop(obj.timer)
+persistent timercount 
+% if isempty(totalscroll)
+%     totalscroll=0;
+% end
+mint=0.01;
+% totalscroll=1+totalscroll;
+if isempty(timercount)||toc(timercount)>mint
+    vs=eventdata.VerticalScrollCount;
+    if vs>0
+        eventcase=1;
+    else
+        eventcase=2;
+    end
+    obj.setPar('fastrender',true)
+    format_callback(0,0,obj,eventcase)
+    obj.setPar('fastrender',false)
+%     totalscroll=0;
 end
-format_callback(0,0,obj,eventcase)
+timercount=tic;
+start(obj.timer);
 end
 
 function format_callback(handle,action,obj,eventcase)
+% if nargin<5
+%     totalscroll=1;
+% end
 h=obj.guihandles;
 pixrec=str2num(get(h.pixrec,'String'));
 switch eventcase
@@ -348,6 +374,68 @@ figure(hfig);
 notify(obj.P,'sr_render')
 end
 end
+
+function clickOnSrImageW(src, action,obj)
+% obj.checkForSRFigure(0,0);
+if isempty(obj.locData.loc) %no localizations loaded
+    return
+end
+% src.SelectionType
+% src.CurrentObject==obj.sraxis
+if ~(src.CurrentObject==obj.sraxis)
+    return
+end
+
+switch src.SelectionType
+    case 'normal'
+        pos=obj.sraxis.CurrentPoint*1000;
+        oldpos=pos(1,1:2);
+        src.WindowButtonMotionFcn = @motion;
+        src.WindowButtonUpFcn = @up;
+        if ~isempty(obj.roicallbackid)&&~isempty(obj.roihandle)&&isvalid(obj.roihandle)
+            obj.roihandle.removeNewPositionCallback(obj.roicallbackid);
+            obj.roicallbackid=[];
+        end
+         obj.setPar('fastrender',true)
+    case 'open'
+        resetview_callback(0,0,obj)
+    case 'alt'
+        pos=obj.sraxis.CurrentPoint(1,1:2)*1000;
+        updatepos(pos)
+end
+    function motion(src,callbackdata)
+         posh=obj.sraxis.CurrentPoint;
+         newpos=posh(1,1:2)*1000;
+         dpos=newpos-oldpos;
+         srpos=obj.getPar('sr_pos');
+         if sum((dpos).^2)>1
+             posax=srpos(1:2)-dpos;
+             updatepos(posax)
+         end
+    end
+    function up(src,callbackdata)
+        obj.setPar('fastrender',false)
+%         obj.getPar('fastrender')
+%         obj.roicallbackid=obj.roihandle.addNewPositionCallback(@obj.linecallback);
+        src.WindowButtonMotionFcn='';
+        src.WindowButtonUpFcn='';
+        if ~isempty(obj.roihandle)&&isvalid(obj.roihandle)
+         obj.roicallbackid=obj.roihandle.addNewPositionCallback(@obj.linecallback);
+        end
+        updatepos()
+    end
+    function updatepos(posh)
+        if nargin>0
+            
+        obj.setPar('sr_pos',posh);
+        obj.updateFormatParameters;
+        end
+%         hfig=obj.getPar('sr_figurehandle');
+%         figure(hfig);
+        notify(obj.P,'sr_render')
+    end
+end
+
 
 function srSizeChange(handle, action,obj)
 hf=handle.Position;
@@ -442,14 +530,24 @@ end
 
 
 function paro=formatpardialog(callobj,event,obj)
+persistent settings
+if isempty(settings)
+    settings.customcheck=false;
+    settings.Pixelsize='1x1';
+    settings.imsize='2000 2000';
+    settings.layerssep=false;
+    settings.colorbarthickness=4;
+    settings.customcheck=false;
+end
 [settings, button] = settingsdlg(...
     'Description', 'SR format parameters',... 
     'title'      , 'Par',... 
     'Pixelsize',{'1x1','2x2','3x3','4x4'},...
+    {'thickness of colorbar (pix)','colorbarthickness'},settings.colorbarthickness,...
+    {'Layers next to each other';'layerssep'},[logical(settings.layerssep)],...
     {'Custom image size';'customcheck'},[false true],...
-    {'Imagesize (pixel)','imsize'},'1000, 2000',...
-    'separator',' ',...
-     {'Layers next to each other';'layerssep'},[false ]);
+    {'Imagesize (pixel) or magnification (if <20)','imsize'},num2str(settings.imsize) );
+     
 
 if strcmpi(button,'ok')
     obj.setPar('sr_imsizecheck',settings.customcheck);
@@ -457,8 +555,24 @@ if strcmpi(button,'ok')
     if ischar(settings.imsize)
         settings.imsize=str2num(settings.imsize);
     end
-    obj.setPar('sr_imagesize',(settings.imsize));
+    if settings.customcheck
+        ims=settings.imsize;
+        if ims(1)<20 %magnification
+            if length(ims)==1
+                ims(2)=ims(1);
+            end
+            imold=obj.getPar('sr_sizeRecPix');
+            imnew=imold.*ims;
+        else
+            imnew=settings.imsize;
+        end
+        obj.setPar('sr_imagesize',imnew);
+        settings.imsize=imnew;
+        pixelsize=obj.getPar('sr_pixrec');
+        obj.setPar('sr_pixrec',pixelsize/ims(1));
+    end
     obj.setPar('sr_layersseparate',settings.layerssep);
+    obj.setPar('sr_colorbarthickness',settings.colorbarthickness);
 %     if settings.newfig
 %         obj.setPar('sr_axes',obj.makesrfigure((settings.fignumber)));
 %     end
@@ -472,13 +586,21 @@ function roi_callback(callobj,data,obj,roimode,roiposition)
 global roimodecallback
 roimodecallback=roimode;
 p=obj.getGuiParameters;
+sr_axes=obj.sraxis;
+f=sr_axes.Parent;
+% oldbdf=f.WindowButtonDownFcn;
+
 if nargin<5
     roiposition=[];
+    f.WindowButtonDownFcn='';
 elseif ~p.roishow %if restore and not show: dont do anything
     return
 end
 delete(obj.roihandle)
-sr_axes=obj.getPar('sr_axes');
+
+
+xlim=sr_axes.XLim;
+ylim=sr_axes.YLim;
 switch roimode
     case {1,'imrect'}
         h=imrect(sr_axes,roiposition);
@@ -503,13 +625,19 @@ switch roimode
         h=[];
         obj.roihandle=h;
         obj.setPar('sr_roihandle',obj.roihandle);
+        mg=obj.getPar('mainGui');
+        mg.children.guiRender.temproi=h;
 end
+f.WindowButtonDownFcn={@clickOnSrImageW,obj};
 if ~isempty(h)
-    addNewPositionCallback(h,@obj.linecallback);
+    obj.roicallbackid=addNewPositionCallback(h,@obj.linecallback);
     obj.roihandle=h;
     obj.setPar('sr_roihandle',obj.roihandle);
     obj.linecallback(obj.roihandle.getPosition)
 end
+sr_axes.XLim=xlim;
+sr_axes.YLim=ylim;
+
 end
 
 function resetview_callback(oject,data,obj)

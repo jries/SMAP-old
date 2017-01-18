@@ -4,7 +4,9 @@ function [iA,iB,uiA,uiB]=matchlocs(xA,yA,xB,yB,d,maxd)
 %d=[dx dy]
 %maxd: maximum allowed difference for match
 % uiA,uiB:unmatched
-
+if isempty(d)
+    d=[0,0];
+end
 lA=length(xA); %xA,yA: same length
 lB=length(xB);
 

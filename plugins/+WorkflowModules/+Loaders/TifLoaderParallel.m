@@ -180,7 +180,7 @@ classdef TifLoaderParallel<interfaces.WorkflowModule
                 
             obj.imloader=imageloaderAll(file);
 %             if ~isempty(obj.imloader.info.metafile)
-            if ~isempty(obj.imloader.metadata.allmetadata) 
+            if ~isempty(obj.imloader.metadata.allmetadata)&&isfield(obj.imloader.metadata.allmetadata,'metafile') 
              obj.setPar('loc_metadatafile',obj.imloader.metadata.allmetadata.metafile);
             end
 %             end

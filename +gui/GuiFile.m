@@ -71,14 +71,14 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.addSynchronization('filelist_long',obj.guihandles.filelist_long,'String');
             obj.addSynchronization('autosavecheck',obj.guihandles.autosavecheck,'Value',{@autosavecheck_callback,0,0,obj});
             %make file menu
-            makefilemenu(obj);
+%             makefilemenu(obj);
             
             f=getParentFigure(obj.handle);
             c=uicontextmenu(f);
             obj.guihandles.filelist_long.UIContextMenu=c;
             m1 = uimenu(c,'Label','info','Callback',{@menu_callback,obj});
             m1 = uimenu(c,'Label','remove','Callback',{@menu_callback,obj});
-            
+            m1 = uimenu(c,'Label','clear','Callback',{@menu_callback,obj});
         end
      
         function loadbutton_callback(obj, handle,actiondata,isadd,pfad,f)
@@ -136,6 +136,14 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 end
 
                 obj.status('file loaded')
+                if isfield(obj.locData.files.file(1),'transformation')
+                    for k=length(obj.locData.files.file):-1:1
+                        if ~isempty(obj.locData.files.file(k).transformation)
+                            obj.setPar('transformationfile','internal');
+                            break
+                        end
+                    end
+                end
 
                 initGuiAfterLoad(obj)
                 autosavecheck_callback(0,0,obj)
@@ -319,6 +327,11 @@ switch menuobj.Label
             listdlg('ListString',texta,'ListSize',[800,800]);
     case 'remove'
         obj.remove_callback;
+    case 'clear'
+        obj.locData.clear;
+        fl={''};
+        obj.setPar('filelist_long',fl,'String');
+        obj.setPar('filelist_short',fl,'String');
 
 end
 end
@@ -356,7 +369,7 @@ pard.add.Height=1.5;
 pard.loadmodule.object=struct('Style','popupmenu','String',{{'auto'}},'Callback',{{@loadmode_callback,obj}});
 pard.loadmodule.position=[4.5,1];
  pard.loadmodule.Width=1.5;
- pard.loadmodule.object.TooltipString='select saver plugin';
+ pard.loadmodule.object.TooltipString='select loader plugin';
  
 % pard.updateGuiPar.object=struct('Style','checkbox','String','load Gui Parameters');
 % pard.updateGuiPar.position=[5.5,1];
@@ -374,6 +387,17 @@ pard.filelist_long.object=struct('Style','Listbox','String',{'x://'});
 pard.filelist_long.position=[3,1];
 pard.filelist_long.Width=4;
 pard.filelist_long.Height=3;
+if ispc
+    psmen={'itr',[-20 -1]};
+else
+    psmen={'itr',[0 0]};
+end
+pard.filelist_long.uimenu=psmen;
+
+% pard.uimenut.object=struct('Style','pushbutton','String','=');
+% pard.uimenut.position=[1,1];
+% pard.uimenut.Width=0.1;
+% pard.uimenut.Height=.5;
 
 pard.autosavecheck.object=struct('Style','checkbox','String','Auto save','Value',0);
 pard.autosavecheck.position=[9,4];
@@ -417,12 +441,12 @@ pard.outputParameters= {'group_dx','group_dt'};
 pard.inputParameters={'mainfile'};
 
 
-pard.load.object.TooltipString='load localization data or image. Load at least one localization data before adding an image.';
+pard.load.object.TooltipString='load localization data or image. Load at least one localization data before adding a Tiff image.';
 pard.add.object.TooltipString='add localization data or image';
 % pard.remove.object.TooltipString='remove file';
 pard.savemodule.object.TooltipString='select what to save';
 pard.group_b.object.TooltipString='group localizations in consecutive frames';
 pard.group_dx.object.TooltipString=sprintf('distance in nm which two locs can be apart \n and still grouped together');
 pard.group_dt.object.TooltipString=sprintf('number of frames locs can be missing \n and still grouped together');
-
+pard.autosavecheck.object.TooltipString=sprintf('save localizations every XX minutes as settings/temp/autosave_sml.mat');
 end

@@ -5,6 +5,7 @@ classdef WorkflowInterface<handle
         inputChannels=1;  
         isstartmodule=false;
         initialized=false;
+        UID
     end
     properties(Access=private) 
         inputData
@@ -12,6 +13,11 @@ classdef WorkflowInterface<handle
         runparameters;
     end
     methods
+        function obj=WorkflowInterface
+            s=char(java.rmi.server.UID());
+            s(s=='-')=[];s(s=='.')=[];
+            obj.UID=s;
+        end
         function setInputModule(obj,inputchannel,module,outputchannel)
             if nargin<4
                 outputchannel=1;

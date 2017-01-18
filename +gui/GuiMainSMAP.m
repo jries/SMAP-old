@@ -15,10 +15,14 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 set(0,'DefaultUIControlFontSize',12);
             end
             SMAP_stopnow=false;
-            addpath('shared')
+            addpath('shared');
+            addpath(pwd);
             if ~exist(['settings' filesep 'temp'],'dir')
                 mkdir(['settings' filesep 'temp'])
             end
+            
+             %global settings
+            initglobalsettings(obj);
             
             makeplugincallfile('plugins');
             
@@ -53,9 +57,6 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.setPar('menu_plugins',pmenu);
    
             
-            
-            %global settings
-            obj.createGlobalSetting('guiPluginConfigFile','Directories','Configuration file for GUI plugin structure. Delete path and save to reset plugins.',struct('Style','file','String','settings/SimpleGui.txt'))
             gfile=obj.getGlobalSetting('guiPluginConfigFile');
             gfile=findsettingsfile(gfile);
             
@@ -69,12 +70,19 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             guimodulespure=myrmfield(guimodules,{'GuiParameters','globalGuiState'});
             obj.setPar('guimodules',guimodulespure);
             
-            object=struct('Style','saveparameter','String','save current gui plugin configuration');
-            obj.createGlobalSetting('guimodules','Directories','',object);
+            
+           
             
             
             h.maintab = uitabgroup(handle,'Units','pixels','Position',tabpos);
-            
+            if ispc
+                posmen='tri';
+                shiftmen=[-10 -5];
+            else
+                posmen='tli';
+                shiftmen=[10 -10];
+            end
+            makemenuindicator(h.maintab,posmen,shiftmen);
             f=getParentFigure(obj.handle);
             ch=uicontextmenu(f);
             h.maintab.UIContextMenu=ch;
@@ -93,6 +101,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 'Position',[0.9,0.002,.07,.03],'String','Stop','Callback',{@stopnow_callback,obj});
             h.stopnow.Units='pixels';
             h.stopnow.Position(4)=28;
+            h.stopnow.TooltipString='Interrupt execution of certain commands (e.g. fitting). Not implemented for all plugins';
             h.status=uicontrol(handle,'Style','text','Units','normalized',...
                            'String','status','Position',[0 0 .8 0.035]);
             h.status.Units='pixels';
@@ -194,14 +203,15 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 
              end
             
-
-            if  isfield(guimodules,'globalGuiState')&&~isempty(guimodules.globalGuiState)
-                obj.setPar('globalGuiState',guimodules.globalGuiState);
+            cb=hmenu.hsimplegui.Callback;
+            if  isfield(guimodules,'globalGuiState')&&~isempty(guimodules.globalGuiState)&& strcmp(guimodules.globalGuiState,'s')
+                feval(cb{1},struct('Checked','off'),0,cb{2})
+                
             else
-                obj.setPar('globalGuiState','a');
+                feval(cb{1},struct('Checked','on'),0,cb{2})
             end
             
-
+            
             
             obj.status('all initialized')
             drawnow  

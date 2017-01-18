@@ -1,4 +1,5 @@
 function  savesml(locData,file,p)
+
 if p.saveroi
     [~,indgroi]=locData.getloc('xnm','position','roi');  
     indgl=false(size(indgroi));
@@ -21,8 +22,27 @@ saveloc=locData.savelocs([],indg); % BETA , maybe problematic with more than 1 f
 % if ~isempty(locData.SE)
 %     saveloc.siteexplorer=locData.SE.save;
 % end
+
+
+if locData.getGlobalSetting('saveas73')
+    version='-v7.3';
+else
+    version='-v7';
+end
 rg=p.mainGui; 
 parameters=rg.saveParameters;
 fileformat.name='sml';
-save(file,'saveloc','fileformat','parameters','-v7.3');
+out=struct('saveloc',saveloc,'fileformat',fileformat,'parameters',parameters);
+if isfield(locData.files.file(1),'transformation')
+    for k=length(locData.files.file):-1:1
+        if ~isempty(locData.files.file(k).transformation)
+            out.transformation=locData.files.file(k).transformation;
+            break
+        end
+    end
+    
+end
+v=saverightversion(file,out,version);
+disp(['saved as version ' v])
+% save(file,'saveloc','fileformat','parameters','-v7.3');
 end

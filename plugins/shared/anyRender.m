@@ -124,8 +124,10 @@ for k=1:p.numberOfLayers
     pl=p.(['layer' num2str(k) '_']);
     
     if pl.layercheck
-        
-         pl.mingaussnm=0;%why????
+        if isempty(strfind(pp.x,'nm'))||isempty(strfind(pp.y,'nm'))
+       
+            pl.mingaussnm=0;%why????
+        end
          pr=copyfields(copyfields(pl,p),pp);
          if pl.groupcheck
              indroi=lochere.getloc('ingrouped','layer',k,'position',pp.position).ingrouped;  

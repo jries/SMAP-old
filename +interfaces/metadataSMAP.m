@@ -5,7 +5,7 @@ classdef metadataSMAP<handle
         Width=512;
         Height=512;
         roi=[];
-        camerainfo=struct('camID','','preAmp','','port','','temperature',0,'readoutrate','');
+        camerainfo=[];
         allmetadata=[];
         exposure=1;
         emgain=1;
@@ -25,9 +25,9 @@ classdef metadataSMAP<handle
         function  obj=metadataSMAP
             fn=(properties(obj));
             for k=1:length(fn)
-                obj.assigned.(fn{k})=false;
+                obj.assigned.(fn{k})=true;
             end
-            obj.assigned.roi=true;
+%             obj.assigned.roi=true;
         end
         function roi=get.roi(obj)
             if isempty(obj.roi)
@@ -52,12 +52,12 @@ classdef metadataSMAP<handle
             end
         end
         function set.roi(obj,roi)
-            if isempty(roi)
+            if length(roi)<4
                 return
             end
             obj.roi=roi;
-            obj.Width=roi(3);
-            obj.Height=roi(4);
+            obj.Width=round(roi(3));
+            obj.Height=round(roi(4));
             obj.assigned.roi=true;
             obj.assigned.Width=true;
             obj.assigned.Height=true;

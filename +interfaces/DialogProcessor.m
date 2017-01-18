@@ -7,6 +7,8 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
         processorgui=true; %switch. true if process button etc are to be rendered. false if called externally (for workflow)
         showresults=false; % defined state for results
         history=false;
+         parent; %encapsulating object, e.g. used to call methods in plugin4workflow from plugin directly
+         undo=false;
 %         moduleinfo;
     end
     properties (SetAccess = private, GetAccess = private)
@@ -141,7 +143,13 @@ end
 if isempty(obj.locData.loc)
     warning('no localization data present')
 end
-    results=obj.run(p);
+
+if obj.undo
+    obj.setPar('undoModule',obj.info.name);
+    notify(obj.P,'backup4undo');
+end
+results=obj.run(p);
+
 if ~isempty(results)
     obj.setAutoResults(obj.pluginpath,results);
     if isfield(results,'clipboard')

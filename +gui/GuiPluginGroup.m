@@ -78,7 +78,7 @@ classdef GuiPluginGroup< interfaces.GuiModuleInterface & interfaces.LocDataInter
 %              m8 = uimenu(c,'Label', 'load plugin structure','Callback',{@menu_callback,obj});
 %              m9 = uimenu(c,'Label','save plugin structure','Callback',{@menu_callback,obj});
               m7 = uimenu(c,'Label','detach','Callback',{@menu_callback,obj});
-
+            makemenuindicator(obj.guihandles.processorselect,'tri',[-15 -1]);
               
              
             
@@ -201,7 +201,7 @@ guimodules=obj.getPar('guimodules');
 switch callobj.Label
     case 'add plugin'
         plugins=obj.getPar('menu_plugins');
-        types={'ProcessorPlugin'};
+        types={'ProcessorPlugin','ROI_Analyze'};
         pg=browsefields(plugins,{},2,0,true,types);
         
         if isempty(pg)
@@ -212,7 +212,8 @@ switch callobj.Label
         obj.guiplugins.(name).module=pluginname;
         obj.makeplugin(name);
         obj.setprocessorlist;
-        obj.guihandles.wrappanel.Children([1 2])=obj.guihandles.wrappanel.Children([2 1]);
+        lc=length(obj.guihandles.wrappanel.Children);
+        obj.guihandles.wrappanel.Children(1:lc)=obj.guihandles.wrappanel.Children([2:lc 1]);
         guimodules.(obj.maindir{1}).(obj.maindir{2}).(name).module=pluginname;
         guimodules.(obj.maindir{1}).(obj.maindir{2}).(name).position=length(obj.plugins.pluginnames);
 %         gm=load(obj.guipluginpath);

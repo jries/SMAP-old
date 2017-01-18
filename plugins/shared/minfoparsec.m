@@ -40,7 +40,10 @@ end
 roi=str2num(getvaldroi(minfo,c.roi{indnames}));
 info.roi=roi(:)';
 
-info.comment=getvald(minfo,'Comment');
+comment=getvald(minfo,'Comment');
+if ~isempty(comment)
+    info.comment=comment;
+end
 % find correct line
 indcal=-1;
 camIds=c{:,2};
@@ -73,7 +76,9 @@ timeinterval=(t2-t1)/(f2-f1);
 else
     timeinterval=1;
 end
+if ~isinf(timeinterval)
 info.timediff=timeinterval;
+end
 
 
 %used names, remove later
@@ -81,13 +86,18 @@ info.gain=info.preAmp;
 if isfield(info,'camId')
 info.chip=info.camId;
 end
-info.comments=getvald(minfo,'Comment','');
+
+comment=getvald(minfo,'Comment');
+if ~isempty(comment)
+    info.comments=comment;
+end
+% info.comments=getvald(minfo,'Comment','');
 
 %PI position
 if isfield(c,'PiezoZ')
     info.PIz=str2double(getvald(minfo,c.PiezoZ{indnames},''));
-else
-    info.PIz=0;
+% else
+%     info.PIz=0;
 end
 % catch
 %     disp('metadata could not be parsed')
@@ -134,17 +144,21 @@ t1s=getval(minfo,indt);
 t=str2double(t1s(3:end-1));
 
 function txt=getval(minfo,index,sep1,sep2)
+if isempty(index)
+    txt='';
+    return
+end
 if nargin==2
     sep1='"';
     sep2='"';
 end
 
-while minfo(index)~=sep1
+while index<length(minfo)&& minfo(index)~=sep1
     index=index+1;
 end
 i1=index+1;
 index=index+1;
-while minfo(index)~=sep2
+while index<length(minfo) && minfo(index)~=sep2
     index=index+1;
 end
 txt=minfo(i1:index-1);

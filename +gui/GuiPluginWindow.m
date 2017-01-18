@@ -65,6 +65,14 @@ classdef GuiPluginWindow< interfaces.GuiModuleInterface & interfaces.LocDataInte
             m4 = uimenu(c,'Label','move left','Callback',{@menu_callback,obj});
             m5 = uimenu(c,'Label','move right','Callback',{@menu_callback,obj});
              m6 = uimenu(c,'Label','detach','Callback',{@menu_callback,obj});
+            if ispc
+                posmen='tri';
+                shiftmen=[-10 -5];
+            else
+                posmen='tli';
+                shiftmen=[10 -10];
+            end
+            makemenuindicator(h.(obj.maindir),posmen,shiftmen);
         end  
         function addplugingroup(obj,name,screenname)
             if nargin<3

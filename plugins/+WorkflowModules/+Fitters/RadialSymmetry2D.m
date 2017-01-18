@@ -13,8 +13,11 @@ classdef RadialSymmetry2D<interfaces.WorkflowFitter
             pard.plugininfo.description='Fast CPU-based radial symmetry localizer (2D) according to: R. Parthasarathy, ?Rapid, accurate particle tracking by calculation of radial symmetry centers,? Nat Methods, Jun. 2012.';
           
         end
-        
+        function fitinit(obj)
+            obj.numberInBlock=0;
+        end
         function locs=fit(obj,imstack,bgstack,stackinfo)
+            
              s=size(imstack);
              if length(s)==2 
                  s(3)=1;

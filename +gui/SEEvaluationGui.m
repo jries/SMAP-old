@@ -201,7 +201,7 @@ pard.preview.object=struct('Style','pushbutton','String','preview');
 pard.preview.position=[11,1];
 
 pard.redrawall.object=struct('Style','pushbutton','String','redraw all','Callback',@obj.redrawall);
-pard.redrawall.position=[9,1.5];
+pard.redrawall.position=[10,1.5];
 
 pard.evaluateon.object=struct('Style','checkbox','String','evaluate on','Value',1);
 pard.evaluateon.position=[7,1];
@@ -209,4 +209,10 @@ pard.evaluateon.Width=1.5;
 pard.display.object=struct('Style','checkbox','String','display','Value', 1);
 pard.display.position=[8,1];
 pard.display.Width=1.5;
+
+pard.se_keeptempimages.object=struct('Style','checkbox','String','keep temp imgs','Value', 0);
+pard.se_keeptempimages.position=[9,1];
+pard.se_keeptempimages.Width=1.5;
+
+pard.outputParameters={'se_keeptempimages'};
 end

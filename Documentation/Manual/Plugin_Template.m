@@ -29,9 +29,14 @@ classdef Plugin_Template<interfaces.DialogProcessor
             %out=[] possible, but out needs to be defined. Out is stored
             %and accessible later or by other plugins
             
+            %Only if you modify the localization date it makes sense to
+            %enable Undo. This can be done with the follwoing lines:
+            obj.setPar('undoModule','PluginName');
+            notify(obj.P,'backup4undo');
+
             %Get access to the localization data via obj.locData.getlocs (see description there):
             %example:
-            locs=obj.locData.getlocs({'xnm','frame','ynm'},'position','roi','layer',1);
+            locs=obj.locData.getloc({'xnm','frame','ynm'},'position','roi','layer',1);
             %locs.xnm, locs.frame, locs.ynm contain data from all
             %localizations in roi, or if no roi is defined in field of
             %view. But only those, displayed (and filtered) in layer 1.

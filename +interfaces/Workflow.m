@@ -138,7 +138,7 @@ classdef Workflow<interfaces.DialogProcessor
             obj.clear;
             obj.makeGui;
             loaded=load(fn);
-            for k=1:length(loaded.modules);
+            for k=1:length(loaded.modules)
                 m=loaded.modules(k);
                 obj.addModule(m.path,m.tag,'input',m.inputmodules);
             end
@@ -160,6 +160,7 @@ classdef Workflow<interfaces.DialogProcessor
                 end
                 fn=fieldnames(pGui); 
                 for k=1:length(fn)
+                   
                     if isfield(pGui.(fn{k}),'handle')
 %                         fn{k}
 % %                         idx=obj.tag2index(fn{k})
@@ -169,7 +170,8 @@ classdef Workflow<interfaces.DialogProcessor
                         if isempty(modh)
                             continue
                         end
-                        modh.handle=pGui.(fn{k}).handle;
+%                         modh.handle=pGui.(fn{k}).handle;
+                        modh.sethandle(pGui.(fn{k}).handle);
                     end 
                     p=pGui.(fn{k});
                     p=copyfields(p,pall);
@@ -191,9 +193,18 @@ classdef Workflow<interfaces.DialogProcessor
             end
             obj.fieldvisibility;
         end
-        function save(obj,fn)
-            if nargin<2
+        function save(obj,fn,descriptiononly)
+            if nargin<2||isempty(fn)
                 fn=obj.pluginpath;
+            end
+            if nargin<3
+                descriptiononly=false;
+            end
+            if descriptiononly
+                load(fn);
+                description=obj.description;
+                save(fn,'modules','parameters','startmodule','fileformat','description');
+                return
             end
             for k=1:length(obj.modules)
                 mk=obj.modules{k};
@@ -223,6 +234,7 @@ classdef Workflow<interfaces.DialogProcessor
             obj.module(tag).initialize;
             p=obj.module(tag).getAllParameters;
             data=interfaces.WorkflowData;
+            data.eof=true;
             obj.module(tag).run(data,p);
         end
         function info=info(obj)
@@ -420,7 +432,7 @@ classdef Workflow<interfaces.DialogProcessor
             hplugin=uicontrol('Style','edit','units','normalized','Position',[0 0.1 1 .55],'String',txt,'Max',100,'Parent',f,'HorizontalAlignment','left');
             b2=uicontrol('Style','pushbutton','units','normalized','Position',[0.75 0 .25 .1],'String','Cancel','Callback',{@buttoncallback},'Parent',f);
             if edit
-                b1=uicontrol('Style','pushbutton','units','normalized','Position',[0 0 .25 .1],'String','Accept changes','Parent',f,'Callback',{@buttoncallback});
+                b1=uicontrol('Style','pushbutton','units','normalized','Position',[0 0 .25 .1],'String','Save changes','Parent',f,'Callback',{@buttoncallback});
             else
 %                 he.Enable='inactive';
             end    
@@ -428,6 +440,7 @@ classdef Workflow<interfaces.DialogProcessor
             function buttoncallback(object,b)
                 if ~strcmp(object.String,'Cancel')
                     obj.description=he.String;
+                    obj.save;
                 end
                 close(f)
             end  

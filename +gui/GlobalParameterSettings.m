@@ -55,7 +55,7 @@ classdef GlobalParameterSettings < interfaces.GuiModuleInterface
                    
                     %any other controlo
                 end
-                poshere=[0 1-(positions.(cs)-1+.2)/numlines 1 .5*1/numlines];
+                poshere=[0 1-(positions.(cs)-1+.1)/numlines 1 .6*1/numlines];
                 obj.guihandles.([os 't'])=uicontrol('Parent',obj.guihandles.(cs),'Units','normalized','Style','text',...
                         'FontSize',obj.guiPar.fontsize,'String',phere.description,'Position',poshere);
             end

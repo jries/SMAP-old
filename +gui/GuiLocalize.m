@@ -60,9 +60,10 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             uimenu(h.wfcontext,'label','Info on workflow','Callback',{@wfinfo_callback,obj});
             uimenu(h.wfcontext,'label','Change workflow','Callback',{@wfload_callback,obj});
             uimenu(h.wfcontext,'label','Save workflow settings','Callback',{@savepar_callback,obj});
-            h.wfname=uicontrol(obj.handle,'Style','text','String','x','Position',[10, l2, 350 h2],...
+            h.wfname=uicontrol(obj.handle,'Style','text','String','x','Position',[10+10, l2, 350 h2],...
                 'FontSize',obj.guiPar.fontsize,'HorizontalAlignment','left');    
             h.wfname.UIContextMenu=h.wfcontext;
+            makemenuindicator(h.wfname,'lo');
             h.wfname.TooltipString='Name of current workflow. Right-click for context menu: info, change workflow, save current workflow settings';
              h.wfload=uicontrol(obj.handle,'Style','pushbutton','String','Change','Position',[370+dhx, l2, 80 h2],...
                 'FontSize',obj.guiPar.fontsize,'Callback',{@wfload_callback,obj});
@@ -79,7 +80,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
 
             tabsizeh=obj.guiPar.tabsize2;
             tabsizeh(4)=tabsizeh(4)-dh;            
-            obj.createGlobalSetting('mainLocalizeWFFile','Directories','Description file for fitting workflow, e.g. settings/workflows/fit_tif_wavelet.txt',struct('Style','file','String','settings/workflows/fit_tif_wavelet.txt'))
+           
             settingsfile=obj.getGlobalSetting('mainLocalizeWFFile');
             par=readstruct(settingsfile);
             if ~isfield(par,'tab')
@@ -140,7 +141,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             
             previewframe_callback(0,0,obj)
             obj.addSynchronization('loc_fileinfo',[],[],@obj.update_slider)
-            
+            obj.addSynchronization('globalGuiState',[],[],@obj.update_guistate)
 
         end
         
@@ -151,9 +152,9 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
                 nf=obj.getPar('loc_previewframe')+1;
             end
             obj.guihandles.previewframeslider.Min=1;
-            obj.guihandles.previewframeslider.Max=nf;
+            obj.guihandles.previewframeslider.Max=max(nf,1);
             pvf=min(nf,obj.getPar('loc_previewframe'));
-            obj.guihandles.previewframeslider.Value=pvf;
+            obj.guihandles.previewframeslider.Value=max(min(1,pvf),nf);
             obj.setPar('loc_previewframe',pvf)
             obj.guihandles.previewframe.String=num2str(pvf);
 %             obj.setPar('loc_previewframe',round(pf));
@@ -164,11 +165,24 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             setglobalguistate@interfaces.GuiModuleInterface(obj,a,b);
             obj.guihandles.wfsimple.Value=obj.simplegui;
         end
+        
+        function update_guistate(obj)
+            hs=obj.guihandles.wfsimple;
+            switch obj.getPar('globalGuiState')
+                case 's'
+                    hs.Value=1;
+                    hs.String='v';
+                otherwise
+                    hs.Value=0;
+                    hs.String='-';
+            end
+                    
+        end
     end
 end
 function wfinfo_callback(~,~,obj)
 obj.mainworkflow.graph;
-obj.mainworkflow.showinfo(false);
+obj.mainworkflow.showinfo(true);
 % if ~isempty(obj.mainworkflow.info.description)
 % msgbox(obj.mainworkflow.info.description,obj.mainworkflow.info.name)
 % end

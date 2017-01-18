@@ -9,6 +9,9 @@ classdef Loader_sml<interfaces.DialogProcessor;
             if nargin<4
                 mode=getfilemode(file);
             end
+            if isempty(p)
+                p.updateGuiPar=false;
+            end
             loadfile(obj,p,file,mode);
         end
         function run(obj,p)
@@ -20,6 +23,9 @@ classdef Loader_sml<interfaces.DialogProcessor;
             pard=guidef;
         end
         function clear(obj,file,isadd)
+            if nargin<3
+                isadd=false;
+            end
             if isadd 
                 obj.locData.clear('filter');
             else
@@ -50,6 +56,7 @@ filenumber=obj.locData.files.filenumberEnd;
 switch mode
     case 'sml'
         [templocData,GUIsettings,siteexplorer]=load_smlV3(filedat);
+        obj.setPar('lastSMLFile',file);
     case 'fitpos'
         templocData=loadfitposV2(filedat);
         GUIsettings=[];
@@ -106,6 +113,12 @@ if isempty(siteexplorer)||siteexplorer.numberOfFiles==0
         siteexplorer.addFile(templocData.files.file(k).name,templocData.files.file(k).number,templocData.files.file(k).info)
     end
 %     newfilenumbers=1:templocData.files.file(end).number;
+else
+    rgp=obj.getPar('ROI_restorparamters');
+    if ~p.updateGuiPar && length(siteexplorer.sites)>0 && (isempty(rgp) ||rgp)%restore parameters only if not already globally restored
+        psites=GUIsettings.children.guiSites;
+        p.mainGui.children.guiSites.setGuiParameters(psites,true);
+    end
 end
 se=obj.locData.SE;
    se.addSites(siteexplorer,newfilenumbers, templocData.files.file)

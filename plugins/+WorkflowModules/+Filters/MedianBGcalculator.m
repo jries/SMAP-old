@@ -27,7 +27,7 @@ classdef MedianBGcalculator<interfaces.WorkflowModule
            end
         end
         function output=run(obj,data,p)
-            persistent block datablock %TODO: also obj.datablock as persistent variable if possible
+            persistent block datablock 
             output=[];
             par=obj.runparameters;
             if ~par.loc_subtractbg

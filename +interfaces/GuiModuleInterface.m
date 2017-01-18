@@ -21,6 +21,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
         guihandles %handles to gui objects are stored here. ONLY flat structure. All handles should be added, otherwise they will not be resized etc.
         simplegui=false;
         guiselector=struct('position',[],'show',false);
+       
     end
     methods
          function obj=GuiModuleInterface(varargin)
@@ -36,7 +37,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
             
             %PC-Mac differences
             if ispc
-                 guiPar.fontsize=11;
+                 guiPar.fontsize=10;
                  guiPar.FieldHeight=26;
                  guiPar.tabsize1=[0    -1  546 342];
                  guiPar.tabsize2=[0    -1  540 311];    
@@ -86,9 +87,9 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                 fn=fieldnames(h);
                 for k=1:length(fn)
                     vh=obj.getSingleGuiParameter(fn{k},onlyedit);  
-                    if ~isempty(vh)
+%                     if ~isempty(vh)
                             p.(fn{k})=vh;             
-                    end
+%                     end
                 end
             end
             psave=obj.propertiesToSave;
@@ -481,6 +482,14 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                                 hg.(remaining{kr})=thisField.(remaining{kr});
                             end
                         end
+                        
+                        if isfield(thisField,'uimenu')
+                            if iscell(thisField.uimenu)
+                            makemenuindicator(hg,thisField.uimenu{1},thisField.uimenu{2})
+                            else
+                                makemenuindicator(hg,thisField.uimenu);
+                            end
+                        end
 %                         if isfield(thisField,'TooltipString')
 %                             h.TooltipString=thisField.TooltipString;
 %                         end
@@ -543,8 +552,11 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
            %returns an info structure. With defaults if empty.
             info=obj.plugininfo;
             if isempty(info)||~isfield(info,'name')
-               
+               try
                 name=obj.pluginpath{end};
+               catch
+                   name=obj.subpluginpath{end};
+               end
                 [~,file]=fileparts(name);
                 if ~isempty(file)
                     name=file;

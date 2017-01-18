@@ -17,6 +17,9 @@ classdef MathParser<interfaces.DialogProcessor
             else
                 indin=locs.filenumber==p.dataselect.Value;
             end
+            nl=cellfun(@length,fn);
+            [~ ,sortind]=sort(nl,'descend');
+            fn=fn(sortind);
             for k = 1:length (fn)
                 ind=strfind(evalstr,fn{k});
                 for m=1:length(ind)

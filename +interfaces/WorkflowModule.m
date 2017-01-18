@@ -22,6 +22,9 @@ classdef WorkflowModule<interfaces.WorkflowInterface&interfaces.GuiModuleInterfa
                 obj.timervalue=tic;
             end
         end
+        function sethandle(obj,h)
+            obj.handle=h;
+        end
 
     end
 end

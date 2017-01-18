@@ -7,12 +7,16 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
     end
     methods
         function addSynchronization(obj,field,handle,syncmode,changecallback)
-            %add synchronization to global parameters
+             %add synchronization to global parameters
+            %field: globalParameterName
+            %handle: handle to guiobject to be synchronized
             %addSynchronization(parametername,handle to synchronize to,syncmode,changecallback)
             %syncmode='String|Value|otherproperty': what to synchronize
             %changecallback: function handle to function which is called
             %when parameter is changed. This is similar to events and
-            %listeners
+            %listeners.
+            %Instead of calling addSynchronization you can define in
+            %obj.guidef: pard.syncParameters={{'globalParameterName','guiobject2',{'String','Value'},{@changecallback,obj}},...};
             if nargin<5
                 changecallback={};
             end
@@ -214,7 +218,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                         end
 %                         v=str2num(st);
 %                         testv=str2double(st(1));
-                        if ~((st(1)>='0'&&st(1)<='9') || st(1)=='-' || st(1)=='I' || st(1)=='i' || st(1)=='.')
+                        if iscell(st)|| (~((st(1)>='0'&&st(1)<='9') || st(1)=='-' || st(1)=='I' || st(1)=='i' || st(1)=='.'))
                             par=hfn.String;
                         else
                             v=str2double(st);
@@ -317,16 +321,19 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
 
         end
         function createGlobalSetting(obj,field,category,description,structure)
+            global SMAP_globalsettings
             if ~isfield(obj.P.globalSettings,field) %don't overwrite current settings
                 obj.P.globalSettings.(field).object=structure;
     %             obj.P.globalSettings.(field).name=name;
                 obj.P.globalSettings.(field).category=category;
                 obj.P.globalSettings.(field).description=description;
                 obj.saveGlobalSettings;
+                SMAP_globalsettings=obj.P.globalSettings;
             end
             %save to global parameters
         end
         function setGlobalSetting(obj,field,value)
+            
             h=obj.value2handle(value,obj.P.globalSettings.(field).object);
             obj.P.globalSettings.(field).object=copyfields(obj.P.globalSettings.(field).object,h);
             obj.saveGlobalSettings;
@@ -336,17 +343,22 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             p=obj.handle2value(obj.P.globalSettings.(field).object);
         end
         function saveGlobalSettings(obj)
+            global SMAP_globalsettings
             file=obj.P.globalSettingsFile;
             writestruct(file,obj.P.globalSettings);
+            SMAP_globalsettings=obj.P.globalSettings;
         end
         function loadGlobalSettings(obj)
+            global SMAP_globalsettings
             obj.P.loadGlobalSettings;
+            SMAP_globalsettings=obj.P.globalSettings;
         end
 
     end
     
     methods (Access=private)      
         function setfields(obj,field,handle)
+            global SMAPparameters 
             hstruc=obj.P.par.(field);
             if hstruc(1).isGuiPar
                 for k=1:length(hstruc)
@@ -370,9 +382,10 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             else
                 for k=1:length(hstruc)
                     hstruc(k).content=handle;
-%                     obj.P.par.(field)(k).content=handle;
                 end
-                obj.P.par.(field)=hstruc;
+
+            SMAPparameters.(field)=hstruc; %Hack to improve performance. its the same as:
+%                 obj.P.par.(field)=hstruc;
             end
         end
         
@@ -384,7 +397,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                     cb=hstruc(k).changecallback;
                     callobj=hstruc(k).obj;
                     if ~isvalid(callobj) %object has been deleted
-                        badstruck(k)=true;
+                        badstruc(k)=true;
                     else
                         if ~isa(obj,class(hstruc(k).obj))&& isvalid(callobj.handle) %or ==? of identical object, in case of copy??
                             feval(cb{:})

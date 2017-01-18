@@ -84,6 +84,9 @@ classdef SEExploreGui<interfaces.SEProcessor
         
         function redrawall(obj,onlysites)
             global SMAP_stopnow
+            if SMAP_stopnow
+                disp('STOP button is activated. Function not executed')
+            end
             if nargin<2
                 onlysites=false;
             end
@@ -118,6 +121,7 @@ classdef SEExploreGui<interfaces.SEProcessor
         end
         sites=obj.SE.sites;
         for k=1:length(sites)
+            
             obj.guihandles.sitelist.Value=k;   
             obj.status(['redrawall: site ' num2str(k) ' of ' num2str(length(sites))])
             drawnow
@@ -127,6 +131,9 @@ classdef SEExploreGui<interfaces.SEProcessor
             sites(k).image.composite=[];
             sites(k).image.layers=[];
             sites(k).image.image=single(sites(k).image.image);
+            if SMAP_stopnow
+                break
+            end
         end
         obj.SE.currentsite=sites(k);
         obj.status(['redrawall: completed'])
@@ -253,9 +260,9 @@ if obj.SE.currentcell.ID==0
     end
 end
 obj.SE.currentsite.ID=obj.SE.addSite(obj.SE.currentsite);
-obj.guihandles.sitelist.Value=length(obj.guihandles.sitelist.String);
+% obj.guihandles.sitelist.Value=length(obj.guihandles.sitelist.String);
 redraw_sitelist(obj);
-obj.guihandles.sitelist.Value=length(obj.guihandles.sitelist.String);
+% obj.guihandles.sitelist.Value=length(obj.guihandles.sitelist.String);
 plotcell(obj,obj.SE.currentcell);
 end
 
@@ -366,7 +373,7 @@ if vold>0&&site.info.cell>0&&obj.SE.cells(vold).ID~=site.info.cell
 %     obj.SE.plotcell(obj.SE.currentcell,obj.guihandles.cellax,obj.guihandles.fileax);
 %     obj.SE.plotfile(obj.SE.currentcell.info.filenumber,obj.guihandles.fileax);
 end
-if obj.getPar('se_drawsideview')
+if obj.getPar('se_drawsideview')&&isfield(obj.locData.loc,'znm')
     if isempty(obj.sideviewax)||~isvalid(obj.sideviewax)
         f=figure;
         obj.sideviewax=gca;
@@ -395,8 +402,17 @@ end
 %update annotations
 obj.SE.processors.annotation.sitechange(obj.SE.currentsite);
 obj.SE.processors.eval.evaluate(obj.SE.currentsite);
-obj.SE.currentsite.image.composite=[];
-obj.SE.currentsite.image.layers=[];
+
+if ~obj.getPar('se_keeptempimgs')
+    obj.SE.currentsite.image.composite=[];
+    obj.SE.currentsite.image.layers=[];
+end
+% l=obj.SE.currentsite.image.layers;
+% for k=length(l):-1:1
+%     obj.SE.currentsite.image.imax=l(k).images.finalImages.imax;
+% end
+
+% 
 obj.SE.currentsite.image.image=single(obj.SE.currentsite.image.image);
 %plot info
 plotinfo(obj,site)
@@ -487,9 +503,11 @@ for k=1:length(ind)
     obj.SE.removeSite(siteID(k));
 end
 redraw_sitelist(obj);
-if obj.guihandles.sitelist.Value>length(obj.guihandles.sitelist.String)
-obj.guihandles.sitelist.Value=length(obj.guihandles.sitelist.String);
-end
+sv=obj.guihandles.sitelist.Value-1;
+sv=min(max(1,sv),length(obj.guihandles.sitelist.String));
+% if obj.guihandles.sitelist.Value>length(obj.guihandles.sitelist.String)
+obj.guihandles.sitelist.Value=sv;
+% end
 end
 
 function removecell_callback(a,b,obj);

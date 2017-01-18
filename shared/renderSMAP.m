@@ -27,20 +27,13 @@ if strcmpi('raw', p.rendermode.selection) %obj.locData.files.file(p.ch_filelist.
     return
 end
 
-if nargin>3&&isempty(indin)
-    imageo.image=[];
-    imageo.numberOfLocs=0;
-    imageo.istiff=0;
-    imageo.rangex=[];
-    imageo.rangey=[];
-    return
-end
+
 
 if nargin<3||isempty(layer)
     layer=p.layer;
 end
 
-if length(p.sr_pixrec)==1;
+if length(p.sr_pixrec)==1
     p.sr_pixrec(2)=p.sr_pixrec(1);
 end
 
@@ -59,14 +52,27 @@ else
 end
 
 
+
+
 if nargin<4||isempty(indin)
     fn=fieldnames(locsh);
     indin=true(length(locsh.(fn{1})),1);
 end
-    
+ 
+if nargin>3&&isempty(indin)
+    imageo.image=[];
+    imageo.numberOfLocs=0;
+    imageo.istiff=0;
+    imageo.rangex=[];
+    imageo.rangey=[];
+    return
+end
+sizefac=1;
 if isfield(p,'sr_layersseparate')&&~isempty(p.sr_layersseparate)&&p.sr_layersseparate
     if isfield(p,'sr_size')&&~isempty(p.sr_size)&&isfield(p,'sr_layerson')
         p.sr_size(1)=p.sr_size(1)/sum(p.sr_layerson);
+        sizefac=1/sum(p.sr_layerson);
+    else   
     end
 end
     
@@ -131,12 +137,15 @@ tpar=0;
 switch lower(p.rendermode.selection)
     case {'gauss','other','constgauss'}
         if ~isfield(locsh,'sx') || ~isfield(locsh,'sy') || isempty(locsh.sx)|| isempty(locsh.sy) 
+            sd=[];
             if isfield(locsh,'s')&&~isempty(locsh.s)
                 sd=locsh.s(indin);
-            else
+            elseif isfield(locsh,'locprecnm')&&~isempty(locsh.locprecnm)
                 sd=locsh.locprecnm(indin);
             end
+            if ~isempty(sd)
             pos.s=min(max(sd*p.gaussfac,max(p.mingaussnm,p.mingausspix*p.sr_pixrec(1))),400);
+            end
         else
             pos.sx=max(locsh.sx(indin)*p.gaussfac,max(p.mingaussnm,p.mingausspix*p.sr_pixrec(1)));
             pos.sy=max(locsh.sy(indin)*p.gaussfac,max(p.mingaussnm,p.mingausspix*p.sr_pixrec(2)));
@@ -209,7 +218,7 @@ switch lower(p.rendermode.selection)
            
         end
     case 'dl'
-        frender=@gaussrender;
+        frender=@constgaussrender;
     case {'hist'}
         frender=@histrender;
     case {'constgauss'}
@@ -223,12 +232,28 @@ end
 rangexrec=rangexrec-p.sr_pixrec(1)/2;
 rangeyrec=rangeyrec-p.sr_pixrec(end)/2;
 
+isxnm=isfield(locsh,'xnm') && ~isempty(locsh.xnm);
+isx=isfield(locsh,'x') && ~isempty(locsh.x);
+if ~(isxnm||isx) 
+
+    sx=round((rangexrec(2)-rangexrec(1))/p.sr_pixrec(1));
+    sy=round((rangeyrec(2)-rangeyrec(1))/p.sr_pixrec(end));
+    imageo.image=zeros(sx,sy,'single');
+    imageo.lut=lutall;
+    imageo.rangex=rangex;
+    imageo.rangey=rangey;
+    imageo.numberOfLocs=0;
+    return
+    
+end
 % tic
 [srimage,nlocs]=frender(pos,rangexrec, rangeyrec, p.sr_pixrec(1), p.sr_pixrec(end),lut,[p.colorfield_min p.colorfield_max],tpar);
 % toc
 if dl
     if isfield(p,'sr_sizeRecPix')
-        newsize=round(p.sr_sizeRecPix([2 1]));
+        spix=p.sr_sizeRecPix([2 1]);
+        spix(2)=spix(2)*sizefac;
+        newsize=round(spix);
         srimage=imresize(srimage,[newsize(1) newsize(2)],'nearest');
 
     end

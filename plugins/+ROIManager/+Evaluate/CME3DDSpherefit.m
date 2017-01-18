@@ -80,6 +80,8 @@ pard.saveimagesdir.object=struct('Style','edit','String','');
 pard.saveimagesdir.position=[9,2.4];
 pard.saveimagesdir.Width=2.6;
 pard.plugininfo.type='ROI_Evaluate';
+
+pard.inputParameters={'numberOfLayers','sr_layerson','se_cellfov','se_sitefov','se_siteroi','layer1_','layer2_','se_sitepixelsize'};
 end
 
 function saveimagesb_callback(a,b,obj)
@@ -92,8 +94,9 @@ end
 end
 
 function out=runintern(obj,p)
-obj.site.sePar.Settings
-roisize=obj.site.sePar.Settings.siteroi/2;
+% obj.site.sePar.Settings
+% roisize=obj.site.sePar.Settings.siteroi/2;
+roisize=p.se_siteroi/2;
 locs=obj.getLocs({'xnm','ynm','znm'},'layer',p.layer.Value,'size',roisize*2);
 
 lenbar=20;

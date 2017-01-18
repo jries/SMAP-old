@@ -43,7 +43,7 @@ else
     int2min=int1min;
 end
 
-loco.channel=0*loc.channel+3;
+loco.channel=0*loc.channel+5;
 int1=loc.(p.assignfield1.selection);
 int2=loc.(p.assignfield2.selection);
 % int1=loc.intA1;
@@ -51,9 +51,10 @@ int2=loc.(p.assignfield2.selection);
 
 m1=myquantilefast(int1(:),[0.01,0.98],1e5);m2=myquantilefast(int2(:),[0.01,0.98],1e5);
 map=max(m1(2), m2(2));mip=min(m1(1),m2(1));
-
+% mip=-300;
 ps=ceil((map-mip)/250);
-indgood=int1~=0&int2~=0;
+% indgood=int1~=0&int2~=0;
+indgood=true(size(int1));
 img=myhist2(int1(indgood),int2(indgood),ps,ps,[mip map],[mip map]);
 % img=myhist2(int1,int2,ps,ps,[mip map],[mip map]);
 
@@ -72,13 +73,16 @@ plotboundary
 hold off
 
 i1co=slope(2)*int2+edge1+offset(1);
-c1=int1>i1co&int1>int1min;
+c1=int1>=i1co&int1>=int1min;
 loco.channel(c1)=1;
 
 
 i2co=1./slope(1)*((int1)+edge2-offset(1));
-c2=int2>i2co&int2>int2min;
+c2=int2>=i2co&int2>=int2min;
 loco.channel(c2)=2;
+
+loco.channel(int2==-100)=3;
+loco.channel(int1==-100)=4;
 
 ax3=initaxis(p.resultstabgroup,'log split');
 imgc2=myhist2(int1(c2),int2(c2),ps,ps,[mip map],[mip map]);

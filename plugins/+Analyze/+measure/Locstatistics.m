@@ -72,23 +72,23 @@ pard.filter.position=[1,2];
 pard.overview.object=struct('String','plot overview','Style','checkbox','Value',0);
 pard.overview.position=[1,3];
 
-pard.checkphot.object=struct('String','use manual photon range','Style','checkbox','Value',0);
-pard.checkphot.position=[3,1];
-pard.checkphot.Width=2;
+pard.tphot.object=struct('String','photon range:','Style','text');
+pard.tphot.position=[3,1];
+pard.tphot.Width=1.5;
 
-pard.photrange.object=struct('String','150 10000','Style','edit');
-pard.photrange.position=[3,3];
+pard.photrange.object=struct('String','800 10000','Style','edit');
+pard.photrange.position=[3,2.5];
 
-pard.checklifetime.object=struct('String','use manual lifetime range','Style','checkbox','Value',0);
-pard.checklifetime.position=[4,1];
-pard.checklifetime.Width=2;
+pard.tlt.object=struct('String','lifetime range (frames):','Style','text');
+pard.tlt.position=[4,1];
+pard.tlt.Width=1.5;
 
 pard.lifetimerange.object=struct('String','1 30','Style','edit');
-pard.lifetimerange.position=[4,3];
+pard.lifetimerange.position=[4,2.5];
 
 pard.plugininfo.name='Statistics';
 pard.plugininfo.description=sprintf(['Locstatistics calculates all kind of statistics for localization data.\n'...
-    'photons: N: number of localizations. <P>: mean. r: ratio between number of localizations above 2000 and between 1000 and 2000. mu: decay constant of exponential fit. \n'...
+    'photons: N: number of localizations. <P>: mean.  mu: decay constant of exponential fit. \n'...
     'locprec: max, median and position of rising edge. \n'...
     'lifetime: how many frames does a fluorophore live (from grouping). mu: from exponential fit.\n'...
     'background: mean\n'...

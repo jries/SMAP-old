@@ -4,12 +4,7 @@ function mij=openfiji(obj)
 
 mij=obj.getPar('MIJ');
 if isempty(mij) %open fiji
-    if ispc
-        fijipath='C:/Program Files/Fiji/scripts';
-    else
-        fijipath='/Applications/Fiji.app/scripts';
-    end
-    obj.createGlobalSetting('fijipath','Directories','The directory of /Fiji/scripts:',struct('Style','dir','String',fijipath))
+    
     fijipath=obj.getGlobalSetting('fijipath');  
     if ~exist(fijipath,'dir')
         mij=[];

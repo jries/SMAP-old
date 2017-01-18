@@ -76,7 +76,7 @@ classdef IntLoc2pos<interfaces.WorkflowModule
                     intLoc2pos_ind2=intLoc2pos_ind2+1;
                 end
                 intLoc2pos_ind2=intLoc2pos_ind2-1;
-                if (intLoc2pos_ind2-ind1+1)~=(sum(obj.locs.frame==frame))
+                if 0 %(intLoc2pos_ind2-ind1+1)~=(sum(obj.locs.frame==frame))
                     disp((intLoc2pos_ind2-ind1+1)-(sum(obj.locs.frame==frame)))
                     disp(frame)
                 end

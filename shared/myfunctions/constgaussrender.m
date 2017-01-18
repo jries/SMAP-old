@@ -7,7 +7,8 @@ elseif isfield(pos,'sx')
     s(2)=myquantilefast(pos.sx,0.5,1000)/pixelsx;
     s(1)=myquantilefast(pos.sy,0.5,1000)/pixelsy;
 else
-    s=[3 3];
+    s(1)=max(.7,1/pixelsx*6);
+    s(2)=max(.7,1/pixelsy*6);
 end
 fs=2*ceil(2.5*s)+1;
 % s(2)=s(2)*10;

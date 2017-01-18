@@ -18,7 +18,10 @@ classdef SEEvaluationProcessor<interfaces.GuiModuleInterface & interfaces.LocDat
         end
         
         
-        function ax=setoutput(obj,name)
+        function ax=setoutput(obj,name,clear)
+            if nargin<3
+                clear=false;
+            end
             if obj.display
             if ~ishandle(obj.output.figure)
                 obj.output.figure=figure;
@@ -38,8 +41,12 @@ classdef SEEvaluationProcessor<interfaces.GuiModuleInterface & interfaces.LocDat
                 obj.output.tabgroup.SelectedTab=oldtab;
                 end
             end
-            
             tab=obj.output.tab.(name);
+            if clear
+                delete(tab.Children);
+                ax=axes('Parent',tab);
+            end
+            
             axs=findobj(tab.Children,'type','axes');
             ax=axs(1);
 %             axes(ax);
@@ -81,8 +88,13 @@ classdef SEEvaluationProcessor<interfaces.GuiModuleInterface & interfaces.LocDat
             if isempty(p.position) %no position specified, that is the usual case
 
                 pos=obj.site.pos;
+                if ~isempty(p.size)
+                    fovsize=p.size(1);
+                end
                 posgetloc=[pos(1), pos(2), fovsize, fovsize];
                 parameters=[parameters {'position', posgetloc}];
+            else
+                pos=p.position;
             end
             locsh=obj.locData.getloc(fields,parameters{:},'removeFilter',{'filenumber'});
             

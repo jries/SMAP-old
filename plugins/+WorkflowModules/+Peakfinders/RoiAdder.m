@@ -60,9 +60,19 @@ classdef RoiAdder<interfaces.WorkflowModule
         function dato=run(obj,data,p)
 
             img=data.data;%get;
-            if ~isempty(img)&&all(size(obj.maskrun)==size(img))
-                img(~obj.maskrun)=-1;
+            if isempty(img)
+                dato=data;
+                return;
             end
+            if ~all(size(obj.maskrun)==size(img))
+                obj.maskrun=imresize(obj.maskrun, size(img));
+                %resize
+                %set rim
+                obj.setrim
+            end
+            
+            img(~obj.maskrun)=-1;
+           
             dato=data;%.copy;
             dato.data=img;%set(img);
             if obj.preview && data.frame==obj.getPar('loc_previewframe')
