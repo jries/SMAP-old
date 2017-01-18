@@ -118,12 +118,12 @@ subplot(1,2,2,ax4);
     
 if isfield(se.sites(1).evaluation.NPCLabelingQuantify,'numcornersfiltered') %not from simulation
     numcorners=getFieldAsVector(se.sites,fields{:},'numcornersfiltered');
-    numcornersunf=getFieldAsVector(se.sites,fields{:},'numcorners');
+    numcorners=getFieldAsVector(se.sites,fields{:},'numcorners');
     
     
 ax6=obj.initaxis('ground truth');
     hold off
-    hnc=hist(numcornersunf(indgood),nb);
+    hnc=hist(numcorners(indgood),nb);
     bar(nb,hnc)
     hold on
     pf=fithist(hnc,nb,p);
