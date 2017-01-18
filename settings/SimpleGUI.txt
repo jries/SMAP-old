@@ -57,11 +57,8 @@ Process.Drift.showdriftinfo.position=2
 Process.Drift.position=1
 Process.Drift.driftcorrectionXYZ.module=Process,Drift,driftcorrectionXYZ
 Process.Drift.driftcorrectionXYZ.position=1
-<<<<<<< HEAD
-=======
 Process.Drift.driftcorrectionM.module=Process,Drift,driftcorrectionM
 Process.Drift.driftcorrectionM.position=3
->>>>>>> a213c0be8d72569eff7dc1a0a04e144ec619ed61
 Process.Modify.MathParser.module=Process,Modify,MathParser
 Process.Modify.MathParser.position=1
 Process.Modify.RemoveLocs.module=Process,Modify,RemoveLocs
@@ -86,7 +83,6 @@ ROIManager.Evaluate.CME3DDSpherefit_DC.module=ROIManager,Evaluate,CME3DDSpherefi
 ROIManager.Evaluate.countingStatistics.module=ROIManager,Evaluate,countingStatistics
 ROIManager.Evaluate.generalStatistics.module=ROIManager,Evaluate,generalStatistics
 ROIManager.Segment.segmentCellsCME.module=ROIManager,Segment,segmentCellsCME
-<<<<<<< HEAD
 ROIManager.Segment.segmentCellsCME.position=1
 ROIManager.Segment.segmentNPC.module=ROIManager,Segment,segmentNPC
 ROIManager.Segment.segmentNPC.position=2
@@ -94,10 +90,6 @@ ROIManager.Segment.segmentSitesPolarCME.module=ROIManager,Segment,segmentSitesPo
 ROIManager.Segment.segmentSitesPolarCME.position=3
 ROIManager.Segment.SimulateSites.module=ROIManager,Segment,SimulateSites
 ROIManager.Segment.SimulateSites.position=4
-=======
-ROIManager.Segment.segmentNPC.module=ROIManager,Segment,segmentNPC
-ROIManager.Segment.segmentSitesPolarCME.module=ROIManager,Segment,segmentSitesPolarCME
->>>>>>> a213c0be8d72569eff7dc1a0a04e144ec619ed61
 WorkflowModules.Filters.BG_wavelet.module=WorkflowModules,Filters,BG_wavelet
 WorkflowModules.Filters.DisplayChooser.module=WorkflowModules,Filters,DisplayChooser
 WorkflowModules.Filters.ImageFilter.module=WorkflowModules,Filters,ImageFilter
