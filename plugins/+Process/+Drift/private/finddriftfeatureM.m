@@ -18,7 +18,7 @@ function [drift,driftinfo]=finddriftfeatureM(pos,par)
 %copyright: Jonas Ries, EMBL, jonas.ries@embl.de
 
 results_ax1=initaxis(par.resultstabgroup,'CC');
-results_ax3=initaxis(par.resultstabgroup,'normalized CC');
+axiscurve=initaxis(par.resultstabgroup,'CC vs M');
 
 %here: rather from par, from channel range. Make sure it does not get
 %displaced. Fill in outside.
@@ -156,7 +156,8 @@ function [Fmovier,posh]=makemovie %calculate fourier transforms of images
 end
 
 function [Mall,Aall]= finddisplacements2 % find displacements
-%     dM=0.006;
+global SMAP_stopnow;
+    %     dM=0.006;
 s=size(Fmovier);
 dnumframesh =s(3);
 Mall=ones(dnumframesh-1);
@@ -167,6 +168,7 @@ for k=1:dnumframesh-1
     oldmag=1;
     for l=k+1:dnumframesh
         oldmag=getMag(posall(l),Fmovier(:,:,k),oldmag,dM);
+        title(axiscurve,[k; l])
         [oldmag,Acc]=getMag(posall(l),Fmovier(:,:,k),oldmag,dM/6);
         Mall(k,l)=oldmag;
         Aall(k,l)=Acc;
@@ -178,7 +180,13 @@ for k=1:dnumframesh-1
 %             results_ax1.Title.String=num2str(k/dnumframesh+(l-k)/dnumframesh^2);
 %             drawnow
 %         end
+    title(axiscurve,[k; l])
+    if SMAP_stopnow
+        error('aborted')
     end
+    end
+    
+
 %     disp(k/dnumframesh)
 end
 end
@@ -195,7 +203,8 @@ dMa=[-3*dM;-2*dM;-dM;0;dM;2*dM;3*dM];
 fp=fit(magt,maxv,'poly2');
 newmag=-fp.p2/2/fp.p1;
 magt2=magt(1):dM/15:magt(end);
-figure(88);plot(magt,maxv,'*',magt2,fp(magt2),newmag,fp(newmag),'ko');drawnow
+plot(axiscurve,magt,maxv,'*',magt2,fp(magt2),newmag,fp(newmag),'ko');drawnow
+
 % mag=magnhere+newmag-1;  
 mag=newmag;
 ampl=fp(newmag);
@@ -229,7 +238,7 @@ ampl=fp(newmag);
 
             imbig=imresize(smallim,3,'bicubic');
             maxv(M)=max(imbig(:));%/(dMa(M)+magnhere);
-           figure(92);imagesc(intim);title(maxv(M));drawnow    
+           imagesc(results_ax1,intim);title(results_ax1,maxv(M));drawnow    
         end
         [~,maxind]=max(maxv);
         if maxind<=2||maxind>=length(maxv)-1 %out of range

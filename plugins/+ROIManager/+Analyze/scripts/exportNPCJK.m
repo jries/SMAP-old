@@ -2,7 +2,7 @@ global se
 
 savetiff=false;
 savecoordinates=true;
-savelist=false;
+savelist=true;
 savesml=true;
 
 sites=se.sites;
@@ -53,15 +53,17 @@ for ff=1:length(se.files)
             coordinates=sh.evaluation.NPCLabelingQuantify.coordinates;
             numl=length(coordinates.rho);
             rangeh=(indlocs:indlocs+numl-1)';
+            rall.ind(rangeh,1)=indtab;
             rall.rho(rangeh,1)=coordinates.rho;
             rall.theta(rangeh,1)=coordinates.theta;
             rall.drho(rangeh,1)=coordinates.drho;
             rall.dtheta(rangeh,1)=coordinates.dtheta;   
-            rall.ind(rangeh,1)=indtab;
+            
             rall.cornersfiltered(rangeh,1)=r.cornersfiltered(indtab);
             
             rall.labels(rangeh,1)=r.plabel(indtab)*100;
             rall.blinks(rangeh,1)=r.reactivations(indtab);
+            rall.photons(rangeh,1)=r.photons(indtab);
             
              indlocs=indlocs+numl;
             end

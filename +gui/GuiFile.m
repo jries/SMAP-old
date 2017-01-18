@@ -136,6 +136,14 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 end
 
                 obj.status('file loaded')
+                if isfield(obj.locData.files.file(1),'transformation')
+                    for k=length(obj.locData.files.file):-1:1
+                        if ~isempty(obj.locData.files.file(k).transformation)
+                            obj.setPar('transformationfile','internal');
+                            break
+                        end
+                    end
+                end
 
                 initGuiAfterLoad(obj)
                 autosavecheck_callback(0,0,obj)

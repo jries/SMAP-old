@@ -45,14 +45,27 @@ fields2={'evaluation','generalStatistics'};
 numfoundint=getFieldAsVector(se.sites,fields{:},'numfoundint');
 numfoundrat=getFieldAsVector(se.sites,fields{:},'numfoundrat');
 numbercornerassined=getFieldAsVector(se.sites,fields{:},'numbercornerassined');
-
+filenumber=getFieldAsVector(se.sites,'info','filenumber');
 psf=getFieldAsVector(se.sites,fields2{:},'PSFlayers');
 ax0=obj.initaxis('Summary');
 axpsf=obj.initaxis('PSF');
 histogram(axpsf,psf);
 title(axpsf,['PSF range: ' num2str(p.PSFrange)])
 xlabel('average PSF (nm)')
+if p.psfcheck
 indgood=psf>=p.PSFrange(1)&psf<=p.PSFrange(2);
+else
+    indgood=true(size(psf));
+end
+
+if p.filecheck
+indf=false(size(filenumber));
+for k=1:length(p.filenumbers)
+    indf=indf | filenumber==p.filenumbers(k);
+end
+indgood=indgood&indf;
+end
+
 nb=0:p.corners;
 
 numfoundint=numfoundint(indgood);
@@ -110,10 +123,10 @@ if isfield(se.sites(1).evaluation.NPCLabelingQuantify,'numcornersfiltered') %not
     
 ax6=obj.initaxis('ground truth');
     hold off
-    hnc=hist(numcornersunf,nb);
+    hnc=hist(numcornersunf(indgood),nb);
     bar(nb,hnc)
     hold on
-    pf=fithist(hnc,nb);
+    pf=fithist(hnc,nb,p);
     results.groundtruth=pf; 
 %     
 %     hh=clusterfromlabeling(nb,8,2,.4)*sum(hnc);
@@ -198,24 +211,32 @@ pard.rings.position=[2,2];
 pard.rings.Width=0.5;
 
 
-pard.t3.object=struct('String','PSF range','Style','text');
-pard.t3.position=[3,1];
+pard.psfcheck.object=struct('String','PSF range','Style','checkbox');
+pard.psfcheck.position=[3,1];
 
 pard.PSFrange.object=struct('String','80 150','Style','edit');
 pard.PSFrange.position=[3,2];
 pard.PSFrange.Width=1;
 
-pard.t4.object=struct('String','fit range histogram','Style','text');
-pard.t4.position=[4,1];
+pard.t3.object=struct('String','fit range histogram','Style','text');
+pard.t3.position=[4,1];
 
 pard.fitrange.object=struct('String','3 8','Style','edit');
 pard.fitrange.position=[4,2];
 pard.fitrange.Width=1;
+
+pard.filecheck.object=struct('String','filenumbers','Style','checkbox');
+pard.filecheck.position=[5,1];
+
+pard.filenumbers.object=struct('String','1:100','Style','edit');
+pard.filenumbers.position=[5,2];
+pard.filenumbers.Width=1;
+
 pard.plugininfo.type='ROI_Analyze';
   
 
 pard.copy2page.object=struct('String','Copy to own page','Style','checkbox');
-pard.copy2page.position=[5,1];
+pard.copy2page.position=[6,1];
 pard.copy2page.Width=2;
 
 pard.plugininfo.type='ROI_Analyze';
