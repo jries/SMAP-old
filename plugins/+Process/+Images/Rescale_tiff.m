@@ -14,15 +14,16 @@ classdef Rescale_tiff<interfaces.DialogProcessor
             img=tiff.image;
             Mx=p.magnification(1);
             My=p.magnification(end);
-            sx=p.shift(1);
-            sy=p.shift(end);
+            pixelsize=tiff.info.pixsize*1000;
+            sx=p.shift(1)/1000;
+            sy=p.shift(end)/1000;
             a=p.rot;
             
             M=[Mx*cosd(a) -My*sind(a) 0
               Mx*sind(a) My*cosd(a) 0
                 sx sy 1];
             tform=affine2d(M);
-            imgc=transformImage(tform,img,tiff.info.pixsize,tiff.info.roi);
+            imgc=transformImage(tform,img,pixelsize,tiff.info.roi);
             
             [path,fileh, ext]=fileparts(tiff.info.name);
             fileh=['T_' fileh ext];
