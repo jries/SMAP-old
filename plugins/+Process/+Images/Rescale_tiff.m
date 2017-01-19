@@ -29,7 +29,7 @@ classdef Rescale_tiff<interfaces.DialogProcessor
             tiff.info.name=fullfile(path,fileh);
             tiff.image=imgc;
             
-            if ~p.previewcheck
+            if 1 %~p.previewcheck
                 if p.overwrite
                     obj.locData.files.file(file).tif(tiffn)=tiff;
                 else
@@ -90,10 +90,10 @@ pard.rot.position=[5,2];
 pard.rot.object.TooltipString='Rotation angle in deg';
 
 
-pard.previewcheck.object=struct('Style','checkbox','String','preview','Value',1);
-pard.previewcheck.position=[6,1];
-pard.previewcheck.Width=2;
-pard.previewcheck.object.TooltipString='Preview if checked. Otherwise the image is saved.';
+% pard.previewcheck.object=struct('Style','checkbox','String','preview','Value',1);
+% pard.previewcheck.position=[6,1];
+% pard.previewcheck.Width=2;
+% pard.previewcheck.object.TooltipString='Preview if checked. Otherwise the image is saved.';
 pard.overwrite.object=struct('Style','checkbox','String','replace, not append');
 pard.overwrite.position=[7,1];
 pard.overwrite.Width=2;
