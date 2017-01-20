@@ -35,6 +35,7 @@ SEpreview=obj.SE.processors.preview;
         SEpreview=obj.SE.processors.preview;
     end
         set(SEpreview.handle,'Visible','on')
+        figure(SEpreview.handle)
 end
 
 function redrawall_callback(a,b,obj)
