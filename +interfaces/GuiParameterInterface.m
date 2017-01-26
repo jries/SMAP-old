@@ -276,7 +276,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             %.selection=h.String{h.Value}
             %Table: Data
             handle=[];
-            if isa(hin,'matlab.ui.control.UIControl')|| (isstruct(hin)&&(isfield(hin,'String')||isfield(hin,'Value'))&&isfield(hin,'Style'))
+            if (isa(hin,'matlab.ui.control.UIControl')&&isvalid(hin))|| (isstruct(hin)&&(isfield(hin,'String')||isfield(hin,'Value'))&&isfield(hin,'Style'))
             switch hin.Style
                 case {'edit','file'} %file:own creation for global settings
                     if isnumeric(v)

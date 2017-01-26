@@ -161,7 +161,8 @@ classdef TifLoader<interfaces.WorkflowModule
                 obj.edgesize=dr;
             end
             obj.setPar('loc_fileinfo',fileinf);
-% 
+            obj.setPar('loc_filename',file);
+            
             obj.guihandles.tiffile.String=obj.imloader.file;
 %              obj.setPar('loc_newfile',true);
              p=obj.getAllParameters;
