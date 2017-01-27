@@ -107,7 +107,7 @@ end
 % stat.stdx, stdy, meansigma
 inclusterf=find(incluster);
 cluster=[];
-figure(88);
+   initaxis(par.resultstabgroup,'found clusters')
 hold off
 for k=1:max(beadnum)
     indbead=beadnum==k;

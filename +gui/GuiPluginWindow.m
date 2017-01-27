@@ -114,7 +114,7 @@ switch callobj.Label
             return
         end
         name=name{1};
-        obj.guiplugins.(name)=[];
+        obj.guiplugins.(name).position=length(fieldnames(obj.guiplugins))+1;
         obj.addplugingroup(name);
         guimodules.(obj.maindir).(name)=[];
 
