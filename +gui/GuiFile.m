@@ -209,7 +209,8 @@ end
 function save_callback(object,event,obj)
 p=obj.getAllParameters;
 saver=obj.savers{p.savemodule.Value};
-psave=obj.getAllParameters(saver.inputParameters);
+% psave=obj.getAllParameters(saver.inputParameters);
+psave=saver.getAllParameters;
 saver.save(psave);
 end
 
