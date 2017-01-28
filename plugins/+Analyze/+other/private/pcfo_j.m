@@ -43,12 +43,13 @@
 %                                       Jena, Germany
 % Bernd Rieger & Rainer Heintzmann
 
-function [gain, offset] = pcfo_j(in, kthres, RNStd, AvoidCross, doPlot, Tiles)
+function [gain, offset] = pcfo_j(in, kthres, RNStd, AvoidCross, doPlot, Tiles,fixoffset)
 if nargin <2; kthres = 0.9; end
 if nargin <3; RNStd = 0;end
 if nargin <4; AvoidCross = 1;end
 if nargin <5; doPlot =1;end
 if nargin <6; Tiles = 3;end
+if nargin <7||isempty(fixoffset); fixoffset=[];end
 
 if numel(Tiles)==1;Tiles(2)=Tiles(1);end
 TilesX = Tiles(1);
@@ -89,11 +90,19 @@ for ty=0:TilesY-1
 end
 end
 %% linear regression on the mean-variance plot to find the variance offset
+
 maxFitBin = n-1;%range for the linear regression
 
 [Voffset, slope, vv] = RWLSPoisson(TotalInt(1:maxFitBin), TotalVar(1:maxFitBin), NumPixelsInBin(1:maxFitBin));  % iteratively updates the variance of the variance estimate
-offset = -Voffset/slope;  % Use result from the fit, mapped into the offset along x where variance is zero
+if isempty(fixoffset)
+    offset = -Voffset/slope;  % Use result from the fit, mapped into the offset along x where variance is zero
+else
+    offset=fixoffset;
+   Voffset=-offset*slope;
+end
 
+% slope 
+% offset
 % slope
 %% compute the noise variance on the full image, correct for the variance offset to find the gain
 % AllTotalVar2=0;AllTotalInt=0;
@@ -103,9 +112,13 @@ for k=sim(3):-1:1
 end
 AllTotalVar=mean(AllTotalVarh);
 AllTotalInt=mean(AllTotalInth);
+if isempty(fixoffset)
 gain = (AllTotalVar-Voffset)/AllTotalInt; % Estimate this again from the whole image to reduce the tile effect
-offset = RNStd^2/gain + offset;  % account for the readout noise effect
 
+offset = RNStd^2/gain + offset;  % account for the readout noise effect
+else
+   gain= AllTotalVar/(AllTotalInt-offset);
+end
 % gain
 %%
 if doPlot
@@ -121,13 +134,13 @@ if doPlot
     xlabel('Mean Intensity [ADU]');
     ylabel('Noise Variance [ADU]');
     title('Mean Variance Plot');
-    s=sprintf('offset: %0.4g ADU\nslope: %0.2g',offset2,slope);
+    s=sprintf('offset: %0.4g ADU\nslope: %0.2g',offset,slope);
     ax = axis;
     axis([0 ax(2) 0 ax(4)])
     text(ax(2)/10,ax(4)*0.8,s,'FontSize',11)
     hold off
     drawnow;
-    fprintf('offset: %0.4g ADU, slope: %0.2g\n',offset2,slope);  % show what the fit results into
+    fprintf('offset: %0.4g ADU, slope: %0.2g\n',offset,slope);  % show what the fit results into
 end
 return;
 

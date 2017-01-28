@@ -22,9 +22,14 @@ classdef GainOffsetFFT<interfaces.DialogProcessor
             img=il.getmanyimages(p.numberimages,'mat');
             imgh=double(img);
             imagesc(imgh(:,:,1));
-            RNStd=0;
+            RNStd=p.readnoise;
             ax=obj.initaxis('result');
-            [gain,off]=pcfo_j((imgh), p.kthresh, RNStd, 1, 1, p.tiles);
+            if p.fixoffsetc
+                fixoffset=p.fixoffset;
+            else
+                fixoffset=[];
+            end
+            [gain,off]=pcfo_j((imgh), p.kthresh, RNStd, 1, 1, p.tiles,fixoffset)
 %             fi=obj.getPar('loc_fileinfo');
             fi=il.getmetadata;
             if p.EMon
@@ -46,14 +51,14 @@ classdef GainOffsetFFT<interfaces.DialogProcessor
             ht='imagefile';
             il=imageloaderAll(file);
             fi=il.getmetadata;
-            obj.setGuiParameters(struct(ht,file,'emgain',fi.emgain,'EMon',double(fi.EMon)))
+            obj.setGuiParameters(struct(ht,file,'emgain',fi.emgain,'EMon',double(fi.EMon),'fixoffset',fi.emgain))
     
         end
     end
 end
 
 
-function load_callback(a,b,obj)
+function load_callback(a,b,obj,what)
 fn=obj.getSingleGuiParameter('imagefile');
 if ~exist(fn,'file')
 fn=obj.getPar('loc_filename');
@@ -63,10 +68,22 @@ if isempty(fn)
 end
 [f,p]=uigetfile(fn);
 if f
-    obj.loadfile(file);
+    switch what
+        case 1
+            obj.loadfile([p f]);
+        case 2
+            getoffest(obj,[p f])
+    end
+end
 end
 
+function getoffest(obj,file)
 
+il=imageloaderAll(file);
+img=double(il.getimage(1));
+varim=std(img(:));
+offim=mean(img(:));
+obj.setGuiParameters(struct('fixoffset',offim,'fixoffsetc',true,'readnoise',varim));
 end
 
 function setpar_callback(a,b,obj)
@@ -86,22 +103,28 @@ function pard=guidef(obj)
 l1=2;
 pard.t1.object=struct('Style','text','String','Parameters PCFO:');
 pard.t1.position=[l1,1];
-pard.t1.Width=1;
+pard.t1.Width=.9;
 
 pard.kthresht.object=struct('Style','text','String','kthresh');
-pard.kthresht.position=[l1,2];
-pard.kthresht.Width=.5;
+pard.kthresht.position=[l1,1.9];
+pard.kthresht.Width=.4;
 pard.kthresh.object=struct('Style','edit','String','0.9');
-pard.kthresh.position=[l1,2.5];
+pard.kthresh.position=[l1,2.3];
 pard.kthresh.Width=.3;
 
 pard.tilest.object=struct('Style','text','String','Tiles');
-pard.tilest.position=[l1,3];
-pard.tilest.Width=.5;
+pard.tilest.position=[l1,2.6];
+pard.tilest.Width=.4;
 pard.tiles.object=struct('Style','edit','String','3');
-pard.tiles.position=[l1,3.5];
+pard.tiles.position=[l1,2.9];
 pard.tiles.Width=.3;
 
+pard.readnoiset.object=struct('Style','text','String','RNStd');
+pard.readnoiset.position=[l1,3.3];
+pard.readnoiset.Width=.4;
+pard.readnoise.object=struct('Style','edit','String','0');
+pard.readnoise.position=[l1,3.7];
+pard.readnoise.Width=.3;
 
 pard.numberimagest.object=struct('Style','text','String','# images');
 pard.numberimagest.position=[l1,4];
@@ -109,6 +132,10 @@ pard.numberimagest.Width=.5;
 pard.numberimages.object=struct('Style','edit','String','1');
 pard.numberimages.position=[l1,4.5];
 pard.numberimages.Width=.5;
+
+
+
+
 
 pard.imagefilet.object=struct('Style','text','String','Image:');
 pard.imagefilet.position=[1,1];
@@ -130,12 +157,16 @@ pard.imagefileb.Width=.5;
 % pard.darkfileb.position=[2,4.5];
 % pard.darkfileb.Width=.5;
 
-% pard.fixoffsetc.object=struct('Style','checkbox','String','Fix offset:');
-% pard.fixoffsetc.position=[3,1];
-% pard.fixoffsetc.Width=1;
-% pard.fixoffset.object=struct('Style','edit','String','0');
-% pard.fixoffset.position=[3,2];
-% pard.fixoffset.Width=1;
+pard.fixoffsetc.object=struct('Style','checkbox','String','Fix offset:');
+pard.fixoffsetc.position=[4,1];
+pard.fixoffsetc.Width=1;
+pard.fixoffset.object=struct('Style','edit','String','0');
+pard.fixoffset.position=[4,2];
+pard.fixoffset.Width=1;
+
+pard.darkfileb.object=struct('Style','pushbutton','String','from dark images','Callback',{{@load_callback,obj,2}});
+pard.darkfileb.position=[4,3];
+pard.darkfileb.Width=1;
 
 pard.EMon.object=struct('Style','checkbox','String','EM gain:');
 pard.EMon.position=[3,3];
