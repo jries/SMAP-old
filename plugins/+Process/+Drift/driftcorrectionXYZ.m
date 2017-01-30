@@ -72,9 +72,9 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
 
             
                 p.maxframeall=max(obj.locData.loc.frame);
-                p.framestart=p.layer1_.frame_min;
-                p.framestart=max(min(locs.frame),(p.layer1_.frame_min));
-                p.framestop=min(p.layer1_.frame_max,p.maxframeall);
+%                 p.framestart=p.layer1_.frame_min;
+                p.framestart=(min(locs.frame));
+                p.framestop=max(locs.frame);
                 [drift,driftinfo,fieldc]=getxyzdrift(locs,p);
                 locsall=copyfields([],obj.locData.loc,{fieldc{:},'frame','filenumber'});
                 locsnew=applydriftcorrection(drift,locsall);

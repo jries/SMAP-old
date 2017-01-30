@@ -56,6 +56,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         end
         function out=run(obj,p)
             out=[];
+            obj.locDataL=[];
             obj.makelocDatacopy;
             obj.addSynchronization('sr_roiposition',[],[],{@obj.redraw}); 
             if isempty(obj.axis)||isstruct(obj.axis)||~isvalid(obj.axis)

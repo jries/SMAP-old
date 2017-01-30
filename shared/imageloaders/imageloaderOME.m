@@ -30,19 +30,23 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
         
         function allmd=getmetadatatags(obj)
         [ph,fh,ext]=fileparts(obj.file);
+        exclude={};
         switch ext
             case '.nd2' %Nikon
                 sm=obj.reader.getGlobalMetadata;
                 exclude={'X position for position','Y position for position','Z position for position','PFS Status #','PFS Offset #'};
                 parselist=true;
             case '.lif'
-                exclude={};
+                
                 cm=obj.reader.getCoreMetadataList;
                 cm1=cm.get(0);
                 sm=cm1.seriesMetadata;
                 parselist=true;
             case '.tif'
                 parselist=false;
+            otherwise 
+                parselist=true;
+                sm=obj.reader.getGlobalMetadata;
                 
         end
                 
