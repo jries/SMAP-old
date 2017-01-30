@@ -1,5 +1,7 @@
 function  savesml(locData,file,p)
 
+
+
 if p.saveroi
     [~,indgroi]=locData.getloc('xnm','position','roi');  
     indgl=false(size(indgroi));
@@ -16,13 +18,22 @@ if p.saveroi
     indg=indgl&indgroi;
     
 else
-    indg=[];
+    indg=true(size(locData.loc.xnm));
+end
+
+if p.savefile
+    filenumber=p.dataselect.Value;
+    indg=indg&locData.loc.filenumber==filenumber;
 end
 saveloc=locData.savelocs([],indg); % BETA , maybe problematic with more than 1 file: this will save only displayed loicalizations
 % if ~isempty(locData.SE)
 %     saveloc.siteexplorer=locData.SE.save;
 % end
-
+if p.savefile
+    saveloc.file=saveloc.file(filenumber);
+    saveloc.history=saveloc.history(filenumber);
+    saveloc.loc.filenumber=ones(size(locData.loc.filenumber));
+end
 
 if locData.getGlobalSetting('saveas73')
     version='-v7.3';

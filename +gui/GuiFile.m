@@ -46,7 +46,7 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             upperpos=obj.guihandles.save.Position;
 %             obj.savers= plugintemp.plugins('File','Save',allsavers{1},[],obj.P); %to initialize
             for k=1:length(allsavers)
-                saverhandle=uipanel(obj.handle,'Units','pixels','Position',[1,1*fh,2.9*fw,upperpos(2)-fh],'Visible','off');
+                saverhandle=uipanel(obj.handle,'Units','pixels','Position',[1,.6*fh,2.9*fw,upperpos(2)-.6*fh],'Visible','off');
                
                 
                 saver=plugin('File','Save',allsavers{k},saverhandle,obj.P);
@@ -76,9 +76,11 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             f=getParentFigure(obj.handle);
             c=uicontextmenu(f);
             obj.guihandles.filelist_long.UIContextMenu=c;
+            obj.guihandles.filelist_long.String=obj.getGlobalSetting('DataDirectory');
             m1 = uimenu(c,'Label','info','Callback',{@menu_callback,obj});
             m1 = uimenu(c,'Label','remove','Callback',{@menu_callback,obj});
             m1 = uimenu(c,'Label','clear','Callback',{@menu_callback,obj});
+            
         end
      
         function loadbutton_callback(obj, handle,actiondata,isadd,pfad,f)

@@ -33,6 +33,7 @@ classdef SMLMsaver<interfaces.DialogProcessor
             par=obj.getAllParameters;
             
             par.saveroi=par.savevisible;
+%             savelocData=obj.locdata.copy;
             savesml(obj.locData,[path f],par)
             
             end
@@ -56,5 +57,18 @@ pard.savevisible.object=struct('Style','checkbox','Visible','on','String','only 
 pard.savevisible.position=[1,1];
 pard.savevisible.Width=4;
 pard.savevisible.object.TooltipString='save only those filtered localizations that have been used to render the image';
+
+pard.savefile.object=struct('Style','checkbox','Visible','on','String','Only: ','Value',0);
+pard.savefile.position=[2,1];
+pard.savefile.Width=1;
+pard.savefile.object.TooltipString='save only selected file';
+
+pard.dataselect.object=struct('Style','popupmenu','Visible','on','String',{{'empty'}});
+pard.dataselect.position=[2,2];
+pard.dataselect.Width=3;
+pard.dataselect.object.TooltipString='save only selected file';
+
+pard.syncParameters={{'filelist_short','dataselect',{'String'}}};
 pard.plugininfo.type='SaverPlugin';
+
 end
