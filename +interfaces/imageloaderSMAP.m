@@ -99,7 +99,7 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
              metao=obj.metadata;   
         end
         function metao=getmetadatacam(obj)
-            md=getCameraCalibration(obj);
+            md=getCameraCalibration(obj,[],[],obj.getGlobalSetting('cameraSettingsFile'));
             if isempty(md)
                 metao=[];
                 return

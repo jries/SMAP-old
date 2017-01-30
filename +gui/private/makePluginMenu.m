@@ -213,4 +213,7 @@ p=obj.getPar('loc_fileinfo');
 if ~isempty(p)
 c.defaultpath=p.basefile;
 end
+c.cameraSettingsFile=obj.getGlobalSetting('cameraSettingsFile');
+c.makeGui;
+
 end

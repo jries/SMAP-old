@@ -3,6 +3,8 @@ if nargin<3||isempty(silent)
     silent=false;
 end
 if nargin<4||isempty(file)
+    disp('camera calibration file not passed')
+    adsf
     file='settings/cameras.mat';
 end
 replacefields={'cam_pixelsize_um','pixsize'};

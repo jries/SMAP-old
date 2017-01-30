@@ -11,11 +11,12 @@ classdef CameraManager<handle
         currentstate=1;
         lastcamtableselected=[];
         defaultpath;
+        cameraSettingsFile='settings/cameras.mat';
     end
     
     methods
         function obj=CameraManager
-            makeGui(obj)
+%             makeGui(obj)
         end
         function loadimages(obj,file) 
             if nargin > 1
@@ -43,13 +44,16 @@ classdef CameraManager<handle
                     prop2table(obj);
                 end
         end
+        function makeGui(obj)
+            makeGui(obj)
+        end
     end
     
 end
 
 function makeGui(obj)
 width=800;
-height=550;
+height=600;
 lineheight=25;
 posbutton=width*.8;
 buttonwidth=width*.15;
@@ -60,27 +64,32 @@ if isempty(obj.handle)||~isvalid(obj.handle)
      delete(obj.handle.Children);
 end
 %load images
-hp=uicontrol('Style','pushbutton','String','Load images','Position',[posbutton height-40,buttonwidth,lineheight],'Callback',{@loadimages,obj});
-hp=uicontrol('Style','pushbutton','String','test','Position',[posbutton height-65,buttonwidth,lineheight],'Callback',{@testcal,obj});
-% hp=uicontrol('Style','pushbutton','String','Save','Position',[posbutton height-90,buttonwidth,lineheight],'Callback',{@savecameras,obj});
+hp=uicontrol('Style','text','String','camera Settings File','Position',[20 height-40,width*.2,lineheight]);
+obj.guihandles.camerafile=uicontrol('Style','edit','String',obj.cameraSettingsFile,'Position',[width*.2 height-40,width*.6,lineheight]);
+hp=uicontrol('Style','pushbutton','String','load','Position',[posbutton height-40,buttonwidth,lineheight],'Callback',{@loadcamerafile,obj});
 
 
-tcam=uitable(obj.handle,'Position',[10 height-lineheight*4 width-200,lineheight*3.5]);
+hp=uicontrol('Style','pushbutton','String','Load images','Position',[posbutton height-90,buttonwidth,lineheight],'Callback',{@loadimages,obj});
+hp=uicontrol('Style','pushbutton','String','test','Position',[posbutton height-115,buttonwidth,lineheight],'Callback',{@testcal,obj});
+hp=uicontrol('Style','pushbutton','String','Add camera','Position',[posbutton height-140,buttonwidth,lineheight],'Callback',{@menu_callback,obj,'add'});
+
+
+tcam=uitable(obj.handle,'Position',[10 height-lineheight*4-50 width-200,lineheight*3.5]);
 tcam.ColumnName={'Camera Name','ID field','ID'};
-tcam.Data={'Cam1','Cam_ID','001'};
+tcam.Data={'Default','select Cam_ID','001'};
 wh=tcam.Position(3);
 tcam.ColumnWidth={'auto',wh*.5,wh*.27};
 tcam.CellSelectionCallback={@cellselect,obj,'cam'};
 tcam.ColumnEditable=[ true false true];
 
 hc=uicontextmenu(obj.handle);
-hui=uimenu('Parent',hc,'Label','add','Callback',{@uimenucallback,obj});
-hui=uimenu('Parent',hc,'Label','remove','Callback',{@uimenucallback,obj});
-hui=uimenu('Parent',hc,'Label','move up','Callback',{@uimenucallback,obj});
-hui=uimenu('Parent',hc,'Label','move down','Callback',{@uimenucallback,obj});
+hui=uimenu('Parent',hc,'Label','add','Callback',{@menu_callback,obj});
+hui=uimenu('Parent',hc,'Label','remove','Callback',{@menu_callback,obj});
+hui=uimenu('Parent',hc,'Label','move up','Callback',{@menu_callback,obj});
+hui=uimenu('Parent',hc,'Label','move down','Callback',{@menu_callback,obj});
 
 tcam.UIContextMenu=hc;
-tpar=uitable(obj.handle,'Position',[10 height-lineheight*13-30 width-40,lineheight*9.5]);
+tpar=uitable(obj.handle,'Position',[10 height-lineheight*13-80 width-40,lineheight*9.5]);
 tpar.ColumnName={'Parameter','mode','fixvalue','metafield','Value','conversion','Converted'};
 
 % parnames={'EMon','pixelsize','conversion','emgain','offset','roi','exposure','timediff','comment'};
@@ -173,8 +182,10 @@ obj.guihandles.statevaltable.BackgroundColor=col;
 end
 
 function loadcameras(obj)
-file='settings/cameras.mat';
+% file='settings/cameras.mat';
+file =obj.cameraSettingsFile;
 if ~exist(file,'file')
+    disp('camera file does not exist')
     return
 end
 l=load(file);
@@ -190,7 +201,8 @@ showpartable(obj);
 end
 
 function savecameras(a,b,obj)
-file='settings/cameras.mat';
+% file='settings/cameras.mat';
+file=obj.cameraSettingsFile;
 tables2prop(obj);
 camtab=obj.guihandles.camtable.Data;
 cameras=obj.cameras;
@@ -239,7 +251,7 @@ end
 function t=intpartable
 t=cell(12,7);
 parnames={'EMon','cam_pixelsize_um','conversion','emgain','offset','roi','exposure','timediff','comment','numberOfFrames','Width','Height'};
-mode={'metadata','fix','state dependent','metadata','state dependent','metadata','metadata','metadata','metadata','metadata','metadata','metadata'};
+mode={'fix','fix','fix','fix','fix','fix','fix','fix','fix','metadata','metadata','metadata'};
 default={'true','0.1','1','100','100','','1','1','settings not initialized','0','0','0'};
 conversion={'str2double(X)','str2double(X)','str2double(X)','str2double(X)','str2double(X)','str2num(X)','str2double(X)','str2double(X)','','str2double(X)','str2double(X)','str2double(X)'};
 metafield={'select','select','select','select','select','select','select','select','select','select','select','select','select'};
@@ -425,8 +437,11 @@ switch addrem
 end
 end
 
-function uimenucallback(object, data, obj)
-switch object.Label
+function menu_callback(object, data, obj,label)
+if nargin<4
+    label=object.Label;
+end
+switch label
     case 'remove'
         if isempty(obj.lastcamtableselected)
             return
@@ -465,4 +480,16 @@ end
 
 function calibrate_cameras(a,b,obj)
 %display info on how to calibrate cameras.
+end
+
+function loadcamerafile(a,b,obj)
+file=obj.cameraSettingsFile;
+[f,p]=uigetfile(file);
+if f
+    obj.cameraSettingsFile=[p f];
+    obj.guihandles.camerafile=[p f];
+    loadcameras(obj);
+end
+
+
 end
