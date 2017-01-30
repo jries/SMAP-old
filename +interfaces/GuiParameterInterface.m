@@ -327,8 +327,9 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
     %             obj.P.globalSettings.(field).name=name;
                 obj.P.globalSettings.(field).category=category;
                 obj.P.globalSettings.(field).description=description;
-                obj.saveGlobalSettings;
                 SMAP_globalsettings=obj.P.globalSettings;
+                obj.saveGlobalSettings;
+                
             end
             %save to global parameters
         end
