@@ -67,9 +67,9 @@ classdef IntLoc2pos<interfaces.WorkflowModule
                 end
                 ind1=min(ind1,lf);
                 intLoc2pos_ind2=ind1;
-                if ~intLoc2pos_locframes(intLoc2pos_ind2)==frame %no localizatiaon in frame
+                if ~(intLoc2pos_locframes(intLoc2pos_ind2)==frame) %no localizatiaon in frame
                       datout=data;%.copy;
-                     datout.data.x=[];%.set(maxout);
+                     datout.data=struct('x',[]);%.set(maxout);
                     return
                 end
                 while intLoc2pos_ind2<=lf&&intLoc2pos_locframes(intLoc2pos_ind2)==frame;
