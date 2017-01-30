@@ -1,6 +1,9 @@
-function [par,cam,state]=getCameraCalibration(imloader,l,silent)
-if nargin<3
+function [par,cam,state]=getCameraCalibration(imloader,l,silent,file)
+if nargin<3||isempty(silent)
     silent=false;
+end
+if nargin<4||isempty(file)
+    file='settings/cameras.mat';
 end
 replacefields={'cam_pixelsize_um','pixsize'};
 
@@ -10,7 +13,7 @@ state=[];
 argin{1}=imloader;argin{3}=silent;
 if nargin<2||isempty(l)
     argin{2}=[];
-    file='settings/cameras.mat';
+    
     if ~exist(file,'file')
 %         l=[];
         [par,cam,state]=askforcameramanager(imloader,'camera calibration file settings/camera.mat not found. ',silent,argin);

@@ -204,6 +204,7 @@ function Fmovier=makemovie %calculate fourier transforms of images
 %     posr.x=pos.xnm;posr.y=pos.ynm;
     binframes=2*ceil(numframes/timepoints/2+1);
     frameranges=[firstframe:binframes:lastframe lastframe] ;  
+    timepoints=length(frameranges)-1;
     Fmovier=zeros(nfftexp,nfftexp,timepoints,'single');
     for k=1:timepoints
         indframe=pos.frame<frameranges(k+1)&pos.frame>=frameranges(k);

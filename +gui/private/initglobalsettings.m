@@ -1,6 +1,6 @@
 function initglobalsettings(obj)
 %defines global settings
-
+obj.loadGlobalSettings;
 obj.createGlobalSetting('guiPluginConfigFile','GUI','Configuration file for GUI plugin structure. Delete path and save to reset plugins.',struct('Style','file','String','settings/SimpleGui.txt'))
 obj.createGlobalSetting('customMenuFile','GUI','Configuration file for custom menu. Delete path and save to not have any custom menu.',struct('Style','file','String',' '))
 obj.createGlobalSetting('mainLocalizeWFFile','GUI','Description file for fitting workflow, e.g. settings/workflows/fit_tif_wavelet.txt',struct('Style','file','String','settings/workflows/fit_any_wavelet.txt'))
@@ -19,3 +19,5 @@ structure=struct('Style','checkbox','String','Ask for Auto Check on','Value',1);
 obj.createGlobalSetting('SE_autosavecheck','ROIManager','Ask for autosave on when starting ROI manager',structure);
  obj.createGlobalSetting('saveas73','File','.mat format. -v7.3: slow and larger files, but ompatibel with >2GB',...
     struct('Style','checkbox','String','Always use -v7.3','Value',0));
+
+obj.createGlobalSetting('cameraSettingsFile','File','CameraManager: File to save camera settings ',struct('Style','file','String','settings/cameras.mat'))  
