@@ -25,6 +25,9 @@ if p.savefile
     filenumber=p.dataselect.Value;
     indg=indg&locData.loc.filenumber==filenumber;
 end
+if all(indg)%save all
+    indg=[];
+end
 saveloc=locData.savelocs([],indg); % BETA , maybe problematic with more than 1 file: this will save only displayed loicalizations
 % if ~isempty(locData.SE)
 %     saveloc.siteexplorer=locData.SE.save;
