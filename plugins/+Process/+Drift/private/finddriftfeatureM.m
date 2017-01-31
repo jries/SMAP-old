@@ -1,5 +1,5 @@
 function [drift,driftinfo]=finddriftfeatureM(pos,par)
-
+global SMAP_stopnow
 %pos.xnm .ynm .frame
 %frame starts with 1, ascending order, maybe not necessary?
 % XXX locData: sort function, general
@@ -149,6 +149,10 @@ function [Fmovier,posh]=makemovie %calculate fourier transforms of images
         imager(:,:,k)=(histrender(posr,mx, my, pixrec, pixrec).*maskimage)';
         Fmovier(:,:,k)=fft2(imager(:,:,k),nfftexp,nfftexp);
         posh(k)=posr;
+        
+        if SMAP_stopnow
+            error('execution stopped by user');
+        end
 %         figure(89)
 %         imagesc(imager)
 %         waitforbuttonpress
@@ -181,9 +185,9 @@ for k=1:dnumframesh-1
 %             drawnow
 %         end
     title(axiscurve,[k; l])
-    if SMAP_stopnow
-        error('aborted')
-    end
+        if SMAP_stopnow
+            error('execution stopped by user');
+        end
     end
     
 
