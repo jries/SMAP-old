@@ -8,12 +8,17 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
         waittime=5;
         currentImageNumber;
         allmetadatatags;
+        calibrationFile='settings/cameras.mat';
     end
     methods
        function obj=imageloaderSMAP(varargin)
            obj.metadata=interfaces.metadataSMAP;
            if nargin>2
-               obj.P=varargin{3};
+               if isa(varargin{3},'interfaces.ParameterData')
+                    obj.P=varargin{3};
+               else
+                   obj.calibrationFile=varargin{3};
+               end
            end
            if nargin>1
                if ~isempty(varargin{2})
@@ -99,7 +104,16 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
              metao=obj.metadata;   
         end
         function metao=getmetadatacam(obj)
-            md=getCameraCalibration(obj,[],[],obj.getGlobalSetting('cameraSettingsFile'));
+            try
+                camfile=obj.getGlobalSetting('cameraSettingsFile');
+            catch err
+                camfile=obj.calibrationFile;
+                display('could not find camera file in global settings.')
+              ererwe
+              
+            end
+                
+            md=getCameraCalibration(obj,[],[],camfile);
             if isempty(md)
                 metao=[];
                 return

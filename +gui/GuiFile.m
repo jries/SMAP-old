@@ -76,7 +76,7 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             f=getParentFigure(obj.handle);
             c=uicontextmenu(f);
             obj.guihandles.filelist_long.UIContextMenu=c;
-            obj.guihandles.filelist_long.String=obj.getGlobalSetting('DataDirectory');
+            obj.guihandles.filelist_long.String=[obj.getGlobalSetting('DataDirectory') filesep ];
             m1 = uimenu(c,'Label','info','Callback',{@menu_callback,obj});
             m1 = uimenu(c,'Label','remove','Callback',{@menu_callback,obj});
             m1 = uimenu(c,'Label','clear','Callback',{@menu_callback,obj});
@@ -138,7 +138,7 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 end
 
                 obj.status('file loaded')
-                if isfield(obj.locData.files.file(1),'transformation')
+                if ~isempty(obj.locData.files.file)&&isfield(obj.locData.files.file(1),'transformation')
                     for k=length(obj.locData.files.file):-1:1
                         if ~isempty(obj.locData.files.file(k).transformation)
                             obj.setPar('transformationfile','internal');

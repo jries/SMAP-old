@@ -15,7 +15,7 @@ classdef GainOffsetFFT<interfaces.DialogProcessor
             fn=p.imagefile;
             ax=obj.initaxis('image');
             
-            il=imageloaderAll(fn);
+            il=imageloaderAll(fn,[],obj.P);
             if numel(p.numberimages)==1
                 p.numberimages=1:p.numberimages;
             end
@@ -49,7 +49,7 @@ classdef GainOffsetFFT<interfaces.DialogProcessor
         end
         function loadfile(obj,file)
             ht='imagefile';
-            il=imageloaderAll(file);
+            il=imageloaderAll(file,[],obj.P);
             fi=il.getmetadata;
             obj.setGuiParameters(struct(ht,file,'emgain',fi.emgain,'EMon',double(fi.EMon),'fixoffset',fi.emgain))
     
