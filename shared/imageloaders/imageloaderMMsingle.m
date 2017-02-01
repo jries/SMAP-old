@@ -43,10 +43,11 @@ classdef imageloaderMMsingle<interfaces.imageloaderSMAP
 end
 
 function image=readseparate(obj,number)
+image=[];
 separate=obj.separate;
 % lenfiles=length(separate.files);
 lenfiles=separate.numfiles;
-if lenfiles<number 
+if lenfiles<number || obj.separatefiles(number).ismissing
     if obj.onlineAnalysis %ask for image that is not in list
         lastfile= obj.separatefiles{lenfiles};
 %         thisname= generateFileName(lastfile,lenfiles,obj.metadata.allmetadata.numberNameRange,number);
@@ -60,9 +61,9 @@ if lenfiles<number
             image=[];
             return
         else
-            if number>lenfiles
-                obj.separatefiles{number+1000}='';
-            end
+%             if number>lenfiles
+%                 obj.separatefiles{number+1000}='';
+%             end
             obj.separatefiles{number}=thisname;
             obj.separate.numfiles=max(lenfiles,number);
             obj.metadata.numberOfFrames=max(lenfiles,number);
@@ -72,7 +73,14 @@ if lenfiles<number
         return
     end
 else
+    try
+        
     thisfile=[separate.path filesep obj.separatefiles{number}];
+    catch err
+        
+        err
+        return
+    end
 end
 try
     image=myimread(thisfile,separate.fmt_s);     
