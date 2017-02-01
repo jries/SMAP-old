@@ -37,7 +37,7 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
                 exclude={'X position for position','Y position for position','Z position for position','PFS Status #','PFS Offset #'};
                 parselist=true;
             case '.lif'
-                
+                setseries(obj);
                 cm=obj.reader.getCoreMetadataList;
                 cm1=cm.get(0);
                 sm=cm1.seriesMetadata;
@@ -166,6 +166,35 @@ end
 metao=obj.metadata;
 end
 
+function setseries(obj)
+reader=obj.reader;
+seri=reader.getSeriesCount;
+        ind=1;
+        series=[];
+        message={};
+        for k=seri:-1:1
+            reader.setSeries(k-1);
+            numim(k)=reader.getImageCount;
+            if numim(k)>1
+                series(ind)=k;
+                message{ind}=['S' num2str(k) ', ' num2str(numim(k)) ' frames'];
+                ind=ind+1;
+            end
+        end
+        if ind>2
+            if isempty(obj.seriesnumber)
+                selected=listdlg('ListString',message,'SelectionMode','single','Name','Select data set');
+                largeseries=series(selected);
+                 obj.seriesnumber=largeseries-1;
+            else
+                largeseries=obj.seriesnumber+1;
+            end
+        else
+            [~,largeseries]=max(numim);
+        end
+        reader.setSeries(largeseries-1);
+        obj.seriesnumber=largeseries-1;
+end
 
 
 

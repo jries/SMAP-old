@@ -1,4 +1,4 @@
-classdef CameraManager<handle
+classdef CameraManager<interfaces.GuiParameterInterface;
     %UNTITLED2 Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -22,7 +22,7 @@ classdef CameraManager<handle
             if nargin > 1
                 obj.imloader=imageloaderAll(file);
             end
-                [par,cam,state]=getCameraCalibration(obj.imloader,[],true);
+                [par,cam,state]=getCameraCalibration(obj.imloader,[],true,obj.cameraSettingsFile);
                 if isempty(cam)
                     answ=questdlg('camera not found. Create new camera?');
                     if strcmp(answ,'Yes')
