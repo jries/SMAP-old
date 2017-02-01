@@ -10,6 +10,7 @@ global SMAP_stopnow
 % par.drift_timepoints=10; %number of time points evaluated 
 % par.drift_maxdrift=500; %maximal drift in nm (not crucial, rather choose to
 % high
+%par.drift_maxpix maximum size of recontsructed image
 
 %other functions needed:
 %myhist2
@@ -39,6 +40,17 @@ my=[min(pos.ynm) max(pos.ynm)]; %You can put your own routine here
 
 srec(1)=round((mx(2)-mx(1))/pixrec);
 srec(2)=round((my(2)-my(1))/pixrec);
+
+if max(srec)>par.drift_maxpixels %too large for reconstruction, fold back
+    pos.xnm=pos.xnm-min(pos.xnm);pos.ynm=pos.ynm-min(pos.xnm);
+    maxnm=par.drift_maxpixels*par.drift_pixrec;
+    pos.xnm=mod(pos.xnm,maxnm);pos.ynm=mod(pos.ynm,maxnm);
+    mx=[min(pos.xnm) max(pos.xnm)]; %ROI which is used for drift correction. 
+    my=[min(pos.ynm) max(pos.ynm)]; %You can put your own routine here
+
+    srec(1)=round((mx(2)-mx(1))/pixrec);
+    srec(2)=round((my(2)-my(1))/pixrec);
+end
 
 % srim= histrender(posr,mx, my, pixrec, pixrec);
 

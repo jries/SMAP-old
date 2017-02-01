@@ -160,7 +160,9 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.setPar('sr_size',(ims/2*pixrec));
             p=obj.getGuiParameters;
             lon=[p.layeron1,p.layeron2,p.layeron3,p.layeron4,p.layeron5,p.layeron6];
-            obj.setPar('sr_layerson',lon);   
+            loo=obj.getPar('sr_layerson');
+            loo(1:6)=lon;
+            obj.setPar('sr_layerson',loo);   
         end
 
         function sr_axes=makesrfigure(obj,fignumber)
