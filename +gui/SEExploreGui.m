@@ -279,6 +279,9 @@ if ~isempty(cells)&&~isempty(cells(1).ID)
         s{k}=['C' num2str(cells(k).ID,'%02.0f') 'F' num2str(cells(k).info.filenumber,'%02.0f')];
     end
     obj.guihandles.celllist.String=s;
+    if isempty(obj.SE.currentcell)
+        obj.SE.currentcell=obj.SE.cells(1);
+    end
     val=obj.SE.indexFromID(obj.SE.cells,obj.SE.currentcell.ID);
     if isempty(val)
         val=obj.guihandles.celllist.Value;

@@ -39,14 +39,15 @@ SEpreview=obj.SE.processors.preview;
 end
 
 function redrawall_callback(a,b,obj)
-obj.SEpreview.redrawall;
+% obj.SEpreview.redrawall;
+obj.SE.processors.preview.redrawall
 
 end
 
 function clearall_callback(a,b,obj) 
 answer=questdlg('Do you really want to clear all sites and cells?','Clear ROIs','No');
 if strcmp(answer,'Yes')
-obj.SEpreview.clearall;
+obj.SE.processors.preview.clearall;
 end
 end
 
