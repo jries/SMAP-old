@@ -26,35 +26,39 @@ beadind=locDatacopy.grouploc.numberInGroup>p.minframes;
 xb=locDatacopy.grouploc.xnm(beadind);
 yb=locDatacopy.grouploc.ynm(beadind);
 
-p=obj.getAllParameters;
-files=obj.SE.files;
-xm=min(obj.locData.loc.xnm);
-ym=min(obj.locData.loc.ynm);
-xx=max(obj.locData.loc.xnm);
-yx=max(obj.locData.loc.ynm);
-posx=xm-p.se_sitefov:p.se_cellfov:xx+p.se_sitefov;
-posy=ym-p.se_sitefov:p.se_cellfov:yx+p.se_sitefov;
-for k=1:length(files)
-    for x=1:length(posx)
-        for y=1:length(posy)
-            pos=[posx(x) posy(y)]+p.se_cellfov/2;
-
-             currentcell=interfaces.SEsites;
-            currentcell.pos=pos;
-            currentcell.ID=0;
-
-            currentcell.info.filenumber=k;
-            obj.SE.addCell(currentcell);
+% p=obj.getAllParameters;
+% files=obj.SE.files;
+% xm=min(obj.locData.loc.xnm);
+% ym=min(obj.locData.loc.ynm);
+% xx=max(obj.locData.loc.xnm);
+% yx=max(obj.locData.loc.ynm);
+% posx=xm-p.se_sitefov:p.se_cellfov:xx+p.se_sitefov;
+% posy=ym-p.se_sitefov:p.se_cellfov:yx+p.se_sitefov;
+% for k=1:length(files)
+%     for x=1:length(posx)
+%         for y=1:length(posy)
+%             pos=[posx(x) posy(y)]+p.se_cellfov/2;
+% 
+%              currentcell=interfaces.SEsites;
+%             currentcell.pos=pos;
+%             currentcell.ID=0;
+% 
+%             currentcell.info.filenumber=k;
+%             obj.SE.addCell(currentcell);
+cells=obj.SE.cells;
+for c=1:length(cells)
+    cellh=cells(c);
+    pos=cellh.pos;
             beadhere=find(mywithin(xb,[pos(1)-p.se_cellfov/2 p.se_cellfov],yb,[pos(2)-p.se_cellfov/2 p.se_cellfov]));
             for b=1:length(beadhere)
                     currentsite=interfaces.SEsites;
                     currentsite.pos=[xb(beadhere(b)) yb(beadhere(b)) 0];     
-                    currentsite.info.cell=obj.SE.cells(end).ID;
-                    currentsite.info.filenumber=k;
+                    currentsite.info.cell=cellh.ID;
+                    currentsite.info.filenumber=cellh.info.filenumber;
                      obj.SE.addSite(currentsite);
             end
-        end
-    end
+%         end
+%     end
 end
 obj.SE.processors.preview.updateCelllist
 obj.SE.processors.preview.updateSitelist
@@ -158,13 +162,24 @@ end
 
 end
 
+function makecells(a,b,obj)
+f=figure;%f.Visible='off';
+mc=plugin('ROIManager','Segment','makeCellGrid',f,obj.P);
+mc.attachLocData(obj.locData)
+mc.attachSE(obj.locData.SE)
+mc.makeGui;
+p=mc.getAllParameters;
+mc.run(p);
+close(f)
+end
+
 function pard=guidef(obj)
 
 
 
 
-% pard.makecells.object=struct('String','Make cell grid','Style','pushbutton','Callback',{{@makecells, obj}});
-% pard.makecells.position=[1,1];
+pard.makecells.object=struct('String','Make cell grid','Style','pushbutton','Callback',{{@makecells, obj}});
+pard.makecells.position=[1,1];
 
 
 % pard.segmentbeads.object=struct('String','Make cell grid','Style','pushbutton','Callback',{{@makecells, obj}});
@@ -172,7 +187,7 @@ function pard=guidef(obj)
 
 pard.t2.object=struct('String','minimum frames','Style','text');
 pard.t2.position=[2,1];
-pard.minframes.object=struct('String','15','Style','edit');
+pard.minframes.object=struct('String','30','Style','edit');
 pard.minframes.position=[2,2];
 
 pard.dofilter.object=struct('String','Filter','Style','pushbutton','Callback',{{@filterbeads, obj}});
