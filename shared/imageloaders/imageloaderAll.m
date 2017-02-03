@@ -22,6 +22,10 @@ file=varargin{1};
            else
                imloader=@imageloaderOME;
            end
+       case '' %directory
+           fns=dir([file filesep '*.tif']);
+           varargin{1}=[file filesep fns(1).name];
+           imloader=@imageloaderMMsingle;
        otherwise
            imloader=@imageloaderOME;
    end    

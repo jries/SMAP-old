@@ -71,7 +71,10 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
                     end
                 case 'mat'
                     for k=length(numbers):-1:1
-                        images(:,:,k)=obj.getimage(numbers(k));
+                        imh=obj.getimage(numbers(k));
+                        if ~isempty(imh)
+                        images(:,:,k)=imh;
+                        end
                     end
             end
             
@@ -126,6 +129,7 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
                 end
             end
             obj.metadata.allmetadata=obj.allmetadatatags;
+            obj.metadata.imagefile=obj.file;
 %             if isempty(obj.metadata.basefile)
                
 %             end

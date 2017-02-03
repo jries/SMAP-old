@@ -107,7 +107,7 @@ for s=length(sites):-1:1
     end
     
 end
-
+if ~isempty(obj.SE.currentsite)
 posh=horzcat(obj.SE.currentsite.pos(1:2),p.se_siteroi);
 locs=obj.locData.getloc({'xnm','ynm','PSFxnm','PSFynm','frame','phot'},'Position',posh,'layer',1,'grouping','ungrouped');
 
@@ -117,7 +117,7 @@ plot(ax2, locs.frame,locs.PSFynm,'k-')
 hold on
 plot(axp, locs.frame,locs.phot,'k-')
 hold on
-
+end
 axh=obj.initaxis('PSFxpos')
 plot(frameminx,minPSFx,'.')
 hold on
@@ -205,7 +205,7 @@ pard.framedistancec.Width=2;
 pard.framedistance.object=struct('String','2','Style','edit');
 pard.framedistance.position=[5,3];
 
-pard.frameranget.object=struct('String','frame range considered','Style','checkbox');
+pard.frameranget.object=struct('String','frame range considered','Style','text');
 pard.frameranget.position=[6,1];
 pard.frameranget.Width=2;
 pard.framerange.object=struct('String','15','Style','edit');

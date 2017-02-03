@@ -19,7 +19,7 @@ for k=length(p):-1:1
             vh=nv;
 %         end
     end
-    if isarray||(numel(vh)==1 && isnumeric(vh))
+    if isarray||(numel(vh)==1 && (isnumeric(vh)||islogical(vh)))
         v(k)=vh;
         isarray=true;
     else

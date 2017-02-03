@@ -19,6 +19,7 @@ classdef metadataSMAP<handle
         pix2phot=[];
         basefile;
         assigned
+        imagefile
     end
     
     methods
