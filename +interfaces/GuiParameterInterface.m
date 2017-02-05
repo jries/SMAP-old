@@ -276,7 +276,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             %.selection=h.String{h.Value}
             %Table: Data
             handle=[];
-            if isa(hin,'matlab.ui.control.UIControl')|| (isstruct(hin)&&(isfield(hin,'String')||isfield(hin,'Value'))&&isfield(hin,'Style'))
+            if (isa(hin,'matlab.ui.control.UIControl')&&isvalid(hin))|| (isstruct(hin)&&(isfield(hin,'String')||isfield(hin,'Value'))&&isfield(hin,'Style'))
             switch hin.Style
                 case {'edit','file'} %file:own creation for global settings
                     if isnumeric(v)
@@ -327,8 +327,9 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
     %             obj.P.globalSettings.(field).name=name;
                 obj.P.globalSettings.(field).category=category;
                 obj.P.globalSettings.(field).description=description;
-                obj.saveGlobalSettings;
                 SMAP_globalsettings=obj.P.globalSettings;
+                obj.saveGlobalSettings;
+                
             end
             %save to global parameters
         end

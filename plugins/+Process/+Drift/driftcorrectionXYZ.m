@@ -72,9 +72,9 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
 
             
                 p.maxframeall=max(obj.locData.loc.frame);
-                p.framestart=p.layer1_.frame_min;
-                p.framestart=max(min(locs.frame),(p.layer1_.frame_min));
-                p.framestop=min(p.layer1_.frame_max,p.maxframeall);
+%                 p.framestart=p.layer1_.frame_min;
+                p.framestart=(min(locs.frame));
+                p.framestop=max(locs.frame);
                 [drift,driftinfo,fieldc]=getxyzdrift(locs,p);
                 locsall=copyfields([],obj.locData.loc,{fieldc{:},'frame','filenumber'});
                 locsnew=applydriftcorrection(drift,locsall);
@@ -180,6 +180,16 @@ pard.drift_maxdrift.position=[5,2];
 
 pard.drift_maxdrift.object.TooltipString=sprintf('Maximum drift expected. \n Smaller if data is sparse and wrong peak found. \n larger if no clear peak found. \n Range 250-2000');
 pard.drift_maxdrift.Optional=true;
+
+pard.drift_maxpixelst.object=struct('String','max size (pix)','Style','text');
+pard.drift_maxpixelst.position=[6,1];
+pard.drift_maxpixelst.Optional=true;
+
+pard.drift_maxpixels.object=struct('String','2048','Style','edit');
+pard.drift_maxpixels.position=[6,2];
+pard.drift_maxpixels.object.TooltipString=sprintf('Maximum size of the reconstructed images. Smaller for speed and lower memory consumption, larger for noisy signal. 128-4096');
+pard.drift_maxpixels.Optional=true;
+
 
 pard.correctz.object=struct('String','Correct z-drift','Style','checkbox','Value',0);
 pard.correctz.position=[1,3];

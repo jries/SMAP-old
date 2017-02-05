@@ -35,6 +35,9 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
            obj.locData.sort('filenumber','frame');
            try
            initGuiAfterLoad(obj);
+           catch err
+               err
+           end
            se=obj.locData.SE;
            cell=interfaces.SEsites;
            cell.pos=[mean(locst.xnm) mean(locst.ynm)];
@@ -49,18 +52,21 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
                 % thissite.cellnumber=sitepar.currentcell.number;
         %         thissite.number=sitepar.sitelist.cellnumber+1;
                 se.addSite(thissite);
-           end
+           end 
+           
 %            obj.setPar('SimulateSitesParameters',p);
-           catch 
-           end
+
             try
-           se.processors.preview.updateFilelist;
-           se.processors.preview.updateCelllist;
-           se.processors.preview.updateSitelist; 
            se.currentsite=se.sites(1);
            se.currentcell=se.cells(1);
            se.currentfile=se.files(1);
-           catch
+           se.processors.preview.updateFilelist;
+           se.processors.preview.updateCelllist;
+           se.processors.preview.updateSitelist; 
+            se.processors.preview.nextsite(1)
+%            se.processors.plotsite(se.sites(1));
+            catch err
+                err
             end
            
             if p.savenow.Value==2

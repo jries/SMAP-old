@@ -1,5 +1,5 @@
 function [drift,driftinfo]=finddriftfeatureZ(pos,par)
-
+global SMAP_stopnow
 %pos.xnm .ynm  .znm .frame
 %frame starts with 1, ascending order, maybe not necessary?
 % XXX locData: sort function, general
@@ -200,7 +200,9 @@ for k=1:dnumframesh-1
         zpos(k,l)=finddisplacementZ(pos.xnm(indframek),pos.znm(indframek),pos.xnm(indframel),pos.znm(indframel),xb,zb,window, plotaxish);
         zpos(l,k)=-zpos(k,l);
         
-        
+        if SMAP_stopnow
+            error('execution stopped by user');
+        end
    
     end
 %     disp(k/dnumframesh)

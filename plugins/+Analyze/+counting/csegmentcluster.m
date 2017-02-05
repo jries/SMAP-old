@@ -7,7 +7,8 @@ classdef csegmentcluster<interfaces.DialogProcessor
         function out=run(obj,p)           
             locs=obj.locData.getloc({'frame','xnm','ynm','phot','bg','PSFxnm','locprecnm'},'layer',1,'position','roi');
 
-            clusters=cluster_counting(locs,p);
+%             clusters=cluster_counting(locs,p);
+            clusters=cluster_counting_2(obj.locData,p);
             obj.setResults('counting_clusters',clusters);
             out=clusters;
         end

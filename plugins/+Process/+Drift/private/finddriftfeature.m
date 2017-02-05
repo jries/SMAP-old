@@ -1,5 +1,5 @@
 function [drift,driftinfo]=finddriftfeature(pos,par)
-
+global SMAP_stopnow
 %pos.xnm .ynm .frame
 %frame starts with 1, ascending order, maybe not necessary?
 % XXX locData: sort function, general
@@ -10,6 +10,7 @@ function [drift,driftinfo]=finddriftfeature(pos,par)
 % par.drift_timepoints=10; %number of time points evaluated 
 % par.drift_maxdrift=500; %maximal drift in nm (not crucial, rather choose to
 % high
+%par.drift_maxpix maximum size of recontsructed image
 
 %other functions needed:
 %myhist2
@@ -40,9 +41,23 @@ my=[min(pos.ynm) max(pos.ynm)]; %You can put your own routine here
 srec(1)=round((mx(2)-mx(1))/pixrec);
 srec(2)=round((my(2)-my(1))/pixrec);
 
+if max(srec)>par.drift_maxpixels %too large for reconstruction, fold back
+    pos.xnm=pos.xnm-min(pos.xnm);pos.ynm=pos.ynm-min(pos.xnm);
+    maxnm=par.drift_maxpixels*par.drift_pixrec;
+    pos.xnm=mod(pos.xnm,maxnm);pos.ynm=mod(pos.ynm,maxnm);
+    mx=[min(pos.xnm) max(pos.xnm)]; %ROI which is used for drift correction. 
+    my=[min(pos.ynm) max(pos.ynm)]; %You can put your own routine here
+
+    srec(1)=round((mx(2)-mx(1))/pixrec);
+    srec(2)=round((my(2)-my(1))/pixrec);
+end
+
 % srim= histrender(posr,mx, my, pixrec, pixrec);
 
 nfftexp=2^ceil(log2(max(max(srec),256))); %for fft use power of 2
+if nfftexp>2500
+    nfftexp=round(max(srec(1:2))/2)*2;
+end
 noff=nfftexp/2+1; 
 disp('make movie')
 Fmovier=makemovie;  %calculate fourier transforms of reconstructed images
@@ -204,12 +219,16 @@ function Fmovier=makemovie %calculate fourier transforms of images
 %     posr.x=pos.xnm;posr.y=pos.ynm;
     binframes=2*ceil(numframes/timepoints/2+1);
     frameranges=[firstframe:binframes:lastframe lastframe] ;  
+    timepoints=length(frameranges)-1;
     Fmovier=zeros(nfftexp,nfftexp,timepoints,'single');
     for k=1:timepoints
         indframe=pos.frame<frameranges(k+1)&pos.frame>=frameranges(k);
         posr.x=pos.xnm(indframe);posr.y=pos.ynm(indframe);
         imager=histrender(posr,mx, my, pixrec, pixrec)';
         Fmovier(:,:,k)=fft2(imager,nfftexp,nfftexp);
+        if SMAP_stopnow
+            error('execution stopped by user');
+        end
 %         figure(89)
 %         imagesc(imager)
 %         waitforbuttonpress
@@ -242,6 +261,9 @@ for k=1:dnumframesh-1
         results_ax3.Title.String=num2str(k/dnumframesh+(l-k)/dnumframesh^2);
         results_ax1.Title.String=num2str(k/dnumframesh+(l-k)/dnumframesh^2);
         drawnow
+        if SMAP_stopnow
+            error('execution stopped by user');
+        end
     end
     end
 %     disp(k/dnumframesh)

@@ -12,6 +12,7 @@ classdef CameraConverter<interfaces.WorkflowModule
         calibrateimages
         offset
         adu2phot
+        autocalhandle
     end
     methods
         function obj=CameraConverter(varargin)
@@ -123,10 +124,21 @@ classdef CameraConverter<interfaces.WorkflowModule
 end
 
 function calibrate_callback(a,b,obj)
-obj.calibrategain=true;
-obj.calibratecounter=1;
-obj.calibrateimages=[];
-obj.parent.run;
+cc=plugin('Analyze','other','GainOffsetFFT');
+cc.attachPar(obj.P);
+if isempty(obj.autocalhandle)||~isvalid(obj.autocalhandle)
+obj.autocalhandle=figure;
+else
+    delete(obj.autocalhandle.Children)
+end
+cc.handle=obj.autocalhandle;
+cc.setGuiAppearence(struct('Vrim',100));
+cc.makeGui;
+f=obj.getPar('loc_filename');
+if ~isempty(f)
+    cc.loadfile(f);
+% cc.setGuiParameters(struct('imagefile',f));
+end
 end
 
 function camparbutton_callback(a,b,obj)
@@ -221,26 +233,26 @@ end
 
 function pard=guidef
 
-pard.text.object=struct('Style','text','String','Acquisition parameters:');
+pard.text.object=struct('Style','text','String','Acquisition:');
 pard.text.position=[1,1];
-pard.text.Width=1.5;
+pard.text.Width=.7;
 pard.text.Optional=true;
 % pard.metadatafile.object=struct('Style','edit','String',' ');
 % pard.metadatafile.position=[2,1];
 % pard.metadatafile.Width=4;
 % pard.metadatafile.Optional=true;
 pard.loadmetadata.object=struct('Style','pushbutton','String','Load metadata');
-pard.loadmetadata.position=[1,2.5];
+pard.loadmetadata.position=[1,1.7];
 pard.loadmetadata.TooltipString=sprintf('Load camera settings metadata from image or _sml.mat file.');
 pard.loadmetadata.Optional=true;
-% pard.calibrate.object=struct('Style','pushbutton','String','auto calibration');
-% pard.calibrate.position=[2,2];
-% pard.calibrate.TooltipString=sprintf('calibrate gain and offset from images (from simpleSTORM)');
-% pard.calibrate.Optional=true;
+pard.calibrate.object=struct('Style','pushbutton','String','auto calibration');
+pard.calibrate.position=[1,2.7];
+pard.calibrate.TooltipString=sprintf('calibrate gain and offset from images');
+pard.calibrate.Optional=true;
 
 pard.camparbutton.object=struct('Style','pushbutton','String','set Cam Parameters');
-pard.camparbutton.position=[1,3.5];
-pard.camparbutton.Width=1.5;
+pard.camparbutton.position=[1,3.7];
+pard.camparbutton.Width=1.3;
 pard.camparbutton.TooltipString=sprintf('Edit camera acquisition parameters.');
 pard.plugininfo.type='WorkflowModule'; 
 pard.plugininfo.description='Allows editing metadata, or loading from a file.';

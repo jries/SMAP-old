@@ -31,6 +31,16 @@ classdef Undo< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.locData.grouploc=obj.locDataOld.grouploc;
             obj.locData.files=obj.locDataOld.files;
             obj.setPar('locFields',fieldnames(obj.locData.loc));
+            
+            fl=({obj.locData.files.file.name});
+            fls=fl;
+            for k=1:length(fl)
+                flh=strrep(fls{k},'\','/');
+                [~ ,fls{k}]=fileparts(flh);
+            end
+
+            obj.setPar('filelist_long',fl);
+            obj.setPar('filelist_short',fls);
             obj.locDataOld=temp;
             
             obj.status(['undo performed: ' obj.undoModule])

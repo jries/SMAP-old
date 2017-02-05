@@ -91,7 +91,8 @@ classdef GuiChannel< interfaces.LayerInterface
              h.imax_min.Callback={@obj.updatefields_callback,'imax'};
 %                  h.([cfields{k} '_max']).Callback={@obj.updatefields_callback,cfields{k}};
             
-            obj.addSynchronization([obj.layerprefix 'layercheck'],h.layercheck,'Value',{@callobj.updatelayer_callback,'layercheck'})       
+            obj.addSynchronization([obj.layerprefix 'layercheck'],h.layercheck,'Value',{@callobj.updatelayer_callback,'layercheck'})   
+            h.layercheck.Callback={@updatelayercheck,obj};
             h.parbutton.Callback={@renderpar_callback,obj};
             
 %             cross-layer synch
@@ -117,6 +118,7 @@ classdef GuiChannel< interfaces.LayerInterface
             obj.updateLayerField;
 
             obj.updatelayer_callback;
+            updatelayercheck(h.layercheck,0,obj);
             obj.setfiltergray;
         end
         
@@ -348,7 +350,17 @@ updatefields_callback(obj,0, 0, thisfield,[])
 
 %refilter?
 end
+function updatelayercheck(object,b,obj)
 
+    lo=obj.getPar('sr_layerson');
+    lo(obj.layer)=object.Value;
+    obj.setPar('sr_layerson',lo);
+    obj.setPar([obj.layerprefix 'layercheck'],object.Value);
+    if obj.layer>6
+        notify(obj.P,'sr_render');
+    end
+% end
+end
 function imaxtoggle_callback(object,data,obj)
 if(object.Value)
     object.String='quantile';

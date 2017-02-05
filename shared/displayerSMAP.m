@@ -95,9 +95,11 @@ end
 if ~isfield(p,'sr_colorbarthickness')
     p.sr_colorbarthickness=4;
 end
-for k=1:min(4,length(layers))
+for k=1:(length(layers))
     if p.sr_layerson(k)&&~isempty(layers(k).images)
+        if k<=4
         imfinal=addcolorbar(imfinal,layers(k).images.finalImages.lut,k,p.sr_colorbarthickness);
+        end
         rangexplot=layers(k).images.finalImages.rangex;
          rangeyplot=layers(k).images.finalImages.rangey;
     end
