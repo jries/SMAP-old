@@ -4,9 +4,12 @@ windn=15;
 
 %     [~,nxind]=max(n);
 %     [~,nxind]=min((sx+sy)./n);
-    [~,nindx]=min((sx)./n);
-    [~,nindy]=min((sy)./n);
-    nxind=round((nindx+nindy)/2);
+[~, indm]=max(n);
+range=max(1,indm-10):min(indm+10,length(n));
+
+    [~,nindx]=min((sx(range))./n(range));
+    [~,nindy]=min((sy(range))./n(range));
+    nxind=round((nindx+nindy)/2)+range(1)-1;
     
     fstartn=max(nxind-windn,1);fstopn=min(nxind+windn,length(n));
 %     [sminx,sxindx]=min(sx(fstartn:fstopn));

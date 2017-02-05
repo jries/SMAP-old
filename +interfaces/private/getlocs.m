@@ -14,6 +14,7 @@ function [locsout,indcombined,hroio]=getlocs(locData,fields,varargin)
 %'position': 'all' (default),'roi','fov': position filter
 %'position': vector: [centerx, centery, widhtx widthy] or [centerx,
 %centery,radius] for circular ROI
+%   'interfaces.SEsites: locaizations in site.
 %'layer': double number or vector of layers.
 
 %'removeFilter': cell array of filter names to remove 
@@ -56,6 +57,17 @@ locs=locData.loc;
 end
 
  hroio=[];
+ 
+ %site as position
+ if isa(p.position,'interfaces.SEsites')
+     site=p.position;
+    p.filenumber=site.info.filenumber;
+    sr=locData.getPar('se_siteroi');
+    if isempty(sr)
+        sr=300;
+    end
+    p.position=[site.pos(1:2) sr];
+ end
 %  fields=fieldnames(locData.loc);           
          
 %  if ~isempty(p.layer)  %determine group from layer   
