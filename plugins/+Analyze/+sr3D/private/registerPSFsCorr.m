@@ -150,6 +150,8 @@ if (yfinish > sizey)
 end
 windowLim = [xstart, xfinish,ystart,yfinish];
 
+
+
 function [pos, amplitude] = getCentroid(im);
 im = im-min(im(:));%offset the image to avoid baseline "zero" values contributing to the avg
 

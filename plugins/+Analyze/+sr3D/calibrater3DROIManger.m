@@ -67,6 +67,7 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
                 
             ax=obj.initaxis('CC PSF');
             [corrPSF,shiftedstack]=registerPSFsCorr(allrois,fzero);
+            [corrPSF,shiftedstack]=registerPSF3D(allrois,struct('framerange',fzero-3:fzero+3));
             drawnow;
             corrPSFhd=zeros(size(corrPSF,1)*2,size(corrPSF,2)*2,size(corrPSF,3));
             for k=1:size(corrPSF,3)
