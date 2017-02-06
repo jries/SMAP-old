@@ -64,9 +64,9 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
                         end
                     end
                 end
-                
+%                 allrois(:,end,:,:)=[]; %make asymmetric for testing
             ax=obj.initaxis('CC PSF');
-            [corrPSF,shiftedstack]=registerPSFsCorr(allrois,fzero);
+            [corrPSFa,shiftedstacka]=registerPSFsCorr(allrois,fzero);
             [corrPSF,shiftedstack]=registerPSF3D(allrois,struct('framerange',fzero-3:fzero+3));
             drawnow;
             corrPSFhd=zeros(size(corrPSF,1)*2,size(corrPSF,2)*2,size(corrPSF,3));
@@ -101,11 +101,19 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             ax=obj.initaxis('PSFz')
             ftest=fzero-15;
             zpall=squeeze(shiftedstack(halfroisizebig+1,halfroisizebig+1,:,:));
+            zpall2=squeeze(allrois(halfroisizebig+1,halfroisizebig+1,:,:));
+            zpall3=squeeze(shiftedstacka(halfroisizebig+1,halfroisizebig+1,:,:));
             xpall=squeeze(shiftedstack(:,halfroisizebig+1,ftest,:));
+            xpall2=squeeze(allrois(:,halfroisizebig+1,ftest,:));
+            xpall3=squeeze(shiftedstacka(:,halfroisizebig+1,ftest,:));
             
             for k=1:size(zpall,2)
                 zpall(:,k)=zpall(:,k)/max(zpall(:,k));
                 xpall(:,k)=xpall(:,k)/max(xpall(:,k));
+                zpall2(:,k)=zpall2(:,k)/max(zpall2(:,k));
+                xpall2(:,k)=xpall2(:,k)/max(xpall2(:,k));                
+                zpall3(:,k)=zpall3(:,k)/max(zpall3(:,k));
+                xpall3(:,k)=xpall3(:,k)/max(xpall3(:,k));
             end
             
             zprofile=squeeze(corrPSF(halfroisizebig+1,halfroisizebig+1,:));
@@ -131,18 +139,22 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
 %             fbs=fzero-13:1:fzero+12;
             
             hold off
-            plot(framerange,zpall,'c')
+            plot(framerange,zpall2,'m')
             hold on
+             plot(framerange,zpall,'c')
+             plot(framerange,zpall3,'y')
             plot(framerange,zprofile,'k+')
             plot(framerange,zbs,'ro')
             
             
             xrange=-halfroisizebig:halfroisizebig;
             
-             ax=obj.initaxis('PSFx')
+             ax=obj.initaxis('PSFx');
             hold off
-            plot(xrange,xpall,'c')
+            plot(xrange,xpall2,'m')
             hold on
+            plot(xrange,xpall,'c')
+            plot(xrange,xpall3,'y')
             plot(xrange,xprofile,'k+-')
             xrangebig=-halfroisizebig-.25:0.5:halfroisizebig+.5;
             plot(xrangebig,xbs,'ro')
@@ -155,8 +167,8 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
 end
 
 function f0=getf0site(locs)
-[zas,zn]=stackas2z(locs.PSFxnm,locs.PSFynm,locs.frame,locs.phot,true);
-drawnow
+[zas,zn]=stackas2z(locs.PSFxnm,locs.PSFynm,locs.frame,locs.phot,0);
+% drawnow
 f0=zas;
 end
 
