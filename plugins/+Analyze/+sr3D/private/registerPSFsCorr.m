@@ -1,11 +1,11 @@
-function outstack=registerPSFsCorr(imstackin,p)
+function [outstack,shiftedim]=registerPSFsCorr(imstackin,posfocus)
 % imstack=imstack(:,:,:,1:2);
 s=size(imstackin);
 imstack=zeros(s(1),s(2),s(3),s(4)+1);
 imstack(:,:,:,2:end)=imstackin;
 imstack(:,:,:,1)=sum(imstackin,4);
 posListCtrd=zeros(size(imstack,4),2)+round((s(1)+1)/2);
-posfocus=12;
+% posfocus=12;
 imPsfInFocus=squeeze(imstack(:,:,posfocus,:));
 cropRatio=1;
 windowSize=10;
@@ -21,7 +21,7 @@ end
 % posListCorr = crossCorrPsfPos(squeeze(shiftedim(:,:,posfocus,:)),posListCtrd(1:end-1,:),cropRatio,windowSize)
 outstack=meanim/s(4);
 
-figure(88); imagesc([squeeze(sum(imstackin(:,:,posfocus,:),4)) meanim(:,:,posfocus)])
+ imagesc([squeeze(sum(imstackin(:,:,posfocus,:),4)) meanim(:,:,posfocus)])
 %--------------------------------------------
 function [drift] = getImDrift(templateIm,featureIm,windowSize)
 % spatial cross correlation function = SCCF
@@ -149,6 +149,8 @@ if (yfinish > sizey)
   yfinish = sizey;
 end
 windowLim = [xstart, xfinish,ystart,yfinish];
+
+
 
 function [pos, amplitude] = getCentroid(im);
 im = im-min(im(:));%offset the image to avoid baseline "zero" values contributing to the avg

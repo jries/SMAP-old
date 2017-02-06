@@ -13,18 +13,38 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
         function out=run(obj,p)
             out=[];
             
+            [path,file]=fileparts(obj.getPar('lastSMLFile'));
+            file=strrep(file,'_sml','_3Dcal');
+%             [file,path]=uiputfile([path filesep file]);
             roisize=p.roisize;
-            framerange=p.framerange;
             halfroisize=(roisize-1)/2;
+            roifac=1.5;
+            roisizebig=(roifac*roisize);
+            halfroisizebig=round((roisizebig-1)/2); %room for shifting
+            roisizebig=2*halfroisizebig+1;
+%             framerange=p.framerange;
+            framerange=1:max(obj.locData.loc.frame);
+            
             
             se=obj.locData.SE;
             sites=se.sites;
             sitefilenumbers=getFieldAsVector(se.sites,'info','filenumber');
             usesites=getFieldAsVector(se.sites,'annotation','use');
-            allrois=zeros(roisize,roisize,length(framerange),sum(usesites));
+            
+            %f0 for all beads: 
+            ax=obj.initaxis('find f0');
+            for k=length(sites):-1:1
+                locs=obj.locData.getloc({'frame','PSFxnm','PSFynm','phot'},'position',sites(k));
+                f0(k)=getf0site(locs);
+            end
+            
+            %if on glass
+            fzero=round(median(f0(~isnan(f0))));
+            
+            allrois=zeros(roisizebig,roisizebig,length(framerange),sum(usesites));
             files=se.files;
             induse=1;
-            k=1;
+            k=1; %for loop
                 filename=files(k).info.basefile;
                 roi=files(k).info.roi;
                 campix=files(k).info.pixsize;
@@ -38,16 +58,107 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
                     sitenumber=thisfile(s);
                     if usesites(sitenumber)
                         pos=round(sites(sitenumber).pos(1:2)/campix/1000-roi(1:2));
-                        if pos(1)>halfroisize&&pos(1)<sim(1)-halfroisize&&pos(2)>halfroisize&&pos(2)<sim(2)-halfroisize
-                            allrois(:,:,:,induse)=imstack(pos(2)-halfroisize:pos(2)+halfroisize,pos(1)-halfroisize:pos(1)+halfroisize,framerange);
+                        if pos(1)>halfroisizebig&&pos(1)<sim(1)-halfroisizebig&&pos(2)>halfroisizebig&&pos(2)<sim(2)-halfroisizebig
+                            allrois(:,:,:,induse)=imstack(pos(2)-halfroisizebig:pos(2)+halfroisizebig,pos(1)-halfroisizebig:pos(1)+halfroisizebig,framerange);
                             induse=induse+1;
                         end
                     end
                 end
-                
-            
-            out=registerPSFsCorr(allrois,0);
+%                 allrois(:,end,:,:)=[]; %make asymmetric for testing
+            ax=obj.initaxis('CC PSF');
+            [corrPSFa,shiftedstacka]=registerPSFsCorr(allrois,fzero);
+            [corrPSF,shiftedstack]=registerPSF3D(allrois,struct('framerange',fzero-3:fzero+3));
+            drawnow;
+            corrPSFhd=zeros(size(corrPSF,1)*2,size(corrPSF,2)*2,size(corrPSF,3));
+            for k=1:size(corrPSF,3)
+                corrPSFhd(:,:,k)=imresize(corrPSF(:,:,k),2);
+            end
+            s_size=p.roisize;
+            tic
+            [np_psf,coeff]=generate_psf_to_spline_YLJ(corrPSFhd,s_size,fzero);
+            toc
+%             bspline
+            np_psf = np_psf/max(np_psf(:));
+            for i = 1:size(np_psf,3)
+            np_psf(:,:,i) = np_psf(:,:,i)/sum(sum(np_psf(:,:,i)));
+            end
 
+%             tic
+%             b3_0=bsarray(double(np_psf),'lambda',p.smoothingfactor);
+%             toc
+            tic
+            b3_0=bsarray(double(corrPSFhd),'lambda',p.smoothingfactor);
+            toc
+            
+%             out.coeff=coeff;
+            bspline=b3_0;
+            save([path filesep file],'bspline','coeff')
+%             b3_0_1=bsarray(double(np_psf),'lambda',0.1);%with smoothing factor 0.1
+            
+
+            %upsampling
+            %spline generation
+            ax=obj.initaxis('PSFz')
+            ftest=fzero-15;
+            zpall=squeeze(shiftedstack(halfroisizebig+1,halfroisizebig+1,:,:));
+            zpall2=squeeze(allrois(halfroisizebig+1,halfroisizebig+1,:,:));
+            zpall3=squeeze(shiftedstacka(halfroisizebig+1,halfroisizebig+1,:,:));
+            xpall=squeeze(shiftedstack(:,halfroisizebig+1,ftest,:));
+            xpall2=squeeze(allrois(:,halfroisizebig+1,ftest,:));
+            xpall3=squeeze(shiftedstacka(:,halfroisizebig+1,ftest,:));
+            
+            for k=1:size(zpall,2)
+                zpall(:,k)=zpall(:,k)/max(zpall(:,k));
+                xpall(:,k)=xpall(:,k)/max(xpall(:,k));
+                zpall2(:,k)=zpall2(:,k)/max(zpall2(:,k));
+                xpall2(:,k)=xpall2(:,k)/max(xpall2(:,k));                
+                zpall3(:,k)=zpall3(:,k)/max(zpall3(:,k));
+                xpall3(:,k)=xpall3(:,k)/max(xpall3(:,k));
+            end
+            
+            zprofile=squeeze(corrPSF(halfroisizebig+1,halfroisizebig+1,:));
+            zprofile=zprofile/max(zprofile);
+            
+            
+            xprofile=squeeze(corrPSF(:,halfroisizebig+1,ftest));
+            xprofile=xprofile/max(xprofile);
+            
+            [XX,YY,ZZ]=meshgrid(1:b3_0.dataSize(1),1:b3_0.dataSize(2),framerange);
+             psfbs = interp3_0(b3_0,XX,YY,ZZ);
+             
+            zbs=squeeze(psfbs(2*halfroisizebig+1,2*halfroisizebig+1,:));
+            zbs=zbs/max(zbs);
+            xbs=squeeze(psfbs(:,2*halfroisizebig+1,ftest));
+            xbs=xbs/max(xbs);
+            
+           
+%             [XX,YY,ZZ]=meshgrid(1:roisizebig*2,halfroisizebig*2+1,ftest);
+%             psfbs = interp3_0(b3_0,XX,YY,ZZ);
+%             xbs=squeeze(psfbs(:));
+%             xbs=xbs/max(xbs);
+%             fbs=fzero-13:1:fzero+12;
+            
+            hold off
+            plot(framerange,zpall2,'m')
+            hold on
+             plot(framerange,zpall,'c')
+             plot(framerange,zpall3,'y')
+            plot(framerange,zprofile,'k+')
+            plot(framerange,zbs,'ro')
+            
+            
+            xrange=-halfroisizebig:halfroisizebig;
+            
+             ax=obj.initaxis('PSFx');
+            hold off
+            plot(xrange,xpall2,'m')
+            hold on
+            plot(xrange,xpall,'c')
+            plot(xrange,xpall3,'y')
+            plot(xrange,xprofile,'k+-')
+            xrangebig=-halfroisizebig-.25:0.5:halfroisizebig+.5;
+            plot(xrangebig,xbs,'ro')
+            
         end
         function pard=guidef(obj)
             pard=guidef(obj);
@@ -55,6 +166,11 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
     end
 end
 
+function f0=getf0site(locs)
+[zas,zn]=stackas2z(locs.PSFxnm,locs.PSFynm,locs.frame,locs.phot,0);
+% drawnow
+f0=zas;
+end
 
 function il=getimageloader(obj,filename)
 try
@@ -70,7 +186,7 @@ catch
         if any(contains(alldir,thisf))&&~isempty(thisf)
 
 
-            filename=[maindir filename(ind(k)+1:end)];
+            filename=[maindir '/' filename(ind(k)+1:end)];
             break
         end
     end
@@ -109,16 +225,24 @@ pard.beaddistribution.Width=2;
 pard.roisizet.object=struct('Style','text','String','Roi (pix)'); 
 pard.roisizet.position=[3,1];
 pard.roisizet.Width=.7;
-pard.roisize.object=struct('Style','edit','String','23'); 
+pard.roisize.object=struct('Style','edit','String','13'); 
 pard.roisize.position=[3,1.7];
 pard.roisize.Width=.3;
 
-pard.frameranget.object=struct('Style','text','String','frames:'); 
-pard.frameranget.position=[3,2];
-pard.frameranget.Width=.5;
-pard.framerange.object=struct('Style','edit','String','5:35'); 
-pard.framerange.position=[3,2.5];
-pard.framerange.Width=.5;
+pard.framewindowt.object=struct('Style','text','String','frame window size'); 
+pard.framewindowt.position=[3,2];
+pard.framewindowt.Width=1;
+pard.framewindow.object=struct('Style','edit','String','15'); 
+pard.framewindow.position=[3,3];
+pard.framewindow.Width=.5;
+
+pard.smoothingfactort.object=struct('Style','text','String','Smoothing factor Bspline'); 
+pard.smoothingfactort.position=[3,3.5];
+pard.smoothingfactort.Width=1;
+pard.smoothingfactor.object=struct('Style','edit','String','.1'); 
+pard.smoothingfactor.position=[3,4.5];
+pard.smoothingfactor.Width=.5;
+
 
 % tp=3.1;tmin=3.6;td=3.9;tmax=4.2;
 % w=0.3;

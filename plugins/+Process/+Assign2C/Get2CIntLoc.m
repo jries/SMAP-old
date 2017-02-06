@@ -9,7 +9,8 @@ classdef Get2CIntLoc<interfaces.DialogProcessor
         
         function out=run(obj,p)
            out=[];
-            transformation=loadtransformation(p.Tfile,'transformation',p.dataselect.Value);
+           transformation=loadtransformation(obj,p.Tfile,p.dataselect.Value);
+%             transformation=loadtransformation(p.Tfile,'transformation',p.dataselect.Value);
             if isempty(transformation)
                 out.error='selected transformation file does not have a valid transformation';
                 return
