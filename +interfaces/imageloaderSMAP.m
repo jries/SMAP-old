@@ -116,7 +116,7 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
               
             end
                 
-            md=getCameraCalibration(obj,[],[],camfile);
+            md=getCameraCalibration(obj,[],obj.getPar('useDefaultCam'),camfile);
             if isempty(md)
                 metao=[];
                 return

@@ -45,6 +45,7 @@ if isempty(val)
         camnames=getFieldAsVector(l.cameras,'ID','name');
         cam=find(strcmp(camnames,'Default'));
         state=1;
+        disp('Camera not recognized. Use default');
         if isempty(cam)&~silent
             errordlg('create Default camera with Camera Manager')
         end    
