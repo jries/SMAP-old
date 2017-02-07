@@ -32,16 +32,16 @@ if isprop(handle,'KeyPressFcn')
 handle.KeyPressFcn=@keypress;
 end
 ax=axes('Parent',handle,'Position',[0.05,0.18,.95,.82]);
-
+ax.XLim=[0 Inf];
 
 vp1=0.07;
 vp2=0.02;
 hs=uicontrol('Parent',handle,'Style','slider','Units','normalized','Position',[0.05 vp1 0.35 0.05],...
     'Min',1,'Max',size(V,3),'Value',1,'SliderStep',[1/(size(V,3)-1) 5/(size(V,3)-1)],'Callback',@slidercallback);
-hn=uicontrol('Parent',handle,'Style','edit','Units','normalized','String','1','Position',[0.05 vp2 0.1 0.05],'Callback',@framecallback);
-hmenu=uicontrol('Parent',handle,'Style','popupmenu','Units','normalized','String',{'xy','yz','xz'},'Position',[0.15 vp2 0.15 0.05],...
+hn=uicontrol('Parent',handle,'Style','edit','Units','normalized','String','1','Position',[0.4 vp1 0.1 0.05],'Callback',@framecallback);
+hmenu=uicontrol('Parent',handle,'Style','popupmenu','Units','normalized','String',{'xy','yz','xz'},'Position',[0.05 vp2 0.15 0.05],...
     'Callback',@changeaxis);
-haxscale=uicontrol('Parent',handle,'Style','checkbox','Units','normalized','String','fill','Position',[0.3 vp2 0.1 0.05],...
+haxscale=uicontrol('Parent',handle,'Style','checkbox','Units','normalized','String','fill','Position',[0.2 vp2 0.1 0.05],...
     'Callback',@plotimage,'Value',1);
 hlut=uicontrol('Parent',handle,'Style','popupmenu','Units','normalized','String',{'parula','gray','hot','jet'},'Position',[0.725 vp1 0.175 0.05],...
     'Callback',@plotimage);
@@ -49,9 +49,14 @@ hcontrastcheck=uicontrol('Parent',handle,'Style','checkbox','Units','normalized'
     'Callback',@plotimage,'Value',0);
 hcontrast=uicontrol('Parent',handle,'Style','edit','Units','normalized','String','1','Position',[0.8 vp2 0.1 0.05],'Callback',@plotimage);
 
+hresetax=uicontrol('Parent',handle,'Style','pushbutton','Units','normalized','String','reset','Position',[0.3 vp2 0.1 0.05],'Callback',@resetax);
+
 
 plotimage
-
+    function resetax(a,b)
+        ax.XLim=[0 Inf];
+        plotimage;
+    end
     function slidercallback(a,b)
         setslice(a.Value);
     end
@@ -68,6 +73,7 @@ plotimage
             case 'xz'
                 dim = [1 3 2];
         end
+        ax.XLim=[0 Inf];
         updateall
 
     end
@@ -86,6 +92,9 @@ plotimage
         
     end
     function plotimage(a,b,c)
+        
+        xlimold=ax.XLim;
+        ylimold=ax.YLim;
         slice=round(str2double(hn.String));
         switch hmenu.String{hmenu.Value}
             case 'xy'
@@ -113,6 +122,9 @@ plotimage
             axis(ax,'fill')
         else
             axis(ax,'equal')
+        end
+        if ~isinf(xlimold(2))
+        ax.XLim=xlimold;ax.YLim=ylimold;
         end
         colormap(ax,hlut.String{hlut.Value})
         
