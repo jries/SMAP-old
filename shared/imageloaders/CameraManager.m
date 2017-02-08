@@ -252,7 +252,7 @@ function t=intpartable
 t=cell(12,7);
 parnames={'EMon','cam_pixelsize_um','conversion','emgain','offset','roi','exposure','timediff','comment','numberOfFrames','Width','Height'};
 mode={'fix','fix','fix','fix','fix','fix','fix','fix','fix','metadata','metadata','metadata'};
-default={'true','0.1','1','100','100','','1','1','settings not initialized','0','0','0'};
+default={'1','0.1','1','100','100','','1','1','settings not initialized','0','0','0'};
 conversion={'str2double(X)','str2double(X)','str2double(X)','str2double(X)','str2double(X)','str2num(X)','str2double(X)','str2double(X)','','str2double(X)','str2double(X)','str2double(X)'};
 metafield={'select','select','select','select','select','select','select','select','select','select','select','select','select'};
 
