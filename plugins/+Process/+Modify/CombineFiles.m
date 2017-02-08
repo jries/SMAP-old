@@ -24,7 +24,9 @@ classdef CombineFiles<interfaces.DialogProcessor
                     end
                     obj.locData.loc.filenumber(ind)=ftarget;
                     obj.locData.files.file(ftarget).tif=[obj.locData.files.file(ftarget).tif obj.locData.files.file(k).tif];
-%                     obj.locData.files.file(ftarget).raw=[obj.locData.files.file(ftarget).raw obj.locData.files.file(k).raw];
+                    if isfield(obj.locData.files.file(ftarget),'raw')
+                        obj.locData.files.file(ftarget).raw=[obj.locData.files.file(ftarget).raw obj.locData.files.file(k).raw];
+                    end
                 end
             end
             
