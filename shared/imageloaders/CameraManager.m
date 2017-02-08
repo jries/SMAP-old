@@ -1,4 +1,4 @@
-classdef CameraManager<interfaces.GuiParameterInterface;
+classdef CameraManager<interfaces.GuiParameterInterface
     %UNTITLED2 Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -20,7 +20,7 @@ classdef CameraManager<interfaces.GuiParameterInterface;
         end
         function loadimages(obj,file) 
             if nargin > 1
-                obj.imloader=imageloaderAll(file);
+                obj.imloader=imageloaderAll(file,[],obj.cameraSettingsFile);
             end
                 [par,cam,state]=getCameraCalibration(obj.imloader,[],true,obj.cameraSettingsFile);
                 if isempty(cam)
@@ -470,7 +470,7 @@ end
 
 function testcal(a,b,obj)
 tables2prop(obj);
-p=getCameraCalibration(obj.imloader,obj,true);
+p=getCameraCalibration(obj.imloader,obj,true,obj.cameraSettingsFile);
 p
 end
 
