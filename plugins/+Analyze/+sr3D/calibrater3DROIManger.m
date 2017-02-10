@@ -54,21 +54,31 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
                 imstack=(double(imstackadu)-il.metadata.offset)*il.metadata.pix2phot;
                 sim=size(imstack);
                 thisfile=find(sitefilenumbers==k);
-                for s=1:length(thisfile)
+                for s=length(thisfile):-1:1
                     sitenumber=thisfile(s);
                     if usesites(sitenumber)
                         pos=round(sites(sitenumber).pos(1:2)/campix/1000-roi(1:2));
+                        ss=2;
+                        dp=round(2*ss*rand(1,2)-ss);
+                        pos=pos+dp;
                         if pos(1)>halfroisizebig&&pos(1)<sim(1)-halfroisizebig&&pos(2)>halfroisizebig&&pos(2)<sim(2)-halfroisizebig
                             allrois(:,:,:,induse)=imstack(pos(2)-halfroisizebig:pos(2)+halfroisizebig,pos(1)-halfroisizebig:pos(1)+halfroisizebig,framerange);
+                            
+                            beadpos(induse,:)=pos(1:2);
                             induse=induse+1;
                         end
                     end
                 end
-%                 allrois(:,end,:,:)=[]; %make asymmetric for testing
-            ax=obj.initaxis('CC PSF');
+%                  allrois(:,end,:,:)=[]; %make asymmetric for testing
+%             ax=obj.initaxis('CC PSF');
             [corrPSFa,shiftedstacka]=registerPSFsCorr(allrois,fzero);
-            [corrPSF,shiftedstack]=registerPSF3D(allrois,struct('framerange',fzero-3:fzero+3));
+            fw2=round((p.framewindow-1)/2);
+            [corrPSF,shiftedstack,shift]=registerPSF3D(allrois,struct('framerange',fzero-fw2:fzero+fw2));
             drawnow;
+            
+            ax=obj.initaxis('zshift');scatter3(beadpos(:,1),beadpos(:,2),shift(:,3))
+            
+            %put this oversmapling in register, if needed
             corrPSFhd=zeros(size(corrPSF,1)*2,size(corrPSF,2)*2,size(corrPSF,3));
             for k=1:size(corrPSF,3)
                 corrPSFhd(:,:,k)=imresize(corrPSF(:,:,k),2);
@@ -139,10 +149,11 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
 %             fbs=fzero-13:1:fzero+12;
             
             hold off
-            plot(framerange,zpall2,'m')
-            hold on
-             plot(framerange,zpall,'c')
-             plot(framerange,zpall3,'y')
+%             plot(framerange,zpall2,'m')
+%             hold on
+             plot(framerange,zpall3,'c')
+             hold on
+             plot(framerange,zpall,'m')
             plot(framerange,zprofile,'k+')
             plot(framerange,zbs,'ro')
             
@@ -151,10 +162,12 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             
              ax=obj.initaxis('PSFx');
             hold off
-            plot(xrange,xpall2,'m')
+%             plot(xrange,xpall2,'m')
+%             hold on
+            plot(xrange,xpall3,'c')
             hold on
-            plot(xrange,xpall,'c')
-            plot(xrange,xpall3,'y')
+            
+            plot(xrange,xpall,'m')
             plot(xrange,xprofile,'k+-')
             xrangebig=-halfroisizebig-.25:0.5:halfroisizebig+.5;
             plot(xrangebig,xbs,'ro')

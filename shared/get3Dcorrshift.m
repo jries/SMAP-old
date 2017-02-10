@@ -1,5 +1,7 @@
-function shift=get3Dcorrshift(refim,targetim)
-
+function shift=get3Dcorrshift(refim,targetim,maxmethod)
+if nargin<3
+    maxmethod='interp';
+end
 sim=size(targetim);
 if sim(3)==1 %2D
 G = (fftshift(real(ifft2(fft2(refim).*conj(fft2(targetim))))))/...
@@ -8,29 +10,34 @@ G = (fftshift(real(ifft2(fft2(refim).*conj(fft2(targetim))))))/...
 else
     refimhd=interp3(refim,2,'cubic');
     targetimhd=interp3(targetim,2,'cubic');
-        refimhd=(refim);
-    targetimhd=(targetim);
+%         refimhd=(refim);
+%     targetimhd=(targetim);
 %     targetimhd=refimhd;
     n=size(refimhd)*1;
-    reffft=fft(fft2(refimhd,n(1),n(2)),n(3),3);
-    targetfft=fft(fft2(targetimhd,n(1),n(2)),n(3),3);
+%     reffft=fft(fft2(refimhd,n(1),n(2)),n(3),3);
+%     targetfft=fft(fft2(targetimhd,n(1),n(2)),n(3),3);
+    reffft=fft(fft2(refimhd),[],3);
+    targetfft=fft(fft2(targetimhd),[],3);
+    
     Gfft=reffft.*conj(targetfft);
     Gs = fftshift(real(ifft(ifft2(Gfft),[],3)));
     G=Gs/((mean(refimhd(:))*mean(targetimhd(:))) *numel(targetimhd))-1;
     
 %     px=sum(sum(G,2),3);
 %      maxmethod='interp';
-    maxmethod='interp';
+    
      switch maxmethod
          case 'fit'
               maxind=[getmaxFit(sum(sum(G,2),3),3),getmaxFit(sum(sum(G,3),1),3),getmaxFit(sum(sum(G,1),2),3)];
          otherwise
             [~,ind]=max(G(:));
             [x,y,z]=ind2sub(size(G),ind);
-             maxind=getmaxInterp(G,[x,y,z],.02,1);
+             maxind=getmaxInterp(G,[x,y,z],.05,1);
      end
      shift=maxind/4-size(refim)/2+1/4;
-     shift=maxind-size(refim)/2;
+     
+%      shift=maxind/2-size(refim)/2;
+%      shift=maxind-size(refim)/2;
 %      shift=maxind-2*size(refim)+1;
     %maximum: quadratic fit in each dimension
     %compare with interp3 in 1 pixel 100x scaling and maximum find
