@@ -39,7 +39,7 @@ end
 ax=axes('Parent',phandle,'Position',[0.05,0.18,.95,.82]);
 ax.XLim=[0 Inf];
 
-vp1=0.07;
+vp1=0.08;
 vp2=0.02;
 
 hslider{1}=uicontrol('Parent',phandle,'Style','slider','Units','normalized','Position',[0.05 vp1 0.35 0.05],...
