@@ -25,6 +25,7 @@ if isempty(p.Parent)
     phandle=figure;
 else
     phandle=p.Parent;
+    delete(phandle.Children)
 end
 
 maxV=max(V(:));
@@ -40,7 +41,7 @@ ax.XLim=[0 Inf];
 
 vp1=0.07;
 vp2=0.02;
-p
+
 hslider{1}=uicontrol('Parent',phandle,'Style','slider','Units','normalized','Position',[0.05 vp1 0.35 0.05],...
     'Min',1,'Max',size(V,3),'Value',1,'SliderStep',[1/(size(V,3)-1) 5/(size(V,3)-1)],'Callback',{@slidercallback,1});
 hslider{2}=uicontrol('Parent',phandle,'Style','slider','Units','normalized','Position',[0.05 vp2 0.35 0.05],...
@@ -238,7 +239,7 @@ changeaxis(0,0,0);
         else
             imax=str2double(hcontrast.String)*max(img(:));
         end
-        
+         if imax==0, imax=1;end
         img(img>imax)=imax;
         
         if length(size(img))==3
@@ -261,6 +262,7 @@ changeaxis(0,0,0);
             ax.YLim=a2([1 end])+[-1 1]*d2/2;
         end
         colormap(ax,hlut.String{hlut.Value})
+       
         ax.CLim=[0 imax];
         
     end

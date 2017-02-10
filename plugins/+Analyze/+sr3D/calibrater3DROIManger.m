@@ -32,7 +32,7 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             usesites=getFieldAsVector(se.sites,'annotation','use');
             
             %f0 for all beads: 
-            ax=obj.initaxis('find f0');
+%             ax=obj.initaxis('find f0');
             for k=length(sites):-1:1
                 locs=obj.locData.getloc({'frame','PSFxnm','PSFynm','phot'},'position',sites(k));
                 f0(k)=getf0site(locs);
@@ -45,7 +45,7 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             files=se.files;
             induse=1;
             k=1; %for loop
-                filename=files(k).info.basefile;
+                filename=files(k).info.imagefile;
                 roi=files(k).info.roi;
                 campix=files(k).info.pixsize;
                 il=getimageloader(obj,filename);
@@ -73,9 +73,13 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
 %             ax=obj.initaxis('CC PSF');
             [corrPSFa,shiftedstacka]=registerPSFsCorr(allrois,fzero);
             fw2=round((p.framewindow-1)/2);
-            [corrPSF,shiftedstack,shift]=registerPSF3D(allrois,struct('framerange',fzero-fw2:fzero+fw2));
+            ax=obj.initaxis('overlay:residuals');
+            ax2=obj.initaxis('PSF');
+            [corrPSF,shiftedstack,shift]=registerPSF3D(allrois,struct('framerange',fzero-fw2:fzero+fw2,'alignz',p.alignz),{ax, ax2});
             drawnow;
             
+%             imageslicer(allrois)
+            imageslicer(imstack)
             ax=obj.initaxis('zshift');scatter3(beadpos(:,1),beadpos(:,2),shift(:,3))
             
             %put this oversmapling in register, if needed

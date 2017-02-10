@@ -1,4 +1,4 @@
-function shift=get3Dcorrshift(refim,targetim,maxmethod)
+function [shift,CC]=get3Dcorrshift(refim,targetim,maxmethod)
 if nargin<3
     maxmethod='interp';
 end
@@ -30,7 +30,7 @@ else
          case 'fit'
               maxind=[getmaxFit(sum(sum(G,2),3),3),getmaxFit(sum(sum(G,3),1),3),getmaxFit(sum(sum(G,1),2),3)];
          otherwise
-            [~,ind]=max(G(:));
+            [CC,ind]=max(G(:));
             [x,y,z]=ind2sub(size(G),ind);
              maxind=getmaxInterp(G,[x,y,z],.05,1);
      end
