@@ -127,6 +127,9 @@ end
 function image=readstack(obj,imagenumber)
 img=obj.reader.getImage(0,0,imagenumber-1,0);
 if isempty(img)
+    img=obj.reader.getImage(0,imagenumber-1,0,0);
+end
+if isempty(img)
     image=[];
     return
 end
