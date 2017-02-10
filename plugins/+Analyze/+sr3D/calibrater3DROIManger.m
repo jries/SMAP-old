@@ -23,7 +23,7 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             halfroisizebig=round((roisizebig-1)/2); %room for shifting
             roisizebig=2*halfroisizebig+1;
 %             framerange=p.framerange;
-            framerange=1:max(obj.locData.loc.frame);
+            framerange=min(obj.locData.loc.frame):max(obj.locData.loc.frame);
             
             
             se=obj.locData.SE;
@@ -58,9 +58,9 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
                     sitenumber=thisfile(s);
                     if usesites(sitenumber)
                         pos=round(sites(sitenumber).pos(1:2)/campix/1000-roi(1:2));
-                        ss=2;
-                        dp=round(2*ss*rand(1,2)-ss);
-                        pos=pos+dp;
+%                         ss=2;
+%                         dp=round(2*ss*rand(1,2)-ss);
+%                         pos=pos+dp;
                         if pos(1)>halfroisizebig&&pos(1)<sim(1)-halfroisizebig&&pos(2)>halfroisizebig&&pos(2)<sim(2)-halfroisizebig
                             allrois(:,:,:,induse)=imstack(pos(2)-halfroisizebig:pos(2)+halfroisizebig,pos(1)-halfroisizebig:pos(1)+halfroisizebig,framerange);
                             
@@ -242,12 +242,7 @@ pard.roisize.object=struct('Style','edit','String','13');
 pard.roisize.position=[3,1.7];
 pard.roisize.Width=.3;
 
-pard.framewindowt.object=struct('Style','text','String','frame window size'); 
-pard.framewindowt.position=[3,2];
-pard.framewindowt.Width=1;
-pard.framewindow.object=struct('Style','edit','String','15'); 
-pard.framewindow.position=[3,3];
-pard.framewindow.Width=.5;
+
 
 pard.smoothingfactort.object=struct('Style','text','String','Smoothing factor Bspline'); 
 pard.smoothingfactort.position=[3,3.5];
@@ -256,6 +251,23 @@ pard.smoothingfactor.object=struct('Style','edit','String','.1');
 pard.smoothingfactor.position=[3,4.5];
 pard.smoothingfactor.Width=.5;
 
+pard.roiframest.object=struct('Style','text','String','ROI (frames)'); 
+pard.roiframest.position=[3,2];
+pard.roiframest.Width=1;
+pard.roiframes.object=struct('Style','edit','String','25'); 
+pard.roiframes.position=[3,3];
+pard.roiframes.Width=.5;
+
+pard.alignz.object=struct('Style','checkbox','String','Align in z'); 
+pard.alignz.position=[5,1];
+pard.alignz.Width=1;
+
+pard.framewindowt.object=struct('Style','text','String','frame window size'); 
+pard.framewindowt.position=[5,2];
+pard.framewindowt.Width=1;
+pard.framewindow.object=struct('Style','edit','String','15'); 
+pard.framewindow.position=[5,3];
+pard.framewindow.Width=.5;
 
 % tp=3.1;tmin=3.6;td=3.9;tmax=4.2;
 % w=0.3;

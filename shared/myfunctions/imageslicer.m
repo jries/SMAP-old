@@ -67,8 +67,10 @@ hresetax=uicontrol('Parent',phandle,'Style','pushbutton','Units','normalized','S
 
 hrgb=uicontrol('Parent',phandle,'Style','checkbox','Units','normalized','String','RGB','Position',[0.9 vp1 0.1 0.05],'Callback',@updateall,'Value',p.rgb);
 updateall
-
-plotimage
+hmenu{1}.Value=p.xdim;
+hmenu{2}.Value=p.ydim;
+changeaxis(0,0,0);
+% plotimage
 
 
     function resetax(a,b)
@@ -294,9 +296,9 @@ p.addOptional('y',[],@isnumeric);
 p.addOptional('z',[],@isnumeric);
 p.addRequired('V',@isnumeric);
 p.addParameter('Parent',[]);
-p.addParameter('fill',true);
-p.addParameter('xdim',[],@isnumeric);
-p.addParameter('ydim',[],@isnumeric);
+p.addParameter('fill',false);
+p.addParameter('xdim',1,@isnumeric);
+p.addParameter('ydim',2,@isnumeric);
 p.addParameter('rgb',false);
 p.addParameter('globalcontrast',false,@islogical);
 parse(p,in{:});
