@@ -33,8 +33,8 @@ maxV=max(V(:));
  dim=1:2;
  dimmenu=3;
 dimrgb=[];
-if isprop(phandle,'KeyPressFcn')
-    phandle.KeyPressFcn=@keypress;
+if isprop(phandle,'WindowKeyPressFcn')
+    phandle.WindowKeyPressFcn=@keypress;
 end
 ax=axes('Parent',phandle,'Position',[0.05,0.18,.95,.82]);
 ax.XLim=[0 Inf];
@@ -66,8 +66,8 @@ hcontrast=uicontrol('Parent',phandle,'Style','edit','Units','normalized','String
 
 hresetax=uicontrol('Parent',phandle,'Style','pushbutton','Units','normalized','String','reset','Position',[0.9 vp2 0.1 0.05],'Callback',@resetax);
 
-hrgb=uicontrol('Parent',phandle,'Style','checkbox','Units','normalized','String','RGB','Position',[0.9 vp1 0.1 0.05],'Callback',@updateall,'Value',p.rgb);
-updateall
+hrgb=uicontrol('Parent',phandle,'Style','checkbox','Units','normalized','String','RGB','Position',[0.9 vp1 0.1 0.05],'Callback',@updatergb,'Value',p.rgb);
+% updateall
 hmenu{1}.Value=p.xdim;
 hmenu{2}.Value=p.ydim;
 changeaxis(0,0,0);
@@ -114,12 +114,18 @@ changeaxis(0,0,0);
 
     end
     
-    function setslice(frame,slider)
+    function setslice(frame,slider,plot)
         frame=min(frame,hslider{slider}.Max);
         frame=max(1,frame);
         hframe{slider}.String=num2str(round(frame));
         hslider{slider}.Value=round(frame);
+        if nargin<=2 || plot
         plotimage
+        end
+    end
+    function updatergb(a,b)
+        p.rgb=a.Value;
+        updateall;
     end
     function updateall(a,b)
         
@@ -158,7 +164,7 @@ changeaxis(0,0,0);
 %         strm=str;strm(dimrgb)=[];
         hslider{1}.SliderStep=[1/(size(V,dimmenu(1))-1) 5/(size(V,dimmenu(1))-1)];
         hslider{1}.Max=size(V,dimmenu(1));
-         setslice(min(hslider{1}.Max,hslider{1}.Value),1);
+         setslice(min(hslider{1}.Max,hslider{1}.Value),1,0);
          
          if dimmenu(1)<3
          hslidert{1}.String=str{dimmenu(1)};
@@ -168,7 +174,7 @@ changeaxis(0,0,0);
         if length(dimmenu)>1
             hslider{2}.SliderStep=[1/(size(V,dimmenu(2))-1) 5/(size(V,dimmenu(2))-1)];
             hslider{2}.Max=size(V,dimmenu(2));
-             setslice(min(hslider{2}.Max,hslider{2}.Value),2);
+             setslice(min(hslider{2}.Max,hslider{2}.Value),2,0);
             hslider{2}.Visible='on';
             hframe{2}.Visible='on';
             hslidert{2}.Visible='on';
@@ -186,10 +192,15 @@ changeaxis(0,0,0);
         
     end
     function plotimage(a,b,c)
+%         disp('plot')
          s=size(V);
             
         for k=1:length(s)
+            if k<=4+double(p.rgb)
             dimall{k}=1:s(k);
+            else
+                dimall{k}=1;
+            end
         end
         xlimold=ax.XLim;
         ylimold=ax.YLim;
@@ -215,9 +226,11 @@ changeaxis(0,0,0);
             dimmenu2=[];
         end
         Vsl=V(dimall{:});
+        dims=[dim(2) dim(1) dimrgb dimmenu(1) dimmenu2];
+        dimshow=(1:length(size(V)));
+        dimshow(1:length(dims))=dims;
         
-        
-        Vslp=permute(Vsl,[dim(2) dim(1) dimrgb dimmenu(1) dimmenu2]);
+        Vslp=permute(Vsl,dimshow);
         
         img=(squeeze(Vslp));
         

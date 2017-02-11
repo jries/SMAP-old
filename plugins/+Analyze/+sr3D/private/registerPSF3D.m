@@ -48,9 +48,10 @@ for k=numbeads:-1:1
      dv=(meanim/sum(meanim(:))-sim/sum(sim(:))).^2;
     res(k)=sqrt(sum(dv(:)));
 end
-[a,b]=robustMean(res);
-co=a+3.5*b;
-indgood=res<co;
+rescc=res./cc;
+[a,b]=robustMean(rescc);
+co=a+3.*b;
+indgood=rescc<co;
 imout=mean(shiftedstack(:,:,:,indgood),4);
 shiftedstack(1,end,:,~indgood)=max(shiftedstack(:));
 shiftedstack(1,:,1,~indgood)=max(shiftedstack(:));
