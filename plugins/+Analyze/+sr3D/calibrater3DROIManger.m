@@ -12,7 +12,7 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
         end
         function out=run(obj,p)
             out=[];
-            
+
             [path,file]=fileparts(obj.getPar('lastSMLFile'));
             file=strrep(file,'_sml','_3Dcal');
 %             [file,path]=uiputfile([path filesep file]);
@@ -22,8 +22,11 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             roisizebig=(roifac*roisize);
             halfroisizebig=round((roisizebig-1)/2); %room for shifting
             roisizebig=2*halfroisizebig+1;
+                        storeframes=p.roiframes+10;
+            halfstoreframes=round((storeframes-1)/2);
+            
 %             framerange=p.framerange;
-            framerange=min(obj.locData.loc.frame):max(obj.locData.loc.frame);
+            fminmax=[min(obj.locData.loc.frame) max(obj.locData.loc.frame)];
             
             
             se=obj.locData.SE;
@@ -31,31 +34,49 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             sitefilenumbers=getFieldAsVector(se.sites,'info','filenumber');
             usesites=getFieldAsVector(se.sites,'annotation','use');
             
+            
             %f0 for all beads: 
 %             ax=obj.initaxis('find f0');
             for k=length(sites):-1:1
                 locs=obj.locData.getloc({'frame','PSFxnm','PSFynm','phot'},'position',sites(k));
                 [f0(k),psfx(k),psfy(k)]=getf0site(locs);
             end
+            f0r=round(f0);
+            usesites=usesites&~isnan(f0);
+
             
+            if p.beaddistribution.Value==2
+                p.alignz=true;
+                df=0;
+                fzero=halfstoreframes+1;
+            else%if on glass
+               fzero=round(median(f0(~isnan(f0))));
+               df=(f0-fzero);
+               
+            end
             
-            %if on glass
-            fzero=round(median(f0(~isnan(f0))));
-            df=(f0-fzero);
+            framerange0=max(fminmax(1),fzero-halfstoreframes):min(fzero+halfstoreframes,fminmax(2));
+            
+
+            
             dpsfx=(psfx-median(psfx(~isnan(psfx))))/10;
             dpsfy=(psfy-median(psfy(~isnan(psfy))))/10;
             dev=df.^2+dpsfx.^2+dpsfy.^2;
             
-            allrois=zeros(roisizebig,roisizebig,length(framerange),sum(usesites));
+
+            
+            allrois=NaN+zeros(roisizebig,roisizebig,storeframes,sum(usesites));
+            
+            
             files=se.files;
             induse=1;
             
-            k=1; %for loop
-            if isfield(files(k).info,'imagefile')
-                filename=files(k).info.imagefile;
-            else
-                filename=files(k).info.basefile;
-            end
+            for k=1:length(files) %for loop
+                if isfield(files(k).info,'imagefile')
+                    filename=files(k).info.imagefile;
+                else
+                    filename=files(k).info.basefile;
+                end
                 roi=files(k).info.roi;
                 campix=files(k).info.pixsize;
                 il=getimageloader(obj,filename);
@@ -72,7 +93,21 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
 %                         dp=round(2*ss*rand(1,2)-ss);
 %                         pos=pos+dp;
                         if pos(1)>halfroisizebig&&pos(1)<sim(1)-halfroisizebig&&pos(2)>halfroisizebig&&pos(2)<sim(2)-halfroisizebig
-                            allrois(:,:,:,induse)=imstack(pos(2)-halfroisizebig:pos(2)+halfroisizebig,pos(1)-halfroisizebig:pos(1)+halfroisizebig,framerange);
+                            
+                            if p.beaddistribution.Value==1 %on glass
+                                frange=framerange0;
+                            else
+                                frange=max(fminmax(1),f0r(sitenumber)-halfstoreframes):min(fminmax(2),f0r(sitenumber)+halfstoreframes);
+                            end
+%                             frange
+                            smallf=imstack(pos(2)-halfroisizebig:pos(2)+halfroisizebig,pos(1)-halfroisizebig:pos(1)+halfroisizebig,frange);
+                            
+                            if frange(1)==fminmax(1)
+                                allrois(:,:,end-size(smallf,3)+1:end,induse)=smallf;
+                            else
+                                allrois(:,:,1:size(smallf,3),induse)=smallf;
+                            end
+%                             allrois(:,:,:,induse)=
                             
                             beadpos(induse,:)=pos(1:2);
                             devs(induse)=dev(sitenumber);
@@ -80,6 +115,7 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
                         end
                     end
                 end
+            end
 %                  allrois(:,end,:,:)=[]; %make asymmetric for testing
 %             ax=obj.initaxis('CC PSF');
 %             [corrPSFa,shiftedstacka]=registerPSFsCorr(allrois,fzero);
@@ -89,7 +125,7 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             [~,sortinddev]=sort(devs);
             allrois=allrois(:,:,:,sortinddev);
             
-            [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D(allrois,struct('framerange',fzero-fw2:fzero+fw2,'alignz',p.alignz),{ax, ax2});
+            [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D(allrois,struct('framerange',halfstoreframes+1-fw2:halfstoreframes+1+fw2,'alignz',p.alignz),{ax, ax2});
             
             numbers=1:length(sortinddev);
             shiftedstack=shiftedstack(:,:,:,numbers(sortinddev));
@@ -100,8 +136,8 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             allroisol=zeros(size(allrois,1),size(allrois,2),size(allrois,3),size(allrois,4),3);
             for k=1:size(allrois,4)
                 ssh=shiftedstack(:,:,:,k);
-                allroisol(:,:,:,k,1)=ssh/sum(ssh(:));
-                allroisol(:,:,:,k,2)=corrPSF/sum(corrPSF(:));
+                allroisol(:,:,:,k,1)=ssh/nansum(ssh(:));
+                allroisol(:,:,:,k,2)=corrPSF/nansum(corrPSF(:));
                 allroisol(:,:,:,k,3)=0.5*(allroisol(:,:,:,k,1)+allroisol(:,:,:,k,2));
             end
             axallps=obj.initaxis('overlayPSF');
@@ -126,6 +162,8 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
                 corrPSFhd(:,:,k)=interp2(corrPSFs(:,:,k),1,'cubic');
             end
             s_size=p.roisize;
+            
+            if 0
             tic
             [np_psf,coeff]=generate_psf_to_spline_YLJ(corrPSFhd,s_size,dz+1);
             toc
@@ -134,7 +172,9 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             for i = 1:size(np_psf,3)
                 np_psf(:,:,i) = np_psf(:,:,i)/sum(sum(np_psf(:,:,i)));
             end
-
+            else
+                coeff=0;
+            end
 %             tic
 %             b3_0=bsarray(double(np_psf),'lambda',p.smoothingfactor);
 %             toc
@@ -143,15 +183,19 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             toc
             
 %             out.coeff=coeff;
-            bspline=b3_0;
-            save([path filesep file],'bspline','coeff')
+            bspline.bslpine=b3_0;
+            bspline.isEM=files(1).info.EMon;
+            cspline.coeff=coeff;
+            cspline.isEM=files(1).info.EMon;
+            
+            save([path filesep file],'bspline','cspline')
 %             b3_0_1=bsarray(double(np_psf),'lambda',0.1);%with smoothing factor 0.1
             
 
             %upsampling
             %spline generation
-            ax=obj.initaxis('PSFz')
-            ftest=fzero;
+            ax=obj.initaxis('PSFz');
+            ftest=fzero-framerange0(1)+1;
             zpall=squeeze(shiftedstack(halfroisizebig+1,halfroisizebig+1,:,beadgood));
             zpall2=squeeze(allrois(halfroisizebig+1,halfroisizebig+1,:,beadgood));
 %             zpall3=squeeze(shiftedstacka(halfroisizebig+1,halfroisizebig+1,:,beadgood));
@@ -175,14 +219,20 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             xprofile=squeeze(corrPSF(:,halfroisizebig+1,ftest));
             xprofile=xprofile/max(xprofile);
             
-            [XX,YY,ZZ]=meshgrid(1:b3_0.dataSize(1),1:b3_0.dataSize(2),1:length(rangez));
-             psfbs = interp3_0(b3_0,XX,YY,ZZ);
-             
-             mp=round(size(psfbs,1)/2);
-            zbs=squeeze(psfbs(mp,mp,:));
-            zbs=zbs/max(zbs);
-            xbs=squeeze(psfbs(:,mp,(ftest-rangez(1))));
+            
+            dxxx=0.1;
+            xxx=1:dxxx:b3_0.dataSize(1);zzzt=0*xxx+ftest-rangez(1)-0*framerange0(1)+1;
+            xbs= interp3_0(b3_0,xxx,0*xxx+b3_0.dataSize(1)/2+.5,zzzt);
+            xbs= interp3_0(b3_0,0*xxx+b3_0.dataSize(1)/2+.5,xxx,zzzt);
             xbs=xbs/max(xbs);
+            
+            zzz=1:dxxx:b3_0.dataSize(3);xxxt=0*zzz+b3_0.dataSize(1)/2+.5;
+            zbs= interp3_0(b3_0,xxxt,xxxt,zzz); 
+%              mp=round(size(psfbs,1)/2);
+%             zbs=squeeze(psfbs(mp,mp,:));
+            zbs=zbs/max(zbs);
+%             xbs=squeeze(psfbs(:,mp,(ftest-rangez(1))));
+            
             
            
 %             [XX,YY,ZZ]=meshgrid(1:roisizebig*2,halfroisizebig*2+1,ftest);
@@ -194,11 +244,11 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             hold off
 %             plot(framerange,zpall2,'m')
 %             hold on
-             plot(framerange,zpall2,'m:')
+             plot(framerange0,zpall2,'m:')
              hold on
-             plot(framerange,zpall,'c')
-            plot(framerange',zprofile,'k+')
-            plot(rangez,zbs,'bo')
+             plot(framerange0,zpall,'c')
+            plot(framerange0',zprofile,'k*')
+            plot(zzz+rangez(1)+framerange0(1)-2,zbs,'b','LineWidth',2)
             
             
             xrange=-halfroisizebig:halfroisizebig;
@@ -211,9 +261,9 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             hold on
             
             plot(xrange,xpall,'c')
-            plot(xrange,xprofile,'k+-')
-            xrangebig=-mp/2+.5:0.5:mp/2-.5;
-            plot(xrangebig,xbs,'bo')
+            plot(xrange,xprofile,'k*-')
+%             xrangebig=-mp/2+.5:0.5:mp/2-.5;
+            plot((xxx-(b3_0.dataSize(1)+1)/2)/2,xbs,'b','LineWidth',2)
             
         end
         function pard=guidef(obj)
@@ -280,7 +330,7 @@ pard.dz.object=struct('Style','edit','String','50');
 pard.dz.position=[1,1.5];
 pard.dz.Width=.5;
 
-pard.beaddistribution.object=struct('String',{{'Beads on Glass','Beads in Gel'}},'Style','popupmenu','Callback',{{@beaddistribution_callback,obj}});
+pard.beaddistribution.object=struct('String',{{'Beads on Glass','Beads in Gel'}},'Style','popupmenu');
 pard.beaddistribution.position=[2,1];
 pard.beaddistribution.Width=2;
 

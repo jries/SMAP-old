@@ -28,7 +28,7 @@ else
     delete(phandle.Children)
 end
 
-maxV=max(V(:));
+maxV=nanmax(V(:));
 
  dim=1:2;
  dimmenu=3;
@@ -36,7 +36,7 @@ dimrgb=[];
 if isprop(phandle,'WindowKeyPressFcn')
     phandle.WindowKeyPressFcn=@keypress;
 end
-ax=axes('Parent',phandle,'Position',[0.05,0.18,.95,.82]);
+ax=axes('Parent',phandle,'Position',[0.05,0.18,.95,.78]);
 ax.XLim=[0 Inf];
 
 vp1=0.08;
@@ -250,9 +250,15 @@ changeaxis(0,0,0);
         if hcontrastcheck.Value
             imax=str2double(hcontrast.String)*maxV;
         else
-            imax=str2double(hcontrast.String)*max(img(:));
+            imaxim=nanmax(img(:));
+            if isnan(imaxim)
+                imax=inf;
+            else
+            imax=str2double(hcontrast.String)*imaxim;
+            end
         end
          if imax==0, imax=1;end
+        
         img(img>imax)=imax;
         
         if length(size(img))==3
@@ -277,6 +283,9 @@ changeaxis(0,0,0);
         colormap(ax,hlut.String{hlut.Value})
        
         ax.CLim=[0 imax];
+        if ~isempty(p.Title)
+            title(ax,p.Title);
+        end
         
     end
     function keypress(a,b)
@@ -316,6 +325,7 @@ p.addParameter('xdim',1,@isnumeric);
 p.addParameter('ydim',2,@isnumeric);
 p.addParameter('rgb',false);
 p.addParameter('globalcontrast',false,@islogical);
+p.addParameter('Title',[]);
 parse(p,in{:});
 pv=p.Results;
 

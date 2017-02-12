@@ -3,10 +3,11 @@ if nargin<3
     maxmethod='interp';
 end
 sim=size(targetim);
-if sim(3)==1 %2D
-G = (fftshift(real(ifft2(fft2(refim).*conj(fft2(targetim))))))/...
-		( (mean(refim(:))*mean(targetim(:))) * size(refim,1)*size(refim,2) ) ...
-		- 1;
+if length(sim)<3||sim(3)==1 %2D
+    [shift,CC]=get2Dcorrshift(refim,targetim,maxmethod);
+% G = (fftshift(real(ifft2(fft2(refim).*conj(fft2(targetim))))))/...
+% 		( (mean(refim(:))*mean(targetim(:))) * size(refim,1)*size(refim,2) ) ...
+% 		- 1;
 else
     refimhd=interp3(refim,2,'cubic');
     targetimhd=interp3(targetim,2,'cubic');

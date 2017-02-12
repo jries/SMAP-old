@@ -23,7 +23,7 @@ smallim=zeros(length(p.xrange),length(p.yrange),length(p.framerange),size(imin,4
 for k=1:size(imin,4)
     smallim(:,:,:,k)=imin(p.xrange,p.yrange,p.framerange,k);
 end
-avim=mean(imin,4);
+avim=nanmean(imin,4);
 
 xn=1:size(imin,1);yn=1:size(imin,2);zn=1:size(imin,3);
 [Xq,Yq,Zq]=meshgrid(yn,xn,zn);
@@ -37,24 +37,27 @@ for k=numbeads:-1:1
         [shift(k,:),cc(k)]=get2Dcorrshift(refim,smallim(:,:,:,k));
     end
     
-    shiftedstack(:,:,:,k)=interp3(imin(:,:,:,k),Xq-shift(k,2),Yq-shift(k,1),Zq-shift(k,3),'cubic',0);
-   
-    meanim=shiftedstack(:,:,:,k)+meanim;
+    shiftedh=interp3(imin(:,:,:,k),Xq-shift(k,2),Yq-shift(k,1),Zq-shift(k,3),'cubic',0);
+    shiftedstack(:,:,:,k)=shiftedh;
+%     shiftedh(isnan(shiftedh))=0;
+%     meanim=shiftedh+meanim;
+    meanim=nanmean(shiftedstack(:,:,:,k:numbeads),4);
+    
     refim=meanim(p.xrange,p.yrange,p.framerange);
 end
 
 for k=numbeads:-1:1
      sim=shiftedstack(:,:,:,k);
-     dv=(meanim/sum(meanim(:))-sim/sum(sim(:))).^2;
-    res(k)=sqrt(sum(dv(:)));
+     dv=(meanim/sum(meanim(:))-sim/nansum(sim(:))).^2;
+    res(k)=sqrt(nansum(dv(:)));
 end
 rescc=res./cc;
 [a,b]=robustMean(rescc);
 co=a+3.*b;
 indgood=rescc<co;
-imout=mean(shiftedstack(:,:,:,indgood),4);
-shiftedstack(1,end,:,~indgood)=max(shiftedstack(:));
-shiftedstack(1,:,1,~indgood)=max(shiftedstack(:));
+imout=nanmean(shiftedstack(:,:,:,indgood),4);
+shiftedstack(1,end,:,~indgood)=nanmax(shiftedstack(:));
+shiftedstack(1,:,1,~indgood)=nanmax(shiftedstack(:));
 
 if length(axs)>0
 hold(axs{1},'off')
