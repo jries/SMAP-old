@@ -35,6 +35,17 @@ classdef Grouper< interfaces.LocDataInterface
             obj.combinemodes.neighbours='sum';
         end
         function connect(obj,dx,dt,framef,xf,yf,varargin)
+            fn=fieldnames(obj.locData.loc);
+            lm=0;
+            for k=1:length(fn)
+                lm=max(lm,length(obj.locData.loc.(fn{k})));
+            end
+            for k=1:length(fn)
+                if length(obj.locData.loc.(fn{k}))<lm
+                    disp([fn{k} ' too short, padded with zeros']);
+                    obj.locData.loc.(fn{k})(lm)=0;
+                end
+            end
 %             obj.status('group localizations')
             %here not clear. like this or exchanged?
             x=double(obj.locData.getloc(xf).(xf));

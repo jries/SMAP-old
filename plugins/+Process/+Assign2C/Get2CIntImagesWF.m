@@ -36,7 +36,11 @@ classdef Get2CIntImagesWF<interfaces.DialogProcessor
             path=fileparts(file.name); %rather in top class, pass on
             %search for tiff images
             try
-                tiffile=obj.locData.files.file(1).info.allmetadata.filename;
+                if isfield(obj.locData.files.file(1).info,'imagefile')
+                tiffile=obj.locData.files.file(1).info.imagefile;
+                else
+                    tiffile=obj.locData.files.file(1).info.basefile;
+                end
                 if ~exist(tiffile,'file')
                     disp('Get2CIntImagesWF ine 40: check if it works')
                     tiffile=strrep(tiffile,'\','/');

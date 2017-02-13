@@ -18,8 +18,8 @@ classdef IntLoc2pos<interfaces.WorkflowModule
             intLoc2pos_ind2=1;
             
             p=obj.getAllParameters;
-            load(p.Tfile);
-            transform=transformation;
+          
+            transform=loadtransformation(obj,p.Tfile);
             obj.locs=obj.locData.getloc({'frame','xnm','ynm','znm','PSFxnm'});
             pix_cam=obj.filestruc.info.pixsize*1000;
             x=double(obj.locs.xnm);
