@@ -15,34 +15,33 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
 
             [path,file]=fileparts(obj.getPar('lastSMLFile'));
             file=strrep(file,'_sml','_3Dcal');
-%             [file,path]=uiputfile([path filesep file]);
+            
+%           initialization
             roisize=p.roisize;
             halfroisize=(roisize-1)/2;
             roifac=1.5;
             roisizebig=(roifac*roisize);
             halfroisizebig=round((roisizebig-1)/2); %room for shifting
             roisizebig=2*halfroisizebig+1;
-                        storeframes=p.roiframes+10;
+            storeframes=p.roiframes+10;
             halfstoreframes=round((storeframes-1)/2);
-            
-%             framerange=p.framerange;
+            storeframes=halfstoreframes*2+1;
+
             fminmax=[min(obj.locData.loc.frame) max(obj.locData.loc.frame)];
-            
-            
+
             se=obj.locData.SE;
             sites=se.sites;
             sitefilenumbers=getFieldAsVector(se.sites,'info','filenumber');
             usesites=getFieldAsVector(se.sites,'annotation','use');
             
             
-            %f0 for all beads: 
-%             ax=obj.initaxis('find f0');
+            %f0 foucs position for all beads: 
             for k=length(sites):-1:1
                 locs=obj.locData.getloc({'frame','PSFxnm','PSFynm','phot'},'position',sites(k));
                 [f0(k),psfx(k),psfy(k)]=getf0site(locs);
             end
             f0r=round(f0);
-            usesites=usesites&~isnan(f0);
+            usesites=usesites&~isnan(f0); %only take those for which a position was found
 
             
             if p.beaddistribution.Value==2
@@ -57,21 +56,18 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             
             framerange0=max(fminmax(1),fzero-halfstoreframes):min(fzero+halfstoreframes,fminmax(2));
             
-
-            
+            % determine some distance metric from median curve to sort according to this 
             dpsfx=(psfx-median(psfx(~isnan(psfx))))/10;
             dpsfy=(psfy-median(psfy(~isnan(psfy))))/10;
             dev=df.^2+dpsfx.^2+dpsfy.^2;
-            
 
-            
             allrois=NaN+zeros(roisizebig,roisizebig,storeframes,sum(usesites));
-            
-            
+
             files=se.files;
             induse=1;
             
-            for k=1:length(files) %for loop
+            %assemble stack of images around beads
+            for k=1:length(files) 
                 if isfield(files(k).info,'imagefile')
                     filename=files(k).info.imagefile;
                 else
@@ -99,7 +95,7 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
                             else
                                 frange=max(fminmax(1),f0r(sitenumber)-halfstoreframes):min(fminmax(2),f0r(sitenumber)+halfstoreframes);
                             end
-%                             frange
+
                             smallf=imstack(pos(2)-halfroisizebig:pos(2)+halfroisizebig,pos(1)-halfroisizebig:pos(1)+halfroisizebig,frange);
                             
                             if frange(1)==fminmax(1)
@@ -107,8 +103,6 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
                             else
                                 allrois(:,:,1:size(smallf,3),induse)=smallf;
                             end
-%                             allrois(:,:,:,induse)=
-                            
                             beadpos(induse,:)=pos(1:2);
                             devs(induse)=dev(sitenumber);
                             induse=induse+1;
@@ -119,6 +113,8 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
 %                  allrois(:,end,:,:)=[]; %make asymmetric for testing
 %             ax=obj.initaxis('CC PSF');
 %             [corrPSFa,shiftedstacka]=registerPSFsCorr(allrois,fzero);
+
+            %align all bead stacks and calculate average PSF
             fw2=round((p.framewindow-1)/2);
             ax=obj.initaxis('matching:residuals');
             ax2=obj.initaxis('PSF');
@@ -127,12 +123,15 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             
             [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D(allrois,struct('framerange',halfstoreframes+1-fw2:halfstoreframes+1+fw2,'alignz',p.alignz),{ax, ax2});
             
+            %undo sorting by deviation to associate beads again to their
+            %bead number
             numbers=1:length(sortinddev);
             shiftedstack=shiftedstack(:,:,:,numbers(sortinddev));
             shift=shift(numbers(sortinddev),:);
             beadgood=beadgood(numbers(sortinddev));
             drawnow;
             
+            %calculate dual-color overlay for display
             allroisol=zeros(size(allrois,1),size(allrois,2),size(allrois,3),size(allrois,4),3);
             for k=1:size(allrois,4)
                 ssh=shiftedstack(:,:,:,k);
@@ -142,132 +141,128 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             end
             axallps=obj.initaxis('overlayPSF');
             imageslicer(allroisol,'rgb',1,'Parent',axallps.Parent)
-%             imageslicer(imstack)
             if p.alignz
                 ax=obj.initaxis('zshift');scatter3(beadpos(:,1),beadpos(:,2),shift(:,3))
             end
+            drawnow
             
+            %cut out the central part of the PSF correspoinding to the set
+            %Roisize in x,y and z
             [~,ind]=max(corrPSF(:));
             [x,y,z]=ind2sub(size(corrPSF),ind);
-            dRx=round((p.roisize-1)/2)+1;
+            dRx=round((p.roisize-1)/2);
             dz=round((p.roiframes-1)/2);
             rangex=x-dRx:x+dRx;
             rangey=y-dRx:y+dRx;
             rangez=z-dz:z+dz;
-            corrPSFs=corrPSF(rangex,rangey,rangez);
             
+            %normalize PSF
             
-            %double sampling not for b-spline. 
-            %cspline on reconstructed b-spline (double sampling).
-            
-            %put this oversmapling in register, if needed
-%             corrPSFhd=zeros(size(corrPSF,1)*2,size(corrPSF,2)*2,size(corrPSF,3));
-            for k=size(corrPSFs,3):-1:1
-                corrPSFhd(:,:,k)=interp2(corrPSFs(:,:,k),1,'cubic');
+            minPSF=min(corrPSF(:));
+            corrPSFn=corrPSF-minPSF;
+            for k=1:size(corrPSF,3)
+                corrPSFn(:,:,k)=corrPSFn(:,:,k)/sum(sum(corrPSFn(:,:,k)));
             end
-            s_size=p.roisize;
+            
+            
+            corrPSFs=corrPSFn(rangex,rangey,rangez);
+            
+            
+            %Normalization of frames??? where to do that? berfore b-spline?
+            %calculatae b-spline coefficients
+            b3_0=bsarray(double(corrPSFs),'lambda',p.smoothingfactor);
+            
+            %calculate double-sampled PSF for c-spline
+            
+            zhd=1:1:b3_0.dataSize(3);
+            [XX,YY,ZZ]=meshgrid(1:0.5:b3_0.dataSize(1),1:0.5:b3_0.dataSize(2),zhd);
+            [XX,YY,ZZ]=meshgrid(1:0.5:b3_0.dataSize(1)+0.5,1:0.5:b3_0.dataSize(2)+0.5,1:2*b3_0.dataSize(1)); %even size:
+            
+            corrPSFhd = interp3_0(b3_0,XX,YY,ZZ,0);
+  
             
             if 1
             tic
-            [np_psf,coeff]=generate_psf_to_spline_YLJ(corrPSFhd,s_size,dz+1);
+            spline = Spline3D(corrPSFhd);
+            coeff = spline.coeff;
+%             [np_psf,coeff]=generate_psf_to_spline_YLJ(corrPSFhd,p.roisize,dz+1);
             toc
 %             bspline
-            np_psf = np_psf/max(np_psf(:));
-            for i = 1:size(np_psf,3)
-                np_psf(:,:,i) = np_psf(:,:,i)/sum(sum(np_psf(:,:,i)));
-            end
+%             np_psf = np_psf/max(np_psf(:));
+%             for i = 1:size(np_psf,3)
+%                 np_psf(:,:,i) = np_psf(:,:,i)/sum(sum(np_psf(:,:,i)));
+%             end
             else
                 coeff=0;
             end
-%             tic
-%             b3_0=bsarray(double(np_psf),'lambda',p.smoothingfactor);
-%             toc
-            tic
-            b3_0=bsarray(double(corrPSFhd),'lambda',p.smoothingfactor);
-            toc
+
             
-%             out.coeff=coeff;
+%             save
             bspline.bslpine=b3_0;
             bspline.isEM=files(1).info.EMon;
             cspline.coeff=coeff;
             cspline.isEM=files(1).info.EMon;
             
             save([path filesep file],'bspline','cspline')
-%             b3_0_1=bsarray(double(np_psf),'lambda',0.1);%with smoothing factor 0.1
-            
 
-            %upsampling
-            %spline generation
+            %plot graphs
             ax=obj.initaxis('PSFz');
             ftest=fzero-framerange0(1)+1;
             zpall=squeeze(shiftedstack(halfroisizebig+1,halfroisizebig+1,:,beadgood));
             zpall2=squeeze(allrois(halfroisizebig+1,halfroisizebig+1,:,beadgood));
-%             zpall3=squeeze(shiftedstacka(halfroisizebig+1,halfroisizebig+1,:,beadgood));
             xpall=squeeze(shiftedstack(:,halfroisizebig+1,ftest,beadgood));
             xpall2=squeeze(allrois(:,halfroisizebig+1,ftest,beadgood));
-%             xpall3=squeeze(shiftedstacka(:,halfroisizebig+1,ftest,beadgood));
             
             for k=1:size(zpall,2)
                 zpall(:,k)=zpall(:,k)/max(zpall(:,k));
                 xpall(:,k)=xpall(:,k)/max(xpall(:,k));
                 zpall2(:,k)=zpall2(:,k)/max(zpall2(:,k));
                 xpall2(:,k)=xpall2(:,k)/max(xpall2(:,k));                
-%                 zpall3(:,k)=zpall3(:,k)/max(zpall3(:,k));
-%                 xpall3(:,k)=xpall3(:,k)/max(xpall3(:,k));
             end
             
-            zprofile=squeeze(corrPSF(halfroisizebig+1,halfroisizebig+1,:));
+            zprofile=squeeze(corrPSFn(halfroisizebig+1,halfroisizebig+1,:));
             zprofile=zprofile/max(zprofile);
+            mphd=round((size(corrPSFhd,1)+1)/2);
+            zprofilehd=squeeze(corrPSFhd(mphd,mphd,:));
+            zprofilehd=zprofilehd/max(zprofilehd);            
             
-            
-            xprofile=squeeze(corrPSF(:,halfroisizebig+1,ftest));
+            xprofile=squeeze(corrPSFn(:,halfroisizebig+1,ftest));
             xprofile=xprofile/max(xprofile);
-            
+            mpzhd=round(size(corrPSFhd,3)+1)/2;
+            xprofilehd=squeeze(corrPSFhd(:,mphd,mpzhd));
+            xprofilehd=xprofilehd/max(xprofilehd);
             
             dxxx=0.1;
             xxx=1:dxxx:b3_0.dataSize(1);zzzt=0*xxx+ftest-rangez(1)-0*framerange0(1)+1;
-            xbs= interp3_0(b3_0,xxx,0*xxx+b3_0.dataSize(1)/2+.5,zzzt);
+%             xbs= interp3_0(b3_0,xxx,0*xxx+b3_0.dataSize(1)/2+.5,zzzt);
             xbs= interp3_0(b3_0,0*xxx+b3_0.dataSize(1)/2+.5,xxx,zzzt);
             xbs=xbs/max(xbs);
             
             zzz=1:dxxx:b3_0.dataSize(3);xxxt=0*zzz+b3_0.dataSize(1)/2+.5;
             zbs= interp3_0(b3_0,xxxt,xxxt,zzz); 
-%              mp=round(size(psfbs,1)/2);
-%             zbs=squeeze(psfbs(mp,mp,:));
             zbs=zbs/max(zbs);
-%             xbs=squeeze(psfbs(:,mp,(ftest-rangez(1))));
-            
-            
-           
-%             [XX,YY,ZZ]=meshgrid(1:roisizebig*2,halfroisizebig*2+1,ftest);
-%             psfbs = interp3_0(b3_0,XX,YY,ZZ);
-%             xbs=squeeze(psfbs(:));
-%             xbs=xbs/max(xbs);
-%             fbs=fzero-13:1:fzero+12;
-            
+
             hold off
-%             plot(framerange,zpall2,'m')
-%             hold on
              plot(framerange0,zpall2,'m:')
              hold on
              plot(framerange0,zpall,'c')
             plot(framerange0',zprofile,'k*')
+            plot(zhd+rangez(1)+framerange0(1)-2,zprofilehd,'ko')
             plot(zzz+rangez(1)+framerange0(1)-2,zbs,'b','LineWidth',2)
             
-            
-            xrange=-halfroisizebig:halfroisizebig;
-            
+            xrange=-halfroisizebig:halfroisizebig;           
              ax=obj.initaxis('PSFx');
             hold off
             plot(xrange,xpall2,'m:')
-%             hold on
-%             plot(xrange,xpall3,'m')
             hold on
-            
             plot(xrange,xpall,'c')
             plot(xrange,xprofile,'k*-')
-%             xrangebig=-mp/2+.5:0.5:mp/2-.5;
-            plot((xxx-(b3_0.dataSize(1)+1)/2)/2,xbs,'b','LineWidth',2)
+            plot((-mphd+1:mphd-1)/2,xprofilehd,'ko')
+            plot((xxx-(b3_0.dataSize(1)+1)/2),xbs,'b','LineWidth',2)
+            
+            
+            %quality control: refit all beads
+            [P] =  kernel_MLEfit_Spline_LM_SMAP(co,cspline.coeff,13,100)
             
         end
         function pard=guidef(obj)
