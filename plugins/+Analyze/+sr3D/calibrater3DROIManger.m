@@ -156,6 +156,10 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             rangez=z-dz:z+dz;
             corrPSFs=corrPSF(rangex,rangey,rangez);
             
+            
+            %double sampling not for b-spline. 
+            %cspline on reconstructed b-spline (double sampling).
+            
             %put this oversmapling in register, if needed
 %             corrPSFhd=zeros(size(corrPSF,1)*2,size(corrPSF,2)*2,size(corrPSF,3));
             for k=size(corrPSFs,3):-1:1
@@ -163,7 +167,7 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             end
             s_size=p.roisize;
             
-            if 0
+            if 1
             tic
             [np_psf,coeff]=generate_psf_to_spline_YLJ(corrPSFhd,s_size,dz+1);
             toc
