@@ -228,7 +228,7 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             
             xprofile=squeeze(corrPSFn(:,halfroisizebig+1,ftest));
             xprofile=xprofile/max(xprofile);
-            mpzhd=round(size(corrPSFhd,3)+1)/2;
+            mpzhd=round(size(corrPSFhd,3)+1)/2+1;
             xprofilehd=squeeze(corrPSFhd(:,mphd,mpzhd));
             xprofilehd=xprofilehd/max(xprofilehd);
             
@@ -262,7 +262,25 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             
             
             %quality control: refit all beads
-            [P] =  kernel_MLEfit_Spline_LM_SMAP_v2(corrPSF,(4*cspline.coeff),13,100)
+            
+            ax=obj.initaxis('fitted z');
+            hold off
+            
+            testfit(allrois(:,:,:,beadgood),spline.coeff,p)
+            testfit(corrPSF,spline.coeff,p,'k')
+%             teststack=allrois(:,:,:,beadgood);
+%             d=round((size(teststack,1)-p.roisize)/2);
+%             range=d+1:d+p.roisize;
+%             ax=obj.initaxis('fitted z');
+%             hold off
+%             for k=1:size(teststack,4)
+%             [P] =  kernel_MLEfit_Spline_LM_SMAP_v2(teststack(range,range,:,k),(4*cspline.coeff),13,100);
+%             
+%             plot(P(:,5))
+%             hold on
+%             end
+%             
+%             [P] =  kernel_MLEfit_Spline_LM_SMAP_v2(teststack(range,range,:,k),(4*cspline.coeff),13,100);
             
         end
         function pard=guidef(obj)
@@ -271,6 +289,21 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
     end
 end
 
+function testfit(teststack,coeff,p,linepar)
+if nargin<4
+    linepar={};
+elseif ~iscell(linepar)
+    linepar={linepar};
+end
+d=round((size(teststack,1)-p.roisize)/2);
+            range=d+1:d+p.roisize;
+    for k=1:size(teststack,4)
+    [P] =  kernel_MLEfit_Spline_LM_SMAP_v2(teststack(range,range,:,k),(4*coeff),p.roisize,100);
+
+    plot(P(:,5),linepar{:})
+    hold on
+    end
+end
 function [f0,PSFx0,PSFy0]=getf0site(locs)
 [zas,zn]=stackas2z(locs.PSFxnm,locs.PSFynm,locs.frame,locs.phot,0);
 if isnan(zas)
