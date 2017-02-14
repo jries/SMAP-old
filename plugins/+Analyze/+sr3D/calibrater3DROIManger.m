@@ -202,8 +202,10 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             bspline.isEM=files(1).info.EMon;
             cspline.coeff=coeff;
             cspline.isEM=files(1).info.EMon;
+            z0=round((b3_0.dataSize(3)+1)/2);
+            dz=p.dz;
             
-            save([path filesep file],'bspline','cspline')
+            save([path filesep file],'bspline','cspline','z0','dz')
 
             %plot graphs
             ax=obj.initaxis('PSFz');
@@ -389,10 +391,10 @@ pard.roisize.Width=.3;
 
 pard.smoothingfactort.object=struct('Style','text','String','Smoothing factor Bspline'); 
 pard.smoothingfactort.position=[3,3.5];
-pard.smoothingfactort.Width=1;
-pard.smoothingfactor.object=struct('Style','edit','String','.1'); 
-pard.smoothingfactor.position=[3,4.5];
-pard.smoothingfactor.Width=.5;
+pard.smoothingfactort.Width=1.6;
+pard.smoothingfactor.object=struct('Style','edit','String','.05'); 
+pard.smoothingfactor.position=[3,4.6];
+pard.smoothingfactor.Width=.4;
 
 pard.roiframest.object=struct('Style','text','String','ROI (frames)'); 
 pard.roiframest.position=[3,2];
