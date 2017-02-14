@@ -176,14 +176,14 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             
             zhd=1:1:b3_0.dataSize(3);
             [XX,YY,ZZ]=meshgrid(1:0.5:b3_0.dataSize(1),1:0.5:b3_0.dataSize(2),zhd);
-            [XX,YY,ZZ]=meshgrid(1:0.5:b3_0.dataSize(1)+0.5,1:0.5:b3_0.dataSize(2)+0.5,1:2*b3_0.dataSize(1)); %even size:
+%             [XX,YY,ZZ]=meshgrid(1:0.5:b3_0.dataSize(1)+0.5,1:0.5:b3_0.dataSize(2)+0.5,1:2*b3_0.dataSize(1)); %even size:
             
             corrPSFhd = interp3_0(b3_0,XX,YY,ZZ,0);
   
             
             if 1
             tic
-            spline = Spline3D(corrPSFhd);
+            spline = Spline3D_v2(corrPSFhd);
             coeff = spline.coeff;
 %             [np_psf,coeff]=generate_psf_to_spline_YLJ(corrPSFhd,p.roisize,dz+1);
             toc
@@ -262,7 +262,7 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             
             
             %quality control: refit all beads
-            [P] =  kernel_MLEfit_Spline_LM_SMAP(co,cspline.coeff,13,100)
+            [P] =  kernel_MLEfit_Spline_LM_SMAP_v2(corrPSF,(4*cspline.coeff),13,100)
             
         end
         function pard=guidef(obj)
@@ -277,8 +277,9 @@ if isnan(zas)
     PSFx0=NaN;
     PSFy0=NaN;
 else
-PSFx0=locs.PSFxnm(round(zas));
-PSFy0=locs.PSFynm(round(zas));
+    ind=find(locs.frame<=zas,1,'last');
+PSFx0=locs.PSFxnm(ind);
+PSFy0=locs.PSFynm(ind);
 end
 % drawnow
 f0=zas;
@@ -289,37 +290,47 @@ try
     il=imageloaderAll(filename,[],obj.P); %still exist?
 catch
     maindir=obj.getGlobalSetting('DataDirectory');
-    filename=strrep(filename,'\','/');
+    filenamef=findfilepath(filename,maindir);
+    try
+        il=imageloaderAll(filenamef,[],obj.P); %still exist?
+    catch
+        lastsml=obj.getPar('lastSMLFile');
+        filenamef=findfilepath(filename,fileparts(lastsml));
+            try
+                il=imageloaderAll(filenamef,[],obj.P); %still exist?
+            catch
+                [~,~,ext]=fileparts(filename);
+                if isempty(ext)
+                    filenamef=[filename '.tif'];
+                end
+                [f,path]=uigetfile(filenamef);
+                if f
+                    il=imageloaderAll([path f],[],obj.P); 
+                else
+                    il=[];
+                end
+            end
+    end
+    %look for file in main directory
+end
+end
+
+function filename=findfilepath(filename,maindir)
+ filename=strrep(filename,'\','/');
     d=dir(maindir);
     alldir={d([d.isdir]).name};
     ind=[1 strfind(filename,'/')];
     for k=1:length(ind)-1
         thisf=filename(ind(k)+1:ind(k+1)-1);
-        if any(contains(alldir,thisf))&&~isempty(thisf)
+        if any(strcmp(alldir,thisf))&&~isempty(thisf)
 
 
             filename=[maindir '/' filename(ind(k)+1:end)];
             break
         end
     end
-    try
-        il=imageloaderAll(filename,[],obj.P); %still exist?
-    catch
-        [~,~,ext]=fileparts(filename);
-        if isempty(ext)
-            filename=[filename '.tif'];
-        end
-        [f,path]=uigetfile(filename);
-        if f
-            il=imageloaderAll([path f],[],obj.P); 
-        else
-            il=[];
-        end
-    end
-    %look for file in main directory
-end
-end
 
+end
 
 function pard=guidef(obj)
 pard.dzt.object=struct('Style','text','String','dz (nm)'); 
