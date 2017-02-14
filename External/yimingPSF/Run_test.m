@@ -86,3 +86,18 @@ end
 data = poissrnd(out,13,13,Nfits);
 [P_CS CRLB LL]=GPUmleFit_LM(single(data),single(coeff*4),200,5,0);
 figure,plot(P_CS(:,end),'.')
+
+%% test for Spline3D_v2
+np_psf = double(psf);
+np_psf = np_psf/max(np_psf(:));
+np_psf = np_psf(25-18:25+18,25-18:25+18,:);
+for i = 1:size(np_psf,3)
+    np_psf(:,:,i) = np_psf(:,:,i)/sum(sum(np_psf(:,:,i)));
+end
+spline = Spline3D_v2(np_psf);
+coeff = spline.coeff;
+
+
+im =imstack(338-6:338+6,220-6:220+6,40-12:40+13);
+[P] =  kernel_MLEfit_Spline_LM_SMAP_v2(im(:,:,:),single(coeff*4),13,200);
+
