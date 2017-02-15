@@ -11,6 +11,7 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
 %             beaddistribution_callback(0,0,obj)           
         end
         function out=run(obj,p)
+            p.doublesample=false;
             out=[];
 
             [path,file]=fileparts(obj.getPar('lastSMLFile'));
@@ -175,10 +176,15 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             %calculate double-sampled PSF for c-spline
             
             zhd=1:1:b3_0.dataSize(3);
-            [XX,YY,ZZ]=meshgrid(1:0.5:b3_0.dataSize(1),1:0.5:b3_0.dataSize(2),zhd);
-%             [XX,YY,ZZ]=meshgrid(1:0.5:b3_0.dataSize(1)+0.5,1:0.5:b3_0.dataSize(2)+0.5,1:2*b3_0.dataSize(1)); %even size:
-            
-            corrPSFhd = interp3_0(b3_0,XX,YY,ZZ,0);
+            if p.doublesample
+                dxxhd=0.5;
+                [XX,YY,ZZ]=meshgrid(1:dxxhd:b3_0.dataSize(1),1:dxxhd:b3_0.dataSize(2),zhd);
+                corrPSFhd = interp3_0(b3_0,XX,YY,ZZ,0);
+            else
+                dxxhd=1;
+                corrPSFhd=corrPSFs;
+            end
+                
   
             
             if 1
@@ -202,6 +208,7 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             bspline.isEM=files(1).info.EMon;
             cspline.coeff=coeff;
             cspline.isEM=files(1).info.EMon;
+            cspline.doublesample=p.doublesample;
             z0=round((b3_0.dataSize(3)+1)/2);
             dz=p.dz;
             
@@ -259,7 +266,7 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             hold on
             plot(xrange,xpall,'c')
             plot(xrange,xprofile,'k*-')
-            plot((-mphd+1:mphd-1)/2,xprofilehd,'ko')
+            plot((-mphd+1:mphd-1)/dxxhd,xprofilehd,'ko')
             plot((xxx-(b3_0.dataSize(1)+1)/2),xbs,'b','LineWidth',2)
             
             
@@ -299,13 +306,23 @@ elseif ~iscell(linepar)
 end
 d=round((size(teststack,1)-p.roisize)/2);
             range=d+1:d+p.roisize;
+            
+if p.doublesample
+    coefffak=4;
+    fitterGPU=@GPUmleFit_LM_v2;
+    fitterCPU=@kernel_MLEfit_Spline_LM_SMAP_v2;
+else
+    coefffak=1;
+    fitterGPU=@GPUmleFit_LM_noInterp;
+    fitterCPU=@kernel_MLEfit_Spline_LM_SMAP_v2_nointerp;
+end  
     for k=1:size(teststack,4)
         try
-            [P] =  GPUmleFit_LM_v2(single(squeeze(teststack(range,range,:,k))),single(4*coeff),100,5,0);
+          [P] =  fitterGPU(single(squeeze(teststack(range,range,:,k))),single(coefffak*coeff),100,5,0);
         catch err
             err
-            disp('run on CPU')
-            [P] =  kernel_MLEfit_Spline_LM_SMAP_v2(teststack(range,range,:,k),(4*coeff),single(p.roisize),100);
+            disp('run on CPU')        
+            [P] =  fitterCPU(teststack(range,range,:,k),(4*coeff),single(p.roisize),100);
         end
 
     plot(P(:,5),linepar{:})

@@ -19,13 +19,15 @@ end
 function segmentb(obj,p)
 
 locDatacopy=obj.locData.copy;
-g=Grouper(locDatacopy);
-g.connect(150,max(locDatacopy.loc.frame),'frame','xnm','ynm');
-g.combine;
+locDatacopy.regroup(150,p.minframes);
+% g=Grouper(locDatacopy);
+% g.connect(150,max(locDatacopy.loc.frame),'frame','xnm','ynm','filenumber');
+% g.connect(50,3,'frame','xnm','ynm','filenumber');
+% g.combine;
 beadind=locDatacopy.grouploc.numberInGroup>p.minframes;
 xb=locDatacopy.grouploc.xnm(beadind);
 yb=locDatacopy.grouploc.ynm(beadind);
-
+filenumber=locDatacopy.grouploc.filenumber(beadind);
 % p=obj.getAllParameters;
 % files=obj.SE.files;
 % xm=min(obj.locData.loc.xnm);
@@ -49,7 +51,11 @@ cells=obj.SE.cells;
 for c=1:length(cells)
     cellh=cells(c);
     pos=cellh.pos;
-            beadhere=find(mywithin(xb,[pos(1)-p.se_cellfov/2 p.se_cellfov],yb,[pos(2)-p.se_cellfov/2 p.se_cellfov]));
+    cfn=cellh.info.filenumber;
+            beadhere=(mywithin(xb,[pos(1)-p.se_cellfov/2 p.se_cellfov],yb,[pos(2)-p.se_cellfov/2 p.se_cellfov]));
+            beadfile=filenumber==cfn;
+            beadhere=beadhere&beadfile;
+            beadhere=find(beadhere);
             for b=1:length(beadhere)
                     currentsite=interfaces.SEsites;
                     currentsite.pos=[xb(beadhere(b)) yb(beadhere(b)) 0];     
