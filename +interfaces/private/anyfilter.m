@@ -1,4 +1,5 @@
 function ig=anyfilter(v,mode,varargin)
+ig=true(size(v));
 switch mode
     case 'minmax'
         if length(varargin)==1
