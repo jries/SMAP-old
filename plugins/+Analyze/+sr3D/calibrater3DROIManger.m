@@ -300,7 +300,13 @@ end
 d=round((size(teststack,1)-p.roisize)/2);
             range=d+1:d+p.roisize;
     for k=1:size(teststack,4)
-    [P] =  kernel_MLEfit_Spline_LM_SMAP_v2(teststack(range,range,:,k),(4*coeff),p.roisize,100);
+        try
+            [P] =  GPUmleFit_LM_v2(single(squeeze(teststack(range,range,:,k))),single(4*coeff),100,5,0);
+        catch err
+            err
+            disp('run on CPU')
+            [P] =  kernel_MLEfit_Spline_LM_SMAP_v2(teststack(range,range,:,k),(4*coeff),single(p.roisize),100);
+        end
 
     plot(P(:,5),linepar{:})
     hold on
