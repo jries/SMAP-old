@@ -19,8 +19,8 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             reporttext='GPU fit function did not run. Possibly the wrong CUDA version is installed.';
             img=zeros(7,'single');img(3,3)=1;
             try
-                fitp=GPUmleFit_LM_v2(img,1,10,1,0);
-                obj.fitpar.fitfunction=@GPUmleFit_LM_v2;
+                fitp=GPUmleFit_LM_noInterp(img,1,10,1,0);
+                obj.fitpar.fitfunction=@GPUmleFit_LM_noInterp;
                  reporttext='GPUmleFit_LM works';
             end
             roisize=obj.getPar('loc_ROIsize');
@@ -224,7 +224,7 @@ if fitpar.fitmode==3
 elseif fitpar.fitmode==5
     calfile=p.cal_3Dfile;
     cal=load(calfile);
-    fitpar.splinecoefficients=single(cal.cspline.coeff*4);
+    fitpar.splinecoefficients=single(cal.cspline.coeff);
     fitpar.z0=cal.z0;
     fitpar.dz=cal.dz; 
     fitpar.refractive_index_mismatch=p.refractive_index_mismatch;
