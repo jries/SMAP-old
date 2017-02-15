@@ -176,14 +176,14 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             
             zhd=1:1:b3_0.dataSize(3);
             [XX,YY,ZZ]=meshgrid(1:0.5:b3_0.dataSize(1),1:0.5:b3_0.dataSize(2),zhd);
-            [XX,YY,ZZ]=meshgrid(1:0.5:b3_0.dataSize(1)+0.5,1:0.5:b3_0.dataSize(2)+0.5,1:2*b3_0.dataSize(1)); %even size:
+%             [XX,YY,ZZ]=meshgrid(1:0.5:b3_0.dataSize(1)+0.5,1:0.5:b3_0.dataSize(2)+0.5,1:2*b3_0.dataSize(1)); %even size:
             
             corrPSFhd = interp3_0(b3_0,XX,YY,ZZ,0);
   
             
             if 1
             tic
-            spline = Spline3D(corrPSFhd);
+            spline = Spline3D_v2(corrPSFhd);
             coeff = spline.coeff;
 %             [np_psf,coeff]=generate_psf_to_spline_YLJ(corrPSFhd,p.roisize,dz+1);
             toc
@@ -202,8 +202,10 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             bspline.isEM=files(1).info.EMon;
             cspline.coeff=coeff;
             cspline.isEM=files(1).info.EMon;
+            z0=round((b3_0.dataSize(3)+1)/2);
+            dz=p.dz;
             
-            save([path filesep file],'bspline','cspline')
+            save([path filesep file],'bspline','cspline','z0','dz')
 
             %plot graphs
             ax=obj.initaxis('PSFz');
@@ -228,7 +230,7 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             
             xprofile=squeeze(corrPSFn(:,halfroisizebig+1,ftest));
             xprofile=xprofile/max(xprofile);
-            mpzhd=round(size(corrPSFhd,3)+1)/2;
+            mpzhd=round(size(corrPSFhd,3)+1)/2+1;
             xprofilehd=squeeze(corrPSFhd(:,mphd,mpzhd));
             xprofilehd=xprofilehd/max(xprofilehd);
             
@@ -262,7 +264,25 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
             
             
             %quality control: refit all beads
-            [P] =  kernel_MLEfit_Spline_LM_SMAP(co,cspline.coeff,13,100)
+            
+            ax=obj.initaxis('fitted z');
+            hold off
+            
+            testfit(allrois(:,:,:,beadgood),spline.coeff,p)
+            testfit(corrPSF,spline.coeff,p,'k')
+%             teststack=allrois(:,:,:,beadgood);
+%             d=round((size(teststack,1)-p.roisize)/2);
+%             range=d+1:d+p.roisize;
+%             ax=obj.initaxis('fitted z');
+%             hold off
+%             for k=1:size(teststack,4)
+%             [P] =  kernel_MLEfit_Spline_LM_SMAP_v2(teststack(range,range,:,k),(4*cspline.coeff),13,100);
+%             
+%             plot(P(:,5))
+%             hold on
+%             end
+%             
+%             [P] =  kernel_MLEfit_Spline_LM_SMAP_v2(teststack(range,range,:,k),(4*cspline.coeff),13,100);
             
         end
         function pard=guidef(obj)
@@ -271,14 +291,36 @@ classdef calibrater3DROIManger<interfaces.DialogProcessor
     end
 end
 
+function testfit(teststack,coeff,p,linepar)
+if nargin<4
+    linepar={};
+elseif ~iscell(linepar)
+    linepar={linepar};
+end
+d=round((size(teststack,1)-p.roisize)/2);
+            range=d+1:d+p.roisize;
+    for k=1:size(teststack,4)
+        try
+            [P] =  GPUmleFit_LM_v2(single(squeeze(teststack(range,range,:,k))),single(4*coeff),100,5,0);
+        catch err
+            err
+            disp('run on CPU')
+            [P] =  kernel_MLEfit_Spline_LM_SMAP_v2(teststack(range,range,:,k),(4*coeff),single(p.roisize),100);
+        end
+
+    plot(P(:,5),linepar{:})
+    hold on
+    end
+end
 function [f0,PSFx0,PSFy0]=getf0site(locs)
 [zas,zn]=stackas2z(locs.PSFxnm,locs.PSFynm,locs.frame,locs.phot,0);
 if isnan(zas)
     PSFx0=NaN;
     PSFy0=NaN;
 else
-PSFx0=locs.PSFxnm(round(zas));
-PSFy0=locs.PSFynm(round(zas));
+    ind=find(locs.frame<=zas,1,'last');
+PSFx0=locs.PSFxnm(ind);
+PSFy0=locs.PSFynm(ind);
 end
 % drawnow
 f0=zas;
@@ -289,37 +331,47 @@ try
     il=imageloaderAll(filename,[],obj.P); %still exist?
 catch
     maindir=obj.getGlobalSetting('DataDirectory');
-    filename=strrep(filename,'\','/');
+    filenamef=findfilepath(filename,maindir);
+    try
+        il=imageloaderAll(filenamef,[],obj.P); %still exist?
+    catch
+        lastsml=obj.getPar('lastSMLFile');
+        filenamef=findfilepath(filename,fileparts(lastsml));
+            try
+                il=imageloaderAll(filenamef,[],obj.P); %still exist?
+            catch
+                [~,~,ext]=fileparts(filename);
+                if isempty(ext)
+                    filenamef=[filename '.tif'];
+                end
+                [f,path]=uigetfile(filenamef);
+                if f
+                    il=imageloaderAll([path f],[],obj.P); 
+                else
+                    il=[];
+                end
+            end
+    end
+    %look for file in main directory
+end
+end
+
+function filename=findfilepath(filename,maindir)
+ filename=strrep(filename,'\','/');
     d=dir(maindir);
     alldir={d([d.isdir]).name};
     ind=[1 strfind(filename,'/')];
     for k=1:length(ind)-1
         thisf=filename(ind(k)+1:ind(k+1)-1);
-        if any(contains(alldir,thisf))&&~isempty(thisf)
+        if any(strcmp(alldir,thisf))&&~isempty(thisf)
 
 
             filename=[maindir '/' filename(ind(k)+1:end)];
             break
         end
     end
-    try
-        il=imageloaderAll(filename,[],obj.P); %still exist?
-    catch
-        [~,~,ext]=fileparts(filename);
-        if isempty(ext)
-            filename=[filename '.tif'];
-        end
-        [f,path]=uigetfile(filename);
-        if f
-            il=imageloaderAll([path f],[],obj.P); 
-        else
-            il=[];
-        end
-    end
-    %look for file in main directory
-end
-end
 
+end
 
 function pard=guidef(obj)
 pard.dzt.object=struct('Style','text','String','dz (nm)'); 
@@ -345,10 +397,10 @@ pard.roisize.Width=.3;
 
 pard.smoothingfactort.object=struct('Style','text','String','Smoothing factor Bspline'); 
 pard.smoothingfactort.position=[3,3.5];
-pard.smoothingfactort.Width=1;
-pard.smoothingfactor.object=struct('Style','edit','String','.1'); 
-pard.smoothingfactor.position=[3,4.5];
-pard.smoothingfactor.Width=.5;
+pard.smoothingfactort.Width=1.6;
+pard.smoothingfactor.object=struct('Style','edit','String','.05'); 
+pard.smoothingfactor.position=[3,4.6];
+pard.smoothingfactor.Width=.4;
 
 pard.roiframest.object=struct('Style','text','String','ROI (frames)'); 
 pard.roiframest.position=[3,2];

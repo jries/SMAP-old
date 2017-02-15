@@ -157,7 +157,7 @@ switch callobj.Label
         selected.Parent.Children=selected.Parent.Children(newpos);
         
         for k=1:numtabs
-            name=selected.Parent.Children(k).Tag;
+            name=selected.Parent.Children(k).Title;
             guimodules.(obj.maindir).(name).position=k;
         end
     case 'detach'
