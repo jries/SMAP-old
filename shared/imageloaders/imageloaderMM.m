@@ -24,6 +24,11 @@ classdef imageloaderMM<interfaces.imageloaderSMAP
             image=readstack(obj,frame);
         end
         
+        function close(obj)
+            obj.reader.close
+%             clear(obj.reader)
+        end
+        
         function image=getimageonline(obj,number)
             image=obj.getimage(number);
             if isempty(image)&&obj.onlineAnalysis 
@@ -118,7 +123,11 @@ for k=1:length(dirs)
 end
 
 dirs{end+1}=  [MMpath filesep 'ij.jar']; 
-javaaddpath(dirs);
+jp=javaclasspath;
+diradd=dirs(~ismember(dirs,jp));
+if ~isempty(diradd)
+javaaddpath(diradd);
+end
 
 end
 

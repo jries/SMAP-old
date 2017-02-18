@@ -3,7 +3,7 @@ classdef imageloaderMMsingle<interfaces.imageloaderSMAP
     %   Detailed explanation goes here
     
     properties
-        calfile='settings/CameraCalibration.xls';
+%         calfile='settings/CameraCalibration.xls';
         separate
         separatefiles
     end
@@ -37,6 +37,9 @@ classdef imageloaderMMsingle<interfaces.imageloaderSMAP
         end
         function image=getimage(obj,frame)
             image=readseparate(obj,frame);
+        end
+        function close(obj)
+            %not needed, as single files are read
         end
     end
     

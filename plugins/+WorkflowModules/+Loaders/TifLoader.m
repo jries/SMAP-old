@@ -28,9 +28,17 @@ classdef TifLoader<interfaces.WorkflowModule
                  error('TifLoader: localization file not found')
             end
 %             obj.imloader=imageLoader(p.tiffile);  
-            if isempty(obj.imloader)
-                obj.imloader=imageloaderAll(p.tiffile,obj.getPar('loc_fileinfo')); 
+            if isempty(obj.imloader)||isempty(obj.imloader.getimage(1))
+                disp('reload file in image loader')
+                obj.addFile(p.tiffile)
+%                 obj.imloader=imageloaderAll(p.tiffile,obj.getPar('loc_fileinfo')); 
             end
+%             try 
+%                 img=obj.imloader.getimage(1);
+%             catch err
+%                 err
+%                  obj.imloader=imageloaderAll(p.tiffile,obj.getPar('loc_fileinfo')); 
+%             end
             obj.imloader.onlineAnalysis=p.onlineanalysis;
             obj.imloader.waittime=p.onlineanalysiswaittime;
             obj.imloader.setImageNumber(p.framestart-1);
@@ -132,12 +140,21 @@ classdef TifLoader<interfaces.WorkflowModule
             dateof.ID=id;
             dateof.eof=true;
             obj.output(dateof)
+            if ~obj.getPar('loc_preview') %if real fitting: close
+                obj.imloader.close;
+%                 obj.imloader=[];
+                disp('close imloader')
+            end
             disp('fitting done')
         end
         function addFile(obj,file)
 %         if 1
 %         else
-                
+            try
+                obj.imloader.close;
+            catch err
+%                 err
+            end
             obj.imloader=imageloaderAll(file,obj.getPar('loc_fileinfo'),obj.P);
 %             if ~isempty(obj.imloader.info.metafile)
             if ~isempty(obj.imloader.metadata.allmetadata)&&isfield(obj.imloader.metadata.allmetadata,'metafile')

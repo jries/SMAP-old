@@ -139,6 +139,10 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
 %             end
         metao=obj.metadata;
         end
+        function close(obj)
+            display(['close not implemented in ' class(obj)])
+%             obj.reader.close;
+        end
     end
     
 end
