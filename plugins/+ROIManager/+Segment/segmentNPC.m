@@ -3,10 +3,11 @@ classdef segmentNPC<interfaces.DialogProcessor&interfaces.SEProcessor
         function obj=segmentNPC(varargin)        
                 obj@interfaces.DialogProcessor(varargin{:});
             obj.inputParameters={};
+            obj.showresults=true;
         end
         
         function out=run(obj,p)  
-          segmentNPCi(obj.SE,p)
+          segmentNPCi(obj.SE,p,obj)
           out=[];
         end
         function pard=guidef(obj)
@@ -45,7 +46,7 @@ pard.getmask.position=[2,3];
 pard.plugininfo.type='ROI_Analyze';
 end
 
-function segmentNPCi(se,p)
+function segmentNPCi(se,p,obj)
 % global se
 
 
@@ -100,14 +101,17 @@ n=-1*diameterNPC:pixrec:1*diameterNPC;
 
 h=exp(-abs(X.^2+Y.^2-(diameterNPC/2)^2)/4/rim^2);
 h=h/sum(h(:));
-figure(99);imagesc(n,n,h);
+obj.initaxis('filter');imagesc(n,n,h);
 
 for cn=1:length(cells)
     cell=cells(cn);
 %     srim=sum(double(cell.image.image),3);
-    srim=cell.image.layers(1).images.rawimage.image;
-    for k=2:length(cell.image.layers)
-        srim=srim+cell.image.layers(k).images.rawimage.image;
+srim=0;
+%     srim=cell.image.layers(1).images.rawimage.image;
+    for k=1:length(cell.image.layers)
+        if ~isempty(cell.image.layers(k).images)
+            srim=cell.image.layers(k).images.rawimage.image+srim;
+        end
     end
 %     srims=size(srim);
 
@@ -157,9 +161,12 @@ for cn=1:length(cells)
 xsite=xsite(indgood);
 ysite=ysite(indgood);
 
-    figure(223)
+    obj.initaxis('images')
     subplot(1,2,1)
-    imagesc(srim)
+    srimp=srim;
+    maxi=myquantilefast(srimp,.99);
+    srimp(srimp>maxi)=maxi;
+    imagesc(srimp)
     hold on
     plot(maximaout(indgood,2),maximaout(indgood,1),'wo')
     hold off

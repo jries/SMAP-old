@@ -85,6 +85,7 @@ classdef SEMainGui< gui.GuiPluginWindow
                 SEpreview.attachSE(obj.locData.SE);
                 SEpreview.makeGui;
                 obj.SEpreview=SEpreview;
+                
                 obj.setPar('se_viewer',SEpreview);
             end
 

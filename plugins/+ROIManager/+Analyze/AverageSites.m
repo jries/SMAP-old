@@ -9,9 +9,11 @@ classdef AverageSites<interfaces.DialogProcessor&interfaces.SEProcessor
         function out=run(obj,p)  
             out=[];
             
-            obj.locData.addfile(p.name);
-            initGuiAfterLoad(obj);
-            obj.SE.processors.preview.updateFilelist;
+            if p.addfile
+                obj.locData.addfile(p.name);
+                initGuiAfterLoad(obj);
+                obj.SE.processors.preview.updateFilelist;
+            end
             newfile=obj.locData.files.filenumberEnd;
             locnew=obj.locData.loc;
             sites=obj.locData.SE.sites;
@@ -19,15 +21,17 @@ classdef AverageSites<interfaces.DialogProcessor&interfaces.SEProcessor
             x0=median(locnew.xnm);
             y0=median(locnew.ynm);
             for k=1:length(sites)
-                [locs,indloc]=obj.locData.getloc({'xnm','ynm'},'position',sites(k),'grouping','ungrouped');
-%                 locnew.xnm(indloc)=locnew.xnm(indloc)-sites(k).pos(1);
-%                 locnew.ynm(indloc)=locnew.ynm(indloc)-sites(k).pos(2);
-                locnew.xnm(indloc)=locs.xnm-sites(k).pos(1);
-                locnew.ynm(indloc)=locs.ynm-sites(k).pos(2);
-%                 figure(88)
-%                 plot(locnew.xnm(indloc),locnew.ynm(indloc),'+')
-                locnew.filenumber(indloc)=newfile;
-                used=used|indloc;
+                if p.sortselection.Value==1 ||  sites(k).annotation.use
+                    [locs,indloc]=obj.locData.getloc({'xnm','ynm'},'position',sites(k),'grouping','ungrouped');
+    %                 locnew.xnm(indloc)=locnew.xnm(indloc)-sites(k).pos(1);
+    %                 locnew.ynm(indloc)=locnew.ynm(indloc)-sites(k).pos(2);
+                    locnew.xnm(indloc)=locs.xnm-sites(k).pos(1);
+                    locnew.ynm(indloc)=locs.ynm-sites(k).pos(2);
+    %                 figure(88)
+    %                 plot(locnew.xnm(indloc),locnew.ynm(indloc),'+')
+                    locnew.filenumber(indloc)=newfile;
+                    used=used|indloc;
+                end
             end
             fn=fieldnames(locnew);
               for k=1:length(fn)
