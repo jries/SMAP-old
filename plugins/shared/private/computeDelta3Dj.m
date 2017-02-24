@@ -1,4 +1,4 @@
-function [delta_f,delta_dxf,delta_ddxf,delta_dyf,delta_ddyf,delta_dzf,delta_ddzf] = computeDelta3D(z_delta, y_delta, x_delta)
+function [delta_f,delta_dxf,delta_ddxf,delta_dyf,delta_ddyf,delta_dzf,delta_ddzf] = computeDelta3Dj(z_delta, y_delta, x_delta)
 
 % if x_delta<0
 %     x_delta = 0;

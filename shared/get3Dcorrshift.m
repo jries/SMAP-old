@@ -9,11 +9,16 @@ if length(sim)<3||sim(3)==1 %2D
 % 		( (mean(refim(:))*mean(targetim(:))) * size(refim,1)*size(refim,2) ) ...
 % 		- 1;
 else
-    refimhd=interp3(refim,2,'cubic');
-    targetimhd=interp3(targetim,2,'cubic');
+    nanval=-1;
+    refimnn=refim; refimnn(isnan(refimnn))=nanval;
+    tarimnn=targetim; tarimnn(isnan(tarimnn))=nanval; 
+    
+    refimhd=interp3(refimnn,2,'cubic');
+    targetimhd=interp3(tarimnn,2,'cubic');
 %         refimhd=(refim);
-%     targetimhd=(targetim);
+%     targetimhd=(targetim;);
 %     targetimhd=refimhd;
+
     n=size(refimhd)*1;
 %     reffft=fft(fft2(refimhd,n(1),n(2)),n(3),3);
 %     targetfft=fft(fft2(targetimhd,n(1),n(2)),n(3),3);
@@ -22,7 +27,9 @@ else
     
     Gfft=reffft.*conj(targetfft);
     Gs = fftshift(real(ifft(ifft2(Gfft),[],3)));
-    G=Gs/((mean(refimhd(:))*mean(targetimhd(:))) *numel(targetimhd))-1;
+    Gs(Gs<0)=NaN;
+    nisn=~isnan(targetimhd);
+    G=Gs/((nanmean(refimhd(:))*nanmean(targetimhd(:))) *sum(nisn(:)))-1;
     
 %     px=sum(sum(G,2),3);
 %      maxmethod='interp';
@@ -32,8 +39,12 @@ else
               maxind=[getmaxFit(sum(sum(G,2),3),3),getmaxFit(sum(sum(G,3),1),3),getmaxFit(sum(sum(G,1),2),3)];
          otherwise
             [CC,ind]=max(G(:));
+            if ind>1
             [x,y,z]=ind2sub(size(G),ind);
              maxind=getmaxInterp(G,[x,y,z],.05,1);
+            else
+                maxind=(size(refim)*2+1);
+            end
      end
      shift=maxind/4-size(refim)/2+1/4;
      

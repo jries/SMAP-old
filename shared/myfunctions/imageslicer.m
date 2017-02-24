@@ -172,7 +172,11 @@ changeaxis(0,0,0);
              hslidert{1}.String=num2str(dimmenu(1));
          end
         if length(dimmenu)>1
+            if size(V,dimmenu(2))>1
             hslider{2}.SliderStep=[1/(size(V,dimmenu(2))-1) 5/(size(V,dimmenu(2))-1)];
+            else
+                hslider{2}.SliderStep=[1 1];
+            end
             hslider{2}.Max=size(V,dimmenu(2));
              setslice(min(hslider{2}.Max,hslider{2}.Value),2,0);
             hslider{2}.Visible='on';

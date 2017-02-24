@@ -69,7 +69,7 @@ classdef Spline3D_v2<handle
                     xs = [xs Spline1D(xv)];
                     cy = cy + 1/3;
                 end
-                cz = cz + 1/3
+                cz = cz + 1/3;
             end
             obj.coeff = zeros(obj.max_ix, obj.max_iy,obj.max_iz,64);
             A = zeros(64,64);

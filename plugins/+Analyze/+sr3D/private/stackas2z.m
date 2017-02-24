@@ -1,6 +1,6 @@
 function [zas,zn]=stackas2z(sx,sy,z,n,ploton)
 wind=4;
-windn=15;
+windn=5;
 
 %     [~,nxind]=max(n);
 %     [~,nxind]=min((sx+sy)./n);
@@ -73,7 +73,7 @@ range=max(1,indm-10):min(indm+10,length(n));
 %         end
     end
     
-    if ploton&& ~isnan(zas)
+    if ploton %&& ~isnan(zas)
 %         ro
 %         disp(zas)
 %         disp(S.df)
