@@ -38,11 +38,20 @@ weighted=0;
     yi=1:s(1);
     gxi=sum(image,1);
     gyi=sum(image,2)';
+    
+    
     xm=sum(xi.*gxi)/sum(gxi);
     ym=sum(yi.*gyi)/sum(gyi);
     
+    gxi(gxi<0)=0;gyi(gyi<0)=0;
     sxm=sqrt(sum((xi-xm).^2.*gxi)/sum(gxi));
     sym=sqrt(sum((yi-ym).^2.*gyi)/sum(gyi));
+    if ~isreal(sxm)
+        sxm=1;
+    end
+    if ~isreal(sym)
+        sym=1;
+    end
     
 [Xi,Yi]=meshgrid(xi,yi);
   rsxsy= sum( sum((Xi-xm).*(Yi-ym).*image))/sum(image(:));
