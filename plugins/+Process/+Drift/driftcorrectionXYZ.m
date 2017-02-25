@@ -2,7 +2,7 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
     methods
         function obj=driftcorrectionXYZ(varargin)        
                 obj@interfaces.DialogProcessor(varargin{:}) ;
-                obj.inputParameters={'layer1_'};
+                obj.inputParameters={'layer1_','cam_pixelsize_nm'};
                 obj.history=true;
                 obj.showresults=true;
                 obj.guiselector.show=true;
@@ -10,7 +10,7 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
         
         function out=run(obj,p)
             out=[];
-            if ~p.correctxy & ~p.correctz
+            if ~p.correctxy && ~p.correctz
                 return
             end
 
@@ -38,6 +38,7 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                     p.maxframeall=max(lochere.loc.frame);
                     p.framestart=min(lochere.loc.frame);
                     p.framestop=p.maxframeall;
+                    p.roi=obj.locData.files.file(k).info.roi;
                     [drift,driftinfo,fieldc]=getxyzdrift(locs,p);
                     
 %                     [drift,driftinfo]=finddriftfeature(locs,p);
@@ -75,6 +76,7 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
 %                 p.framestart=p.layer1_.frame_min;
                 p.framestart=(min(locs.frame));
                 p.framestop=max(locs.frame);
+                p.roi=obj.locData.files.file(1).info.roi;  
                 [drift,driftinfo,fieldc]=getxyzdrift(locs,p);
                 locsall=copyfields([],obj.locData.loc,{fieldc{:},'frame','filenumber'});
                 locsnew=applydriftcorrection(drift,locsall);
@@ -86,7 +88,7 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
 
                obj.locData.files(obj.locData.loc.filenumber(1)).file.driftinfo=driftinfo;
                 fn=obj.locData.files(obj.locData.loc.filenumber(1)).file.name;
-                              
+                            
                 if strfind(fn,'_sml')
                     fnn=strrep(fn,'_sml','_driftc_sml');
                 else
@@ -115,9 +117,37 @@ drift=[];driftinfo=[];
 % end
                 
 if p.correctxy
-    [driftxy,driftinfoxy]=finddriftfeature(locs,p);
-    driftinfo=copyfields(driftinfo,driftinfoxy);
-    drift=copyfields(drift,driftxy,{'x','y'});
+    
+    switch p.drift_mirror2c.Value
+        case 1 %all
+            ind=true(length(locs.xnm),1);
+            rep=false;
+            mirror='none';
+            midpoint=0;
+        case 2 %horizontal
+            midpoint=p.cam_pixelsize_nm*(p.roi(1)+(p.roi(1)+p.roi(3))/2);
+            ind=locs.xnm<=midpoint;
+            rep=true;
+            mirror='horizontal';
+        case 3 %vertical
+            midpoint=p.cam_pixelsize_nm*(p.roi(2)+(p.roi(2)+p.roi(4))/2);
+            ind=locs.ynm<=midpoint;
+            rep=true;
+            mirror='vertical';
+    end
+    [driftxy,driftinfoxy]=finddriftfeature(copystructReduce(locs,ind),p);
+    driftinfoxy.mirror=mirror; driftinfoxy.midpoint=midpoint;
+    driftinfo.xy=driftinfoxy;
+    drift.xy=copyfields([],driftxy,{'x','y'});
+    drift.xy(1).mirror=mirror;drift(1).xy(1).midpoint=midpoint;
+
+    if rep
+        [driftxy,driftinfoxy]=finddriftfeature(copystructReduce(locs,~ind),p);
+        driftinfoxy.mirror=mirror; driftinfoxy.midpoint=midpoint;
+        driftinfo.xy(2)=(driftinfoxy);
+        drift.xy(2)=copyfields(drift.xy(1),driftxy,{'x','y'});
+%         drift.xy(2).mirror=mirror;drift(2).midpoint=midpoint;
+    end
 end
 if ~isempty(locs.znm)&&p.correctz
     if p.correctxy
@@ -127,8 +157,9 @@ if ~isempty(locs.znm)&&p.correctz
         drift=[];
     end
     [driftz,driftinfoz]=finddriftfeatureZ(locsnew,p);
-    drift=copyfields(drift,driftz,'z');
-     driftinfo=copyfields(driftinfo,driftinfoz);
+    
+    drift.z=driftz;%copyfields(drift,driftz,'z');
+     driftinfo.z=driftinfoz;%copyfields(driftinfo,driftinfoz);
      fieldc={'xnm','ynm','znm'};
 else
     fieldc={'xnm','ynm'};
@@ -243,11 +274,19 @@ pard.slicewidth.Optional=true;
 
 
 pard.drift_reference.object=struct('String','reference is last frame','Style','checkbox');
-pard.drift_reference.position=[7,1];
+pard.drift_reference.position=[7,3];
 pard.drift_reference.Optional=true;
 pard.drift_reference.object.TooltipString=sprintf('If checked, drift at end of data set is set to zero. \n Useful for sequential acquisition, use this for first data set.');
 pard.drift_reference.Width=2;
 pard.drift_reference.Optional=true;
+
+pard.drift_mirror2c.object=struct('String',{{'no mirror', '2 Channels, mirrored, horizontal', '2 Channels, mirrored, vertical'}},'Style','popupmenu');
+pard.drift_mirror2c.position=[7,1];
+pard.drift_mirror2c.Optional=true;
+pard.drift_mirror2c.object.TooltipString=sprintf('If checked, drift at end of data set is set to zero. \n Useful for sequential acquisition, use this for first data set.');
+pard.drift_mirror2c.Width=2;
+pard.drift_mirror2c.Optional=true;
+
 
 pard.drift_individual.object=struct('String','correct every file individually','Style','checkbox','Value',1);
 pard.drift_individual.position=[8,1];

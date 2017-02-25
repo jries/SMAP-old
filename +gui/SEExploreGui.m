@@ -28,6 +28,8 @@ classdef SEExploreGui<interfaces.SEProcessor
              h.redrawsite=uicontrol(obj.handle,'Position',[30,925,100,40],'Style','pushbutton','String','redraw','Units','normalized','FontSize',fontsize,'Callback',{@redrawsite_callback,obj});
              h.addsite=uicontrol(obj.handle,'Position',[290,925,60,40],'Style','pushbutton','String','Add','Units','normalized','FontSize',fontsize,'Callback',{@addsite,obj});
              h.removesite=uicontrol(obj.handle,'Position',[400,540,90,30],'Style','pushbutton','String','Remove','Units','normalized','FontSize',fontsize,'Callback',{@removesite_callback,obj});
+             h.toggleuse=uicontrol(obj.handle,'Position',[510,540,70,30],'Style','pushbutton','String','Use','Units','normalized','FontSize',fontsize,'Callback',{@toggleuse_callback,obj});
+             
              
              h.redrawcell=uicontrol(obj.handle,'Position',[430,925,100,40],'Style','pushbutton','String','redraw','Units','normalized','FontSize',fontsize,'Callback',{@redrawcell_callback,obj});
              h.addcell=uicontrol(obj.handle,'Position',[650,925,60,40],'Style','pushbutton','String','Add','Units','normalized','FontSize',fontsize,'Callback',{@addcell,obj});
@@ -183,7 +185,21 @@ function sizechanged_callback(object, event, obj)
 % end
 end
 
+function toggleuse_callback(data,action,obj)
+ selected=obj.guihandles.sitelist.Value;
+ newstate=~obj.SE.sites(selected(1)).annotation.use;
+if length(selected)<=1
 
+site=obj.SE.currentsite;
+site.annotation.use=newstate;
+else
+    for k=1:length(selected)
+       site=obj.SE.sites(selected(k));
+        site.annotation.use=newstate;
+    end
+end
+obj.updateSitelist;
+end
 
 function fileaxclick(data,action,obj)
 pos=action.IntersectionPoint*1000;

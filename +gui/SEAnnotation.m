@@ -74,16 +74,16 @@ classdef SEAnnotation< interfaces.SEProcessor
              end
             
         end
-        function usesite_callback(obj,a,b)
+        function usesite_callback(obj,object,b)
             selected=obj.SE.processors.preview.guihandles.sitelist.Value;
             if length(selected)<=1
             
             site=obj.SE.currentsite;
-            site.annotation.use=obj.guihandles.usesite.Value;
+            site.annotation.use=obj.object.Value;
             else
                 for k=1:length(selected)
                    site=obj.SE.sites(selected(k));
-                    site.annotation.use=obj.guihandles.usesite.Value;
+                    site.annotation.use=object.Value;
                 end
             end
             obj.SE.processors.preview.updateSitelist;
