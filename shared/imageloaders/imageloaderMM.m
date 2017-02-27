@@ -24,6 +24,11 @@ classdef imageloaderMM<interfaces.imageloaderSMAP
             image=readstack(obj,frame);
         end
         
+        function close(obj)
+            obj.reader.close
+%             clear(obj.reader)
+        end
+        
         function image=getimageonline(obj,number)
             image=obj.getimage(number);
             if isempty(image)&&obj.onlineAnalysis 
@@ -54,7 +59,7 @@ classdef imageloaderMM<interfaces.imageloaderSMAP
             allmd(end+1,:)={'ROI direct',num2str(troi{:}')};
             catch err
             end
-            framesd=img.lastAcquiredFrame;
+            framesd=max(img.lastAcquiredFrame,summarymetadata.get('Slices'));
             allmd(end+1,:)={'frames direct',num2str(framesd)};
             
             allmd=vertcat(allmd,alls);
@@ -118,7 +123,11 @@ for k=1:length(dirs)
 end
 
 dirs{end+1}=  [MMpath filesep 'ij.jar']; 
-javaaddpath(dirs);
+jp=javaclasspath;
+diradd=dirs(~ismember(dirs,jp));
+if ~isempty(diradd)
+javaaddpath(diradd);
+end
 
 end
 
@@ -126,6 +135,9 @@ end
 
 function image=readstack(obj,imagenumber)
 img=obj.reader.getImage(0,0,imagenumber-1,0);
+if isempty(img)
+    img=obj.reader.getImage(0,imagenumber-1,0,0);
+end
 if isempty(img)
     image=[];
     return

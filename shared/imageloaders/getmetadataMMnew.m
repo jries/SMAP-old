@@ -1,7 +1,7 @@
 function mdinf=getmetadataMMnew(file)
 info=getimageinfo(file);
 mdinf(1,1:2)={'numberOfFrames info',info.numberOfFrames};
-mdinf(end+1,1:2)={'Widht info',info.Width};
+mdinf(end+1,1:2)={'Width info',info.Width};
 mdinf(end+1,1:2)={'Height info',info.Height};
 mdinf(end+1,1:2)={'format info',info.format};
 if isfield(info,'numberNameRange')

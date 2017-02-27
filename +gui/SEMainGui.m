@@ -1,4 +1,4 @@
-classdef SEMainGui< gui.GuiPluginWindow;
+classdef SEMainGui< gui.GuiPluginWindow
     properties
         SEpreview
 %         maindir
@@ -13,7 +13,7 @@ classdef SEMainGui< gui.GuiPluginWindow;
             h.sitetabs=uitabgroup(obj.handle);
             h.tab_settings=uitab(h.sitetabs,'Title','Settings');
             h.tab_annotate=uitab(h.sitetabs,'Title','Annotation');
-            h.tab_sort=uitab(h.sitetabs,'Title','Sort');
+%             h.tab_sort=uitab(h.sitetabs,'Title','Sort');
             h.tab_evaluate=uitab(h.sitetabs,'Title','Evaluate');
 %             h.tab_analyze=uitab(h.sitetabs,'Title','Analyze');
             obj.guihandles=h;
@@ -44,15 +44,15 @@ classdef SEMainGui< gui.GuiPluginWindow;
             obj.children.annotation=annotation;
             
             %sort panel
-            guiparsort.FieldHeight=24;
-             h.sortpanel=uipanel(h.tab_sort,'Unit','pixels','Position',obj.guiPar.tabsize2); 
-            sort=gui.SESort(h.sortpanel,obj.P);
-            sort.attachSE(se);
-            sort.attachLocData(obj.locData);
-            sort.setGuiAppearence(guiparsort);
-            sort.makeGui;
-             se.processors.sort=sort;
-            obj.children.sort=sort;
+%             guiparsort.FieldHeight=24;
+%              h.sortpanel=uipanel(h.tab_sort,'Unit','pixels','Position',obj.guiPar.tabsize2); 
+%             sort=gui.SESort(h.sortpanel,obj.P);
+%             sort.attachSE(se);
+%             sort.attachLocData(obj.locData);
+%             sort.setGuiAppearence(guiparsort);
+%             sort.makeGui;
+%              se.processors.sort=sort;
+%             obj.children.sort=sort;
             
             %evaluation panel
             h.evalpanel=uipanel(h.tab_evaluate,'Unit','pixels','Position',obj.guiPar.tabsize2); 
@@ -85,6 +85,7 @@ classdef SEMainGui< gui.GuiPluginWindow;
                 SEpreview.attachSE(obj.locData.SE);
                 SEpreview.makeGui;
                 obj.SEpreview=SEpreview;
+                
                 obj.setPar('se_viewer',SEpreview);
             end
 

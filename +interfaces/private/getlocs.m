@@ -62,7 +62,7 @@ end
  if isa(p.position,'interfaces.SEsites')
      site=p.position;
     p.filenumber=site.info.filenumber;
-    sr=locData.getPar('se_siteroi');
+    sr=locData.getPar('se_siteroi')/2;
     if isempty(sr)
         sr=300;
     end

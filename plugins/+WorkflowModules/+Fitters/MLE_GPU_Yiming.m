@@ -19,8 +19,8 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             reporttext='GPU fit function did not run. Possibly the wrong CUDA version is installed.';
             img=zeros(7,'single');img(3,3)=1;
             try
-                fitp=GPUmleFit_LM(img,1,10,1,0);
-                obj.fitpar.fitfunction=@GPUmleFit_LM;
+                fitp=GPUmleFit_LM_noInterp(img,1,10,1,0);
+                obj.fitpar.fitfunction=@GPUmleFit_LM_noInterp;
                  reporttext='GPUmleFit_LM works';
             end
             roisize=obj.getPar('loc_ROIsize');
@@ -224,7 +224,7 @@ if fitpar.fitmode==3
 elseif fitpar.fitmode==5
     calfile=p.cal_3Dfile;
     cal=load(calfile);
-    fitpar.splinecoefficients=single(cal.coeff*4);
+    fitpar.splinecoefficients=single(cal.cspline.coeff);
     fitpar.z0=cal.z0;
     fitpar.dz=cal.dz; 
     fitpar.refractive_index_mismatch=p.refractive_index_mismatch;
@@ -327,7 +327,7 @@ pard.trefractive_index_mismatch.position=[5,1];
 pard.trefractive_index_mismatch.Width=3;
 pard.trefractive_index_mismatch.Optional=true;
 
-pard.refractive_index_mismatch.object=struct('Style','edit','String','.72');
+pard.refractive_index_mismatch.object=struct('Style','edit','String','.8');
 pard.refractive_index_mismatch.position=[5,4];
 pard.refractive_index_mismatch.TooltipString=sprintf('Correction factor to take into account the different refracrive indices of immersion oil and buffer. \n This leads to smaller distances inside the sample compared to bead calibration. \n Bead calibration: in piezo positions (nm). \n This factor transforms z positions to real-space z positions. \n For high-NA oil objectives: typical 0.72 (range 0.7-1).');
 pard.refractive_index_mismatch.Optional=true;

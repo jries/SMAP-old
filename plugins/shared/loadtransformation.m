@@ -7,7 +7,7 @@ if exist(file,'file')
     transformation=l.transformation;
 elseif isfield(obj.locData.files.file(1),'transformation')
      if ~isempty(obj.locData.files.file(dataset).transformation)
-            transformation=locData.files.file(dataset).transformation;
+            transformation=obj.locData.files.file(dataset).transformation;
      else
         for k=length(obj.locData.files.file):-1:1
             if ~isempty(obj.locData.files.file(k).transformation)

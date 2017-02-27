@@ -17,6 +17,8 @@ file=varargin{1};
                 imloader=@imageloaderMM;
            elseif any(strfind(file,'MMStack'))
                 imloader=@imageloaderMM;
+           elseif filesize(file)>4e9&&filesize(file)<4.5e9
+               imloader=@imageloaderMM;
            elseif countfiles(file)>1000
                imloader=@imageloaderMMsingle;
            else
@@ -32,6 +34,10 @@ file=varargin{1};
    io=imloader(varargin{:});
 end
 
+function f=filesize(file)
+d=dir(file);
+f=d.bytes;
+end
 function numf=countfiles(file)
 files=myfastdir(fileparts(file),'*.tif');
 sstr=regexprep(files{1},'[0-9]*','[0-9]*');

@@ -57,15 +57,16 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             if obj.files.filenumberEnd==1
                 obj.files.file=filenew;
             else
-            obj.files.file(obj.files.filenumberEnd)=filenew;
+                obj.files.file(obj.files.filenumberEnd)=obj.files.file(1);
+            obj.files.file(obj.files.filenumberEnd)=copyfields(obj.files.file(obj.files.filenumberEnd),filenew,fieldnames(obj.files.file(obj.files.filenumberEnd)));
             end
             if isempty(obj.loc)
                 emp=zeros(0,1);
-            locs=struct('frame',double(emp),'xnm',single(emp),'ynm',single(emp),'channel',single(emp),'locprecnm',single(emp),'filenumber',single(emp));
-            obj.loc=locs;
-            obj.grouploc=locs;
+                locs=struct('frame',double(emp),'xnm',single(emp),'ynm',single(emp),'channel',single(emp),'locprecnm',single(emp),'filenumber',single(emp));
+                obj.loc=locs;
+                obj.grouploc=locs;
             end
-            
+            obj.SE.addFile(filenew.name,obj.files.filenumberEnd,obj.files.file(obj.files.filenumberEnd).info);
         end
         function setloc(obj,name, value,indused)
             %Add a field to all localizations. setloc(field, value) sets obj.loc.(name)=value

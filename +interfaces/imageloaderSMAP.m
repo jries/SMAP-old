@@ -112,11 +112,15 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
             catch err
                 camfile=obj.calibrationFile;
                 display('could not find camera file in global settings.')
-              ererwe
+%               ererwe
               
             end
-                
-            md=getCameraCalibration(obj,[],[],camfile);
+            try
+                usedef=obj.getPar('useDefaultCam');
+            catch
+                usedef=true;
+            end
+            md=getCameraCalibration(obj,[],usedef,camfile);
             if isempty(md)
                 metao=[];
                 return
@@ -134,6 +138,10 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
                
 %             end
         metao=obj.metadata;
+        end
+        function close(obj)
+            display(['close not implemented in ' class(obj)])
+%             obj.reader.close;
         end
     end
     

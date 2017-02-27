@@ -3,7 +3,7 @@ classdef imageloaderMMsingle<interfaces.imageloaderSMAP
     %   Detailed explanation goes here
     
     properties
-        calfile='settings/CameraCalibration.xls';
+%         calfile='settings/CameraCalibration.xls';
         separate
         separatefiles
     end
@@ -38,6 +38,9 @@ classdef imageloaderMMsingle<interfaces.imageloaderSMAP
         function image=getimage(obj,frame)
             image=readseparate(obj,frame);
         end
+        function close(obj)
+            %not needed, as single files are read
+        end
     end
     
 end
@@ -47,7 +50,7 @@ image=[];
 separate=obj.separate;
 % lenfiles=length(separate.files);
 lenfiles=separate.numfiles;
-if lenfiles<number || obj.separatefiles(number).ismissing
+if lenfiles<number || (ismethod(obj.separatefiles(number),'missing') && obj.separatefiles(number).ismissing)
     if obj.onlineAnalysis %ask for image that is not in list
         lastfile= obj.separatefiles{lenfiles};
 %         thisname= generateFileName(lastfile,lenfiles,obj.metadata.allmetadata.numberNameRange,number);

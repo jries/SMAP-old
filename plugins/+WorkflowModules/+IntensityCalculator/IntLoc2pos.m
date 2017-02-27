@@ -18,8 +18,8 @@ classdef IntLoc2pos<interfaces.WorkflowModule
             intLoc2pos_ind2=1;
             
             p=obj.getAllParameters;
-            load(p.Tfile);
-            transform=transformation;
+          
+            transform=loadtransformation(obj,p.Tfile);
             obj.locs=obj.locData.getloc({'frame','xnm','ynm','znm','PSFxnm'});
             pix_cam=obj.filestruc.info.pixsize*1000;
             x=double(obj.locs.xnm);
@@ -62,7 +62,7 @@ classdef IntLoc2pos<interfaces.WorkflowModule
             frame=data.frame;
                 %find indices for same frame
                 ind1=intLoc2pos_ind2;
-                while ind1>0&&intLoc2pos_locframes(ind1)<frame && ind1<lf;
+                while ind1>0&&intLoc2pos_locframes(ind1)<frame && ind1<lf
                     ind1=ind1+1;
                 end
                 ind1=min(ind1,lf);
@@ -72,7 +72,7 @@ classdef IntLoc2pos<interfaces.WorkflowModule
                      datout.data=struct('x',[]);%.set(maxout);
                     return
                 end
-                while intLoc2pos_ind2<=lf&&intLoc2pos_locframes(intLoc2pos_ind2)==frame;
+                while intLoc2pos_ind2<=lf&&intLoc2pos_locframes(intLoc2pos_ind2)==frame
                     intLoc2pos_ind2=intLoc2pos_ind2+1;
                 end
                 intLoc2pos_ind2=intLoc2pos_ind2-1;
@@ -93,6 +93,8 @@ classdef IntLoc2pos<interfaces.WorkflowModule
                datout.data=maxout;%.set(maxout);
 %                obj.output(datout); 
                 if intLoc2pos_ind2==lf
+                    obj.output(datout);
+                    datout.data=struct('x',[]);
                     datout.eof=true;
                 end
         end

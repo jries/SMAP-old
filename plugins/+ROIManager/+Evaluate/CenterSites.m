@@ -55,7 +55,7 @@ end
 function out=runintern(obj,p)
 for k=1:p.iterations
 %     obj.site.pos(1)
-    locs=obj.getLocs({'xnm','ynm','znm','locprecznm','locprecnm'},'layer',1,'size',p.se_siteroi);
+    locs=obj.getLocs({'xnm','ynm','znm','locprecznm','locprecnm'},'layer',find(obj.getPar('sr_layerson')),'size',p.se_siteroi);
     if obj.display
     ax=obj.setoutput('images');
     end

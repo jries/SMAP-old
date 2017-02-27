@@ -45,6 +45,7 @@ if isempty(val)
         camnames=getFieldAsVector(l.cameras,'ID','name');
         cam=find(strcmp(camnames,'Default'));
         state=1;
+        disp('Camera not recognized. Use default');
         if isempty(cam)&~silent
             errordlg('create Default camera with Camera Manager')
         end    
@@ -102,11 +103,25 @@ for k=1:s(1)
     par.(partable{k,1})=X;
     
 end
+if isempty(par.Width)
+    w=[str2double(imloader.gettag('Width')),imloader.gettag('Width info')];
+    h=[str2double(imloader.gettag('Height')),imloader.gettag('Height info')];
+    par.Width=max(w);
+    par.Height=max(h);
+end
+
 if isempty(par.roi)
     par.roi=[0 0 par.Width par.Height];
 end
 for k=1:size(replacefields,1)
     par.(replacefields{k,2})=par.(replacefields{k,1});
+end
+%number Of Frames needed, clean up
+if isempty(par.numberOfFrames)||par.numberOfFrames==0
+    f1=str2double(imloader.gettag('frames direct'));
+    f2=imloader.gettag('numberOfFrames info');
+    f3=str2double(imloader.gettag('Frames'));
+    par.numberOfFrames=max([f1 f2 f3]);
 end
 
 function [paro,camo,stateo]=askforcameramanager(imloader,message,silent,argin)
