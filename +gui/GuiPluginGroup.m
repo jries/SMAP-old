@@ -139,7 +139,7 @@ classdef GuiPluginGroup< interfaces.GuiModuleInterface & interfaces.LocDataInter
             
 
             thisplugin.handle=panel;
-            parp.Vrim=90;
+            parp.Vrim=85;
             thisplugin.setGuiAppearence(parp);
             thisplugin.processorgui=processorgui;
             thisplugin.makeGui;

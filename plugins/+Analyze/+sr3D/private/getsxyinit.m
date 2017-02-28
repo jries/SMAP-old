@@ -13,5 +13,6 @@ function SXY=getsxyinit(p,X,Y,Z)
     SXY.splineLUT=[];
     SXY.curve=[];
     SXY.splinefit=[];
+    SXY.spline=[];
     SXY.EMon=p.EMon;
 end

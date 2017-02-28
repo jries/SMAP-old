@@ -1,4 +1,5 @@
 function [SXY,beadgood]=getstackcal(beadsh,p,X,Y,axall)
+global stackcal_testfit
 zc=p.spatialcalibration & p.zcalc &p.beaddistribution.Value==2;
 
 sstack=size(beadsh(1).stack.image);
@@ -248,9 +249,10 @@ for Z=1:length(p.Zrange)-1
             ax=maketgax(axall.hspline_validate,tgt);
             hold off
     
-            
+            if isempty(stackcal_testfit)||stackcal_testfit
             testfit(allrois(:,:,:,beadgood),cspline.coeff,p)
             testfit(corrPSF,cspline.coeff,p,{'k','LineWidth',2})
+            end
    end 
 
 
