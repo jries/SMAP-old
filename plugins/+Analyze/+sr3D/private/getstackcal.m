@@ -224,10 +224,10 @@ for Z=1:length(p.Zrange)-1
             zbs=zbs/max(zbs);
 
             hold off
-             plot(framerange0,zpall2,'m:')
+             plot(framerange0,zpall2(1:length(framerange0)),'m:')
              hold on
-             plot(framerange0,zpall,'c')
-            plot(framerange0',zprofile,'k*')
+             plot(framerange0,zpall(1:length(framerange0)),'c')
+            plot(framerange0',zprofile(1:length(framerange0)),'k*')
             plot(zhd+rangez(1)+framerange0(1)-2,zprofilehd,'ko')
             plot(zzz+rangez(1)+framerange0(1)-2,zbs,'b','LineWidth',2)
             
