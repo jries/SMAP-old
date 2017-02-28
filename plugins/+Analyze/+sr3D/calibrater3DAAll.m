@@ -26,7 +26,7 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
             for k=1:length(beads)
                 beads(k).loc.PSFxpix=beads(k).loc.PSFxnm/p.cam_pixelsize_nm;
                  beads(k).loc.PSFypix=beads(k).loc.PSFynm/p.cam_pixelsize_nm;
-                [beads(k).f0,beads(k).psfx0,beads(k).psfy0]=getf0site(beads(k).loc);
+                [beads(k).f0,beads(k).psfx0,beads(k).psfy0]=getf0site(beads(k).loc,p);
             end
             badind=isnan([beads(:).f0]);
             beads(badind)=[];
@@ -142,8 +142,9 @@ use=logical(getFieldAsVector(sites,'annotation','use'));
 bead=bead(use);
 end
 
-function [f0,PSFx0,PSFy0]=getf0site(locs)
-[zas,zn]=stackas2z(locs.PSFxpix,locs.PSFypix,locs.frame,locs.phot,0);
+function [f0,PSFx0,PSFy0]=getf0site(locs,p)
+p.ploton=0;
+[zas,zn]=stackas2z(locs.PSFxpix,locs.PSFypix,locs.frame,locs.phot,p);
 if isnan(zas)
     PSFx0=NaN;
     PSFy0=NaN;
@@ -164,7 +165,7 @@ roifac=1.5;
 roisizebig=(roifac*roisize);
 halfroisizebig=round((roisizebig-1)/2); %room for shifting
 roisizebig=2*halfroisizebig+1;
-storeframes=p.roiframes+10;
+storeframes=p.roiframes+500/p.dz;
 halfstoreframes=round((storeframes-1)/2);
 storeframes=halfstoreframes*2+1;
 f0=[beads(:).f0];

@@ -1,6 +1,10 @@
-function [zas,zn]=stackas2z(sx,sy,z,n,ploton)
+function [zas,zn]=stackas2z(sx,sy,z,n,p)
+ploton=p.ploton;
 wind=4;
 windn=5;
+
+wind=wind/p.dz*50;
+windn=windn/p.dz*50;
 
 %     [~,nxind]=max(n);
 %     [~,nxind]=min((sx+sy)./n);
