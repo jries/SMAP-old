@@ -287,7 +287,7 @@ d=round((size(teststack,1)-p.roisize)/2);
             [P] =  fitterCPU(teststack(range,range,:,k),(4*coeff),single(p.roisize),100);
         end
     z=(1:size(P,1))'-1;
-    plot(z,P(:,5)-z,linepar{:})
+    plot(z,P(:,5),linepar{:})
     hold on
     end
 end

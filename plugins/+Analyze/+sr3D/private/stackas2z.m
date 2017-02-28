@@ -1,7 +1,7 @@
 function [zas,zn]=stackas2z(sx,sy,z,n,p)
 ploton=p.ploton;
 wind=4;
-windn=5;
+windn=10;
 
 wind=wind/p.dz*50;
 windn=windn/p.dz*50;
