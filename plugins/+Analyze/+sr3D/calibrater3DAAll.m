@@ -150,6 +150,9 @@ if isnan(zas)
     PSFy0=NaN;
 else
     ind=find(locs.frame<=zas,1,'last');
+    if isempty(ind)
+        ind=1;
+    end
 PSFx0=locs.PSFxpix(ind);
 PSFy0=locs.PSFypix(ind);
 end
@@ -209,7 +212,8 @@ indbad=false(length(beads),1);
             else
                 frange=max(fminmax(1),f0r(beadnumber)-halfstoreframes):min(fminmax(2),f0r(beadnumber)+halfstoreframes);
             end
-            smallf=imstack(pos(2)-halfroisizebig:pos(2)+halfroisizebig,pos(1)-halfroisizebig:pos(1)+halfroisizebig,frange);
+            smallfr=imstack(pos(2)-halfroisizebig:pos(2)+halfroisizebig,pos(1)-halfroisizebig:pos(1)+halfroisizebig,frange);
+            smallf=rescalestack(smallfr);
             stack=zeros(roisizebig,roisizebig,storeframes);
             % XXXXX gel: or always: center fzero or similar.
             if frange(1)==fminmax(1)
@@ -237,6 +241,21 @@ indbad=false(length(beads),1);
     end
  end
 beads(indbad)=[];
+end
+
+function out=rescalestack(in)
+s=size(in);
+midp=round((s(1)-1)/2+1);
+range=2;
+center=squeeze(sum(sum(in(midp-range:midp+range,midp-range:midp+range,:))));
+x=(1:s(3))';
+fp=fit(x,center,'gauss1');
+int=fp(x);
+corr=int./center;
+for k=s(3):-1:1
+    out(:,:,k)=in(:,:,k)*corr(k);
+end
+% center2=squeeze(sum(sum(out(midp-1:midp+1,midp-1:midp+1,:))));
 end
 
 function p=getranges(p)
@@ -709,6 +728,9 @@ end
                     plot(axall.axzlut,za,za-zha,'.','MarkerSize',2)
                     axall.axzlut.NextPlot='add';
                     plot(axall.axzlut,zt,dzba,'k',zt,dzba+dzs,'k',zt,dzba-dzs,'k')
+                    plot(axall.axzlut,p.zrangeuse,[0 0],'k');
+                     ylim(axall.axzlut,yrange)
+                     xlim(axall.axzlut,p.zrangeuse)
                 end
                     zha2=zfromSx2_Ss2(SXY(k).Sx2_Sy2,sxa,sya);
                      plot(axall.axsxs22,za,za-zha2,'.','MarkerSize',2)
@@ -717,11 +739,10 @@ end
                     dzs2=bindata(za,za-zha2,zt,'std');
                     plot(axall.axsxs22,zt,dzba2,'k',zt,dzba2+dzs2,'k',zt,dzba2-dzs2,'k')
             end
-            plot(axall.axzlut,p.zrangeuse,[0 0],'k');
+            
             plot(axall.axsxs22,p.zrangeuse,[0 0],'k');
             yrange=[-100 100];
-            ylim(axall.axzlut,yrange)
-            xlim(axall.axzlut,p.zrangeuse)
+
             ylim(axall.axsxs22,yrange)
             xlim(axall.axsxs22,p.zrangeuse)     
             obj.SXY=SXY;  
