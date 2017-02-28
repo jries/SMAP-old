@@ -127,7 +127,10 @@ classdef Workflow<interfaces.DialogProcessor
             delete(obj.handle.Children);
             
         end
-        function load(obj,fn,pGui,writeParameters)
+        function load(obj,fn,pGui,writeParameters,overwrite)
+           if nargin<5
+                overwrite=false;
+            end
             if nargin<4
                 writeParameters=true;
             end
@@ -141,6 +144,9 @@ classdef Workflow<interfaces.DialogProcessor
             for k=1:length(loaded.modules)
                 m=loaded.modules(k);
                 obj.addModule(m.path,m.tag,'input',m.inputmodules);
+                if overwrite
+                    obj.module(m.tag).excludeFromSave={};
+                end
             end
             if ~isempty(pGui) %set position parameters
                 if isfield(pGui,'all')
