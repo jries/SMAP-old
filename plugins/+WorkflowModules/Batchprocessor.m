@@ -217,8 +217,12 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
             wf.load(wffile);
             disp(mytextsplit(wf.description));
             %workflow: recover tiff file and start
-            tiffile=wf.module(wf.startmodule).getGuiParameters.tiffile;
-            wf.module(wf.startmodule).addFile(tiffile);
+            loadergui=wf.module(wf.startmodule);
+            loader=loadergui.loaders{loadergui.getGuiParameters.loaderlist.Value};
+            tiffile=loader.getGuiParameters.tiffile;
+            loader.addFile(tiffile);
+%             tiffile=wf.module(wf.startmodule).getGuiParameters.tiffile;
+%             wf.module(wf.startmodule).addFile(tiffile);
             wf.run;  
             delete(wf)
         end
@@ -244,7 +248,9 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
             wf.makeGui;
             wf.load(wffile);
             %workflow: recover tiff file and start
-            tiffile=wf.module(wf.startmodule).getGuiParameters.tiffile;
+            loadergui=wf.module(wf.startmodule);
+            loader=loadergui.loaders{loadergui.getGuiParameters.loaderlist.Value};
+            tiffile=loader.getGuiParameters.tiffile;
             obj.processtiff(tiffile);
             delete(wf)
         end
