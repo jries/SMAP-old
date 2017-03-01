@@ -87,12 +87,14 @@ LogL=results.LogL;
            LogL((LogL)<0)= 0; %XXXXXXXXX
            
            
-locs.xpix=P(:,2)-dn+posx;
+% locs.xpix=P(:,2)-dn+posx;
 if fitpar.mirrorstack
-    locs.ypix=dn-P(:,1)+1+posy;
+    locs.xpix=dn-P(:,2)+1+posx;
 else
-locs.ypix=P(:,1)-dn+posy;
+    locs.xpix=P(:,2)-dn+posx;
 end
+locs.ypix=P(:,1)-dn+posy;
+
 locs.phot=P(:,3)*EMexcess;
 locs.bg=P(:,4)*EMexcess;
 locs.frame=frame;
@@ -129,9 +131,10 @@ switch fitpar.fitmode
         locs.PSFypix=P(:,6);
         locs.PSFyerr=sqrt(CRLB(:,6));  
     case 5
+        
         %         locs.znm=(P(:,5)*1000+fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
-        locs.znm=((P(:,5)-fitpar.splinefithere.cspline.z0)*fitpar.splinefithere.cspline.dz)*fitpar.refractive_index_mismatch;
-        locs.zerr=sqrt(CRLB(:,5))*fitpar.splinefithere.cspline.dz*fitpar.refractive_index_mismatch;
+        locs.znm=((P(:,5)-fitpar.z0)*fitpar.dz)*fitpar.refractive_index_mismatch;
+        locs.zerr=sqrt(CRLB(:,5))*fitpar.dz*fitpar.refractive_index_mismatch;
 %         [locs.PSFxpix,locs.PSFypix]=zpar2sigma(locs.znm/1000,fitpar.zparhere);
         
          sx=100*v1;
@@ -227,8 +230,11 @@ if fitpar.fitmode==3||fitpar.fitmode==5
                 for Y=s(2):-1:1
                     zpar{X,Y}=cal.SXY(X,Y,Z).fitzpar;
                     splinefit{X,Y}=cal.SXY(X,Y,Z).splinefit;
+                    
                 end
             end
+            fitpar.dz=splinefit{1}.cspline.dz;
+            fitpar.z0=splinefit{1}.cspline.z0;
             fitpar.zpar=zpar;
             fitpar.splinefit=splinefit;
             if size(cal.SXY,3)>1

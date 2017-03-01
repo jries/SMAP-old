@@ -56,7 +56,12 @@ for Z=1:length(p.Zrange)-1
         stackh=allstacks(:,:,:,B);
 %         inth=nansum(stackh(:)); %take into account when sorting
         goodvs(B)=sum(~isnan(stackh(:)))/numel(stackh);
-        dframe(B)=beadsh(B).stack.framerange(halfstoreframes)-beadsh(B).f0;
+   
+        if  halfstoreframes<length(beadsh(B).stack.framerange)
+            dframe(B)=beadsh(B).stack.framerange(halfstoreframes+1)-beadsh(B).f0;
+        else
+            dframe(B)=0;
+        end
     end
     
     %sort
@@ -300,7 +305,7 @@ d=round((size(teststack,1)-p.roisize)/2);
 %     fitterCPU=@kernel_MLEfit_Spline_LM_SMAP_v2;
 % else
     coefffak=1;
-    fitterGPU=@GPUmleFit_LM_noInterp;
+    fitterGPU=@callYimingFitter;
     fitterCPU=@kernel_MLEfit_Spline_LM_SMAP_v2_nointerp;
 % end  
     for k=1:size(teststack,4)

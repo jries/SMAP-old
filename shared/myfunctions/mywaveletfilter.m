@@ -1,4 +1,10 @@
-function out=mywaveletfilter(in,level,refine)
+function out=mywaveletfilter(in,level,refine,cutoff)
+if nargin<4
+    cutoff=false;
+end
+if nargin<3
+    refine=false;
+end
 persistent wf1 wf2
 if isempty(wf1)
     wf1=load('near_sym_a.mat');
@@ -11,6 +17,10 @@ if nargin<3
     refine=false;
 end
 % ino=in;
+if cutoff
+    co=myquantilefast(in(:),.99);
+    in(in>co)=co;
+end
 if refine
     level2=level*2;
     [L,S]=dtwavexfm2_L(in,level2,wf1,wf2);

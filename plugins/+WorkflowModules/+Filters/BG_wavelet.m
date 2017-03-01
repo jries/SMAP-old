@@ -40,7 +40,7 @@ classdef BG_wavelet<interfaces.WorkflowModule
                     clear imgg;
 %                     bg=(mywaveletfilteratrous((img),false));
                 else
-                    bg=mywaveletfilter(img,p.loc_wavelet_level,p.loc_wavelet_refine);
+                    bg=mywaveletfilter(img,p.loc_wavelet_level,p.loc_wavelet_refine,true);
                 end
                 
                 dato=data;
