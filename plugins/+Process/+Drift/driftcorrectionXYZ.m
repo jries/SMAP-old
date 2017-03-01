@@ -158,7 +158,7 @@ if ~isempty(locs.znm)&&p.correctz
     end
     [driftz,driftinfoz]=finddriftfeatureZ(locsnew,p);
     
-    drift.z=driftz;%copyfields(drift,driftz,'z');
+    drift.z=driftz.z;%copyfields(drift,driftz,'z');
      driftinfo.z=driftinfoz;%copyfields(driftinfo,driftinfoz);
      fieldc={'xnm','ynm','znm'};
 else

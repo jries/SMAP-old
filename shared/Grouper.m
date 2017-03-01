@@ -62,13 +62,18 @@ classdef Grouper< interfaces.LocDataInterface
             maxactive=10000;
             list=connectsingle2c(double(x(indsort)),double(y(indsort)),double(frame(indsort)),double(dx),int32(dt),int32(maxactive));
 %             listm=connectsingle2mat(double(x(indsort)),double(y(indsort)),double(frame(indsort)),double(dx),int32(dt),int32(maxactive));
+            if list(end)==0
+                list(end)=max(list)+1; %FIX connectsingle doesnt assign last loc. Fix later!
+            end  
+            if list(1)==0
+                list(end)=max(list)+1; %FIX connectsingle doesnt assign last loc. Fix later!
+            end   
+            
             numbers=1:sm(1);
             indold=numbers(indsort);
             [~,indback]=sort(indold);
             listback=list(indback);
-            if listback(end)==0
-            listback(end)=listback(end-1)+1; %FIX connectsingle doesnt assign last loc. Fix later!
-            end            
+          
             obj.locData.setloc('groupindex',listback)
             
              %number of locs
