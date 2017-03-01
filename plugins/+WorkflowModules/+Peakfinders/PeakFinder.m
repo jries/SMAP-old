@@ -20,6 +20,7 @@ classdef PeakFinder<interfaces.WorkflowModule
              cutoffvalue_callback(0,0,obj)
         end
         function prerun(obj,p)
+            cutoffvalue_callback(0,0,obj)
         end
         function dato=run(obj,data,p)
             image=data.data;%get;

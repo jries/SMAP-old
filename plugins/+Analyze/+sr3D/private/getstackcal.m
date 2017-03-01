@@ -1,6 +1,10 @@
 function [SXY,beadgood]=getstackcal(beadsh,p,X,Y,axall)
 global stackcal_testfit
-zc=p.spatialcalibration & p.zcalc &p.beaddistribution.Value==2;
+
+alignzf0=p.alignz;
+alignxcorr=p.alignzxcorr;
+
+zc=p.spatialcalibration & p.zcalc &p.beaddistribution.Value==2; %z-dependent calibration
 
 sstack=size(beadsh(1).stack.image);
 
@@ -8,9 +12,9 @@ sstack=size(beadsh(1).stack.image);
 
 fmedian=nanmedian([beadsh(:).f0]);
 halfstoreframes=(size(beadsh(1).stack.image,3)-1)/2;
-if zc
+if zc||alignzf0||alignxcorr
     df=0;
-    fzero=halfstoreframes+1;
+    fzero=halfstoreframes+1; %only used for plotting. Take out? f0 should be in center now.
 else
     f0=[beadsh(:).f0];
     fzero=round(fmedian);
@@ -36,7 +40,7 @@ for Z=1:length(p.Zrange)-1
             if p.zfilter.Value==1 % f0
 
                 if beadz0>p.Zrange(Z)-p.framerangecombine && beadz0<p.Zrange(Z+1)+p.framerangecombine
-                   sx=beadsh(B).loc.PSFxpix; 
+%                    sx=beadsh(B).loc.PSFxpix; 
                    allstacks(:,:,:,B)=beadsh(B).stack.image;
                 end             
             else
@@ -52,7 +56,7 @@ for Z=1:length(p.Zrange)-1
         stackh=allstacks(:,:,:,B);
 %         inth=nansum(stackh(:)); %take into account when sorting
         goodvs(B)=sum(~isnan(stackh(:)))/numel(stackh);
-        
+        dframe(B)=beadsh(B).stack.framerange(halfstoreframes)-beadsh(B).f0;
     end
     
     %sort
@@ -70,7 +74,13 @@ for Z=1:length(p.Zrange)-1
     [~,sortinddev]=sort(devs);
     allrois=allstacks(:,:,:,sortinddev);
     
-    [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D(allrois,struct('framerange',halfstoreframes+1-fw2:halfstoreframes+1+fw2,'alignz',zc|p.alignz),{ax, ax2});
+    if ~alignxcorr&&alignzf0
+        zshift=dframe(sortinddev);
+    else
+        zshift=[];
+    end
+    
+    [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D(allrois,struct('framerange',halfstoreframes+1-fw2:halfstoreframes+1+fw2,'alignz',alignxcorr,'zshiftf0',zshift),{ax, ax2});
 
         %undo sorting by deviation to associate beads again to their
     %bead number
@@ -100,26 +110,29 @@ for Z=1:length(p.Zrange)-1
             %Roisize in x,y and z
             
             [im,ind]=nanmax(corrPSF(:));
-            if im>1
+            
+            if ind>1
             [x,y,z]=ind2sub(size(corrPSF),ind);
             dRx=round((p.roisize-1)/2);
             dz=round((p.roiframes-1)/2);
             rangex=x-dRx:x+dRx;
             rangey=y-dRx:y+dRx;
-            rangez=z-dz:z+dz;
+            rangez=max(1,z-dz):min(size(corrPSF,3),z+dz);
             
             %normalize PSF
             
             minPSF=min(corrPSF(:));
             corrPSFn=corrPSF-minPSF;
-            corrPSFn(isnan(corrPSFn))=0;
+            intglobal=nanmean(nansum(nansum(corrPSFn(rangex,rangey,z-1:z+1),1),2));
             for k=1:size(corrPSF,3)
-                int=nansum(nansum(corrPSFn(:,:,k)));
-                if int>0
-                corrPSFn(:,:,k)=corrPSFn(:,:,k)/int;
-                end
+                corrPSFn(:,:,k)=corrPSFn(:,:,k)/intglobal;
+                
+%                 int(k)=nansum(nansum(corrPSFn(:,:,k)));
+%                 if int(k)>0
+% %                 corrPSFn(:,:,k)=corrPSFn(:,:,k)/int(k);
+%                 end
             end
-            
+            corrPSFn(isnan(corrPSFn))=0;
             
             corrPSFs=corrPSFn(rangex,rangey,rangez);
             PSFgood=true;
@@ -132,18 +145,30 @@ for Z=1:length(p.Zrange)-1
             
             %Normalization of frames??? where to do that? berfore b-spline?
             %calculatae b-spline coefficients
-            b3_0=bsarray(double(corrPSFs),'lambda',p.smoothingfactor);
+            
+            %calculate effective smoothing factor
+            lambda=p.smoothingfactor*100;
+            if length(lambda)<2
+                lambda(2:3)=lambda;
+            elseif length(lambda)<3
+                lambda=[lambda(1) lambda(1) lambda(2)];
+            end
+            lambda(1:2)=lambda(1:2)/p.cam_pixelsize_nm;
+            lambda(3)=lambda(3)/p.dz;
+            
+            b3_0=bsarray(double(corrPSFs),'lambda',lambda);
             
             %calculate double-sampled PSF for c-spline
             
             zhd=1:1:b3_0.dataSize(3);
 %             if p.doublesample
 %                 dxxhd=0.5;
-%                 [XX,YY,ZZ]=meshgrid(1:dxxhd:b3_0.dataSize(1),1:dxxhd:b3_0.dataSize(2),zhd);
-%                 corrPSFhd = interp3_0(b3_0,XX,YY,ZZ,0);
+ dxxhd=1;
+                [XX,YY,ZZ]=meshgrid(1:dxxhd:b3_0.dataSize(1),1:dxxhd:b3_0.dataSize(2),zhd);
+                corrPSFhd = interp3_0(b3_0,XX,YY,ZZ,0);
 %             else
-                dxxhd=1;
-                corrPSFhd=corrPSFs;
+               
+%                 corrPSFhd=corrPSFs;
 %             end
                 
   
@@ -175,9 +200,9 @@ for Z=1:length(p.Zrange)-1
             bspline.z0=round((b3_0.dataSize(3)+1)/2);
             bspline.dz=p.dz;            
 %             save([path filesep file],'bspline','cspline','z0','dz')
-    if p.fitbsplinec      
+%     if p.fitbsplinec      
         SXY(Z).splinefit.bspline=bspline;
-    end
+%     end
     if p.fitcsplinec
         SXY(Z).splinefit.cspline=cspline;
     end
@@ -203,15 +228,15 @@ for Z=1:length(p.Zrange)-1
             
             zprofile=squeeze(corrPSFn(halfroisizebig+1,halfroisizebig+1,:));
             zprofile=zprofile/max(zprofile);
-            mphd=round((size(corrPSFhd,1)+1)/2);
-            zprofilehd=squeeze(corrPSFhd(mphd,mphd,:));
-            zprofilehd=zprofilehd/max(zprofilehd);            
+%             mphd=round((size(corrPSFhd,1)+1)/2);
+%             zprofilehd=squeeze(corrPSFhd(mphd,mphd,:));
+%             zprofilehd=zprofilehd/max(zprofilehd);            
             
             xprofile=squeeze(corrPSFn(:,halfroisizebig+1,ftest));
             xprofile=xprofile/max(xprofile);
-            mpzhd=round(size(corrPSFhd,3)+1)/2+1;
-            xprofilehd=squeeze(corrPSFhd(:,mphd,mpzhd));
-            xprofilehd=xprofilehd/max(xprofilehd);
+%             mpzhd=round(size(corrPSFhd,3)+1)/2+1;
+%             xprofilehd=squeeze(corrPSFhd(:,mphd,mpzhd));
+%             xprofilehd=xprofilehd/max(xprofilehd);
             
             dxxx=0.1;
             xxx=1:dxxx:b3_0.dataSize(1);zzzt=0*xxx+ftest-rangez(1)-0*framerange0(1)+1;
@@ -224,11 +249,11 @@ for Z=1:length(p.Zrange)-1
             zbs=zbs/max(zbs);
 
             hold off
-             plot(framerange0,zpall2(1:length(framerange0)),'m:')
+             plot(framerange0,zpall2(1:length(framerange0),:),'m:')
              hold on
-             plot(framerange0,zpall(1:length(framerange0)),'c')
+             plot(framerange0,zpall(1:length(framerange0),:),'c')
             plot(framerange0',zprofile(1:length(framerange0)),'k*')
-            plot(zhd+rangez(1)+framerange0(1)-2,zprofilehd,'ko')
+%             plot(zhd+rangez(1)+framerange0(1)-2,zprofilehd,'ko')
             plot(zzz+rangez(1)+framerange0(1)-2,zbs,'b','LineWidth',2)
             
             xrange=-halfroisizebig:halfroisizebig;  
@@ -241,14 +266,14 @@ for Z=1:length(p.Zrange)-1
             hold on
             plot(xrange,xpall,'c')
             plot(xrange,xprofile,'k*-')
-            plot((-mphd+1:mphd-1)/dxxhd,xprofilehd,'ko')
+%             plot((-mphd+1:mphd-1)/dxxhd,xprofilehd,'ko')
             plot((xxx-(b3_0.dataSize(1)+1)/2),xbs,'b','LineWidth',2)
             
             drawnow
             %quality control: refit all beads
             ax=maketgax(axall.hspline_validate,tgt);
             hold off
-    
+            drawnow
             if isempty(stackcal_testfit)||stackcal_testfit
             testfit(allrois(:,:,:,beadgood),cspline.coeff,p)
             testfit(corrPSF,cspline.coeff,p,{'k','LineWidth',2})

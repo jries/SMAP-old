@@ -12,6 +12,7 @@ indf=indf&inds;
 if sum(indf)>5
 % fitpsx=fit(sx(indf).^2-sy(indf).^2,z(indf),'smoothingSpline','Normalize','on','SmoothingParam',0.95);
 fitpsx=fit(sx(indf).^2-sy(indf).^2,z(indf),'poly6','Robust','LAR','Normalize','on');
+lastwarn
 % yyaxis right
 % hold on
 % % fitpsx=polyfit(zcorr,sx.^2-sy.^2,4);

@@ -1,6 +1,7 @@
 classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
     properties
         fitpar
+%         mirrorstack
     end
     methods
         function obj=MLE_GPU_Yiming(varargin)
@@ -18,13 +19,22 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             disp('checking cuda fit')
             reporttext='GPU fit function did not run. Possibly the wrong CUDA version is installed.';
             img=zeros(7,'single');img(3,3)=1;
+            
             try
                 fitp=GPUmleFit_LM_noInterp(img,1,10,1,0);
-                obj.fitpar.fitfunction=@GPUmleFit_LM_noInterp;
+                obj.fitpar.fitfunction=@callYimingFitter;
+%                 obj.fitpar.fitfunction=@callYimingFitter;
                  reporttext='GPUmleFit_LM works';
             end
             roisize=obj.getPar('loc_ROIsize');
             obj.numberInBlock=round(obj.fitpar.roisperfit*100/roisize^2);
+            
+            if obj.fitpar.fitmode==5
+                EMfile=obj.getPar('loc_fileinfo').EMon;
+                EMcal=obj.fitpar.splinefit{1}.cspline.isEM;
+                obj.fitpar.mirrorstack=~(EMfile==EMcal);
+            end
+            
             
             disp(reporttext)
         end
@@ -36,6 +46,9 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             if obj.fitpar.fitmode==3
                 X=stackinfo.X;Y=stackinfo.Y;
                 obj.fitpar.zparhere=[obj.fitpar.zpar{X,Y}(:)];
+            elseif obj.fitpar.fitmode==5
+                X=stackinfo.X;Y=stackinfo.Y;
+                obj.fitpar.splinefithere=[obj.fitpar.splinefit{X,Y}(:)];
             end
             out=fitwrapper(imstack,obj.fitpar);
             locs=fit2locs(out,stackinfo,obj.fitpar,imstack);
@@ -75,7 +88,11 @@ LogL=results.LogL;
            
            
 locs.xpix=P(:,2)-dn+posx;
+if fitpar.mirrorstack
+    locs.ypix=dn-P(:,1)+1+posy;
+else
 locs.ypix=P(:,1)-dn+posy;
+end
 locs.phot=P(:,3)*EMexcess;
 locs.bg=P(:,4)*EMexcess;
 locs.frame=frame;
@@ -113,8 +130,8 @@ switch fitpar.fitmode
         locs.PSFyerr=sqrt(CRLB(:,6));  
     case 5
         %         locs.znm=(P(:,5)*1000+fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
-        locs.znm=((P(:,5)-fitpar.z0)*fitpar.dz)*fitpar.refractive_index_mismatch;
-        locs.zerr=sqrt(CRLB(:,5))*fitpar.dz*fitpar.refractive_index_mismatch;
+        locs.znm=((P(:,5)-fitpar.splinefithere.cspline.z0)*fitpar.splinefithere.cspline.dz)*fitpar.refractive_index_mismatch;
+        locs.zerr=sqrt(CRLB(:,5))*fitpar.splinefithere.cspline.dz*fitpar.refractive_index_mismatch;
 %         [locs.PSFxpix,locs.PSFypix]=zpar2sigma(locs.znm/1000,fitpar.zparhere);
         
          sx=100*v1;
@@ -138,7 +155,7 @@ EMexcess=fitpar.EMexcessNoise;
 if isempty(EMexcess)
     EMexcess=1;
 end
-arguments{1}=single(imstack/EMexcess);
+
 arguments{3}=fitpar.iterations;
 arguments{4}=fitpar.fitmode;
 arguments{5}=fitpar.issCMOS;
@@ -146,13 +163,20 @@ arguments{5}=fitpar.issCMOS;
     switch fitpar.fitmode
         case {1,2,4} %fix
             arguments{2}=fitpar.PSFx0;
+            arguments{1}=single(imstack/EMexcess);
 %         case 2 %free
         case 3 %z
+            arguments{1}=single(imstack/EMexcess);
             arguments{2}=fitpar.zparhere(1);
             arguments(6:12)=num2cell(fitpar.zparhere(2:8));
 %         case 4 %sx sy
         case 5 %spline   
-            arguments{2}=single(fitpar.splinecoefficients);
+            if fitpar.mirrorstack
+                arguments{1}=single(imstack(:,end:-1:1,:)/EMexcess);
+            else
+                arguments{1}=single(imstack/EMexcess);
+            end
+            arguments{2}=single(fitpar.splinefithere.cspline.coeff);
     end
     
     [P CRLB LogL]=fitpar.fitfunction(arguments{:});
@@ -181,7 +205,7 @@ p=obj.getAllParameters;
 fitpar.iterations=p.iterations;
 fitpar.fitmode=p.fitmode.Value;
 fitpar.roisperfit=p.roisperfit;
-if fitpar.fitmode==3
+if fitpar.fitmode==3||fitpar.fitmode==5
     calfile=p.cal_3Dfile;
     cal=load(calfile);
     if 0% p.useObjPos
@@ -199,12 +223,14 @@ if fitpar.fitmode==3
                 zr(1)=[];zr(end)=inf;
                 Z=find(p.objPos<=zr,1,'first');
             end
-            for X=1:s(1)
-                for Y=1:s(2)
+            for X=s(1):-1:1
+                for Y=s(2):-1:1
                     zpar{X,Y}=cal.SXY(X,Y,Z).fitzpar;
+                    splinefit{X,Y}=cal.SXY(X,Y,Z).splinefit;
                 end
             end
             fitpar.zpar=zpar;
+            fitpar.splinefit=splinefit;
             if size(cal.SXY,3)>1
                 obj.spatial3Dcal=true;
             else
@@ -221,14 +247,14 @@ if fitpar.fitmode==3
         fitpar.refractive_index_mismatch=p.refractive_index_mismatch;
     end
     
-elseif fitpar.fitmode==5
-    calfile=p.cal_3Dfile;
-    cal=load(calfile);
-    fitpar.splinecoefficients=single(cal.cspline.coeff);
-    fitpar.z0=cal.z0;
-    fitpar.dz=cal.dz; 
-    fitpar.refractive_index_mismatch=p.refractive_index_mismatch;
-    fitpar.objPos=p.objPos;
+% elseif fitpar.fitmode==5
+%     calfile=p.cal_3Dfile;
+%     cal=load(calfile);
+%     fitpar.splinecoefficients=single(cal.cspline.coeff);
+%     fitpar.z0=cal.z0;
+%     fitpar.dz=cal.dz; 
+%     fitpar.refractive_index_mismatch=p.refractive_index_mismatch;
+%     fitpar.objPos=p.objPos;
     
 else
     fitpar.PSFx0=p.PSFx0;

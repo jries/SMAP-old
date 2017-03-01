@@ -315,7 +315,7 @@ function [D,CFlag,direction,lambda] = parseInputs(varargin)
 
 % check number of inputs
 nargs = length(varargin);
-error(nargchk(0,4,nargs));
+% error(nargchk(0,4,nargs));
 
 % get, check D
 if nargs<1

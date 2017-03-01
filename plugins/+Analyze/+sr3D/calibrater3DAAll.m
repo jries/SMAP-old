@@ -10,6 +10,9 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
         end
         function out=run(obj,p)
             out=[];
+            if p.beaddistribution.Value==2
+                p.alignz=true;
+            end
             %get beads. Either parse sites or segment new
  %                 beads.loc.xnm,ynm,frame,psfxnm,psfynm
 %                 beads.filenumber .stack  .f0 .pos 
@@ -33,7 +36,7 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
             
             p.fglass=myquantile([beads(:).f0],0.03);
             %get image stacks if needed
-            if p.fitbsplinec || p.fitcsplinec 
+            if  p.fitcsplinec 
                 beads=getimagestacks(obj,p,beads);      
             end
             
@@ -68,10 +71,10 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
                     % get calibration and used beads
                     
                     [curvecal,indgoodc]=getcurvecal(beadh,p,X,Y,axall);
-                    if p.fitbsplinec|| p.fitcsplinec
+                    if  p.fitcsplinec
                         [stackcal,indgoods]=getstackcal(beadh,p,X,Y,axall);
                         for Z=1:length(curvecal)
-                            allcal(Z)=copyfields(stackcal(Z),curvecal(Z));
+                            allcal(Z)=copyfields(curvecal(Z),stackcal(Z),{'splinefit'});
                         end
                     else
                         allcal=curvecal;
@@ -207,7 +210,7 @@ indbad=false(length(beads),1);
         beadnumber=thisfile(s);
         pos=round(beads(beadnumber).pos(1:2)/campix/1000-roi(1:2));
         if pos(1)>halfroisizebig&&pos(1)<sim(1)-halfroisizebig&&pos(2)>halfroisizebig&&pos(2)<sim(2)-halfroisizebig
-            if p.beaddistribution.Value==1 %on glass
+            if p.beaddistribution.Value==1&&~p.alignz %on glass
                 frange=framerange0;
             else
                 frange=max(fminmax(1),f0r(beadnumber)-halfstoreframes):min(fminmax(2),f0r(beadnumber)+halfstoreframes);
@@ -244,10 +247,15 @@ beads(indbad)=[];
 end
 
 function out=rescalestack(in)
+% out=in;
+% return;
+
 s=size(in);
 midp=round((s(1)-1)/2+1);
-range=2;
+range=3;
 center=squeeze(sum(sum(in(midp-range:midp+range,midp-range:midp+range,:))));
+
+% out=in/max(in(:));
 x=(1:s(3))';
 fp=fit(x,center,'gauss1');
 int=fp(x);
@@ -297,7 +305,7 @@ function axall=getaxes(p)
             axall.htbeads=uitabgroup(ax.Parent);
             axall.axbeads=maketgax(axall.htbeads,'scatter');   
             
-            if p.fitbsplinec||p.fitcsplinec
+            if p.fitcsplinec
                 ax=initaxis(p.resultstabgroup,'spline fit');
                 axall.allsplines=uitabgroup(ax.Parent);
                 ax=maketgax(axall.allsplines,'scatter');
@@ -424,208 +432,6 @@ for Z=1:length(p.Zrange)-1
 end
 end
 
-
-
-       function out=run(obj,p)
-%             out=[];
-%             
-%             
-%             locsall=obj.locData.getloc({'frame','xnm','ynm','PSFxnm','PSFynm','filenumber','phot'},'position','all','layer',1,'removeFilter','filenumber','grouping','ungrouped');
-% %             locsall=obj.locData.getloc('frame','xnm','ynm','PSFxnm','PSFynm','filenumber','phot');
-%             if isempty(locsall.PSFynm)
-%                 error('no PSFy found')
-%             end
-%             if p.correctbeadsizec
-%                 Rbead=p.beadsize/2;
-%                 x=-Rbead:Rbead;
-%                 y=sqrt(Rbead.^2-x.^2);
-%                 sigmaB=sqrt(sum(y.*x.^2)/sum(y));
-%                 locsall.PSFxnm=sqrt(locsall.PSFxnm.^2-sigmaB.^2);
-%                 locsall.PSFynm=sqrt(locsall.PSFynm.^2-sigmaB.^2);
-%             end
-%             
-%             locsall.PSFxpix=locsall.PSFxnm/p.cam_pixelsize_nm;
-%             locsall.PSFypix=locsall.PSFynm/p.cam_pixelsize_nm;
-%             locsall.zfnm=locsall.frame*p.dz;
-%             
-%             ax=initaxis(p.resultstabgroup,'found beads');
-%             htg=uitabgroup(ax.Parent);
-%                          axbeadss=maketgax(htg,'all');
-%                          axbeadss.NextPlot='add';
-%             numfiles=max(locsall.filenumber);
-%             maxd=p.cam_pixelsize_nm*2;
-%             locsall.beadnum=zeros(size(locsall.xnm));
-%             for k=1:numfiles
-%                 ax=maketgax(htg,num2str(k));
-%                 indf=locsall.filenumber==k;
-%                 beadlocs(k)=getBeadLocs(locsall.xnm(indf),locsall.ynm(indf),p);
-%                 [beadnum,numlocs]=associatelocs(beadlocs(k).x,beadlocs(k).y,locsall.xnm(indf),locsall.ynm(indf),maxd);
-%                 beadn=beadnum>0;
-%                 indff=find(indf);
-%                 locsall.beadnum(indff(beadn))=beadnum(beadn)+max(locsall.beadnum);
-%                 plot(axbeadss,beadlocs(k).x,beadlocs(k).y,'o')
-%             end
-%             
-%             %make bead structure
-%             for k=max(locsall.beadnum):-1:1
-%                 thisbead=(locsall.beadnum==k);
-%                 bead(k).PSFxpix=double(locsall.PSFxpix(thisbead));
-%                 bead(k).PSFypix=double(locsall.PSFypix(thisbead));
-%                 bead(k).phot=double(locsall.phot(thisbead));
-%                 bead(k).xpos=median(double(locsall.xnm(thisbead)));
-%                 bead(k).ypos=median(double(locsall.ynm(thisbead)));
-%                 bead(k).filenumber=double(locsall.filenumber(find(thisbead,1)));
-%                 bead(k).numlocs=sum(thisbead);
-%                 bead(k).frame=double(locsall.frame(thisbead));
-%                 bead(k).zfnm=double(locsall.zfnm(thisbead));
-%                 bead(k).beadnum=double(locsall.beadnum(thisbead));
-%                 
-%                 %derived properties
-%                 bead(k).ztrue=stackas2z(bead(k).PSFxpix,bead(k).PSFypix,bead(k).zfnm,bead(k).phot,0);
-%                 indz0=find(bead(k).zfnm>bead(k).ztrue,1);
-%                 rangez0=indz0-15:indz0+15;rangez0(rangez0<1)=1;rangez0(rangez0>length(bead(k).zfnm))=length(bead(k).zfnm);
-%                 if isempty(rangez0)
-%                     bead(k).minSx=NaN;
-%                     bead(k).minSy=NaN;
-%                 else
-%                     bead(k).minSx=min(bead(k).PSFxpix(rangez0));
-%                     bead(k).minSy=min(bead(k).PSFypix(rangez0));                    
-%                 end
-% %                 ztrue(k);
-%                 bead(k).I0=max(bead(k).phot);
-%             end
-%             
-%             % if on glass: correct position based on average, not taking
-%             % into account position. This might create errors. change
-%             % later?
-%             zrangeall=[min(locsall.frame) max(locsall.frame)].*p.dz;
-%             if p.beaddistribution.Value==1 %glass
-%                 f1ind=find([bead(:).filenumber]==1);
-%                 zf1=robustMean([bead(f1ind).ztrue]);
-%                 if p.ztoframet
-%                     zpos=p.ztoframe.*p.dz;
-%                 else
-%                     zpos=0;
-%                 end
-% %                 zshift=dzh+zpos;
-%                 zrangeall=zrangeall-zpos;
-%                 for k=1:max([bead(:).filenumber])
-%                         bi=find([bead(:).filenumber]==k);
-%                         dzh=robustMean([bead(bi).ztrue])-zf1;
-%                         for b=1:length(bi)
-% %                             dzh+zpos
-%                             bead(bi(b)).ztrue=bead(bi(b)).ztrue-dzh-zpos;
-%                             bead(bi(b)).zfnm=bead(bi(b)).zfnm-dzh-zpos;
-%                             bead(bi(b)).zrangeall=zrangeall;
-%                         end
-%                 end
-%                 p.ztruepos=zf1-zpos; 
-%                 p.Zval=[0 0];
-%             else
-%                 %make absolute with respect to coverslip. Either from GUI
-%                 %or from finding smallest ztrue. Assume: approx same stack
-%                 %z position (rest taken care of by ztrue)
-% %                 zshift=0;
-%                 ztrue=[bead(:).ztrue];
-%                 zGlass=quantile(ztrue,0.02);
-%                 for k=1:length(bead)
-%                     bead(k).ztrue=bead(k).ztrue-zGlass;
-%                     bead(k).zfnm=bead(k).zfnm-zGlass;
-%                     bead(k).zrangeall=zrangeall-zGlass;
-%                 end
-%                 p.ztruepos=0;
-%             end
-%             
-%             
-%             
-%             %sort beads according to X,Y
-%             
-%             Xrange=(p.Xmin:p.Xd:p.Xmax).*p.cam_pixelsize_nm;
-%             Yrange=(p.Ymin:p.Yd:p.Ymax).*p.cam_pixelsize_nm;
-%             
-%             Zrange=p.Zval;
-%             if ischar(Zrange)
-%                 Zrange=str2num(Zrange)
-%             end
-%             if length(Xrange)==1
-%                 Xrange(2)=p.Xmax*p.cam_pixelsize_nm;
-%             end
-%             if length(Yrange)==1
-%                 Yrange(2)=p.Ymax*p.cam_pixelsize_nm;
-%             end
-%             if length(Zrange)==1
-%                 Zrange(2)=p.Zmax;
-%             end
-%             p.Zrange=Zrange;
-%             
-%             %init validation and summary axes
-%             ax=initaxis(p.resultstabgroup,'splines');
-%             htsplines=uitabgroup(ax.Parent);
-%             ax=initaxis(p.resultstabgroup,'sx^2-sy^2');
-%             htsx2sy2=uitabgroup(ax.Parent);
-%             ax=initaxis(p.resultstabgroup,'z fit');
-%             htzfit=uitabgroup(ax.Parent);
-%             ax=initaxis(p.resultstabgroup,'Z(Sx,Sy)');
-%             hzsx=uitabgroup(ax.Parent);
-%             axzfits=maketgax(htzfit,'summary');  
-%             axsxsys=maketgax(htsx2sy2,'summary');  
-%             axsxs22=maketgax(htsx2sy2,'validation');  
-%             axsplines=maketgax(htsplines,'summary'); 
-%             axzlut=maketgax(hzsx,'validation'); 
-%             
-%             %get clean curves
-%             for X=1:length(Xrange)-1
-%                 for Y=1:length(Yrange)-1
-%                     indh=[bead(:).xpos]>Xrange(X)&[bead(:).xpos]<Xrange(X+1)&[bead(:).ypos]>Yrange(Y)&[bead(:).ypos]<Yrange(Y+1);
-%                     if sum(indh)==0
-%                         continue
-%                     end
-%                     bh=cleanupbeads(bead(indh),p);
-%                     curves=getcurves(bh,p);
-%                     for Z=1:length(curves)
-%                         CXY(X,Y,Z)=curves(Z);
-%                     end
-%                 end
-%             end           
-%             scurves=size(CXY);
-%             if length(scurves)==2
-%                 scurves(3)=1;
-%             end
-%             
-% %             get fits
-%             for X=1:scurves(1)%length(Xrange)-1
-%                 for Y=1:scurves(2)%length(Yrange)-1
-%                     for Z=1:scurves(3)
-%                         bh=CXY{X,Y,Z};
-%                         tgt=[num2str(X) num2str(Y) num2str(Z)];
-%                         ax=maketgax(htsplines,tgt);                     
-%                         [SXY(X,Y,Z).spline,indg]=getcleanspline(bh,p);
-%                         bh=bh(indg);
-%                         ax=maketgax(htsx2sy2,tgt);
-%                         SXY(X,Y,Z).Sx2_Sy2=cal_Sx2_Sy2(bh,p);
-%                         ax=maketgax(htzfit,tgt);
-%                         SXY(X,Y,Z).fitzpar=cal_fitzpar(bh,p);
-%                         if p.calculateZSxSy
-%                             ax=maketgax(hzsx,tgt);
-%                             SXY(X,Y,Z).splineLUT=cal_splineLUT(SXY(X,Y,Z).spline,p);
-%                         else
-%                             SXY(X,Y,Z).splineLUT=[];
-%                         end
-%                         SXY(X,Y,Z).curve=CXY{X,Y,Z};
-%                         SXY(X,Y,Z).Xrangeall=Xrange;
-%                         SXY(X,Y,Z).Yrangeall=Yrange;
-%                         SXY(X,Y,Z).Zrangeall=Zrange;
-%                         SXY(X,Y,Z).posind=[X,Y,Z];                        
-%                         SXY(X,Y,Z).Xrange=[Xrange(X), Xrange(X+1)];
-%                         SXY(X,Y,Z).Yrange=[Yrange(Y) ,Yrange(Y+1)];
-%                         SXY(X,Y,Z).Zrange=[Zrange(Z), Zrange(Z+1)];
-%                         SXY(X,Y,Z).Zoffset=p.ztruepos+mean(SXY(X,Y,Z).Zrange);
-%                         SXY(X,Y,Z).legend=[num2str(X) num2str(Y) num2str(Z)];
-%                     end
-%                 end
-%             end
-%             
-       end
        function plotcurves(obj,SXY,axall,p)
             %plot results
             axes(axall.axbeads)
@@ -1085,8 +891,8 @@ else
     setvis(obj,scfields,'off')
 end
 
-splinef={'framewindow','alignzt','smoothingfactor','smoothingfactort','roiframes','roiframest','roisize','roisizet'};
-if p.fitbsplinec||p.fitcsplinec
+splinef={'framewindow','alignzxcorr','smoothingfactor','smooth','roiframes','roiframest','roisize','roisizet'};
+if p.fitcsplinec
     setvis(obj,splinef,'on')
 else
     setvis(obj,splinef,'off')
@@ -1152,14 +958,14 @@ pard.beaddistribution.Width=.75;
 
 
 
-pard.ztoframet.object=struct('String','z0 (frame)','Style','checkbox');
-pard.ztoframet.position=[6,tp];
-pard.ztoframet.Width=.75;
-pard.ztoframe.object=struct('String','21','Style','edit');
-pard.ztoframe.position=[6,tp+.75];
-pard.ztoframe.Width=.25;
+% pard.ztoframet.object=struct('String','z0 (frame)','Style','checkbox');
+% pard.ztoframet.position=[6,tp];
+% pard.ztoframet.Width=.75;
+% pard.ztoframe.object=struct('String','21','Style','edit');
+% pard.ztoframe.position=[6,tp+.75];
+% pard.ztoframe.Width=.25;
 
-pard.alignz.object=struct('Style','checkbox','String','Align in z'); 
+pard.alignz.object=struct('Style','checkbox','String','Align in z with f0'); 
 pard.alignz.position=[7,tp];
 pard.alignz.Width=1.;
 
@@ -1260,9 +1066,9 @@ pard.fitcsplinec.object=struct('String','cspline','Style','checkbox','Callback',
 pard.fitcsplinec.position=[4,1];
 pard.fitcsplinec.Width=.75;
 
-pard.fitbsplinec.object=struct('String','bspline','Style','checkbox','Callback',{{@setvisible,obj}});
-pard.fitbsplinec.position=[5,1];
-pard.fitbsplinec.Width=.75;
+% pard.fitbsplinec.object=struct('String','bspline','Style','checkbox','Callback',{{@setvisible,obj}});
+% pard.fitbsplinec.position=[5,1];
+% pard.fitbsplinec.Width=.75;
 
 pard.roisizet.object=struct('Style','text','String','ROI (pix)'); 
 pard.roisizet.position=[4,1.75];
@@ -1272,29 +1078,29 @@ pard.roisize.position=[4,2.35];
 pard.roisize.Width=.25;
 
 pard.roiframest.object=struct('Style','text','String','frames'); 
-pard.roiframest.position=[4,2.6];
+pard.roiframest.position=[4,2.65];
 pard.roiframest.Width=.5;
 pard.roiframes.object=struct('Style','edit','String','35'); 
-pard.roiframes.position=[4,3.1];
+pard.roiframes.position=[4,3.15];
 pard.roiframes.Width=.25;
 
 
 
-pard.smoothingfactort.object=struct('Style','text','String','Smoothing'); 
-pard.smoothingfactort.position=[5,1.75];
-pard.smoothingfactort.Width=.6;
-pard.smoothingfactor.object=struct('Style','edit','String','.05'); 
-pard.smoothingfactor.position=[5,2.35];
-pard.smoothingfactor.Width=.25;
+pard.smooth.object=struct('Style','checkbox','String','Smooth:','Value',1); 
+pard.smooth.position=[5,1.25];
+pard.smooth.Width=.6;
+pard.smoothingfactor.object=struct('Style','edit','String','0.02 0.05'); 
+pard.smoothingfactor.position=[5,1.85];
+pard.smoothingfactor.Width=.5;
 
 
 
-pard.alignzt.object=struct('Style','text','String','Align in z based on XX frames:'); 
-pard.alignzt.position=[6,1.5];
-pard.alignzt.Width=1.8;
+pard.alignzxcorr.object=struct('Style','checkbox','String','align z corr, f:'); 
+pard.alignzxcorr.position=[5,2.35];
+pard.alignzxcorr.Width=.75;
 
 pard.framewindow.object=struct('Style','edit','String','15'); 
-pard.framewindow.position=[6,3.1];
+pard.framewindow.position=[5,3.15];
 pard.framewindow.Width=.25;
 
 pard.splinepart.object=struct('String','spline smoothing','Style','text');

@@ -174,7 +174,7 @@ varargout{1} = vi;
 function [b,xi,yi,zi,extrapval] = parseInputs(varargin)
 
 nargs = length(varargin);
-error(nargchk(4,5,nargs));
+% error(nargchk(4,5,nargs));
 
 % Process B
 b = varargin{1};

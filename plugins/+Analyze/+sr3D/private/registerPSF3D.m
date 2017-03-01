@@ -39,6 +39,11 @@ refim=avim(p.xrange,p.yrange,p.framerange);
 
 simin=size(imin);
 shiftedstack=zeros(simin(1),simin(2),simin(3),numbeads);
+if ~isempty(p.zshiftf0)
+    zshiftf0=p.zshiftf0;
+else
+    zshiftf0=zeros(numbeads,1);
+end
 for k=1:numbeads
 %     shift(k,:)=get3Dcorrshift(avim,smallim(:,:,:,k));
     if p.alignz
@@ -47,7 +52,7 @@ for k=1:numbeads
         [shift(k,:),cc(k)]=get2Dcorrshift(refim,smallim(:,:,:,k));
     end
     
-    shiftedh=interp3(imin(:,:,:,k),Xq-shift(k,2),Yq-shift(k,1),Zq-shift(k,3),'cubic',0);
+    shiftedh=interp3(imin(:,:,:,k),Xq-shift(k,2),Yq-shift(k,1),Zq-shift(k,3)-double(zshiftf0(k)),'cubic',0);
     shiftedstack(:,:,:,k)=shiftedh;
 %     shiftedh(isnan(shiftedh))=0;
 %     meanim=shiftedh+meanim;
