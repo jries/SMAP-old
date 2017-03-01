@@ -20,6 +20,13 @@ end
 if cutoff
     co=myquantilefast(in(:),.99);
     in(in>co)=co;
+    
+%         fun = @(block_struct) ...
+%    mean(block_struct.data(:)) * ones(size(block_struct.data));
+%     bgm= blockproc(in,[32 32],fun);
+%     ibg=in-bgm;
+%     co=myquantilefast(ibg,.99);
+%     in(ibg>co)=co+bgm(ibg>co);
 end
 if refine
     level2=level*2;

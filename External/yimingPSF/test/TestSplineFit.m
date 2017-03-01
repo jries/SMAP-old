@@ -1211,7 +1211,7 @@ for i = 1:size(np_psf1,3)
     np_psf1(:,:,i) = np_psf1(:,:,i)/sum(sum(np_psf1(:,:,i)));
 end
 spline1 = Spline3D_v2(np_psf1);
-coeff2 = spline1.coeff;
+coeff1 = spline1.coeff;
 
 b3_sin=bsarray(double(np_psf1),'lambda',0.4);
 coeffs_bs1= b3_sin.coeffs;
@@ -1292,9 +1292,9 @@ coeff2 = spline2.coeff;
 
 
 
-Nfits=10000         %number of images to fit
+Nfits=5917         %number of images to fit
 bg=20;               %background fluorescence in photons/pixel/frame
-Nphotons=10000;      %expected photons/frame
+Nphotons=1000;      %expected photons/frame
 Npixels=13;         %linear size of fit region in pixels.
 PSFsigma=1;         %PSF sigma in pixels
 Ax=0;               %Aberration Terms
