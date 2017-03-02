@@ -25,6 +25,10 @@ if isempty(p.Parent)
     phandle=figure;
 else
     phandle=p.Parent;
+    if isa(phandle,'matlab.graphics.axis.Axes')
+        phandle=phandle.Parent;
+    end
+    
     delete(phandle.Children)
 end
 
