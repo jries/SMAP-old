@@ -236,8 +236,8 @@ isxnm=isfield(locsh,'xnm') && ~isempty(locsh.xnm);
 isx=isfield(locsh,'x') && ~isempty(locsh.x);
 if ~(isxnm||isx) 
 
-    sx=round((rangexrec(2)-rangexrec(1))/p.sr_pixrec(1));
-    sy=round((rangeyrec(2)-rangeyrec(1))/p.sr_pixrec(end));
+    sy=round((rangexrec(2)-rangexrec(1))/p.sr_pixrec(1));
+    sx=round((rangeyrec(2)-rangeyrec(1))/p.sr_pixrec(end));
     imageo.image=zeros(sx,sy,'single');
     imageo.lut=lutall;
     imageo.rangex=rangex;

@@ -9,7 +9,7 @@ end
 try
 g=gui.GuiMainSMAP;g.makeGui;       
 catch err
-    disp('Error making the GUI. Try deleting plugins/plugin.m and the settings/temp directory.')
+    disp('ESMAPrror making the GUI. Try deleting plugins/plugin.m and the settings/temp directory.')
     err.rethrow
 end
 
