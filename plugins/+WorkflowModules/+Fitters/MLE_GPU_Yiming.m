@@ -145,6 +145,15 @@ locs.locpthompson=sqrt((locs.PSFxpix.*locs.PSFypix+1/12*v1)./( locs.phot/EMexces
 end
 
 function out=fitwrapper(imstack,fitpar)
+
+
+%             if any(imstack(:)<0)
+%                 figure(88);
+%                 imageslicer(imstack);
+% 
+%                 
+%             end
+            
 s=size(imstack);
 if length(s)==2 
  s(3)=1;

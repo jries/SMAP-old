@@ -94,33 +94,43 @@ classdef CameraConverter<interfaces.WorkflowModule
             %calibrate gain offset from images
             global SMAP_stopnow           
              
-            if obj.calibrategain
-                datao=[];
-                if data.eof            
-                    SMAP_stopnow=false;
-                    calculategain(obj.calibrateimages);
-                    obj.calibrategain=false;
-                    return
-                end
-
-                obj.calibrateimages(:,:,obj.calibratecounter)=data.data;
-                obj.calibratecounter=obj.calibratecounter+1;
-                if obj.calibratecounter>140
-                    SMAP_stopnow=true;
-                end
-                
-                
-                
-                return
-            end
-           
-            imphot=single((data.data-obj.offset))*obj.adu2phot;
+%             if obj.calibrategain
+%                 datao=[];
+%                 if data.eof            
+%                     SMAP_stopnow=false;
+%                     calculategain(obj.calibrateimages);
+%                     obj.calibrategain=false;
+%                     return
+%                 end
+% 
+%                 obj.calibrateimages(:,:,obj.calibratecounter)=data.data;
+%                 obj.calibratecounter=obj.calibratecounter+1;
+%                 if obj.calibratecounter>140
+%                     SMAP_stopnow=true;
+%                 end
+%                 
+%                 
+%                 
+%                 return
+%             end
+           imgp=makepositive(data.data);
+            imphot=(single(imgp)-obj.offset)*obj.adu2phot;
                datao=data;
                datao.data=imphot;  
         end
         
        
     end
+end
+
+
+function out=makepositive(in)
+if isa(in,'int16')
+    out=single(in);
+    out(out<0)=out(out<0)+2^16;
+else
+    out=in;
+end
 end
 
 function calibrate_callback(a,b,obj)
