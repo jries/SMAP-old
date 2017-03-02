@@ -337,6 +337,10 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
                  allsites=[obj.sites(:).info];
                  ind=[allsites.cell]==cell.ID;
                  use=getFieldAsVector(obj.sites,'annotation','use');
+%                  use(isnan(use))=false;
+                if iscell(use)
+                    use=ind;
+                end
                  
                  plotmanyboxes(hax,obj.sites,ind&use,obj.getPar('se_sitefov'),[1 0 1]);
                  plotmanyboxes(hax,obj.sites,ind & ~use,obj.getPar('se_sitefov'),[1 0 0]);

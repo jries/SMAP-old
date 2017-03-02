@@ -504,10 +504,25 @@ hax.Units='normalized';
 fi=obj.getPar('currentfileinfo');
 pixrec=fi.pixsize*1000; 
 roi=fi.roi;
-axis(hax,'equal')
 xext=[roi(1) roi(1)+roi(3)]* pixrec;
-yext=[roi(2) roi(2)+roi(4)]* pixrec;
-p.sr_size=[roi(3) roi(4) ]/2* pixrec;
+yext=[roi(2) roi(2)+roi(4)]* pixrec;  
+
+% sron=obj.getPar('sr_layerson');
+files=obj.locData.files.file;
+for k=1:length(files)
+    roi=files(k).info.roi;
+xexth=[roi(1) roi(1)+roi(3)]* pixrec;
+yexth=[roi(2) roi(2)+roi(4)]* pixrec; 
+xext(1)=min(xext(1),xexth(1));xext(2)=max(xext(2),xexth(2));
+yext(1)=min(yext(1),yexth(1));yext(2)=max(yext(2),yexth(2));
+end
+    
+  axis(hax,'equal')
+
+
+
+% p.sr_size=[roi(3) roi(4) ]/2* pixrec;
+p.sr_size=[xext(2)-xext(1) yext(2)-yext(1)]/2;
 
 px=(xext(2)-xext(1))/pos(3);
 py=(yext(2)-yext(1))/pos(4);
