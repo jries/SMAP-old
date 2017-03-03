@@ -39,7 +39,9 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
             %pglass needs to be file-dependent!
             p.fglass=myquantile([beads(:).f0],0.03);
             %get image stacks if needed
+            
             if  p.fitcsplinec 
+                disp('load images')
                 beads=getimagestacks(obj,p,beads);      
             end
             
@@ -72,9 +74,10 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
                     end
                     beadh=beads(indh);
                     % get calibration and used beads
-                    
+                    disp('get curves')
                     [curvecal,indgoodc]=getcurvecal(beadh,p,X,Y,axall);
                     if  p.fitcsplinec
+                         disp('get stack spline calibration')
                         [stackcal,indgoods]=getstackcal(beadh,p,X,Y,axall);
                         for Z=1:length(curvecal)
                             allcal(Z)=copyfields(curvecal(Z),stackcal(Z),{'splinefit'});
@@ -961,7 +964,7 @@ pard.refine.object=struct('Style','checkbox','String','refine iteratively','Valu
 pard.refine.position=[2,2];
 pard.refine.Width=1;
 
-pard.beaddistribution.object=struct('String',{{'Glass','Gel'}},'Style','popupmenu','Value',1,'Callback',{{@setvisible,obj}});
+pard.beaddistribution.object=struct('String',{{'Glass','Gel'}},'Style','popupmenu','Value',2,'Callback',{{@setvisible,obj}});
 pard.beaddistribution.position=[1,2];
 pard.beaddistribution.Width=.75;
 
