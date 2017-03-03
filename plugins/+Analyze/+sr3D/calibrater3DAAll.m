@@ -36,8 +36,11 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
             badind=isnan([beads(:).f0]);
             beads(badind)=[];
             
+            for k=1: max([beads(:).filenumber])
             %pglass needs to be file-dependent!
-            p.fglass=myquantile([beads(:).f0],0.03);
+                indf=[beads(:).filenumber]==k;
+                p.fglass(k)=myquantile([beads(indf).f0],0.03);
+            end
             %get image stacks if needed
             
             if  p.fitcsplinec 
@@ -177,7 +180,7 @@ roifac=1.5;
 roisizebig=(roifac*roisize);
 halfroisizebig=round((roisizebig-1)/2); %room for shifting
 roisizebig=2*halfroisizebig+1;
-storeframes=p.roiframes+500/p.dz;
+storeframes=p.roiframes+300/p.dz;
 halfstoreframes=round((storeframes-1)/2);
 storeframes=halfstoreframes*2+1;
 f0=[beads(:).f0];
@@ -225,7 +228,7 @@ indbad=false(length(beads),1);
             smallf=rescalestack(smallfr);
             stack=zeros(roisizebig,roisizebig,storeframes);
             % XXXXX gel: or always: center fzero or similar.
-            if frange(1)==fminmax(1)
+            if frange(1)==fminmax(1) && frange(end)~=fminmax(2)
                 stack(:,:,end-size(smallf,3)+1:end)=smallf;
             else
                 stack(:,:,1:size(smallf,3))=smallf;
@@ -264,7 +267,7 @@ center=squeeze(sum(sum(in(midp-range:midp+range,midp-range:midp+range,:))));
 % out=in/max(in(:));
 try
 x=(1:s(3))';
-fp=fit(x,center,'gauss1');
+fp=fit(x,center,'gauss1','Lower',[0 1 8],'Upper',[inf length(x) length(x)*2]);
 int=fp(x);
 corr=int./center;
 for k=s(3):-1:1
@@ -372,14 +375,14 @@ zc=p.spatialcalibration && p.zcalc &p.beaddistribution.Value==2;
 indgoodc=true(1,length(beadsh));
 for Z=1:length(p.Zrange)-1
     for B=length(beadsh):-1:1
-        beadz0=(beadsh(B).f0-p.fglass)*p.dz;
+        beadz0=(beadsh(B).f0-p.fglass(beadsh(B).filenumber))*p.dz;
         
         if p.alignz||p.beaddistribution.Value==2
              beadz=(beadsh(B).loc.frame*p.dz)-beadz0;
         else 
             beadz=(beadsh(B).loc.frame)*p.dz;
         end
-        zglass=p.fglass*p.dz;
+        zglass=p.fglass(beadsh(B).filenumber)*p.dz;
         if zc
             if p.zfilter.Value==1 % f0
 
@@ -393,7 +396,7 @@ for Z=1:length(p.Zrange)-1
                     phot=[];
                 end             
             else
-                zs=(beadsh(B).loc.frame-p.fglass)*p.dz;
+                zs=(beadsh(B).loc.frame-p.fglass(beadsh(B).filenumber))*p.dz;
                 goodz=zs>p.Zrange(Z)-p.framerangecombine & zs<p.Zrange(Z+1)+p.framerangecombine;
                sx=beadsh(B).loc.PSFxpix(goodz); 
                sy=beadsh(B).loc.PSFypix(goodz); 
@@ -420,7 +423,8 @@ for Z=1:length(p.Zrange)-1
     %get calibrations
     bh=curves;
     tgt=[num2str(X) num2str(Y) num2str(Z)];
-    ax=maketgax(axall.htsplines,tgt);                     
+    ax=maketgax(axall.htsplines,tgt);  
+    axes(ax)
      [spline,indg]=getcleanspline(curves,p);
      indgoodc=indgoodc&indg;
     bh=bh(indg);
@@ -949,7 +953,7 @@ w=0.3;
 wp=0.5;
 wcb=1.;
 
-pard.beadsource.object=struct('String',{{'RoiManager','Segment'}},'Style','popupmenu');
+pard.beadsource.object=struct('String',{{'RoiManager','Segment'}},'Style','popupmenu','Value',2);
 pard.beadsource.position=[1,1];
 pard.beadsource.Width=1;
 
@@ -964,7 +968,7 @@ pard.refine.object=struct('Style','checkbox','String','refine iteratively','Valu
 pard.refine.position=[2,2];
 pard.refine.Width=1;
 
-pard.beaddistribution.object=struct('String',{{'Glass','Gel'}},'Style','popupmenu','Value',2,'Callback',{{@setvisible,obj}});
+pard.beaddistribution.object=struct('String',{{'Glass','Gel'}},'Style','popupmenu','Value',1,'Callback',{{@setvisible,obj}});
 pard.beaddistribution.position=[1,2];
 pard.beaddistribution.Width=.75;
 
@@ -1101,7 +1105,7 @@ pard.roiframes.Width=.25;
 pard.smooth.object=struct('Style','checkbox','String','Smooth:','Value',1); 
 pard.smooth.position=[5,1.25];
 pard.smooth.Width=.6;
-pard.smoothingfactor.object=struct('Style','edit','String','0.02 1'); 
+pard.smoothingfactor.object=struct('Style','edit','String','0.02 .3'); 
 pard.smoothingfactor.position=[5,1.85];
 pard.smoothingfactor.Width=.5;
 

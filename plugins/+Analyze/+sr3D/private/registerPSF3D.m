@@ -28,7 +28,8 @@ if numbeads==1
 end
 smallim=zeros(length(p.xrange),length(p.yrange),length(p.framerange),size(imin,4));
 for k=1:size(imin,4)
-    smallim(:,:,:,k)=imin(p.xrange,p.yrange,p.framerange,k);
+    frh=round(p.framerange-p.zshiftf0(k));
+    smallim(:,:,:,k)=imin(p.xrange,p.yrange,frh,k);
 end
 avim=nanmean(imin,4);
 
@@ -67,7 +68,8 @@ for k=numbeads:-1:1
     res(k)=sqrt(nansum(dv(:)));
 end
 rescc=res./cc;
-[a,b]=robustMean(rescc);
+rescc(abs(shift(:,1))>3|abs(shift(:,2))>3)=NaN;
+[a,b]=robustMean(rescc(cc>0));
 if isnan(b)
     a=nanmean(rescc);b=nanstd(rescc);
 end

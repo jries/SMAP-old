@@ -2,6 +2,12 @@ function [shift,CC]=get2Dcorrshift(refim,targetim,maxmethod)
 if nargin<3
     maxmethod='interp';
 end
+if sum(refim(:))==0||sum(targetim(:))==0
+    shift=[0 0];
+    CC=0;
+    return;
+end
+
 refim=sum(refim,3);
 targetim=sum(targetim,3);
 sim=size(targetim);

@@ -2,6 +2,11 @@ function [shift,CC]=get3Dcorrshift(refim,targetim,maxmethod)
 if nargin<3
     maxmethod='interp';
 end
+if sum(refim(:))==0||sum(targetim(:))==0
+    shift=[0 0 0];
+    CC=0;
+    return;
+end
 sim=size(targetim);
 if length(sim)<3||sim(3)==1 %2D
     [shift,CC]=get2Dcorrshift(refim,targetim,maxmethod);

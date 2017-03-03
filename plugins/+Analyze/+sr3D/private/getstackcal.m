@@ -27,7 +27,7 @@ dpsfy=(psfy-median(psfy(~isnan(psfy))))*10;
 for Z=1:length(p.Zrange)-1
     allstacks=zeros(sstack(1),sstack(2),sstack(3),length(beadsh))+NaN;
     for B=length(beadsh):-1:1
-        beadz0=(beadsh(B).f0-p.fglass)*p.dz;
+        beadz0=(beadsh(B).f0-p.fglass(beadsh(B).filenumber))*p.dz;
 %         
 %         if p.alignz||p.beaddistribution.Value==2
 %              beadz=(beadsh(B).loc.frame*p.dz)-beadz0;
@@ -39,12 +39,12 @@ for Z=1:length(p.Zrange)-1
         if zc
             if p.zfilter.Value==1 % f0
 
-                if beadz0>p.Zrange(Z)-p.framerangecombine && beadz0<p.Zrange(Z+1)+p.framerangecombine
+                if beadz0>p.Zrange(Z)-p.framerangecombine*p.dz && beadz0<p.Zrange(Z+1)+p.framerangecombine
 %                    sx=beadsh(B).loc.PSFxpix; 
                    allstacks(:,:,:,B)=beadsh(B).stack.image;
                 end             
             else
-                zs=(beadsh(B).stack.framerange-p.fglass)*p.dz;
+                zs=(beadsh(B).stack.framerange-p.fglass(beadsh(B).filenumber))*p.dz;
                 goodz=zs>p.Zrange(Z)-p.framerangecombine & zs<p.Zrange(Z+1)+p.framerangecombine;
                 allstacks(:,:,goodz,B)=beadsh(B).stack.image(:,:,goodz);
             end
@@ -67,7 +67,11 @@ for Z=1:length(p.Zrange)-1
     %sort
     devs=(df.^2+dpsfx.^2+dpsfy.^2)./goodvs;
     
-    fw2=round((p.framewindow-1)/2);
+    if p.alignzxcorr
+        fw2=round((p.framewindow-1)/2);
+    else
+        fw2=2;
+    end
     
     tgt=[num2str(X) num2str(Y) num2str(Z)];
     ax=maketgax(axall.hspline_scatter,tgt);  
@@ -80,28 +84,30 @@ for Z=1:length(p.Zrange)-1
     allrois=allstacks(:,:,:,sortinddev);
     
     if ~alignxcorr&&alignzf0
-        zshift=dframe(sortinddev);
+        zshift=dframe(sortinddev)-median(dframe);
     else
         zshift=[];
     end
+%     zshift=-zshift;
+    midrange=halfstoreframes+round(median(dframe));
     
-    [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D(allrois,struct('framerange',halfstoreframes+1-fw2:halfstoreframes+1+fw2,'alignz',alignxcorr,'zshiftf0',zshift),{ax, ax2});
+    [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D(allrois,struct('framerange',midrange+1-fw2:midrange+1+fw2,'alignz',alignxcorr,'zshiftf0',zshift),{ax, ax2});
 
         %undo sorting by deviation to associate beads again to their
     %bead number
-    numbers=1:length(sortinddev);
-    shiftedstack=shiftedstack(:,:,:,numbers(sortinddev));
-    shift=shift(numbers(sortinddev),:);
-    beadgood=beadgood(numbers(sortinddev));
-
-    
+  [~,sortback]=sort(sortinddev);
+    shiftedstack=shiftedstack(:,:,:,sortback);
+    shift=shift(sortback,:);
+    beadgood=beadgood(sortback);
+    allrois=allstacks;
+  
      %calculate dual-color overlay for display
             allroisol=zeros(size(allrois,1),size(allrois,2),size(allrois,3),size(allrois,4),3);
             for k=1:size(allrois,4)
                 ssh=shiftedstack(:,:,:,k);
                 allroisol(:,:,:,k,1)=ssh/nansum(ssh(:));
                 allroisol(:,:,:,k,2)=corrPSF/nansum(corrPSF(:));
-                allroisol(:,:,:,k,3)=0.5*(allroisol(:,:,:,k,1)+allroisol(:,:,:,k,2));
+%                 allroisol(:,:,:,k,3)=0.5*(allroisol(:,:,:,k,1)+allroisol(:,:,:,k,2));
             end
             axallps=maketgax(axall.hspline_overlay,tgt);
 %             axallps=obj.initaxis('overlayPSF');
@@ -211,6 +217,8 @@ for Z=1:length(p.Zrange)-1
 %             save([path filesep file],'bspline','cspline','z0','dz')
 %     if p.fitbsplinec      
         SXY(Z).splinefit.bspline=bspline;
+        SXY(Z).splinefit.PSF=corrPSF;
+         SXY(Z).splinefit.PSFsmooth=corrPSFhd;
 %     end
     if p.fitcsplinec
         SXY(Z).splinefit.cspline=cspline;
@@ -236,10 +244,10 @@ for Z=1:length(p.Zrange)-1
             xpall2=squeeze(allrois(:,yt,ftest,beadgood));
             
             for k=1:size(zpall,2)
-                zpall(:,k)=zpall(:,k)/max(zpall(:,k));
-                xpall(:,k)=xpall(:,k)/max(xpall(:,k));
-                zpall2(:,k)=zpall2(:,k)/max(zpall2(:,k));
-                xpall2(:,k)=xpall2(:,k)/max(xpall2(:,k));                
+                zpall(:,k)=zpall(:,k)/nanmax(zpall(:,k));
+                xpall(:,k)=xpall(:,k)/nanmax(xpall(:,k));
+                zpall2(:,k)=zpall2(:,k)/nanmax(zpall2(:,k));
+                xpall2(:,k)=xpall2(:,k)/nanmax(xpall2(:,k));                
             end
             
             zprofile=squeeze(corrPSFn(xt,yt,:));
@@ -250,7 +258,7 @@ for Z=1:length(p.Zrange)-1
             
             xprofile=squeeze(corrPSFn(:,yt,ftest));
             xprofile=xprofile/max(xprofile);
-            mpzhd=round(size(corrPSFhd,3)+1)/2+1;
+            mpzhd=round((size(corrPSFhd,3)+1)/2+1);
             xprofilehd=squeeze(corrPSFhd(:,mphd,mpzhd));
             xprofilehd=xprofilehd/max(xprofilehd);
             
@@ -266,9 +274,9 @@ for Z=1:length(p.Zrange)-1
             zbs= interp3_0(b3_0,xxxt,xxxt,zzz); 
             zbs=zbs/max(zbs);
 
-            hold off
+           hold(ax,'off')
              plot(ax,framerange0,zpall2(1:length(framerange0),:),'m:')
-             hold on
+            hold(ax,'on')
              plot(ax,framerange0,zpall(1:length(framerange0),:),'c')
             plot(ax,framerange0',zprofile(1:length(framerange0)),'k*')
             plot(ax,rangez,zprofilehd,'ko')
@@ -279,9 +287,9 @@ for Z=1:length(p.Zrange)-1
             
             ax=maketgax(axall.hspline_psfx,tgt);
 %              ax=obj.initaxis('PSFx');
-            hold off
+            hold(ax,'off')
             plot(ax,xrange,xpall2,'m:')
-            hold on
+            hold(ax,'on')
             plot(ax,xrange,xpall,'c')
             plot(ax,xrange,xprofile,'k*-')
             plot(ax,xrange(rangex),xprofilehd,'ko')
@@ -290,11 +298,14 @@ for Z=1:length(p.Zrange)-1
             drawnow
             %quality control: refit all beads
             ax=maketgax(axall.hspline_validate,tgt);
-            hold off
+%             hold(ax,'off')
+%             axes(ax)
             drawnow
             if isempty(stackcal_testfit)||stackcal_testfit
-            testfit(allrois(:,:,:,beadgood),cspline.coeff,p)
-            testfit(corrPSF,cspline.coeff,p,{'k','LineWidth',2})
+                testallrois=allrois(:,:,:,beadgood);
+                testallrois(isnan(testallrois))=0;
+            testfit(testallrois,cspline.coeff,p,{},ax)
+            testfit(corrPSF,cspline.coeff,p,{'k','LineWidth',2},ax)
             end
    end 
 
@@ -303,7 +314,7 @@ end
 end
 
 
-function testfit(teststack,coeff,p,linepar)
+function testfit(teststack,coeff,p,linepar,ax)
 if nargin<4
     linepar={};
 elseif ~iscell(linepar)
@@ -330,7 +341,7 @@ d=round((size(teststack,1)-p.roisize)/2);
             [P] =  fitterCPU(teststack(range,range,:,k),(coefffak*coeff),single(p.roisize),100);
         end
     z=(1:size(P,1))'-1;
-    plot(z,P(:,5),linepar{:})
-    hold on
+    plot(ax,z,P(:,5),linepar{:})
+    hold(ax,'on')
     end
 end
