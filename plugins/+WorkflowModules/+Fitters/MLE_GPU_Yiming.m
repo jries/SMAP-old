@@ -66,6 +66,10 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
 end
 
 function locs=fit2locs(results,stackinfo,fitpar,image)
+if isempty(results)
+    locs=[];
+    return
+end
 numl=size(results.P,1);
 
 v1=ones(numl,1,'single');
@@ -246,7 +250,7 @@ if fitpar.fitmode==3||fitpar.fitmode==5
             fitpar.z0=splinefit{1}.cspline.z0;
             fitpar.zpar=zpar;
             fitpar.splinefit=splinefit;
-            if size(cal.SXY,3)>1
+            if numel(cal.SXY)>1
                 obj.spatial3Dcal=true;
             else
                 obj.spatial3Dcal=false;

@@ -214,7 +214,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
 %                 if eof
                     if obj.numberInBlock>1
                         for fsi=1:length(fninfo) %stackinfor
-                            fitterstackinfo{X,Y}.(fninfo{fsi})=fitterstackinfo{X,Y}.(fninfo{fsi})(1:obj.stackind);
+                            fitterstackinfo{X,Y}.(fninfo{fsi})=fitterstackinfo{X,Y}.(fninfo{fsi})(1:obj.stackind(X,Y));
                         end
                         stackinfoout=copyfields(fitterstackinfo{X,Y},struct('X',X,'Y',Y));
                         if passbg
