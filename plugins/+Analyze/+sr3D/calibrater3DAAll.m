@@ -16,6 +16,7 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
             %get beads. Either parse sites or segment new
  %                 beads.loc.xnm,ynm,frame,psfxnm,psfynm
 %                 beads.filenumber .stack  .f0 .pos 
+            disp('get beads')
             if p.beadsource.Value==1 %ROImanager
                 beads=sites2beads(obj,p);
             else % segment new
@@ -26,6 +27,7 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
            axall=getaxes(p);
 
             % get f0 for beads
+            disp('get bead z positions')
             for k=1:length(beads)
                 beads(k).loc.PSFxpix=beads(k).loc.PSFxnm/p.cam_pixelsize_nm;
                  beads(k).loc.PSFypix=beads(k).loc.PSFynm/p.cam_pixelsize_nm;
@@ -34,6 +36,7 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
             badind=isnan([beads(:).f0]);
             beads(badind)=[];
             
+            %pglass needs to be file-dependent!
             p.fglass=myquantile([beads(:).f0],0.03);
             %get image stacks if needed
             if  p.fitcsplinec 
@@ -209,7 +212,7 @@ indbad=false(length(beads),1);
     for s=length(thisfile):-1:1
         beadnumber=thisfile(s);
         pos=round(beads(beadnumber).pos(1:2)/campix/1000-roi(1:2));
-        if pos(1)>halfroisizebig&&pos(1)<sim(1)-halfroisizebig&&pos(2)>halfroisizebig&&pos(2)<sim(2)-halfroisizebig
+        if pos(1)>halfroisizebig&&pos(1)<sim(2)-halfroisizebig&&pos(2)>halfroisizebig&&pos(2)<sim(1)-halfroisizebig
             if p.beaddistribution.Value==1&&~p.alignz %on glass
                 frange=framerange0;
             else
@@ -256,12 +259,17 @@ range=3;
 center=squeeze(sum(sum(in(midp-range:midp+range,midp-range:midp+range,:))));
 
 % out=in/max(in(:));
+try
 x=(1:s(3))';
 fp=fit(x,center,'gauss1');
 int=fp(x);
 corr=int./center;
 for k=s(3):-1:1
     out(:,:,k)=in(:,:,k)*corr(k);
+end
+catch err
+    err
+    out=in;
 end
 % center2=squeeze(sum(sum(out(midp-1:midp+1,midp-1:midp+1,:))));
 end
@@ -379,6 +387,7 @@ for Z=1:length(p.Zrange)-1
                    phot=beadsh(B).loc.phot;  
                 else
                     sx=[];sy=[];z=[];
+                    phot=[];
                 end             
             else
                 zs=(beadsh(B).loc.frame-p.fglass)*p.dz;
@@ -952,7 +961,7 @@ pard.refine.object=struct('Style','checkbox','String','refine iteratively','Valu
 pard.refine.position=[2,2];
 pard.refine.Width=1;
 
-pard.beaddistribution.object=struct('String',{{'Glass','Gel'}},'Style','popupmenu','Callback',{{@setvisible,obj}});
+pard.beaddistribution.object=struct('String',{{'Glass','Gel'}},'Style','popupmenu','Value',1,'Callback',{{@setvisible,obj}});
 pard.beaddistribution.position=[1,2];
 pard.beaddistribution.Width=.75;
 
@@ -1080,7 +1089,7 @@ pard.roisize.Width=.25;
 pard.roiframest.object=struct('Style','text','String','frames'); 
 pard.roiframest.position=[4,2.65];
 pard.roiframest.Width=.5;
-pard.roiframes.object=struct('Style','edit','String','35'); 
+pard.roiframes.object=struct('Style','edit','String','130'); 
 pard.roiframes.position=[4,3.15];
 pard.roiframes.Width=.25;
 
@@ -1089,7 +1098,7 @@ pard.roiframes.Width=.25;
 pard.smooth.object=struct('Style','checkbox','String','Smooth:','Value',1); 
 pard.smooth.position=[5,1.25];
 pard.smooth.Width=.6;
-pard.smoothingfactor.object=struct('Style','edit','String','0.02 0.05'); 
+pard.smoothingfactor.object=struct('Style','edit','String','0.02 1'); 
 pard.smoothingfactor.position=[5,1.85];
 pard.smoothingfactor.Width=.5;
 

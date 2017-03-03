@@ -18,10 +18,10 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             obj.fitpar.fitfunction = @obj.nofound;
             disp('checking cuda fit')
             reporttext='GPU fit function did not run. Possibly the wrong CUDA version is installed.';
-            img=zeros(7,'single');img(3,3)=1;
+            img=zeros(11,'single');img(5,5)=1;
             
             try
-                fitp=GPUmleFit_LM_noInterp(img,1,10,1,0);
+                fitp=callYimingFitter(img,single(1),single(10),single(2),single(0),0);
                 obj.fitpar.fitfunction=@callYimingFitter;
 %                 obj.fitpar.fitfunction=@callYimingFitter;
                  reporttext='GPUmleFit_LM works';
@@ -88,7 +88,7 @@ LogL=results.LogL;
            
            
 % locs.xpix=P(:,2)-dn+posx;
-if fitpar.mirrorstack
+if fitpar.fitmode==5&& fitpar.mirrorstack
     locs.xpix=dn-P(:,2)+1+posx;
 else
     locs.xpix=P(:,2)-dn+posx;

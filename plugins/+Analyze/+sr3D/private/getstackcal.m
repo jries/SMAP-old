@@ -152,6 +152,7 @@ for Z=1:length(p.Zrange)-1
             %calculatae b-spline coefficients
             
             %calculate effective smoothing factor
+            if p.smooth
             lambda=p.smoothingfactor*100;
             if length(lambda)<2
                 lambda(2:3)=lambda;
@@ -160,6 +161,9 @@ for Z=1:length(p.Zrange)-1
             end
             lambda(1:2)=lambda(1:2)/p.cam_pixelsize_nm;
             lambda(3)=lambda(3)/p.dz;
+            else
+                lambda=0;
+            end
             
             b3_0=bsarray(double(corrPSFs),'lambda',lambda);
             
@@ -219,10 +223,17 @@ for Z=1:length(p.Zrange)-1
              framerange0=max(p.fminmax(1),fzero-halfstoreframes):min(fzero+halfstoreframes,p.fminmax(2));
              halfroisizebig=(size(shiftedstack,1)-1)/2;
             ftest=fzero-framerange0(1)+1;
-            zpall=squeeze(shiftedstack(halfroisizebig+1,halfroisizebig+1,:,beadgood));
-            zpall2=squeeze(allrois(halfroisizebig+1,halfroisizebig+1,:,beadgood));
-            xpall=squeeze(shiftedstack(:,halfroisizebig+1,ftest,beadgood));
-            xpall2=squeeze(allrois(:,halfroisizebig+1,ftest,beadgood));
+            
+            xt=halfroisizebig+1;
+            yt=halfroisizebig+1;
+            
+            ftest=z;
+            xt=x;
+            yt=y;
+            zpall=squeeze(shiftedstack(xt,yt,:,beadgood));
+            zpall2=squeeze(allrois(xt,yt,:,beadgood));
+            xpall=squeeze(shiftedstack(:,yt,ftest,beadgood));
+            xpall2=squeeze(allrois(:,yt,ftest,beadgood));
             
             for k=1:size(zpall,2)
                 zpall(:,k)=zpall(:,k)/max(zpall(:,k));
@@ -231,20 +242,22 @@ for Z=1:length(p.Zrange)-1
                 xpall2(:,k)=xpall2(:,k)/max(xpall2(:,k));                
             end
             
-            zprofile=squeeze(corrPSFn(halfroisizebig+1,halfroisizebig+1,:));
+            zprofile=squeeze(corrPSFn(xt,yt,:));
             zprofile=zprofile/max(zprofile);
-%             mphd=round((size(corrPSFhd,1)+1)/2);
-%             zprofilehd=squeeze(corrPSFhd(mphd,mphd,:));
-%             zprofilehd=zprofilehd/max(zprofilehd);            
+            mphd=round((size(corrPSFhd,1)+1)/2);
+            zprofilehd=squeeze(corrPSFhd(mphd,mphd,:));
+            zprofilehd=zprofilehd/max(zprofilehd);            
             
-            xprofile=squeeze(corrPSFn(:,halfroisizebig+1,ftest));
+            xprofile=squeeze(corrPSFn(:,yt,ftest));
             xprofile=xprofile/max(xprofile);
-%             mpzhd=round(size(corrPSFhd,3)+1)/2+1;
-%             xprofilehd=squeeze(corrPSFhd(:,mphd,mpzhd));
-%             xprofilehd=xprofilehd/max(xprofilehd);
+            mpzhd=round(size(corrPSFhd,3)+1)/2+1;
+            xprofilehd=squeeze(corrPSFhd(:,mphd,mpzhd));
+            xprofilehd=xprofilehd/max(xprofilehd);
             
             dxxx=0.1;
-            xxx=1:dxxx:b3_0.dataSize(1);zzzt=0*xxx+ftest-rangez(1)-0*framerange0(1)+1;
+            xxx=1:dxxx:b3_0.dataSize(1);
+            zzzt=0*xxx+mpzhd;
+%             zzzt=0*xxx+ftest-rangez(1)-0*framerange0(1)+1;
 %             xbs= interp3_0(b3_0,xxx,0*xxx+b3_0.dataSize(1)/2+.5,zzzt);
             xbs= interp3_0(b3_0,0*xxx+b3_0.dataSize(1)/2+.5,xxx,zzzt);
             xbs=xbs/max(xbs);
@@ -254,12 +267,12 @@ for Z=1:length(p.Zrange)-1
             zbs=zbs/max(zbs);
 
             hold off
-             plot(framerange0,zpall2(1:length(framerange0),:),'m:')
+             plot(ax,framerange0,zpall2(1:length(framerange0),:),'m:')
              hold on
-             plot(framerange0,zpall(1:length(framerange0),:),'c')
-            plot(framerange0',zprofile(1:length(framerange0)),'k*')
-%             plot(zhd+rangez(1)+framerange0(1)-2,zprofilehd,'ko')
-            plot(zzz+rangez(1)+framerange0(1)-2,zbs,'b','LineWidth',2)
+             plot(ax,framerange0,zpall(1:length(framerange0),:),'c')
+            plot(ax,framerange0',zprofile(1:length(framerange0)),'k*')
+            plot(ax,rangez,zprofilehd,'ko')
+            plot(ax,zzz+rangez(1)+framerange0(1)-2,zbs,'b','LineWidth',2)
             
             xrange=-halfroisizebig:halfroisizebig;  
             
@@ -267,12 +280,12 @@ for Z=1:length(p.Zrange)-1
             ax=maketgax(axall.hspline_psfx,tgt);
 %              ax=obj.initaxis('PSFx');
             hold off
-            plot(xrange,xpall2,'m:')
+            plot(ax,xrange,xpall2,'m:')
             hold on
-            plot(xrange,xpall,'c')
-            plot(xrange,xprofile,'k*-')
-%             plot((-mphd+1:mphd-1)/dxxhd,xprofilehd,'ko')
-            plot((xxx-(b3_0.dataSize(1)+1)/2),xbs,'b','LineWidth',2)
+            plot(ax,xrange,xpall,'c')
+            plot(ax,xrange,xprofile,'k*-')
+            plot(ax,xrange(rangex),xprofilehd,'ko')
+            plot(ax,(xxx-(b3_0.dataSize(1)+1)/2),xbs,'b','LineWidth',2)
             
             drawnow
             %quality control: refit all beads
@@ -314,7 +327,7 @@ d=round((size(teststack,1)-p.roisize)/2);
         catch err
 %             err
             disp('run on CPU')        
-            [P] =  fitterCPU(teststack(range,range,:,k),(4*coeff),single(p.roisize),100);
+            [P] =  fitterCPU(teststack(range,range,:,k),(coefffak*coeff),single(p.roisize),100);
         end
     z=(1:size(P,1))'-1;
     plot(z,P(:,5),linepar{:})

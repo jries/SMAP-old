@@ -8,11 +8,22 @@ windn=windn/p.dz*50;
 
 %     [~,nxind]=max(n);
 %     [~,nxind]=min((sx+sy)./n);
-[~, indm]=max(n);
-range=max(1,indm-10):min(indm+10,length(n));
 
-    [~,nindx]=min((sx(range))./n(range));
-    [~,nindy]=min((sy(range))./n(range));
+%more pre-processing
+% ntest=n;
+% sxmin=myquantilefast(sx,.1);symin=myquantilefast(sy,.1);
+% ind=sx<sxmin&sy<symin;
+% zn=mean(z(ind));
+% winstd=round(std(z(ind)));
+% indm=round(zn);
+[~, indm]=max(n./sx./sy);
+winstd=round(500./p.dz);
+range=max(1,indm-winstd):min(indm+winstd,length(n));
+
+    [~,nindx]=min((sx(range)));
+    [~,nindy]=min((sy(range)));
+%     [~,nindx]=min((sx(range))./n(range));
+%     [~,nindy]=min((sy(range))./n(range));
     nxind=round((nindx+nindy)/2)+range(1)-1;
     
     fstartn=max(nxind-windn,1);fstopn=min(nxind+windn,length(n));

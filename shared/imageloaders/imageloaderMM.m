@@ -143,7 +143,16 @@ if isempty(img)
     return
 end
 image=img.pix;
-image=reshape(image,obj.metadata.Width,obj.metadata.Height)';
+% if numel(image)==obj.metadata.Width*obj.metadata.Height
+    image=reshape(image,obj.metadata.Width,obj.metadata.Height)';
+    if isa(image,'int16')
+        image2=uint16(image);
+        image2(image<0)=image(image<0)+2^16;
+        image=image2;
+    end
+% else
+%     image=[];
+% end
 
 %    if imagenumber<=obj.reader.getImageCount()
 %        image=bfGetPlane(obj.reader,imagenumber);
