@@ -28,6 +28,7 @@ for Z=1:length(p.Zrange)-1
     allstacks=zeros(sstack(1),sstack(2),sstack(3),length(beadsh))+NaN;
     for B=length(beadsh):-1:1
         beadz0=(beadsh(B).f0-p.fglass(beadsh(B).filenumber))*p.dz;
+        beadf0(B)=(beadsh(B).f0-p.fglass(beadsh(B).filenumber));
 %         
 %         if p.alignz||p.beaddistribution.Value==2
 %              beadz=(beadsh(B).loc.frame*p.dz)-beadz0;
@@ -56,7 +57,8 @@ for Z=1:length(p.Zrange)-1
         stackh=allstacks(:,:,:,B);
 %         inth=nansum(stackh(:)); %take into account when sorting
         goodvs(B)=sum(~isnan(stackh(:)))/numel(stackh);
-   
+        storecenter(B)=beadsh(B).stack.framerange(halfstoreframes+1);
+        
         if  halfstoreframes<length(beadsh(B).stack.framerange)
             dframe(B)=beadsh(B).stack.framerange(halfstoreframes+1)-beadsh(B).f0;
         else
@@ -84,14 +86,14 @@ for Z=1:length(p.Zrange)-1
     allrois=allstacks(:,:,:,sortinddev);
     
     if ~alignxcorr&&alignzf0
-        zshift=dframe(sortinddev)-median(dframe);
+        zshift=dframe(sortinddev)-round(median(dframe));
     else
         zshift=[];
     end
 %     zshift=-zshift;
-    midrange=halfstoreframes+round(median(dframe));
+    midrange=halfstoreframes+round(median(dframe))+1;
     
-    [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D(allrois,struct('framerange',midrange+1-fw2:midrange+1+fw2,'alignz',alignxcorr,'zshiftf0',zshift),{ax, ax2});
+    [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D(allrois,struct('framerange',midrange-fw2:midrange+fw2,'alignz',alignxcorr,'zshiftf0',zshift),{ax, ax2});
 
         %undo sorting by deviation to associate beads again to their
     %bead number
@@ -128,8 +130,12 @@ for Z=1:length(p.Zrange)-1
             dz=round((p.roiframes-1)/2);
             rangex=x-dRx:x+dRx;
             rangey=y-dRx:y+dRx;
-            rangez=max(1,z-dz):min(size(corrPSF,3),z+dz);
             
+            z=midrange;%always same reference: z=f0
+            
+            
+            rangez=max(1,z-dz):min(size(corrPSF,3),z+dz);
+%             framess=
             %normalize PSF
             
             minPSF=min(corrPSF(:));
@@ -304,9 +310,27 @@ for Z=1:length(p.Zrange)-1
             if isempty(stackcal_testfit)||stackcal_testfit
                 testallrois=allrois(:,:,:,beadgood);
                 testallrois(isnan(testallrois))=0;
-            testfit(testallrois,cspline.coeff,p,{},ax)
-            testfit(corrPSF,cspline.coeff,p,{'k','LineWidth',2},ax)
+            zall=testfit(testallrois,cspline.coeff,p,{},ax);
+            zref=testfit(corrPSF,cspline.coeff,p,{'k','LineWidth',2},ax);
             end
+            
+%             ztest=zall;
+%             for k=1:size(ztest,2)
+%                 xa=find(ztest(:,k)>15.5,1,'first');
+%                 xa=19;
+%                 xb=xa+1;
+%                 ya=ztest(xa,k);
+%                 yb=ztest(xb,k);
+%                 y0=16;
+%                 framezero(k)=(xb-xa)/(yb-ya)*(y0-ya)+xa;
+%             end
+%                 xa=find(zref>15.5,1,'first');
+%                 xa=19;
+%                 xb=xa+1;
+%                 ya=zref(xa);
+%                 yb=zref(xb);
+%                 y0=16;
+%                 framezeropsf=(xb-xa)/(yb-ya)*(y0-ya)+xa;
    end 
 
 
@@ -314,7 +338,7 @@ end
 end
 
 
-function testfit(teststack,coeff,p,linepar,ax)
+function zs=testfit(teststack,coeff,p,linepar,ax)
 if nargin<4
     linepar={};
 elseif ~iscell(linepar)
@@ -343,5 +367,7 @@ d=round((size(teststack,1)-p.roisize)/2);
     z=(1:size(P,1))'-1;
     plot(ax,z,P(:,5),linepar{:})
     hold(ax,'on')
+    zs(:,k)=P(:,5);
     end
+    
 end

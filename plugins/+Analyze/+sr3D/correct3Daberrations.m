@@ -1,21 +1,16 @@
-classdef calibrater3DAAll<interfaces.DialogProcessor
+classdef correct3Daberrations<interfaces.DialogProcessor
     properties
         SXY
     end
     methods
-        function obj=calibrater3DAAll(varargin)   
+        function obj=correct3Daberrations(varargin)   
             obj@interfaces.DialogProcessor(varargin{:}) ;
              obj.showresults=true;
-             obj.guiPar.FieldHeight=obj.guiPar.FieldHeight-1;obj.guiPar.Vrim=obj.guiPar.Vrim-20;
+%              obj.guiPar.FieldHeight=obj.guiPar.FieldHeight-1;obj.guiPar.Vrim=obj.guiPar.Vrim-20;
         end
         function out=run(obj,p)
             out=[];
-            if p.beaddistribution.Value==2
-                p.alignz=true;
-            end
-            %get beads. Either parse sites or segment new
- %                 beads.loc.xnm,ynm,frame,psfxnm,psfynm
-%                 beads.filenumber .stack  .f0 .pos 
+
             disp('get beads')
             if p.beadsource.Value==1 %ROImanager
                 beads=sites2beads(obj,p);
@@ -23,15 +18,14 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
                 beads=segmentb(obj,p);
             end
             p.EMon=obj.locData.files.file(1).info.EMon;
-            p.fminmax=[min(obj.locData.loc.frame) max(obj.locData.loc.frame)];
-           axall=getaxes(p);
+%             p.fminmax=[min(obj.locData.loc.frame) max(obj.locData.loc.frame)];
+%            axall=getaxes(p);
 
             % get f0 for beads
             disp('get bead z positions')
             for k=1:length(beads)
-                beads(k).loc.PSFxpix=beads(k).loc.PSFxnm/p.cam_pixelsize_nm;
-                 beads(k).loc.PSFypix=beads(k).loc.PSFynm/p.cam_pixelsize_nm;
-                [beads(k).f0,beads(k).psfx0,beads(k).psfy0]=getf0site(beads(k).loc,p);
+        
+                [beads(k).f0]=getf0Z(beads(k).loc,p);
             end
             badind=isnan([beads(:).f0]);
             beads(badind)=[];
@@ -116,9 +110,28 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
     end
 end
 
-%%
+%
+function  f0=getf0Z(loc,p)
+frames=loc.frames;
+z=loc.znm;
+window=200/p.dz;
+az=abs(z);
+zco=myquantile(az,0.1);
 
+
+midp=round(length(z)/2);
+ind1=find(z(midp+1:end)>0,1,'first');
+ind2=find(z(1:midp)>0,1,'last')-midp;
+ind3=find(z(midp+1:end)<0,1,'first');
+ind4=find(z(1:midp)<0,1,'last')-midp;
+
+
+
+
+
+end
 function p=getranges(p)
+
 if p.spatialcalibration
     
     Xrange=(p.Xmin:p.Xd:p.Xmax).*p.cam_pixelsize_nm;
@@ -705,73 +718,74 @@ obj.setGuiParameters(p)
 end
 
 function setvisible(a,b,obj)
-p=obj.getAllParameters;
-% gel={'Zt','Zval'};
-glass={'ztoframe','ztoframet','alignz'};
-gelpatial={'framerangecombinet','framerangecombine','Zt','Zval','zfilter','zfiltert'};
-% p=obj.getSingleGuiParameter('beaddistribution');
-switch p.beaddistribution.Value 
-    case 1%glass
-%         setvis(obj,gel,'off')
-        setvis(obj,glass,'on')
-        setvis(obj,gelpatial,'off')
-        setvis(obj,'zcalc','off')
-    case 2 %gel
-%         setvis(obj,gel,'on')
-        setvis(obj,glass,'off')
-        if p.spatialcalibration
-            setvis(obj,'zcalc','on')
-            if p.zcalc
-                setvis(obj,gelpatial,'on')
-            else
-                setvis(obj,gelpatial,'off')
-            end
-        else
-            setvis(obj,'zcalc','off')
-            setvis(obj,gelpatial,'off')
-        end
-end
-
-
-
-% pard.framerangecombinet.object=struct('String','z beyond interval (nm)','Style','text');
-
-
-scfields={'Ymax','Yd','Ymin','Yt','Xmax','Xd','Xmin','Xt','maxt','dxt','mint','tt1','getcoords','xyoverlap','xyoverlapt'};
-if p.spatialcalibration
-    setvis(obj,scfields,'on')
-else
-    setvis(obj,scfields,'off')
-end
-
-splinef={'framewindow','alignzxcorr','smoothingfactor','smooth','roiframes','roiframest','roisize','roisizet'};
-if p.fitcsplinec
-    setvis(obj,splinef,'on')
-else
-    setvis(obj,splinef,'off')
-end
-
-gaussz={'fitzB0','fitzrange','fitzranget'};
-if p.fitzc
-    setvis(obj,gaussz,'on')
-else
-    setvis(obj,gaussz,'off')
-end
-
-
-spl={'splinepart','splinepar'};
-if p.fitzsxsyc||p.calculateZSxSy
-    setvis(obj,spl,'on')
-else
-    setvis(obj,spl,'off')
-end
-
-spl={'Smax','Sd','Smin','St'};
-if p.calculateZSxSy
-    setvis(obj,spl,'on')
-else
-    setvis(obj,spl,'off')
-end
+return
+% p=obj.getAllParameters;
+% % gel={'Zt','Zval'};
+% glass={'ztoframe','ztoframet','alignz'};
+% gelpatial={'framerangecombinet','framerangecombine','Zt','Zval','zfilter','zfiltert'};
+% % p=obj.getSingleGuiParameter('beaddistribution');
+% switch p.beaddistribution.Value 
+%     case 1%glass
+% %         setvis(obj,gel,'off')
+%         setvis(obj,glass,'on')
+%         setvis(obj,gelpatial,'off')
+%         setvis(obj,'zcalc','off')
+%     case 2 %gel
+% %         setvis(obj,gel,'on')
+%         setvis(obj,glass,'off')
+%         if p.spatialcalibration
+%             setvis(obj,'zcalc','on')
+%             if p.zcalc
+%                 setvis(obj,gelpatial,'on')
+%             else
+%                 setvis(obj,gelpatial,'off')
+%             end
+%         else
+%             setvis(obj,'zcalc','off')
+%             setvis(obj,gelpatial,'off')
+%         end
+% end
+% 
+% 
+% 
+% % pard.framerangecombinet.object=struct('String','z beyond interval (nm)','Style','text');
+% 
+% 
+% scfields={'Ymax','Yd','Ymin','Yt','Xmax','Xd','Xmin','Xt','maxt','dxt','mint','tt1','getcoords','xyoverlap','xyoverlapt'};
+% if p.spatialcalibration
+%     setvis(obj,scfields,'on')
+% else
+%     setvis(obj,scfields,'off')
+% end
+% 
+% splinef={'framewindow','alignzxcorr','smoothingfactor','smooth','roiframes','roiframest','roisize','roisizet'};
+% if p.fitcsplinec
+%     setvis(obj,splinef,'on')
+% else
+%     setvis(obj,splinef,'off')
+% end
+% 
+% gaussz={'fitzB0','fitzrange','fitzranget'};
+% if p.fitzc
+%     setvis(obj,gaussz,'on')
+% else
+%     setvis(obj,gaussz,'off')
+% end
+% 
+% 
+% spl={'splinepart','splinepar'};
+% if p.fitzsxsyc||p.calculateZSxSy
+%     setvis(obj,spl,'on')
+% else
+%     setvis(obj,spl,'off')
+% end
+% 
+% spl={'Smax','Sd','Smin','St'};
+% if p.calculateZSxSy
+%     setvis(obj,spl,'on')
+% else
+%     setvis(obj,spl,'off')
+% end
 
 end
 
@@ -801,22 +815,6 @@ pard.dz.object=struct('Style','edit','String','50');
 pard.dz.position=[2,1.4];
 pard.dz.Width=.35;
 
-pard.refine.object=struct('Style','checkbox','String','refine iteratively','Value',0); 
-pard.refine.position=[2,2];
-pard.refine.Width=1;
-
-pard.beaddistribution.object=struct('String',{{'Glass','Gel'}},'Style','popupmenu','Value',1,'Callback',{{@setvisible,obj}});
-pard.beaddistribution.position=[1,2];
-pard.beaddistribution.Width=.75;
-
-
-
-% pard.ztoframet.object=struct('String','z0 (frame)','Style','checkbox');
-% pard.ztoframet.position=[6,tp];
-% pard.ztoframet.Width=.75;
-% pard.ztoframe.object=struct('String','21','Style','edit');
-% pard.ztoframe.position=[6,tp+.75];
-% pard.ztoframe.Width=.25;
 
 pard.alignz.object=struct('Style','checkbox','String','Align in z with f0','Value',1); 
 pard.alignz.position=[7,tp];
@@ -906,97 +904,11 @@ pard.framerangecombine.object=struct('String','100','Style','edit');
 pard.framerangecombine.position=[8,tmax];
 pard.framerangecombine.Width=w;
 
-pard.zfiltert.object=struct('String','filter beads by:','Style','text');
-pard.zfiltert.position=[9,tp];
-pard.zfiltert.Width=1;
-
-pard.zfilter.object=struct('String',{{'f0','frames'}},'Style','popupmenu');
-pard.zfilter.position=[9,td];
-pard.zfilter.Width=2*w;
-
-
-pard.fitcsplinec.object=struct('String','cspline','Style','checkbox','Callback',{{@setvisible,obj}});
-pard.fitcsplinec.position=[4,1];
-pard.fitcsplinec.Width=.75;
-
-% pard.fitbsplinec.object=struct('String','bspline','Style','checkbox','Callback',{{@setvisible,obj}});
-% pard.fitbsplinec.position=[5,1];
-% pard.fitbsplinec.Width=.75;
-
-pard.roisizet.object=struct('Style','text','String','ROI (pix)'); 
-pard.roisizet.position=[4,1.75];
-pard.roisizet.Width=.6;
-pard.roisize.object=struct('Style','edit','String','15'); 
-pard.roisize.position=[4,2.35];
-pard.roisize.Width=.25;
-
-pard.roiframest.object=struct('Style','text','String','frames'); 
-pard.roiframest.position=[4,2.65];
-pard.roiframest.Width=.5;
-pard.roiframes.object=struct('Style','edit','String','130'); 
-pard.roiframes.position=[4,3.15];
-pard.roiframes.Width=.25;
 
 
 
-pard.smooth.object=struct('Style','checkbox','String','Smooth:','Value',1); 
-pard.smooth.position=[5,1.25];
-pard.smooth.Width=.6;
-pard.smoothingfactor.object=struct('Style','edit','String','0.02 .3'); 
-pard.smoothingfactor.position=[5,1.85];
-pard.smoothingfactor.Width=.5;
 
 
-
-pard.alignzxcorr.object=struct('Style','checkbox','String','align z corr, f:'); 
-pard.alignzxcorr.position=[5,2.35];
-pard.alignzxcorr.Width=.75;
-
-pard.framewindow.object=struct('Style','edit','String','15'); 
-pard.framewindow.position=[5,3.15];
-pard.framewindow.Width=.25;
-
-pard.splinepart.object=struct('String','spline smoothing','Style','text');
-pard.splinepart.position=[8,2];
-pard.splinepart.Width=1;
-pard.splinepar.object=struct('String','0.95','Style','edit');
-pard.splinepar.position=[8,3];
-pard.splinepar.Width=.35;
-
-pard.fitzc.object=struct('String','z Gauss: ','Style','checkbox','Callback',{{@setvisible,obj}});
-pard.fitzc.position=[7,1];
-pard.fitzc.Width=.75;
-pard.fitzranget.object=struct('String','zrange nm','Style','text');
-pard.fitzranget.position=[7,1.75];
-pard.fitzranget.Width=.6;
-pard.fitzrange.object=struct('String','-500 500','Style','edit');
-pard.fitzrange.position=[7,2.35];
-pard.fitzrange.Width=.5;
-pard.fitzB0.object=struct('String','B0=0','Style','checkbox','Value',0);
-pard.fitzB0.position=[7,2.85];
-pard.fitzB0.Width=.5;
-
-
-pard.fitzsxsyc.object=struct('String','sx^2-sy^2','Style','checkbox','Callback',{{@setvisible,obj}});
-pard.fitzsxsyc.position=[8,1];
-pard.fitzsxsyc.Width=.75;
-
-pard.calculateZSxSy.object=struct('String','Z(Sx,Sy,X,Y,Z)','Style','checkbox','Value',0,'Callback',{{@setvisible,obj}});
-pard.calculateZSxSy.position=[9,1];
-pard.calculateZSxSy.Width=1.;
-
-pard.St.object=struct('String','S (pix)','Style','text');
-pard.St.position=[9,2];
-pard.St.Width=wp;
-pard.Smin.object=struct('String','0','Style','edit');
-pard.Smin.position=[9,tmin-tp+2];
-pard.Smin.Width=w;
-pard.Sd.object=struct('String','.03','Style','edit');
-pard.Sd.position=[9,td-tp+2];
-pard.Sd.Width=w;
-pard.Smax.object=struct('String','4','Style','edit');
-pard.Smax.position=[9,tmax-tp+2];
-pard.Smax.Width=w;
 
 pard.inputParameters={'cam_pixelsize_nm'};
 pard.plugininfo.type='ProcessorPlugin';
