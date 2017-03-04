@@ -10,7 +10,10 @@ classdef correct3Daberrations<interfaces.DialogProcessor
         end
         function out=run(obj,p)
             out=[];
-
+            %             * Make 3D fitting model
+            % * Fit bead stacks (gel, cells) with this model 
+            %     * (refractive index mismatch =1) or rescale later
+            % * extract bead positions (grouping)
             disp('get beads')
             if p.beadsource.Value==1 %ROImanager
                 beads=sites2beads(obj,p);
@@ -22,13 +25,30 @@ classdef correct3Daberrations<interfaces.DialogProcessor
 %            axall=getaxes(p);
 
             % get f0 for beads
+            % * determine f0,z0
             disp('get bead z positions')
             for k=1:length(beads)
         
                 [beads(k).f0]=getf0Z(beads(k).loc,p);
             end
-            badind=isnan([beads(:).f0]);
-            beads(badind)=[];
+
+
+            % * cut out image stacks
+            p.roisize=15;
+            p.roiframes=800/p.dz;
+            p.beaddistribution.Value=2;
+            beads=getimagestacks(obj,p,beads);  
+            % * fit with sx,sy
+
+            % * determine fglass, glass
+            % * zfitted(z0-zglass,ZObjective)
+            %     * also for xfitted, yfitted, 
+            %     * also spatially resolved
+            % * z0-zglass=ztrue(zfitted, zObjective): interpolated or lookup table
+            % * use for correction
+            % * save with 3Dcal.mat
+            % * fitter: instead of refractive index mismatch choose this correction.
+            % * calculate refractive index mismatch (z)
             
             for k=1: max([beads(:).filenumber])
             %pglass needs to be file-dependent!
@@ -112,23 +132,19 @@ end
 
 %
 function  f0=getf0Z(loc,p)
-frames=loc.frames;
+frames=loc.frame;
 z=loc.znm;
-window=200/p.dz;
+window=round(100/p.dz);
 az=abs(z);
-zco=myquantile(az,0.1);
+nn=loc.phot./(az+p.dz);
+[~,maxind]=max(nn);
 
+range=max(1,maxind-window):min(maxind+window,length(z));
 
-midp=round(length(z)/2);
-ind1=find(z(midp+1:end)>0,1,'first');
-ind2=find(z(1:midp)>0,1,'last')-midp;
-ind3=find(z(midp+1:end)<0,1,'first');
-ind4=find(z(1:midp)<0,1,'last')-midp;
-
-
-
-
-
+zs=z(range);
+fs=frames(range);
+fp=fit(zs,fs,'poly1');
+f0=fp(0);
 end
 function p=getranges(p)
 
