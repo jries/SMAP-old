@@ -13,7 +13,7 @@ classdef BG_wavelet<interfaces.WorkflowModule
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
             obj.setPar('loc_blocksize_frames',1); %preview: tiff loader should load only one frame
-            atrous_callback(obj.guihandles.loc_wavelet_atrous,0,obj)
+            filtermode_callback(obj.guihandles.filtermode,0,obj)
         end
         function prerun(obj,p)
         end
@@ -27,20 +27,16 @@ classdef BG_wavelet<interfaces.WorkflowModule
             end
             if ~isempty(data.data)
                 img=data.data;
-                if p.loc_wavelet_atrous
-%                     wait(gpuDevice);
-%                     gpu = parallel.gpu.GPUDevice.getDevice(1)
-                    imgg=gpuArray((img));
-                    bgg=(mywaveletfilteratrous(gpuArray(imgg),false));
-%                     bgg(1:end,1:2)=imgg(1:end,1:2);
-%                      bgg(1:end,end-1:end)=imgg(1:end,end-1:end);
-%                      bgg(1:2,1:end)=imgg(1:2,1:end);
-%                      bgg(end-1:end,1:end)=imgg(end-1:end,1:end);
-                    bg=gather(bgg);
-                    clear imgg;
-%                     bg=(mywaveletfilteratrous((img),false));
-                else
-                    bg=mywaveletfilter(img,p.loc_wavelet_level,p.loc_wavelet_refine,true);
+                switch p.filtermode.Value
+                    case 1 %wavelet
+                        bg=mywaveletfilter(img,p.loc_wavelet_level,p.loc_wavelet_refine,true);
+                    case 2 %minimum
+                        bg=minfilt2(img,p.min_filter_size);
+                    case 3 % a trous
+                        imgg=gpuArray((img));
+                        bgg=(mywaveletfilteratrous(gpuArray(imgg),false));
+                        bg=gather(bgg);
+                        clear imgg;
                 end
                 
                 dato=data;
@@ -54,15 +50,21 @@ classdef BG_wavelet<interfaces.WorkflowModule
     end
 end
 
-function atrous_callback(object,b,obj)
-if object.Value
-    offstr='off';
-else
-    offstr='on';
+function filtermode_callback(object,b,obj)
+
+switch object.Value
+    case 1
+        onf={'loc_wavelet_levelt','loc_wavelet_level','loc_wavelet_refine'};
+        offf={'min_filter_sizet','min_filter_size'};
+    case 2
+        offf={'loc_wavelet_levelt','loc_wavelet_level','loc_wavelet_refine'};
+        onf={'min_filter_sizet','min_filter_size'};
+    case 3
+        offf={'min_filter_sizet','min_filter_size','loc_wavelet_levelt','loc_wavelet_level','loc_wavelet_refine'};
+        onf={};
 end
-obj.guihandles.text2.Visible=offstr;
-obj.guihandles.loc_wavelet_level.Visible=offstr;
-obj.guihandles.loc_wavelet_refine.Visible=offstr;
+
+obj.fieldvisibility('on',onf,'off',offf);
 
 end
 
@@ -71,21 +73,36 @@ pard.loc_subtractbg.object=struct('Style','checkbox','String','Subtract backgrou
 pard.loc_subtractbg.position=[1,1];
 pard.loc_subtractbg.Width=2;
 pard.loc_subtractbg.TooltipString=sprintf('If checked, the background is subtracted for Peak finding. \n This does NOT mean, that fitting is performed on the background corrected images.');
-pard.text1.object=struct('Style','text','String','Wavelet filtering:');
-pard.text1.position=[2,1];
-pard.text1.Optional=true;
+% pard.text1.object=struct('Style','text','String','Wavelet filtering:');
+% pard.text1.position=[2,1];
+% pard.text1.Optional=true;
 
 
-pard.loc_wavelet_atrous.object=struct('Style','checkbox','String','fast a trous','Value',0,'Callback',{{@atrous_callback,obj}});
-pard.loc_wavelet_atrous.position=[2,2];
-pard.loc_wavelet_atrous.Width=1.3;
-pard.loc_wavelet_atrous.TooltipString=sprintf('If checked, the a trous algorithm is used. Only level 2. Can be faster on GPU.');
-pard.loc_wavelet_atrous.Optional=true;
+pard.filtermode.object=struct('Style','popupmenu','String',{{'Wavelet','fast minimum filter', 'a trous'}},'Value',1,'Callback',{{@filtermode_callback,obj}});
+pard.filtermode.position=[2,1];
+pard.filtermode.Width=2;
+pard.filtermode.TooltipString=sprintf('trous algorithm is used. Only level 2. Can be faster on GPU.');
+pard.filtermode.Optional=true;
+
+% pard.loc_wavelet_atrous.object=struct('Style','checkbox','String','fast a trous','Value',0,'Callback',{{@atrous_callback,obj}});
+% pard.loc_wavelet_atrous.position=[2,2];
+% pard.loc_wavelet_atrous.Width=1.3;
+% pard.loc_wavelet_atrous.TooltipString=sprintf('If checked, the a trous algorithm is used. Only level 2. Can be faster on GPU.');
+% pard.loc_wavelet_atrous.Optional=true;
+
+pard.min_filter_sizet.object=struct('Style','text','String','filter size');
+pard.min_filter_sizet.position=[3,1.3];
+pard.min_filter_sizet.Optional=true;
+pard.min_filter_size.object=struct('Style','edit','String','5');
+pard.min_filter_size.position=[3,2.3];
+pard.min_filter_size.Width=.7;
+pard.min_filter_size.TooltipString=sprintf('Size of kernel of minimum filter in pixels');
+pard.min_filter_size.Optional=true;
 
 
-pard.text2.object=struct('Style','text','String','Wavelet level');
-pard.text2.position=[3,1.3];
-pard.text2.Optional=true;
+pard.loc_wavelet_levelt.object=struct('Style','text','String','Wavelet level');
+pard.loc_wavelet_levelt.position=[3,1.3];
+pard.loc_wavelet_levelt.Optional=true;
 
 
 pard.loc_wavelet_level.object=struct('Style','edit','String','3');
