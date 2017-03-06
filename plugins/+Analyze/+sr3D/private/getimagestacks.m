@@ -50,6 +50,10 @@ indbad=false(length(beads),1);
             else
                 frange=max(fminmax(1),f0r(beadnumber)-halfstoreframes):min(fminmax(2),f0r(beadnumber)+halfstoreframes);
             end
+            if length(frange)<halfroisizebig
+                indbad(beadnumber)=true;
+                continue
+            end
             smallfr=imstack(pos(2)-halfroisizebig:pos(2)+halfroisizebig,pos(1)-halfroisizebig:pos(1)+halfroisizebig,frange);
             smallf=rescalestack(smallfr);
             stack=zeros(roisizebig,roisizebig,storeframes);
