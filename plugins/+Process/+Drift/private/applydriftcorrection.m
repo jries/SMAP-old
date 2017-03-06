@@ -25,7 +25,7 @@ if isfield(drift,'xy')
         end
 end
 
-if isfield(drift,'z')&&isfield(drift.z,'z')&&isfield(pos,'znm')
+if isfield(drift,'z')&&isfield(pos,'znm')
     poso.znm=pos.znm;
     poso.znm(indg)=pos.znm(indg)-drift.z(pos.frame(indg));
 end

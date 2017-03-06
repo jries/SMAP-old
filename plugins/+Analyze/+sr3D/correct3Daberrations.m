@@ -40,7 +40,7 @@ classdef correct3Daberrations<interfaces.DialogProcessor
             beads=getimagestacks(obj,p,beads);  
             % * fit with sx,sy
             s=size(beads(1).stack.image);    
-            f0=getfsxsy(bead(1),p);
+            f0=getfsxsy(beads(1),p);
             
 
             % * determine fglass, glass
@@ -134,8 +134,14 @@ classdef correct3Daberrations<interfaces.DialogProcessor
 end
 
 function f0=getfsxsy(bead,p)
-
-callYimingFitter
+roi=15;
+s=size(bead.stack.image);
+dn=(s(1)-roi)/2;
+stackh=bead.stack.image(dn:end-dn,dn:end-dn,:);
+P=callYimingFitter(single(stackh),1,100,4,0,0);
+sx=P(:,5);
+sy=P(:,6);
+[zas,zn]=stackas2z(locs.PSFxpix,locs.PSFypix,locs.frame,locs.phot,p);
 end
 %
 function  f0=getf0Z(loc,p)
