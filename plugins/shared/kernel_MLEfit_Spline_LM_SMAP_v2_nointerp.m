@@ -1,7 +1,8 @@
-function [P] =  kernel_MLEfit_Spline_LM_SMAP_v2_nointerp(d_data,coeff,sz,iterations)
+function [P,CRLB,LogL] =  kernel_MLEfit_Spline_LM_SMAP_v2_nointerp(d_data,coeff,sz,iterations)
 % update computeDelta3Dj and fAt3Dj. Add kernel_derivativeSpline
 % make it capable of handling coeff with random size using Spline3D_v2
 %work with odd number of ROI for calibration
+CRLB=[];LogL=[];
 pi = single(3.141592);
 spline_xsize = size(coeff,1);
 spline_ysize = size(coeff,2);
