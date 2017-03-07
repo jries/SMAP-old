@@ -1,0 +1,34 @@
+﻿Build started 3/7/2017 12:12:19 PM.
+     1>Project "D:\Yiming\code\VS2010 Project\git project\GPUmleFit_LM_Unite\CPUmleFit_LM\CPUmleFit_LM.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "x64\Release\CPUmleFit_LM.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /GL /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc100.pdb" /Gd /TP /errorReport:prompt CPUgaussLib.cpp
+         CPUgaussLib.cpp
+     1>CPUgaussLib.cpp(19): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>CPUgaussLib.cpp(20): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>CPUgaussLib.cpp(21): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>CPUgaussLib.cpp(22): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>CPUgaussLib.cpp(23): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>CPUgaussLib.cpp(24): warning C4305: 'initializing' : truncation from 'double' to 'float'
+     1>CPUgaussLib.cpp(34): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>CPUgaussLib.cpp(35): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"D:\Yiming\code\VS2010 Project\git project\GPUmleFit_LM_unite\x64\Release\CPUmleFit_LM.mexw64" /NOLOGO libmex.lib libmat.lib libmx.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /DEF:"matlab.def" /MANIFEST /ManifestFile:"x64\Release\CPUmleFit_LM.mexw64.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"D:\Yiming\code\VS2010 Project\git project\GPUmleFit_LM_unite\x64\Release\CPUmleFit_LM.pdb" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\Yiming\code\VS2010 Project\git project\GPUmleFit_LM_unite\x64\Release\CPUmleFit_LM.lib" /MACHINE:X64 /DLL x64\Release\CPUgaussLib.obj
+         x64\Release\CPUmleFit_LM.obj
+         x64\Release\CPUsplineLib.obj
+         x64\Release\mexFunction.obj
+            Creating library D:\Yiming\code\VS2010 Project\git project\GPUmleFit_LM_unite\x64\Release\CPUmleFit_LM.lib and object D:\Yiming\code\VS2010 Project\git project\GPUmleFit_LM_unite\x64\Release\CPUmleFit_LM.exp
+         Generating code
+         Finished generating code
+         CPUmleFit_LM.vcxproj -> D:\Yiming\code\VS2010 Project\git project\GPUmleFit_LM_unite\x64\Release\CPUmleFit_LM.mexw64
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"D:\Yiming\code\VS2010 Project\git project\GPUmleFit_LM_unite\x64\Release\CPUmleFit_LM.mexw64;#2" /manifest x64\Release\CPUmleFit_LM.mexw64.intermediate.manifest
+       FinalizeBuildStatus:
+         Deleting file "x64\Release\CPUmleFit_LM.unsuccessfulbuild".
+         Touching "x64\Release\CPUmleFit_LM.lastbuildstate".
+     1>Done Building Project "D:\Yiming\code\VS2010 Project\git project\GPUmleFit_LM_Unite\CPUmleFit_LM\CPUmleFit_LM.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:01.64

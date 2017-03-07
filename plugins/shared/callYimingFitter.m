@@ -1,7 +1,8 @@
 function [P,CRLB,LogL]=callYimingFitter(varargin)
 persistent fitter
 
-cpufitter=@kernel_MLEfit_Spline_LM_SMAP_v2_nointerp;
+% cpufitter=@kernel_MLEfit_Spline_LM_SMAP_v2_nointerp;
+cpufitter=@CPUmleFit_LM;
 gpufitter=@GPUmleFit_LM;
 
 if isempty(fitter)
@@ -13,14 +14,14 @@ if isempty(fitter)
         fitter=1;
     end
 end
-
+varargingpu=varargin;
+if length(varargingpu)==5
+    varargingpu{6}=1;
+end
 switch fitter
     case 1
         [P]=cpufitter(varargin{:});
     case 2
-        varargingpu=varargin;
-        if length(varargingpu)==5
-            varargingpu{6}=1;
-        end
+
         [P,CRLB,LogL]=gpufitter(varargingpu{:});
 end
