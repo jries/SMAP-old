@@ -1,4 +1,4 @@
-classdef LocSaver<interfaces.WorkflowModule;
+classdef LocSaver<interfaces.WorkflowModule
     properties
         timer
         filenumber
@@ -9,19 +9,28 @@ classdef LocSaver<interfaces.WorkflowModule;
         numsaved
         frames;
         saveframes=20;
+        savefields=struct('fieldnames',{{''}},'tosave',{{''}},'notsave',{{'PSFxerr','PSFyerr','bgerr','locpthompson','peakfindx','peakfindy'}});
         
     end
     methods
        function obj=LocSaver(varargin)
             obj@interfaces.WorkflowModule(varargin{:})
             obj.inputChannels=1; 
+%             obj.propertiesToSave={'savefields'};
         end
         function pard=guidef(obj)
             pard.plugininfo.type='WorkflowModule'; 
             pard.plugininfo.description='Saves the fitted localizations as a SMAP *.sml file. When fitting via a network, fitting a local copy which is then moved to the destination can be faster.';
+           
+            pard.selectfields.object=struct('Style','pushbutton','String','Fields to save','Callback',{{@outputfields_callback,obj}});
+            pard.selectfields.object.TooltipString='Select which fields to save. Use preview before.';
+            pard.selectfields.position=[1,1];
+            pard.selectfields.Width=1;
+            pard.selectfields.Optional=true;
+            
             pard.savelocal.object=struct('Style','checkbox','String','save local and copy','Value',0);
             pard.savelocal.object.TooltipString='Select this if you fit via a network and the saving of the localizations is very long (stauts bar stops for a long time at last frames).';
-            pard.savelocal.position=[1,1];
+            pard.savelocal.position=[2,1];
             pard.savelocal.Width=2;
             pard.savelocal.Optional=true;
         end
@@ -59,6 +68,9 @@ classdef LocSaver<interfaces.WorkflowModule;
             end
             output=[];
             if obj.getPar('loc_preview')
+                try 
+                    obj.savefields.fieldnames=fieldnames(data.data); 
+                end
                 return
             end
             locs=data.data;%get;
@@ -66,6 +78,7 @@ classdef LocSaver<interfaces.WorkflowModule;
                 maxfitdist=5;
                 indin=abs(locs.xpix-locs.peakfindx)<maxfitdist & abs(locs.ypix-locs.peakfindy)<maxfitdist;
                 fn=fieldnames(locs);
+                obj.savefields.fieldnames=fn;
                 if isempty(templocs)
                     for k=1:length(fn)
                         templocs.(fn{k})=locs.(fn{k})(indin);
@@ -145,6 +158,7 @@ classdef LocSaver<interfaces.WorkflowModule;
                 catch err
                     err
                 end
+                obj.locDatatemp.loc=rmfield(obj.locDatatemp.loc,obj.savefields.notsave);
                 obj.locDatatemp.files.file.raw=obj.frames;
                 obj.locDatatemp.savelocs(filename,[],struct('fitparameters',fitpar));
                 
@@ -175,6 +189,29 @@ classdef LocSaver<interfaces.WorkflowModule;
         end
 
     end
+end
+
+function outputfields_callback(a,b,obj)
+tosave=obj.savefields.tosave;
+notsave=obj.savefields.notsave;
+fn=obj.savefields.fieldnames;
+if isempty(fn)
+    warndlg('please use preview before');
+    return
+end
+
+fn{end+1}='filenumber';
+on=num2cell(ones(length(fn),1));
+loctest=cell2struct(on,fn,1);
+fn=fieldnames(fitloc2locdata(struct('filenumber',1),loctest,1));
+
+fn=setdiff(fn,{'xerrpix','yerrpix','PSFxpix','PSFypix','xpix','ypix','xnm','ynm','frame'});
+tosave=setdiff(fn,notsave);
+[save,inds]=checknames(fn,tosave);
+if ~isempty(save)
+    obj.savefields.tosave=tosave;
+    obj.savefields.notsave=fn(~inds);
+end
 end
 
 function imout=makeSRimge(locDatatemp)

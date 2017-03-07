@@ -72,6 +72,14 @@ indout=templocData.loc.locprecnm>250|imag(templocData.loc.locprecnm)~=0|isnan(te
 templocData.removelocs(indout);
 
 %correct filenumber: .loc, files.filenumber, add files.
+fn=fieldnames(templocData.loc);
+ldat=length(templocData.loc.(fn{1}));
+if ~isfield(templocData.loc,'filenumber')
+    templocData.loc.filenumber=ones(ldat,1);
+end
+if ~isfield(templocData.loc,'channel')
+    templocData.loc.filenumber=ones(ldat,1,'single');
+end
 nfiles=length(templocData.files.file);
 templocData.loc.filenumber=templocData.loc.filenumber+filenumber;
 obj.locData.addLocData(templocData);

@@ -11,11 +11,15 @@ for k=1:length(keepfields)
         locdat.(keepfields{k})=single(locs.(keepfields{k})(indin));
     end
 end
-
-pixelsize=obj.fileinfo.pixsize*1000;
-if myisfield(obj.fileinfo,'roi')&&~isempty(obj.fileinfo.roi)
-roi=obj.fileinfo.roi;
+if isprop(obj,'fileinfo')
+    pixelsize=obj.fileinfo.pixsize*1000;
+    if myisfield(obj.fileinfo,'roi')&&~isempty(obj.fileinfo.roi)
+    roi=obj.fileinfo.roi;
+    else
+        roi=zeros(2);
+    end
 else
+    pixelsize=1;
     roi=zeros(2);
 end
 

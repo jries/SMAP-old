@@ -1,4 +1,7 @@
 classdef SMLMsaver<interfaces.DialogProcessor
+    properties
+        excludesavefields={'groupindex','numberInGroup','colorfield'};
+    end
     methods
         function obj=SMLMsaver(varargin)  
                 obj@interfaces.DialogProcessor(varargin{:}) ;
@@ -33,15 +36,16 @@ classdef SMLMsaver<interfaces.DialogProcessor
             par=obj.getAllParameters;
             
             par.saveroi=par.savevisible;
-%             savelocData=obj.locdata.copy;
-            savesml(obj.locData,[path f],par)
+            savelocData=obj.locData.copy;
+            savelocData.loc=rmfield(savelocData.loc,obj.excludesavefields);
+            savesml(savelocData,[path f],par)
             
             end
             obj.status('save done')
           
         end
         function pard=guidef(obj)
-            pard=guidef;
+            pard=guidef(obj);
         end
         function run(obj,p)
             obj.save(p)
@@ -49,10 +53,17 @@ classdef SMLMsaver<interfaces.DialogProcessor
     end
 end
 
+function outputfields_callback(a,b,obj)
+fn=fieldnames(obj.locData.loc);
+tosave=setdiff(fn,obj.excludesavefields);
+[save,inds]=checknames(fn,tosave);
+if ~isempty(save)
+    obj.excludesavefields=fn(~inds);
+end
+end
 
 
-
-function pard=guidef
+function pard=guidef(obj)
 pard.savevisible.object=struct('Style','checkbox','Visible','on','String','only save visible','Value',0);
 pard.savevisible.position=[1,1];
 pard.savevisible.Width=4;
@@ -68,6 +79,12 @@ pard.dataselect.position=[2,2];
 pard.dataselect.Width=3;
 pard.dataselect.object.TooltipString='save only selected file';
 
+pard.selectfields.object=struct('Style','pushbutton','String','Fields to save','Callback',{{@outputfields_callback,obj}});
+pard.selectfields.object.TooltipString='Select which fields to save. Use preview before.';
+pard.selectfields.position=[1,3];
+pard.selectfields.Width=2;
+pard.selectfields.Optional=true;
+            
 pard.syncParameters={{'filelist_short','dataselect',{'String'}}};
 pard.plugininfo.type='SaverPlugin';
 
