@@ -39,8 +39,10 @@ classdef correct3Daberrations<interfaces.DialogProcessor
             p.beaddistribution.Value=2;
             beads=getimagestacks(obj,p,beads);  
             % * fit with sx,sy
-            s=size(beads(1).stack.image);    
-            f0=getfsxsy(beads(1),p);
+            s=size(beads(1).stack.image);  
+            for k=1:length(beads)
+            beads(k).f0sxsy=getfsxsy(beads(k),p);
+            end
             
 
             % * determine fglass, glass
@@ -56,7 +58,8 @@ classdef correct3Daberrations<interfaces.DialogProcessor
             for k=1: max([beads(:).filenumber])
             %pglass needs to be file-dependent!
                 indf=[beads(:).filenumber]==k;
-                p.fglass(k)=myquantile([beads(indf).f0],0.03);
+%                 p.fglass(k)=myquantile([beads(indf).f0sxsy],0.03);
+                p.fglass(k)=min([beads(indf).f0sxsy]);
             end
             %get image stacks if needed
             
@@ -141,7 +144,10 @@ stackh=bead.stack.image(dn:end-dn,dn:end-dn,:);
 P=callYimingFitter(single(stackh),1,100,4,0,0);
 sx=P(:,5);
 sy=P(:,6);
-[zas,zn]=stackas2z(locs.PSFxpix,locs.PSFypix,locs.frame,locs.phot,p);
+phot=P(:,3);
+p.ploton=0;
+[zas,zn]=stackas2z(sx,sy,bead.stack.framerange',phot,p);
+f0=zas;
 end
 %
 function  f0=getf0Z(loc,p)
@@ -154,8 +160,8 @@ nn=loc.phot./(az+p.dz);
 
 range=max(1,maxind-window):min(maxind+window,length(z));
 
-zs=z(range);
-fs=frames(range);
+zs=double(z(range));
+fs=double(frames(range));
 fp=fit(zs,fs,'poly1');
 f0=fp(0);
 end
