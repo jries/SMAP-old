@@ -100,10 +100,13 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 	//const int Nfitspad=(int) Nfitraw; //kernel auto aborts when thread > Nfitspad?
 
 	//fun with timing
-	mwSize freq;
-	double togpu=0,fit=0,fromgpu=0,cleanup=0;
-	mwSize start,stop;
+	//mwSize freq;
+	
+	//mwSize start,stop;
     #ifdef _WIN32
+        LARGE_INTEGER freq;
+        LARGE_INTEGER start,stop;
+        double togpu=0,fit=0,fromgpu=0,cleanup=0;
         QueryPerformanceFrequency( &freq );
         QueryPerformanceCounter(&start);
     #endif
@@ -262,7 +265,7 @@ if  (silent==0)
 
 	//cleanup
 	QueryPerformanceCounter(&stop);
-    #endif  
+     
 
 	if (silent==0)
 	{//mexPrintf("Memory copies to GPU %f seconds\n", togpu);
@@ -271,5 +274,6 @@ if  (silent==0)
 		//mexPrintf("Memory copies from GPU %f seconds\n", fromgpu);
 		//mexPrintf("Clean up from GPU %f seconds\n", (double)(stop.QuadPart-start.QuadPart)/freq.QuadPart);
 	}
+    #endif 
 	return;
 }
