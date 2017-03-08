@@ -75,7 +75,7 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
              layer=gui.GuiChannel(hpanel,obj.P);
              layer.layer=k;
              layer.attachLocData(obj.locData);
-             p.Vsep=6;p.FieldHeight=32;
+             p.Vsep=3;p.FieldHeight=30;
              layer.setGuiAppearence(p);
              layer.makeGui;
              if isfield(obj.children,'Layer1')

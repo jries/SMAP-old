@@ -17,7 +17,7 @@ classdef GuiChannel< interfaces.LayerInterface
             obj.guiPar.srmodes={'normal','z','field'};
             obj.outputParameters={'ch_filelist','channels','layercheck','rendermode','render_colormode','renderfield',...
                 'groupcheck','imaxtoggle','imax','lut','remout','shift','shiftxy_min','shiftxy_max','layer','colorrange',...
-                'znm_min','znm_max','frame_min','frame_max'};
+                'znm_min','znm_max','frame_min','frame_max','scalex','scaley'};
             obj.guiselector.show=true;
         end
         
@@ -107,6 +107,8 @@ classdef GuiChannel< interfaces.LayerInterface
             obj.addSynchronization([obj.layerprefix 'shiftxy_max'],h.shiftxy_max,'String',{@callobj.updatefields_callback,'shiftxy'})
             obj.addSynchronization(['frame_min'],[],[],{@callobj.updateframes_callback})
             obj.addSynchronization(['frame_max'],[],[],{@callobj.updateframes_callback})
+%             obj.addSynchronization([obj.layerprefix 'scalex'],h.scalex,'String')
+%             obj.addSynchronization([obj.layerprefix 'scaley'],h.scaley,'String')
             obj.guihandles=h;
 
             recpar=renderpardialog([],1);
@@ -953,19 +955,44 @@ pard.shiftxy_z.Width=1/3;
 pard.shiftxy_z.TooltipString=pard.shiftxyb.TooltipString;
 pard.shiftxy_z.Optional=true;
 
+
+
+% pard.scalext.object=struct('Style','text','String','Scale X:');
+% pard.scalext.position=[8,3.4];
+% pard.scalext.Width=.6;
+% pard.scalext.TooltipString='Scale image in X/Y by this factor. Use it for image deformations e.g. due to cylindrical lens.';
+% pard.scalext.Optional=true;
+% 
+% pard.scalex.object=struct('Style','edit','String','1');
+% pard.scalex.position=[8,4];
+% pard.scalex.Width=1/3;
+% pard.scalex.TooltipString=pard.scalext.TooltipString;
+% pard.scalex.Optional=true;
+% 
+% pard.scaleyt.object=struct('Style','text','String','Y:');
+% pard.scaleyt.position=[8,4+1/3];
+% pard.scaleyt.Width=1/3;
+% pard.scaleyt.TooltipString=pard.scalext.TooltipString;
+% pard.scaleyt.Optional=true;
+% 
+% pard.scaley.object=struct('Style','edit','String','1');
+% pard.scaley.position=[8,4+2/3];
+% pard.scaley.Width=1/3;
+% pard.scaley.TooltipString=pard.scalext.TooltipString;
+% pard.scaley.Optional=true;
+
 pard.copyalllayers_button.object=struct('Style','pushbutton','String','-> all L');
-pard.copyalllayers_button.position=[8.5,3.4];
+pard.copyalllayers_button.position=[9,3.4];
 pard.copyalllayers_button.Width=.6;
 pard.copyalllayers_button.TooltipString='Copy these parameters to all layers';
 pard.copyalllayers_button.Optional=true;
-
 pard.default_button.object=struct('Style','pushbutton','String','Default');
-pard.default_button.position=[8.5,4];
+pard.default_button.position=[9,4];
 pard.default_button.Width=.6;
 pard.default_button.TooltipString='Reset to default. ';
 pard.default_button.Optional=true;
 pard.defaultsave_button.object=struct('Style','pushbutton','String','Save');
-pard.defaultsave_button.position=[8.5,4.6];
+pard.defaultsave_button.position=[9,4.6];
 pard.defaultsave_button.Width=.4;
 pard.defaultsave_button.TooltipString='Save default. ';
 pard.defaultsave_button.Optional=true;

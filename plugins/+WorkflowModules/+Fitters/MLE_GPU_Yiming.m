@@ -359,23 +359,27 @@ pard.cal_3Dfile.TooltipString=sprintf('3D calibration file for astigmtic 3D. \n 
 
 pard.useObjPos.object=struct('Style','checkbox','String','Use objective position:');
 pard.useObjPos.position=[4,1];
-pard.useObjPos.Width=3;
+pard.useObjPos.Width=1.5;
 pard.useObjPos.Optional=true;
 
 pard.objPos.object=struct('Style','edit','String','0');
-pard.objPos.position=[4,4];
+pard.objPos.position=[4,2.5];
 pard.objPos.TooltipString=sprintf('Position of the objective above the coverslip (nm, piezo position). \n Only used in combination with CalibrateAstigDeep.');
 pard.objPos.Optional=true;
+pard.objPos.Width=0.5;
 
-pard.trefractive_index_mismatch.object=struct('Style','text','String','Refractive Index mismatch factor:');
-pard.trefractive_index_mismatch.position=[5,1];
-pard.trefractive_index_mismatch.Width=3;
+pard.trefractive_index_mismatch.object=struct('Style','text','String','RI mismatch factor:');
+pard.trefractive_index_mismatch.position=[4,3];
+pard.trefractive_index_mismatch.Width=1.5;
 pard.trefractive_index_mismatch.Optional=true;
 
 pard.refractive_index_mismatch.object=struct('Style','edit','String','.8');
-pard.refractive_index_mismatch.position=[5,4];
+pard.refractive_index_mismatch.position=[4,4.5];
 pard.refractive_index_mismatch.TooltipString=sprintf('Correction factor to take into account the different refracrive indices of immersion oil and buffer. \n This leads to smaller distances inside the sample compared to bead calibration. \n Bead calibration: in piezo positions (nm). \n This factor transforms z positions to real-space z positions. \n For high-NA oil objectives: typical 0.72 (range 0.7-1).');
 pard.refractive_index_mismatch.Optional=true;
+pard.refractive_index_mismatch.Width=0.5;
+
+
 
 pard.plugininfo.type='WorkflowFitter';
 pard.plugininfo.description='Maximum likelyhood estimater, optimized for GPU processing. According to: C. S. Smith, N. Joseph, B. Rieger, and K. A. Lidke, ?Fast, single-molecule localization that achieves theoretically minimum uncertainty.,? Nat Methods, vol. 7, no. 5, pp. 373?375, May 2010.';
