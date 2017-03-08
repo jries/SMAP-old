@@ -1,10 +1,11 @@
-classdef OnlineReconstruction<interfaces.WorkflowModule;
+classdef OnlineReconstruction<interfaces.WorkflowModule
     properties
         localupdatetime=10
         localtimervalue
         filenumber
         fileinfo
         locDatatemp;
+        updatenow=false;
         
     end
     methods
@@ -14,7 +15,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
 %              obj.setInputChannels(1,'frame');
         end
         function pard=guidef(obj)
-            pard=guidef;
+            pard=guidef(obj);
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -23,6 +24,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
             if obj.getPar('loc_preview')
                 return
             end
+            obj.updatenow=false;
             obj.localupdatetime=obj.getGuiParameters.loc_updatetime;
             obj.filenumber=1;%obj.locData.files.filenumberEnd+1;
             obj.locData.files.filenumberEnd=1;%obj.filenumber;
@@ -61,7 +63,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
             end
             
             output=[];
-            if obj.getPar('loc_preview')||~obj.getSingleGuiParameter('update_check')
+            if obj.getPar('loc_preview')||(~obj.getSingleGuiParameter('update_check')&&~obj.updatenow)
                 return
             end
             locs=data.data;%get;
@@ -95,7 +97,8 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
 %                     end
                     numlocs=numlocs+sindin;
                 end
-                if toc(obj.localtimervalue)>obj.getSingleGuiParameter('loc_updatetime')||data.eof 
+                if toc(obj.localtimervalue)>obj.getSingleGuiParameter('loc_updatetime')||data.eof || obj.updatenow
+                    obj.updatenow=false;
                     locdat=interfaces.LocalizationData;
                     locdat.loc=fitloc2locdata(obj,templocs,1:numlocs);
 %                     obj.locDatatemp.addLocData(locdat);
@@ -113,19 +116,28 @@ classdef OnlineReconstruction<interfaces.WorkflowModule;
         end
     end
 end
+function updatenow(a,b,obj)
+obj.updatenow=true;
+end
 
-
-function pard=guidef
-pard.loc_updatetime.object=struct('Style','edit','String','30');
-pard.loc_updatetime.position=[1,2.5];
-pard.loc_updatetime.Width=0.5;
-pard.loc_updatetime.TooltipString=sprintf('Render fitted data every XX seconds.');
+function pard=guidef(obj)
 
 pard.update_check.object=struct('Style','checkbox','String','Render update (s):','Value',1);
 pard.update_check.position=[1,1];
 pard.update_check.Width=1.5;
 pard.update_check.TooltipString=sprintf('If checked, the fitted localizations are directly rendered and can be analyzed during the fit.');
  
+pard.loc_updatetime.object=struct('Style','edit','String','1200');
+pard.loc_updatetime.position=[1,2.2];
+pard.loc_updatetime.Width=0.4;
+pard.loc_updatetime.TooltipString=sprintf('Render fitted data every XX seconds.');
+
+pard.update_now.object=struct('Style','pushbutton','String','Now','Callback',{{@updatenow,obj}});
+pard.update_now.position=[1,2.6];
+pard.update_now.Width=0.4;
+pard.update_now.TooltipString=sprintf('If checked, the fitted localizations are directly rendered and can be analyzed during the fit.');
+ 
+
 pard.plugininfo.type='WorkflowModule'; 
 pard.plugininfo.description='Passes on the fitted localizations to the rendering engine of SMAP. This happens at user-defined time intervals.';
 end
