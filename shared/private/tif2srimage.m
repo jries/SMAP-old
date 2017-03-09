@@ -46,7 +46,7 @@ magnification=pixsize/p.sr_pixrec*1000;
 %%%XXX pixresize: here it is not clear if indices are correct.
 disp('tif2srimage: check rescale line 47')
 s=size(coim);
-srcoim=imresize(coim,magnification(:).*s(1:2),'nearest');
+srcoim=imresize(coim,magnification.*s(1:2),'nearest');
 
 psr=[rangex(:)/p.sr_pixrec-position(1)*magnification(1)+1; rangey(:)/p.sr_pixrec-position(3)*magnification(2)+1];
 psr(2)=psr(1)+srec(1)-1;

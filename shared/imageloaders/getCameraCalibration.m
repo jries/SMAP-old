@@ -125,6 +125,11 @@ if isempty(par.numberOfFrames)||par.numberOfFrames==0
     par.numberOfFrames=max([f1 f2 f3]);
 end
 
+if length(par.cam_pixelsize_um)==1
+    par.cam_pixelsize_um(2)=par.cam_pixelsize_um(1);
+end
+
+
 function [paro,camo,stateo]=askforcameramanager(imloader,message,silent,argin)
 paro=par;camo=cam;stateo=state;
 if silent

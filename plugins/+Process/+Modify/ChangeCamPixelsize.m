@@ -21,6 +21,9 @@ classdef ChangeCamPixelsize<interfaces.DialogProcessor
             obj.locData.loc.ynm(ind)=obj.locData.loc.ynm(ind)*factor(2);
             %update filelist
             obj.locData.files.file(p.file1.Value).info.cam_pixelsize_um=pixnew;
+            for k=1:length(obj.locData.files.file(p.file1.Value).tif)
+                obj.locData.files.file(p.file1.Value).tif(k).info.cam_pixelsize_um=pixnew;
+            end
             obj.locData.regroup;
             initGuiAfterLoad(obj)
              
