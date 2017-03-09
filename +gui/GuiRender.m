@@ -194,6 +194,7 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             end
             if ~isfast
             obj.status('render') 
+            drawnow
             end
             
             for k=1:obj.numberOfLayers
