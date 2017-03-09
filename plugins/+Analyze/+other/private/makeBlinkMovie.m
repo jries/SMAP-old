@@ -1,7 +1,7 @@
 function makeBlinkMovie(loc,filestruc,p)
 global reconstructgui_abort
 gaussfac=0.7;
-pix_cam=filestruc.info.pixsize*1000;
+pix_cam=filestruc.info.cam_pixelsize_um*1000;
 roi=filestruc.info.roi;
 path=fileparts(filestruc.name); %rather in top class, pass on
 [file, path]=uigetfile([path filesep '*.tif'],'Select single images');
@@ -23,7 +23,7 @@ fileloader=imageLoader([path file]);
 % fileloader=fitter.FileLoader;
 % fileloader.setParameters(pfile);
 
-sr=round(2*pix_cam/p.sr_pixrec);
+sr=round(2*pix_cam(1)/p.sr_pixrec);
 % pcut.kernelSize=13;
 % roiCutter=fitter.RoiCutter;
 % roiCutter.setParameters(pcut);
@@ -32,8 +32,8 @@ rx=((p.sr_pos(1)-p.sr_size(1))/p.sr_pixrec:(p.sr_pos(1)+p.sr_size(1))/p.sr_pixre
 ry=((p.sr_pos(2)-p.sr_size(2))/p.sr_pixrec:(p.sr_pos(2)+p.sr_size(2))/p.sr_pixrec);
 
 
-rx=round(rx-roi(1)*pix_cam/p.sr_pixrec);
-ry=round(ry-roi(2)*pix_cam/p.sr_pixrec);
+rx=round(rx-roi(1)*pix_cam(1)/p.sr_pixrec);
+ry=round(ry-roi(2)*pix_cam(2)/p.sr_pixrec);
 
 pos.x=loc.xnm;pos.y=loc.ynm;pos.s=max(loc.locprecnm*gaussfac,p.sr_pixrec/2);
 rangex=[p.sr_pos(1)-p.sr_size(1) p.sr_pos(1)+p.sr_size(1)];
@@ -98,7 +98,7 @@ imf=double(fileloader.getImage(k))';
 % imf=double(fileloader.getImage(k));
 if ~isempty(imf)
 
-imb=imresize(imf,pix_cam/p.sr_pixrec,'nearest');
+imb=imresize(imf,pix_cam(1)/p.sr_pixrec,'nearest');
 imcut=imb(rx,ry);
 
 imcut=imcut-min(imcut(:));

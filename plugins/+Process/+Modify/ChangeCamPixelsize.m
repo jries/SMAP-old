@@ -9,7 +9,7 @@ classdef ChangeCamPixelsize<interfaces.DialogProcessor
             obj.setPar('undoModule','CombineFiles');
             notify(obj.P,'backup4undo');
 
-            pixold=obj.locData.files.file(p.file1.Value).info.pixsize;
+            pixold=obj.locData.files.file(p.file1.Value).info.cam_pixelsize_um;
             if length(pixold)==1
                 pixold(2)=pixold(1);
             end       
@@ -20,7 +20,7 @@ classdef ChangeCamPixelsize<interfaces.DialogProcessor
             obj.locData.loc.xnm(ind)=obj.locData.loc.xnm(ind)*factor(1);
             obj.locData.loc.ynm(ind)=obj.locData.loc.ynm(ind)*factor(2);
             %update filelist
-            obj.locData.files.file(p.file1.Value).info.pixsize=pixnew;
+            obj.locData.files.file(p.file1.Value).info.cam_pixelsize_um=pixnew;
             obj.locData.regroup;
             initGuiAfterLoad(obj)
              
@@ -37,7 +37,7 @@ classdef ChangeCamPixelsize<interfaces.DialogProcessor
     end
 end
 function fileselect(a,b,obj)
-pixold=obj.locData.files.file(a.Value).info.pixsize;
+pixold=obj.locData.files.file(a.Value).info.cam_pixelsize_um;
 pixnew=pixold;
 if length(pixold)==1
     pixnew(2)=pixnew(1);

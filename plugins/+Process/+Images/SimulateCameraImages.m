@@ -87,7 +87,7 @@ classdef SimulateCameraImages<interfaces.DialogProcessor
             [obj.locs,p]=storelocs(obj,p);
             [~,par]=simulatecamera(obj.locs,p,1);
             filestruct.info=interfaces.metadataSMAP;
-            filestruct.info.pixsize=p.pixelsize/1000;
+            filestruct.info.cam_pixelsize_um=p.pixelsize([1 1])/1000;
            filestruct.info.Width=par.sizex;
            filestruct.info.Height=par.sizey;
            filestruct.info.offset=par.offset;

@@ -148,7 +148,7 @@ switch ext
         meta=[];
 end
 try
-m2.pixsize=double(omemeta.getPixelsPhysicalSizeX(indseries).value());
+m2.cam_pixelsize_um=[double(omemeta.getPixelsPhysicalSizeX(indseries).value()) double(omemeta.getPixelsPhysicalSizeY(indseries).value())];
 fn=[fn fieldnames(m2)];
 catch
     m2=[];

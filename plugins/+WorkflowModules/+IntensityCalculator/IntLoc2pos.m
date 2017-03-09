@@ -21,7 +21,7 @@ classdef IntLoc2pos<interfaces.WorkflowModule
           
             transform=loadtransformation(obj,p.Tfile);
             obj.locs=obj.locData.getloc({'frame','xnm','ynm','znm','PSFxnm'});
-            pix_cam=obj.filestruc.info.pixsize*1000;
+            pix_cam=obj.filestruc.info.cam_pixelsize_um*1000;
             x=double(obj.locs.xnm);
             y=double(obj.locs.ynm);
             indref=transform.getRef(x,y);
@@ -47,7 +47,7 @@ classdef IntLoc2pos<interfaces.WorkflowModule
                     obj.locs.PSFypix=sigmafromz_simple(obj.locs.znm/1000,[d g sx0]);
                 end
             else
-                obj.locs.PSFxpix=double(obj.locs.PSFxnm/pix_cam);
+                obj.locs.PSFxpix=double(obj.locs.PSFxnm/pix_cam(1));
                 obj.locs.PSFypix=obj.locs.PSFxpix;
             end
             intLoc2pos_locframes=obj.locs.frame;
@@ -80,8 +80,8 @@ classdef IntLoc2pos<interfaces.WorkflowModule
                     disp((intLoc2pos_ind2-ind1+1)-(sum(obj.locs.frame==frame)))
                     disp(frame)
                 end
-               [maxposA,maxposAR]=nm2pixLoc(obj.locs.xA(ind1:intLoc2pos_ind2),obj.locs.yA(ind1:intLoc2pos_ind2),obj.filestruc.info.pixsize*1000,obj.filestruc.info.roi);
-               [maxposB,maxposBR]=nm2pixLoc(obj.locs.xB(ind1:intLoc2pos_ind2),obj.locs.yB(ind1:intLoc2pos_ind2),obj.filestruc.info.pixsize*1000,obj.filestruc.info.roi);  
+               [maxposA,maxposAR]=nm2pixLoc(obj.locs.xA(ind1:intLoc2pos_ind2),obj.locs.yA(ind1:intLoc2pos_ind2),obj.filestruc.info.cam_pixelsize_um*1000,obj.filestruc.info.roi);
+               [maxposB,maxposBR]=nm2pixLoc(obj.locs.xB(ind1:intLoc2pos_ind2),obj.locs.yB(ind1:intLoc2pos_ind2),obj.filestruc.info.cam_pixelsize_um*1000,obj.filestruc.info.roi);  
                maxout.x=vertcat(maxposAR.x,maxposBR.x);
                maxout.y=vertcat(maxposAR.y,maxposBR.y);
                maxout.frame=frame+0*maxout.y;
@@ -101,12 +101,12 @@ classdef IntLoc2pos<interfaces.WorkflowModule
     end
 end
 
-function [loc,locr]=nm2pixLoc(x,y,pixelsize,roi)
-loc.x=(x/pixelsize)-roi(1);
-loc.y=(y/pixelsize)-roi(2);
-locr.x=round(loc.x);
-locr.y=round(loc.y);
-end
+% function [loc,locr]=nm2pixLoc(x,y,pixelsize,roi)
+% loc.x=(x/pixelsize(1))-roi(1);
+% loc.y=(y/pixelsize(2))-roi(2);
+% locr.x=round(loc.x);
+% locr.y=round(loc.y);
+% end
 
 
 function pard=guidef

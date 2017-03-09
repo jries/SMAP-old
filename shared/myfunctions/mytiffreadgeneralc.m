@@ -62,7 +62,7 @@ allfiles=myfastdir(pathstr,searchx);
             info.timediff=1;
             info.port='EM';
             info.roi=[];
-            info.pixsize=0.1;  %depends on settings, camera
+            info.cam_pixelsize_um=0.1;  %depends on settings, camera
         end
 
     end

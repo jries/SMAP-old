@@ -22,16 +22,16 @@ tnum=p.render_colormode.Value;
  end
  
  if strcmp(form,'tif')&&isfield(fileh.(form)(tnum).info,'pixsize') 
-    pixsize=fileh.(form)(tnum).info.pixsize;
+    pixsize=fileh.(form)(tnum).info.cam_pixelsize_um;
     roi=fileh.(form)(tnum).info.roi;
  else
-    pixsize=fileh.info.pixsize;
+    pixsize=fileh.info.cam_pixelsize_um;
     roi=fileh.info.roi;
  end
  
 srec=round(p.sr_sizeRecPix);
-rangex=rangex+pixsize*1000/2;rangey=rangey+pixsize*1000/2;
-rangexpix=rangex/1000/pixsize;rangeypix=rangey/1000/pixsize;
+rangex=rangex+pixsize(1)*1000/2;rangey=rangey+pixsize(2)*1000/2;
+rangexpix=rangex/1000/pixsize(1);rangeypix=rangey/1000/pixsize(2);
 % rpixrx=[floor(rangexpix(1)) ceil(rangexpix(2))];rpixry=[floor(rangeypix(1)) ceil(rangeypix(2))];
 rpixrx=[round(rangexpix(1)) round(rangexpix(2))];rpixry=[round(rangeypix(1)) round(rangeypix(2))];
 position=[rpixrx(1),rpixrx(2),rpixry(1),rpixry(2)];
@@ -43,9 +43,12 @@ positionc(3:4)=position(3:4)-roi(2);
 coim=cutoutim(permute(double(fileh.(form)(tnum).image),[2 1 3]),positionc);
 
 magnification=pixsize/p.sr_pixrec*1000;
-srcoim=imresize(coim,magnification,'nearest');
+%%%XXX pixresize: here it is not clear if indices are correct.
+disp('tif2srimage: check rescale line 47')
+s=size(coim);
+srcoim=imresize(coim,magnification(:).*s(1:2),'nearest');
 
-psr=[rangex(:)/p.sr_pixrec-position(1)*magnification+1; rangey(:)/p.sr_pixrec-position(3)*magnification+1];
+psr=[rangex(:)/p.sr_pixrec-position(1)*magnification(1)+1; rangey(:)/p.sr_pixrec-position(3)*magnification(2)+1];
 psr(2)=psr(1)+srec(1)-1;
 psr(4)=psr(3)+srec(2)-1;
 srfinal=cutoutim(srcoim,psr);

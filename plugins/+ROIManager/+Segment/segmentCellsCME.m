@@ -66,12 +66,13 @@ rangef=1:length(files);
 end
 
  for kf=rangef
-    pr=files(kf).info.pixsize*1000;
+    pr=files(kf).info.cam_pixelsize_um*1000;
     locs=locData.getloc({'xnm','ynm'},'filenumber',files(kf).ID,'layer',1,'position','all');
-    roi=files(kf).info.roi*pr;
+    roi([1 3])=files(kf).info.roi([1 3])*pr(1);
+    roi([2 4])=files(kf).info.roi([2 4])*pr(2);
     rx=[roi(1) roi(1)+roi(3)];
     ry=[roi(2) roi(2)+roi(4)];
-    imh=(myhist2(locs.xnm,locs.ynm,pr,pr, rx,ry))';
+    imh=(myhist2(locs.xnm,locs.ynm,pr(1),pr(2), rx,ry))';
     imfs=imfilter(sqrt(imh),hgauss);
     imf=imfilter((imh),hgauss);
 %     imbw=imf>cutoff;
@@ -86,8 +87,8 @@ end
     end
     indco=maxima(:,3)>cutoffmax;
     
-    cx=maxima(indco,1)*pr+rx(1);
-    cy=maxima(indco,2)*pr+ry(1);
+    cx=maxima(indco,1)*pr(1)+rx(1);
+    cy=maxima(indco,2)*pr(2)+ry(1);
     s=size(imh);
     implot=zeros(s(1),s(2),3);
     implot(:,:,1)=imf2/max(imf2(:));

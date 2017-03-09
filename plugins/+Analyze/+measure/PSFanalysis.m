@@ -58,17 +58,17 @@ numberofframes=imageloader.metadata.numberOfFrames;
 offset=min(img(:));
 rp=p.sr_roihandle.getPosition;
 croi=fileinfo.roi;
-c=rp/fileinfo.pixsize;
+
 
 positions=locData.getloc({'frame','xnm','ynm','PSFxnm','PSFynm'},'position','roi');
 % c=par.roicoords/par.pixelsize;
-ccentx=round(median(positions.xnm)/fileinfo.pixsize/1000-croi(1));
-ccenty=round(median(positions.ynm)/fileinfo.pixsize/1000-croi(2));
+ccentx=round(median(positions.xnm)/fileinfo.cam_pixelsize_um(1)/1000-croi(1));
+ccenty=round(median(positions.ynm)/fileinfo.cam_pixelsize_um(end)/1000-croi(2));
 % ccentx=round(c(1)+c(3)/2)-croi(1);
 % ccenty=round(c(2)+c(4)/2)-croi(2);
 wins=round((p.roisize-1)/2);
 
-xx=(-wins:wins)*fileinfo.pixsize*1000;
+xx=(-wins:wins)*fileinfo.cam_pixelsize_um(1)*1000;
 % xx=(-wins:wins)*pixtrue;
 smallim=double(img(ccenty-wins:ccenty+wins,ccentx-wins:ccentx+wins,:)-offset);
 ssm=size(smallim);

@@ -40,9 +40,12 @@ loctarget.x=loctarget.xnm;
 loctarget.y=loctarget.ynm;
 loctT=loctarget;
 % file=locData.files.file(p.layer1_.ch_filelist.Value);
-roinm=p.currentfileinfo.pixsize*1000*p.currentfileinfo.roi;
 
-chipsizenm=p.currentfileinfo.pixsize*1000*[p.currentfileinfo.Width p.currentfileinfo.Height]; 
+roinm=p.currentfileinfo.roi;
+roinm([1 3])=roinm([1 3])*p.currentfileinfo.cam_pixelsize_um(1)*1000;
+roinm([2 4])=roinm([2 4])*p.currentfileinfo.cam_pixelsize_um(end)*1000;
+
+chipsizenm=p.currentfileinfo.cam_pixelsize_um*1000.*[p.currentfileinfo.Width p.currentfileinfo.Height]; 
 facsize=ones(2,1);
 % separator=chipsizenm;
 separator=roinm(1:2)+roinm(3:4);
@@ -125,7 +128,10 @@ loctT.frame(~indtarget)=-1;
 
 pixelsizerec=p.register_parameters.pixelsizenm;
 roi=p.currentfileinfo.roi;
-roinm=roi*p.currentfileinfo.pixsize*1000;
+roinm=roi;
+roinm([1 3])=roinm([1 3])*p.currentfileinfo.cam_pixelsize_um(1)*1000;
+roinm([2 4])=roinm([2 4])*p.currentfileinfo.cam_pixelsize_um(end)*1000;
+
 
 % pos=[mean(roinm([1,3])) meannm(roi([2,4]))];
 %     rsize=[roi(3)-roi(1) roi(4)-roi(2)];

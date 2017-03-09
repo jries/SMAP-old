@@ -12,11 +12,11 @@ classdef Mirror<interfaces.DialogProcessor
             file=obj.locData.files.file(filenumber);
             loc=obj.locData.loc;
             indfile=loc.filenumber==filenumber;
-            pixelsize=file.info.pixsize;
+            pixelsize=file.info.cam_pixelsize_um;
 %             roi=file.info.roi*pixelsize*1000;
             
-            midpx=256*pixelsize*1000;
-            midpy=midpx;
+            midpx=256*pixelsize(1)*1000;
+            midpy=256*pixelsize(2)*1000;
 %             midpy=roi(2)+roi(4)/2;
             
             switch p.mirrorpart.selection

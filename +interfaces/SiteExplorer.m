@@ -360,13 +360,13 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
             ind=obj.indexFromID(obj.files,fileID);
             file=obj.files(ind);
             if isempty(file.image)
-                pixrec=file.info.pixsize*1000;
+                pixrec=file.info.cam_pixelsize_um*1000;
                 roi=file.info.roi*pixrec;
 
                 % test for SML could be all wrong
                 p1.sr_pos=[roi(1)+roi(3)/2 roi(2)+roi(4)/2];
                 p1.sr_size=[roi(3) roi(4)]/2; 
-                p1.sr_pixrec=pixrec;
+                p1.sr_pixrec=mean(pixrec);
                 p1.sr_sizeRecPix=round((p1.sr_size*2)/p1.sr_pixrec);
                 p1.sr_axes=-1;
                 p1.mingausspix=0.8;

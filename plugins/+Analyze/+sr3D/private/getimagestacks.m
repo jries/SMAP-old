@@ -30,7 +30,7 @@ indbad=false(length(beads),1);
         filename=files(k).info.basefile;
     end
     roi=files(k).info.roi;
-    campix=files(k).info.pixsize;
+    campix=files(k).info.cam_pixelsize_um;
     il=getimageloader(obj,filename);
     imstackadu=il.getmanyimages([],'mat');
                 
@@ -43,7 +43,7 @@ indbad=false(length(beads),1);
             
     for s=length(thisfile):-1:1
         beadnumber=thisfile(s);
-        pos=round(beads(beadnumber).pos(1:2)/campix/1000-roi(1:2));
+        pos=round(beads(beadnumber).pos(1:2)./campix/1000-roi(1:2));
         if pos(1)>halfroisizebig&&pos(1)<sim(2)-halfroisizebig&&pos(2)>halfroisizebig&&pos(2)<sim(1)-halfroisizebig
             if p.beaddistribution.Value==1&&~p.alignz %on glass
                 frange=framerange0;

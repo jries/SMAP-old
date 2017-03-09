@@ -28,18 +28,18 @@ classdef intensityTiff<interfaces.SEEvaluationProcessor
             end
             
             file=obj.locData.files.file(obj.site.info.filenumber);
-            pixcam=file.info.pixsize*1000;
+            pixcam=file.info.cam_pixelsize_um*1000;
             roi=file.tif(1).info.roi;
 
-            pospixr=round(pos(1:2)/pixcam)-roi(1:2)';
+            pospixr=round(pos(1:2)./pixcam(:))-roi(1:2)';
             
             sfit=round((p.roisize-1)/2);
             
             coim=file.tif(1).image(pospixr(2)-sfit:pospixr(2)+sfit,pospixr(1)-sfit:pospixr(1)+sfit,:);
         
-            pr=round(pos/pixcam);
-            rangex=(pr(1)-sfit:pr(1)+sfit)*pixcam;
-            rangey=(pr(2)-sfit:pr(2)+sfit)*pixcam;
+            pr=round(pos(1:2)./pixcam(:));
+            rangex=(pr(1)-sfit:pr(1)+sfit)*pixcam(1);
+            rangey=(pr(2)-sfit:pr(2)+sfit)*pixcam(2);
                 
                 
                 fixp=[pos(1),pos(2),p.sigmaG,p.mind];
@@ -112,15 +112,17 @@ classdef intensityTiff<interfaces.SEEvaluationProcessor
                  plot(fitp3(3),fitp3(4),'k+','Parent',ax)
                  plot(fitp3(3),fitp3(4),'ko','Parent',ax)
                 else
-                    dv=dv/mv*(sx+0.7*pixcam);
+                    dv=dv/mv*(sx+0.7*pixcam(1));
+                    %%%XXX pixsize conversion: look into
+                    
 %                     plot(pos(1)+dv(1),pos(2)+dv(2),'k+','Parent',ax)
 %                     plot(pos(1)+dv(1),pos(2)+dv(2),'wo','Parent',ax)
                     
                   
                     plot(psh(1)+dv(1),psh(2)+dv(2),'k+','Parent',ax)
                     plot(psh(1)+dv(1),psh(2)+dv(2),'ko','Parent',ax)
-                    ax.XLim=[rangex(1)-pixcam rangex(end)+pixcam];
-                    ax.YLim=[rangey(1)-pixcam rangey(end)+pixcam];
+                    ax.XLim=[rangex(1)-pixcam(1) rangex(end)+pixcam(1)];
+                    ax.YLim=[rangey(1)-pixcam(2) rangey(end)+pixcam(2)];
                 end
                 
                 dv=(fitp3(8:9)-pos(1:2));
@@ -129,11 +131,11 @@ classdef intensityTiff<interfaces.SEEvaluationProcessor
                  plot(fitp3(8),fitp3(9),'k+','Parent',ax)
                  plot(fitp3(8),fitp3(9),'ko','Parent',ax)
                 else
-                    dv=dv/mv*(sx+0.7*pixcam);
+                    dv=dv/mv*(sx+0.7*pixcam(1));
                     plot(psh(1)+dv(1),psh(2)+dv(2),'k+','Parent',ax)
                     plot(psh(1)+dv(1),psh(2)+dv(2),'ko','Parent',ax)
-                    ax.XLim=[rangex(1)-pixcam rangex(end)+pixcam];
-                    ax.YLim=[rangey(1)-pixcam rangey(end)+pixcam];
+                    ax.XLim=[rangex(1)-pixcam(1) rangex(end)+pixcam(1)];
+                    ax.YLim=[rangey(1)-pixcam(2) rangey(end)+pixcam(2)];
                 end
                 
                 ttxt=['A1=' num2str(fitp3(1),'%5.0f') ', A2=' num2str(fitp3(2),'%5.0f') ', A3=' num2str(fitp3(7),'%5.0f') ', d=' num2str(d,'%5.0f') ', chi2=' num2str(chi2red,'%5.2f')];

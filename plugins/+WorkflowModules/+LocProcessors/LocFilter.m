@@ -17,7 +17,7 @@ classdef LocFilter<interfaces.WorkflowModule;
         end
         function prerun(obj,p)
 
-           obj.pixelsize=obj.getPar('loc_cameraSettings').pixsize*1000;
+           obj.pixelsize=obj.getPar('loc_cameraSettings').cam_pixelsize_um*1000;
             
         end
         function output=run(obj,data,p)
@@ -38,7 +38,7 @@ classdef LocFilter<interfaces.WorkflowModule;
                     if isfield(locs,'yerrpix')
                         phot=sqrt((phot.^2+locs.yerrpix.^2)/2);
                     end
-                    xerrnm=phot*obj.pixelsize;
+                    xerrnm=phot*obj.pixelsize(1);
                     val=p.val_locprec;
                     if length(val)==1
                         val=[0 val];
@@ -53,10 +53,10 @@ classdef LocFilter<interfaces.WorkflowModule;
                     if isfield(locs,'PSFypix')
                         psf=sqrt((psf.^2+locs.PSFypix.^2)/2);
                     end
-                    psfnm=psf*obj.pixelsize;
+                    psfnm=psf*obj.pixelsize(1);
                     val=p.val_psf;
                     if length(val)==1
-                        val=[obj.pixelsize*.52 val];
+                        val=[obj.pixelsize(1)*.52 val];
                     end
                     indinh=psfnm>=val(1)&psfnm<=val(2);
                     indin=indin&indinh;

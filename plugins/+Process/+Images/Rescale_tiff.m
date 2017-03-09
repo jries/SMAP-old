@@ -14,7 +14,7 @@ classdef Rescale_tiff<interfaces.DialogProcessor
             img=tiff.image;
             Mx=p.magnification(1);
             My=p.magnification(end);
-            pixelsize=tiff.info.pixsize*1000;
+            pixelsize=tiff.info.cam_pixelsize_um*1000;
             sx=p.shift(1)/1000;
             sy=p.shift(end)/1000;
             a=p.rot;

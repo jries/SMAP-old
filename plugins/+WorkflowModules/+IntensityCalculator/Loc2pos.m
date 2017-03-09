@@ -45,7 +45,7 @@ classdef Loc2pos<interfaces.WorkflowModule
                 end
                 intLoc2pos_ind2=intLoc2pos_ind2-1;
  
-              [~,maxout]=nm2pixLoc(obj.locs.xnm(ind1:intLoc2pos_ind2),obj.locs.ynm(ind1:intLoc2pos_ind2),obj.filestruc.info.pixsize*1000,obj.filestruc.info.roi);
+              [~,maxout]=nm2pixLoc(obj.locs.xnm(ind1:intLoc2pos_ind2),obj.locs.ynm(ind1:intLoc2pos_ind2),obj.filestruc.info.cam_pixelsize_um*1000,obj.filestruc.info.roi);
                maxout.frame=frame+0*maxout.y;
                datout=data;%.copy;
                datout.data=maxout;%.set(maxout);
@@ -57,12 +57,7 @@ classdef Loc2pos<interfaces.WorkflowModule
     end
 end
 
-function [loc,locr]=nm2pixLoc(x,y,pixelsize,roi)
-loc.x=(x/pixelsize)-roi(1);
-loc.y=(y/pixelsize)-roi(2);
-locr.x=round(loc.x);
-locr.y=round(loc.y);
-end
+
 
 
 function pard=guidef

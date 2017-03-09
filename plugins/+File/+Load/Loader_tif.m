@@ -58,7 +58,7 @@ else
 end
 obj.locData.files.file(f).numberOfTif=obj.locData.files.file(f).numberOfTif+1;
 imout=gettif(file);
-imout.info.pixsize=obj.locData.files.file(f).info.pixsize;
+imout.info.cam_pixelsize_um=obj.locData.files.file(f).info.cam_pixelsize_um;
 obj.locData.files.file(f).tif(obj.locData.files.file(f).numberOfTif)=imout;
 
   initGuiAfterLoad(obj)    

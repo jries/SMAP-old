@@ -1,5 +1,5 @@
-function locout=get2CIntfromImages(loc,transform,filestruc,p)
-pix_cam=filestruc.info.pixsize*1000;
+function locout=get2CIntfromImagesWF(loc,transform,filestruc,p)
+pix_cam=filestruc.info.cam_pixelsize_um*1000;
 x=double(loc.xnm);
 y=double(loc.ynm);
 
@@ -76,9 +76,9 @@ if isfield(loc,'znm')
     end
 else
     if p.fitUsePSF
-        PSFxpix=double(loc.PSFxnm/pix_cam);
+        PSFxpix=double(loc.PSFxnm/pix_cam(1));
     else
-        PSFxpix=ones(length(loc.xnm),1)*p.PSFxnm/pix_cam;
+        PSFxpix=ones(length(loc.xnm),1)*p.PSFxnm/pix_cam(1);
     end 
     PSFypix=PSFxpix;
 end
@@ -204,11 +204,11 @@ for k=1:length(fieldpref)
     out.([fieldpref{k} '2'])(indright)=in.([fieldpref{k} '1'])(indright);    
 end
 
-function [loc,locr]=nm2pixLoc(x,y,pixelsize,roi)
-loc.x=(x/pixelsize)-roi(1);
-loc.y=(y/pixelsize)-roi(2);
-locr.x=round(loc.x);
-locr.y=round(loc.y);
+% function [loc,locr]=nm2pixLoc(x,y,pixelsize,roi)
+% loc.x=(x/pixelsize(1))-roi(1);
+% loc.y=(y/pixelsize(2))-roi(2);
+% locr.x=round(loc.x);
+% locr.y=round(loc.y);
 
 function out=adu2phot(in,p)
 out=(in-p.cam_offset)*p.pix2phot;

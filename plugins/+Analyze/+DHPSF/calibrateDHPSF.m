@@ -42,7 +42,7 @@ if il.metadata.emgain>1 %metadata found, unlikely emgain = 300
     
 end
 if il.metadata.conversion>1
-    ps.nmPerPixel=il.metadata.pixsize;
+    ps.nmPerPixel=il.metadata.cam_pixelsize_um(1);
     ps.conversion=il.metadata.conversion;
 end
 obj.setGuiParameters(ps);

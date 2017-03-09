@@ -94,6 +94,9 @@ for k=1:nfiles
     if ~isfield(templocData.files.file(k).info,'cam_pixelsize_um')
         templocData.files.file(k).info.cam_pixelsize_um=templocData.files.file(k).info.pixsize([1 1]);
     end
+    if length(templocData.files.file(k).info.cam_pixelsize_um)==1
+        templocData.files.file(k).info.cam_pixelsize_um(2)=templocData.files.file(k).info.cam_pixelsize_um(1);
+    end
 end
 
 if isfield(templocData.files.file(k).info,'pixsize')

@@ -20,7 +20,7 @@ classdef pushLocs<interfaces.WorkflowModule
             p=obj.getAllParameters;
           
             obj.locs=obj.locData.getloc(p.locfields);
-            pix_cam=obj.filestruc.info.pixsize*1000;
+            pix_cam=obj.filestruc.info.cam_pixelsize_um*1000;
             x=double(obj.locs.xnm);
             y=double(obj.locs.ynm);
             
@@ -40,7 +40,7 @@ classdef pushLocs<interfaces.WorkflowModule
                     obj.locs.PSFypix=sigmafromz_simple(obj.locs.znm/1000,[d g sx0]);
                 end
             elseif ~isempty(obj.locs.PSFxnm)
-                obj.locs.PSFxpix=double(obj.locs.PSFxnm/pix_cam);
+                obj.locs.PSFxpix=double(obj.locs.PSFxnm/pix_cam(1));
                 obj.locs.PSFypix=obj.locs.PSFxpix;
             end
             intLoc2pos_locframes=obj.locs.frame;
@@ -64,8 +64,8 @@ classdef pushLocs<interfaces.WorkflowModule
                     intLoc2pos_ind2=intLoc2pos_ind2+1;
                 end
                 
-                
-                locnm=num2pix(obj.locs.xnm(ind1:intLoc2pos_ind2),obj.locs.ynm(ind1:intLoc2pos_ind2),obj.filestruc.info.pixsize*1000,obj.filestruc.info.roi);
+                % XXXXX replace by: nm2pixLoc???
+                locnm=num2pix(obj.locs.xnm(ind1:intLoc2pos_ind2),obj.locs.ynm(ind1:intLoc2pos_ind2),obj.filestruc.info.cam_pixelsize_um*1000,obj.filestruc.info.roi);
                 fn=fieldnames(obj.locs);
                 for k=1:length(fn)
                     locout.(fn{k})=obj.locs.(fn{k})(ind1:intLoc2pos_ind2);
@@ -80,12 +80,12 @@ classdef pushLocs<interfaces.WorkflowModule
     end
 end
 
-function [loc,locr]=nm2pixLoc(x,y,pixelsize,roi)
-loc.x=(x/pixelsize)-roi(1);
-loc.y=(y/pixelsize)-roi(2);
-locr.x=round(loc.x);
-locr.y=round(loc.y);
-end
+% function [loc,locr]=nm2pixLoc(x,y,pixelsize,roi)
+% loc.x=(x/pixelsize)-roi(1);
+% loc.y=(y/pixelsize)-roi(2);
+% locr.x=round(loc.x);
+% locr.y=round(loc.y);
+% end
 
 
 function pard=guidef

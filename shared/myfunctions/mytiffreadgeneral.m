@@ -76,14 +76,14 @@ allfiles=myfastdir(pathstr,searchx);
                     info.emgain=1;
                     info.offset=500;
             end
-            info.pixsize=0.1;%38;  %depends on settings, camera
+            info.cam_pixelsize_um=0.1;%38;  %depends on settings, camera
             elseif strfind(minfo,'Andor sCMOS')
                 %only EM-Gain, 10 MHz, baseline clamp on
                  info.offset=100;
 
                  info.conversion=.666; %preliminary..
                  info.actualconversion=.666;
-                 info.pixsize=0.096;  %2x2 binning, f=400
+                 info.cam_pixelsize_um=0.096;  %2x2 binning, f=400
                   info.port='CCD';
                   disp('Andor  sCMOS')
             elseif strfind(minfo,'iXon Ultra')
@@ -122,7 +122,7 @@ allfiles=myfastdir(pathstr,searchx);
                     3.87 2.95 1.37
                     3.84 2.96 1.36];
                 info.conversion=gainmatrix(mode,info.gain);
-                info.pixsize=0.138;
+                info.cam_pixelsize_um=0.138;
 
              elseif strfind(minfo,'Andor')
                 %only EM-Gain, 10 MHz, baseline clamp on
@@ -148,14 +148,14 @@ allfiles=myfastdir(pathstr,searchx);
                         info.conversion=62.2;
                 end
                 end
-                info.pixsize=0.138;  %depends on settings, camera
+                info.cam_pixelsize_um=0.138;  %depends on settings, camera
             else %default
                 disp('dummy 1')
                 info.emgain=18;  
                 
                 info.conversion=1;
                 info.offset=4000;
-                info.pixsize=0.13;  %depends on settings, camera
+                info.cam_pixelsize_um=0.13;  %depends on settings, camera
             end
        
         
@@ -189,7 +189,7 @@ allfiles=myfastdir(pathstr,searchx);
             info.timediff=1;
             info.port='EM';
             info.roi=[];
-            info.pixsize=0.1;  %depends on settings, camera
+            info.cam_pixelsize_um=0.1;  %depends on settings, camera
         end
 
     end

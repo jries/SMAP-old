@@ -60,7 +60,7 @@ else
 info.conversion=str2double(c.conversion{indcal,1});
 info.offset=str2double(c.offset{indcal,1});
 info.temperature=str2double(c.temperature{indcal,1});
-info.pixsize=str2double(c.pixsize{indcal,1});
+info.cam_pixelsize_um=str2double(c.pixsize{indcal,1});
 end
 % 
 % else  %default parameters
@@ -116,7 +116,7 @@ function info=setdefault(c)
     info.conversion=str2double(c.conversion{indnames,1});
     info.offset=str2double(c.offset{indnames,1});
     info.temperature=str2double(c.temperature{indnames,1});
-    info.pixsize=str2double(c.pixsize{indnames,1});
+    info.cam_pixelsize_um=str2double(c.pixsize{indnames,1});
 
 
 function [f,t]=minfotime(minfo,direction)
