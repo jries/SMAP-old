@@ -29,7 +29,7 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
             filetest=[il.info.path filesep il.info.files{framerange(1)}];
             tiff=gettif(filetest);
             tiff.image=im;
-            tiff.info.pixsize=obj.locData.files.file(end).info.pixsize;
+            tiff.info.cam_pixelsize_um=obj.locData.files.file(end).info.cam_pixelsize_um;
             tiff.info.name='MIP';
             
             bg=mywaveletfilter(double(im),3,true);
@@ -39,7 +39,7 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
                 disp('selected transformation file does not have a valid transformation, image not transformed');
                 mipbgT=mipbg;
             else
-                p.cam_pixelsize_nm=tiff.info.pixsize*1000;
+                p.cam_pixelsize_nm=tiff.info.cam_pixelsize_um*1000;
                 p.roitiff=tiff.info.roi;
                 p.datapart.selection='all (T->R)';
                 mipbgT=apply_transform_image(mipbg,transformation,p);

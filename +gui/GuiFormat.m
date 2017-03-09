@@ -502,17 +502,17 @@ pos=hax.Position;
 hax.Units='normalized';
 
 fi=obj.getPar('currentfileinfo');
-pixrec=fi.pixsize*1000; 
+pixrec=fi.cam_pixelsize_um*1000; 
 roi=fi.roi;
-xext=[roi(1) roi(1)+roi(3)]* pixrec;
-yext=[roi(2) roi(2)+roi(4)]* pixrec;  
+xext=[roi(1) roi(1)+roi(3)]* pixrec(1);
+yext=[roi(2) roi(2)+roi(4)]* pixrec(end);  
 
 % sron=obj.getPar('sr_layerson');
 files=obj.locData.files.file;
 for k=1:length(files)
     roi=files(k).info.roi;
-xexth=[roi(1) roi(1)+roi(3)]* pixrec;
-yexth=[roi(2) roi(2)+roi(4)]* pixrec; 
+xexth=[roi(1) roi(1)+roi(3)]* pixrec(1);
+yexth=[roi(2) roi(2)+roi(4)]* pixrec(end); 
 xext(1)=min(xext(1),xexth(1));xext(2)=max(xext(2),xexth(2));
 yext(1)=min(yext(1),yexth(1));yext(2)=max(yext(2),yexth(2));
 end

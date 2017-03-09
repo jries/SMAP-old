@@ -12,7 +12,8 @@ classdef metadataSMAP<handle
         EMon=false;
         conversion=1;
         offset=100;
-        pixsize=0.1;
+%         pixsize=0.1;
+        cam_pixelsize_um=0.1;
         timediff=30;
         comment='';
         numberOfFrames=0;

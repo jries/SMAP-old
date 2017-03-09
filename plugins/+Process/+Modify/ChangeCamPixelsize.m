@@ -14,12 +14,13 @@ classdef ChangeCamPixelsize<interfaces.DialogProcessor
                 pixold(2)=pixold(1);
             end       
             pixnew=[p.pixx p.pixy];
-            factor=pixnew./pixold
+            factor=pixnew./pixold;
             
             ind=obj.locData.loc.filenumber==p.file1.Value;
             obj.locData.loc.xnm(ind)=obj.locData.loc.xnm(ind)*factor(1);
             obj.locData.loc.ynm(ind)=obj.locData.loc.ynm(ind)*factor(2);
             %update filelist
+            obj.locData.files.file(p.file1.Value).info.pixsize=pixnew;
             obj.locData.regroup;
             initGuiAfterLoad(obj)
              

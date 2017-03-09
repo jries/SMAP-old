@@ -7,8 +7,9 @@ if nargin<4||isempty(file)
      adsf
     file='settings/cameras.mat';
 end
-replacefields={'cam_pixelsize_um','pixsize'};
+% replacefields={'cam_pixelsize_um','pixsize'};
 
+replacefields={};
 par=[];
 cam=[];
 state=[];
