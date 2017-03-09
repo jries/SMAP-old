@@ -43,7 +43,7 @@ classdef fitterGUI<interfaces.WorkflowModule
         
         function loadfitters(obj)
             t1=obj.plugininfo.description;
-            fitnames={'EMCCD_SE_MLE_GPU','RadialSymmetry2D','RadialSymmetry3D','MLE_GPU_Yiming'};
+            fitnames={'MLE_GPU_Yiming','EMCCD_SE_MLE_GPU','RadialSymmetry2D','RadialSymmetry3D'};
             obj.guihandles.fitterlist.String=fitnames;
             p=obj.guiPar;
             p.Vrim=00;
