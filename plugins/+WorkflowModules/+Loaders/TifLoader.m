@@ -126,9 +126,10 @@ classdef TifLoader<interfaces.WorkflowModule
                     end
                     
                     numlocs=obj.getPar('fittedLocs');
-
-                    statuss=['frame ' int2str(datout.frame-obj.framestart) ' of ' int2str(totalf) ...
-                        '. Time: ' num2str(elapsed,'%4.0f') ' of ' num2str(totaltime,'%4.0f') 's. ' num2str(numlocs,'%6.0f') ' locs.'];
+                    sep='''';
+                    statuss=['frame ' separatethousands(datout.frame-obj.framestart,sep) ' of ' separatethousands(totalf,sep) ...
+                        '. Time: ' separatethousands(elapsed,sep,0) ' of ' separatethousands(totaltime,sep,0) sprintf('s. \n')...
+                        separatethousands(numlocs,sep) ' locs, ' separatethousands(numlocs/elapsed,sep,0) ' locs/s.'];
                     obj.status(statuss);
                 end
                 tall=tall+toc(th);
