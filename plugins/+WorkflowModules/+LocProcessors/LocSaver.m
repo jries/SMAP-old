@@ -158,7 +158,8 @@ classdef LocSaver<interfaces.WorkflowModule
                 catch err
                     err
                 end
-                obj.locDatatemp.loc=rmfield(obj.locDatatemp.loc,obj.savefields.notsave);
+                nosave=intersect(fieldnames(obj.locDatatemp.loc),obj.savefields.notsave);
+                obj.locDatatemp.loc=rmfield(obj.locDatatemp.loc,nosave);
                 obj.locDatatemp.files.file.raw=obj.frames;
                 obj.locDatatemp.savelocs(filename,[],struct('fitparameters',fitpar));
                 

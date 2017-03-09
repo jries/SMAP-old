@@ -93,7 +93,7 @@ pard.allfiles.Width=1.3;
 pard.textb.object=struct('String','transform:','Style','text');
 pard.textb.position=[2,1];
 
-pard.datapart.object=struct('Style','popupmenu','String',{{'all (T->R)','all (R->T)','reference','target'}});
+pard.datapart.object=struct('Style','popupmenu','Value',4,'String',{{'all (T->R)','all (R->T)','reference','target'}});
 pard.datapart.position=[2,1.7];
 
 pard.textc.object=struct('String','locs/tifs:','Style','text');
@@ -102,6 +102,12 @@ pard.textc.position=[3,1];
 pard.setchannel.object=struct('Style','checkbox','String','set channel (ref=1,target=2)', 'Value',0);
 pard.setchannel.position=[3,3];
 pard.setchannel.Width=2;
+pard.addchannelc.object=struct('Style','checkbox','String','add to target channel', 'Value',0);
+pard.addchannelc.position=[4,3];
+pard.addchannelc.Width=1.5;
+pard.addchannel.object=struct('Style','edit','String','10');
+pard.addchannel.position=[4,4.5];
+pard.addchannel.Width=0.5;
 
 pard.transformwhat.object=struct('Style','popupmenu','String',{{'both','locs','tiffs'}});
 pard.transformwhat.position=[3,1.7];

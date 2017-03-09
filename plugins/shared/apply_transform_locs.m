@@ -44,3 +44,9 @@ if isfield(p,'setchannel')&&p.setchannel
     loco.channel(indff)=2;
 end
 
+if isfield(p,'addchannelc')&&p.addchannelc
+    loco.ch_preT=loc.channel;
+%     loco.channel(indf&~indt)=1;
+    loco.channel(indff)=loco.channel(indff)+p.addchannel;
+end
+
