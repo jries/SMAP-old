@@ -63,7 +63,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule
             end
             
             output=[];
-            if obj.getPar('loc_preview')||(~obj.getSingleGuiParameter('update_check')&&~obj.updatenow)
+            if obj.getPar('loc_preview') %||(~obj.getSingleGuiParameter('update_check')&&~obj.updatenow)
                 return
             end
             locs=data.data;%get;
@@ -97,7 +97,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule
 %                     end
                     numlocs=numlocs+sindin;
                 end
-                if toc(obj.localtimervalue)>obj.getSingleGuiParameter('loc_updatetime')||data.eof || obj.updatenow
+                if (toc(obj.localtimervalue)>obj.getSingleGuiParameter('loc_updatetime') && obj.getSingleGuiParameter('update_check'))||data.eof || obj.updatenow
                     obj.updatenow=false;
                     locdat=interfaces.LocalizationData;
                     locdat.loc=fitloc2locdata(obj,templocs,1:numlocs);
