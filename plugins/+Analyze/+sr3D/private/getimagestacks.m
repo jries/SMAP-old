@@ -1,4 +1,4 @@
-function beads=getimagestacks(obj,p,beads)
+function [beads,allstacks]=getimagestacks(obj,p,beads)
 
 roisize=p.roisize;
 % halfroisize=(roisize-1)/2;
@@ -23,6 +23,7 @@ framerange0=max(fminmax(1),fzero-halfstoreframes):min(fzero+halfstoreframes,fmin
 
 files=obj.locData.files.file;
 indbad=false(length(beads),1);
+allstacks=[];
  for k=1:length(files) 
     if isfield(files(k).info,'imagefile')
         filename=files(k).info.imagefile;
@@ -35,6 +36,11 @@ indbad=false(length(beads),1);
     imstackadu=il.getmanyimages([],'mat');
                 
     imstack=(double(imstackadu)-il.metadata.offset)*il.metadata.pix2phot;
+    si=size(imstack);
+    if isempty(allstacks)
+        allstacks=zeros(si(1),si(2),si(3),length(files));
+    end
+    allstacks(1:si(1),1:si(2),1:si(3),k)=imstack;
     sim=size(imstack);
     thisfile=find([beads(:).filenumber]==k);
 %                 f=figure(88);

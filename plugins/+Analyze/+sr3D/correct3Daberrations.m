@@ -28,7 +28,6 @@ classdef correct3Daberrations<interfaces.DialogProcessor
             % * determine f0,z0
             disp('get bead z positions')
             for k=1:length(beads)
-        
                 [beads(k).f0]=getf0Z(beads(k).loc,p);
             end
 
@@ -37,31 +36,60 @@ classdef correct3Daberrations<interfaces.DialogProcessor
             p.roisize=15;
             p.roiframes=800/p.dz;
             p.beaddistribution.Value=2;
-            beads=getimagestacks(obj,p,beads);  
+            [beads,allstacks]=getimagestacks(obj,p,beads);  
+            imageslicer(allstacks);
             % * fit with sx,sy
             s=size(beads(1).stack.image);  
             for k=1:length(beads)
-            beads(k).f0sxsy=getfsxsy(beads(k),p);
+                beads(k).f0sxsy=getfsxsy(beads(k),p);
+                beads(k).phot=beads(k).loc.phot(min(max(1,round(beads(k).f0sxsy)),length(beads(k).loc.phot)));
             end
             
 
             % * determine fglass, glass
-            % * zfitted(z0-zglass,ZObjective)
+
+            
+            figure(88);
+            hold off
+            
+            for k=1: max([beads(:).filenumber]) 
+            %pglass needs to be file-dependent!
+                indf=[beads(:).filenumber]==k;
+                f0sxsy=[beads(indf).f0sxsy];
+%                 p.fglass(k)=myquantile([beads(indf).f0sxsy],0.03);
+%                 p.fglass(k)=min([beads(indf).f0sxsy]);
+%                 plot([beads(indf).f0sxsy],[beads(indf).f0],'*')
+%                 plot([beads(indf).phot],[beads(indf).f0sxsy],'*')
+                dzh=50/p.dz;
+                range=0:dzh:1000;
+                h=histogram(f0sxsy,range);
+                
+                [mh]=max(h.Values);
+                ind=find(h.Values>mh/2,1,'first');
+                f0h=range(ind);
+                ind=find(f0sxsy>f0h-2*dzh&f0sxsy<f0h+2*dzh);
+                f0glass(k)=mean(f0sxsy(ind));
+                hold on
+            end
+            
+            for k=1:length(beads)
+                beads(k).loc.zglass=(beads(k).loc.frame-f0glass(beads(k).filenumber))*p.dz;
+            end
+            %get image stacks if needed
+            
+               % * zfitted(z0-zglass,ZObjective)
             %     * also for xfitted, yfitted, 
             %     * also spatially resolved
             % * z0-zglass=ztrue(zfitted, zObjective): interpolated or lookup table
             % * use for correction
             % * save with 3Dcal.mat
             % * fitter: instead of refractive index mismatch choose this correction.
-            % * calculate refractive index mismatch (z)
+            % * calculate refractive index mismatch (z)         
             
-            for k=1: max([beads(:).filenumber])
-            %pglass needs to be file-dependent!
-                indf=[beads(:).filenumber]==k;
-%                 p.fglass(k)=myquantile([beads(indf).f0sxsy],0.03);
-                p.fglass(k)=min([beads(indf).f0sxsy]);
-            end
-            %get image stacks if needed
+            
+            
+            
+            
             
             if  p.fitcsplinec 
                 disp('load images')
@@ -145,7 +173,8 @@ P=callYimingFitter(single(stackh),1,100,4,0,0);
 sx=P(:,5);
 sy=P(:,6);
 phot=P(:,3);
-p.ploton=0;
+p.ploton=1;
+figure(77)
 [zas,zn]=stackas2z(sx,sy,bead.stack.framerange',phot,p);
 f0=zas;
 end

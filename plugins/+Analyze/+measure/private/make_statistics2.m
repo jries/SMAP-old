@@ -30,6 +30,7 @@ if p.overview
     ax3=subplot(3,2,3);ax3.Position(3)=ax3.Position(3)*sf;
     ax4=subplot(3,2,4);ax4.Position(3)=ax4.Position(3)*sf;
     ax5=subplot(3,2,5);ax5.Position(3)=ax5.Position(3)*sf;
+   
     ax6=subplot(3,2,6);ax6.Position(3)=ax6.Position(3)*sf;ax7=[];
 else
     ax1=initaxis(p.resultstabgroup,'Photons');
@@ -249,12 +250,23 @@ end
 
 if ploton
 fontsize=14;
+if p.overview
+    pos=[.25,0.0,-.1,0];
+    fontsize=10;
+    uicontrol('Parent',ax1.Parent,'style','text','String',sphot,'Units','normalized','Position',ax1.Position+pos,'FontSize',fontsize,'HorizontalAlignment','left')
+    uicontrol('Parent',ax2.Parent,'style','text','String',slp,'Units','normalized','Position',ax2.Position+pos,'FontSize',fontsize,'HorizontalAlignment','left')
+    uicontrol('Parent',ax3.Parent,'style','text','String',slt,'Units','normalized','Position',ax3.Position+pos,'FontSize',fontsize,'HorizontalAlignment','left')
+    uicontrol('Parent',ax4.Parent,'style','text','String',slb,'Units','normalized','Position',ax4.Position+pos,'FontSize',fontsize,'HorizontalAlignment','left')
+    uicontrol('Parent',ax5.Parent,'style','text','String',sls,'Units','normalized','Position',ax5.Position+pos,'FontSize',fontsize,'HorizontalAlignment','left')
+else
 pos=[.7,0.025,.3,.95];
+
 uicontrol('Parent',ax1.Parent,'style','text','String',sphot,'Units','normalized','Position',pos,'FontSize',fontsize,'HorizontalAlignment','left')
 uicontrol('Parent',ax2.Parent,'style','text','String',slp,'Units','normalized','Position',pos,'FontSize',fontsize,'HorizontalAlignment','left')
 uicontrol('Parent',ax3.Parent,'style','text','String',slt,'Units','normalized','Position',pos,'FontSize',fontsize,'HorizontalAlignment','left')
 uicontrol('Parent',ax4.Parent,'style','text','String',slb,'Units','normalized','Position',pos,'FontSize',fontsize,'HorizontalAlignment','left')
 uicontrol('Parent',ax5.Parent,'style','text','String',sls,'Units','normalized','Position',pos,'FontSize',fontsize,'HorizontalAlignment','left')
+end
 end
 
 if zexist
@@ -273,14 +285,18 @@ if zexist
     rz=[-800 800];
     rsz=[0 100];
     him=myhist2(znm{1},v{1},10,1,rz,rsz);    
-    if ploton
+    if ploton &&~isempty(ax7)
         axes(ax7)
         imagesc(rz,rsz,him')
         axis xy
         xlabel('znm');ylabel('locprec z');
     end
     if ploton
+        if p.overview
+            uicontrol('Parent',ax6.Parent,'style','text','String',slp,'Units','normalized','Position',ax6.Position+pos,'FontSize',fontsize,'HorizontalAlignment','left')
+        else
         uicontrol('Parent',ax6.Parent,'style','text','String',slp,'Units','normalized','Position',pos,'FontSize',fontsize,'HorizontalAlignment','left')
+        end
     end   
 end
 

@@ -94,9 +94,9 @@ range=max(1,indm-winstd):min(indm+winstd,length(n));
 %         disp(S.df)
 %         disp(length(x))
 %         disp(S.normr)
-        
+        try
 
-        subplot(2,1,1)
+        subplot(2,2,1)
         hold off
         plot(x,sxfit,'ro');
         hold on
@@ -104,14 +104,19 @@ range=max(1,indm-winstd):min(indm+winstd,length(n));
         plot(x,polyval(psx,x),'r')
         plot(x,polyval(psy,x),'g')
         plot(zas,polyval(psy,zas),'ko')
-        subplot(2,1,2)
+        subplot(2,2,3)
         hold off
         plot(x,nfit,'o');
         hold on
         plot(x,polyval(p,x),'r')
+        subplot(2,2,2)
+        plot(z,sx,'o',z,sy,'o',x,polyval(psx,x),'k',x,polyval(psy,x),'k');
+        subplot(2,2,4)
+        plot(z,n,x,polyval(p,x));
 %         S
 %         plot(zn(k),1,'x')
         drawnow
+        end
     end
     else
         zs=NaN;
