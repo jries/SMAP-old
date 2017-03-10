@@ -215,7 +215,7 @@ end
 end
 
 function warnmissingmeta(md)
-expected={'emgain','conversion','offset','EMon','pixsize'};
+expected={'emgain','conversion','offset','EMon','cam_pixelsize_um'};
 missing=setdiff(expected,fieldnames(md));
 if isempty(missing)
     return
