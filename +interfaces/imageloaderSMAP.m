@@ -79,6 +79,9 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
             end
             
         end
+        function file=getbasefile(obj)
+            file=obj.file;
+        end
         function updatemetadata(obj, md)
             if isempty(md)
                 return;
@@ -103,7 +106,7 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
         
         function metao=getmetadata(obj)
             getmetadatacam(obj);
-             obj.metadata.basefile=getbasefile(obj.file);
+             obj.metadata.basefile=obj.getbasefile;
              metao=obj.metadata;   
         end
         function metao=getmetadatacam(obj)

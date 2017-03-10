@@ -56,7 +56,9 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
                 end
             end
             str=p.filelist.String;
-            str{end+1}=[path f];
+            for k=1:length(f)
+                str{end+1}=[path f{k}];
+            end
             obj.guihandles.filelist.String=str;
             
             if ~isempty(strfind(f,'_batch.mat'))&&~exist(p.mainbatchfile,'file') %put as main batch file

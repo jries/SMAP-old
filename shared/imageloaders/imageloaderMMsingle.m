@@ -41,6 +41,9 @@ classdef imageloaderMMsingle<interfaces.imageloaderSMAP
         function close(obj)
             %not needed, as single files are read
         end
+        function file= getbasefile(obj)
+            file=getbasefile(obj.file);
+        end
     end
     
 end
