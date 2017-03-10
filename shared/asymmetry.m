@@ -1,4 +1,7 @@
 function [out,asymmr,dir]=asymmetry(imin)
+if isempty(imin)
+    out=0;dir=0;asymmr=0;
+end
 if iscell(imin)
     for k=numel(imin):-1:1
         [out{k},asymmr{k},dir{k}]=asymmetryi(imin{k});
