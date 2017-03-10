@@ -11,8 +11,9 @@ img=him.image;
 si=size(img);
 if isfield(p,'normalizeFoV')&&~isempty(p.normalizeFoV)&&p.normalizeFoV>0
     s=size(img)/2;
-    x=round(s(1)-p.normalizeFoV:s(1)+p.normalizeFoV);
-    y=round(s(2)-p.normalizeFoV:s(2)+p.normalizeFoV);
+    normalizeFoV=min(p.normalizeFoV,floor(s)-1);
+    x=round(s(1)-normalizeFoV(1):s(1)+normalizeFoV(1));
+    y=round(s(2)-normalizeFoV(end):s(2)+normalizeFoV(end));
     imgnorm=img(x,y,:);
 else
     imgnorm=img;

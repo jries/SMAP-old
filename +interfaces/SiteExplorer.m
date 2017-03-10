@@ -360,8 +360,14 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
             ind=obj.indexFromID(obj.files,fileID);
             file=obj.files(ind);
             if isempty(file.image)
+                if isfield(file.info,'cam_pixelsize_um')
                 pixrec=file.info.cam_pixelsize_um*1000;
-                roi=file.info.roi*pixrec;
+                else
+                    pixrec=obj.locData.files.file(file.ID).info.cam_pixelsize_um*1000;
+                end
+                roi=file.info.roi;
+                roi([1 3])=roi([1 3])*pixrec(1);
+                roi([2 4])=roi([2 4])*pixrec(2);
 
                 % test for SML could be all wrong
                 p1.sr_pos=[roi(1)+roi(3)/2 roi(2)+roi(4)/2];
