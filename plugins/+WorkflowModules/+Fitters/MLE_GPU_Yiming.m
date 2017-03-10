@@ -34,7 +34,13 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
                 EMcal=obj.fitpar.splinefit{1}.cspline.isEM;
                 obj.fitpar.mirrorstack=~(EMfile==EMcal);
             end
-            
+            p=obj.getAllParameters;
+            if p.overwritePixelsize
+                obj.setPar('overwrite_pixelsize',[p.pixelsizex p.pixelsizey])
+            else
+                obj.setPar('overwrite_pixelsize',[])
+            end
+               
             
             disp(reporttext)
         end
@@ -59,12 +65,16 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             obj.guihandles.fitmode.Callback={@fitmode_callback,obj};
             fitmode_callback(0,0,obj)
             obj.guihandles.loadcal.Callback={@loadcall_callback,obj};
+%             obj.addSynchronization('loc_fileinfo',[],[],{@loc_fileinfo_callback,obj});
 
         end
             
     end
 end
 
+% function loc_fileinfo_callback(obj)
+% 
+% end
 function locs=fit2locs(results,stackinfo,fitpar,image)
 if isempty(results)
     locs=[];
@@ -289,13 +299,15 @@ end
 function fitmode_callback(a,b,obj)
 p=obj.getGuiParameters;
 fitmode=p.fitmode.Value;
+fitz={'loadcal','cal_3Dfile','useObjPos','objPos','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','pixelsizex','pixelsizey'};
+fitxy={'PSFx0','tPSFx0'};
 switch fitmode
     case {3,5}
-        ton={'loadcal','cal_3Dfile','useObjPos','objPos','trefractive_index_mismatch','refractive_index_mismatch'};
-        toff={'PSFx0','tPSFx0'};
+        ton=fitz;
+        toff=fitxy;
     otherwise
-        toff={'loadcal','cal_3Dfile','useObjPos','objPos','trefractive_index_mismatch','refractive_index_mismatch'};
-        ton={'PSFx0','tPSFx0'};
+        toff=fitz;
+        ton=fitxy;
 end
 
 switch fitmode
@@ -379,6 +391,20 @@ pard.refractive_index_mismatch.TooltipString=sprintf('Correction factor to take 
 pard.refractive_index_mismatch.Optional=true;
 pard.refractive_index_mismatch.Width=0.5;
 
+pard.overwritePixelsize.object=struct('Style','checkbox','String','Overwrite pixelsize X,Y (um):');
+pard.overwritePixelsize.position=[5,1];
+pard.overwritePixelsize.Width=1.5;
+pard.overwritePixelsize.Optional=true;
+
+pard.pixelsizex.object=struct('Style','edit','String','.1');
+pard.pixelsizex.position=[5,2.5];
+pard.pixelsizex.Width=0.5;
+pard.pixelsizex.Optional=true;
+
+pard.pixelsizey.object=struct('Style','edit','String','.1');
+pard.pixelsizey.position=[5,3];
+pard.pixelsizey.Width=0.5;
+pard.pixelsizey.Optional=true;
 
 
 pard.plugininfo.type='WorkflowFitter';

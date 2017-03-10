@@ -18,6 +18,10 @@ end
 infost=prop2struct(obj.getPar('loc_cameraSettings'));
 infost=copyfields(infost,finfo);
 
+newpix=obj.getPar('overwrite_pixelsize');
+if ~isempty(newpix)
+    infost.cam_pixelsize_um=newpix;
+end
 filestruct.info=infost;
 filestruct.name=filename;
 filestruct.number=obj.filenumber;
