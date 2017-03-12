@@ -18,6 +18,9 @@ for k=length(beadind):-1:1
 %     bead(k).loc=copystructReduce(locDatacopy.loc,beadhere,{'xnm','ynm','PSFxnm,','PSFynm','frame'});
     bead(k).filenumber=filenumber(k);
     bead(k).pos=[xb(k) yb(k)];
-    
+    fn=fieldnames(bead(k).loc);
+    for f=1:length(fn)
+        bead(k).loc.(fn{f})=double(bead(k).loc.(fn{f}));
+    end    
 end
 end
