@@ -1,5 +1,5 @@
 function initGuiAfterLoad(obj, resetview)
-if isempty(obj.locData.loc)
+if isempty(obj.locData.loc)||isempty(obj.locData.loc.frame)
     return
 end
 if nargin<2

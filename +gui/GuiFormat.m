@@ -659,7 +659,7 @@ end
 
 function resetview_callback(oject,data,obj)
   si=obj.getPar('sr_sizeRecPix');
-  if ~isempty(obj.locData.loc)
+  if ~isempty(obj.locData.loc)&&~isempty(obj.locData.loc.xnm)
     mx=myquantilefast(obj.locData.loc.xnm,[0.9995,0.0005],100000);
     maxx=mx(1);minx=mx(2);
     my=myquantilefast(obj.locData.loc.ynm,[0.9995,0.0005],100000);
