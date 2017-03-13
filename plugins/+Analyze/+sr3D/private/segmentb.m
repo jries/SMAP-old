@@ -5,10 +5,16 @@ minframes=(p.zrangeuse(2)-p.zrangeuse(1))/ p.dz/2;
 locDatacopy=obj.locData.copy;
 locDatacopy.regroup(150,minframes);
 
-beadind=find(locDatacopy.grouploc.numberInGroup>minframes);
-xb=locDatacopy.grouploc.xnm(beadind);
-yb=locDatacopy.grouploc.ynm(beadind);
-filenumber=locDatacopy.grouploc.filenumber(beadind);
+
+% beadind=find(locDatacopy.grouploc.numberInGroup>minframes);
+% xb=locDatacopy.grouploc.xnm(beadind);
+% yb=locDatacopy.grouploc.ynm(beadind);
+% filenumber=locDatacopy.grouploc.filenumber(beadind);
+locg=locDatacopy.getloc({'xnm','ynm','numberInGroup','filenumber'},'layer',1,'Position','roi','removeFilter','filenumber','grouping','grouped');
+beadind=find(locg.numberInGroup>minframes);
+xb=locg.xnm(beadind);
+yb=locg.ynm(beadind);
+filenumber=locg.filenumber(beadind);
 winsize=250;
 for k=length(beadind):-1:1
 %     beadhere=(mywithin(locDatacopy.loc.xnm,[xb(k)-winsize/2 winsize],locDatacopy.loc.ynm,[yb(k)-winsize/2 winsize]));
