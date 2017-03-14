@@ -391,7 +391,7 @@ else
       case 'always'
         xnodes(1) = xmin;
       case 'warning'
-        warning('GRIDFIT:extend',['xnodes(1) was decreased by: ',num2str(xnodes(1)-xmin),', new node = ',num2str(xmin)])
+%         warning('GRIDFIT:extend',['xnodes(1) was decreased by: ',num2str(xnodes(1)-xmin),', new node = ',num2str(xmin)])
         xnodes(1) = xmin;
       case 'never'
         error(['Some x (',num2str(xmin),') falls below xnodes(1) by: ',num2str(xnodes(1)-xmin)])
@@ -402,7 +402,7 @@ else
       case 'always'
         xnodes(end) = xmax;
       case 'warning'
-        warning('GRIDFIT:extend',['xnodes(end) was increased by: ',num2str(xmax-xnodes(end)),', new node = ',num2str(xmax)])
+%         warning('GRIDFIT:extend',['xnodes(end) was increased by: ',num2str(xmax-xnodes(end)),', new node = ',num2str(xmax)])
         xnodes(end) = xmax;
       case 'never'
         error(['Some x (',num2str(xmax),') falls above xnodes(end) by: ',num2str(xmax-xnodes(end))])
