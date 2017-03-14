@@ -34,7 +34,7 @@ classdef correct3Daberrations<interfaces.DialogProcessor
                 beads(k).phot=beads(k).loc.phot(min(length(beads(k).loc.phot),max(1,round(beads(k).f0))));
             end
             f0all=([beads(:).f0]);
-            badind=f0all<frange(1)|f0all>frange(2);
+            badind=f0all<frange(1)|f0all>frange(2)|isnan(f0all);
             beads(badind)=[];
             
             % * determine fglass, glass
@@ -51,25 +51,26 @@ classdef correct3Daberrations<interfaces.DialogProcessor
                 beads(k).f0glass=beads(k).f0-f0glass(beads(k).filenumber);
                 beads(k).loc.z0glass=beads(k).f0glass*p.dz+0*beads(k).loc.zglass;
                 indplot=(beads(k).loc.z0relative)>p.zrangeuse(1)&(beads(k).loc.z0relative)<p.zrangeuse(2);
-                plot(axh,beads(k).loc.zglass(indplot),beads(k).loc.znm(indplot))
+                plot(axh,beads(k).loc.zglass(indplot),beads(k).loc.znm(indplot),'.')
 %                 beads(k).stddz=std(diff(beads(k).loc.znm(indplot)));
                 hold on
             end
             
             p.axhere=[];
+            p.setzero=true;
             %get interpolation
             phere=p;
             phere.smoothing=[0.05 0.002];
-           [ZcorrInterp]=getZinterp(beads,[],phere);
-           p.cutoffrefine=300;
+           [ZcorrInterp]=getZinterp(beads,[],phere,'zglass');
+           p.cutoffrefine=500;
            [ZcorrInterp]=getZinterp(beads,ZcorrInterp,p);
            p.cutoffrefine=150;
             %calculate errors
-           [err1,dzerr]=geterrors(beads,ZcorrInterp);
+           [err1,dzerr]=geterrors(beads,ZcorrInterp,p);
            err0=err1;
            goodind=find(true(length(beads),1));
            beads2=beads;
-           while  length(beads2)>length(beads)/2
+           while  1% length(beads2)>length(beads)/2
                 cutoff=3*nanmean(err1);
                 badind=(err1>cutoff|isnan(err1));
                 if sum(badind)==0
@@ -80,7 +81,7 @@ classdef correct3Daberrations<interfaces.DialogProcessor
                 dzerr2=dzerr(goodind);
                 [ZcorrInterp]=getZinterp(beads2,ZcorrInterp,p);
                 %calculate errors
-                [err1,dzerrh]=geterrors(beads2,ZcorrInterp);    
+                [err1,dzerrh]=geterrors(beads2,ZcorrInterp,p);    
                 dzerr(goodind)=dzerrh;
            end
            
@@ -103,14 +104,18 @@ classdef correct3Daberrations<interfaces.DialogProcessor
             maxv=-inf;
            for k=1:length(beads)
 
-               dZ=ZcorrInterp(beads(k).loc.zglass,beads(k).loc.znm);
+               dZ=ZcorrInterp.interp(beads(k).loc.zglass,beads(k).loc.znm);
+%                 z0glass=beads(k).loc.zglass-(beads(k).loc.frame)*p.dz
+%                 dZ=ZcorrInterp.interp(z0glass,beads(k).loc.znm);
                beads(k).loc.znmcorrected=beads(k).loc.znm+dZ;
                
                if any(goodind==k)
                    col='k.';
                    inr=abs(beads(k).loc.z0relative)<1000;
+                   if sum(inr)>0
                    minv=min(min(minv,min(beads(k).loc.znm(inr))),min(beads(k).loc.znmcorrected(inr)));
                    maxv=max(max(maxv,max(beads(k).loc.znm(inr))),max(beads(k).loc.znmcorrected(inr)));
+                   end
                else
                    col='r.';
                end
@@ -151,9 +156,13 @@ classdef correct3Daberrations<interfaces.DialogProcessor
     end
 end
 
-function [Zint]=getZinterp(beads,Zintold,p)
+function [Zint]=getZinterp(beads,Zintold,p,zaxis)
+if nargin<4
+    zaxis='zglass';
+end
  %make big array for interpolation
  zglassall=[];z0relativeall=[];zfitall=[];idall=[];zplot=[];dzerrall=[];z0glassall=[];
+ 
             for k=1:length(beads)
                 
                 zglassall=double(vertcat(zglassall,beads(k).loc.zglass));
@@ -177,14 +186,25 @@ function [Zint]=getZinterp(beads,Zintold,p)
 %                 end
             end
             
-            zglassall=z0glassall;
-%             zplot(z0glassall<150)=0;
+            if strcmp(zaxis,'z0glass')
+                zzax=z0glassall;
+            else
+                zzax=zglassall;
+            end
+            
+            if p.setzero
+                zplot(z0glassall<150)=0;
+            end
+%             zglassall=z0glassall;
+%             zglassall=zglassall-
+            qzfit=myquantile(zfitall,[0.05,0.95]);
+            qzfit(1)=qzfit(1)-p.dz;qzfit(2)=qzfit(2)-p.dz;
             
             %for now don't follow up, later: remove single wrong
             %localizations.
             
             %determine range/outliers
-            qzfit=myquantile(zfitall,[0.05,0.95]);
+            
             inz=abs(z0relativeall)<800;
 %             inz=inz&z0glassall>-50;
             inz=inz&(zfitall)<qzfit(2)&(zfitall)>qzfit(1);
@@ -192,25 +212,41 @@ function [Zint]=getZinterp(beads,Zintold,p)
 %             zplot=z0relativeall-zfitall;
             inz=inz&abs(zplot)<800;
             
-            if ~isempty(Zintold)
-                
-                dz=Zintold(zglassall,zfitall)-zplot;
+            if ~isempty(Zintold)  
+                dz=Zintold.interp(zzax,zfitall)-zplot;
 
                 inz=inz&abs(dz)<p.cutoffrefine;
                 h=histcounts(idall(inz),(1:max(idall)+1))';
-                minpoints=150;
+                minpoints=(p.zrangeuse(2)-p.zrangeuse(1))/p.dz/2;
                 innump=h(idall)>minpoints;
                 inz=inz&innump;
             end
+            if p.setzero
+                    
+                    zfitx=(qzfit(1):p.dz:qzfit(2))';
+                    zfitallh=vertcat(zfitall(inz),zfitx,zfitx,zfitx);
+                    zploth=vertcat(zplot(inz),0*zfitx,0*zfitx,0*zfitx);
+                    zploth(z0glassall(inz)<150)=0;
+                    zzaxh=vertcat(zzax(inz),min(zzax)+0*zfitx,min(zfitx)+0*zfitx,mean([min(zfitx),min(zzax)])+0*zfitx);
+                
+            else
+                zfitallh=zfitall(inz);
+                zploth=zplot(inz);
+                zzaxh=zzax(inz);
+
+            end            
             
-            
-            xrange=min(zglassall(inz)):100:max(zglassall(inz));
+            xrange=min(zzax(inz)):100:max(zzax(inz));
             
             yrange=[qzfit(1):10: qzfit(2)];
             [X,Y]=meshgrid(xrange,yrange);  
             %interpolation
-            Z=RegularizeData3D(zglassall(inz),zfitall(inz),zplot(inz),xrange,yrange,'smoothness',p.smoothing);
-             Zint=griddedInterpolant(X',Y',Z');
+
+            idallh=idall(inz);
+            idallh(length(zzaxh))=0;
+            Z=RegularizeData3D(zzaxh,zfitallh,zploth,xrange,yrange,'smoothness',p.smoothing);
+             Zint.interp=griddedInterpolant(X',Y',Z');
+             Zint.zaxis=zaxis;
            
             
 %              Z=RegularizeData3D(zglassall(inz),zfitall(inz),zplot(inz),xrange,yrange,'smoothness',[.1,.001]);
@@ -218,11 +254,13 @@ function [Zint]=getZinterp(beads,Zintold,p)
 %             Zint=griddedInterpolant(X',Y',Z');
             
             if ~isempty(p.axhere)
-                scatter3(p.axhere,zglassall(inz),zfitall(inz),zplot(inz),[],idall(inz))
+                scatter3(p.axhere,zzax(inz),zfitall(inz),zplot(inz),[],idall(inz))
+
+%                 scatter3(p.axhere,zzaxh,zfitallh,zploth,[],idallh)
                 xlabel(p.axhere,'zglass');ylabel(p.axhere,'zfit'); zlabel(p.axhere,'z0r');
                 colormap(p.axhere,'lines')
                 hold(p.axhere,'on')
-                mesh(p.axhere,X,Y,Zint(X,Y),'FaceAlpha',0.2)
+                mesh(p.axhere,X,Y,Zint.interp(X,Y),'FaceAlpha',0.2)
             end
 end
 
@@ -238,7 +276,8 @@ for k=1: max([beads(:).filenumber])
       phot=[beads(indf).phot];
       dzh=50/p.dz;
       induse=f0<dzh*60;
-      induse=induse&phot>mean(phot);
+%       induse=induse&phot>median(phot);
+      mean(phot)
     
     f0=f0(induse); %only look in the first 3 um
     
@@ -260,26 +299,32 @@ else
     plot(ax,f0glass,ones(size(f0glass)),'k*')
 end
 end
-function [err1,dzerr]=geterrors(beads,Zint)
+function [err1,dzerr]=geterrors(beads,Zint,p)
 %   figure(99)
 %             hold off
-            xrange=Zint.GridVectors{1};
-            yrange=Zint.GridVectors{2};
+            xrange=Zint.interp.GridVectors{1};
+            yrange=Zint.interp.GridVectors{2};
+
   for k=1:length(beads)
         zh=double(beads(k).loc.znm);
         zglass=beads(k).loc.zglass;
         z0f=beads(k).loc.dzcorr;
         inz=abs(zh<300) & abs(z0f)<300 & (zh)<yrange(end) & (zh)>yrange(1);
 %                 inz= (zh)<qzfit(2) & (zh)>qzfit(1);
-        dz=Zint(zglass(inz),zh(inz))-z0f(inz);
+        dz=Zint.interp(zglass(inz),zh(inz))-z0f(inz);
 % 
 %         plot(zh(inz),dz)
 %         hold on
-        err1(k)=mean(dz.^2);
-        err2(k)=mean(abs(dz));
-        err3(k)=std(dz);
+  if p.setzero&&beads(k).f0glass*p.dz<2*p.dz %on glass
+      factor=0.2;
+  else
+      factor=1;
+  end        
+        err1(k)=mean(dz.^2)*factor;
+        err2(k)=mean(abs(dz))*factor;
+        err3(k)=std(dz)*factor;
 %         dzerr{k}=ones(size(beads(k).loc.znm))+NaN;
-         dzerr{k}=Zint(zglass,zh)-z0f;
+         dzerr{k}=Zint.interp(zglass,zh)-z0f;
    end
 end
 %
@@ -292,11 +337,15 @@ nn=loc.phot./(az+p.dz);
 [~,maxind]=max(nn);
 
 range=max(1,maxind-window):min(maxind+window,length(z));
+if sum(abs(z(range))<2*p.dz)<4
+    f0=NaN;
+else
 
-zs=double(z(range));
-fs=double(frames(range));
-fp=fit(zs,fs,'poly1');
-f0=fp(0);
+    zs=double(z(range));
+    fs=double(frames(range));
+    fp=fit(zs,fs,'poly1');
+    f0=fp(0);
+end
 end
 
 % function f0=getfsxsy(bead,p)

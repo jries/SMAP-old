@@ -1,10 +1,10 @@
 function bead=segmentb(obj,p)
 
-% minframes=(p.zrangeuse(2)-p.zrangeuse(1))/ p.dz/2;
-minframes=(p.zrangeuse(2)-p.zrangeuse(1))/ p.dz/10;
+minframes=(p.zrangeuse(2)-p.zrangeuse(1))/ p.dz/2;
+% minframes=(p.zrangeuse(2)-p.zrangeuse(1))/ p.dz/5;
 
 locDatacopy=obj.locData.copy;
-locDatacopy.regroup(150,minframes);
+locDatacopy.regroup(150,minframes/2);
 
 
 % beadind=find(locDatacopy.grouploc.numberInGroup>minframes);
@@ -30,4 +30,19 @@ for k=length(beadind):-1:1
         bead(k).loc.(fn{f})=double(bead(k).loc.(fn{f}));
     end    
 end
+
+%remove beads with close neighbours.
+mindist=1000;
+goodind=true(length(beadind),1);
+for k=1:length(beadind)
+    for l=k+1:length(beadind)
+        d2=sum((bead(k).pos-bead(l).pos).^2);
+        df=mean(bead(k).loc.frame)-mean(bead(l).loc.frame);
+        if bead(k).filenumber==bead(l).filenumber && d2<mindist^2 && df<p.zrangeuse(2)-p.zrangeuse(1)
+            goodind(k)=false;
+            goodind(l)=false;
+        end
+    end
+end
+bead=bead(goodind);
 end
