@@ -1,4 +1,10 @@
 function il=getimageloader(obj,filename)
+filename=strrep(filename,'\','/');
+[~,~,ext]=fileparts(filename);
+
+if isempty(ext)&&~strcmp(filename(end),'/') %directory
+    filename=[filename '/'];
+end
 try
     il=imageloaderAll(filename,[],obj.P); %still exist?
 catch

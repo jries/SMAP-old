@@ -108,7 +108,7 @@
 
 		for (kk=0;kk<iterations;kk++) {//main iterative loop
 
-			if(abs((newErr-oldErr)/newErr)<TOLERANCE){
+			if(fabs((newErr-oldErr)/newErr)<TOLERANCE){
 				//newStatus = CONVERGED;
 				break;
 			}
@@ -173,7 +173,7 @@
 							newSign[ll]=-1;
 						}
 
-						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+abs(newUpdate[ll]/newClamp[ll]));
+						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+fabs(newUpdate[ll]/newClamp[ll]));
 					}
 
 					newTheta[0] = max(newTheta[0],(float(sz)-1)/2-4);
@@ -346,7 +346,7 @@
 
 		for (kk=0;kk<iterations;kk++) {//main iterative loop
 
-			if(abs((newErr-oldErr)/newErr)<TOLERANCE){
+			if(fabs((newErr-oldErr)/newErr)<TOLERANCE){
 				//newStatus = CONVERGED;
 				break;
 			}
@@ -411,7 +411,7 @@
 							newSign[ll]=-1;
 						}
 
-						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+abs(newUpdate[ll]/newClamp[ll]));
+						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+fabs(newUpdate[ll]/newClamp[ll]));
 					}
 
 					newTheta[0] = max(newTheta[0],(float(sz)-1)/2-4);
@@ -597,7 +597,7 @@
 
 		for (kk=0;kk<iterations;kk++) {//main iterative loop
 
-			if(abs((newErr-oldErr)/newErr)<TOLERANCE){
+			if(fabs((newErr-oldErr)/newErr)<TOLERANCE){
 				//newStatus = CONVERGED;
 				break;
 			}
@@ -662,7 +662,7 @@
 							newSign[ll]=-1;
 						}
 
-						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+abs(newUpdate[ll]/newClamp[ll]));
+						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+fabs(newUpdate[ll]/newClamp[ll]));
 					}
 
 					newTheta[0] = max(newTheta[0],(float(sz)-1)/2-4);
@@ -830,7 +830,7 @@
 
 		for (kk=0;kk<iterations;kk++) {//main iterative loop
 
-			if(abs((newErr-oldErr)/newErr)<TOLERANCE){
+			if(fabs((newErr-oldErr)/newErr)<TOLERANCE){
 				//newStatus = CONVERGED;
 				break;
 			}
@@ -895,7 +895,7 @@
 							newSign[ll]=-1;
 						}
 
-						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+abs(newUpdate[ll]/newClamp[ll]));
+						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+fabs(newUpdate[ll]/newClamp[ll]));
 					}
 
 					newTheta[0] = max(newTheta[0],(float(sz)-1)/2-4);
@@ -1101,7 +1101,7 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 	int newStatus = 0;
 	for (kk=0;kk<iterations;kk++) {//main iterative loop
 
-			if(abs((newErr-oldErr)/newErr)<TOLERANCE){
+			if(fabs((newErr-oldErr)/newErr)<TOLERANCE){
 				//newStatus = CONVERGED;
 				newStatus =1;
 				break;
@@ -1169,7 +1169,7 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 							newSign[ll]=-1;
 						}
 
-						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+abs(newUpdate[ll]/newClamp[ll]));
+						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+fabs(newUpdate[ll]/newClamp[ll]));
 						newStatus = 4;
 					}
 

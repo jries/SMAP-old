@@ -31,6 +31,7 @@ classdef correct3Daberrations<interfaces.DialogProcessor
             for k=length(beads):-1:1
                    beads(k).loc.znm=beads(k).loc.znm;
                 [beads(k).f0]=getf0Z(beads(k).loc,p);
+                beads(k).phot=beads(k).loc.phot(min(length(beads(k).loc.phot),max(1,round(beads(k).f0))));
             end
             f0all=([beads(:).f0]);
             badind=f0all<frange(1)|f0all>frange(2);
@@ -41,13 +42,18 @@ classdef correct3Daberrations<interfaces.DialogProcessor
             f0glass=getf0glass(beads,p);
             p.f0glass=f0glass;
             %calculate relevant other coordinates
-            
+            axh=obj.initaxis('z vs frame');
+            hold off
             for k=1:length(beads)
                 beads(k).loc.zglass=(beads(k).loc.frame-f0glass(beads(k).filenumber))*p.dz;
                 beads(k).loc.z0relative=-(beads(k).f0-beads(k).loc.frame)*p.dz;
                 beads(k).loc.dzcorr=beads(k).loc.z0relative-beads(k).loc.znm;
                 beads(k).f0glass=beads(k).f0-f0glass(beads(k).filenumber);
                 beads(k).loc.z0glass=beads(k).f0glass*p.dz+0*beads(k).loc.zglass;
+                indplot=(beads(k).loc.z0relative)>p.zrangeuse(1)&(beads(k).loc.z0relative)<p.zrangeuse(2);
+                plot(axh,beads(k).loc.zglass(indplot),beads(k).loc.znm(indplot))
+%                 beads(k).stddz=std(diff(beads(k).loc.znm(indplot)));
+                hold on
             end
             
             p.axhere=[];
@@ -229,8 +235,13 @@ end
 for k=1: max([beads(:).filenumber]) 
     indf=[beads(:).filenumber]==k;
       f0=[beads(indf).f0];
-    dzh=50/p.dz;
-    f0=f0(f0<dzh*40); %only look in the first 2 um
+      phot=[beads(indf).phot];
+      dzh=50/p.dz;
+      induse=f0<dzh*60;
+      induse=induse&phot>mean(phot);
+    
+    f0=f0(induse); %only look in the first 3 um
+    
     range=0:dzh:1000;
     h=histogram(ax,f0,range);
 

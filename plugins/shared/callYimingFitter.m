@@ -34,3 +34,5 @@ end
 % end
 
 [P,CRLB,LogL]=allfitters{fitter}(varargingpu{:});
+
+%

@@ -1,6 +1,7 @@
 function bead=segmentb(obj,p)
 
-minframes=(p.zrangeuse(2)-p.zrangeuse(1))/ p.dz/2;
+% minframes=(p.zrangeuse(2)-p.zrangeuse(1))/ p.dz/2;
+minframes=(p.zrangeuse(2)-p.zrangeuse(1))/ p.dz/10;
 
 locDatacopy=obj.locData.copy;
 locDatacopy.regroup(150,minframes);
