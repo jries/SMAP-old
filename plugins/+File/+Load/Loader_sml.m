@@ -91,7 +91,7 @@ for k=1:nfiles
     if ~myisfield(templocData.files.file(k).info,'roi')||isempty(templocData.files.file(k).info.roi)||~isnumeric(templocData.files.file(k).info.roi)
         templocData.files.file(k).info.roi=[0 0 templocData.files.file(k).info.Width templocData.files.file(k).info.Height];
     end
-    if ~isfield(templocData.files.file(k).info,'cam_pixelsize_um')
+    if ~myisfield(templocData.files.file(k).info,'cam_pixelsize_um')
         templocData.files.file(k).info.cam_pixelsize_um=templocData.files.file(k).info.pixsize([1 1]);
     end
     if length(templocData.files.file(k).info.cam_pixelsize_um)==1
