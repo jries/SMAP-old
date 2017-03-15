@@ -23,7 +23,7 @@ end
 obj.setPar('filelist_long',fl,'String');
 % obj.locData.filter;
 if resetview
-    obj.setPar('cam_pixelsize_nm',obj.locData.files.file(1).info.cam_pixelsize_um*1000)
+    obj.setPar('cam_pixelsize_um',obj.locData.files.file(1).info.cam_pixelsize_um*1000)
     file=obj.locData.files(1).file;
     info=file.info;
     roi=info.roi;
