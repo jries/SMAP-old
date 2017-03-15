@@ -177,6 +177,9 @@ function axall=getaxes(p)
                 
                 ax=maketgax(axall.allsplines,'validate');
                 axall.hspline_validate=uitabgroup(ax.Parent);
+                
+                ax=maketgax(axall.allsplines,'stripes');
+                axall.hspline_stripes=uitabgroup(ax.Parent);
             end  
                 
             %init validation and summary axes

@@ -313,6 +313,8 @@ for Z=1:length(p.Zrange)-1
             zall=testfit(testallrois,cspline.coeff,p,{},ax);
             zref=testfit(corrPSF,cspline.coeff,p,{'k','LineWidth',2},ax);
             end
+            ax=maketgax(axall.hspline_stripes,tgt);
+            teststripes(cspline.coeff,p,ax);
             
 %             ztest=zall;
 %             for k=1:size(ztest,2)
@@ -337,7 +339,15 @@ for Z=1:length(p.Zrange)-1
 end
 end
 
-
+function teststripes(coeff,p,ax)
+nn=rand(11,11,100000,'single');
+P=callYimingFitter(nn,single(coeff),50,5,0,0);
+zr=0:0.05:max(P(:,5));
+h=histcounts(P(:,5),zr);
+h(1)=[];h(end)=[];
+hx=myxcorr(h,h);
+plot(zr,h,zr,hx/max(hx)*max(h));
+end
 function zs=testfit(teststack,coeff,p,linepar,ax)
 if nargin<4
     linepar={};
