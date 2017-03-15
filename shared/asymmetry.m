@@ -1,6 +1,7 @@
 function [out,asymmr,dir]=asymmetry(imin)
 if isempty(imin)
     out=0;dir=0;asymmr=0;
+    return
 end
 if iscell(imin)
     for k=numel(imin):-1:1

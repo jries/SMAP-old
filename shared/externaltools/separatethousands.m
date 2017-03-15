@@ -30,6 +30,10 @@ function numstring = separatethousands(number, separator, decimalspaces)
         decimalspaces = 0;
     end
     
+    if isempty(number)
+        numstring='';
+        return
+    end
     % Check if negative
     if number < 0
         modified_number(1) = -number;
