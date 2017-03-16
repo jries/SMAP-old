@@ -104,7 +104,7 @@ th=tha(inr);rho=rhoa(inr);
 % find rotation
 locptheta=locs.locprecnm(inr)./rho;
 
-out.coordinates=struct('rho',rho,'theta',th,'drho',locs.locprecnm(inr), 'dtheta',locptheta);
+out.coordinates=struct('rho',rho,'theta',th,'drho',locs.locprecnm(inr), 'dtheta',locptheta,'x',locs.xnm,'y',locs.ynm);
 % dth=mod(th,step);
 mdt=cyclicaverage(th,step,1./locptheta.^2);
 if mdt>pi/16

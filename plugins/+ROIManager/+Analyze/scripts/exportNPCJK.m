@@ -58,7 +58,9 @@ for ff=1:length(se.files)
             rall.theta(rangeh,1)=coordinates.theta;
             rall.drho(rangeh,1)=coordinates.drho;
             rall.dtheta(rangeh,1)=coordinates.dtheta;   
-            
+            rall.x(rangeh,1)=coordinates.x;
+            rall.y(rangeh,1)=coordinates.y;
+            rall.xyerr(rangeh,1)=coordinates.drho;
             rall.cornersfiltered(rangeh,1)=r.cornersfiltered(indtab);
             
             rall.labels(rangeh,1)=r.plabel(indtab)*100;
