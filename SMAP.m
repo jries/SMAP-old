@@ -21,4 +21,5 @@ if ~isdeployed
         disp(['git: ' message(1:ind(min(4,length(ind))))]);
     end
 end
+
  

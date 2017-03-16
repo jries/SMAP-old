@@ -1,6 +1,6 @@
 global se
 
-savetiff=false;
+savetiff=true;
 savecoordinates=true;
 savelist=true;
 savesml=true;
