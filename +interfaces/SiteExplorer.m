@@ -367,7 +367,7 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
                 end
                 roi=file.info.roi;
                 roi([1 3])=roi([1 3])*pixrec(1);
-                roi([2 4])=roi([2 4])*pixrec(2);
+                roi([2 4])=roi([2 4])*pixrec(end);
 
                 % test for SML could be all wrong
                 p1.sr_pos=[roi(1)+roi(3)/2 roi(2)+roi(4)/2];
