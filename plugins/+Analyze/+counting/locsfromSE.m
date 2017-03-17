@@ -7,7 +7,8 @@ classdef locsfromSE<interfaces.DialogProcessor
         
         function out=run(obj,p)
             sites=obj.locData.SE.sites;
-            nums=length(sites);
+            induse=find(getFieldAsVector(sites,'annotation','use'));
+            nums=length(induse);
             locprecnm=zeros(nums,1);
             localizations=zeros(nums,1);
             psf=zeros(nums,1);
@@ -20,7 +21,7 @@ classdef locsfromSE<interfaces.DialogProcessor
                     gfield='noblink';
             end
             ind=1;
-            for k=1:nums
+            for k=induse
                 if ~p.c_listofcellsc|| any(sites(k).info.cell==p.c_listofcells)
                     info=sites(k).evaluation.countingStatistics;
                     locprecnm(ind)=info.locprecnm;
@@ -69,6 +70,7 @@ classdef locsfromSE<interfaces.DialogProcessor
             [y,x]=hist(dlocs,0:dloc:maxhist+dloc);
             xlim([1,100])
             plot(x,y)
+            title(['mean: ' num2str(mean(dlocs(dlocs<maxhist))) ',median: ' num2str(median(dlocs(dlocs<maxhist)))]);
             % sum(y)
             % length(cluster)
 

@@ -12,35 +12,39 @@ classdef SEExploreGui<interfaces.SEProcessor
         function makeGui(obj)
 %             obj.handle=figure(37);
 %             clf
-            fontsize=16;
+            if ispc
+                fontsize=14;
+            else
+                        fontsize=16;
+            end
             set(obj.handle,'Position',[560,300,800,1000]);
              set(obj.handle,'MenuBar','none','Toolbar','none','SizeChangedFcn',{@sizechanged_callback,obj},'Name','ROIManager','NumberTitle','off')
              h.siteax=axes('Position',[.05,.6,.4,.32],'DataAspectRatio',[1 1 1],'NextPlot','replacechildren');
              h.cellax=axes('Position',[.55,.6,.4,.32],'DataAspectRatio',[1 1 1],'NextPlot','replacechildren');
              h.fileax=axes('Position',[.05,.2,.4,.32],'DataAspectRatio',[1 1 1],'NextPlot','replacechildren');%,'PlotBoxAspectRatio',[1 1 1],'DataAspectRatioMode','manual','PlotBoxAspectRatioMode','manual');
 %              h.filelist=uicontrol(obj.handle,'Position',[.05,.05,.4,.1],'Style','listbox','String','X://','Units','normalized')
-             h.filelist=uicontrol(obj.handle,'Position',[10,10,580,150],'Style','listbox','String','empty ','Units','normalized','FontSize',fontsize,'Callback',{@filelist_callback,obj});
-             h.sitelist=uicontrol(obj.handle,'Position',[400,160,190,380],'Style','listbox',...
+             h.filelist=uicontrol(obj.handle,'Position',[10,10,580+20,150],'Style','listbox','String','empty ','Units','normalized','FontSize',fontsize,'Callback',{@filelist_callback,obj});
+             h.sitelist=uicontrol(obj.handle,'Position',[400-10,160,190+30,380],'Style','listbox',...
                  'String','empty ','Units','normalized','FontSize',fontsize,'max',100,'Callback',{@sitelist_callback,obj});
-             h.celllist=uicontrol(obj.handle,'Position',[600,360,190,180],'Style','listbox',...
+             h.celllist=uicontrol(obj.handle,'Position',[600+20,360,190-20,180],'Style','listbox',...
                  'String',' empty','Units','normalized','FontSize',fontsize,...
                  'Callback',{@celllist_callback,obj});
              h.redrawsite=uicontrol(obj.handle,'Position',[30,925,100,40],'Style','pushbutton','String','redraw','Units','normalized','FontSize',fontsize,'Callback',{@redrawsite_callback,obj});
              h.addsite=uicontrol(obj.handle,'Position',[290,925,60,40],'Style','pushbutton','String','Add','Units','normalized','FontSize',fontsize,'Callback',{@addsite,obj});
-             h.removesite=uicontrol(obj.handle,'Position',[400,540,90,30],'Style','pushbutton','String','Remove','Units','normalized','FontSize',fontsize,'Callback',{@removesite_callback,obj});
-             h.toggleuse=uicontrol(obj.handle,'Position',[510,540,70,30],'Style','pushbutton','String','Use','Units','normalized','FontSize',fontsize,'Callback',{@toggleuse_callback,obj});
+             h.removesite=uicontrol(obj.handle,'Position',[400-10,540,90,30],'Style','pushbutton','String','Remove','Units','normalized','FontSize',fontsize,'Callback',{@removesite_callback,obj});
+             h.toggleuse=uicontrol(obj.handle,'Position',[510+20,540,70,30],'Style','pushbutton','String','Use','Units','normalized','FontSize',fontsize,'Callback',{@toggleuse_callback,obj});
              
              
              h.redrawcell=uicontrol(obj.handle,'Position',[430,925,100,40],'Style','pushbutton','String','redraw','Units','normalized','FontSize',fontsize,'Callback',{@redrawcell_callback,obj});
              h.addcell=uicontrol(obj.handle,'Position',[650,925,60,40],'Style','pushbutton','String','Add','Units','normalized','FontSize',fontsize,'Callback',{@addcell,obj});
-             h.removecell=uicontrol(obj.handle,'Position',[600,540,90,30],'Style','pushbutton','String','Remove','Units','normalized','FontSize',fontsize,'Callback',{@removecell_callback,obj});
+             h.removecell=uicontrol(obj.handle,'Position',[600+20,540,90,30],'Style','pushbutton','String','Remove','Units','normalized','FontSize',fontsize,'Callback',{@removecell_callback,obj});
              
              h.redrawfile=uicontrol(obj.handle,'Position',[30,525,100,40],'Style','pushbutton','String','redraw','Units','normalized','FontSize',fontsize,'Callback',{@redrawfile_callback,obj});
              h.fileax.ButtonDownFcn={@fileaxclick,obj};
              h.cellax.ButtonDownFcn={@cellaxclick,obj};
              h.siteax.ButtonDownFcn={@siteaxclick,obj};
              
-             h.info=uicontrol(obj.handle,'Position',[600,10,190,340],'Style','listbox','String','info','FontSize',fontsize*.85,'Max',10,'Units','normalized');
+             h.info=uicontrol(obj.handle,'Position',[600+20,10,190-20,340],'Style','listbox','String','info','FontSize',fontsize*.85,'Max',10,'Units','normalized');
              
              h.anglebutton=uicontrol(obj.handle,'Position',[150,925,60,40],'Style','pushbutton','String','Angle','Units','normalized','FontSize',fontsize,'Callback',{@anglebutton_callback,obj});
              h.angle=uicontrol(obj.handle,'Position',[210,925,60,40],'Style','edit','String','0','Units','normalized','FontSize',fontsize,'Callback',{@angle_callback,obj});
@@ -122,7 +126,13 @@ classdef SEExploreGui<interfaces.SEProcessor
         obj.SE.currentcell=cells(k);
         end
         sites=obj.SE.sites;
-        for k=1:length(sites)
+        indselected=obj.getSingleGuiParameter('sitelist').Value;
+        if length(indselected)>1 %only redraw selected
+            disp('redrawing only selected sites')
+        else
+            indselected=1:length(sites);
+        end
+        for k=indselected
             
             obj.guihandles.sitelist.Value=k;   
             obj.status(['redrawall: site ' num2str(k) ' of ' num2str(length(sites))])
