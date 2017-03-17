@@ -45,6 +45,22 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
 %             attachLocData@interfaces.LocDataInterface(obj,locData);
 %             obj.initializeProcessors()
 %         end
+        function seout=copy(obj)
+            seout=interfaces.SiteExplorer;
+            pp=properties(obj);
+            direct={'P','locData'};
+            for k=1:length(pp)
+                if isa(obj.(pp{k}),'handle')&&~any(strcmp(pp{k},direct))
+
+                     seout.(pp{k})=copy(obj.(pp{k}));
+
+                else
+                    seout.(pp{k})=(obj.(pp{k}));
+                end
+            end
+            
+            
+        end
         function addSites(obj, SEin,filenew,files)
             if isempty(filenew)
                 filenew=1:max([SEin.files(:).ID]);

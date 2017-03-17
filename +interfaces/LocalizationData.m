@@ -443,7 +443,8 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             locout=interfaces.LocalizationData;
            locout.P=obj.P;
             locout.files=obj.files;
-            
+            locout.SE=obj.SE.copy;
+             locout.SE.locData=locout;
             if nargin<2
                 locout.loc=obj.loc;
                 locout.grouploc=obj.grouploc;
@@ -510,7 +511,9 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                         end                
                     end
                 end
+                
             end
+            
         end
         
         function regroup(obj,dx,dt)  
