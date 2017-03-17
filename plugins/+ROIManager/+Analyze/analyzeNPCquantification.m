@@ -149,6 +149,28 @@ ax7=obj.initaxis('comparison');
     numbercornerassinedm=mean(numbercornerassined-numcorners);
 
     title(['int: ' num2str(numfoundintm),', rat: ' num2str(numfoundratm), ' ,asssigned: ' num2str(numbercornerassinedm)])
+    
+    
+ax8=obj.initaxis('comparison h');
+
+range=-8:8;
+rangep=range(1:end-1)-0.5;
+h1=histcounts(numfoundint-numcorners,range);
+h2=histcounts(numfoundrat-numcorners,range);
+h3= histcounts(numbercornerassined-numcorners,range);
+stairs(ax8,rangep,h1)
+hold on;
+stairs(rangep,h2);
+stairs(rangep,h3);
+hold off
+  
+
+axis tight
+xlim(ax8,[-8 8])
+t8={['I:' num2str(mean(numfoundint-numcorners),2) '\pm' num2str(std(numfoundint-numcorners),2)],[ 'p:' num2str(mean(numfoundrat-numcorners),2) '\pm' num2str(std(numfoundrat-numcorners),2)],[ 'a:' num2str(mean(numbercornerassined-numcorners),2) '\pm' num2str(std(numbercornerassined-numcorners),2)]};
+% title(ax8,t8)
+%   ax8l=legend(ax8,'integer','prob','assigned');
+   ax8l=legend(ax8,t8);
 end
 
 
@@ -190,6 +212,13 @@ if p.copy2page
         axt=ax6.copy;
     axt.Parent=f;
     subplot(3,3,8,axt) 
+    end
+    if exist('ax8','var')
+        axt=ax8.copy;
+    axt.Parent=f;
+    subplot(3,3,9,axt) 
+     ax8l=legend(axt,t8,'Location','northoutside');
+%     legend(axt,'integer','prob','assigned','Location','northwestoutside');
     end
 end
 
