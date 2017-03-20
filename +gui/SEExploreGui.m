@@ -96,6 +96,7 @@ classdef SEExploreGui<interfaces.SEProcessor
             if nargin<2
                 onlysites=false;
             end
+            indselected=obj.getSingleGuiParameter('sitelist').Value;
             if ~onlysites
         files=obj.SE.files;
         for k=1:length(files)
@@ -126,7 +127,7 @@ classdef SEExploreGui<interfaces.SEProcessor
         obj.SE.currentcell=cells(k);
         end
         sites=obj.SE.sites;
-        indselected=obj.getSingleGuiParameter('sitelist').Value;
+        
         if length(indselected)>1 %only redraw selected
             disp('redrawing only selected sites')
         else
