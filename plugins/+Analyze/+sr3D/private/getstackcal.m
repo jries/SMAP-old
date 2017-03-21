@@ -171,7 +171,7 @@ for Z=1:length(p.Zrange)-1
             elseif length(lambda)<3
                 lambda=[lambda(1) lambda(1) lambda(2)];
             end
-            lambda(1:2)=lambda(1:2)/p.cam_pixelsize_nm;
+            lambda(1:2)=lambda(1:2)./p.cam_pixelsize_um/1000;
             lambda(3)=lambda(3)/p.dz;
             else
                 lambda=0;
@@ -340,13 +340,39 @@ end
 end
 
 function teststripes(coeff,p,ax)
-nn=rand(11,11,100000,'single');
-P=callYimingFitter(nn,single(coeff),50,5,0,0);
-zr=0:0.05:max(P(:,5));
-h=histcounts(P(:,5),zr);
-h(1)=[];h(end)=[];
-hx=myxcorr(h,h);
-plot(zr,h,zr,hx/max(hx)*max(h));
+tt=tic;
+
+zr=0:0.2:p.roiframes;
+xr=0:0.05:p.roisize;
+hz=zeros(1,length(zr)-1);
+hx=zeros(1,length(xr)-1);
+hy=hx;
+while toc(tt)<90
+    nn=rand(11,11,50000,'single');
+    P=callYimingFitter(nn,single(coeff),50,5,0,0);
+    
+    hz=histcounts(P(:,5),zr)+hz;
+    hx=histcounts(P(:,1),xr)+hx;
+    hy=histcounts(P(:,2),xr)+hy;
+    
+end
+
+hz(1)=[];hz(end)=[];
+indx=(hx==0);
+hx(indx)=[];
+indy=(hy==0);
+hy(indy)=[];
+hx(1)=[];hx(end)=[];
+hy(1)=[];hy(end)=[];
+hzx=myxcorr(hz-mean(hz),hz-mean(hz));
+hxx=myxcorr(hx-mean(hx),hx-mean(hx));
+hyx=myxcorr(hy-mean(hy),hy-mean(hy));
+ax2=axes(ax.Parent);
+subplot(1,2,1,ax);
+subplot(1,2,2,ax2);
+findx=find(~indx);findy=find(~indy);
+plot(ax,zr(2:end-2),hz,zr(2:end-2),hzx/max(hzx)*max(hz));
+plot(ax2,xr(findx(2:end-1)),hx,xr(findx(2:end-1)),hxx/max(hxx)*max(hx),xr(findy(2:end-1)),hy,xr(findy(2:end-1)),hyx/max(hyx)*max(hy));
 end
 function zs=testfit(teststack,coeff,p,linepar,ax)
 if nargin<4

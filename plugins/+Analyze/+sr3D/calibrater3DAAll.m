@@ -29,8 +29,8 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
             % get f0 for beads
             disp('get bead z positions')
             for k=1:length(beads)
-                beads(k).loc.PSFxpix=beads(k).loc.PSFxnm/p.cam_pixelsize_nm(1);
-                 beads(k).loc.PSFypix=beads(k).loc.PSFynm/p.cam_pixelsize_nm(end);
+                beads(k).loc.PSFxpix=beads(k).loc.PSFxnm/p.cam_pixelsize_um(1)/1000;
+                 beads(k).loc.PSFypix=beads(k).loc.PSFynm/p.cam_pixelsize_um(end)/1000;
                 [beads(k).f0,beads(k).psfx0,beads(k).psfy0]=getf0site(beads(k).loc,p);
             end
             badind=isnan([beads(:).f0]);
@@ -1001,7 +1001,7 @@ pard.Smax.object=struct('String','4','Style','edit');
 pard.Smax.position=[9,tmax-tp+2];
 pard.Smax.Width=w;
 
-pard.inputParameters={'cam_pixelsize_nm'};
+pard.inputParameters={'cam_pixelsize_um'};
 pard.plugininfo.type='ProcessorPlugin';
 
 
