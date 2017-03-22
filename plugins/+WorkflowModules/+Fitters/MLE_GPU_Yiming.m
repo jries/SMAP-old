@@ -33,17 +33,16 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
                 EMfile=obj.getPar('loc_fileinfo').EMon;
                 EMcal=obj.fitpar.splinefit{1}.cspline.isEM;
                 obj.fitpar.mirrorstack=~(EMfile==EMcal);
-            end
-            p=obj.getAllParameters;
-            if p.overwritePixelsize
-                obj.setPar('overwrite_pixelsize',[p.pixelsizex p.pixelsizey])
-                cs=obj.getPar('loc_cameraSettings');
-                cs.cam_pixelsize_um=[p.pixelsizex p.pixelsizey];
-                obj.setPar('loc_cameraSettings',cs);
-            else
-                obj.setPar('overwrite_pixelsize',[])
-            end
-               
+                p=obj.getAllParameters;
+                if p.overwritePixelsize
+                    obj.setPar('overwrite_pixelsize',[p.pixelsizex p.pixelsizey])
+                    cs=obj.getPar('loc_cameraSettings');
+                    cs.cam_pixelsize_um=[p.pixelsizex p.pixelsizey];
+                    obj.setPar('loc_cameraSettings',cs);
+                else
+                    obj.setPar('overwrite_pixelsize',[])
+                end
+            end   
             
             disp(reporttext)
         end
