@@ -40,6 +40,10 @@ classdef OnlineReconstruction<interfaces.WorkflowModule
             end
             
             obj.fileinfo=obj.getPar('loc_cameraSettings');
+            op=obj.getPar('overwrite_pixelsize');
+            if ~isempty(op)
+                  obj.fileinfo.cam_pixelsize_um=op;
+            end
             obj.setPar('currentfileinfo',obj.fileinfo);
             obj.setPar('filelist_long',filelist,'String')
             obj.setPar('filelist_short',filelists,'String')

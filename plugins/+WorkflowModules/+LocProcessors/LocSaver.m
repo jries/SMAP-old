@@ -57,6 +57,11 @@ classdef LocSaver<interfaces.WorkflowModule
              obj.locDatatemp.addhistory(p);
              
              obj.fileinfo=obj.getPar('loc_cameraSettings');    %not used?  
+              op=obj.getPar('overwrite_pixelsize');
+              if ~isempty(op)
+                  obj.fileinfo.cam_pixelsize_um=op;
+              end
+             
              obj.timer=tic;
              obj.run(); %clear variables;
         end

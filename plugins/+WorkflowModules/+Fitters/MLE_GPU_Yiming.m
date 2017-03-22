@@ -37,6 +37,9 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             p=obj.getAllParameters;
             if p.overwritePixelsize
                 obj.setPar('overwrite_pixelsize',[p.pixelsizex p.pixelsizey])
+                cs=obj.getPar('loc_cameraSettings');
+                cs.cam_pixelsize_um=[p.pixelsizex p.pixelsizey];
+                obj.setPar('loc_cameraSettings',cs);
             else
                 obj.setPar('overwrite_pixelsize',[])
             end
