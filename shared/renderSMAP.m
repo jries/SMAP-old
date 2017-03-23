@@ -5,7 +5,7 @@ if nargin==0
     %input parameters
     imageo={'ch_filelist','sr_pixrec','sr_axes','sr_pos','sr_size','rendermode','render_colormode',...
                 'renderfield','colorfield_min','colorfield_max','groupcheck','lut','shiftxy_min','shiftxy_max'...
-                'mingaussnm','mingausspix','gaussfac','sr_sizeRecPix','shift','displayLocsInd','cam_pixelsize_nm','remout',...
+                'mingaussnm','mingausspix','gaussfac','sr_sizeRecPix','shift','displayLocsInd','cam_pixelsize_um','remout',...
                 'rangex','rangey','intensitycoding','sr_layersseparate','sr_layerson'};
     return          
 end
@@ -180,14 +180,14 @@ switch lower(p.rendermode.selection)
             end
         end
     case 'dl'
-        if ~isfield(p,'cam_pixelsize_nm')
-            p.cam_pixelsize_nm=140;
+        if ~isfield(p,'cam_pixelsize_um')
+            p.cam_pixelsize_um=.140;
         end
-        p.sr_pixrec=p.cam_pixelsize_nm;
-        if isfield(locsh,'PSFxnm')&&~isempty(locsh.PSFxnm)
+        p.sr_pixrec=p.cam_pixelsize_um(1)*1000;
+        if isfield(locsh,'PSFxnm')&&~isempty(locsh.PSFxnm) &&all(locsh.PSFxnm(indin)>0)
             pos.s=locsh.PSFxnm(indin);
         else
-            pos.s=pos.x*0+p.cam_pixelsize_nm;
+            pos.s=pos.x*0+p.cam_pixelsize_um(1)*1000;
         end
  
         dl=1;
