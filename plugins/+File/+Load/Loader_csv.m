@@ -243,7 +243,7 @@ filestruc.name=file;
 mx=ceil(max(locData.loc.xnm)/100);
 my=ceil(max(locData.loc.ynm)/100);
 
-filestruc.info=struct('Width',mx,'Height',my,'roi',[0 0 mx my],'pixsize',100/1000);
+filestruc.info=struct('Width',mx,'Height',my,'roi',[0 0 mx my],'cam_pixelsize_um',100/1000);
 if obj.locData.files.filenumberEnd==0
     obj.locData.files.file=filestruc;
     
