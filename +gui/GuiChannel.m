@@ -371,7 +371,7 @@ else
     object.String='Imax';
     obj.quantilestore=str2num(obj.guihandles.imax_min.String);
     try
-    imax=obj.locData.layer(obj.layer).images.finalImages.imax_min;
+    imax=obj.locData.layer(obj.layer).images.finalImages.imax;
     catch
         imax=1;
     end
