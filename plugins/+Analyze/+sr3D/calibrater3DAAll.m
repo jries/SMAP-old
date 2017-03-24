@@ -100,7 +100,12 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
             end
             plotcurves(obj,SXY,axall,p)
             %save
-            [path,file]=fileparts(obj.getPar('lastSMLFile'));
+            lastf=obj.getPar('lastSMLFile');
+            if ~isempty(lastf)
+            [path,file]=fileparts(lastf);
+            else
+                [file,path]=uiputfile('3d.mat');
+            end
             file=strrep(file,'_sml','_3Dcal');
             save([path filesep file],'SXY')
         end
