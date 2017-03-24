@@ -121,18 +121,18 @@ end
 function p=getranges(p)
 if p.spatialcalibration
     
-    Xrange=(p.Xmin:p.Xd:p.Xmax).*p.cam_pixelsize_nm;
-    Yrange=(p.Ymin:p.Yd:p.Ymax).*p.cam_pixelsize_nm;
+    Xrange=(p.Xmin:p.Xd:p.Xmax).*p.cam_pixelsize_um(1)*1000;
+    Yrange=(p.Ymin:p.Yd:p.Ymax).*p.cam_pixelsize_um(end)*1000;
 
     Zrange=p.Zval;
     if ischar(Zrange)
         Zrange=str2num(Zrange)
     end
     if length(Xrange)==1
-        Xrange(2)=p.Xmax*p.cam_pixelsize_nm;
+        Xrange(2)=p.Xmax*p.cam_pixelsize_um(1)*1000;
     end
     if length(Yrange)==1
-        Yrange(2)=p.Ymax*p.cam_pixelsize_nm;
+        Yrange(2)=p.Ymax*p.cam_pixelsize_um(end)*1000;
     end
     if length(Zrange)==1
         Zrange(2)=p.Zmax;
