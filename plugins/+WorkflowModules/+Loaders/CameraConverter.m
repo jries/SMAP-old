@@ -173,7 +173,7 @@ end
 answer=inputdlg(fields,'Acquisition settings',1,defAns);
 if ~isempty(answer)
     for k=1:length(fn)
-        if isnumeric(obj.loc_cameraSettings.(fn{k}))||islogical(obj.loc_cameraSettings.(fn{k}))
+        if isnumeric(obj.loc_cameraSettingsStructure.(fn{k}))||islogical(obj.loc_cameraSettingsStructure.(fn{k}))
             obj.loc_cameraSettings.(fn{k})=str2num(answer{k});
         else
             obj.loc_cameraSettings.(fn{k})=(answer{k});
