@@ -77,7 +77,7 @@ for(k=0;k<numlocs;k++)
                             {
                             inttemp=(Gtemplate[xt+yt*Gx]*gaussnorm);
                             oldfac=transparency*inttemp;
-                            oldfac2=oldfac;
+                            oldfac2=oldfac*5;
                             if(oldfac2>1) oldfac2=1;
                             
                             for(col=0;col<3;col++)
@@ -164,8 +164,9 @@ void mexFunction( int nlhs, mxArray *plhs[],
 
      srec3[0]=srec[0];
      srec3[1]=srec[1];
+         //  printf("output size %i,%i,%i\n",srec3[0],srec3[1],srec3[2]);
      plhs[0] = mxCreateNumericArray(3,srec3,mxSINGLE_CLASS,mxREAL);
-     /*printf("output size %i,%i,%i\n",srec3[0],srec3[1],sl);*/
+
 
   
   /*  create a C pointer to a copy of the output matrix */

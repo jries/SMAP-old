@@ -69,7 +69,7 @@ end
     
 % srim=gaussrenderi(xpix,ypix,srec,pos.s,G.template,G.sigmatemplate,roiks,N,uselut,pos.c,lut, rangec);
 if ~isempty(xpix)&&~isempty(ypix)&&~isempty(xspix)&&~isempty(yspix)&&~isempty(pos.c)
-[srim,nlocs]=gaussrender_T_elliptc(single(xpix-1),single(ypix-1),uint32(srec),single(xspix),single(yspix),single(G.template),single(G.sigmatemplate),...
+[srim,nlocs]=gaussrender_T_elliptc(single(xpix-1),single(ypix-1),uint64(srec),single(xspix),single(yspix),single(G.template),single(G.sigmatemplate),...
     single(roiks),single(N),int32(uselut),single(pos.c),single(lut), single(rangec),single(transparency));
 srim=permute(srim,[2 1 3]);
 

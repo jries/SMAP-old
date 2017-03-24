@@ -63,15 +63,27 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 figure;
                 obj.axis=gca;
             end
-            obj.axis.Units='normalized';
-            obj.axis.Position=[0.05 0.05 .95 .9];
+            
+            
             
              set(obj.axis,'NextPlot','replacechildren','PickableParts','all','Units','pixels')
             fig=getParentFigure(obj.axis);
+
+            obj.axis.Units='normalized';
+             if strcmp(p.stereo.selection,'goggles')
+                 fig.ToolBar='none';
+                 fig.MenuBar='none';
+                 obj.axis.Position=[0 0 1 1];
+                 fig.Color=[0 0 0];
+             else
+                 obj.axis.Position=[0.05 0.05 .95 .9];
+                 fig.ToolBar='figure';
+                 fig.MenuBar='figure';
+                 fig.Color=[0.94 0.94 0.94];
+             end
              axis(obj.axis,'tight');
              axis(obj.axis,'equal');
              axis(obj.axis,'ij');
-            
              set(fig,'WindowKeyPressFcn',{@obj.keypress,[]})
              set(fig,'WindowButtonDownFcn',{@obj.mousebutton,1})
              fig.BusyAction='cancel';
@@ -398,7 +410,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             end
             
             ph.sr_axes=[];
-            for k=1:p.numberOfLayers
+            for k=p.numberOfLayers:-1:1
                 pl=p.(['layer' num2str(k) '_']);
                 if pl.layercheck
                     if length(obj.recpar)>=k
@@ -540,6 +552,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                     eyemm=35;
                     dplanemm=p.dplanemm;
                     pixmm=p.monitorpmm;
+                    obj.axis.Units='pixel';
                     widthpix=obj.axis.Position(3);
 %                     pixnm=ph.sr_pixrec;
                     widthnm=ph.rangex(2)-ph.rangex(1);
@@ -554,9 +567,15 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                         p.transparencypar(2)=5;
                     end
                if stereo   
-                    loc.x1=(x-xe1)./(1+sortdepth/dplanenm)+xe1;
-                    loc.x2=(x-xe2)./(1+sortdepth/dplanenm)+xe2;
-                    loc.y=(y)./(1+sortdepth/dplanenm);
+%                     dplanenm=max(abs(sortdepth))*1.5;
+                    fac=(sortdepth+dplanenm)/dplanenm;
+                    loc.x2=(x-xe1)./(fac)+xe1;
+                    loc.x1=(x-xe2)./(fac)+xe2;
+                    loc.y=(y)./(fac);
+
+%                     loc.x1=(x-xe1)./(1+sortdepth/dplanenm)+xe1;
+%                     loc.x2=(x-xe2)./(1+sortdepth/dplanenm)+xe2;
+%                     loc.y=(y)./(1+sortdepth/dplanenm);
                     obj.stereopar=struct('eyemm',eyemm,'eyenm',eyenm,'widthnm',widthnm,'widthmm',widthmm,'widthpix',widthpix,'heightpix',heightpix);
                 elseif strcmp(p.stereo.selection,'perspective')
                     loc.x=(x)./(1+sortdepth/dplanemm);
