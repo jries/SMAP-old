@@ -89,7 +89,11 @@ classdef SEEvaluationProcessor<interfaces.GuiModuleInterface & interfaces.LocDat
 
                 pos=obj.site.pos;
                 if ~isempty(p.size)
+                    if length(p.size)==1
+                        fovsize=p.size(1)*2;
+                    else
                     fovsize=p.size(1);
+                    end
                 end
                 posgetloc=[pos(1), pos(2), fovsize, fovsize];
                 parameters=[parameters {'position', posgetloc}];
