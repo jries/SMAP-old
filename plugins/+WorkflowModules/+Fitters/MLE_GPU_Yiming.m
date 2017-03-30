@@ -153,7 +153,7 @@ switch fitpar.fitmode
         locs.zerr=sqrt(CRLB(:,5))*fitpar.dz*fitpar.refractive_index_mismatch;
 %         [locs.PSFxpix,locs.PSFypix]=zpar2sigma(locs.znm/1000,fitpar.zparhere);
         
-         sx=100*v1;
+         sx=1*v1;
         locs.PSFxpix=sx;
         locs.PSFypix=sx;
 end

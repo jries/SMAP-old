@@ -184,7 +184,7 @@ switch lower(p.rendermode.selection)
             p.cam_pixelsize_um=.140;
         end
         p.sr_pixrec=p.cam_pixelsize_um(1)*1000;
-        if isfield(locsh,'PSFxnm')&&~isempty(locsh.PSFxnm) &&all(locsh.PSFxnm(indin)>0)
+        if isfield(locsh,'PSFxnm')&&~isempty(locsh.PSFxnm) &&all(locsh.PSFxnm(indin)>0) &&any(locsh.PSFxnm(indin)<500)
             pos.s=locsh.PSFxnm(indin);
         else
             pos.s=pos.x*0+p.cam_pixelsize_um(1)*1000;
