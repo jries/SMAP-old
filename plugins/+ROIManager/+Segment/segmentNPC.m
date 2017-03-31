@@ -145,7 +145,7 @@ srim=0;
     xm=xsite-file.image.rangex(1)*1000;
     xr=round(xm/pf);
     yr=round(ym/pf);
-    xr(xr<1)=1;yr(yr<1)=1;xr(xr>sf(1))=1;yr(yr>sf(1))=1;
+    xr(xr<1)=1;yr(yr<1)=1;xr(xr>sf(2))=1;yr(yr>sf(1))=1;
     
     linind=sub2ind(sf(1:2),yr,xr);
     indinroi=bw(linind);
