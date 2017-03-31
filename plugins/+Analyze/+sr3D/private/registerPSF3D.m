@@ -73,7 +73,7 @@ rescc(abs(shift(:,1))>3|abs(shift(:,2))>3)=NaN;
 if isnan(b)
     a=nanmean(rescc);b=nanstd(rescc);
 end
-co=a+3.*b;
+co=a+2.*b;
 indgood=rescc<co;
 imout=nanmean(shiftedstack(:,:,:,indgood),4);
 shiftedstack(1,end,:,~indgood)=nanmax(shiftedstack(:));

@@ -38,9 +38,22 @@ classdef calibrate3Daberrations<interfaces.DialogProcessor
             beads(badind)=[];
             
             % * determine fglass, glass
-            p.axhere=obj.initaxis('z0positions');
-            f0glass=getf0glass(beads,p);
+            if p.setglass
+                if isempty(p.glassframe)
+                    beadst=beads;
+                    for k=1:length(beadst)
+                        beadst(k).filenumber=1;
+                    end
+                    p.axhere=obj.initaxis('z0positions');
+                    p.glassframe=getf0glass(beadst,p);
+                end
+                f0glass=p.glassframe*ones(1,max([beads(:).filenumber]));
+            else
+                p.axhere=obj.initaxis('z0positions');
+                f0glass=getf0glass(beads,p);
+            end
             p.f0glass=f0glass;
+            
             %calculate relevant other coordinates
             axh=obj.initaxis('z vs frame');
             hold off
@@ -208,7 +221,7 @@ end
 %             zglassall=z0glassall;
 %             zglassall=zglassall-
             qzfit=myquantile(zfitall,[0.05,0.95]);
-            qzfit(1)=qzfit(1)-p.dz;qzfit(2)=qzfit(2)-p.dz;
+            qzfit(1)=qzfit(1)+p.dz;qzfit(2)=qzfit(2)-p.dz;
             
             %for now don't follow up, later: remove single wrong
             %localizations.
@@ -435,6 +448,17 @@ pard.cutoffrefine.Width=1;
 pard.setzero.object=struct('String','Set dz on glass to zero','Style','checkbox','Value',1);
 pard.setzero.position=[6,1];
 pard.setzero.Width=1.5;
+
+
+pard.setglass.object=struct('String','Set glass to frame (empty: automatic): ','Style','checkbox','Value',0);
+pard.setglass.position=[7,1];
+pard.setglass.Width=2;
+
+pard.glassframe.object=struct('String','','Style','edit');
+pard.glassframe.position=[7,3];
+pard.glassframe.Width=0.5;
+
+
 % pard.spatialcalibration.object=struct('Style','checkbox','String','Spatial calibration','Value',0,'Callback',{{@setvisible,obj}}); 
 % pard.spatialcalibration.position=[1,tp];
 % pard.spatialcalibration.Width=wcb+.2;

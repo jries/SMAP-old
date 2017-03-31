@@ -13,7 +13,12 @@ classdef correct3Daberrations<interfaces.DialogProcessor
              obj.setPar('undoModule','correct3Daberrations');
             notify(obj.P,'backup4undo');
 %             p.EMon=obj.locData.files.file(1).info.EMon;
-            p.RIM=obj.locData.history{1}.children.fitparamters.fitterGUI.children.MLE_GPU_Yiming.refractive_index_mismatch;
+            try
+                        p.RIM=obj.locData.history{1}.children.fitparamters.fitterGUI.children.MLE_GPU_Yiming.refractive_index_mismatch;
+            catch err
+                disp('could not find history')
+                p.RIM=0.8;
+            end
 %             p.dz=p.dz*p.RIM;
             Zcorr=load(p.calfile);
             Zcorr=Zcorr.ZcorrInterp;

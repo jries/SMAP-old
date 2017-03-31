@@ -409,11 +409,13 @@ end
                 end
             end
             
-            plot(axall.axsxs22,p.zrangeuse,[0 0],'k');
-            yrange=[-100 100];
+            if isfield(axall,'axsxs22')
+                plot(axall.axsxs22,p.zrangeuse,[0 0],'k');
+                yrange=[-100 100];
 
-            ylim(axall.axsxs22,yrange)
-            xlim(axall.axsxs22,p.zrangeuse)     
+                ylim(axall.axsxs22,yrange)
+                xlim(axall.axsxs22,p.zrangeuse)   
+            end
             obj.SXY=SXY;  
        end
 
