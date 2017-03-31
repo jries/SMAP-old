@@ -196,7 +196,9 @@ for Z=1:length(p.Zrange)-1
             
             if p.fitcsplinec
             tic
+%             profile on
             spline = Spline3D_v2(corrPSFhd);
+%             profile viewer
             coeff = spline.coeff;
 %             [np_psf,coeff]=generate_psf_to_spline_YLJ(corrPSFhd,p.roisize,dz+1);
             toc
@@ -348,7 +350,7 @@ hz=zeros(1,length(zr)-1);
 hx=zeros(1,length(xr)-1);
 hy=hx;
 while toc(tt)<90
-    nn=rand(11,11,50000,'single');
+    nn=rand(11,11,10000,'single');
     P=callYimingFitter(nn,single(coeff),50,5,0,0);
     
     hz=histcounts(P(:,5),zr)+hz;

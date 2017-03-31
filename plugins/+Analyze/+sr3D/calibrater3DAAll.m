@@ -399,12 +399,14 @@ end
                      ylim(axall.axzlut,yrange)
                      xlim(axall.axzlut,p.zrangeuse)
                 end
+                if ~isempty(SXY(k).Sx2_Sy2)
                     zha2=zfromSx2_Ss2(SXY(k).Sx2_Sy2,sxa,sya);
                      plot(axall.axsxs22,za,za-zha2,'.','MarkerSize',2)
                      axall.axsxs22.NextPlot='add';
                     dzba2=bindata(za,za-zha2,zt,'mean');
                     dzs2=bindata(za,za-zha2,zt,'std');
                     plot(axall.axsxs22,zt,dzba2,'k',zt,dzba2+dzs2,'k',zt,dzba2-dzs2,'k')
+                end
             end
             
             plot(axall.axsxs22,p.zrangeuse,[0 0],'k');

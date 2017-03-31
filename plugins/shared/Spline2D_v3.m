@@ -6,14 +6,18 @@ classdef Spline2D_v3<handle
     end
     methods
         function obj = Spline2D_v3(d)
+            if nargin ==0
+                return
+            end
 %         function obj = Spline2D( d, coeff = false, verbose = false)
             d_sizex = size(d,1);
             d_sizey = size(d,2);
             obj.max_ix = d_sizex-1;
             obj.max_iy = d_sizey-1;
-            ys = [];
-            for i = 1:d_sizex
-                ys = [ys Spline1D(d(i,:))];%append(spline1D.Spline1D(d[i,:]))
+%             ys = [];
+            for i = d_sizex:-1:1
+%                 ys = [ys Spline1D(d(i,:))];%append(spline1D.Spline1D(d[i,:]))
+                 ys(i) = Spline1D(d(i,:));%append(spline1D.Spline1D(d[i,:]))
             end
             xs = [];
             cx = 0;

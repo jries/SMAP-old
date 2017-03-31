@@ -5,6 +5,9 @@ classdef Spline1D<handle
     end
     methods
         function obj = Spline1D(y)
+            if nargin ==0
+                return
+            end
             obj.max_i = numel(y)-1;
             
             b = zeros(numel(y),1);

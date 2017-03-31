@@ -44,14 +44,17 @@ classdef Spline3D_v2<handle
 %             end
 %             obj.coeff = zeros(obj.max_)     
             
-                  
-            yzs = [];
-            for i = 1:d_sizex
-                yzs = [yzs Spline2D_v3(reshape(d(i,:,:),d_sizey,d_sizez))];%append(spline1D.Spline1D(d[i,:]))
+                 
+            for i = d_sizex:-1:1
+                s1=Spline2D_v3(reshape(d(i,:,:),d_sizey,d_sizez));
+                yzs(i) = s1;%append(spline1D.Spline1D(d[i,:]))
+%                 yzs = [yzs Spline2D_v3(reshape(d(i,:,:),d_sizey,d_sizez))];%append(spline1D.Spline1D(d[i,:]))
             end
-            xs = [];
+            maxx=obj.max_iy*obj.max_iz*9;
+            xs(maxx) =Spline1D;
+            xsind=1;
             %need check cy or cz first
-            cy = 0;
+%             cy = 0;
             cz = 0;
             while cz <= (obj.max_iz+0.01)
                 if cz > obj.max_iz
@@ -66,11 +69,15 @@ classdef Spline3D_v2<handle
                     for i = 1:d_sizex
                         xv(i) = yzs(i).f(cy,cz);
                     end
-                    xs = [xs Spline1D(xv)];
+                    s1=Spline1D(xv);
+%                     xs = [xs s1];
+                    xs(xsind)=s1;
+                    xsind=xsind+1;
                     cy = cy + 1/3;
                 end
                 cz = cz + 1/3;
             end
+            xs(xsind:end)=[];
             obj.coeff = zeros(obj.max_ix, obj.max_iy,obj.max_iz,64);
             A = zeros(64,64);
             for i = 1:4
