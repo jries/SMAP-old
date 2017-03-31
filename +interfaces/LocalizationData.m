@@ -445,6 +445,8 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             locout.files=obj.files;
             locout.SE=obj.SE.copy;
              locout.SE.locData=locout;
+             locout.history=obj.history;
+             
             if nargin<2
                 locout.loc=obj.loc;
                 locout.grouploc=obj.grouploc;
@@ -471,7 +473,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                     indu=true(numlocs,1);
                     indg=true(numglocs,1);
                 else
-                    if length(indin)==numlocs;
+                    if length(indin)==numlocs
                         indu=indin;
                         indg=indungrouped2grouped(indin,obj.loc.groupindex);
                     else
@@ -492,7 +494,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                 end
 %                 fields=fieldnames(obj.grouploc);
                 if clearfilter
-                    for l=1:length(obj.layer);
+                    for l=1:length(obj.layer)
                     locout.layer(l).filter=[];
                     locout.layer(l).groupfilter=[];
                     end
