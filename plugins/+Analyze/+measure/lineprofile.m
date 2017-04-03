@@ -3,7 +3,7 @@ classdef lineprofile<interfaces.DialogProcessor
     methods
         function obj=lineprofile(varargin)        
             obj@interfaces.DialogProcessor(varargin{:});
-            obj.inputParameters={'sr_layerson','linewidth_roi','znm_min','znm_max','sr_pixrec'};
+            obj.inputParameters={'sr_layerson','linewidth_roi','znm_min','znm_max','sr_pixrec','layernames'};
             obj.showresults=true;
         end
         

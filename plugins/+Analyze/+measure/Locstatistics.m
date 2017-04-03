@@ -4,7 +4,7 @@ classdef Locstatistics<interfaces.DialogProcessor
     methods
         function obj=Locstatistics(varargin)           
             obj@interfaces.DialogProcessor(varargin{:}) 
-            obj.inputParameters={'sr_layerson'};
+            obj.inputParameters={'sr_layerson','layernames'};
             obj.showresults=true;
         end
         

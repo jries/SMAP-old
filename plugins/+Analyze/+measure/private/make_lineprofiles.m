@@ -75,9 +75,13 @@ for layer=1:length(p.sr_layerson)
     axis equal tight
     hold on
     
-    t1{end+1}=['Layer ' 9 int2str(layer)];
-    t2{end+1}=['Layer ' 9 int2str(layer)];
-    t3{end+1}=['Layer ' 9 int2str(layer)];
+%     t1{end+1}=['Layer ' 9 int2str(layer)];
+%     t2{end+1}=['Layer ' 9 int2str(layer)];
+%     t3{end+1}=['Layer ' 9 int2str(layer)];
+    t1{end+1}=p.layernames{layer};
+    t2{end+1}=p.layernames{layer};
+    t3{end+1}=p.layernames{layer};  
+    
     n=my-linew-binwidth:binwidth:my+linew+binwidth;
     profy=hist(y,n);profy([1 end])=[];n([1 end])=[];
     axes(ax2)

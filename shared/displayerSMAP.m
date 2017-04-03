@@ -2,7 +2,7 @@ function [imout,sr_imagehandle]=displayerSMAP(layers,p)
 
 if nargin==0
     %input parameters
-    imout={'sr_layerson','sr_axes','sr_sizeRecPix','roihandle','sr_pixrec','rotationangle','sr_pos','sr_size','sr_layersseparate'};
+    imout={'sr_layerson','sr_axes','sr_sizeRecPix','roihandle','sr_pixrec','rotationangle','sr_pos','sr_size','sr_layersseparate','layernames','sr_plotlayernames'};
     return          
 end
 
@@ -105,11 +105,11 @@ for k=1:(length(layers))
     end
 end
 
-        if layersnext
+if layersnext
      imfinal=allnext;
      nlayer=sum(p.sr_layerson)-1;
      rangexplot(2)=rangexplot(2)+nlayer*(rangexplot(2)-rangexplot(1));
-        end
+end
 
     imfinal=addscalebar(imfinal,p.sr_pixrec(1));
 
@@ -127,6 +127,37 @@ end
 %         axes(p.sr_axes) %bring to forground
         imout.handle=sr_imagehandle;
         drawnow limitrate nocallbacks
+        
+        dxy=0;
+        fontsize=15;
+        extent=0;
+        if isfield(p,'sr_plotlayernames')&&p.sr_plotlayernames
+             for k=1:(length(layers))
+                 if p.sr_layerson(k)&&~isempty(layers(k).images)
+
+        
+                     lut=layers(k).images.srimage.lut;
+
+                     
+                     if layersnext
+                        dx=(layers(k).images.srimage.rangex(2)-layers(k).images.srimage.rangex(1))/1000*dxy;
+                        dy=0;
+                     else
+                        dx=0;
+                        dy=dxy;
+                     end
+                     px=layers(k).images.srimage.rangex(1)/1000+dx+p.sr_pixrec/1000*5;
+                     py=layers(k).images.srimage.rangey(1)/1000;
+                     lutm=mean(lut,1);lutm=lutm/max(lutm);
+                     th=text(px,py,p.layernames{k},'Color',lutm,'FontSize',fontsize,'BackgroundColor','k','Units','data');
+%                      th.Units='pixels';
+                     th.Position(2)=th.Position(2)+th.Extent(4)*(dy+.6)*1.2;
+                     
+                     dxy=dxy+1;
+                 end
+             end
+            
+        end
     else
         sr_imagehandle=[];
     end

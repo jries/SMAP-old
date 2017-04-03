@@ -532,13 +532,14 @@ p.sr_sizeRecPix=round(p.sr_size/p.sr_pixrec*2);
 p.sr_pos=[mean(xext) mean(yext)];
 p.sr_axes=hax;
 
+p.sr_plotlayernames=false;
 pall=obj.getLayerParameters;
 for k=1:length(pall)
     pall{k}=copyfields(pall{k},p);
 end
 try
 TotalRender(obj.locData,pall,{'xnm','ynm'});
-catch
+catch err
     obj.status('Error in reconstruction. Maybe some render settings are incompatible with current data');
 end
 end
@@ -555,6 +556,7 @@ if isempty(settings)
     settings.layerssep=false;
     settings.colorbarthickness=4;
     settings.customcheck=false;
+    settings.plotlayernames=false;
 end
 [settings, button] = settingsdlg(...
     'Description', 'SR format parameters',... 
@@ -562,6 +564,7 @@ end
     'Pixelsize',{'1x1','2x2','3x3','4x4'},...
     {'thickness of colorbar (pix)','colorbarthickness'},settings.colorbarthickness,...
     {'Layers next to each other';'layerssep'},[logical(settings.layerssep)],...
+    {'Plot layer names';'plotlayernames'},[logical(settings.plotlayernames)],...
     {'Custom image size';'customcheck'},[false true],...
     {'Imagesize (pixel) or magnification (if <20)','imsize'},num2str(settings.imsize) );
      
@@ -590,6 +593,7 @@ if strcmpi(button,'ok')
     end
     obj.setPar('sr_layersseparate',settings.layerssep);
     obj.setPar('sr_colorbarthickness',settings.colorbarthickness);
+    obj.setPar('sr_plotlayernames',settings.plotlayernames);
 %     if settings.newfig
 %         obj.setPar('sr_axes',obj.makesrfigure((settings.fignumber)));
 %     end

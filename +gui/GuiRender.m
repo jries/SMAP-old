@@ -14,7 +14,7 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             %make channel tabs
             h.layertab=uitabgroup(obj.handle,'SelectionChangedFcn',{@selectLayer_callback,obj});
             obj.adjusttabgroup(h.layertab);
-            h.tab_layer1=uitab(h.layertab,'Title',['Layer' num2str(1)]);
+            h.tab_layer1=uitab(h.layertab,'Title',['Layer' num2str(1)],'Tag','Layer1');
             
             h.tab_addlayer=uitab(h.layertab,'Title','+');   
             h.reconstruct=uicontrol(obj.handle,'Units','pixels','Position',[15 17,150,35],'String','Reconstruct','Tag','reconstructbutton','FontSize',obj.guiPar.fontsize*1.5,...
@@ -34,6 +34,7 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.children.guiFormat=formatgui;
             obj.setPar('numberOfLayers',1);
             h.layer_1=obj.addlayer(h.tab_layer1,1);
+            obj.setPar('layernames',{'Layer1'});
             obj.guihandles=h;
             
             addlistener(obj.P,'sr_render',@obj.render_notify);
@@ -43,8 +44,9 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             c=uicontextmenu(f);
             h.layertab.UIContextMenu=c;
             
-            m1 = uimenu(c,'Label','remove layer','Callback',{@menu_callback,obj});
             m3 = uimenu(c,'Label','add layer','Callback',{@menu_callback,obj});
+            m1 = uimenu(c,'Label','remove layer','Callback',{@menu_callback,obj});
+            m4 = uimenu(c,'Label','rename layer','Callback',{@menu_callback,obj});
             if ispc
                 posmen='tlo';
                 shiftmen=[10 0];
@@ -73,6 +75,7 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
         function hpanel=addlayer(obj,handle,k)
              hpanel=uipanel(handle,'Unit','pixels','Position',obj.guiPar.tabsize2);        
              layer=gui.GuiChannel(hpanel,obj.P);
+             tag=handle.Tag;
              layer.layer=k;
              layer.attachLocData(obj.locData);
              p.Vsep=3;p.FieldHeight=30;
@@ -87,7 +90,8 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                  layer.setfiltergray;
              end
              layer.updateLayerField;
-             obj.children.(['Layer' num2str(k)])=layer;
+             obj.children.(tag)=layer;
+             layer.name=tag;
 %              obj.locData.layer(k).filter=[];
 %              obj.locData.layer(k).groupfilter=[];
              obj.locData.filter([],k);           
@@ -267,7 +271,8 @@ function selectLayer_callback(tabgroup,eventdata,obj)
 layer=(eventdata.NewValue.Title);
 if strcmp(layer,'+')
     newlayernumber=obj.numberOfLayers+1;
-      h.(['tab_layer' num2str(newlayernumber)])=uitab(obj.guihandles.layertab,'Title',['Layer' num2str(newlayernumber)]);
+    tag=['Layer' num2str(newlayernumber)];
+      h.(['tab_layer' num2str(newlayernumber)])=uitab(obj.guihandles.layertab,'Title',tag,'Tag',tag);
        h.(['layer_' num2str(newlayernumber)])=obj.addlayer(  h.(['tab_layer' num2str(newlayernumber)]),newlayernumber);
     obj.numberOfLayers=newlayernumber;
     obj.setPar('numberOfLayers',newlayernumber);
@@ -282,9 +287,11 @@ else
     selectedlayer=sscanf(layer,'Layer%d');
 end
 for k=1:length(tabgroup.Children)-1
-    layernumber=tabgroup.Children(k).Title;
-    obj.children.(layernumber).setlayer(selectedlayer);
+%     layernumber=tabgroup.Children(k).Title;
+    layertag=tabgroup.Children(k).Tag;
+    obj.children.(layertag).setlayer(selectedlayer);
 end
+updatelayernames(obj)
 end
 
 function menu_callback(callobj,b,obj)
@@ -315,7 +322,30 @@ switch callobj.Label
         obj.setPar('numberOfLayers',obj.numberOfLayers);
         tab=findobj(obj.guihandles.layertab,'Title','Layer1');
         obj.guihandles.layertab.SelectedTab=tab;
+    case 'rename layer'
+        currentname=obj.guihandles.layertab.SelectedTab.Title;
+        tag=obj.guihandles.layertab.SelectedTab.Tag;
+        newname=inputdlg('New layer name: ','rename layer',1,{currentname});
+        if isempty(newname)
+            return
+        end
+        newname=newname{1};
+        obj.children.(tag).name=newname;
+        obj.guihandles.layertab.SelectedTab.Title=newname;
+        updatelayernames(obj)
+        
         
 end
 end
 
+
+
+function updatelayernames(obj)
+k=1;
+names={};
+while isfield(obj.children,['Layer' num2str(k)])
+    names{k}=obj.children.(['Layer' num2str(k)]).name;
+    k=k+1;
+end
+obj.setPar('layernames',names);
+end        

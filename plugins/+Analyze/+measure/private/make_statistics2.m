@@ -4,7 +4,8 @@ if nargin<3
 end
 
 if p.filter
-    modetxt={'layer','layer','layer','layer','layer','layer','layer','layer','layer','layer','layer','layer','layer','layer'};
+    modetxt=p.layernames;
+%     modetxt={'layer','layer','layer','layer','layer','layer','layer','layer','layer','layer','layer','layer','layer','layer'};
 else
     modetxt={'ungroup','group'};
 end
@@ -116,7 +117,7 @@ end
 % else
     pr=0.99;
 % end
-[hphot,mmax]=plothist(phot,pr,[],0,ax1);
+[hphot,mmax]=plothist(phot,pr,[],0,ax1,modetxt);
 sphot={'Photons'};
 % phot1=1000;
 % phot2=3000;
@@ -145,7 +146,7 @@ stat.photons.mu=[dat(:).mu];
 
 %locprec
 locp=getFieldAsVector(locs,'locprecnm');
-hlocp=plothist(locp,0.99,.25,0,ax2);
+hlocp=plothist(locp,0.99,.25,0,ax2,modetxt);
 slp={'locprec_x'};
 for k=datrange
     slp{end+1}='';
@@ -195,7 +196,7 @@ lifetime=getFieldAsVector(locs,'numberInGroup');
 % end
 
 
-[hlifet,mmax]=plothist(lifetime,plr,1,0,ax3);
+[hlifet,mmax]=plothist(lifetime,plr,1,0,ax3,modetxt);
  ax3.NextPlot='add';
 slt={'lifetime'};
 for k=datrange
@@ -212,7 +213,7 @@ end
 
 %background
 bg=getFieldAsVector(locs,'bg');
-hbg=plothist(bg,0.95,1,0,ax4);
+hbg=plothist(bg,0.95,1,0,ax4,modetxt);
 slb={'Background'};
 for k=datrange
     slb{end+1}='';
@@ -233,7 +234,7 @@ if zexist
 else
     v=getFieldAsVector(locs,'PSFxnm');
 end
-hz=plothist(v,.99,[],[],ax5);
+hz=plothist(v,.99,[],[],ax5,modetxt);
 sls={txt};
 for k=1:length(datrange)
     sls{end+1}='';
@@ -271,7 +272,7 @@ end
 
 if zexist
     v=getFieldAsVector(locs,'locprecznm');
-    hz=plothist(v,.99,[],0,ax6);
+    hz=plothist(v,.99,[],0,ax6,modetxt);
     slp={'locprecznm'};
     for k=datrange
         slp{end+1}='';
@@ -332,7 +333,7 @@ else %use all values, plot for unconnected and connected
     datrange=1:2;
 end
 
-function [his,mmo]=plothist(v,quantile,dphot,hmin,ax)
+function [his,mmo]=plothist(v,quantile,dphot,hmin,ax,modetxt)
 his=[];
 for k=1:length(v)
     if length(quantile)==1
@@ -378,7 +379,7 @@ for k=1:length(v)
         plot(nphot(2:end-1),h(2:end-1)/mmax)
         hold on
         end
-        slegend{end+1}=num2str(k);
+        slegend{end+1}=[modetxt{k}];
         mmo{k}=mmax;
     end
 end

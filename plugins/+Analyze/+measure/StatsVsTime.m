@@ -4,7 +4,7 @@ classdef StatsVsTime<interfaces.DialogProcessor
     methods
         function obj=StatsVsTime(varargin)           
             obj@interfaces.DialogProcessor(varargin{:}) 
-            obj.inputParameters={'sr_layerson'};
+            obj.inputParameters={'sr_layerson','layernames'};
             obj.showresults=true;
         end
         

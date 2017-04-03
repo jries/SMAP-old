@@ -6,6 +6,7 @@ classdef GuiChannel< interfaces.LayerInterface
         imax
         synchronizedFields
         rec_addpar = {'mingaussnm','mingausspix','gaussfac','par.gamma'};
+        name
     end
     methods
         function obj=GuiChannel(varargin)
