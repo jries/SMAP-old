@@ -39,8 +39,11 @@ Fccfilt=Fccsmall;
 
 [maxcc,ind]=max(Fccfilt(:));
 [x,y]=ind2sub(size(Fccfilt),ind);
-
+try
 Fcccut=Fccsmall(x-winfit:x+winfit,y-winfit:y+winfit);
+catch err
+    disp('Maximum on edge:increase Max shift (correlation)')
+end
 if subpixel
 fitp=my2Dgaussfit(Fcccut);
 dx=fitp(:,1)+x-maxdisplacement-winfit-1-displace(1);
