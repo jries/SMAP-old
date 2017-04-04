@@ -131,7 +131,7 @@ end
         dxy=0;
         fontsize=15;
         extent=0;
-        if isfield(p,'sr_plotlayernames')&&p.sr_plotlayernames
+        if isfield(p,'sr_plotlayernames')&&~isempty(p.sr_plotlayernames)&&p.sr_plotlayernames
              for k=1:(length(layers))
                  if p.sr_layerson(k)&&~isempty(layers(k).images)
 
