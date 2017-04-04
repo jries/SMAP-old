@@ -814,9 +814,15 @@ pard.lut.TooltipString='select the lookup table';
 
 pard.remout.object=struct('Style','checkbox','String','restrict');
 pard.remout.position=[5,p3];
-pard.remout.Width=w3;
+pard.remout.Width=w3*.7;
 pard.remout.TooltipString=sprintf('if checked: remove loclizations outside lut. \n If unchecked: set them to maximum color');
 pard.remout.Optional=true;
+
+pard.lutinv.object=struct('Style','checkbox','String','Inv','Value',0);
+pard.lutinv.position=[5,p3+w3*.6];
+pard.lutinv.Width=w3*.5;
+pard.lutinv.TooltipString=sprintf('if checked: invert the colormap');
+pard.lutinv.Optional=true;
 
 
 pard.colorfieldb.object=struct('Style','pushbutton','String','c range');

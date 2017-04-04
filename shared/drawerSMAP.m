@@ -1,7 +1,7 @@
 
 function imout=drawerSMAP(him,p)
 if nargin==0
-    imout={'imaxtoggle','imax_min','sr_sizeRecPix','lut','colorfield_min','colorfield_max','gamma','normalizeFoV'};
+    imout={'imaxtoggle','imax_min','sr_sizeRecPix','lut','colorfield_min','colorfield_max','gamma','normalizeFoV','lutinv'};
     return
 end
 
@@ -24,7 +24,7 @@ if p.gamma ~=1
     imgn=imgn.^p.gamma;
 end
 
-[iml,lut]=applyLut(imgn,p.lut.selection,p.colorfield_min,p.colorfield_max);
+[iml,lut]=applyLut(imgn,p.lut.selection,p.colorfield_min,p.colorfield_max,p.lutinv);
 imout.image=iml;
 if him.istiff==0
     imout.mask=double(makemask(imgn));
@@ -61,9 +61,13 @@ function [imout,norm]=normalizeImage(img,imaxtoggle,imax,imgnorm)
     end
 end
 
-function [imo,lut]=applyLut(im,lutname,pmin,pmax)
+function [imo,lut]=applyLut(im,lutname,pmin,pmax,lutinv)
 s=size(im);
     lut=mymakelut(lutname);
+if ~isempty(lutinv)&&lutinv
+    lut=lutinvert(lut);
+end
+    
 if length(s)==2||s(3)==1
     im=im-pmin;
     im=im/(pmax-pmin);
@@ -87,6 +91,14 @@ else
 end
 
 
+end
+
+function luto=lutinvert(lut)
+s=size(lut);
+luto=lut;
+for k=1:s(1)
+    luto(k,:)=sum(lut(k,:))-lut(k,:);
+end
 end
 
 function mask3=makemask(image)
