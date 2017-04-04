@@ -344,12 +344,17 @@ guirender=obj.getPar('mainGui').children.guiRender.children;
 thisgui=guirender.(['Layer' num2str(obj.layer)]);
 
 thisfield=thisgui.children.histgui.getGuiParameters.field;
+if isempty(thisfield)
+    syncf=obj.synchronizedFields;
+else
 syncf=setdiff(obj.synchronizedFields,thisfield);
+updatefields_callback(obj,0, 0, thisfield,[])
+end
 for k=1:length(syncf)
     updatefields_callback(obj,0, 0, syncf{k},[])
 %     obj.setPar(obj.synchronizedFields{k})
 end
-updatefields_callback(obj,0, 0, thisfield,[])
+
 
 %refilter?
 end
@@ -383,8 +388,10 @@ obj.updateLayerField('imax_min');
 end
 
 function copyalllayer_callback(object,data,obj)
-phere=getChannelParameters(obj);
 
+excludefields={'ch_filelist','channels','layercheck'};
+phere=getChannelParameters(obj);
+phere=rmfield(phere,excludefields);
 thislayer=obj.layer;
 numlayers=obj.getPar('numberOfLayers');
 mainGui=obj.getPar('mainGui');
