@@ -17,9 +17,13 @@ global SMAP_stopnow
 %my2DGaussfit
 
 %copyright: Jonas Ries, EMBL, jonas.ries@embl.de
-
-results_ax1=initaxis(par.resultstabgroup,'CC');
-results_ax3=initaxis(par.resultstabgroup,'normalized CC');
+if isfield(par,'repetitionname')
+    rn=par.repetitionname;
+else
+    rn='';
+end
+results_ax1=initaxis(par.resultstabgroup,['CC' rn]);
+results_ax3=initaxis(par.resultstabgroup,['normalized CC' rn]);
 
 %here: rather from par, from channel range. Make sure it does not get
 %displaced. Fill in outside.
@@ -150,7 +154,7 @@ dytt(1:firstframe-1+binframes/2)=dytt(firstframe-1+binframes/2);
 dytt(lastframe+1-binend:end)=dytt(lastframe+1-binend);
 
 
-results_ax2=initaxis(par.resultstabgroup,'dxy/frame');
+results_ax2=initaxis(par.resultstabgroup,['dxy/frame' rn]);
 
 subplot(1,2,1)
 hold off
@@ -188,7 +192,7 @@ driftinfo.dxt=dxtt;
 driftinfo.dyt=dytt;
 driftinfo.binframes=cfit1;
 %
-initaxis(par.resultstabgroup,'dxy/frame final');
+initaxis(par.resultstabgroup,['dxy/frame final' rn]);
 
 hold off
 plot(cfit1,dx,'x',framesall,dxtt,'k')
@@ -198,7 +202,7 @@ xlabel('frame')
 ylabel('dx, dy (nm)')
 drawnow
 
-initaxis(par.resultstabgroup,'dx vs dy');
+initaxis(par.resultstabgroup,['dx vs dy' rn]);
 hold off
 plot(dxtt,dytt,'k')
 hold on

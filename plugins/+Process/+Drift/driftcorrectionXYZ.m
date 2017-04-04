@@ -117,23 +117,26 @@ drift=[];driftinfo=[];
 % end
                 
 if p.correctxy
-    
+   
     switch p.drift_mirror2c.Value
         case 1 %all
             ind=true(length(locs.xnm),1);
             rep=false;
             mirror='none';
             midpoint=0;
+             p.repetitionname='';
         case 2 %horizontal
-            midpoint=p.cam_pixelsize_nm*(p.roi(1)+(p.roi(1)+p.roi(3))/2);
+            midpoint=p.cam_pixelsize_nm(1)*(p.roi(1)+(p.roi(1)+p.roi(3))/2);
             ind=locs.xnm<=midpoint;
             rep=true;
             mirror='horizontal';
+             p.repetitionname='1';
         case 3 %vertical
-            midpoint=p.cam_pixelsize_nm*(p.roi(2)+(p.roi(2)+p.roi(4))/2);
+            midpoint=p.cam_pixelsize_nm(2)*(p.roi(2)+(p.roi(2)+p.roi(4))/2);
             ind=locs.ynm<=midpoint;
             rep=true;
             mirror='vertical';
+            p.repetitionname='1';
     end
     [driftxy,driftinfoxy]=finddriftfeature(copystructReduce(locs,ind),p);
     driftinfoxy.mirror=mirror; driftinfoxy.midpoint=midpoint;
@@ -142,6 +145,7 @@ if p.correctxy
     drift.xy(1).mirror=mirror;drift(1).xy(1).midpoint=midpoint;
 
     if rep
+         p.repetitionname='2';
         [driftxy,driftinfoxy]=finddriftfeature(copystructReduce(locs,~ind),p);
         driftinfoxy.mirror=mirror; driftinfoxy.midpoint=midpoint;
         driftinfo.xy(2)=(driftinfoxy);
