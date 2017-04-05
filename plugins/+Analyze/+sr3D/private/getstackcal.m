@@ -1,6 +1,6 @@
-function [SXY,beadgood]=getstackcal(beadsh,p,X,Y,axall)
+function [SXY,indgood]=getstackcal(beadsh,p,X,Y,axall,indgood)
 global stackcal_testfit
-
+iter=p.iter;
 alignzf0=p.alignz;
 alignxcorr=p.alignzxcorr;
 
@@ -25,10 +25,11 @@ dpsfx=(psfx-median(psfx(~isnan(psfx))))*10;
 dpsfy=(psfy-median(psfy(~isnan(psfy))))*10;
  
 for Z=1:length(p.Zrange)-1
-    allstacks=zeros(sstack(1),sstack(2),sstack(3),length(beadsh))+NaN;
-    for B=length(beadsh):-1:1
-        beadz0=(beadsh(B).f0-p.fglass(beadsh(B).filenumber))*p.dz;
-        beadf0(B)=(beadsh(B).f0-p.fglass(beadsh(B).filenumber));
+    beadshz=beadsh(indgood{Z});
+    allstacks=zeros(sstack(1),sstack(2),sstack(3),length(beadshz))+NaN;
+    for B=length(beadshz):-1:1
+        beadz0=(beadshz(B).f0-p.fglass(beadshz(B).filenumber))*p.dz;
+        beadf0(B)=(beadshz(B).f0-p.fglass(beadshz(B).filenumber));
 %         
 %         if p.alignz||p.beaddistribution.Value==2
 %              beadz=(beadsh(B).loc.frame*p.dz)-beadz0;
@@ -42,25 +43,25 @@ for Z=1:length(p.Zrange)-1
 
                 if beadz0>p.Zrange(Z)-p.framerangecombine*p.dz && beadz0<p.Zrange(Z+1)+p.framerangecombine
 %                    sx=beadsh(B).loc.PSFxpix; 
-                   allstacks(:,:,:,B)=beadsh(B).stack.image;
+                   allstacks(:,:,:,B)=beadshz(B).stack.image;
                 end             
             else
-                zs=(beadsh(B).stack.framerange-p.fglass(beadsh(B).filenumber))*p.dz;
+                zs=(beadshz(B).stack.framerange-p.fglass(beadshz(B).filenumber))*p.dz;
                 goodz=zs>p.Zrange(Z)-p.framerangecombine & zs<p.Zrange(Z+1)+p.framerangecombine;
-                allstacks(:,:,goodz,B)=beadsh(B).stack.image(:,:,goodz);
+                allstacks(:,:,goodz,B)=beadshz(B).stack.image(:,:,goodz);
             end
         else
-            allstacks(:,:,:,B)=beadsh(B).stack.image;
+            allstacks(:,:,:,B)=beadshz(B).stack.image;
             
         end
         
         stackh=allstacks(:,:,:,B);
 %         inth=nansum(stackh(:)); %take into account when sorting
         goodvs(B)=sum(~isnan(stackh(:)))/numel(stackh);
-        storecenter(B)=beadsh(B).stack.framerange(halfstoreframes+1);
+        storecenter(B)=beadshz(B).stack.framerange(halfstoreframes+1);
         
-        if  halfstoreframes<length(beadsh(B).stack.framerange)
-            dframe(B)=beadsh(B).stack.framerange(halfstoreframes+1)-beadsh(B).f0;
+        if  halfstoreframes<length(beadshz(B).stack.framerange)
+            dframe(B)=beadshz(B).stack.framerange(halfstoreframes+1)-beadshz(B).f0;
         else
             dframe(B)=0;
         end
@@ -75,7 +76,7 @@ for Z=1:length(p.Zrange)-1
         fw2=2;
     end
     
-    tgt=[num2str(X) num2str(Y) num2str(Z)];
+    tgt=[num2str(X) num2str(Y) num2str(Z) num2str(iter)];
     ax=maketgax(axall.hspline_scatter,tgt);  
     ax2=maketgax(axall.hspline_psf,tgt);
     
@@ -101,6 +102,8 @@ for Z=1:length(p.Zrange)-1
     shiftedstack=shiftedstack(:,:,:,sortback);
     shift=shift(sortback,:);
     beadgood=beadgood(sortback);
+    indgoodf=find(indgood{Z});
+    indgood{Z}(indgoodf)=beadgood;
     allrois=allstacks;
   
      %calculate dual-color overlay for display
@@ -349,7 +352,7 @@ xr=0:0.05:p.roisize;
 hz=zeros(1,length(zr)-1);
 hx=zeros(1,length(xr)-1);
 hy=hx;
-while toc(tt)<90
+while toc(tt)<60
     nn=rand(11,11,10000,'single');
     P=callYimingFitter(nn,single(coeff),50,5,0,0);
     

@@ -14,7 +14,7 @@ catch
         il=imageloaderAll(filenamef,[],obj.P); %still exist?
     catch
         lastsml=obj.getPar('lastSMLFile');
-        filenamef=findfilepath(filename,fileparts(lastsml));
+        filenamef=findfilepathcomp(filename,fileparts(lastsml));
             try
                 il=imageloaderAll(filenamef,[],obj.P); %still exist?
             catch
@@ -34,8 +34,16 @@ catch
 end
 end
 
-function filename=findfilepath(filename,maindir)
+function filename=findfilepathcomp(filename,maindir)
+% test: find common directory names
  filename=strrep(filename,'\','/');
+ maindir=strrep(maindir,'\','/');
+ [substr,loc1,loc2]=commonsubstring(filename,maindir);
+
+filename=[maindir(1:loc2{1}) filename(loc1{1}:end)];
+end
+
+function filename=findfilepath(filename,maindir)
     d=dir(maindir);
     alldir={d([d.isdir]).name};
     ind=[1 strfind(filename,'/')];

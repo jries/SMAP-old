@@ -62,7 +62,7 @@ allstacks=[];
             end
             smallfr=imstack(pos(2)-halfroisizebig:pos(2)+halfroisizebig,pos(1)-halfroisizebig:pos(1)+halfroisizebig,frange);
             smallf=rescalestack(smallfr);
-            stack=zeros(roisizebig,roisizebig,storeframes);
+            stack=zeros(roisizebig,roisizebig,storeframes)+NaN;
             % XXXXX gel: or always: center fzero or similar.
             if frange(1)==fminmax(1) && frange(end)~=fminmax(2)
                 stack(:,:,end-size(smallf,3)+1:end)=smallf;

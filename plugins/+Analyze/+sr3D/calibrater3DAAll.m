@@ -56,11 +56,11 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
             end
             
             p=getranges(p);
-            indgood=true(1,length(beads));
+
             
-            for iter=1:redo  
-                beads=beads(indgood);
-                indgood=true(1,length(beads));
+%             for iter=1:redo  
+%                 beads=beads(indgood);
+%                 indgood=true(1,length(beads));
             %if spatial analysis: group according to X,Y,Z 
             %get clean curves
             xbead=zeros(length(beads),1);
@@ -69,6 +69,8 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
                 xbead(k)=beads(k).pos(1);
                 ybead(k)=beads(k).pos(2);
             end
+            
+            
             for X=1:length(p.Xrange)-1
                 for Y=1:length(p.Yrange)-1
                     indh=xbead>p.Xrange(X)-p.xyoverlap&xbead<p.Xrange(X+1)+p.xyoverlap&ybead>p.Yrange(Y)-p.xyoverlap&ybead<p.Yrange(Y+1)+p.xyoverlap;
@@ -76,27 +78,34 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
                         continue
                     end
                     beadh=beads(indh);
-                    % get calibration and used beads
-                    disp('get curves')
-                    [curvecal,indgoodc]=getcurvecal(beadh,p,X,Y,axall);
-                    if  p.fitcsplinec
-                         disp('get stack spline calibration')
-                        [stackcal,indgoods]=getstackcal(beadh,p,X,Y,axall);
-                        for Z=1:length(curvecal)
-                            allcal(Z)=copyfields(curvecal(Z),stackcal(Z),{'splinefit'});
-                        end
-                    else
-                        allcal=curvecal;
-                        indgoods=indgoodc;
+                    for Z=1:length(p.Zrange)-1
+                        indgood{Z}=true(1,length(beadh));
                     end
-    
-                    
-                    indhf=find(indh);
-                    indgood(indhf)=indgood(indhf)&indgoods&indgoodc;
-%                     indgood=indgood&indgoods&indgoodc;
-                    SXY(X,Y,:)=allcal;
-                end
-            end       
+                    % get calibration and used beads
+                    for iter=1:redo
+                        p.iter=iter;
+                        disp('get curves')
+                        [curvecal,indgoodc]=getcurvecal(beadh,p,X,Y,axall,indgood);
+                        if  p.fitcsplinec
+                             disp('get stack spline calibration')
+                            [stackcal,indgoods]=getstackcal(beadh,p,X,Y,axall,indgood);
+                            for Z=1:length(curvecal)
+                                allcal(Z)=copyfields(curvecal(Z),stackcal(Z),{'splinefit'});
+                            end
+                        else
+                            allcal=curvecal;
+                            indgoods=indgoodc;
+                        end
+
+                        for Z=1:length(indgoods)
+                            indgood{Z}=indgoods{Z}&indgoodc{Z};
+                        end
+    %                     indhf=find(indh);
+    %                     indgood(indhf)=indgood(indhf)&indgoods&indgoodc;
+    %                     indgood=indgood&indgoods&indgoodc;
+                        SXY(X,Y,:)=allcal;
+                    end
+                end       
             end
             plotcurves(obj,SXY,axall,p)
             %save
@@ -140,7 +149,7 @@ if p.spatialcalibration
         Yrange(2)=p.Ymax*p.cam_pixelsize_um(end)*1000;
     end
     if length(Zrange)==1
-        Zrange(2)=p.Zmax;
+        Zrange(2)=inf;
     end
     p.Zrange=Zrange;
     p.Xrange=Xrange;
@@ -212,13 +221,14 @@ function axall=getaxes(p)
               
 end
 
-function [SXY,indgoodc]=getcurvecal(beadsh,p,X,Y,axall)
+function [SXY,indgood]=getcurvecal(beadsh,p,X,Y,axall,indgood)
 %z-dependent? 
 zc=p.spatialcalibration && p.zcalc &p.beaddistribution.Value==2;
 
 % hold off
-indgoodc=true(1,length(beadsh));
+% indgoodc=true(1,length(beadsh));
 for Z=1:length(p.Zrange)-1
+    indgoodc=indgood{Z};
     for B=length(beadsh):-1:1
         beadz0=(beadsh(B).f0-p.fglass(beadsh(B).filenumber))*p.dz;
         
@@ -267,7 +277,7 @@ for Z=1:length(p.Zrange)-1
     
     %get calibrations
     bh=curves;
-    tgt=[num2str(X) num2str(Y) num2str(Z)];
+    tgt=[num2str(X) num2str(Y) num2str(Z) num2str(p.iter)];
     ax=maketgax(axall.htsplines,tgt);  
     axes(ax)
      [spline,indg]=getcleanspline(curves,p);
@@ -289,6 +299,7 @@ for Z=1:length(p.Zrange)-1
         SXY(Z).splineLUT=cal_splineLUT(SXY(Z).spline,p);
     end
     SXY(Z).curve=curves;
+    indgood{Z}=indgoodc;
 
 end
 end
