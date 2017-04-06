@@ -9,24 +9,26 @@ zc=p.spatialcalibration & p.zcalc &p.beaddistribution.Value==2; %z-dependent cal
 sstack=size(beadsh(1).stack.image);
 
 %for sorting
-
-fmedian=nanmedian([beadsh(:).f0]);
-halfstoreframes=(size(beadsh(1).stack.image,3)-1)/2;
+for Z=1:length(p.Zrange)-1
+    beadshz=beadsh(indgood{Z});
+    
+fmedian=nanmedian([beadshz(:).f0]);
+halfstoreframes=(size(beadshz(1).stack.image,3)-1)/2;
 if zc||alignzf0||alignxcorr
     df=0;
     fzero=halfstoreframes+1; %only used for plotting. Take out? f0 should be in center now.
 else
-    f0=[beadsh(:).f0];
+    f0=[beadshz(:).f0];
     fzero=round(fmedian);
     df=(f0-fmedian);
 end
- psfx=[beadsh(:).psfx0];psfy=[beadsh(:).psfy0];
+ psfx=[beadshz(:).psfx0];psfy=[beadshz(:).psfy0];
 dpsfx=(psfx-median(psfx(~isnan(psfx))))*10;
 dpsfy=(psfy-median(psfy(~isnan(psfy))))*10;
  
-for Z=1:length(p.Zrange)-1
-    beadshz=beadsh(indgood{Z});
+
     allstacks=zeros(sstack(1),sstack(2),sstack(3),length(beadshz))+NaN;
+    goodvs=[];dframe=[];
     for B=length(beadshz):-1:1
         beadz0=(beadshz(B).f0-p.fglass(beadshz(B).filenumber))*p.dz;
         beadf0(B)=(beadshz(B).f0-p.fglass(beadshz(B).filenumber));
@@ -41,7 +43,7 @@ for Z=1:length(p.Zrange)-1
         if zc
             if p.zfilter.Value==1 % f0
 
-                if beadz0>p.Zrange(Z)-p.framerangecombine*p.dz && beadz0<p.Zrange(Z+1)+p.framerangecombine
+                if beadz0>p.Zrange(Z)-p.framerangecombine && beadz0<p.Zrange(Z+1)+p.framerangecombine
 %                    sx=beadsh(B).loc.PSFxpix; 
                    allstacks(:,:,:,B)=beadshz(B).stack.image;
                 end             
@@ -68,7 +70,11 @@ for Z=1:length(p.Zrange)-1
     end
     
     %sort
+    try
     devs=(df.^2+dpsfx.^2+dpsfy.^2)./goodvs;
+    catch
+        disp('problem')
+    end
     
     if p.alignzxcorr
         fw2=round((p.framewindow-1)/2);
@@ -152,6 +158,7 @@ for Z=1:length(p.Zrange)-1
 % %                 corrPSFn(:,:,k)=corrPSFn(:,:,k)/int(k);
 %                 end
             end
+            shiftedstack=shiftedstack/intglobal;
             corrPSFn(isnan(corrPSFn))=0;
             
             corrPSFs=corrPSFn(rangex,rangey,rangez);
@@ -255,23 +262,23 @@ for Z=1:length(p.Zrange)-1
             xpall2=squeeze(allrois(:,yt,ftest,beadgood));
             
             for k=1:size(zpall,2)
-                zpall(:,k)=zpall(:,k)/nanmax(zpall(:,k));
-                xpall(:,k)=xpall(:,k)/nanmax(xpall(:,k));
+%                 zpall(:,k)=zpall(:,k)/nanmax(zpall(:,k));
+%                 xpall(:,k)=xpall(:,k)/nanmax(xpall(:,k));
                 zpall2(:,k)=zpall2(:,k)/nanmax(zpall2(:,k));
                 xpall2(:,k)=xpall2(:,k)/nanmax(xpall2(:,k));                
             end
             
             zprofile=squeeze(corrPSFn(xt,yt,:));
-            zprofile=zprofile/max(zprofile);
+%             zprofile=zprofile/max(zprofile);
             mphd=round((size(corrPSFhd,1)+1)/2);
             zprofilehd=squeeze(corrPSFhd(mphd,mphd,:));
-            zprofilehd=zprofilehd/max(zprofilehd);            
+%             zprofilehd=zprofilehd/max(zprofilehd);            
             
             xprofile=squeeze(corrPSFn(:,yt,ftest));
-            xprofile=xprofile/max(xprofile);
+%             xprofile=xprofile/max(xprofile);
             mpzhd=round((size(corrPSFhd,3)+1)/2+1);
             xprofilehd=squeeze(corrPSFhd(:,mphd,mpzhd));
-            xprofilehd=xprofilehd/max(xprofilehd);
+%             xprofilehd=xprofilehd/max(xprofilehd);
             
             dxxx=0.1;
             xxx=1:dxxx:b3_0.dataSize(1);
@@ -279,16 +286,17 @@ for Z=1:length(p.Zrange)-1
 %             zzzt=0*xxx+ftest-rangez(1)-0*framerange0(1)+1;
 %             xbs= interp3_0(b3_0,xxx,0*xxx+b3_0.dataSize(1)/2+.5,zzzt);
             xbs= interp3_0(b3_0,0*xxx+b3_0.dataSize(1)/2+.5,xxx,zzzt);
-            xbs=xbs/max(xbs);
+%             xbs=xbs/max(xbs);
             
             zzz=1:dxxx:b3_0.dataSize(3);xxxt=0*zzz+b3_0.dataSize(1)/2+.5;
             zbs= interp3_0(b3_0,xxxt,xxxt,zzz); 
-            zbs=zbs/max(zbs);
+%             zbs=zbs/max(zbs);
 
            hold(ax,'off')
-             plot(ax,framerange0,zpall2(1:length(framerange0),:),'m:')
-            hold(ax,'on')
+%              plot(ax,framerange0,zpall2(1:length(framerange0),:),'m:')
+            
              plot(ax,framerange0,zpall(1:length(framerange0),:),'c')
+             hold(ax,'on')
             plot(ax,framerange0',zprofile(1:length(framerange0)),'k*')
             plot(ax,rangez,zprofilehd,'ko')
             plot(ax,zzz+rangez(1)+framerange0(1)-2,zbs,'b','LineWidth',2)
@@ -299,9 +307,10 @@ for Z=1:length(p.Zrange)-1
             ax=maketgax(axall.hspline_psfx,tgt);
 %              ax=obj.initaxis('PSFx');
             hold(ax,'off')
-            plot(ax,xrange,xpall2,'m:')
-            hold(ax,'on')
+%             plot(ax,xrange,xpall2,'m:')
+            
             plot(ax,xrange,xpall,'c')
+            hold(ax,'on')
             plot(ax,xrange,xprofile,'k*-')
             plot(ax,xrange(rangex),xprofilehd,'ko')
             plot(ax,(xxx-(b3_0.dataSize(1)+1)/2),xbs,'b','LineWidth',2)
@@ -315,12 +324,14 @@ for Z=1:length(p.Zrange)-1
             if isempty(stackcal_testfit)||stackcal_testfit
                 testallrois=allrois(:,:,:,beadgood);
                 testallrois(isnan(testallrois))=0;
-            zall=testfit(testallrois,cspline.coeff,p,{},ax);
-            zref=testfit(corrPSF,cspline.coeff,p,{'k','LineWidth',2},ax);
+                zall=testfit(testallrois,cspline.coeff,p,{},ax);
+                corrPSFfit=corrPSF/max(corrPSF(:))*max(testallrois(:)); %bring back to some reasonable photon numbers;
+                zref=testfit(corrPSFfit,cspline.coeff,p,{'k','LineWidth',2},ax);
+
+                drawnow
+                ax=maketgax(axall.hspline_stripes,tgt);
+                teststripes(cspline.coeff,p,ax);
             end
-            ax=maketgax(axall.hspline_stripes,tgt);
-            teststripes(cspline.coeff,p,ax);
-            
 %             ztest=zall;
 %             for k=1:size(ztest,2)
 %                 xa=find(ztest(:,k)>15.5,1,'first');
@@ -379,6 +390,7 @@ findx=find(~indx);findy=find(~indy);
 plot(ax,zr(2:end-2),hz,zr(2:end-2),hzx/max(hzx)*max(hz));
 plot(ax2,xr(findx(2:end-1)),hx,xr(findx(2:end-1)),hxx/max(hxx)*max(hx),xr(findy(2:end-1)),hy,xr(findy(2:end-1)),hyx/max(hyx)*max(hy));
 end
+
 function zs=testfit(teststack,coeff,p,linepar,ax)
 if nargin<4
     linepar={};
@@ -397,7 +409,10 @@ d=round((size(teststack,1)-p.roisize)/2);
     fitterGPU=@callYimingFitter;
     fitterCPU=@kernel_MLEfit_Spline_LM_SMAP_v2_nointerp;
 % end  
+numstack=size(teststack,4);
+fprintf('fitting test stacks: 0.00')
     for k=1:size(teststack,4)
+        fprintf([ '\b\b\b\b' num2str(k/numstack,'%1.2f')])
         try
           [P] =  fitterGPU(single(squeeze(teststack(range,range,:,k))),single(coefffak*coeff),100,5,0);
         catch err

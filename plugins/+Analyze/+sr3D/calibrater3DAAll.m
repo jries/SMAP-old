@@ -229,48 +229,50 @@ zc=p.spatialcalibration && p.zcalc &p.beaddistribution.Value==2;
 % indgoodc=true(1,length(beadsh));
 for Z=1:length(p.Zrange)-1
     indgoodc=indgood{Z};
-    for B=length(beadsh):-1:1
-        beadz0=(beadsh(B).f0-p.fglass(beadsh(B).filenumber))*p.dz;
+    beadshz=beadsh(indgoodc);
+    curves=[];
+    for B=length(beadshz):-1:1
+        beadz0=(beadshz(B).f0-p.fglass(beadshz(B).filenumber))*p.dz;
         
         if p.alignz||p.beaddistribution.Value==2
-             beadz=(beadsh(B).loc.frame*p.dz)-beadz0;
+             beadz=(beadshz(B).loc.frame*p.dz)-beadz0;
         else 
-            beadz=(beadsh(B).loc.frame)*p.dz;
+            beadz=(beadshz(B).loc.frame)*p.dz;
         end
-        zglass=p.fglass(beadsh(B).filenumber)*p.dz;
+        zglass=p.fglass(beadshz(B).filenumber)*p.dz;
         if zc
             if p.zfilter.Value==1 % f0
 
                 if beadz0>p.Zrange(Z)-p.framerangecombine && beadz0<p.Zrange(Z+1)+p.framerangecombine
-                   sx=beadsh(B).loc.PSFxpix; 
-                   sy=beadsh(B).loc.PSFypix; 
+                   sx=beadshz(B).loc.PSFxpix; 
+                   sy=beadshz(B).loc.PSFypix; 
                    z=beadz-zglass;     
-                   phot=beadsh(B).loc.phot;  
+                   phot=beadshz(B).loc.phot;  
                 else
                     sx=[];sy=[];z=[];
                     phot=[];
                 end             
             else
-                zs=(beadsh(B).loc.frame-p.fglass(beadsh(B).filenumber))*p.dz;
+                zs=(beadshz(B).loc.frame-p.fglass(beadshz(B).filenumber))*p.dz;
                 goodz=zs>p.Zrange(Z)-p.framerangecombine & zs<p.Zrange(Z+1)+p.framerangecombine;
-               sx=beadsh(B).loc.PSFxpix(goodz); 
-               sy=beadsh(B).loc.PSFypix(goodz); 
+               sx=beadshz(B).loc.PSFxpix(goodz); 
+               sy=beadshz(B).loc.PSFypix(goodz); 
                z=beadz(goodz)-zglass;   
-               phot=beadsh(B).loc.phot(goodz);
+               phot=beadshz(B).loc.phot(goodz);
                 
             end
         else
-           sx=beadsh(B).loc.PSFxpix; 
-           sy=beadsh(B).loc.PSFypix; 
-           z=beadz-zglass; phot=beadsh(B).loc.phot;  
+           sx=beadshz(B).loc.PSFxpix; 
+           sy=beadshz(B).loc.PSFypix; 
+           z=beadz-zglass; phot=beadshz(B).loc.phot;  
         end
         inzr=z>=p.zrangeuse(1)&z<=p.zrangeuse(2);
         curves(B).sx=double(sx(inzr));
         curves(B).sy=double(sy(inzr));
         curves(B).z=double(z(inzr));
         curves(B).phot=double(phot(inzr));
-        curves(B).xpos=beadsh(B).pos(1);
-        curves(B).ypos=beadsh(B).pos(2);
+        curves(B).xpos=beadshz(B).pos(1);
+        curves(B).ypos=beadshz(B).pos(2);
 %         plot(curves(B).z,curves(B).sx,curves(B).z,curves(B).sy)
 %         hold on
     end
@@ -281,7 +283,7 @@ for Z=1:length(p.Zrange)-1
     ax=maketgax(axall.htsplines,tgt);  
     axes(ax)
      [spline,indg]=getcleanspline(curves,p);
-     indgoodc=indgoodc&indg;
+     indgoodc(indgoodc)=indgoodc(indgoodc)&indg;
     bh=bh(indg);
     
     SXY(Z)=getsxyinit(p,X,Y,Z);
@@ -343,7 +345,7 @@ end
                 plot(axall.axsplines,zt,sp(k).y(zt),'Color',linecolors(k,:));
                 
             end
-            ylim([0 5])
+            ylim(axall.axsplines,[0 5])
             legend(pl2,legends);
             
             if ~isempty(SXY(1).Sx2_Sy2)
@@ -513,7 +515,7 @@ if isnan(es), es=em; end
 % if isnan(es3), es3=em3; end
 indgood2=err<em+2*es & err2+err3<.15;
 if sum(indgood2)==0
-    indgood2=true(length(curves),1);
+    indgood2=true(1,length(curves));
 end
 zg=vertcat(curves(indgood2).z);
 indz=zg>p.zrangeuse(1)&zg<p.zrangeuse(2);
@@ -548,6 +550,7 @@ plot(zt,splinex2(zt),'k')
 plot(zt,spliney2(zt),'k')
 
 xlim([zt(1) zt(end)])
+ylim([0 min(5,max(max(splinex2(zt)),max(spliney2(zt))))])
 drawnow
 s.x=splinex2;s.y=spliney2;
 s.zrange=[zt(1) zt(end)];

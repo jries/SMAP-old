@@ -34,6 +34,7 @@ allstacks=[];
     campix=files(k).info.cam_pixelsize_um;
     il=getimageloader(obj,filename);
     imstackadu=il.getmanyimages([],'mat');
+    il.close;
                 
     imstack=(double(imstackadu)-il.metadata.offset)*il.metadata.pix2phot;
     si=size(imstack);
