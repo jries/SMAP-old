@@ -115,7 +115,7 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
             else
                 [file,path]=uiputfile('3d.mat');
             end
-            file=strrep(file,'_sml','_3Dcal');
+            file=strrep(file,'_sml',['_3Dcal' p.zfilter.selection]);
             save([path filesep file],'SXY')
         end
         
@@ -968,7 +968,7 @@ pard.roiframes.Width=.25;
 pard.smooth.object=struct('Style','checkbox','String','Smooth:','Value',1); 
 pard.smooth.position=[5,1.25];
 pard.smooth.Width=.6;
-pard.smoothingfactor.object=struct('Style','edit','String','0.02 .3'); 
+pard.smoothingfactor.object=struct('Style','edit','String','0.005 2'); 
 pard.smoothingfactor.position=[5,1.85];
 pard.smoothingfactor.Width=.5;
 

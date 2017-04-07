@@ -100,7 +100,7 @@ dpsfy=(psfy-median(psfy(~isnan(psfy))))*10;
 %     zshift=-zshift;
     midrange=halfstoreframes+round(median(dframe))+1;
     
-    [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D(allrois,struct('framerange',midrange-fw2:midrange+fw2,'alignz',alignxcorr,'zshiftf0',zshift),{ax, ax2});
+    [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D(allrois,struct('framerange',midrange-fw2:midrange+fw2,'alignz',alignxcorr,'zshiftf0',zshift,'beadfilterf0',(p.zfilter.Value==1)),{ax, ax2});
 
         %undo sorting by deviation to associate beads again to their
     %bead number

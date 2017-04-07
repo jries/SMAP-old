@@ -26,6 +26,9 @@ if numbeads==1
     indgood=true;
     return
 end
+if ~p.beadfilterf0
+    p.framerange=3:size(imin,3)-3;
+end
 smallim=zeros(length(p.xrange),length(p.yrange),length(p.framerange),size(imin,4));
 for k=1:size(imin,4)
     frh=round(p.framerange-p.zshiftf0(k));
@@ -48,10 +51,15 @@ else
 end
 for k=1:numbeads
 %     shift(k,:)=get3Dcorrshift(avim,smallim(:,:,:,k));
+    goodframes=squeeze(nansum(nansum(smallim(:,:,:,k),1),2))>0;
     if p.alignz
-        [shift(k,:),cc(k)]=get3Dcorrshift(refim,smallim(:,:,:,k));
+        [shift(k,:),cc(k)]=get3Dcorrshift(refim(:,:,goodframes),smallim(:,:,goodframes,k));
     else
-        [shift(k,:),cc(k)]=get2Dcorrshift(refim,smallim(:,:,:,k));
+        if any(goodframes)
+            [shift(k,:),cc(k)]=get2Dcorrshift(refim(:,:,goodframes),smallim(:,:,goodframes,k));
+        else
+            shift(k,:)=[0 0 0];cc(k)=NaN;
+        end
     end
     
     shiftedh=interp3(imin(:,:,:,k),Xq-shift(k,2),Yq-shift(k,1),Zq-shift(k,3)-double(zshiftf0(k)),'cubic',0);
@@ -68,6 +76,7 @@ for k=1:numbeads
 %     shiftedh(isnan(shiftedh))=0;
 %     meanim=shiftedh+meanim;
     meanim=nanmean(shiftedstack(:,:,:,1:k),4);
+    meanim(isnan(meanim))=avim(isnan(meanim));
     
     refim=meanim(p.xrange,p.yrange,p.framerange);
 end
@@ -75,9 +84,9 @@ end
 shiftedstackn=normalizstack(shiftedstack,p);
 
 
-[indgood]=getoverlap(shiftedstackn,cc,shift,p,true(1,size(shiftedstackn,4)));
-[indgood]=getoverlap(shiftedstackn,cc,shift,p,indgood);
-[indgood,res,normglobal,co]=getoverlap(shiftedstackn,cc,shift,p,indgood);
+[indgood]=getoverlap(shiftedstackn,shift,p,true(1,size(shiftedstackn,4)));
+[indgood]=getoverlap(shiftedstackn,shift,p,indgood);
+[indgood,res,normglobal,co,cc2]=getoverlap(shiftedstackn,shift,p,indgood);
 
 shiftedstackn=shiftedstackn/normglobal;
 
@@ -87,9 +96,9 @@ shiftedstackn(1,:,1,~indgood)=nanmax(shiftedstackn(:));
 
 if length(axs)>0
 hold(axs{1},'off')
-plot(axs{1},(res(~indgood)),cc(~indgood),'rx');title(co)
+plot(axs{1},(res(~indgood)),cc2(~indgood),'rx');title(co)
 hold(axs{1},'on')
-plot(axs{1},(res(indgood)),cc(indgood),'g*');title(co)
+plot(axs{1},(res(indgood)),cc2(indgood),'g*');title(co)
 xlabel(axs{1},'residulas')
 ylabel(axs{1},'cross-correlation value')
 end
@@ -118,16 +127,33 @@ end
 
 end
 
-function [indgood,res,normamp,co]=getoverlap(shiftedstackn,cc,shift,p,indgood)
+function [indgood,res,normamp,co,cc]=getoverlap(shiftedstackn,shift,p,indgood)
+%re-calculate CC! bisas for first.
 refimn=nanmean(shiftedstackn(p.xrange,p.yrange,p.framerange,indgood),4);
+% refimb=nanmean(shiftedstackn(:,:,:,indgood),4);
+
+for k=size(shiftedstackn,4):-1:1
+    imh=shiftedstackn(p.xrange,p.yrange,p.framerange,k);
+    badind=isnan(imh)|isnan(refimn);
+    cc(k)=sum(refimn(~badind).*imh(~badind))/(sum(refimn(~badind))*sum(imh(~badind)))*sum(~badind(:));
+%     imhb=shiftedstackn(:,:,:,k);
+%     badindb=isnan(imhb)|isnan(refimb);
+%     ccb(k)=sum(refimb(~badindb).*imhb(~badindb))/(sum(refimb(~badindb))*sum(imhb(~badindb)))*sum(~badindb(:));
+%     
+end
+
 normamp=nanmax(refimn(:));
 shiftedstackn=shiftedstackn/normamp;
 refimn=refimn/normamp;
 for k=size(shiftedstackn,4):-1:1
      sim=shiftedstackn(p.xrange(2:end-1),p.yrange(2:end-1),p.framerange,k);
      dv=(refimn(2:end-1,2:end-1,:)-sim).^2;
-    res(k)=sqrt(nansum(dv(:)));
-    sumall(k)=nansum(sim(:));
+    res(k)=sqrt(nanmean(dv(:)));
+
+    
+%          simb=shiftedstackn(:,:,:,k);
+%      dvb=(refimb(:,:,:)-simb).^2;
+%     resb(k)=sqrt(nanmean(dvb(:)));
 end
 rescc=res./cc;
 rescc(abs(shift(:,1))>3|abs(shift(:,2))>3)=NaN;
@@ -141,28 +167,52 @@ end
 
 function out=normalizstack(in,p)
 sin=size(in);
-out=0*in+NaN;
-midp=round((length(p.xrange)+1)/2);
-xr=p.xrange(midp-3:midp+3);yr=p.yrange(midp-3:midp+3);
-for k=1:sin(4)
-    imh=in(xr,yr,p.framerange,k);
-    nm=nanmean(imh(:));
-    if nm>0
-    out(:,:,:,k)=in(:,:,:,k)/nm;
+  midp=round((length(p.xrange)+1)/2);
+    xr=p.xrange(midp-3:midp+3);yr=p.yrange(midp-3:midp+3);
+if p.beadfilterf0 
+    out=0*in+NaN;
+  
+    for k=1:sin(4)
+        imh=in(xr,yr,p.framerange,k);
+        nm=nanmean(imh(:));
+        if nm>0
+        out(:,:,:,k)=in(:,:,:,k)/nm;
+        end
     end
-end
-% meanim=nanmean(out,4);
+else %use fitting
+%     x0=ones(1,size(in,4));
+%     fitp=lsqnonlin(@alignstacks,x0,0*x0,[],[],in)
 
-% out=0*in+NaN;
-% for k=1:sin(4)
-%     imh=in(:,:,:,k);
-%     ratio=imh(p.xrange,p.yrange,p.framerange)./meanim(p.xrange,p.yrange,p.framerange);
-%     factor=nanmedian(ratio(:));
-%     if factor>0
-%     out(:,:,:,k)=imh/factor;
-%     end
-% end
-
-% iii=squeeze(out(round(sin(1)/2),round(sin(1)/2),:,:));
-% figure(88);plot(iii)
+    inh=in;
+    out=0*in+NaN;
+%     xr=p.xrange(2:end-1);yr=p.yrange(2:end-1);
+    for iter=1:4
+        meanim=nanmean(inh,4);
+        for k=1:sin(4)
+            imh=inh(:,:,:,k);
+            if all(isnan(imh))
+                continue
+            end
+            ims=imh(xr,yr,p.framerange);
+            meanims=meanim(xr,yr,p.framerange);
+            isn=isnan(ims)|isnan(meanims);
+            intcutoff=meanims>myquantile(meanims(:),0.75);
+            indg=~isn&intcutoff;
+            ratio=ims(indg)./meanims(indg);
+            
+            factor=nanmedian(ratio(:));
+            factor2=sum(ims(indg))/sum(meanims(indg));
+            disp([factor  factor2])
+            if factor>0
+                out(:,:,:,k)=imh/factor;
+            end
+        end
+        inh=out;
+    end
+%         iii=squeeze(out(round(sin(1)/2),round(sin(1)/2),:,:));
+%         iii2=squeeze(in(round(sin(1)/2),round(sin(1)/2),:,:));
+%     figure(88);subplot(2,1,1);plot(iii);subplot(2,1,2);plot(iii2);hold off
 end
+
+end
+
