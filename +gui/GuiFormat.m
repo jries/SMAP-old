@@ -583,13 +583,16 @@ if strcmpi(button,'ok')
             end
             imold=obj.getPar('sr_sizeRecPix');
             imnew=imold.*ims;
+            mag=ims(1);
         else
-            imnew=settings.imsize;
+            imnew=ims;
+            imold=obj.getPar('sr_sizeRecPix');
+            mag=ims(1)/imold(1);
         end
         obj.setPar('sr_imagesize',imnew);
         settings.imsize=imnew;
         pixelsize=obj.getPar('sr_pixrec');
-        obj.setPar('sr_pixrec',pixelsize/ims(1));
+        obj.setPar('sr_pixrec',pixelsize/mag);
     end
     obj.setPar('sr_layersseparate',settings.layerssep);
     obj.setPar('sr_colorbarthickness',settings.colorbarthickness);
