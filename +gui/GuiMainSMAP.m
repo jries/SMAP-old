@@ -36,25 +36,27 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.setPar('mainGuihandle',handle);
             obj.setPar('mainGui',obj);
             obj.handle=handle;
+            set(handle,'MenuBar','none','Toolbar','none')
+            [pmenu,hmenu]=makePluginMenu(obj,handle);
+            obj.setPar('menu_plugins',pmenu);
             
             obj.guiPar.width=550;
             scrsz = get(groot,'ScreenSize');
-            height=min(scrsz(4)-70,760);
+            height=min(scrsz(4)-155,760);
             hpos=min(scrsz(4)-height,scrsz(4)/5);
             if ispc
                 vpossmap=8;
             else
                 vpossmap=3;
             end
-            set(handle,'Position',[vpossmap hpos obj.guiPar.width height]);
-            set(handle,'MenuBar','none','Toolbar','none','ButtonDownFcn',{@figure_selected,obj},...
-                'SizeChangedFcn',{@sizechanged_callback,obj},'NumberTitle','off')
             set(handle,'Units','Pixels', 'Name','SMAP')
-            set(handle, 'Name','SMAP');
+            set(handle,'Position',[vpossmap hpos obj.guiPar.width height]);            
+            set(handle,'ButtonDownFcn',{@figure_selected,obj},...
+                'SizeChangedFcn',{@sizechanged_callback,obj},'NumberTitle','off')
+drawnow
+%             set(handle, 'Name','SMAP');
             tabpos=[2 32 obj.guiPar.width-2 368];
-            [pmenu,hmenu]=makePluginMenu(obj,handle);
-%             obj.setPar('SMAP_menu',hmenu);
-            obj.setPar('menu_plugins',pmenu);
+
    
             
             gfile=obj.getGlobalSetting('guiPluginConfigFile');
@@ -212,7 +214,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             end
             
             
-            
+%             sizechanged_callback(obj.handle, 0, obj)
             obj.status('all initialized')
             drawnow  
         end
