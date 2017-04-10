@@ -1,5 +1,6 @@
 classdef BG_wavelet<interfaces.WorkflowModule
     properties
+        gpufit;
     end
     methods
         function obj=BG_wavelet(varargin)
@@ -16,6 +17,14 @@ classdef BG_wavelet<interfaces.WorkflowModule
             filtermode_callback(obj.guihandles.filtermode,0,obj)
         end
         function prerun(obj,p)
+            if p.filtermode.Value>1  
+                try
+                    gpuArray(5);
+                    gpufit=true;
+                catch
+                    gpufit=false;
+                end
+            end
         end
         function output=run(obj,data,p)
            
@@ -27,18 +36,25 @@ classdef BG_wavelet<interfaces.WorkflowModule
             end
             if ~isempty(data.data)
                 img=data.data;
+                if p.filtermode.Value>1&&obj.gpufit
+                    img=gpuArray(img);
+                end
                 switch p.filtermode.Value
                     case 1 %wavelet
                         bg=mywaveletfilter(img,p.loc_wavelet_level,p.loc_wavelet_refine,true);
                     case 2 %minimum
+                      
                         bg=minfilt2(img,p.min_filter_size);
                     case 3 % a trous
-                        imgg=gpuArray((img));
-                        bgg=(mywaveletfilteratrous(gpuArray(imgg),false));
-                        bg=gather(bgg);
-                        clear imgg;
+%                         imgg=gpuArray((img));
+                        bg=(mywaveletfilteratrous(img,false));
+%                         bg=gather(bgg);
+%                         clear imgg;
                 end
-                
+                if p.filtermode.Value>1&&obj.gpufit
+                    bg=gather(bg);
+                    clear img;
+                end
                 dato=data;
                 dato.data=bg;
                 output=dato; 
