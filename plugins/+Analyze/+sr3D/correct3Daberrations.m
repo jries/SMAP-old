@@ -22,13 +22,14 @@ classdef correct3Daberrations<interfaces.DialogProcessor
 %             p.dz=p.dz*p.RIM;
             Zcorr=load(p.calfile);
             Zcorr=Zcorr.ZcorrInterp;
-            z=obj.locData.loc.znm;
-            zg=obj.locData.grouploc.znm;
+            z=double(obj.locData.loc.znm);
+            zg=double(obj.locData.grouploc.znm);
             
             dz=Zcorr.interp(ones(size(z))*p.objectivepos,z/p.RIM)*p.RIM;
             dzg=Zcorr.interp(ones(size(zg))*p.objectivepos,zg/p.RIM)*p.RIM;
-            obj.locData.loc.znm=z+dz;
-            obj.locData.grouploc.znm=zg+dzg;
+            obj.locData.loc.znm=single(z+dz);
+            obj.locData.grouploc.znm=single(zg+dzg);
+            out=[];
            
            
         end
