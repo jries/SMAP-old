@@ -111,7 +111,8 @@ if layersnext
      rangexplot(2)=rangexplot(2)+nlayer*(rangexplot(2)-rangexplot(1));
 end
 
-    imfinal=addscalebar(imfinal,p.sr_pixrec(1));
+    [imfinal,lennm]=addscalebar(imfinal,p.sr_pixrec(1));
+    
 
     
     if isfield(p,'sr_axes')&&~isempty(p.sr_axes)&&ishandle(p.sr_axes)&&~isempty(rangexplot)&&~isempty(rangeyplot)
@@ -168,6 +169,7 @@ end
     imout.composite=compimage;
     imout.rangex=rangexplot/1000;
     imout.rangey=rangeyplot/1000;
+    imout.scalebarnm=lennm;
 
 end
 
@@ -212,7 +214,7 @@ end
 
 end
 
-function imin=addscalebar(imin,pixrec,fac)
+function [imin,lennm]=addscalebar(imin,pixrec,fac)
 sim=size(imin);
 if nargin<3
     fac=1;

@@ -828,7 +828,7 @@ pard.beadsource.Width=1;
 pard.dzt.object=struct('Style','text','String','dz (nm)'); 
 pard.dzt.position=[2,1];
 pard.dzt.Width=.4;
-pard.dz.object=struct('Style','edit','String','50'); 
+pard.dz.object=struct('Style','edit','String','10'); 
 pard.dz.position=[2,1.4];
 pard.dz.Width=.35;
 
@@ -838,7 +838,11 @@ pard.refine.Width=1;
 
 pard.beaddistribution.object=struct('String',{{'Glass','Gel'}},'Style','popupmenu','Value',1,'Callback',{{@setvisible,obj}});
 pard.beaddistribution.position=[1,2];
-pard.beaddistribution.Width=.75;
+pard.beaddistribution.Width=.65;
+
+pard.modality.object=struct('String',{{'astigmatic','any'}},'Style','popupmenu','Value',1);
+pard.modality.position=[1,2.65];
+pard.modality.Width=.9;
 
 
 

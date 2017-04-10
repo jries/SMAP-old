@@ -211,6 +211,7 @@ function imout=makeSRimge(locDatatemp)
 channelfile='settings/workflows/FitTif_Channelsettings.mat';
 pall=load(channelfile);
 p=pall.globalParameters;
+p.lutinv=false;
 p.sr_pixrec=20;
 p.layer=1;
 % p.gaussfac=0.4;

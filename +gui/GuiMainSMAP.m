@@ -42,7 +42,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             
             obj.guiPar.width=550;
             scrsz = get(groot,'ScreenSize');
-            height=min(scrsz(4)-155,760);
+            height=min(scrsz(4)-80,760);
             hpos=min(scrsz(4)-height,scrsz(4)/5);
             if ispc
                 vpossmap=8;

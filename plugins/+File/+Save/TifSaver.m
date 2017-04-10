@@ -16,19 +16,22 @@ classdef TifSaver<interfaces.DialogProcessor
                 of=[path filesep file '_' num2str(ind) p2.img_ext.selection];
                 ind=ind+1;
             end
-            txt=filterpar(obj,p);
+            
+            
             serchstr={['*' p2.img_ext.selection];['*' strjoin(p2.img_ext.String,';*')]};
             [f,path]=uiputfile(serchstr,'select output file for image', of);
             if f
                 img=obj.getPar('sr_image');
-                res=ones(2,1)/p.sr_pixrec*2.5e4;       
+                res=ones(2,1)/p.sr_pixrec*2.5e7;  
+                p.scalebarnm=img.scalebarnm;
+                txt=filterpar(obj,p);
                 description=sprintf(txt);
                 [~,~,ext]=fileparts(f);
                 switch ext
                     case '.tif'
                         imwrite(img.image,[path f],'Description',description,'Resolution',res);
                     case '.png'
-                        imwrite(img.image,[path f],'Description',description,'XResolution',res(1),'YResolution',res(2));
+                        imwrite(img.image,[path f],'Description',description,'XResolution',res(1),'YResolution',res(2),'ResolutionUnit','inch');
                 end
             end
             obj.status('save done')
@@ -51,6 +54,7 @@ end
 function txt=filterpar(obj,p)
 txt='SMAP \n';
 txt=[txt 'pixelsize(nm) \t' num2str(p.sr_pixrec) '\n'];
+txt=[txt 'scalebar (nm) \t' num2str(p.scalebarnm) '\n'];
 txt=[txt 'position (nm) \t' num2str(p.sr_pos (1:2)) '\n'];
 txt=[txt 'group_dx (nm) \t' num2str(p.group_dx) '\n'];
 txt=[txt 'group_dt (frames) \t' num2str(p.group_dt) '\n'];
