@@ -149,7 +149,7 @@ end
                      px=layers(k).images.srimage.rangex(1)/1000+dx+p.sr_pixrec/1000*5;
                      py=layers(k).images.srimage.rangey(1)/1000;
                      lutm=mean(lut,1);lutm=lutm/max(lutm);
-                     th=text(px,py,p.layernames{k},'Color',lutm,'FontSize',fontsize,'BackgroundColor','k','Units','data');
+                     th=text(p.sr_axes,px,py,p.layernames{k},'Color',lutm,'FontSize',fontsize,'BackgroundColor','k','Units','data');
 %                      th.Units='pixels';
                      th.Position(2)=th.Position(2)+th.Extent(4)*(dy+.6)*1.2;
                      

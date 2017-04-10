@@ -96,9 +96,9 @@ shiftedstackn(1,:,1,~indgood)=nanmax(shiftedstackn(:));
 
 if length(axs)>0
 hold(axs{1},'off')
-plot(axs{1},(res(~indgood)),cc2(~indgood),'rx');title(co)
+plot(axs{1},(res(~indgood)),cc2(~indgood),'g*');title(co)
 hold(axs{1},'on')
-plot(axs{1},(res(indgood)),cc2(indgood),'g*');title(co)
+plot(axs{1},(res(indgood)),cc2(indgood),'rx');title(co)
 xlabel(axs{1},'residulas')
 ylabel(axs{1},'cross-correlation value')
 end

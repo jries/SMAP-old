@@ -16,6 +16,7 @@ classdef LocSaver<interfaces.WorkflowModule
        function obj=LocSaver(varargin)
             obj@interfaces.WorkflowModule(varargin{:})
             obj.inputChannels=1; 
+            obj.inputParameters={'loc_ROIsize'};
 %             obj.propertiesToSave={'savefields'};
         end
         function pard=guidef(obj)
@@ -80,8 +81,11 @@ classdef LocSaver<interfaces.WorkflowModule
             end
             locs=data.data;%get;
             if ~isempty(locs)&&~isempty(locs.frame)
-                maxfitdist=5;
+                maxfitdist=min(5,(p.loc_ROIsize-1)/2);
                 indin=abs(locs.xpix-locs.peakfindx)<maxfitdist & abs(locs.ypix-locs.peakfindy)<maxfitdist;
+                if isfield(locs,'znm')
+                    indin=indin&~isnan(locs.znm);
+                end
                 fn=fieldnames(locs);
                 obj.savefields.fieldnames=fn;
                 if isempty(templocs)
@@ -117,24 +121,7 @@ classdef LocSaver<interfaces.WorkflowModule
             end
             
             
-            
-%             if 0 % ~isempty(locs)&&~isempty(locs.frame)
-%                 maxfitdist=5;
-%                 indin=abs(locs.xpix-locs.peakfindx)<maxfitdist & abs(locs.ypix-locs.peakfindy)<maxfitdist;
-%                 locdat=interfaces.LocalizationData;
-%                 locdat.loc=fitloc2locdata(obj,locs,indin);
-%                 obj.locDatatemp.addLocData(locdat);
-% %                 delete(locdat)
-%                     if locs.frame(end)>obj.index && obj.numsaved<obj.saveframes
-%                         obj.numsaved=obj.numsaved+1;
-%                         obj.index=obj.index+obj.deltaframes;
-%                         if isempty(obj.frames)
-%                             obj.frames=obj.getPar('loc_currentframe');
-%                         else
-%                             obj.frames(obj.numsaved)=obj.getPar('loc_currentframe');
-%                         end
-%                     end
-%             end
+           
             
             if data.eof %save locs
                 if ~isempty(templocs)

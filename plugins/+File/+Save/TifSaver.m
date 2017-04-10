@@ -2,7 +2,7 @@ classdef TifSaver<interfaces.DialogProcessor
     methods
         function obj=TifSaver(varargin)  
                 obj@interfaces.DialogProcessor(varargin{:}) ;
-                obj.inputParameters={'filelist_long','mainfile','mainGui','numberOfLayers','sr_layerson','sr_pixrec','layers','sr_image','sr_pos'};
+                obj.inputParameters={'filelist_long','mainfile','mainGui','numberOfLayers','sr_layerson','sr_pixrec','layers','sr_image','sr_pos','group_dt','group_dx'};
         end
         
         function out=save(obj,p)
@@ -52,6 +52,8 @@ function txt=filterpar(obj,p)
 txt='SMAP \n';
 txt=[txt 'pixelsize(nm) \t' num2str(p.sr_pixrec) '\n'];
 txt=[txt 'position (nm) \t' num2str(p.sr_pos (1:2)) '\n'];
+txt=[txt 'group_dx (nm) \t' num2str(p.group_dx) '\n'];
+txt=[txt 'group_dt (frames) \t' num2str(p.group_dt) '\n'];
 for k=1:length(p.sr_layerson)
     if p.sr_layerson(k)
         lp=['layer' num2str(k)];
@@ -68,6 +70,7 @@ for k=1:length(p.sr_layerson)
         end
         txt=[txt 'channels: ' num2str(p.([lp '_']).channels) '\n'];
         txt=[txt 'grouping: ' num2str(p.([lp '_']).groupcheck) '\n'];
+        txt=[txt 'lut: ' p.([lp '_']).lut.selection '\n'];
         txt=[txt 'quantile/Imax: ' num2str(p.([lp '_']).imax_min) '\n'];
         txt=[txt 'color range: \t' num2str(p.([lp '_']).colorfield_min) ' : \t' num2str(p.([lp '_']).colorfield_max) '\n'];
         txt=[txt 'remove outside c-range: ' num2str(p.([lp '_']).remout) '\n'];

@@ -64,6 +64,7 @@ classdef calibrate3Daberrations<interfaces.DialogProcessor
                 beads(k).f0glass=beads(k).f0-f0glass(beads(k).filenumber);
                 beads(k).loc.z0glass=beads(k).f0glass*p.dz+0*beads(k).loc.zglass;
                 indplot=(beads(k).loc.z0relative)>p.zrangeuse(1)&(beads(k).loc.z0relative)<p.zrangeuse(2);
+%                 plot(axh,beads(k).loc.frame,beads(k).loc.znm,'.')
                 plot(axh,beads(k).loc.zglass(indplot),beads(k).loc.znm(indplot),'.')
 %                 beads(k).stddz=std(diff(beads(k).loc.znm(indplot)));
                 hold on
@@ -249,7 +250,7 @@ end
                     zfitx=(qzfit(1):p.dz:qzfit(2))';
                     zfitallh=vertcat(zfitall(inz),zfitx,zfitx,zfitx);
                     zploth=vertcat(zplot(inz),0*zfitx,0*zfitx,0*zfitx);
-                    zploth(z0glassall(inz)<150)=0;
+%                     zploth(z0glassall(inz)<50)=0;
                     zzaxh=vertcat(zzax(inz),min(zzax)+0*zfitx,min(zfitx)+0*zfitx,mean([min(zfitx),min(zzax)])+0*zfitx);
                 
             else
@@ -452,10 +453,10 @@ pard.setzero.Width=1.5;
 
 pard.setglass.object=struct('String','Set glass to frame (empty: automatic): ','Style','checkbox','Value',0);
 pard.setglass.position=[7,1];
-pard.setglass.Width=2;
+pard.setglass.Width=3;
 
 pard.glassframe.object=struct('String','','Style','edit');
-pard.glassframe.position=[7,3];
+pard.glassframe.position=[7,4];
 pard.glassframe.Width=0.5;
 
 

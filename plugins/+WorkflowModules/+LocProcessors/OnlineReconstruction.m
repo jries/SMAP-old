@@ -12,6 +12,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule
        function obj=OnlineReconstruction(varargin)
             obj@interfaces.WorkflowModule(varargin{:})
             obj.inputChannels=1; 
+            obj.inputParameters={'loc_ROIsize'};
 %              obj.setInputChannels(1,'frame');
         end
         function pard=guidef(obj)
@@ -73,12 +74,12 @@ classdef OnlineReconstruction<interfaces.WorkflowModule
             locs=data.data;%get;
             
             if ~isempty(locs)&&~isempty(locs.frame)
-                maxfitdist=5;
+                maxfitdist=min(5,(p.loc_ROIsize-1)/2);
                 indin=abs(locs.xpix-locs.peakfindx)<maxfitdist & abs(locs.ypix-locs.peakfindy)<maxfitdist;
-
-%                 locdat=interfaces.LocalizationData;
-%                 locdat.loc=fitloc2locdata(obj,locs,indin);
-%                 obj.locDatatemp.addLocData(locdat);
+                if isfield(locs,'znm')
+                    indin=indin&~isnan(locs.znm);
+                end
+                
                 fn=fieldnames(locs);
                 if isempty(templocs)
                     for k=1:length(fn)

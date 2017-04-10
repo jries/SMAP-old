@@ -220,7 +220,7 @@ pard.drift_maxpixelst.object=struct('String','max size (pix)','Style','text');
 pard.drift_maxpixelst.position=[6,1];
 pard.drift_maxpixelst.Optional=true;
 
-pard.drift_maxpixels.object=struct('String','2048','Style','edit');
+pard.drift_maxpixels.object=struct('String','4096','Style','edit');
 pard.drift_maxpixels.position=[6,2];
 pard.drift_maxpixels.object.TooltipString=sprintf('Maximum size of the reconstructed images. Smaller for speed and lower memory consumption, larger for noisy signal. 128-4096');
 pard.drift_maxpixels.Optional=true;

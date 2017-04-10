@@ -33,7 +33,7 @@ plot(ax,z,sx,'r.')
 hold on
 plot(ax,z,sy,'r.')
 plot(ax,zt,sxf,'k')
-plot(ax,zt,sxfs,'c',zt,syfs,'g')
+% plot(ax,zt,sxfs,'c',zt,syfs,'g')
 fpy=fitp([1 3 5 7 8 9]);
 fpy(5)=-fpy(5);
 syf=sigmafromz(fpy,zt,B0);

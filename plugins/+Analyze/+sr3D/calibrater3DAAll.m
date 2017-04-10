@@ -115,7 +115,12 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
             else
                 [file,path]=uiputfile('3d.mat');
             end
-            file=strrep(file,'_sml',['_3Dcal' p.zfilter.selection]);
+            if p.spatialcalibration && p.zcalc
+                adds=p.zfilter.selection;
+            else
+                adds='';
+            end
+            file=strrep(file,'_sml',['_3Dcal' adds]);
             save([path filesep file],'SXY')
         end
         
