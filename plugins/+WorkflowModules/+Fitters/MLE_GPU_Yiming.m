@@ -258,10 +258,13 @@ if fitpar.fitmode==3||fitpar.fitmode==5
                     
                 end
             end
-            fitpar.dz=splinefit{1}.cspline.dz;
-            fitpar.z0=splinefit{1}.cspline.z0;
+            if ~isempty(splinefit{1})
+                fitpar.dz=splinefit{1}.cspline.dz;
+                fitpar.z0=splinefit{1}.cspline.z0;
+                fitpar.splinefit=splinefit;
+            end
             fitpar.zpar=zpar;
-            fitpar.splinefit=splinefit;
+            
             if numel(cal.SXY)>1
                 obj.spatial3Dcal=true;
             else
