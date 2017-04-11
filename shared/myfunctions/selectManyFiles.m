@@ -3,6 +3,7 @@ classdef selectManyFiles<handle
         handle;
         guihandles;
         filelist;
+        addpar;
 
     end
 
@@ -23,7 +24,12 @@ classdef selectManyFiles<handle
         end
         function done_callback(obj,a,b)
             obj.filelist=obj.guihandles.filelist.String;
+            fn=fieldnames(obj.guihandles);
+            for k=1:length(fn)
+                obj.addpar.(fn{k})=copyfields([],obj.guihandles.(fn{k}),{'String','Value'});
+            end
             close(obj.handle);
+            
         end
         function addb_callback(obj,a,b)
             filelist=obj.guihandles.filelist.String;
