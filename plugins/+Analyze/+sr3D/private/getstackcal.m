@@ -362,7 +362,7 @@ for Z=1:length(p.Zrange)-1
         end 
 
 
-    end
+end
 end
 
 function teststripes(coeff,p,ax)

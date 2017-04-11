@@ -32,7 +32,12 @@ file=varargin{1};
        otherwise
            imloader=@imageloaderOME;
    end    
-   io=imloader(varargin{:});
+   try
+        io=imloader(varargin{:});
+   catch
+       imloader=@imageloaderTifSimple;
+       io=imloader(varargin{:});
+   end
 end
 
 function f=filesize(file)

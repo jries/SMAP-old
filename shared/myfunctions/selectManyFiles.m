@@ -20,7 +20,8 @@ classdef selectManyFiles<handle
             uicontrol('Style','pushbutton','String','add','Callback',@obj.addb_callback,'Parent',obj.handle,'Position',[820 220 80 30])
             uicontrol('Style','pushbutton','String','add dir','Callback',@obj.adddirb_callback,'Parent',obj.handle,'Position',[820 190 80 30])
             uicontrol('Style','pushbutton','String','remove','Callback',@obj.removeb_callback,'Parent',obj.handle,'Position',[820 160 80 30])
-            uicontrol('Style','pushbutton','String','Done','Callback',@obj.done_callback,'Parent',obj.handle,'Position',[820 130 80 30])
+            uicontrol('Style','pushbutton','String','Done','Callback',@obj.done_callback,'Parent',obj.handle,'Position',[820 10 80 50])
+            obj.guihandles.freepos=uicontrol('Style','text','String','','Position',[820 60 80 30]);
         end
         function done_callback(obj,a,b)
             obj.filelist=obj.guihandles.filelist.String;

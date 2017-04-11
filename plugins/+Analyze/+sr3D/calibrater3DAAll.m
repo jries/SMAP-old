@@ -25,13 +25,18 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
             %add:get from figure files only
             switch p.beadsource.Value
                 case 1 %ROImanager
-                beads=sites2beads(obj,p);
+                [beads]=sites2beads(obj,p);
+                            p.EMon=obj.locData.files.file(1).info.EMon; %later: in segmentation
+                            p.fminmax=[min(obj.locData.loc.frame) max(obj.locData.loc.frame)];
                 case 2 % segment new
                 beads=segmentb(obj,p);
+                            p.EMon=obj.locData.files.file(1).info.EMon; %later: in segmentation
+                            p.fminmax=[min(obj.locData.loc.frame) max(obj.locData.loc.frame)];
                 case 3 %from images
+                [beads,p]=images2beads(obj,p);
+                p.EMon=false;
             end
-            p.EMon=obj.locData.files.file(1).info.EMon; %later: in segmentation
-            p.fminmax=[min(obj.locData.loc.frame) max(obj.locData.loc.frame)];
+
            axall=getaxes(p);
             
             if p.uselocs
@@ -59,7 +64,7 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
             end
             %get image stacks if needed
             
-            if  p.fitcsplinec 
+            if  p.fitcsplinec && (~isfield(beads(1),'stack') || isempty(beads(1).stack.image))
                 disp('load images')
                 beads=getimagestacks(obj,p,beads);      
             end
@@ -138,6 +143,9 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
             [path,file]=fileparts(lastf);
             else
                 [file,path]=uiputfile('3d.mat');
+                if ~file
+                    error('no file selected')
+                end
             end
             if p.spatialcalibration && p.zcalc
                 adds=p.zfilter.selection;

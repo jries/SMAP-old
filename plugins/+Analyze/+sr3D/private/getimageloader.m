@@ -14,6 +14,7 @@ catch
         il=imageloaderAll(filenamef,[],obj.P); %still exist?
     catch
         lastsml=obj.getPar('lastSMLFile');
+        if ~isempty(lastsml)
         filenamef=findfilepathcomp(filename,fileparts(lastsml));
             try
                 il=imageloaderAll(filenamef,[],obj.P); %still exist?
@@ -29,6 +30,7 @@ catch
                     il=[];
                 end
             end
+        end
     end
     %look for file in main directory
 end
