@@ -1,17 +1,15 @@
-function  savesml(locData,file,p)
-
-
+function  savesml(locData,file,p,excludesavefields)
 
 if p.saveroi
     [~,indgroi]=locData.getloc('xnm','position','roi');  
     indgl=false(size(indgroi));
     for k=1:p.numberOfLayers
         if p.sr_layerson(k)
-           [~,indgh]=locData.getloc('xnm','layer',k); 
-           if length(indgh)~=length(indgl)
-               disp('save visible works only for ungrouped data')
-           end
-           indgl=indgl|indgh;
+           [locs,indgh]=locData.getloc('inlayeru','layer',k); 
+%            if length(indgh)~=length(indgl)
+%                disp('save visible works only for ungrouped data')
+%            end
+           indgl=indgl|locs.inlayeru{1};
        
         end
     end
@@ -28,6 +26,7 @@ end
 if all(indg)%save all
     indg=[];
 end
+locData.loc=rmfield(locData.loc,excludesavefields);
 saveloc=locData.savelocs([],indg); % BETA , maybe problematic with more than 1 file: this will save only displayed loicalizations
 % if ~isempty(locData.SE)
 %     saveloc.siteexplorer=locData.SE.save;

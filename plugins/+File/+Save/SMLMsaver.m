@@ -37,8 +37,8 @@ classdef SMLMsaver<interfaces.DialogProcessor
             
             par.saveroi=par.savevisible;
             savelocData=obj.locData.copy;
-            savelocData.loc=rmfield(savelocData.loc,obj.excludesavefields);
-            savesml(savelocData,[path f],par)
+%             savelocData.loc=rmfield(savelocData.loc,obj.excludesavefields);
+            savesml(savelocData,[path f],par,obj.excludesavefields)
             
             end
             obj.status('save done')
