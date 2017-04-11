@@ -7,6 +7,7 @@ classdef GuiFilterTable< interfaces.LayerInterface
         function obj=GuiFilterTable(varargin)
             obj@interfaces.LayerInterface(varargin{:});
             obj.outputParameters={'filter'};
+            obj.propertiesToSave={'filter'};
         end
         function makeGui(obj)
            obj.excludefields={'peakfindxnm','peakfindynm','groupindex','photerr'};
@@ -45,6 +46,13 @@ classdef GuiFilterTable< interfaces.LayerInterface
            if ~isempty(obj.locData.loc)
             updateGui(obj,0,0)
            end
+        end
+        
+        function setGuiParameters(obj,p,setchildren)
+            setGuiParameters@interfaces.GuiModuleInterface(obj,p,setchildren);  
+            obj.guihandles.table.Data=p.table.Data;
+            obj.setPar('filtertable',p.table.Data,'layer',obj.layer);
+            refilter(obj);
         end
 
         function selectedField_callback(obj)
@@ -164,5 +172,9 @@ function cellEdit_callback(object,data,obj)
 end
 
 function refilter(obj,fn)
-obj.locData.filter(fn,obj.layer)
+if nargin>1
+    obj.locData.filter(fn,obj.layer)
+else
+    obj.locData.filter([],obj.layer)
+end
 end

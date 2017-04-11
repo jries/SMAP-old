@@ -540,6 +540,7 @@ end
 try
 TotalRender(obj.locData,pall,{'xnm','ynm'});
 catch err
+    err
     obj.status('Error in reconstruction. Maybe some render settings are incompatible with current data');
 end
 end

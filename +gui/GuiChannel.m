@@ -6,6 +6,7 @@ classdef GuiChannel< interfaces.LayerInterface
         imax
         synchronizedFields
         rec_addpar = {'mingaussnm','mingausspix','gaussfac','par.gamma'};
+        rec_addparval;
         name
     end
     methods
@@ -20,10 +21,21 @@ classdef GuiChannel< interfaces.LayerInterface
                 'groupcheck','imaxtoggle','imax','lut','remout','shift','shiftxy_min','shiftxy_max','layer','colorrange',...
                 'znm_min','znm_max','frame_min','frame_max','scalex','scaley'};
             obj.guiselector.show=true;
+            obj.propertiesToSave={'rec_addparval'};
         end
         
         function pard=guidef(obj)
             pard=guidef(obj);
+        end
+        
+        function set.rec_addparval(obj,par)
+            
+            obj.rec_addparval=par;
+            if ~isempty(par)
+            layerp=obj.getPar(obj.layerprefix);
+            layerp=copyfields(layerp,par);
+            obj.setPar(obj.layerprefix,layerp) 
+            end
         end
 
         function makeGui(obj)
@@ -112,7 +124,7 @@ classdef GuiChannel< interfaces.LayerInterface
 %             obj.addSynchronization([obj.layerprefix 'scaley'],h.scaley,'String')
             obj.guihandles=h;
 
-            recpar=renderpardialog([],1);
+            recpar=renderpardialog(obj.rec_addparval,1);
             p=obj.getAllParameters;
             layerp=copyfields(p,recpar);
             obj.setPar(obj.layerprefix,layerp);
@@ -183,6 +195,9 @@ classdef GuiChannel< interfaces.LayerInterface
             layeron=obj.getPar([obj.layerprefix 'layercheck']);
             layerp=obj.getPar(obj.layerprefix);
             layerp.layercheck=layeron;
+            recpar=renderpardialog(obj.rec_addparval,1);
+%             p=obj.getAllParameters;
+            layerp=copyfields(layerp,recpar);
             obj.setPar(obj.layerprefix,layerp);
         end
         
@@ -312,7 +327,9 @@ classdef GuiChannel< interfaces.LayerInterface
             if length(varargin)>1&&varargin{2}==true
 %             %update fields to histogram
                 obj.updateLayerField;
+                
             end
+%             obj.updatelayer_callback;
         end
         
         function setvisibility(obj,field)
@@ -549,9 +566,11 @@ case 'Other'
     obj.setPar('rendermodules',rendermodules);
     
 otherwise
-    layerp=obj.getPar(obj.layerprefix);
-    [par,settings]=renderpardialog(layerp);
+     layerp=obj.getPar(obj.layerprefix);
+     recp=obj.rec_addparval;
+    [par,settings]=renderpardialog(recp);
     if ~isempty(par)
+        obj.rec_addparval=par;
        layerp=copyfields(layerp,par);
        obj.setPar(obj.layerprefix,layerp)       
 %        if par.copyall
@@ -693,11 +712,15 @@ end
 
 function [paro,settings]=renderpardialog(par,default)
 if nargin==0 || isempty(par)
+%     if isempty(obj.rec_addparval)
     par.mingaussnm=3;
     par.mingausspix=.7;
     par.gaussfac=0.4;
     par.gamma=1;
     par.copyall=false;
+%     else
+%         par=obj.rec_addparval;
+%     end
 end
 if nargin<2||~default
 [settings, button] = settingsdlg(...
