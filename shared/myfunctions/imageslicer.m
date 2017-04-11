@@ -5,6 +5,7 @@ function imageslicer(varargin)
 
 %input parser: x,y,z (optional),V,'name',value
 %Parent,all gui parameters: scale,  contrastmode, contrast,
+%Title
 
 %todo: rgb, more dimension, choose dim1,dim2
 p=parseinput(varargin);

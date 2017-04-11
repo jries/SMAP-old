@@ -16,12 +16,12 @@ classdef selectManyFiles<handle
                 obj.handle=figure('Units','normalized','Units','pixels','Position',[150,200,900,330],'Name','Select Files','NumberTitle','off','ToolBar','none','MenuBar','none');
                 delete(obj.handle.Children);
             end
-            obj.guihandles.filelist=uicontrol('Style','listbox','Parent',obj.handle,'Position',[10 10 800,300]);
-            uicontrol('Style','pushbutton','String','add','Callback',@obj.addb_callback,'Parent',obj.handle,'Position',[820 220 80 30])
-            uicontrol('Style','pushbutton','String','add dir','Callback',@obj.adddirb_callback,'Parent',obj.handle,'Position',[820 190 80 30])
-            uicontrol('Style','pushbutton','String','remove','Callback',@obj.removeb_callback,'Parent',obj.handle,'Position',[820 160 80 30])
-            uicontrol('Style','pushbutton','String','Done','Callback',@obj.done_callback,'Parent',obj.handle,'Position',[820 10 80 50])
-            obj.guihandles.freepos=uicontrol('Style','text','String','','Position',[820 60 80 30]);
+            obj.guihandles.filelist=uicontrol('Style','listbox','Parent',obj.handle,'Position',[10 10 680,300]);
+            uicontrol('Style','pushbutton','String','add','Callback',@obj.addb_callback,'Parent',obj.handle,'Position',[700 270 100 30])
+            uicontrol('Style','pushbutton','String','add dir','Callback',@obj.adddirb_callback,'Parent',obj.handle,'Position',[800 270 100 30])
+            uicontrol('Style','pushbutton','String','remove','Callback',@obj.removeb_callback,'Parent',obj.handle,'Position',[750 230 100 30])
+            uicontrol('Style','pushbutton','String','Done','Callback',@obj.done_callback,'Parent',obj.handle,'Position',[750 10 100 50])
+            obj.guihandles.freepos=uicontrol('Style','text','String','','Position',[700 60 200 30]);
         end
         function done_callback(obj,a,b)
             obj.filelist=obj.guihandles.filelist.String;

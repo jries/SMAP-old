@@ -105,7 +105,7 @@ for Z=1:length(p.Zrange)-1
 %     zshift=-zshift;
     midrange=halfstoreframes+round(median(dframe))+1;
     
-    [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D(allrois,struct('framerange',midrange-fw2:midrange+fw2,'alignz',alignxcorr,'zshiftf0',zshift,'beadfilterf0',(p.zfilter.Value==1)),{ax, ax2});
+    [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D(allrois,struct('framerange',midrange-fw2:midrange+fw2,'alignz',alignxcorr,'zshiftf0',zshift,'beadfilterf0',(p.zfilter.Value==1)),{ax});
 
         %undo sorting by deviation to associate beads again to their
     %bead number
@@ -172,6 +172,7 @@ for Z=1:length(p.Zrange)-1
         corrPSFn(isnan(corrPSFn))=0;
 
         corrPSFs=corrPSFn(rangex,rangey,rangez);
+        
         PSFgood=true;
 %             else
 %                 corrPSFn=0*corrPSF;
@@ -207,6 +208,11 @@ for Z=1:length(p.Zrange)-1
         dxxhd=1;
         [XX,YY,ZZ]=meshgrid(1:dxxhd:b3_0.dataSize(1),1:dxxhd:b3_0.dataSize(2),zhd);
         corrPSFhd = interp3_0(b3_0,XX,YY,ZZ,0);
+        
+        psfshow(:,:,:,1)=corrPSFs;
+        psfshow(:,:,:,2)=corrPSFhd;
+        psfshow(1,1,1,3)=0;
+        imageslicer(psfshow,'Parent',ax2,'Title','PSF: 1.average, 2.smooth')
 %             else
                
 %                 corrPSFhd=corrPSFs;
