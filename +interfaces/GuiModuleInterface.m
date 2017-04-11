@@ -428,7 +428,8 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                             allFields{k}
                             thisField
                             str=['guidef definition is incomplete in classe:' class(obj)];
-                            error(str)
+                            warning(str)
+                            continue
                             
                         end
                         if isfield(thisField,'Optional')&&thisField.Optional

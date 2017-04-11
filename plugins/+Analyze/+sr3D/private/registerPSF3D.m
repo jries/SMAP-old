@@ -30,8 +30,15 @@ if ~p.beadfilterf0
     p.framerange=3:size(imin,3)-3;
 end
 smallim=zeros(length(p.xrange),length(p.yrange),length(p.framerange),size(imin,4));
+
+if ~isempty(p.zshiftf0)
+    zshiftf0=p.zshiftf0;
+else
+    zshiftf0=zeros(numbeads,1);
+end
+
 for k=1:size(imin,4)
-    frh=round(p.framerange-p.zshiftf0(k));
+    frh=round(p.framerange-zshiftf0(k));
     smallim(:,:,:,k)=imin(p.xrange,p.yrange,frh,k);
 end
 avim=nanmean(imin,4);
@@ -44,11 +51,7 @@ refim=avim(p.xrange,p.yrange,p.framerange);
 
 simin=size(imin);
 shiftedstack=zeros(simin(1),simin(2),simin(3),numbeads)+NaN;
-if ~isempty(p.zshiftf0)
-    zshiftf0=p.zshiftf0;
-else
-    zshiftf0=zeros(numbeads,1);
-end
+
 for k=1:numbeads
 %     shift(k,:)=get3Dcorrshift(avim,smallim(:,:,:,k));
     goodframes=squeeze(nansum(nansum(smallim(:,:,:,k),1),2))>0;

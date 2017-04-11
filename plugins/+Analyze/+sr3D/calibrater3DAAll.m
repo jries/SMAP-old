@@ -10,36 +10,52 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
         end
         function out=run(obj,p)
             out=[];
-            if p.beaddistribution.Value==2
+            if p.beaddistribution.Value==2 %if in gel: z-alignment necessary
                 p.alignz=true;
+            end
+            if strcmp(p.modality.selection,'any')
+                p.uselocs=false;
+            else
+                p.uselocs=true;
             end
             %get beads. Either parse sites or segment new
  %                 beads.loc.xnm,ynm,frame,psfxnm,psfynm
 %                 beads.filenumber .stack  .f0 .pos 
             disp('get beads')
-            if p.beadsource.Value==1 %ROImanager
+            %add:get from figure files only
+            switch p.beadsource.Value
+                case 1 %ROImanager
                 beads=sites2beads(obj,p);
-            else % segment new
+                case 2 % segment new
                 beads=segmentb(obj,p);
+                case 3 %from images
             end
-            p.EMon=obj.locData.files.file(1).info.EMon;
+            p.EMon=obj.locData.files.file(1).info.EMon; %later: in segmentation
             p.fminmax=[min(obj.locData.loc.frame) max(obj.locData.loc.frame)];
            axall=getaxes(p);
-
-            % get f0 for beads
-            disp('get bead z positions')
-            for k=1:length(beads)
-                beads(k).loc.PSFxpix=beads(k).loc.PSFxnm/p.cam_pixelsize_um(1)/1000;
-                 beads(k).loc.PSFypix=beads(k).loc.PSFynm/p.cam_pixelsize_um(end)/1000;
-                [beads(k).f0,beads(k).psfx0,beads(k).psfy0]=getf0site(beads(k).loc,p);
-            end
-            badind=isnan([beads(:).f0]);
-            beads(badind)=[];
             
-            for k=1: max([beads(:).filenumber])
-            %pglass needs to be file-dependent!
-                indf=[beads(:).filenumber]==k;
-                p.fglass(k)=myquantile([beads(indf).f0],0.03);
+            if p.uselocs
+                % get f0 for beads
+                disp('get bead z positions')
+                for k=1:length(beads)
+                    beads(k).loc.PSFxpix=beads(k).loc.PSFxnm/p.cam_pixelsize_um(1)/1000;
+                     beads(k).loc.PSFypix=beads(k).loc.PSFynm/p.cam_pixelsize_um(end)/1000;
+                    [beads(k).f0,beads(k).psfx0,beads(k).psfy0]=getf0site(beads(k).loc,p);
+                end
+                badind=isnan([beads(:).f0]);
+                beads(badind)=[];
+
+                for k=1: max([beads(:).filenumber])
+                %pglass needs to be file-dependent!
+                    indf=[beads(:).filenumber]==k;
+                    p.fglass(k)=myquantile([beads(indf).f0],0.03);
+                end
+            else
+                f0all=ceil((p.fminmax(2)-p.fminmax(1))/2);
+                for k=1:length(beads)
+                    beads(k).f0=f0all;
+                end
+                p.fglass=zeros(1,max([beads(:).filenumber]))+f0all;
             end
             %get image stacks if needed
             
@@ -78,19 +94,27 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
                         continue
                     end
                     beadh=beads(indh);
-                    for Z=1:length(p.Zrange)-1
+                    for Z=length(p.Zrange)-1:-1:1
                         indgood{Z}=true(1,length(beadh));
                     end
                     % get calibration and used beads
                     for iter=1:redo
                         p.iter=iter;
                         disp('get curves')
-                        [curvecal,indgoodc]=getcurvecal(beadh,p,X,Y,axall,indgood);
+                        if p.uselocs
+                            [curvecal,indgoodc]=getcurvecal(beadh,p,X,Y,axall,indgood); 
+                        else
+                            indgoodc=indgood;
+                        end
                         if  p.fitcsplinec
                              disp('get stack spline calibration')
                             [stackcal,indgoods]=getstackcal(beadh,p,X,Y,axall,indgood);
-                            for Z=1:length(curvecal)
-                                allcal(Z)=copyfields(curvecal(Z),stackcal(Z),{'splinefit'});
+                            if p.uselocs
+                                for Z=length(curvecal):-1:1
+                                    allcal(Z)=copyfields(curvecal(Z),stackcal(Z),{'splinefit'});
+                                end
+                            else
+                                allcal=stackcal;
                             end
                         else
                             allcal=curvecal;
@@ -320,8 +344,8 @@ end
                 if ~isempty(sp(k).curve)
                     xpos=vertcat(sp(k).curve(:).xpos);
                     ypos=vertcat(sp(k).curve(:).ypos);
-                plot(xpos,ypos,'k.');hold on;
-                text(mean(sp(k).Xrange),mean(sp(k).Yrange),sp(k).legend)
+                    plot(xpos,ypos,'k.');hold on;
+                    text(mean(sp(k).Xrange),mean(sp(k).Yrange),sp(k).legend)
                 end
             end
             
@@ -337,21 +361,23 @@ end
 %             zt=zrangeall(1):0.01:zrangeall(2);
 %             z0=zf1-zpos;
 %             z0=zshift;
-            z0=0;
-            zt=z0+p.zrangeuse(1):0.01:z0+p.zrangeuse(2);
+            if ~isempty(sp)
+                z0=0;
+                zt=z0+p.zrangeuse(1):0.01:z0+p.zrangeuse(2);
 
-            linecolors=lines(length(sp));
-            axes(axall.axsplines)
-            hold off;
-            
-            for k=1:numel(sp)
-                pl2(k)=plot(axall.axsplines,zt,sp(k).x(zt),'Color',linecolors(k,:));
-                hold on;
-                plot(axall.axsplines,zt,sp(k).y(zt),'Color',linecolors(k,:));
-                
+                linecolors=lines(length(sp));
+                axes(axall.axsplines)
+                hold off;
+
+                for k=1:numel(sp)
+                    pl2(k)=plot(axall.axsplines,zt,sp(k).x(zt),'Color',linecolors(k,:));
+                    hold on;
+                    plot(axall.axsplines,zt,sp(k).y(zt),'Color',linecolors(k,:));
+
+                end
+                ylim(axall.axsplines,[0 5])
+                legend(pl2,legends);
             end
-            ylim(axall.axsplines,[0 5])
-            legend(pl2,legends);
             
             if ~isempty(SXY(1).Sx2_Sy2)
                 sp={SXY(:).Sx2_Sy2};
@@ -400,32 +426,34 @@ end
             
 %             hold off
             zt=p.zrangeuse(1):p.dz:p.zrangeuse(2);
-            
+             
             for k=1:numel(SXY)
-                sxa=vertcat(SXY(k).curve(:).sx);
-                sya=vertcat(SXY(k).curve(:).sy);
-                za=vertcat(SXY(k).curve(:).z);
-                
-                if ~isempty(SXY(k).splineLUT)
-                    zha=zfromSXSYLut(SXY(k).splineLUT,sxa,sya);
-                    dzba=bindata(za,za-zha,zt,'mean');
-                    dzs=bindata(za,za-zha,zt,'std');
-                    plot(axall.axzlut,za,za-zha,'.','MarkerSize',2)
-                    axall.axzlut.NextPlot='add';
-                    plot(axall.axzlut,zt,dzba,'k',zt,dzba+dzs,'k',zt,dzba-dzs,'k')
-                    plot(axall.axzlut,p.zrangeuse,[0 0],'k');
-                     ylim(axall.axzlut,yrange)
-                     xlim(axall.axzlut,p.zrangeuse)
+                if ~isempty(SXY(k).curve)
+                    sxa=vertcat(SXY(k).curve(:).sx);
+                    sya=vertcat(SXY(k).curve(:).sy);
+                    za=vertcat(SXY(k).curve(:).z);
+
+                    if ~isempty(SXY(k).splineLUT)
+                        zha=zfromSXSYLut(SXY(k).splineLUT,sxa,sya);
+                        dzba=bindata(za,za-zha,zt,'mean');
+                        dzs=bindata(za,za-zha,zt,'std');
+                        plot(axall.axzlut,za,za-zha,'.','MarkerSize',2)
+                        axall.axzlut.NextPlot='add';
+                        plot(axall.axzlut,zt,dzba,'k',zt,dzba+dzs,'k',zt,dzba-dzs,'k')
+                        plot(axall.axzlut,p.zrangeuse,[0 0],'k');
+                         ylim(axall.axzlut,yrange)
+                         xlim(axall.axzlut,p.zrangeuse)
+                    end
+                    if ~isempty(SXY(k).Sx2_Sy2)
+                        zha2=zfromSx2_Ss2(SXY(k).Sx2_Sy2,sxa,sya);
+                         plot(axall.axsxs22,za,za-zha2,'.','MarkerSize',2)
+                         axall.axsxs22.NextPlot='add';
+                        dzba2=bindata(za,za-zha2,zt,'mean');
+                        dzs2=bindata(za,za-zha2,zt,'std');
+                        plot(axall.axsxs22,zt,dzba2,'k',zt,dzba2+dzs2,'k',zt,dzba2-dzs2,'k')
+                    end
                 end
-                if ~isempty(SXY(k).Sx2_Sy2)
-                    zha2=zfromSx2_Ss2(SXY(k).Sx2_Sy2,sxa,sya);
-                     plot(axall.axsxs22,za,za-zha2,'.','MarkerSize',2)
-                     axall.axsxs22.NextPlot='add';
-                    dzba2=bindata(za,za-zha2,zt,'mean');
-                    dzs2=bindata(za,za-zha2,zt,'std');
-                    plot(axall.axsxs22,zt,dzba2,'k',zt,dzba2+dzs2,'k',zt,dzba2-dzs2,'k')
-                end
-            end
+             end
             
             if isfield(axall,'axsxs22')
                 plot(axall.axsxs22,p.zrangeuse,[0 0],'k');
@@ -821,7 +849,7 @@ w=0.3;
 wp=0.5;
 wcb=1.;
 
-pard.beadsource.object=struct('String',{{'RoiManager','Segment'}},'Style','popupmenu','Value',2);
+pard.beadsource.object=struct('String',{{'RoiManager','Segment','From Images'}},'Style','popupmenu','Value',2);
 pard.beadsource.position=[1,1];
 pard.beadsource.Width=1;
 
