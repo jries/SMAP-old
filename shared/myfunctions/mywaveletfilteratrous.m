@@ -9,6 +9,11 @@ if isempty(H0)
     g2=[H2,0,H1,0,H0,0,H1,0,H2];
 end
 
+if 0
+    co=2*mean(in(:));
+    in(in>co)=co;  
+end
+
 V1=conv2(conv2(in,g1','same'),g1,'same');
 V2=conv2(conv2(V1,g2','same'),g2,'same');
 if filter

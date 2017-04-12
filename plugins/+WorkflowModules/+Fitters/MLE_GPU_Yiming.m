@@ -211,6 +211,7 @@ arguments{5}=fitpar.issCMOS;
     end
     
     [P CRLB LogL]=fitpar.fitfunction(arguments{:});
+   
 
 out.P=P;
 out.CRLB=CRLB;

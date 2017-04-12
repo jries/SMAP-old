@@ -5,6 +5,7 @@ persistent fitter
 % cpufitter=@CPUmleFit_LM;
 % gpufitter=@GPUmleFit_LM;
 allfitters={@GPUmleFit_LM,@GPUmleFit_LM_CUDA75,@CPUmleFit_LM,@kernel_MLEfit_Spline_LM_SMAP_v2_nointerp};
+allfittersnames={'GPUmleFit_LM','GPUmleFit_LM_CUDA75','CPUmleFit_LM','kernel_MLEfit_Spline_LM_SMAP_v2_nointerp'};
 if isempty(fitter)
     for k=1:length(allfitters)
         try
@@ -35,5 +36,6 @@ end
 % end
 
 [P,CRLB,LogL]=allfitters{fitter}(varargingpu{:});
+ clear(allfittersnames{fitter})
 
 %
