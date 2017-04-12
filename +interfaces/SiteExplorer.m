@@ -65,6 +65,9 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
             if isempty(filenew)
                 filenew=1:max([SEin.files(:).ID]);
             end
+            if length(SEin.files)>length(filenew)
+                filenew=1:length(SEin.files);
+            end
             
             %renumber files
             if ~isempty(SEin.files)
@@ -75,7 +78,9 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
             end
             %rename files
             for k=1:length(SEin.files)
+                if k<=length(files)
                 SEin.files(k).name=files(k).name;
+                end
             end
             
             for k=1:length(SEin.cells)
