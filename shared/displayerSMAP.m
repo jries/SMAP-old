@@ -137,7 +137,7 @@ end
                  if p.sr_layerson(k)&&~isempty(layers(k).images)
 
         
-                     lut=layers(k).images.srimage.lut;
+                     lut=layers(k).images.finalImages.lut;
 
                      
                      if layersnext

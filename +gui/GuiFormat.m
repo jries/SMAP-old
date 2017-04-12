@@ -9,7 +9,8 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
     end
     methods
         function obj=GuiFormat(varargin)
-            obj@interfaces.GuiModuleInterface(varargin{:})      
+            obj@interfaces.GuiModuleInterface(varargin{:})     
+            obj.outputParameters={'sr_layersseparate','sr_plotlayernames'};
         end
         function makeGui(obj)
             widtht=105;
@@ -31,23 +32,27 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             h.roi6=uicontrol('Parent',h.hroi,'Style','pushbutton','String','<>','FontSize',fontsize,'Position',[2*swidth,4.3*fieldheight,swidth,fieldheight*1.5],'Callback',{@roi_callback,obj,6});
             
             %format
-            h.hformat=uipanel('Parent',obj.handle,'Title','format','Units','pixel','Position',[1 8.5*fieldheight+10 widtht 7.5*fieldheight]);
-            h.hplus=uicontrol('Parent',h.hformat,'Style','togglebutton','String','+','FontSize',fontsize*1.5,'Position',[0,5*fieldheight,width/2,fieldheight*1.5],'Callback',{@format_callback,obj,1});
-            h.hminus=uicontrol('Parent',h.hformat,'Style','togglebutton','String','-','FontSize',fontsize*1.5,'Position',[width/2,5*fieldheight,width/2,fieldheight*1.5],'Callback',{@format_callback,obj,2});
-            h.picrt=uicontrol('Parent',h.hformat,'Style','text','String','Pixrec (nm)','Position',[0 4*fieldheight,width,fieldheight]);
-            h.pixrec=uicontrol('Style','edit','Parent',h.hformat,'String','20','Position',[0,2.8*fieldheight,width,fieldheight*1.2],'FontSize',fontsize,'Callback',{@format_callback,obj,3});         
+            h.hformat=uipanel('Parent',obj.handle,'Title','format','Units','pixel','Position',[1 8.5*fieldheight+5 widtht 6*fieldheight]);
+             h.picrt=uicontrol('Parent',h.hformat,'Style','text','String','Pixrec (nm)','Position',[0 4.1*fieldheight,width,fieldheight*1.2]);
+            
+            h.hplus=uicontrol('Parent',h.hformat,'Style','togglebutton','String','+','FontSize',fontsize*1.5,'Position',[0,2.8*fieldheight,width/3,fieldheight*1.4],'Callback',{@format_callback,obj,1});
+            h.hminus=uicontrol('Parent',h.hformat,'Style','togglebutton','String','-','FontSize',fontsize*1.5,'Position',[width/3*2,2.8*fieldheight,width/3,fieldheight*1.4],'Callback',{@format_callback,obj,2});
+            h.pixrec=uicontrol('Style','edit','Parent',h.hformat,'String','20','Position',[width/3,3*fieldheight,width/3,fieldheight*1.2],'FontSize',fontsize,'Callback',{@format_callback,obj,3});         
             h.pref1=uicontrol('Style','pushbutton','Parent',h.hformat,'String','2','Position',[0,1.6*fieldheight,width/2,fieldheight*1.2],'FontSize',fontsize,'Callback',{@predef_callback,obj},'KeyPressFcn',{@predefkey_callback,obj});
             h.pref2=uicontrol('Style','pushbutton','Parent',h.hformat,'String','10','Position',[width/2,1.6*fieldheight,width/2,fieldheight*1.2],'FontSize',fontsize,'Callback',{@predef_callback,obj},'KeyPressFcn',{@predefkey_callback,obj});
             h.resetview=uicontrol('Style','pushbutton','Parent',h.hformat,'String','Reset','Position',[width/2,0.1*fieldheight,width/2,fieldheight*1.4],'FontSize',fontsize,'Callback',{@resetview_callback,obj});
             h.parformat=uicontrol('Style','pushbutton','Parent',h.hformat,'String','Par','Position',[0,0.1*fieldheight,width/2,fieldheight*1.4],'FontSize',fontsize,'Callback',{@formatpardialog,obj});
             
-            h.hlayers=uipanel('Parent',obj.handle,'Title','layers','Units','pixel','Position',[1 17*fieldheight widtht 3*fieldheight+18]);
-            h.layeron3=uicontrol('Style','checkbox','Parent',h.hlayers,'String','L3','Position',[0,0,width/2,fieldheight],'FontSize',fontsize);
-            h.layeron6=uicontrol('Style','checkbox','Parent',h.hlayers,'String','L6','Position',[width/2,0,width/2,fieldheight],'FontSize',fontsize);
-            h.layeron2=uicontrol('Style','checkbox','Parent',h.hlayers,'String','L2','Position',[0,fieldheight,width/2,fieldheight],'FontSize',fontsize);
-            h.layeron5=uicontrol('Style','checkbox','Parent',h.hlayers,'String','L5','Position',[width/2,fieldheight,width/2,fieldheight],'FontSize',fontsize);
-            h.layeron1=uicontrol('Style','checkbox','Parent',h.hlayers,'String','L1','Value',1,'Position',[0,2*fieldheight,width/2,fieldheight],'FontSize',fontsize);
-            h.layeron4=uicontrol('Style','checkbox','Parent',h.hlayers,'String','L4','Position',[width/2,2*fieldheight,width/2,fieldheight],'FontSize',fontsize);
+            h.hlayers=uipanel('Parent',obj.handle,'Title','layers','Units','pixel','Position',[1 15*fieldheight widtht 3*fieldheight+15]);
+            h.layeron3=uicontrol('Style','checkbox','Parent',h.hlayers,'String','3','Position',[width/3,fieldheight,width/3,fieldheight],'FontSize',fontsize);
+            h.layeron6=uicontrol('Style','checkbox','Parent',h.hlayers,'String','6','Position',[width/3*2,0,width/3,fieldheight],'FontSize',fontsize);
+            h.layeron2=uicontrol('Style','checkbox','Parent',h.hlayers,'String','2','Position',[0,0,width/3,fieldheight],'FontSize',fontsize);
+            h.layeron5=uicontrol('Style','checkbox','Parent',h.hlayers,'String','5','Position',[width/3*2,fieldheight,width/3,fieldheight],'FontSize',fontsize);
+            h.layeron1=uicontrol('Style','checkbox','Parent',h.hlayers,'String','1','Value',1,'Position',[0,fieldheight,width/3,fieldheight],'FontSize',fontsize);
+            h.layeron4=uicontrol('Style','checkbox','Parent',h.hlayers,'String','4','Position',[width/3,0,width/3,fieldheight],'FontSize',fontsize);
+            h.sr_layersseparate=uicontrol('Style','checkbox','Parent',h.hlayers,'String','split','Value',0,'Position',[0,2*fieldheight,width*.6,fieldheight],'FontSize',fontsize*.8);
+            h.sr_plotlayernames=uicontrol('Style','checkbox','Parent',h.hlayers,'String','label','Value',0,'Position',[width/2,2*fieldheight,width*.6,fieldheight],'FontSize',fontsize*0.8);
+            
             
              h.layeron1.Callback={@obj.layer_update,1};
             h.layeron2.Callback={@obj.layer_update,2};
@@ -112,7 +117,7 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             h.roi3.TooltipString='free roi';
             h.roishow.TooltipString='redraw roi after updating image. Untick if Roi is in the way.';
             h.roidelete.TooltipString='Delete current ROI';
-            
+            makeGui@interfaces.GuiModuleInterface(obj);
             obj.initGui;
         end
         
@@ -554,18 +559,16 @@ if isempty(settings)
     settings.customcheck=false;
     settings.Pixelsize='1x1';
     settings.imsize='2000 2000';
-    settings.layerssep=false;
+%     settings.layerssep=false;
     settings.colorbarthickness=4;
     settings.customcheck=false;
-    settings.plotlayernames=false;
+%     settings.plotlayernames=false;
 end
 [settings, button] = settingsdlg(...
     'Description', 'SR format parameters',... 
     'title'      , 'Par',... 
     'Pixelsize',{'1x1','2x2','3x3','4x4'},...
     {'thickness of colorbar (pix)','colorbarthickness'},settings.colorbarthickness,...
-    {'Layers next to each other';'layerssep'},[logical(settings.layerssep)],...
-    {'Plot layer names';'plotlayernames'},[logical(settings.plotlayernames)],...
     {'Custom image size';'customcheck'},[false true],...
     {'Imagesize (pixel) or magnification (if <20)','imsize'},num2str(settings.imsize) );
      
@@ -595,9 +598,9 @@ if strcmpi(button,'ok')
         pixelsize=obj.getPar('sr_pixrec');
         obj.setPar('sr_pixrec',pixelsize/mag);
     end
-    obj.setPar('sr_layersseparate',settings.layerssep);
+%     obj.setPar('sr_layersseparate',settings.layerssep);
     obj.setPar('sr_colorbarthickness',settings.colorbarthickness);
-    obj.setPar('sr_plotlayernames',settings.plotlayernames);
+%     obj.setPar('sr_plotlayernames',settings.plotlayernames);
 %     if settings.newfig
 %         obj.setPar('sr_axes',obj.makesrfigure((settings.fignumber)));
 %     end
