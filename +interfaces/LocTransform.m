@@ -22,9 +22,9 @@ classdef LocTransform<handle
             end
         end
         
-        function findTransform3D(obj,xreference,yreference,zreference,xtargeti,ytargeti,ztarget,transform)
+        function findTransformZ(obj,xreference,yreference,zreference,xtargeti,ytargeti,ztarget,transform)
             %do 2D transform first;
-            obj.findTransform(xreference,yreference,xtargeti,ytargeti,transform);
+%             obj.findTransform(xreference,yreference,xtargeti,ytargeti,transform);
 %             transform x,y target
             [xtarget,ytarget]=transformCoordinatesFwd(obj,xtargeti,ytargeti);
 
@@ -37,8 +37,8 @@ classdef LocTransform<handle
             ztarget=ztarget/1000;
             
             %only affine3d possible      
-            obj.transformz.inverse= fitgeotrans(double([xtarget ytarget ztarget]),[double(xreference) double(yreference) double(zreference)],'affine3d');
-            obj.transformz.forward= fitgeotrans([double(xreference) double(yreference) double(zreference)],double([xtarget ytarget ztarget]),'affine3d');
+            obj.transformz.inverse= findAffineTransformZ(double([xtarget ytarget ztarget]),double([zreference]));
+            obj.transformz.forward= findAffineTransformZ(double([xreference  yreference zreference]),double([ztarget]));
         end
         
         function [xo,yo,zo]=transformCoordinatesFwd(obj,x,y,z)

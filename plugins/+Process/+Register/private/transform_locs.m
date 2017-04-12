@@ -186,15 +186,20 @@ transform=interfaces.LocTransform;
 t.type=p.transform.selection;
 t.parameter=p.transformparam;
 transform.findTransform(locref.x(iAa),locref.y(iAa),loctarget.x(iBa),loctarget.y(iBa),t)
+
+if isfield(locref,'znm')
+    transform.findTransformZ(locref.x(iAa),locref.y(iAa),locref.znm(iAa),loctarget.x(iBa),loctarget.y(iBa),loctarget.znm(iBa),t)
+end
 % transform.findTransform(locref.x(iAa),locref.y(iAa),loctT.x(iBa),loctT.y(iBa),t)
 % if p.showresults
     initaxis(p.resultstabgroup,'scatter')
-    [xa, ya]=transform.transformCoordinatesInv((loctarget.x(iBa)),(loctarget.y(iBa)));
+    [xa, ya, za]=transform.transformCoordinatesInv((loctarget.x(iBa)),(loctarget.y(iBa)),(loctarget.znm(iBa)));
 %      [xa, ya]=transform.transformCoordinatesInv((loctT.x(iBa)),(loctT.y(iBa)));
 %  [xa, ya]=transform.transformCoordinates((loc.x(indr(iBa))),(loc.y(indt(iBa))),'target');
  
    dx=xa-locref.x(iAa);
    dy=ya-locref.y(iAa);
+   dz=za-locref.znm(iAa);
    
 %    dx=loctarget.x(iBa)-locref.x(iAa);
 %    dx=loctarget.y(iBa)-locref.y(iAa);
