@@ -16,17 +16,26 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
             loadfile(obj,p,file,mode);
             %search for Tiff
             ind=regexp(file,p.searchstring);
-            path=[file(1:ind(end)-1) p.replacestring filesep 'Pos0' filesep];
-            il=imageLoader(path);
+            path=[file(1:ind(end)-1) p.replacestring];
+            allfiles=dir([path filesep '*ome.tif']);
+            if isempty(allfiles)
+                testfile=path;
+            else
+                testfile=[path filesep allfiles(1).name];
+            end
+            
+            il=imageLoader(testfile);
             im=il.getImage(framerange(1));
             for k=framerange
                 im=max(im,il.getImage(k));
             end
-            catch
+            catch err
+                err
                 disp(['no image found for ' file])
             end
             
-            filetest=[il.info.path filesep il.info.files{framerange(1)}];
+%             filetest=[il.info.path filesep il.info.files{framerange(1)}];
+            filetest=il.info.filename;
             tiff=gettif(filetest);
             tiff.image=im;
             tiff.info.cam_pixelsize_um=obj.locData.files.file(end).info.cam_pixelsize_um;

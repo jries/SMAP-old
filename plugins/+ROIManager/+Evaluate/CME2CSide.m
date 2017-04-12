@@ -110,11 +110,22 @@ pq=[0.05 0.5 0.95];
 if ~isempty(xm1)
     out.qx1=myquantile(xm1,pq);
     out.qz1=myquantile(ym1,pq);
+    out.dz1=out.qz1(3)-out.qz1(1);
+else
+    out.qx1=[0 0 0];
+    out.qz1=[0 0 0];
+    out.dz1=0;
 end
 if ~isempty(xm2)
     out.qx2=myquantile(xm2,pq);
     out.qz2=myquantile(ym2,pq);
+    out.dz2=out.qz2(3)-out.qz2(1);
+else
+    out.qx2=[0 0 0];
+    out.qz2=[0 0 0];
+    out.dz2=0;
 end
+    out.centdist=out.qz2(2)-out.qz1(2);
 
 %plot all
 img1=makeimage(p,locs1.xnmrot,locs1.ynmrot,locs1.locprecnm*p.layer1_.gaussfac);
@@ -145,26 +156,33 @@ h2.NextPlot='replace';
 axis(h2,'ij');
 
 %make shifted images from filtered localizations
-xref=out.xmed2;
-yref=out.qz2(3);
-
-x1=locs1.xnmrot(inmask1)-xref;y1=locs1.ynmrot(inmask1)-yref;
-x2=locs2.xnmrot(inmask2)-xref;y2=locs2.ynmrot(inmask2)-yref;
-img1=makeimage(p,x1,y1,locs1.locprecnm(inmask1)*p.layer1_.gaussfac,[],2*roisize);
-img2=makeimage(p,x2,y2,locs2.locprecnm(inmask2)*p.layer2_.gaussfac,[],2*roisize);
-s=size(img1);
-imgt=zeros(s(1),s(2),3);
-imgtp=imgt;
-imgt(:,:,1)=img1;
-imgt(:,:,2)=img2;
-
-imgtp(:,:,1)=img1/max(img1(:));
-imgtp(:,:,2)=img2/max(img2(:));
-
-
- hc=obj.setoutput('image_shifted');
- imagesc([-roisize(1) roisize(1)],[-roisize(2) roisize(2)],imgtp,'Parent',hc);
- out.imageshift=imgt;
+% if ~isnan(out.xmed2)
+%     xref=out.xmed2;
+% else
+%     xref=0;
+% end
+% if isfield(out,'qz2')
+%     yref=out.qz2(3);
+% else yref=0;
+% end
+% 
+% x1=locs1.xnmrot(inmask1)-xref;y1=locs1.ynmrot(inmask1)-yref;
+% x2=locs2.xnmrot(inmask2)-xref;y2=locs2.ynmrot(inmask2)-yref;
+% img1=makeimage(p,x1,y1,locs1.locprecnm(inmask1)*p.layer1_.gaussfac,[],2*roisize);
+% img2=makeimage(p,x2,y2,locs2.locprecnm(inmask2)*p.layer2_.gaussfac,[],2*roisize);
+% s=size(img1);
+% imgt=zeros(s(1),s(2),3);
+% imgtp=imgt;
+% imgt(:,:,1)=img1;
+% imgt(:,:,2)=img2;
+% 
+% imgtp(:,:,1)=img1/max(img1(:));
+% imgtp(:,:,2)=img2/max(img2(:));
+% 
+% 
+%  hc=obj.setoutput('image_shifted');
+%  imagesc([-roisize(1) roisize(1)],[-roisize(2) roisize(2)],imgtp,'Parent',hc);
+%  out.imageshift=imgt;
 end
 function imc=mask2im(p,img1,img2,mask1,mask2,mask12,mask)
 sim=size(mask1);
