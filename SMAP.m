@@ -1,4 +1,4 @@
-aaa%This is a script to start SMAP.
+%This is a script to start SMAP.
 
 dirlist=genpath('shared');
 addpath(dirlist)
