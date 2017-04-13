@@ -125,7 +125,7 @@ if ~isempty(GUIsettings) %write back parameters
     end
 end
 
-if isempty(siteexplorer)||siteexplorer.numberOfFiles==0
+if isempty(siteexplorer)||siteexplorer.numberOfFiles==0||strcmp(siteexplorer.files(1).name,'smapgenerated_sml.mat')
     siteexplorer=interfaces.SiteExplorer;
     for k=1:length(templocData.files.file)
         siteexplorer.addFile(templocData.files.file(k).name,templocData.files.file(k).number,templocData.files.file(k).info)
