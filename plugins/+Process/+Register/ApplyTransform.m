@@ -112,6 +112,11 @@ pard.addchannel.Width=0.5;
 pard.transformwhat.object=struct('Style','popupmenu','String',{{'both','locs','tiffs'}});
 pard.transformwhat.position=[3,1.7];
 
+pard.transformz.object=struct('Style','checkbox','String','transform z for 3D data');
+pard.transformz.position=[4,1];
+pard.transformz.Width=2;
+
+
 pard.Tfile.object=struct('Style','edit','String','settings/temp/temp_T.mat');
 pard.Tfile.position=[7,1];
 pard.Tfile.Width=3;

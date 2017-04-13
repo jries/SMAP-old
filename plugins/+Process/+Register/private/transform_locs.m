@@ -192,18 +192,26 @@ if isfield(locref,'znm')
 end
 % transform.findTransform(locref.x(iAa),locref.y(iAa),loctT.x(iBa),loctT.y(iBa),t)
 % if p.showresults
-    initaxis(p.resultstabgroup,'scatter')
+    
     [xa, ya, za]=transform.transformCoordinatesInv((loctarget.x(iBa)),(loctarget.y(iBa)),(loctarget.znm(iBa)));
+%         [xa, ya]=transform.transformCoordinatesInv((loctarget.x(iBa)),(loctarget.y(iBa)));
 %      [xa, ya]=transform.transformCoordinatesInv((loctT.x(iBa)),(loctT.y(iBa)));
 %  [xa, ya]=transform.transformCoordinates((loc.x(indr(iBa))),(loc.y(indt(iBa))),'target');
  
    dx=xa-locref.x(iAa);
    dy=ya-locref.y(iAa);
-   dz=za-locref.znm(iAa);
+   
+   if isfield(locref,'znm')
+       dz=za-locref.znm(iAa);
+       dzb=loctarget.znm(iBa)-locref.znm(iAa);
+       initaxis(p.resultstabgroup,'zcalib')
+       histogram(dz);hold on ; histogram(dzb);hold off
+   end
    
 %    dx=loctarget.x(iBa)-locref.x(iAa);
 %    dx=loctarget.y(iBa)-locref.y(iAa);
 %    figure(88)
+initaxis(p.resultstabgroup,'scatter')
    dscatter(dx,dy)
    title({['number of anchor points: ' num2str(length(iBa)) ' of ' num2str(nseen)],['dx= ' num2str(std(dx),3) ' nm, dy= ' num2str(std(dy),3) ' nm']});
  ax3=initaxis(p.resultstabgroup,'hist');
@@ -213,7 +221,7 @@ end
  ra=ceil(rr*length(iBa));
   rb=ceil(rr*length(nb));
  ax4=initaxis(p.resultstabgroup,'locs');
- plot(loctarget.x(iBa(ra)),loctarget.y(iBa(ra)),'.',loctarget.x(nb(rb)),loctarget.y(nb(rb)),'r.')
+ plot(loctarget.x(iBa(ra)),loctarget.y(iBa(ra)),'+',loctarget.x(nb(rb)),loctarget.y(nb(rb)),'ro')
  
 transform.tinfo.targetpos=p.targetpos.selection;
 transform.tinfo.separator=separator;

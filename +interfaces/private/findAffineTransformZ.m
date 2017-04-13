@@ -26,7 +26,7 @@ function tform = findAffineTransformZ(Xr,zt)
 % [xy,normMatrix2] = images.geotrans.internal.normalizeControlPoints(xy);
 
 minRequiredNonCollinearPairs = 3;
-M = size(xr,1);
+M = size(Xr,1);
 X = [Xr ones(M,1)];
 
 % just solve for the first two columns of T
@@ -50,4 +50,4 @@ Tinvb(:,3)=Tinv;
 T = inv(Tinvb);
 % T(:,3) = [0 0 1]';
 
-tform = affine3d(T);
+tform = affine3d(Tinvb);
