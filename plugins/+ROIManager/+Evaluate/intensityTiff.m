@@ -31,13 +31,14 @@ classdef intensityTiff<interfaces.SEEvaluationProcessor
             pixcam=file.info.cam_pixelsize_um*1000;
             roi=file.tif(1).info.roi;
 
-            pospixr=round(pos(1:2)./pixcam(:))-roi(1:2)';
+            pospixr(1)=round(pos(1)./pixcam(1))-roi(1);
+            pospixr(2)=round(pos(2)./pixcam(2))-roi(2);
             
             sfit=round((p.roisize-1)/2);
             
             coim=file.tif(1).image(pospixr(2)-sfit:pospixr(2)+sfit,pospixr(1)-sfit:pospixr(1)+sfit,:);
         
-            pr=round(pos(1:2)./pixcam(:));
+            pr=round(pos([1,2])./pixcam([1,2]));
             rangex=(pr(1)-sfit:pr(1)+sfit)*pixcam(1);
             rangey=(pr(2)-sfit:pr(2)+sfit)*pixcam(2);
                 
@@ -229,7 +230,7 @@ function fit=doublegaussfit(img,rangex,rangey,startp,fixp)
 dx=rangex(end)-rangex(1);
 meanposx=mean(rangex); meanposy=mean(rangey);
 n=1;
-lb=[0 0 meanposx-n*dx meanposy-n*dx 150 0];ub=[inf inf meanposx+n*dx meanposy+n*dx  750 inf];
+lb=double([0 0 meanposx-n*dx meanposy-n*dx 150 0]);ub=double([inf inf meanposx+n*dx meanposy+n*dx  750 inf]);
 fit=lsqnonlin(@dgaussforfiterr,double(startp),lb,ub,[],double(img),X,Y,fixp);
 
 end
@@ -261,7 +262,7 @@ meanposx=mean(rangex); meanposy=mean(rangey);
 % change n to determine how far 2nd and 3rd Gaussians can move outside, n
 % is maximum distance from center in [ROI size]s
 n=.5;
-lb=[0 0 meanposx-n*dx meanposy-n*dx 150 0 0 meanposx-n*dx meanposy-n*dx  150];ub=[inf inf meanposx+n*dx meanposy+n*dx  750 inf inf meanposx+n*dx meanposy+n*dx 750];
+lb=double([0 0 meanposx-n*dx meanposy-n*dx 150 0 0 meanposx-n*dx meanposy-n*dx  150]);ub=double([inf inf meanposx+n*dx meanposy+n*dx  750 inf inf meanposx+n*dx meanposy+n*dx 750]);
 fit=lsqnonlin(@triplegaussforfiterr,double(startp),lb,ub,[],double(img),X,Y,fixp);
 
 end
@@ -295,7 +296,7 @@ end
 function fit=doublegaussfit2(img,rangex,rangey,startp,fixp)
 [X,Y]=meshgrid(double(rangex),double(rangey));
 dx=(rangex(2)-rangex(1))/4;
-lb=[0 0 -inf -inf 150 0 rangex(1)+dx rangey(1)+dx];ub=[inf inf inf inf 750 inf rangex(end)-dx rangey(end)-dx];
+lb=double([0 0 -inf -inf 150 0 rangex(1)+dx rangey(1)+dx]);ub=double([inf inf inf inf 750 inf rangex(end)-dx rangey(end)-dx]);
 fit=lsqnonlin(@dgaussforfiterr2,double(startp),lb,ub,[],double(img),X,Y,fixp);
 
 end
