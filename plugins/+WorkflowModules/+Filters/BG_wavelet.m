@@ -1,6 +1,7 @@
 classdef BG_wavelet<interfaces.WorkflowModule
     properties
         gpufit;
+        cutoff;
     end
     methods
         function obj=BG_wavelet(varargin)
@@ -40,6 +41,11 @@ classdef BG_wavelet<interfaces.WorkflowModule
             end
             if ~isempty(data.data)
                 img=data.data;
+                
+                if true %pre-filter
+                    co=myquantilefast(img(:),.99);
+                    img(img>co)=co;
+                end
                 if p.filtermode.Value>2&&obj.gpufit
                     img=gpuArray(img);
                 end

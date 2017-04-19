@@ -11,6 +11,7 @@ end
 
 if 0
     co=2*mean(in(:));
+   
     in(in>co)=co;  
 end
 

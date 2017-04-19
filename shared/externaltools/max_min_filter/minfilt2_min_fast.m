@@ -33,4 +33,10 @@ end
 % filtering
 Y = vanherk_min_fast(X,S(1),'row');
 Y = vanherk_min_fast(Y,S(2),'col');
+if size(Y,1)<size(X,1)
+    Y(end+1,:)=0;
+end
+if size(Y,2)<size(X,2)
+    Y(:,end+1)=0;
+end
 

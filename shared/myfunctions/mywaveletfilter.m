@@ -17,17 +17,10 @@ if nargin<3
     refine=false;
 end
 % ino=in;
-if cutoff
-    co=myquantilefast(in(:),.99);
-    in(in>co)=co;
-    
-%         fun = @(block_struct) ...
-%    mean(block_struct.data(:)) * ones(size(block_struct.data));
-%     bgm= blockproc(in,[32 32],fun);
-%     ibg=in-bgm;
-%     co=myquantilefast(ibg,.99);
-%     in(ibg>co)=co+bgm(ibg>co);
-end
+% if cutoff
+%     co=myquantilefast(in(:),.99);
+%     in(in>co)=co;
+% end
 if refine
     level2=level*2;
     [L,S]=dtwavexfm2_L(in,level2,wf1,wf2);
