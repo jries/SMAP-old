@@ -22,11 +22,11 @@ classdef LocTransform<handle
             end
         end
         
-        function findTransform3D(obj,xreference,yreference,zreference,xtargeti,ytargeti,ztarget,transform)
+        function findTransformZ(obj,xreference,yreference,zreference,xtargeti,ytargeti,ztarget,transform)
             %do 2D transform first;
-            obj.findTransform(xreference,yreference,xtargeti,ytargeti,transform);
+%             obj.findTransform(xreference,yreference,xtargeti,ytargeti,transform);
 %             transform x,y target
-            [xtarget,ytarget]=transformCoordinatesFwd(obj,xtargeti,ytargeti);
+            [xtarget,ytarget]=transformCoordinatesInv(obj,xtargeti,ytargeti);
 
             %XXX make sure reference and target are not exchanged 
             %matrix becomes singular for too large coordinates. Use um
@@ -37,8 +37,8 @@ classdef LocTransform<handle
             ztarget=ztarget/1000;
             
             %only affine3d possible      
-            obj.transformz.inverse= fitgeotrans(double([xtarget ytarget ztarget]),[double(xreference) double(yreference) double(zreference)],'affine3d');
-            obj.transformz.forward= fitgeotrans([double(xreference) double(yreference) double(zreference)],double([xtarget ytarget ztarget]),'affine3d');
+            obj.transformz.inverse= findAffineTransformZ(double([xtarget ytarget ztarget]),double([zreference]));
+            obj.transformz.forward= findAffineTransformZ(double([xreference  yreference zreference]),double([ztarget]));
         end
         
         function [xo,yo,zo]=transformCoordinatesFwd(obj,x,y,z)
@@ -47,9 +47,9 @@ classdef LocTransform<handle
             x=x/1000;y=y/1000;
             [xo,yo]=transformPointsInverse(obj.transform.inverse,x,y); %inverse of inverse is forward
            
-            if nargin>3 %z coordinates present
+            if nargin>3&&~isemtpy(z) %z coordinates present
                 z=z/1000;
-                 X=transformPointsInverse(obj.transformz.inverse,[x,y,z]);
+                 X=transformPointsInverse(obj.transformz.inverse,[xo,yo,z]);
                  xo=X(:,1);yo=X(:,2);zo=X(:,3);
                  zo=zo*1000;
             else
@@ -63,9 +63,9 @@ classdef LocTransform<handle
 %             [xo,yo]=transformPointsForward(obj.transform.inverse,x,y);
             x=x/1000;y=y/1000;
             [xo,yo]=transformPointsInverse(obj.transform.forward,x,y);
-             if nargin>3 %z coordinates present
+             if nargin>3 &&~isempty(z)%z coordinates present
                 z=z/1000;
-                 X=transformPointsInverse(obj.transformz.inverse,[x,y,z]);
+                 X=transformPointsInverse(obj.transformz.forward,[xo,yo,z]);
                  xo=X(:,1);yo=X(:,2);zo=X(:,3);
                  zo=zo*1000;
             else

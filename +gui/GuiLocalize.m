@@ -60,6 +60,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             uimenu(h.wfcontext,'label','Info on workflow','Callback',{@wfinfo_callback,obj});
             uimenu(h.wfcontext,'label','Change workflow','Callback',{@wfload_callback,obj});
             uimenu(h.wfcontext,'label','Save workflow settings','Callback',{@savepar_callback,obj});
+            uimenu(h.wfcontext,'label','Save workflow as...','Callback',{@wsave_callback,obj});
             h.wfname=uicontrol(obj.handle,'Style','text','String','x','Position',[10+10, l2, 350 h2],...
                 'FontSize',obj.guiPar.fontsize,'HorizontalAlignment','left');    
             h.wfname.UIContextMenu=h.wfcontext;
@@ -195,10 +196,7 @@ settingsfile=obj.getGlobalSetting('mainLocalizeWFFile');
 [f,p]=uigetfile(settingsfile,'Select workflow *.txt file');
 if f
     settingsfilen=[p filesep f];
-    obj.setGlobalSetting('mainLocalizeWFFile',settingsfilen);
-    obj.mainworkflow.clear;
-    delete(obj.handle.Children)
-    obj.makeGui;
+    loadwf(obj,settingsfilen)
     obj.status('new workflow loaded');
 else
     obj.status('no workflow *.txt selected');
@@ -206,6 +204,13 @@ end
 
 end
 
+
+function loadwf(obj,settingsfilen)
+    obj.setGlobalSetting('mainLocalizeWFFile',settingsfilen);
+    obj.mainworkflow.clear;
+    delete(obj.handle.Children)
+    obj.makeGui;
+end
 function menu_callback(callobj,~,obj)
 switch callobj.Label
     case 'remove'
@@ -332,6 +337,8 @@ end
 % pluginname=pluginpath{end};
 % obj.children.(pluginname)=plugino;
 % end
+
+
 function wfsimplegui_callback(object,~,obj)
 if object.Value
     object.String='v';
@@ -353,4 +360,24 @@ end
 function savepar_callback(a,b,obj)
 wf=obj.mainworkflow;
 wf.save;
+end
+
+function wsave_callback(a,b,obj)
+settingsfile=obj.getGlobalSetting('mainLocalizeWFFile');
+[f,p]=uiputfile(settingsfile,'Select workflow *.txt file');
+if ~f
+    return
+end
+newtext=[p f];
+[~,newname]=fileparts(f);
+newmat=[p newname '.mat'];
+psettings=readstruct(settingsfile);
+psettings.all.file=newmat;
+writestruct(newtext,psettings);
+
+wf=obj.mainworkflow;
+% wfmat=wf.pluginpath;
+wf.save(newmat)
+loadwf(obj,newtext)
+obj.status(['workflow saved as ' newmat]);
 end
