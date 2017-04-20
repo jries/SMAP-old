@@ -9,6 +9,7 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
              obj.guiPar.FieldHeight=obj.guiPar.FieldHeight-1;obj.guiPar.Vrim=obj.guiPar.Vrim-20;
         end
         function out=run(obj,p)
+            persistent pathhere
             out=[];
             if p.beaddistribution.Value==2 %if in gel: z-alignment necessary
                 p.alignz=true;
@@ -33,7 +34,9 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
                             p.EMon=obj.locData.files.file(1).info.EMon; %later: in segmentation
                             p.fminmax=[min(obj.locData.loc.frame) max(obj.locData.loc.frame)];
                 case 3 %from images
+                     p.pathhere=pathhere;
                 [beads,p]=images2beads(obj,p);
+                pathhere=p.pathhere;
                 p.EMon=false;
             end
 
@@ -139,10 +142,10 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
             plotcurves(obj,SXY,axall,p)
             %save
             lastf=obj.getPar('lastSMLFile');
-            if ~isempty(lastf)
+            if ~isempty(lastf)&&p.beadsource.Value~=3
             [path,file]=fileparts(lastf);
             else
-                [file,path]=uiputfile('3d.mat');
+                [file,path]=uiputfile([pathhere '3d_3Dcal.mat']);
                 if ~file
                     error('no file selected')
                 end
@@ -153,7 +156,7 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
                 adds='';
             end
             file=strrep(file,'_sml',['_3Dcal' adds]);
-            save([path filesep file],'SXY')
+            save([fileparts(path) filesep file],'SXY')
         end
         
         function initGui(obj)

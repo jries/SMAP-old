@@ -17,8 +17,8 @@ classdef CompareToGroundTruthChallenge<interfaces.DialogProcessor
             
             lochere=obj.locData.copy;
             if p.shiftpix
-            shiftx=-0.5*p.cam_pixelsize_nm;
-            shifty=-0.5*p.cam_pixelsize_nm;
+            shiftx=-0.5*p.cam_pixelsize_nm(1);
+            shifty=-0.5*p.cam_pixelsize_nm(2);
             else
                 shiftx=0;
                 shifty=0;

@@ -4,12 +4,15 @@ classdef selectManyFiles<handle
         guihandles;
         filelist;
         addpar;
-
+        startpath;
     end
 
     methods
         function obj=selectManyFiles(varargin)
             obj.makegui;
+            if nargin>0
+                obj.startpath=varargin{1};
+            end
         end
         function makegui(obj)
             if isempty(obj.handle)||~isvalid(obj.handle)
@@ -34,7 +37,7 @@ classdef selectManyFiles<handle
         end
         function addb_callback(obj,a,b)
             filelist=obj.guihandles.filelist.String;
-            path='';
+            path=obj.startpath;
             if  ~isempty(filelist)
                 fileselect=filelist{obj.guihandles.filelist.Value};
                 if ~isempty(fileselect)
@@ -58,7 +61,7 @@ classdef selectManyFiles<handle
         end
         function adddirb_callback(obj,a,b)
             filelist=obj.guihandles.filelist.String;
-            path='';
+            path=obj.startpath;
             if  ~isempty(filelist)
                 fileselect=filelist{obj.guihandles.filelist.Value};
                 if ~isempty(fileselect)

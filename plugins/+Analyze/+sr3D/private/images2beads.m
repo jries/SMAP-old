@@ -1,5 +1,5 @@
 function [b,p]=images2beads(obj,p)
-sf=selectManyFiles;
+sf=selectManyFiles(p.pathhere);
 pos=sf.guihandles.freepos.Position;
 sf.guihandles.filtersize=uicontrol('Style','edit','String','3','Parent',sf.handle,'Position',pos);
 pos(2)=pos(2)+30;
@@ -46,4 +46,5 @@ end
 
 p.fminmax=[1 fmax];
 p.cam_pixelsize_um=[1 1]/1000;
+p.pathhere=fileparts(filelist{1});
 end

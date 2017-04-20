@@ -9,8 +9,11 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
         function out=run(obj,p)
             if p.checklayer
                 % do something with grouping? at least warn?
-                lr=obj.locData.getloc({'xnm','ynm','znm','phot'},'layer',p.reflayer.Value);
-                lt=obj.locData.getloc({'xnm','ynm','znm','phot'},'layer',p.targetlayer.Value);
+                obj.locData.sort('frame');
+                obj.locData.filter;
+                lr=obj.locData.getloc({'xnm','ynm','znm','phot','frame'},'layer',p.reflayer.Value);
+                lt=obj.locData.getloc({'xnm','ynm','znm','phot','frame'},'layer',p.targetlayer.Value);
+%                 lt.frame=lt.frame+1;
                 [outlayer2D, outlayer3D,mr,mt]=getmatch(lr,lt,p);
                 outlayer2D.name='layer2D';
                 outlayer3D.name='layer3D';
@@ -36,6 +39,9 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
             ax=obj.initaxis('z compare gt');
             plot(ax,lr.znm(mr),lt.znm(mt),'.');
             out=[];
+            ax=obj.initaxis('z phot');
+            plot(ax,lr.phot(mr),lt.phot(mt),'.');
+            title(nanmedian(lt.phot(mt)./lr.phot(mr)))
         end
         function pard=guidef(obj)
             pard=guidef(obj);
@@ -48,6 +54,8 @@ if length(p.searchradius)==1
     p.searchradius(2)=p.searchradius(1);
 end
     [mr,mt,ur,ut]=matchlocs(lr.xnm,lr.ynm,lt.xnm,lt.ynm,[],p.searchradius(1));
+    lr.x=lr.xnm;lr.y=lr.ynm;lt.x=lt.xnm;lt.y=lt.ynm;
+    [mr,mt,ur,ut,nseen]=matchlocsall(lr,lt,0,0,p.searchradius(1));
      out=getmatchstat(lr,lt,mr,mt,ur,ut);  
     
     %look at z
@@ -77,6 +85,7 @@ function out=getmatchstat(lr,lt,mr,mt,ur,ut)
         dz=0*dx;
     end
     out.shift=[mean(dx),mean(dy),mean(dz)];
+    dx=dx-mean(dx);dy=dy-mean(dy);dz=dz-mean(dz);
     out.stderr=[std(dx),std(dy),std(dz)];
     out.err=sqrt([mean(dx.^2),mean(dy.^2),mean(dz.^2)]);
     out.meanabs=([mean(abs(dx)),mean(abs(dy)),mean(abs(dz))]);
@@ -90,9 +99,9 @@ for k=1:length(varargin)
     ss.fPos(k,1)=inh.falsePositives;
     ss.fNeg(k,1)=inh.falseNegatives;
     ss.Jaccard(k,1)=(1-inh.falseNegatives)*(1-inh.falsePositives);
-    ss.stdxy(k,1)=sqrt(sum(inh.stderr.^2));
+    ss.stdxy(k,1)=sqrt(sum(inh.stderr(1:2).^2));
     ss.meanabsxy(k,1)=mean(inh.meanabs);
-    ss.errxy(k,1)=sqrt(sum(inh.err.^2));
+    ss.errxy(k,1)=sqrt(sum(inh.err(1:2).^2));
     ss.stdz(k,1)=(inh.stderr(3));
     ss.meanabsz(k,1)=mean(inh.meanabs(3));
     ss.errz(k,1)=(inh.err(3));
