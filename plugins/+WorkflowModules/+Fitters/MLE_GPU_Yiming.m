@@ -32,7 +32,11 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             if obj.fitpar.fitmode==5
                 EMfile=obj.getPar('loc_fileinfo').EMon;
                 EMcal=obj.fitpar.splinefit{1}.cspline.isEM;
-                obj.fitpar.mirrorstack=~(EMfile==EMcal);
+                if obj.getSingleGuiParameter('automirror')
+                    obj.fitpar.mirrorstack=~(EMfile==EMcal);
+                else
+                    obj.fitpar.mirrorstack=false;
+                end
                 p=obj.getAllParameters;
                 if p.overwritePixelsize
                     obj.setPar('overwrite_pixelsize',[p.pixelsizex p.pixelsizey])
@@ -309,7 +313,7 @@ end
 function fitmode_callback(a,b,obj)
 p=obj.getGuiParameters;
 fitmode=p.fitmode.Value;
-fitz={'loadcal','cal_3Dfile','useObjPos','objPos','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','pixelsizex','pixelsizey'};
+fitz={'loadcal','cal_3Dfile','useObjPos','objPos','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','pixelsizex','pixelsizey','automirror'};
 fitxy={'PSFx0','tPSFx0'};
 switch fitmode
     case {3,5}
@@ -416,6 +420,10 @@ pard.pixelsizey.position=[5,3];
 pard.pixelsizey.Width=0.5;
 pard.pixelsizey.Optional=true;
 
+pard.automirror.object=struct('Style','checkbox','String','mirror if needed','Value',1);
+pard.automirror.position=[5,4];
+pard.automirror.Width=1;
+pard.automirror.Optional=true;
 
 pard.plugininfo.type='WorkflowFitter';
 pard.plugininfo.description='Maximum likelyhood estimater, optimized for GPU processing. According to: C. S. Smith, N. Joseph, B. Rieger, and K. A. Lidke, ?Fast, single-molecule localization that achieves theoretically minimum uncertainty.,? Nat Methods, vol. 7, no. 5, pp. 373?375, May 2010.';

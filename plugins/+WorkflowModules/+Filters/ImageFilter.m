@@ -79,11 +79,11 @@ if f
     PSF=l.SXY(1).splinefit.PSF;
     fig=nanmean(PSF,3);
     h=fig-nanmin(fig);
-    h=h/nanmax(h(:));
+    h=h/nansum(h(:));
     obj.filterkernelPSF=h;
     
 end
-
+figure(99);imagesc(h);
 end
 
 function pard=guidef(obj)
