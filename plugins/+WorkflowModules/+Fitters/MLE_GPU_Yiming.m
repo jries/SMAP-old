@@ -190,6 +190,7 @@ end
 arguments{3}=fitpar.iterations;
 arguments{4}=fitpar.fitmode;
 arguments{5}=fitpar.issCMOS;
+arguments{6}=1;
 % try   
     switch fitpar.fitmode
         case {1,2,4} %fix
@@ -199,7 +200,7 @@ arguments{5}=fitpar.issCMOS;
         case 3 %z
             arguments{1}=single(imstack/EMexcess);
             arguments{2}=fitpar.zparhere(1);
-            arguments(6:12)=num2cell(fitpar.zparhere(2:8));
+            arguments(7:13)=num2cell(fitpar.zparhere(2:8));
 %         case 4 %sx sy
         case 5 %spline   
             if fitpar.mirrorstack
