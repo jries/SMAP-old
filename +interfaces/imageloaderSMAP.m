@@ -16,6 +16,7 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
            if nargin>2
                if isa(varargin{3},'interfaces.ParameterData')
                     obj.P=varargin{3};
+                    obj.calibrationFile=obj.getGlobalSetting('cameraSettingsFile');
                else
                    obj.calibrationFile=varargin{3};
                end

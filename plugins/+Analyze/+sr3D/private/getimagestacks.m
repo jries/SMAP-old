@@ -6,20 +6,26 @@ roifac=1.5;
 roisizebig=(roifac*roisize);
 halfroisizebig=round((roisizebig-1)/2); %room for shifting
 roisizebig=2*halfroisizebig+1;
-storeframes=p.roiframes+300/p.dz;
-halfstoreframes=round((storeframes-1)/2);
-storeframes=halfstoreframes*2+1;
+
 f0=[beads(:).f0];
 f0r=round(f0);
 
 fminmax=[min(obj.locData.loc.frame) max(obj.locData.loc.frame)];
-if p.beaddistribution.Value==2
+if p.beaddistribution.Value==1&&~p.alignz
+    storeframes=p.roiframes;
+else
+    storeframes=p.roiframes+300/p.dz;
+end
+halfstoreframes=round((storeframes-1)/2);
+storeframes=halfstoreframes*2+1;
+
+if p.beaddistribution.Value==2|| (p.beaddistribution.Value==1&&~p.alignz)
     fzero=halfstoreframes+1;
 else%if on glass
     fzero=round(median(f0(~isnan(f0))));
 end
 
-framerange0=max(fminmax(1),fzero-halfstoreframes):min(fzero+halfstoreframes,fminmax(2));
+framerange0=max(fminmax(1),fzero-halfstoreframes):min(fzero+halfstoreframes+1,fminmax(2));
 
 files=obj.locData.files.file;
 indbad=false(length(beads),1);

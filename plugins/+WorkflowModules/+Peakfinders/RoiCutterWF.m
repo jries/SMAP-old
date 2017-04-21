@@ -83,12 +83,24 @@ classdef RoiCutterWF<interfaces.WorkflowModule
             if obj.preview && ~isempty(maxima.x)
 %                 figure(obj.globpar.parameters.outputfig)
 %                 ax=gca;
+                
+                try
+                    col=[0.3 0.3 0.3];
+                figure(obj.getPar('loc_outputfig'))
                 ax=findobj(obj.getPar('loc_outputfig').Children,'Type','Axes');
                 ax.NextPlot='add';
+                catch
+                    figure(207);
+                    ax=gca;
+                    ax.NextPlot='replace';
+                    imagesc(ax,image);
+                     ax.NextPlot='add';
+                    col=[1 0 1];
+                end
 %                 hold on
                 for k=1:length(maxima.x)
                     pos=[maxima.x(k)-dn maxima.y(k)-dn maxima.x(k)+dn maxima.y(k)+dn ];
-                    col=[0.3 0.3 0.3];
+                    
                     plotrect(ax,pos,col);
                 end
 

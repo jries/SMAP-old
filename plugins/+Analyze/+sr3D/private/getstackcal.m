@@ -379,7 +379,7 @@ xr=0:0.05:p.roisize;
 hz=zeros(1,length(zr)-1);
 hx=zeros(1,length(xr)-1);
 hy=hx;
-while toc(tt)<60
+while toc(tt)<30
     nn=rand(11,11,10000,'single');
     P=callYimingFitter(nn,single(coeff),50,5,0,0);
     
@@ -390,6 +390,7 @@ while toc(tt)<60
 end
 
 hz(1)=[];hz(end)=[];
+hz(1)=0;hz(end)=0;
 indx=(hx==0);
 hx(indx)=[];
 indy=(hy==0);

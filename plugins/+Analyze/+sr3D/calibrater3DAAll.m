@@ -143,7 +143,9 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
             %save
             lastf=obj.getPar('lastSMLFile');
             if ~isempty(lastf)&&p.beadsource.Value~=3
-            [path,file]=fileparts(lastf);
+            [path,file,ext]=fileparts(lastf);
+            file=[file ext];
+            path=[path filesep];
             else
                 [file,path]=uiputfile([pathhere '3d_3Dcal.mat']);
                 if ~file
@@ -156,7 +158,7 @@ classdef calibrater3DAAll<interfaces.DialogProcessor
                 adds='';
             end
             file=strrep(file,'_sml',['_3Dcal' adds]);
-            save([fileparts(path) filesep file],'SXY')
+            save([(path)  file],'SXY')
         end
         
         function initGui(obj)

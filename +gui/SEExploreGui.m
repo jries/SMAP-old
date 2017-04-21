@@ -82,8 +82,11 @@ classdef SEExploreGui<interfaces.SEProcessor
                 obj.guihandles.filelist.String={obj.SE.files.name};
                 obj.guihandles.filelist.Value=1;
             end
+            try
             infofile=['settings' filesep 'infostruct.txt'];
             obj.infostruct=getinfostruct(infofile);
+            catch
+            end
             redraw_sitelist(obj)
             redraw_celllist(obj)
         end
