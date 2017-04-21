@@ -2,7 +2,7 @@ function loco=apply_transform_locs(loc,transform,file,p)
 if nargin<4||~isfield(p,'datapart') || isempty(p)
     p.datapart.selection='all (T->R)';
 end
-if p.transformz&&isfield(loc,'znm')
+if isfield(p,'transformz')&& p.transformz&&isfield(loc,'znm')
     transformz=true;
 else
     transformz=false;

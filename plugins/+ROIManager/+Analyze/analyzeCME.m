@@ -12,6 +12,7 @@ dy=0;
 dtheta=0;
 dtheta10=0;
 ori=0;
+use=0;
 curv=0;
 rfit=0;
 class=0;
@@ -765,18 +766,22 @@ case 'theta plots new'
         footprint(k)=si.map2D.areanm;
         newthetafit(k)=(si.fitcoverage_thetabottom+pi/2)*(180/pi);
         newrfit(k)=si.map3D.rSphere;
+        newcurv(k)=1/newrfit(k);
         
 
         
 
 
         
-if (se.sites(k).annotation.list1.value < 3) && (se.sites(k).annotation.list2.value==1) && (se.sites(k).annotation.list4.value==1) 
-            keeptemp(k)=1;
-        else
-            keeptemp(k)=0;
-end
-        keep=logical(keeptemp);
+% if (se.sites(k).annotation.list1.value < 3) && (se.sites(k).annotation.list2.value==1) && (se.sites(k).annotation.list4.value==1) 
+%             keeptemp(k)=1;
+%         else
+%             keeptemp(k)=0;
+% end
+%         keep=logical(keeptemp);
+        
+        
+                
 %         sphere_segm(k)=2*pi*rfit(k)*(rfit(k)*(1-sin(-dtheta(k))));
         sphere_segm(k)=2*pi*rfit(k)*(rfit(k)*(1-cos((pi/2)+dtheta(k))));
         % M =2pi*rh, h=r*(1-sin(-theta))
@@ -801,7 +806,10 @@ end
         
      end
 
-     
+     %only sites with "use" in ROImanager Apr13 2017
+        keep=getFieldAsVector(se.sites,'annotation','use');
+        
+        
      % for new classification: 1-small flat, 2-big flat, 3-slightly curved,
 % 4-curvedC, 5-curvedU, 6-omega, 7-closed
     ind_sm_fl=(class==1 & keep);  %green, small    
@@ -983,47 +991,51 @@ end
 % PLUS curvature vs coverage
 
 if 1    
-    figure(94)
-    clf
-    
-     subplot(1,2,1)
-    plot(dx(ind_sm_fl),dtheta(ind_sm_fl),'.g','MarkerSize',20);
-    hold on
-    plot(dx(ind_bg_fl),dtheta(ind_bg_fl),'.r','MarkerSize',20);
-%     plot(dx(ind_slightly),dtheta(ind_slightly),'.m');
-    plot(dx(ind_C),dtheta(ind_C),'.c','MarkerSize',20);
-    plot(dx(ind_U),dtheta(ind_U),'.y','MarkerSize',20);
-    plot(dx(ind_omega),dtheta(ind_omega),'.','MarkerSize',20);
-    plot(dx(ind_closed),dtheta(ind_closed),'.','MarkerEdgeColor',[.7 .7 .7],'MarkerSize',20);
-    hold off
-    xlabel('width (dx)');ylabel('dtheta');
-    legend('small flat','big flat','curved C','curved U','curved Omega','closed');
-    
-     subplot(1,2,2)
-    plot(rfit(ind_sm_fl),dtheta(ind_sm_fl),'.g','MarkerSize',20);
-    hold on
-    plot(rfit(ind_bg_fl),dtheta(ind_bg_fl),'.r','MarkerSize',20);
-%     plot(rfit(ind_slightly),dtheta(ind_slightly),'.m');
-    plot(rfit(ind_C),dtheta(ind_C),'.c','MarkerSize',20);
-    plot(rfit(ind_U),dtheta(ind_U),'.y','MarkerSize',20);
-    plot(rfit(ind_omega),dtheta(ind_omega),'.','MarkerSize',20);
-    plot(rfit(ind_closed),dtheta(ind_closed),'.','MarkerEdgeColor',[.7 .7 .7],'MarkerSize',20);
-    hold off
-    xlabel('rfit');ylabel('dtheta');
-    
+%     figure(94)
+%     clf
+%     
+%      subplot(1,2,1)
+%     plot(dx(ind_sm_fl),dtheta(ind_sm_fl),'.g','MarkerSize',20);
+%     hold on
+%     plot(dx(ind_bg_fl),dtheta(ind_bg_fl),'.r','MarkerSize',20);
+% %     plot(dx(ind_slightly),dtheta(ind_slightly),'.m');
+%     plot(dx(ind_C),dtheta(ind_C),'.c','MarkerSize',20);
+%     plot(dx(ind_U),dtheta(ind_U),'.y','MarkerSize',20);
+%     plot(dx(ind_omega),dtheta(ind_omega),'.','MarkerSize',20);
+%     plot(dx(ind_closed),dtheta(ind_closed),'.','MarkerEdgeColor',[.7 .7 .7],'MarkerSize',20);
+%     hold off
+%     xlabel('width (dx)');ylabel('dtheta');
+%     legend('small flat','big flat','curved C','curved U','curved Omega','closed');
+%     
+%      subplot(1,2,2)
+%     plot(rfit(ind_sm_fl),dtheta(ind_sm_fl),'.g','MarkerSize',20);
+%     hold on
+%     plot(rfit(ind_bg_fl),dtheta(ind_bg_fl),'.r','MarkerSize',20);
+% %     plot(rfit(ind_slightly),dtheta(ind_slightly),'.m');
+%     plot(rfit(ind_C),dtheta(ind_C),'.c','MarkerSize',20);
+%     plot(rfit(ind_U),dtheta(ind_U),'.y','MarkerSize',20);
+%     plot(rfit(ind_omega),dtheta(ind_omega),'.','MarkerSize',20);
+%     plot(rfit(ind_closed),dtheta(ind_closed),'.','MarkerEdgeColor',[.7 .7 .7],'MarkerSize',20);
+%     hold off
+%     xlabel('rfit');ylabel('dtheta');
+% no    
     figure (999)
     clf
+%     subplot (2,2,1)
+%     plot(curv(keep),dtheta(keep),'.b','MarkerSize',20);
+%     xlabel('curvature');ylabel('coverage');
+    
     subplot (2,2,1)
-    plot(curv(keep),dtheta(keep),'.b','MarkerSize',20);
-    xlabel('curvature');ylabel('coverage');
+    plot(coverage_fraction_raw(keep),newcurv(keep),'.b','MarkerSize',10);
+    xlabel('cov_frct_raw');ylabel('curvature_new');
     
     subplot(2,2,2)
-    plot(ori(keep),rfit(keep),'.b','MarkerSize',20);
-    xlabel('theta ori');ylabel('radius');
+    plot(newthetafit(keep),newrfit(keep),'.b','MarkerSize',10);
+    xlabel('theta new fit');ylabel('radius new fit');
     
     subplot(2,2,3)
-    hist(ori(keep))
-    xlabel('theta ori');
+    histogram(newthetafit(keep),50)
+    xlabel('theta new fit');
     
     
     
@@ -1033,7 +1045,7 @@ end
     
 % surface calculated from fit or calculated from dx and dz
 
-if 1
+if 0
  figure (996)
     clf
 %     subplot(1,2,1)
@@ -1052,7 +1064,7 @@ if 1
     clf
     subplot(4,3,1)
     plot(ori(keep),coverage_area_raw(keep),'.');
-    xlabel('theta ori');ylabel('surface raw');
+    xlabel('theta ori');ylabel('surface raw new');
     subplot(4,3,2)
     plot(ori(keep),coverage_area_main(keep),'.');
     xlabel('theta ori');ylabel('surface main, only bottom hole');
@@ -1074,17 +1086,17 @@ if 1
     hist(footprint(keep));
     xlabel('footprint');
     subplot(4,3,8)
-    plot(ori(keep),footprint(keep),'.');
-    xlabel('theta ori');ylabel('footprint');
+    plot(coverage_fraction_main(keep),footprint(keep),'.');
+    xlabel('coverage fraction main new');ylabel('footprint');
     subplot(4,3,9)
     plot(footprint(keep),coverage_area_raw(keep),'.');
     xlabel('footprint');ylabel('surface raw');
     subplot(4,3,10)
     plot(ori(keep),newthetafit(keep),'.');
-    xlabel('theta ori');ylabel('theta fit');
+    xlabel('theta ori');ylabel('theta new fit');
     subplot(4,3,11)
-    plot(coverage_fraction_main(keep),coverage_area_main(keep),'.');
-    xlabel('coverage fraction main');ylabel('surface area main');
+    plot(coverage_fraction_raw(keep),coverage_area_raw(keep),'.');
+    xlabel('coverage fraction raw');ylabel('surface area raw');
     
     
     
