@@ -187,13 +187,17 @@ t.type=p.transform.selection;
 t.parameter=p.transformparam;
 transform.findTransform(locref.x(iAa),locref.y(iAa),loctarget.x(iBa),loctarget.y(iBa),t)
 
-if isfield(locref,'znm')
+ztransform=isfield(locref,'znm')&&~isempty(locref.znm);
+if ztransform
     transform.findTransformZ(locref.x(iAa),locref.y(iAa),locref.znm(iAa),loctarget.x(iBa),loctarget.y(iBa),loctarget.znm(iBa),t)
+     [xa, ya, za]=transform.transformCoordinatesInv((loctarget.x(iBa)),(loctarget.y(iBa)),(loctarget.znm(iBa)));
+else
+    [xa, ya]=transform.transformCoordinatesInv((loctarget.x(iBa)),(loctarget.y(iBa)));
 end
 % transform.findTransform(locref.x(iAa),locref.y(iAa),loctT.x(iBa),loctT.y(iBa),t)
 % if p.showresults
     
-    [xa, ya, za]=transform.transformCoordinatesInv((loctarget.x(iBa)),(loctarget.y(iBa)),(loctarget.znm(iBa)));
+   
 %         [xa, ya]=transform.transformCoordinatesInv((loctarget.x(iBa)),(loctarget.y(iBa)));
 %      [xa, ya]=transform.transformCoordinatesInv((loctT.x(iBa)),(loctT.y(iBa)));
 %  [xa, ya]=transform.transformCoordinates((loc.x(indr(iBa))),(loc.y(indt(iBa))),'target');
@@ -201,7 +205,7 @@ end
    dx=xa-locref.x(iAa);
    dy=ya-locref.y(iAa);
    
-   if isfield(locref,'znm')
+   if ztransform
        dz=za-locref.znm(iAa);
        dzb=loctarget.znm(iBa)-locref.znm(iAa);
        initaxis(p.resultstabgroup,'zcalib')
