@@ -28,7 +28,9 @@ if ~isempty(strfind(f,'fitpos'))
     emptylocs=true;
     return
 end
+try
 vars=whos('-file',file);
+
 if sum(strcmpi({vars.name},'fileformat'))
     f=load(file,'fileformat');
     mode=f.fileformat.name;
@@ -52,5 +54,8 @@ if sum(strcmpi({vars.name},'SEsettings'))
     mode='settings';
     return
 end
-
+catch
+    mode='unknown';
+    
+end
 end

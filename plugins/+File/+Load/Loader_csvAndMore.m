@@ -1,9 +1,9 @@
-classdef Loader_csv<interfaces.DialogProcessor
+classdef Loader_csvAndMore<interfaces.DialogProcessor
     properties
         loaderpath
     end
     methods
-        function obj=Loader_csv(varargin)        
+        function obj=Loader_csvAndMore(varargin)        
                 obj@interfaces.DialogProcessor(varargin{:}) ;
                 obj.inputParameters={'mainGui'};
         end
@@ -94,6 +94,12 @@ f=figure;
         ht.Data=ds;
         ht.CellEditCallback=@table_callback;
         
+        uicontrol('Parent',f,'Style','text','String','Cam pixel size (nm)','Position',[5,50,150,20]);
+        hcam=uicontrol('Parent',f,'Style','edit','String','100','Position',[155,50,100,20]);
+        
+        uicontrol('Parent',f,'Style','text','String','Factor (xy or [xy z])','Position',[5,70,150,20]);
+        hfac=uicontrol('Parent',f,'Style','edit','String','1','Position',[155,70,100,20]);
+        
         b1=uicontrol('Parent',f,'Style','pushbutton','String','Cancel','Callback',{@button_callback,0},'Position',[5,5,50,20]);
         b2=uicontrol('Parent',f,'Style','pushbutton','String','Save conversion structure','Callback',{@button_callback,2},'Position',[70,5,190,20]);
         b3=uicontrol('Parent',f,'Style','pushbutton','String','Ok','Callback',{@button_callback,1},'Position',[275,5,50,20]);
@@ -113,6 +119,8 @@ f=figure;
        else
            pfileo=[];
        end
+       pfileo.cam_pixelsize_um=str2double(hcam.String);
+       pfileo.factor=str2num(hfac.String);
        if number==2 %save
 %            path='settings/csvloaderconversion/';
            [ file, path]=uiputfile([obj.loaderpath 'csv_.txt']);
@@ -128,7 +136,36 @@ end
 
 function loadfile(obj,p,file,mode)
 
-tab=readtable(file);
+[~,~,ext]=fileparts(file);
+switch ext
+    case '.csv'
+        tab=readtable(file);
+    case '.mat'
+        tab=load(file);
+    case '.hdf5'
+        info=h5info(file);
+        tab=h5read(file,['/' info.Datasets(1).Name]);
+
+end
+
+if isstruct(tab)
+fn=fieldnames(tab);
+while length(fn)==1 
+    tab=tab.(fn{1});
+    if isstruct(tab)
+        fn=fieldnames(tab);
+    else
+        break
+    end
+end
+end
+
+if isnumeric(tab)
+    tab=array2table(tab);
+elseif isstruct(tab)
+   tab=struct2table(tab);
+end
+
 if ~isfield(p,'importdef') %if called from loader
     p.importdef.Value=1;
 end
@@ -174,7 +211,9 @@ try
 filenumber=obj.locData.files.filenumberEnd+1;
 
 locData=interfaces.LocalizationData;
-fn=fieldnames(pfile);
+fn=setdiff(fieldnames(pfile),{'cam_pixelsize_um','factor'});
+
+
 for k=1:length(fn)
     fnsmap=fn{k};
     fnimport=pfile.(fnsmap);
@@ -184,6 +223,20 @@ for k=1:length(fn)
         locData.addloc(fnsmap,single(tab.(fnimport)));
     end
 end
+
+fieldsxy=intersect(fieldnames(locData.loc),{'xnm','ynm','locprecnm','PSFxnm','PSFynm'});
+fieldsz=intersect(fieldnames(locData.loc),{'znm','locprecznm'});
+if isfield(pfile,'factor')&&any(pfile.factor~=1)
+    facxy=pfile.factor(1);
+    facz=pfile.factor(end);
+    for k=1:length(fieldsxy)
+        locData.loc.(fieldsxy{k})=locData.loc.(fieldsxy{k})*facxy;
+    end
+    for k=1:length(fieldsz)
+        locData.loc.(fieldsz{k})=locData.loc.(fieldsz{k})*facz;
+    end
+end
+
 if ~isfield(locData.loc,'xnm')||~isfield(locData.loc,'ynm')
     warning('Define at least the fields xnm and ynm')
 end
@@ -206,9 +259,7 @@ else
     phot=zd+1;
 end
 psfnm=150;psfznm=500;
-if ~isfield(locData.loc,'locprecnm')
-    locData.addloc('locprecnm',psfnm./sqrt(phot));
-end
+
 if ~isfield(locData.loc,'locprecznm')&&isfield(locData.loc,'znm')
     locData.addloc('locprecznm',psfznm./sqrt(phot));
 end
@@ -231,10 +282,14 @@ end
 
 locData.addloc('filenumber',zd+filenumber);
 catch err
+    err
     warndlg('import did not work. Select a different import format file or define new file')
     return
 %     rethrow(err);
 end
+
+
+
 
 obj.locData.addLocData(locData);
 
@@ -252,6 +307,9 @@ else
 end
 obj.locData.files.filenumberEnd=length(obj.locData.files.file);
 obj.locData.files.file(filenumber).number=filenumber;
+
+
+
 end
 
 function [po,p]=pxml2p(pxml)
@@ -276,9 +334,9 @@ end
 
 
 function pard=guidef
-info.name='CSV loader';
-info.extensions={'*.csv';'*.*'};
-info.dialogtitle='select any CSV file';
+info.name='Import CSV/MAT/HDF5';
+info.extensions={'*.csv;*.xls;*.mat;*.hdf5','*.*'};
+info.dialogtitle='select any .csv .mat or .hdf5 file';
 pard.plugininfo=info;  
 pard.plugininfo.type='LoaderPlugin';
 
