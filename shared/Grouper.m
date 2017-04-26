@@ -33,6 +33,7 @@ classdef Grouper< interfaces.LocDataInterface
             obj.combinemodes.groupindex='first';
             obj.combinemodes.filenumber='first';
             obj.combinemodes.neighbours='sum';
+            obj.combinemodes.clusterdensity='sum';
         end
         function connect(obj,dx,dt,framef,xf,yf,varargin)
             fn=fieldnames(obj.locData.loc);

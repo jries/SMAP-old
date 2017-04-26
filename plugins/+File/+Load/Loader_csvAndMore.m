@@ -61,7 +61,8 @@ end
 
 function pfileo=importdialog(tab,pfile,obj)
  defnames={'edit','ID','frame','channel','xnm','ynm','znm','phot','bg','locprecnm','locprecznm','PSFxnm','PSFynm'};
-        varnames=tab.Properties.VariableNames;
+%         varnames=tab.Properties.VariableNames;
+        varnames=fieldnames(tab);
         columnformat={'char','logical','char',defnames};
 %         f=dialog;
 f=figure;
@@ -75,7 +76,8 @@ f=figure;
         
         ht2=uitable('units','normalized','Parent',f,'Position',[0 0.7 1 .3]);
         ht2.ColumnName=varnames;
-        a=table2array(tab);
+        a=table2array(struct2table(tab));
+%         a=struct2cell(tab);
         ht2.Data=a(1:100,:);
         
         fn=fieldnames(pfile);
@@ -162,7 +164,7 @@ end
 
 if isnumeric(tab)
      tab=array2table(tab);
-    tab=array2(tab);
+%     tab=table2struct(tab);
 % elseif isstruct(tab)
 %    tab=struct2table(tab);
 end
