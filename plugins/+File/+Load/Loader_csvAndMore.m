@@ -161,9 +161,14 @@ end
 end
 
 if isnumeric(tab)
-    tab=array2table(tab);
-elseif isstruct(tab)
-   tab=struct2table(tab);
+     tab=array2table(tab);
+    tab=array2(tab);
+% elseif isstruct(tab)
+%    tab=struct2table(tab);
+end
+
+if istable(tab)
+    tab=table2struct(tab);
 end
 
 if ~isfield(p,'importdef') %if called from loader
@@ -219,7 +224,7 @@ for k=1:length(fn)
     fnimport=pfile.(fnsmap);
     if strcmp(fnsmap,'frame')
         locData.addloc(fnsmap,double(tab.(fnimport)));
-    else
+    elseif isfield(tab,fnimport)
         locData.addloc(fnsmap,single(tab.(fnimport)));
     end
 end

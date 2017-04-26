@@ -40,7 +40,9 @@ classdef density_calculator<interfaces.DialogProcessor
                 neighbours=obj.locData.grouped2ungrouped(locs.ingrouped,neighbours);
 
             end
-            obj.locData.setloc('clusterdensity',single(neighbours));
+            neighbourstot=zeros(length(obj.locData.loc.xnm),1);
+            neighbourstot(locs.inungrouped)=neighbours;
+            obj.locData.setloc('clusterdensity',single(neighbourstot));
             obj.locData.sort('filenumber','channel','frame');
             obj.locData.regroup;
             obj.setPar('locFields',fieldnames(obj.locData.loc));  
