@@ -771,6 +771,8 @@ case 'theta plots new'
 
         
 
+    
+    
 
         
 % if (se.sites(k).annotation.list1.value < 3) && (se.sites(k).annotation.list2.value==1) && (se.sites(k).annotation.list4.value==1) 
@@ -808,7 +810,7 @@ case 'theta plots new'
 
      %only sites with "use" in ROImanager Apr13 2017
         keep=getFieldAsVector(se.sites,'annotation','use');
-        
+      %  keep=logical(ones(1,length(se.sites)));
         
      % for new classification: 1-small flat, 2-big flat, 3-slightly curved,
 % 4-curvedC, 5-curvedU, 6-omega, 7-closed

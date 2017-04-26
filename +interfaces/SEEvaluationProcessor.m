@@ -84,18 +84,18 @@ classdef SEEvaluationProcessor<interfaces.GuiModuleInterface & interfaces.LocDat
             end
             p=roiparser(varargin); 
                 sx=obj.site.image.rangex;
-                fovsize=(sx(2)-sx(1))*1000/2;             
+                fovsize=(sx(2)-sx(1))*1000/2*[1,1];             
             if isempty(p.position) %no position specified, that is the usual case
 
                 pos=obj.site.pos;
                 if ~isempty(p.size)
                     if length(p.size)==1
-                        fovsize=p.size(1)*2;
+                        fovsize=p.size(1);
                     else
-                    fovsize=p.size(1);
+                    fovsize=p.size;
                     end
                 end
-                posgetloc=[pos(1), pos(2), fovsize, fovsize];
+                posgetloc=[pos(1), pos(2), fovsize];
                 parameters=[parameters {'position', posgetloc}];
             else
                 pos=p.position;
