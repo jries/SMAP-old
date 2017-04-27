@@ -19,34 +19,43 @@ classdef analyzeNPCquantification<interfaces.DialogProcessor&interfaces.SEProces
     end
 end
 
-function pf=fithist(hi,n,p)
-
-shi=sum(hi);
-% hi=hi/shi;
-
-corners=p.corners;rings=p.rings;
-n1=find(n>=p.fitrange(1),1,'first');
-n2=find(n<=p.fitrange(2),1,'last');
-range=n1:n2;
-% x=(0:corners)';
-x=n(range)';
-% clusterfromlabeling(x,corners,rings,.5)
-ft=fittype('a*clusterfromlabeling(x,corners,rings,p)','problem',{'corners','rings'});
-f=fit(x,hi(range)',ft,'problem',{corners, rings},'Lower',[0 0.01],'Upper',[inf .99],'Start',[shi .4]);
-plot(n,f(n),'-g')
-plot(x,f(x),'-*r')
-pf=f.p;
-end
+% function pf=fithist(hi,n,p)
+% 
+% shi=sum(hi);
+% % hi=hi/shi;
+% 
+% corners=p.corners;rings=p.rings;
+% n1=find(n>=p.fitrange(1),1,'first');
+% n2=find(n<=p.fitrange(2),1,'last');
+% range=n1:n2;
+% % x=(0:corners)';
+% x=n(range)';
+% % clusterfromlabeling(x,corners,rings,.5)
+% ft=fittype('a*clusterfromlabeling(x,corners,rings,p)','problem',{'corners','rings'});
+% f=fit(x,hi(range)',ft,'problem',{corners, rings},'Lower',[0 0.01],'Upper',[inf .99],'Start',[shi .4]);
+% plot(n,f(n),'-g')
+% plot(x,f(x),'-*r')
+% pf=f.p;
+% end
 
 function out=runintern(obj,p)
 se=obj.SE;
 fields={'evaluation','NPCLabelingQuantify'};
 fields2={'evaluation','generalStatistics'};
+
 numfoundint=getFieldAsVector(se.sites,fields{:},'numfoundint');
 numfoundrat=getFieldAsVector(se.sites,fields{:},'numfoundrat');
 numbercornerassined=getFieldAsVector(se.sites,fields{:},'numbercornerassined');
 filenumber=getFieldAsVector(se.sites,'info','filenumber');
 psf=getFieldAsVector(se.sites,fields2{:},'PSFlayers');
+
+use=getFieldAsVector(se.sites,'annotation','use');
+numfoundint=numfoundint(use);
+numfoundrat=numfoundrat(use);
+numbercornerassined=numbercornerassined(use);
+psf=psf(use);
+
+
 ax0=obj.initaxis('Summary');
 axpsf=obj.initaxis('PSF');
 histogram(axpsf,psf);
@@ -78,7 +87,7 @@ subplot(1,2,1,ax1);
 hi=hist(numfoundint,nb);
     bar(nb,hi)
     hold on
-    pf=fithist(hi,nb,p);
+    pf=fitNPClabeling(hi,p);
     title(['gap integer: ' num2str(pf,2)])
     axis tight
     results.gapinteger=pf;   
@@ -87,7 +96,7 @@ subplot(1,2,2,ax2);
     hr=hist(numfoundrat,nb);
     bar(nb,hr)
     hold on
-    pf=fithist(hr,nb,p);
+    pf=fitNPClabeling(hr,p);
     title(['gap fractional: ' num2str(pf,2)])
     axis tight
     results.gapfractional=pf; 
@@ -99,7 +108,7 @@ subplot(1,2,1,ax3);
     ha=hist(numbercornerassined,nb);
     bar(nb,ha)
     hold on
-    pf=fithist(ha,nb,p);
+    pf=fitNPClabeling(ha,p);
     title(['assigned: ' num2str(pf,2)])
    axis tight
    results.assigned=pf; 
@@ -108,7 +117,7 @@ subplot(1,2,2,ax4);
     hall=hi+hr+ha;
     bar(nb,hall)
     hold on
-    pf=fithist(hall,nb,p);
+    pf=fitNPClabeling(hall,p);
     title(['all: ' num2str(pf,2)])
     axis tight 
     results.all=pf; 
@@ -126,7 +135,7 @@ ax6=obj.initaxis('ground truth');
     hnc=hist(numcorners(indgood),nb);
     bar(nb,hnc)
     hold on
-    pf=fithist(hnc,nb,p);
+    pf=fitNPClabeling(hnc,p);
     results.groundtruth=pf; 
 %     
 %     hh=clusterfromlabeling(nb,8,2,.4)*sum(hnc);

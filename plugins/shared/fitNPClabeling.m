@@ -1,7 +1,13 @@
 function plabel=fitNPClabeling(corners,p)
 % p.corners, rings,fitrange
-nb=0:p.corners;
- hr=hist(corners,nb);
+
+    
+ nb=0:p.corners;
+ if length(corners)>9 %otherwise: histogram passed on
+    hr=hist(corners,nb);
+ else
+     hr=corners;
+ end
 %  hold off
  plot(nb(1:end),hr,'-x')
  hold on

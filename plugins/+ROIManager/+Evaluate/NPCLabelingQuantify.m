@@ -78,7 +78,7 @@ function out=runintern(obj,p)
 R=p.R;
 dR=p.dR;
 
-locs=obj.getLocs({'xnm','ynm','xnm_gt','ynm_gt','locprecnm'},'layer',1,'size',p.se_siteroi);
+locs=obj.getLocs({'xnm','ynm','xnm_gt','ynm_gt','locprecnm'},'layer',1,'size',p.se_siteroi(1)/2);
 
 
 % xm=locs.xnm-obj.site.pos(1);
