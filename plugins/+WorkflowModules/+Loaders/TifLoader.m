@@ -86,6 +86,7 @@ classdef TifLoader<interfaces.WorkflowModule
             image=imloader.readNext ; 
 %             imloader.currentImageNumber
             tall=0;
+            tfitall=0;
             while ~isempty(image)&&imloader.currentImageNumber<=obj.framestop&&~SMAP_stopnow
                 
                 datout=interfaces.WorkflowData;
@@ -105,7 +106,9 @@ classdef TifLoader<interfaces.WorkflowModule
                 datout.frame=imloader.currentImageNumber;
                 datout.ID=id;
                 id=id+1;
+                th=tic;
                 obj.output(datout)
+                tfitall=tfitall+toc(th);
                 th=tic;
                 image=imloader.readNext;
       
@@ -136,6 +139,7 @@ classdef TifLoader<interfaces.WorkflowModule
             end
             
             obj.setPar('tiffloader_loadingtime',tall);
+            obj.setPar('tiffloader_fittime',tfitall);
             dateof=interfaces.WorkflowData;
             dateof.frame=imloader.currentImageNumber+1;
             dateof.ID=id;
