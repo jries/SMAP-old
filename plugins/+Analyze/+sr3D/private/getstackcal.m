@@ -391,6 +391,7 @@ end
 
 hz(1)=[];hz(end)=[];
 hz(1)=0;hz(end)=0;
+
 indx=(hx==0);
 hx(indx)=[];
 indy=(hy==0);
@@ -405,6 +406,7 @@ subplot(1,2,1,ax);
 subplot(1,2,2,ax2);
 findx=find(~indx);findy=find(~indy);
 plot(ax,zr(2:end-2),hz,zr(2:end-2),hzx/max(hzx)*max(hz));
+ax.YLim(2)=myquantile(hz,.95);
 plot(ax2,xr(findx(2:end-1)),hx,xr(findx(2:end-1)),hxx/max(hxx)*max(hx),xr(findy(2:end-1)),hy,xr(findy(2:end-1)),hyx/max(hyx)*max(hy));
 end
 

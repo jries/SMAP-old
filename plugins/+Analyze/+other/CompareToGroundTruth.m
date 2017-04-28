@@ -38,12 +38,34 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
             
             ax=obj.initaxis('z compare gt');
             plot(ax,lr.znm(mr),lt.znm(mt),'.');
+            zrh=lr.znm(mr);
+            zth=lt.znm(mt);
+            inrange=abs(zrh)<300;
+            zrh=zrh(inrange);
+            zth=zth(inrange);
+            B=[zrh ones(length(zrh),1)];
+            fit=B\zth;
+            slope=fit(1);off=fit(2);
+            hold(ax,'on');
+            plot(ax, zrh,slope*zrh+off);
+            hold(ax,'off');
+            title(ax,['slope: ' num2str(slope) ', off: ' num2str(off)])
+            xlabel(ax,'z reference (nm)')
+            ylabel(ax,'z target(nm)')
+            
+            
             out=[];
-            ax=obj.initaxis('z phot');
+            ax=obj.initaxis(' phot');
+            photr=lr.phot(mr);photr=photr(inrange);
+            phott=lt.phot(mt);phott=phott(inrange);
             plot(ax,lr.phot(mr),lt.phot(mt),'.');
+            plot(ax,photr,phott,'r.');
             xlabel('reference')
             ylabel('target')
-            title(['reference/target' num2str(nanmedian(lr.phot(mr)./lt.phot(mt)))])
+            title(['reference/target' num2str(nanmedian(photr./phott))])
+            
+            ax=obj.initaxis('phot (z)');
+            plot(ax,lr.znm(mr),lr.phot(mr)./lt.phot(mt),'.')
         end
         function pard=guidef(obj)
             pard=guidef(obj);

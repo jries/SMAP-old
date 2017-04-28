@@ -23,7 +23,8 @@ for k=1:length(filelist)
     imagesc(mim);
     int=maxima(:,3);
     
-    mmed=myquantile(mim(:),0.1);
+    mimc=mim(p.roisize:end-p.roisize,p.roisize:end-p.roisize);
+    mmed=myquantile(mimc(:),0.1);
     imt=mim(mim<mmed);
     cutoff=mean(imt(:))+3*std(imt(:));
     maxima=maxima(int>cutoff,:);

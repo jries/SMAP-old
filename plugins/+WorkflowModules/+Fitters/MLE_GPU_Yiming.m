@@ -104,7 +104,7 @@ LogL=results.LogL;
            CRLB(isnan(CRLB))= 0; %XXXXXXXXX
            LogL(isnan(LogL))= 0; %XXXXXXXXX
            CRLB((CRLB)<0)= 0; %XXXXXXXXX
-           LogL((LogL)<0)= 0; %XXXXXXXXX
+          % LogL((LogL)<0)= 0; %XXXXXXXXX
            
            
 % locs.xpix=P(:,2)-dn+posx;
