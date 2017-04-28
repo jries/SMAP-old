@@ -96,6 +96,7 @@ step=2*pi/8;
 minlp=step*R*.4;
 % minlp=inf;
 inr=rhoa>R-dR&rhoa<R+dR;
+
 inr=inr&locs.locprecnm<minlp;
 th=tha(inr);rho=rhoa(inr);
 
