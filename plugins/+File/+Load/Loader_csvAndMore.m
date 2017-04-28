@@ -170,7 +170,7 @@ if isnumeric(tab)
 end
 
 if istable(tab)
-    tab=table2struct(tab);
+    tab=table2struct(tab,'ToScalar',true);
 end
 
 if ~isfield(p,'importdef') %if called from loader

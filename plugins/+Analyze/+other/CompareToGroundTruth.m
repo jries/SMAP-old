@@ -41,7 +41,9 @@ classdef CompareToGroundTruth<interfaces.DialogProcessor
             out=[];
             ax=obj.initaxis('z phot');
             plot(ax,lr.phot(mr),lt.phot(mt),'.');
-            title(nanmedian(lt.phot(mt)./lr.phot(mr)))
+            xlabel('reference')
+            ylabel('target')
+            title(['reference/target' num2str(nanmedian(lr.phot(mr)./lt.phot(mt)))])
         end
         function pard=guidef(obj)
             pard=guidef(obj);

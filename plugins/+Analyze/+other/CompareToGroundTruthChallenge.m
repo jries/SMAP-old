@@ -28,6 +28,10 @@ classdef CompareToGroundTruthChallenge<interfaces.DialogProcessor
             end
             lochere.loc.xnm=lochere.loc.xnm+shiftx;
             lochere.loc.ynm=lochere.loc.ynm+shifty;
+            lochere.loc.xnm=lochere.loc.xnm+p.offsetxyz(1);
+            lochere.loc.ynm=lochere.loc.ynm+p.offsetxyz(2);
+            lochere.loc.znm=lochere.loc.znm+p.offsetxyz(3);
+             lochere.loc.phot=lochere.loc.phot*p.photonfactor;
             [descfile]=saveLocalizationsCSV(lochere,filenew,p.onlyfiltered,p.numberOfLayers,p.sr_layerson);
             
             %modify challenge data
@@ -66,7 +70,7 @@ end
 function wobble_callback(a,b,obj)
 filename=(obj.locData.files.file(1).name);
 path=fileparts(filename);
-gtfile=[path filesep 'activations.csv','load ground truth for data'];
+gtfile=[path filesep 'activations.csv'];
 if ~exist(gtfile,'file')
     ind=strfind(path,filesep); 
     gtfile=[path(1:ind(end))  'activations.csv'];
@@ -81,7 +85,7 @@ if ~exist(gtfile,'file')
     end
 end
 
-gtData=csvread(gtfile);
+gtData=csvread(gtfile,1,0);
 % fullnameLoc = get(handles.text5,'String');
 %hasHeader = fgetl(fopen(fullnameLoc));
 %hasHeader = 1*(sum(isstrprop(hasHeader,'digit'))/length(hasHeader) < .6);
@@ -159,6 +163,21 @@ pard.comparer.Width=4;
 pard.wobblebutton.object=struct('Style','pushbutton','String','Wobble.m','Callback',{{@wobble_callback,obj}});
 pard.wobblebutton.position=[4,4];
 pard.wobblebutton.Width=1;
+
+
+pard.offsetxyzt.object=struct('Style','text','String','Shift by x,y,z nm');
+pard.offsetxyzt.position=[6,1];
+pard.offsetxyzt.Width=1;
+pard.offsetxyz.object=struct('Style','edit','String','0 0 0');
+pard.offsetxyz.position=[6,2];
+pard.offsetxyz.Width=1;
+
+pard.photonfactort.object=struct('Style','text','String','factor for photon count');
+pard.photonfactort.position=[7,1];
+pard.photonfactort.Width=1;
+pard.photonfactor.object=struct('Style','edit','String','1');
+pard.photonfactor.position=[7,2];
+pard.photonfactor.Width=1;
 
 pard.plugininfo.type='ProcessorPlugin';
 end
