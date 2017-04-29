@@ -12,7 +12,9 @@ classdef density_calculator<interfaces.DialogProcessor
         function out=run(obj,p)
             out=[];
             obj.locData.sort('filenumber','channel','xnm');
-            [locs,indin]=obj.locData.getloc({'xnm','ynm','channel','frame','znm','ingrouped','inungrouped'},'layer',find(p.sr_layerson),'position','all');
+            %problem on filtered data, somehow it gets confused.
+            [locs,indin]=obj.locData.getloc({'xnm','ynm','channel','frame','znm','ingrouped','inungrouped'},'position','all');
+           %    [locs,indin]=obj.locData.getloc({'xnm','ynm','channel','frame','znm','ingrouped','inungrouped'},'layer',find(p.sr_layerson),'position','all');
            
             x=locs.xnm;
             y=locs.ynm;
