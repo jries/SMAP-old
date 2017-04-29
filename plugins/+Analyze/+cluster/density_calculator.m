@@ -11,18 +11,20 @@ classdef density_calculator<interfaces.DialogProcessor
         
         function out=run(obj,p)
             out=[];
-            obj.locData.sort('filenumber','channel','xnm');
+            %obj.locData.sort('filenumber','channel','xnm');
             %problem on filtered data, somehow it gets confused.
-            [locs,indin]=obj.locData.getloc({'xnm','ynm','channel','frame','znm','ingrouped','inungrouped'},'position','all');
-           %    [locs,indin]=obj.locData.getloc({'xnm','ynm','channel','frame','znm','ingrouped','inungrouped'},'layer',find(p.sr_layerson),'position','all');
+            %[locs,indin]=obj.locData.getloc({'xnm','ynm','channel','frame','znm','ingrouped','inungrouped'},'position','all');
+           [locs,indin]=obj.locData.getloc({'xnm','ynm','filenumber','channel','frame','znm','ingrouped','inungrouped'},'layer',find(p.sr_layerson),'position','all');
            
-            x=locs.xnm;
-            y=locs.ynm;
+            sortm=horzcat(locs.filenumber,locs.channel,locs.xnm,(1:length(locs.frame))');
+            [sortedm,sortind]=sortrows(sortm);
+            x=locs.xnm(sortind);
+            y=locs.ynm(sortind);
             
             dx=p.countingsize_xy;
             dz=p.countingsize_z;
             if ~isempty(locs.znm)
-                z=locs.znm;
+                z=locs.znm(sortind);
                 if p.countingregion.Value==1 %Gauss
                     neighbours=countneighbours3DGauss(double(x),double(y),double(z),double(dx),double(dz));
                 else
@@ -36,16 +38,25 @@ classdef density_calculator<interfaces.DialogProcessor
                 end
             end
             
-            if sum(locs.inungrouped)==length(locs.xnm) %ungrouped data
-
-            else
-                neighbours=obj.locData.grouped2ungrouped(locs.ingrouped,neighbours);
-
-            end
             neighbourstot=zeros(length(obj.locData.loc.xnm),1);
-            neighbourstot(locs.inungrouped)=neighbours;
+             [~,sortbackind]=sort(sortedm(:,4));
+             neighboursback=neighbours(sortbackind);
+             
+            
+             
+            if sum(locs.inungrouped)==length(locs.xnm) %ungrouped data
+                 neighbourstot(locs.inungrouped)=neighboursback;
+            else
+%                 error('does not work at the moment for grouped data')
+                
+                neighbourstot=obj.locData.grouped2ungrouped(locs.ingrouped,neighboursback);
+                    
+            end
+           
+            
+            
             obj.locData.setloc('clusterdensity',single(neighbourstot));
-            obj.locData.sort('filenumber','channel','frame');
+%             obj.locData.sort('filenumber','channel','frame');
             obj.locData.regroup;
             obj.setPar('locFields',fieldnames(obj.locData.loc));  
         end
