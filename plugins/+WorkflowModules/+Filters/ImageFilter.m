@@ -73,16 +73,29 @@ end
 end
 
 function loadPSF_callback(object,b,obj)
+
 p=(obj.getPar('lastSMLFile'));
 if ~isempty(p)
     p=fileparts(p);
 end
 [f,p]=uigetfile([p filesep '*.mat']);
+
 if f
+    
+
+    
     l=load([p f]);
     PSF=l.SXY(1).splinefit.PSF;
+        rs=obj.getPar('loc_ROIsize');
+    if isempty(rs)
+        disp('preview once to set roisize')
+        rs=size(PSF,1);
+    end
     fig=nanmean(PSF,3);
-    h=fig-nanmin(fig);
+    rss=round((rs-1)/2);
+    midp=round(size(fig)/2);
+    figs=fig(midp(1)-rss:midp(1)+rss,midp(2)-rss:midp(2)+rss);
+    h=figs-nanmin(figs);
     h=h/nansum(h(:));
     obj.filterkernelPSF=h;
     

@@ -28,9 +28,19 @@ classdef TifLoader<interfaces.WorkflowModule
                  error('TifLoader: localization file not found')
             end
 %             obj.imloader=imageLoader(p.tiffile);  
-            if isempty(obj.imloader)||isempty(obj.imloader.getimage(1))
-                disp('reload file in image loader')
+            if isempty(obj.imloader)
                 obj.addFile(p.tiffile)
+            else
+                try 
+                    img=(obj.imloader.getimage(1));
+                    if isemtpy(img)
+                        obj.addFile(p.tiffile)
+                    end
+                catch
+                    disp('reload file in image loader')
+                    
+                end
+                
 %                 obj.imloader=imageloaderAll(p.tiffile,obj.getPar('loc_fileinfo')); 
             end
 %             try 
@@ -173,8 +183,8 @@ classdef TifLoader<interfaces.WorkflowModule
             fileinf=obj.imloader.metadata;
             if p.padedges
 %                 locsettings=obj.getPar('loc_cameraSettings');
-                roisize=13;
-                dr=ceil((roisize-1)/2);
+                dr=p.padedgesdr;
+                %dr=ceil((roisize-1)/2);
                 fileinf.roi(1:2)=fileinf.roi(1:2)-dr;
                 fileinf.roi(3:4)=fileinf.roi(3:4)+2*dr;
 %                 fileinf.Width=fileinf.Width+2*dr;
@@ -271,6 +281,13 @@ pard.padedges.position=[4.2,3.5];
 pard.padedges.Width=1;
 pard.padedges.Optional=true;
 pard.padedges.TooltipString='Pad edges with minimum values to allow detection of localizations close to edges. Usually not necessary.';
+
+pard.padedgesdr.object=struct('Style','edit','String','9','Callback',@obj.loadedges);
+pard.padedgesdr.position=[4.2,4.5];
+pard.padedgesdr.Width=.5;
+pard.padedgesdr.Optional=true;
+pard.padedgesdr.TooltipString='Pad edges with minimum values to allow detection of localizations close to edges. Usually not necessary.';
+
 % pard.locdata_empty.object=struct('Style','checkbox','String','Empty localizations','Value',1);
 % pard.locdata_empty.position=[4.2,3.5];
 % pard.locdata_empty.Width=1.5;

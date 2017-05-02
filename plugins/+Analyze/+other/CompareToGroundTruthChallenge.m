@@ -30,7 +30,9 @@ classdef CompareToGroundTruthChallenge<interfaces.DialogProcessor
             lochere.loc.ynm=lochere.loc.ynm+shifty;
             lochere.loc.xnm=lochere.loc.xnm+p.offsetxyz(1);
             lochere.loc.ynm=lochere.loc.ynm+p.offsetxyz(2);
+            if isfield(lochere.loc,'znm')
             lochere.loc.znm=lochere.loc.znm+p.offsetxyz(3);
+            end
              lochere.loc.phot=lochere.loc.phot*p.photonfactor;
             [descfile]=saveLocalizationsCSV(lochere,filenew,p.onlyfiltered,p.numberOfLayers,p.sr_layerson);
             
