@@ -268,7 +268,13 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                     if isfield(obj.children,fn{k})
                     child=obj.children.(fn{k});
                     pchild=p.children.(fn{k});
+                    try
                     child.setGuiParameters(pchild,true);
+                    catch err
+                        child
+                        err
+                    end
+                    
                     end
                 end
             end
