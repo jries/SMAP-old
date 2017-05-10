@@ -119,10 +119,11 @@ for Z=1:length(p.Zrange)-1
   
      %calculate dual-color overlay for display
         allroisol=zeros(size(allrois,1),size(allrois,2),size(allrois,3),size(allrois,4),3);
+        psfnorm=corrPSF/nansum(corrPSF(:));
         for k=1:size(allrois,4)
             ssh=shiftedstack(:,:,:,k);
             allroisol(:,:,:,k,1)=ssh/nansum(ssh(:));
-            allroisol(:,:,:,k,2)=corrPSF/nansum(corrPSF(:));
+            allroisol(:,:,:,k,2)=psfnorm;
 %                 allroisol(:,:,:,k,3)=0.5*(allroisol(:,:,:,k,1)+allroisol(:,:,:,k,2));
         end
         axallps=maketgax(axall.hspline_overlay,tgt);
@@ -156,8 +157,8 @@ for Z=1:length(p.Zrange)-1
         rangez=max(1,z-dz):min(size(corrPSF,3),z+dz);
 %             framess=
         %normalize PSF
-
-        minPSF=min(corrPSF(:));
+        centpsf=corrPSF(2:end-1,2:end-1,2:end-1); %cut out rim from shift
+        minPSF=min(centpsf(:));
         corrPSFn=corrPSF-minPSF;
         intglobal=nanmean(nansum(nansum(corrPSFn(rangex,rangey,z-1:z+1),1),2));
         for k=1:size(corrPSF,3)
@@ -170,7 +171,7 @@ for Z=1:length(p.Zrange)-1
         end
         shiftedstack=shiftedstack/intglobal;
         corrPSFn(isnan(corrPSFn))=0;
-
+        corrPSFn(corrPSFn<0)=0;
         corrPSFs=corrPSFn(rangex,rangey,rangez);
         
         PSFgood=true;
