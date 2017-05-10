@@ -100,6 +100,6 @@ end
 
 function out=poissonNormalize(in)
 % out=real(2*sqrt(in+3/8));
-in(in<3/8)=0;
-out=(2*sqrt(in+3/8));
+in(in<-0.3750)=0;
+out=(2*sqrt(in+0.3750));
 end
