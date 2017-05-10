@@ -97,6 +97,11 @@ classdef TifLoader<interfaces.WorkflowModule
 %             imloader.currentImageNumber
             tall=0;
             tfitall=0;
+            
+            % parallel
+            if p.parallelload
+                parp=gcp;
+            end
             while ~isempty(image)&&imloader.currentImageNumber<=obj.framestop&&~SMAP_stopnow
                 
                 datout=interfaces.WorkflowData;
@@ -253,15 +258,23 @@ pard.tiffile.position=[2,1];
 pard.tiffile.Width=4;
 
 pard.onlineanalysis.object=struct('Style','checkbox','String','Online analysis. Waittime (s):','Value',0);
-pard.onlineanalysis.position=[3,2.25];
+pard.onlineanalysis.position=[3,2];
 pard.onlineanalysis.Width=1.75;
 pard.onlineanalysis.TooltipString='Fit during acquisition. If checked, max frames is ignored. Waits until no more images are written to file.';
 pard.onlineanalysis.Optional=true;
 pard.onlineanalysiswaittime.object=struct('Style','edit','String','5');
-pard.onlineanalysiswaittime.position=[3,4];
+pard.onlineanalysiswaittime.position=[3,3.75];
 pard.onlineanalysiswaittime.Width=0.5;
 pard.onlineanalysiswaittime.TooltipString='Waiting time for online analysis.';
 pard.onlineanalysiswaittime.Optional=true;
+
+
+pard.parallelload.object=struct('Style','checkbox','String','parallel','Value',0);
+pard.parallelload.position=[3,4.25];
+pard.parallelload.Width=0.75;
+pard.parallelload.TooltipString='Parallel load and process. Makes sense only for very slow loading process.';
+pard.parallelload.Optional=true;
+
 
 pard.textf.object=struct('Style','text','String','Frame range');
 pard.textf.position=[4.2,1.25];
