@@ -59,6 +59,7 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
             obj.currentImageNumber=number;
         end
         function images=getmanyimages(obj,numbers,format)
+            loadfun=@obj.getimageonline;
             if nargin<3
                 format='cell';
             end
@@ -68,13 +69,18 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
             switch format
                 case 'cell'
                     for k=length(numbers):-1:1
-                        images{k}=obj.getimage(numbers(k));
+                        images{k}=loadfun(numbers(k));
+                        if isempty(images{k})
+                            loadfun=@obj.getimage;
+                        end
                     end
                 case 'mat'
                     for k=length(numbers):-1:1
-                        imh=obj.getimage(numbers(k));
+                        imh=loadfun(numbers(k));
                         if ~isempty(imh)
                         images(:,:,k)=imh;
+                        else
+                            loadfun=@obj.getimage;
                         end
                     end
             end
