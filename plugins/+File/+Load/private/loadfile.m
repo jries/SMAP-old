@@ -67,9 +67,12 @@ else
 end
 obj.locData.files.filenumberEnd=length(obj.locData.files.file);
 
+if ~ isfield(p,'updateGuiPar')
+    p.updateGuiPar=false;
+end
 if ~isempty(GUIsettings) %write back parameters
 %     button=questdlg('Restore saved GUI Parameters?','GUI parameters','Yes','No','No');
-    if p.updateGuiPar %strcmpi(button,'Yes')
+    if  p.updateGuiPar %strcmpi(button,'Yes')
         if isfield(GUIsettings,'par')
             GUIsettings=convertparameters(GUIsettings);
         end
