@@ -23,11 +23,11 @@ classdef SEExploreGui<interfaces.SEProcessor
              h.cellax=axes('Position',[.55,.6,.4,.32],'DataAspectRatio',[1 1 1],'NextPlot','replacechildren');
              h.fileax=axes('Position',[.05,.2,.4,.32],'DataAspectRatio',[1 1 1],'NextPlot','replacechildren');%,'PlotBoxAspectRatio',[1 1 1],'DataAspectRatioMode','manual','PlotBoxAspectRatioMode','manual');
 %              h.filelist=uicontrol(obj.handle,'Position',[.05,.05,.4,.1],'Style','listbox','String','X://','Units','normalized')
-             h.filelist=uicontrol(obj.handle,'Position',[10,10,580+20,150],'Style','listbox','String','empty ','Units','normalized','FontSize',fontsize,'Callback',{@filelist_callback,obj});
+             h.filelist=uicontrol(obj.handle,'Position',[10,10,580+20,150],'Style','listbox','String','empty ','Units','normalized','FontSize',fontsize-2,'Callback',{@filelist_callback,obj});
              h.sitelist=uicontrol(obj.handle,'Position',[400-10,160,190+30,380],'Style','listbox',...
-                 'String','empty ','Units','normalized','FontSize',fontsize,'max',100,'Callback',{@sitelist_callback,obj});
+                 'String','empty ','Units','normalized','FontSize',fontsize-2,'max',100,'Callback',{@sitelist_callback,obj});
              h.celllist=uicontrol(obj.handle,'Position',[600+20,360,190-20,180],'Style','listbox',...
-                 'String',' empty','Units','normalized','FontSize',fontsize,...
+                 'String',' empty','Units','normalized','FontSize',fontsize-2,...
                  'Callback',{@celllist_callback,obj});
              h.redrawsite=uicontrol(obj.handle,'Position',[30,925,100,40],'Style','pushbutton','String','redraw','Units','normalized','FontSize',fontsize,'Callback',{@redrawsite_callback,obj});
              h.addsite=uicontrol(obj.handle,'Position',[290,925,60,40],'Style','pushbutton','String','Add','Units','normalized','FontSize',fontsize,'Callback',{@addsite,obj});
@@ -44,7 +44,7 @@ classdef SEExploreGui<interfaces.SEProcessor
              h.cellax.ButtonDownFcn={@cellaxclick,obj};
              h.siteax.ButtonDownFcn={@siteaxclick,obj};
              
-             h.info=uicontrol(obj.handle,'Position',[600+20,10,190-20,340],'Style','listbox','String','info','FontSize',fontsize*.85,'Max',10,'Units','normalized');
+             h.info=uicontrol(obj.handle,'Position',[600+20,10,190-20,340],'Style','listbox','String','info','FontSize',fontsize-2,'Max',10,'Units','normalized');
              
              h.anglebutton=uicontrol(obj.handle,'Position',[150,925,60,40],'Style','pushbutton','String','Angle','Units','normalized','FontSize',fontsize,'Callback',{@anglebutton_callback,obj});
              h.angle=uicontrol(obj.handle,'Position',[210,925,60,40],'Style','edit','String','0','Units','normalized','FontSize',fontsize,'Callback',{@angle_callback,obj});

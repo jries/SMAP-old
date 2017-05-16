@@ -329,6 +329,9 @@ classdef GuiChannel< interfaces.LayerInterface
                 obj.updateLayerField;
                 
             end
+            if isfield(varargin{1},'rec_addparval')
+                    obj.rec_addparval=varargin{1}.rec_addparval;
+            end
 %             obj.updatelayer_callback;
         end
         
