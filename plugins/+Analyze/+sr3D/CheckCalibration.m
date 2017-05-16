@@ -78,7 +78,8 @@ for k=1:mmax
 end
 initaxis(p.resultstabgroup,'slope vs z')
  indb=abs(slope1)>1.3|abs(off1)>10000|abs(slope1)<.8;
-indb=false(size(slope1));
+% indb=false(size(slope1));
+indb=slope1==0;
 plot(off1(~indb),slope1(~indb),'ro')
 
 
@@ -130,6 +131,10 @@ if isempty(i1)
 end
 if isempty(i2)
     i2=length(locs.znm);
+end
+if i2-i1<8
+    pf=zeros(2,1);
+    return
 end
 zlin=locs.znm(i1:i2);
 flin=z(i1:i2);
