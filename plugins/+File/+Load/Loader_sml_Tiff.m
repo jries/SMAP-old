@@ -10,7 +10,7 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
             if nargin<4
                 mode=getfilemode(file);
             end
-            try
+%             try
             framerange=p.framerange(1):p.framerange(end);
             
             loadfile(obj,p,file,mode);
@@ -29,10 +29,10 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
             for k=framerange
                 im=max(im,il.getImage(k));
             end
-            catch err
-                err
-                disp(['no image found for ' file])
-            end
+%             catch err
+%                 err
+%                 disp(['no image found for ' file])
+%             end
             
 %             filetest=[il.info.path filesep il.info.files{framerange(1)}];
             filetest=il.info.filename;
