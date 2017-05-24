@@ -21,7 +21,7 @@ end
 numbeads=size(imin,4);
 if numbeads==1
     imout=imin;
-    shiftedstack=imin;
+    shiftedstackn=imin;
     shift=[0 0 0 ];
     indgood=true;
     return
