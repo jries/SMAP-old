@@ -99,9 +99,10 @@ classdef Spline2D_v3<handle
                 return
             end
             yval = 0;
+            coeff=obj.coeff;
             for i = 1:4
                 for j = 1:4
-                    yval = yval+obj.coeff(ix,iy,4*(i-1)+j)*y_diff^(i-1)*x_diff^(j-1);
+                    yval = yval+coeff(ix,iy,4*(i-1)+j)*y_diff^(i-1)*x_diff^(j-1);
                 end
             end
         end

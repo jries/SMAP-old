@@ -7,17 +7,20 @@ if isempty(ext)&&~strcmp(filename(end),'/') %directory
 end
 try
     il=imageloaderAll(filename,[],obj.P); %still exist?
+    il.getimage(1);
 catch
     maindir=obj.getGlobalSetting('DataDirectory');
     filenamef=findfilepath(filename,maindir);
     try
         il=imageloaderAll(filenamef,[],obj.P); %still exist?
+        il.getimage(1);
     catch
         lastsml=obj.getPar('lastSMLFile');
         if ~isempty(lastsml)
         filenamef=findfilepathcomp(filename,fileparts(lastsml));
             try
                 il=imageloaderAll(filenamef,[],obj.P); %still exist?
+                il.getimage(1);
             catch
                 [~,~,ext]=fileparts(filename);
                 if isempty(ext)

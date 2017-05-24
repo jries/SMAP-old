@@ -59,14 +59,31 @@ classdef Spline1D<handle
         end
         
         function yval = f(obj,x)
-            [ix, x_diff] = obj.roundAndCheck(x,obj.max_i);
+             max_x=obj.max_i;
+             if x<0||x>max_x
+                disp(['value out of range'])
+                ix = -1;
+                x_diff = -1;
+%                 return
+             else
+            x_floor = floor(x);
+            x_diff = x - x_floor;
+            ix = floor(x_floor)+1;
+            if x == max_x
+                ix = ix-1;
+                x_diff = 1;
+            end
+             end
+            
+%             [ix, x_diff] = obj.roundAndCheck(x,obj.max_i);
             if ix == -1
                 yval = 0;
                 return
             end
             yval = 0;
+            coeff=obj.coeff;
             for i = 1:4
-                yval = yval + obj.coeff(ix,i)*x_diff^(i-1);
+                yval = yval + coeff(ix,i)*x_diff^(i-1);
             end
             
         end
