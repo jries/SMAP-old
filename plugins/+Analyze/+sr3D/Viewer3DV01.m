@@ -96,7 +96,9 @@ classdef Viewer3DV01<interfaces.DialogProcessor
         function makelocDatacopy(obj)
 
             hroi=obj.getPar('sr_roihandle');
-            
+            if ~isvalid(hroi)
+                return
+            end
             posrx=hroi.getPosition;
             len=sum((posrx(2,:)-posrx(1,:)).^2);
             meanpos=mean(posrx,1);

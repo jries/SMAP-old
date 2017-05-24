@@ -12,7 +12,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
         function obj=Batchprocessor(varargin)
             obj@interfaces.GuiModuleInterface(varargin{:})
             if isempty(obj.handle)||~isvalid(obj.handle)
-                obj.handle=figure('Units','normalized','Units','pixels','Position',[150,200,900,330],'Name','Batch Processor','NumberTitle','off','ToolBar','none','MenuBar','none');
+                obj.handle=figure('Units','normalized','Units','pixels','Position',[150,200,900,350],'Name','Batch Processor','NumberTitle','off','ToolBar','none','MenuBar','none');
                 delete(obj.handle.Children);
             end
         end
