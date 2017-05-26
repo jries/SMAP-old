@@ -11,6 +11,12 @@ classdef selectCoordinates2Color<interfaces.SEEvaluationProcessor
         end
         function out=run(obj,p)
             obj.line=p.lineselect.selection;
+            switch obj.line
+                case 'line1'
+                    cellline='line2';
+                otherwise
+                    cellline='line1';
+            end
             %  use shift_xy to fit with offset
             ax1=obj.setoutput('positions',true);
             hp=ax1.Parent;
@@ -18,10 +24,20 @@ classdef selectCoordinates2Color<interfaces.SEEvaluationProcessor
 %             ax1=axes(hp);
             ax2=axes(hp);
             ax3=axes(hp);
-            subplot(1,3,1,ax1);
-            subplot(1,3,2,ax2);
-            subplot(1,3,3,ax3);
+            ax4=axes(hp);
+            ax5=axes(hp);
+            ax6=axes(hp);
+            subplot(2,3,1,ax1);
+            subplot(2,3,2,ax2);
+            subplot(2,3,3,ax3);
+            subplot(2,3,4,ax4);
+            subplot(2,3,5,ax5);
+            subplot(2,3,6,ax6);
+            
             site=obj.site;
+            
+%             cellind=obj.locData.SE.indexFromID(obj.locData.SE.cells,obj.site.info.cell);
+            cell=obj.locData.SE.getcell(obj.site.info.cell);
             im1=site.image.layers(1).images.finalImages;
             if length(site.image.layers)<2
                 ind=1;
@@ -45,14 +61,38 @@ classdef selectCoordinates2Color<interfaces.SEEvaluationProcessor
                 obj.site.annotation.(obj.line).pos=pl;
             end
             obj.hax1=impoint(ax1,pl(1,:));
+                
             
-
+            %direction of cell
+            pcell=site.annotation.(cellline).pos;
+            vcell=(pcell(2,:)-pcell(1,:));vcell=vcell/norm(vcell);
+            
+            cim1=cell.image.layers(1).images.finalImages;
+            cim2=cell.image.layers(ind).images.finalImages;
+%             tA=eye(3);
+            dx=vcell(1)*p.shiftval/p.se_cellpixelsize;dy=vcell(2)*p.shiftval/p.se_cellpixelsize;
+            cim2sp=imtranslate(cim2.image,[dx,dy]);
+%              tA(3,1)=-vcell(1)*p.shiftval/p.se_cellpixelsize;tA(3,2)=-vcell(2)*p.shiftval/p.se_cellpixelsize;
+            cim2sm=imtranslate(cim2.image,[-dx,-dy]);
+            imagesc(ax4,cell.image.rangex,cell.image.rangey,cell.image.image)
+            imagesc(ax5,cell.image.rangex,cell.image.rangey,cim1.image+cim2sp)
+            imagesc(ax6,cell.image.rangex,cell.image.rangey,cim1.image+cim2sm)
+            axis(ax6,'equal')
+     
             
             obj.hax1.addNewPositionCallback(@(p) obj.posconstraint(p,1));
             obj.hax2=impoint(ax2,pl(2,:));
             obj.hax2.addNewPositionCallback(@(p) obj.posconstraint(p,2));
             obj.hax3=imline(ax3,pl);
             obj.hax3.addNewPositionCallback(@(p) obj.posconstraint(p,3));
+            
+            
+
+            pcell(1,:)=pcell(1,:)-p.se_cellfov*vcell/1000;
+            pcell(2,:)=pcell(2,:)+p.se_cellfov*vcell/1000;
+            hcl=imline(ax4,pcell);
+            
+            
             out=[];
 
         end
@@ -84,11 +124,19 @@ classdef selectCoordinates2Color<interfaces.SEEvaluationProcessor
 end
 
 function pard=guidef
-pard.inputParameters={'numberOfLayers','sr_layerson','se_cellfov','se_sitefov','se_siteroi','layer2_'};
+pard.inputParameters={'se_cellpixelsize','numberOfLayers','sr_layerson','se_cellfov','se_sitefov','se_siteroi','layer2_'};
 
 pard.lineselect.object=struct('Style','popupmenu','String',{{'line1','line2'}});
 pard.lineselect.position=[1,1];
 pard.lineselect.Width=4;
+
+pard.shiftvalt.object=struct('Style','text','String','mean shift nm');
+pard.shiftvalt.position=[2,1];
+pard.shiftvalt.Width=2;
+
+pard.shiftval.object=struct('Style','edit','String','0');
+pard.shiftval.position=[2,3];
+pard.shiftval.Width=2;
 
 pard.plugininfo.type='ROI_Evaluate';
 
