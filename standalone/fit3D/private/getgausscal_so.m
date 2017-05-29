@@ -8,33 +8,9 @@ function [gauss,indgood]=getgausscal_so(beads,p)
         else 
             beadz=(beads(B).loc.frames-round(size(beads(B).stack.image,3)/2))*p.dz;
         end
-%         zglass=p.fglass(beadshz(B).filenumber)*p.dz;
-%         if zc
-%             if p.zfilter.Value==1 % f0
-% 
-%                 if beadz0>p.Zrange(Z)-p.framerangecombine && beadz0<p.Zrange(Z+1)+p.framerangecombine
-%                    sx=beadshz(B).loc.PSFxpix; 
-%                    sy=beadshz(B).loc.PSFypix; 
-%                    z=beadz-zglass;     
-%                    phot=beadshz(B).loc.phot;  
-%                 else
-%                     sx=[];sy=[];z=[];
-%                     phot=[];
-%                 end             
-%             else
-%                 zs=(beadshz(B).loc.frame-p.fglass(beadshz(B).filenumber))*p.dz;
-%                 goodz=zs>p.Zrange(Z)-p.framerangecombine & zs<p.Zrange(Z+1)+p.framerangecombine;
-%                sx=beadshz(B).loc.PSFxpix(goodz); 
-%                sy=beadshz(B).loc.PSFypix(goodz); 
-%                z=beadz(goodz)-zglass;   
-%                phot=beadshz(B).loc.phot(goodz);
-%                 
-%             end
-%         else
            sx=beads(B).loc.PSFxpix; 
            sy=beads(B).loc.PSFypix; 
            z=beadz; phot=beads(B).loc.phot;  
-%         end
         inzr=z>=p.gaussrange(1)&z<=p.gaussrange(2);
         curves(B).sx=double(sx(inzr));
         curves(B).sy=double(sy(inzr));
@@ -42,8 +18,7 @@ function [gauss,indgood]=getgausscal_so(beads,p)
         curves(B).phot=double(phot(inzr));
         curves(B).xpos=beads(B).pos(1);
         curves(B).ypos=beads(B).pos(2);
-%         plot(curves(B).z,curves(B).sx,curves(B).z,curves(B).sy)
-%         hold on
+
     end
     
     %get calibrations
@@ -83,9 +58,10 @@ Sx=Sxa(indz);
 Sy=Sya(indz);
 
 % Sxs=smoothn({z,Sx});
+warning('off','curvefit:fit:iterationLimitReached');
 splinex=fit(z,Sx,'poly6','Robust','LAR','Normalize','on');
 spliney=fit(z,Sy,'poly6','Robust','LAR','Normalize','on');
-
+warning('on','curvefit:fit:iterationLimitReached');
 hold off
 for k=length(curves):-1:1
     w=(curves(k).phot);
@@ -268,7 +244,7 @@ switch button
     case 'Refit'
         calibrateAstig3D(locs,p)
     case 'Save'
-        fn=[p.fileout(1:end-4) '_3DAcal.mat']
+        fn=[p.fileout(1:end-4) '_3DAcal.mat'];
         [f,p]=uiputfile(fn);
         if f
             save([p f],'outforfit')
@@ -341,15 +317,16 @@ function fitpsx=fitsx2sy2_so(sx,sy,z,zrange,ax)
 indf=z>zrange(1)&z<zrange(2);
 
 ds=sx.^2-sy.^2;
-q=myquantile(ds,[0.01 0.99]);
+q=quantile(ds,[0.01 0.99]);
 inds=ds>q(1)&ds<q(2);
 indf=indf&inds;
 
 
 if sum(indf)>5
 % fitpsx=fit(sx(indf).^2-sy(indf).^2,z(indf),'smoothingSpline','Normalize','on','SmoothingParam',0.95);
+warning('off','curvefit:fit:iterationLimitReached');
 fitpsx=fit(sx(indf).^2-sy(indf).^2,z(indf),'poly6','Robust','LAR','Normalize','on');
-lastwarn
+% lastwarn
 % yyaxis right
 % hold on
 % % fitpsx=polyfit(zcorr,sx.^2-sy.^2,4);

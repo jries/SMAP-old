@@ -1,4 +1,4 @@
-function [imout,shiftedstackn,shift,indgood]=registerPSF3D(imin,p,axs)
+function [imout,shiftedstackn,shift,indgood]=registerPSF3D_so(imin,p,axs)
 if nargin<3
     axs={};
 end
@@ -203,13 +203,13 @@ else %use fitting
             ims=imh(xr,yr,p.framerange);
             meanims=meanim(xr,yr,p.framerange);
             isn=isnan(ims)|isnan(meanims);
-            intcutoff=meanims>myquantile(meanims(:),0.75);
+            intcutoff=meanims>quantile(meanims(:),0.75);
             indg=~isn&intcutoff;
             ratio=ims(indg)./meanims(indg);
             
             factor=nanmedian(ratio(:));
-            factor2=sum(ims(indg))/sum(meanims(indg));
-            disp([factor  factor2])
+%             factor2=sum(ims(indg))/sum(meanims(indg));
+%             disp([factor  factor2])
             if factor>0
                 out(:,:,:,k)=imh/factor;
             end
