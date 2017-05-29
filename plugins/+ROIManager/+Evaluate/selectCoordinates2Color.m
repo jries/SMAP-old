@@ -75,7 +75,9 @@ classdef selectCoordinates2Color<interfaces.SEEvaluationProcessor
 %              tA(3,1)=-vcell(1)*p.shiftval/p.se_cellpixelsize;tA(3,2)=-vcell(2)*p.shiftval/p.se_cellpixelsize;
             cim2sm=imtranslate(cim2.image,[-dx,-dy]);
             imagesc(ax4,cell.image.rangex,cell.image.rangey,cell.image.image)
+            axis(ax4,'equal');
             imagesc(ax5,cell.image.rangex,cell.image.rangey,cim1.image+cim2sp)
+            axis(ax5,'equal');
             imagesc(ax6,cell.image.rangex,cell.image.rangey,cim1.image+cim2sm)
             axis(ax6,'equal')
      
