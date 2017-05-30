@@ -62,6 +62,9 @@ function out=runintern(obj,p)
 
 %     obj.site.pos(1)
 linepos=obj.site.annotation.(p.centerwhat.selection).pos*1000;
+linepos(isnan(linepos(:,1)),1)=obj.site.pos(1);
+linepos(isnan(linepos(:,2)),2)=obj.site.pos(2);
+lineposcorr=linepos;
 locs1=obj.getLocs({'xnm','ynm','locprecznm','locprecnm'},'layer',1,'size',p.se_siteroi);
 locs2=obj.getLocs({'xnm','ynm','locprecznm','locprecnm'},'layer',2,'size',p.se_siteroi);
 
@@ -92,7 +95,11 @@ switch p.centerwhat.selection
     case 'line2'
         linesel=2;
 end
+if ~any(isnan(linepos))
 obj.site.setlinepos(linesel,linepos)
+else
+ obj.site.setlinepos(linesel,lineposcorr)
+end
 out=[];
 end
 
