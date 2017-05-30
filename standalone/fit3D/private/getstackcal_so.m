@@ -153,7 +153,7 @@ sstack=size(beads(1).stack.image);
                 xpall2(:,k)=xpall2(:,k)/nanmax(xpall2(:,k));                
             end           
             zprofile=squeeze(corrPSFn(xt,yt,:));
-            mphd=round((size(corrPSFhd,1)+1)/2);
+%             mphd=round((size(corrPSFhd,1)+1)/2);
                  
             xprofile=squeeze(corrPSFn(:,yt,ftest));
             mpzhd=round((size(corrPSFhd,3)+1)/2+1);
@@ -209,8 +209,8 @@ hx=zeros(1,length(xr)-1);
 hy=hx;
 while toc(tt)<30
     nn=rand(11,11,10000,'single');
-    P=callYimingFitter(nn,single(coeff),50,5,0,1);
-    
+%     P=callYimingFitter(nn,single(coeff),50,5,0,1);
+    [P] =  mleFit_LM(nn,5,50,single(coeff),0,1);
     hz=histcounts(P(:,5),zr)+hz;
     hx=histcounts(P(:,1),xr)+hx;
     hy=histcounts(P(:,2),xr)+hy;
@@ -247,15 +247,12 @@ elseif ~iscell(linepar)
 end
 d=round((size(teststack,1)-p.ROIxy)/2);
             range=d+1:d+p.ROIxy;
-            
-    coefffak=1;
-    fitterGPU=@callYimingFitter;
 
 numstack=size(teststack,4);
 fprintf('fitting test stacks: 0.00')
     for k=1:size(teststack,4)
         fprintf([ '\b\b\b\b' num2str(k/numstack,'%1.2f')])
-          [P] =  fitterGPU(single(squeeze(teststack(range,range,:,k))),single(coefffak*coeff),100,5,0,1);
+          [P] =  mleFit_LM(single(squeeze(teststack(range,range,:,k))),5,100,single(coeff),0,1);
     z=(1:size(P,1))'-1;
     plot(ax,z,P(:,5),linepar{:})
     hold(ax,'on')

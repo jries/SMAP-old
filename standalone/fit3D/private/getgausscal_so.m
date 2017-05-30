@@ -35,11 +35,11 @@ function [gauss,indgood]=getgausscal_so(beads,p)
     
         ax=axes(uitab(p.tabgroup,'Title','sx^2-sy^2'));
         gauss.Sx2_Sy2=cal_Sx2_Sy2(bh,p);
-   
+   drawnow
     
         ax=axes(uitab(p.tabgroup,'Title','Gauss: fit z'));
         gauss.fitzpar=cal_fitzpar(bh,p);
-    
+    drawnow
 end
 
 

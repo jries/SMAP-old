@@ -30,7 +30,7 @@ if contains(p.modality,'astig')
         s=size(stackh); 
         d=round((s(1)-p.gaussroi)/2);
         stack=stackh(d+1:end-d,d+1:end-d,:);
-        P=callYimingFitter(stack,1,100,4,0,1);
+        P=mleFit_LM(stack,4,100,1,0,1);
         beads(k).loc.PSFxpix=P(:,5);
         beads(k).loc.PSFypix=P(:,6);
         beads(k).loc.phot=P(:,3);

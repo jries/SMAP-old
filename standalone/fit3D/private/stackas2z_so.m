@@ -4,8 +4,11 @@ windn=10;
 
 wind=wind/p.dz*50;
 windn=windn/p.dz*50;
+midp=mean(p.fminmax);
+range=find(abs(z-midp)<700/p.dz); %only consider vicinity of glass
 
-[~, indm]=max(n./sx./sy);
+[~, indm]=max(n(range)./max(0.5,sx(range))./max(0.5,sy(range)));
+indm=indm+range(1);
 winstd=round(500./p.dz);
 range=max(1,indm-winstd):min(indm+winstd,length(n));
 
