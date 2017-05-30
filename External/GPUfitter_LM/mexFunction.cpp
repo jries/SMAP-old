@@ -349,7 +349,7 @@ if  (silent==0)
 				for (int ii = 0; ii<Nfitraw; ii++)
 					kernel_MLEFit_LM_EMCCD(ii, data, PSFSigma, (int) sz, iterations, Parameters, CRLBs, LogLikelihood, (const int) Nfitraw);
 			}
-			else if (cameratype =1) {
+			else if (cameratype ==1) {
 				for (int ii = 0; ii<Nfitraw; ii++)
 					kernel_MLEFit_LM_sCMOS(ii, data, PSFSigma, (int) sz, iterations, Parameters, CRLBs, LogLikelihood, (const int) Nfitraw,varim);
 			}
@@ -361,7 +361,7 @@ if  (silent==0)
 				for (int ii = 0; ii<Nfitraw; ii++)
 					kernel_MLEFit_LM_Sigma_EMCCD(ii, data, PSFSigma, (int) sz, iterations, Parameters, CRLBs, LogLikelihood, (const int) Nfitraw);
 			}
-			else if (cameratype =1) {
+			else if (cameratype ==1) {
 				for (int ii = 0; ii<Nfitraw; ii++)
 					kernel_MLEFit_LM_Sigma_sCMOS(ii, data, PSFSigma, (int) sz, iterations, Parameters, CRLBs, LogLikelihood, (const int) Nfitraw,varim);
 			}
