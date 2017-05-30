@@ -3,10 +3,10 @@ function [gauss,indgood]=getgausscal_so(beads,p)
     for B=length(beads):-1:1
         beadz0=(beads(B).f0)*p.dz;
         
-        if contains(p.zcorr,'astig')
+        if contains(p.zcorr,'astig')||contains(p.zcorr,'corr')
              beadz=(beads(B).loc.frames*p.dz)-beadz0;
         else 
-            beadz=(beads(B).loc.frames-round(size(beads(B).stack.image,3)/2))*p.dz;
+            beadz=(beads(B).loc.frames-p.midpoint)*p.dz;
         end
            sx=beads(B).loc.PSFxpix; 
            sy=beads(B).loc.PSFypix; 
