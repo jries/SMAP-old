@@ -12,7 +12,7 @@ ht=uitab(p.tabgroup,'Title','Files');
 tg=uitabgroup(ht);
 for k=1:length(filelist)
     ax=axes(uitab(tg,'Title',num2str(k)));
-    imstack=getfile(filelist{k});
+    imstack=readfile_ome(filelist{k});
     imstack=imstack-min(imstack(:)); %fast fix for offset;
     mim=mean(imstack,3);
     mim=filter2(h,mim);
@@ -61,18 +61,3 @@ p.pathhere=fileparts(filelist{1});
 end
 
 
-function img=getfile(file)
-try
-imgall=bfopen(file);
-catch
-    disp(['could not open file ' file])
-    img=[];
-    return
-end
-sim=size(imgall{1}{1});
-numframes=length(imgall{1});
-img=zeros(sim(1),sim(2),numframes);
-for k=1:numframes
-    img(:,:,k)=imgall{1}{k};
-end
-end

@@ -17,40 +17,45 @@ classdef calibrate3D_GUI<handle
             obj.guihandles.filelist=uicontrol('style','listbox','String','','Position',[xpos1+1.5*xw,top-4*vsep,xw*2.5,vsep*3],'FontSize',fontsize);
             obj.guihandles.selectoutputfile=uicontrol('style','pushbutton','String','Select otuput file','Position',[xpos1,top-5*vsep,xw*1.5,vsep],'FontSize',fontsize,'Callback',@obj.selectoutputfile_callback);
             obj.guihandles.outputfile=uicontrol('style','edit','String','','Position',[xpos1+1.5*xw,top-5*vsep,xw*2.5,vsep],'FontSize',fontsize);
-            obj.guihandles.dzt=uicontrol('style','text','String','Distance between frames (nm)','Position',[xpos1,top-7*vsep,xw*2.5,vsep],'FontSize',fontsize);
-            obj.guihandles.dz=uicontrol('style','edit','String','10','Position',[xpos1+2.5*xw,top-7*vsep,xw*1,vsep],'FontSize',fontsize);
             
-            obj.guihandles.modalityt=uicontrol('style','text','String','3D modality ','Position',[xpos1,top-8*vsep,xw*2.5,vsep],'FontSize',fontsize);
-            obj.guihandles.modality=uicontrol('style','popupmenu','String',{'astigmatism','arbitrary'},'Position',[xpos1+2.5*xw,top-8*vsep,xw*1.5,vsep],'FontSize',fontsize,'Callback',@obj.modality_callback);
+            hatitle='left';
+            ha='right';
+            obj.guihandles.csplinet=uicontrol('style','text','String','General paramters: ','Position',[xpos1,top-7*vsep,xw*4,vsep],'FontSize',fontsize,'HorizontalAlignment',hatitle,'FontWeight','bold');
+            obj.guihandles.dzt=uicontrol('style','text','String','Distance between frames (nm)','Position',[xpos1,top-8*vsep,xw*2.5,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
+            obj.guihandles.dz=uicontrol('style','edit','String','10','Position',[xpos1+2.5*xw,top-8*vsep,xw*1,vsep],'FontSize',fontsize);
             
-            obj.guihandles.corrzt=uicontrol('style','text','String','Correct bead z-positions using ','Position',[xpos1,top-9*vsep,xw*2.5,vsep],'FontSize',fontsize);
-            obj.guihandles.corrzselect=uicontrol('style','popupmenu','String',{'none','cross-correlation','shape (astig)'},'Position',[xpos1+2.5*xw,top-9*vsep,xw*1.5,vsep],'FontSize',fontsize,'Callback',@obj.zcorr_callback);
+            obj.guihandles.modalityt=uicontrol('style','text','String','3D modality ','Position',[xpos1,top-9*vsep,xw*2.5,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
+            obj.guihandles.modality=uicontrol('style','popupmenu','String',{'astigmatism','arbitrary'},'Position',[xpos1+2.5*xw,top-9*vsep,xw*1.5,vsep],'FontSize',fontsize,'Callback',@obj.modality_callback);
             
-            obj.guihandles.zcorrframest=uicontrol('style','text','String','frames to use for CC: ','Position',[xpos1+1.5*xw,top-10*vsep,xw*2,vsep],'FontSize',fontsize,'Visible','off');
-            obj.guihandles.zcorrframes=uicontrol('style','edit','String','30','Position',[xpos1+3.5*xw,top-10*vsep,xw*.5,vsep],'FontSize',fontsize,'Visible','off');
+            obj.guihandles.corrzt=uicontrol('style','text','String','Correct bead z-positions using ','Position',[xpos1,top-10*vsep,xw*2.5,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
+            obj.guihandles.corrzselect=uicontrol('style','popupmenu','String',{'none','cross-correlation','shape (astig)'},...
+                'Value',2,'Position',[xpos1+2.5*xw,top-10*vsep,xw*1.5,vsep],'FontSize',fontsize,'Callback',@obj.zcorr_callback);
             
-            obj.guihandles.filtert=uicontrol('style','text','String','Filter size for peak finding','Position',[xpos1,top-12*vsep,xw*2.5,vsep],'FontSize',fontsize);
+            obj.guihandles.zcorrframest=uicontrol('style','text','String','frames to use for CC: ','Position',[xpos1+1.5*xw,top-11*vsep,xw*2,vsep],'FontSize',fontsize,'Visible','off','HorizontalAlignment',ha);
+            obj.guihandles.zcorrframes=uicontrol('style','edit','String','30','Position',[xpos1+3.5*xw,top-11*vsep,xw*.5,vsep],'FontSize',fontsize,'Visible','off');
+            
+            obj.guihandles.filtert=uicontrol('style','text','String','Filter size for peak finding','Position',[xpos1,top-12*vsep,xw*2.5,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
             obj.guihandles.filter=uicontrol('style','edit','String','2','Position',[xpos1+2.5*xw,top-12*vsep,xw*1,vsep],'FontSize',fontsize);
             
             
      
-            obj.guihandles.csplinet=uicontrol('style','text','String','Cspline paramters: ','Position',[xpos1,top-14*vsep,xw*4,vsep],'FontSize',fontsize);
-            obj.guihandles.roisizet=uicontrol('style','text','String','ROI size: X,Y (pixels): ','Position',[xpos1,top-15*vsep,xw*2,vsep],'FontSize',fontsize);
+            obj.guihandles.csplinet=uicontrol('style','text','String','Cspline paramters: ','Position',[xpos1,top-14*vsep,xw*4,vsep],'FontSize',fontsize,'HorizontalAlignment',hatitle,'FontWeight','bold');
+            obj.guihandles.roisizet=uicontrol('style','text','String','ROI size: X,Y (pixels): ','Position',[xpos1,top-15*vsep,xw*2,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
             obj.guihandles.ROIxy=uicontrol('style','edit','String','21','Position',[xpos1+2*xw,top-15*vsep,xw*.5,vsep],'FontSize',fontsize);
-            obj.guihandles.roisizezt=uicontrol('style','text','String','Z (frames): ','Position',[xpos1+2.5*xw,top-15*vsep,xw,vsep],'FontSize',fontsize);
+            obj.guihandles.roisizezt=uicontrol('style','text','String','Z (frames): ','Position',[xpos1+2.5*xw,top-15*vsep,xw,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
             obj.guihandles.ROIz=uicontrol('style','edit','String','200','Position',[xpos1+3.5*xw,top-15*vsep,xw*.5,vsep],'FontSize',fontsize);
             
-            obj.guihandles.smootht=uicontrol('style','text','String','Smoothing parameter. XY: ','Position',[xpos1,top-16*vsep,xw*2,vsep],'FontSize',fontsize);
+            obj.guihandles.smootht=uicontrol('style','text','String','Smoothing parameter. XY: ','Position',[xpos1,top-16*vsep,xw*2,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
             obj.guihandles.smoothxy=uicontrol('style','edit','String','0','Position',[xpos1+2*xw,top-16*vsep,xw*.5,vsep],'FontSize',fontsize);
-            obj.guihandles.smoothzt=uicontrol('style','text','String','Z: ','Position',[xpos1+2.5*xw,top-16*vsep,xw,vsep],'FontSize',fontsize);
+            obj.guihandles.smoothzt=uicontrol('style','text','String','Z: ','Position',[xpos1+2.5*xw,top-16*vsep,xw,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
             obj.guihandles.smoothz=uicontrol('style','edit','String','2','Position',[xpos1+3.5*xw,top-16*vsep,xw*.5,vsep],'FontSize',fontsize);
             
-            obj.guihandles.gausst=uicontrol('style','text','String','Gauss fit parameters: ','Position',[xpos1,top-18*vsep,xw*4,vsep],'FontSize',fontsize);
-            obj.guihandles.gaussmint=uicontrol('style','text','String','Range. minimum (nm): ','Position',[xpos1,top-19*vsep,xw*2,vsep],'FontSize',fontsize);
+            obj.guihandles.gausst=uicontrol('style','text','String','Gauss fit parameters: ','Position',[xpos1,top-18*vsep,xw*4,vsep],'FontSize',fontsize,'HorizontalAlignment',hatitle,'FontWeight','bold');
+            obj.guihandles.gaussmint=uicontrol('style','text','String','Range (nm). minimum: ','Position',[xpos1,top-19*vsep,xw*2,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
             obj.guihandles.gaussmin=uicontrol('style','edit','String','-500','Position',[xpos1+2*xw,top-19*vsep,xw*.5,vsep],'FontSize',fontsize);
-            obj.guihandles.gaussmaxt=uicontrol('style','text','String','maximum (nm): ','Position',[xpos1+2.5*xw,top-19*vsep,xw,vsep],'FontSize',fontsize);
+            obj.guihandles.gaussmaxt=uicontrol('style','text','String','maximum: ','Position',[xpos1+2.5*xw,top-19*vsep,xw,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
             obj.guihandles.gaussmax=uicontrol('style','edit','String','500','Position',[xpos1+3.5*xw,top-19*vsep,xw*.5,vsep],'FontSize',fontsize);
-             obj.guihandles.gaussroit=uicontrol('style','text','String','Size ROI (pixels): ','Position',[xpos1,top-20*vsep,xw*2,vsep],'FontSize',fontsize);
+             obj.guihandles.gaussroit=uicontrol('style','text','String','ROI size (pixels): ','Position',[xpos1,top-20*vsep,xw*2,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
             obj.guihandles.gaussroi=uicontrol('style','edit','String','17','Position',[xpos1+2*xw,top-20*vsep,xw*.5,vsep],'FontSize',fontsize);
            
             obj.guihandles.run=uicontrol('style','pushbutton','String','Calculate bead calibration','Position',[xpos1,top-22*vsep,xw*4,vsep],'FontSize',fontsize,'Callback',@obj.run_callback);

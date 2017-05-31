@@ -58,6 +58,7 @@ classdef selectManyFiles<handle
                 str{end+1}=[path f{k}];
             end
             obj.guihandles.filelist.String=str;
+            obj.guihandles.filelist.Value=max(min(obj.guihandles.filelist.Value,length(str)),1);
         end
         function adddirb_callback(obj,a,b)
             filelist=obj.guihandles.filelist.String;
@@ -84,7 +85,8 @@ classdef selectManyFiles<handle
                 end
                     
             end
-            obj.guihandles.filelist.String=str;          
+            obj.guihandles.filelist.String=str;   
+            obj.guihandles.filelist.Value=max(min(obj.guihandles.filelist.Value,length(str)),1);
         end
        
         function removeb_callback(obj,a,b)
@@ -93,7 +95,7 @@ classdef selectManyFiles<handle
             str=obj.guihandles.filelist.String;
             str(vo)=[];
             obj.guihandles.filelist.String=str;
-            obj.guihandles.filelist.Value=min(vo,length(str));
+            obj.guihandles.filelist.Value=max(1,min(vo,length(str)));
         end
         function processb_callback(obj,a,b)
             obj.setPar('loc_preview',false);

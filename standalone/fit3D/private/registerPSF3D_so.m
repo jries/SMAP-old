@@ -113,40 +113,15 @@ end
 if length(axs)>1
     imageslicer(vertcat(avim,imout),'Parent',axs{2}.Parent)
 end
-%later: include 2x upscaling here
-
-%  shift=-shift;
-% for k=numbeads:-1:1
-%     
-%     
-% end
-% imout=meanim/numbeads;
-
-% f=figure(99);
-% delete(f.Children)
-% % avim(2,2,2)=max(avim(:));
-% imageslicer(vertcat(avim,imout,shiftedstack(:,:,:,1),imin(:,:,:,1)),'Parent',f);
-% imageslicer(shiftedstack);
-% average
-%shift of everything to average
-%shift volumea
-
 
 end
 
 function [indgood,res,normamp,co,cc]=getoverlap(shiftedstackn,shift,p,indgood)
-%re-calculate CC! bisas for first.
 refimn=nanmean(shiftedstackn(p.xrange,p.yrange,p.framerange,indgood),4);
-% refimb=nanmean(shiftedstackn(:,:,:,indgood),4);
-
 for k=size(shiftedstackn,4):-1:1
     imh=shiftedstackn(p.xrange,p.yrange,p.framerange,k);
     badind=isnan(imh)|isnan(refimn);
-    cc(k)=sum(refimn(~badind).*imh(~badind))/(sum(refimn(~badind))*sum(imh(~badind)))*sum(~badind(:));
-%     imhb=shiftedstackn(:,:,:,k);
-%     badindb=isnan(imhb)|isnan(refimb);
-%     ccb(k)=sum(refimb(~badindb).*imhb(~badindb))/(sum(refimb(~badindb))*sum(imhb(~badindb)))*sum(~badindb(:));
-%     
+    cc(k)=sum(refimn(~badind).*imh(~badind))/(sum(refimn(~badind))*sum(imh(~badind)))*sum(~badind(:));  
 end
 
 normamp=nanmax(refimn(:));
@@ -156,11 +131,6 @@ for k=size(shiftedstackn,4):-1:1
      sim=shiftedstackn(p.xrange(2:end-1),p.yrange(2:end-1),p.framerange,k);
      dv=(refimn(2:end-1,2:end-1,:)-sim).^2;
     res(k)=sqrt(nanmean(dv(:)));
-
-    
-%          simb=shiftedstackn(:,:,:,k);
-%      dvb=(refimb(:,:,:)-simb).^2;
-%     resb(k)=sqrt(nanmean(dvb(:)));
 end
 rescc=res./cc;
 rescc(abs(shift(:,1))>3|abs(shift(:,2))>3)=NaN;
@@ -187,12 +157,8 @@ if p.beadfilterf0
         end
     end
 else %use fitting
-%     x0=ones(1,size(in,4));
-%     fitp=lsqnonlin(@alignstacks,x0,0*x0,[],[],in)
-
     inh=in;
     out=0*in+NaN;
-%     xr=p.xrange(2:end-1);yr=p.yrange(2:end-1);
     for iter=1:4
         meanim=nanmean(inh,4);
         for k=1:sin(4)
@@ -208,17 +174,13 @@ else %use fitting
             ratio=ims(indg)./meanims(indg);
             
             factor=nanmedian(ratio(:));
-%             factor2=sum(ims(indg))/sum(meanims(indg));
-%             disp([factor  factor2])
             if factor>0
                 out(:,:,:,k)=imh/factor;
             end
         end
         inh=out;
     end
-%         iii=squeeze(out(round(sin(1)/2),round(sin(1)/2),:,:));
-%         iii2=squeeze(in(round(sin(1)/2),round(sin(1)/2),:,:));
-%     figure(88);subplot(2,1,1);plot(iii);subplot(2,1,2);plot(iii2);hold off
+
 end
 
 end
