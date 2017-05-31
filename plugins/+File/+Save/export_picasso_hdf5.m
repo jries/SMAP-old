@@ -43,11 +43,12 @@ classdef export_picasso_hdf5<interfaces.DialogProcessor
             of=[path filesep file  '.hdf5'];
             
             [f,path]=uiputfile(of);
+            locsout.frame=locs.frame-1;
             locsout.x=locs.xnm/(p.cam_pixelsize_um(1)*1000);
             locsout.y=locs.ynm/(p.cam_pixelsize_um(2)*1000);
             locsout.lpx=locs.locprecnm/(p.cam_pixelsize_um(1)*1000);
             locsout.lpy=locs.locprecnm/(p.cam_pixelsize_um(2)*1000);
-            locsout.frame=locs.frame-1;
+            
             if f
                 savepicasso(path,f,locsout);
 %                 writetable(taball,[path f]);
