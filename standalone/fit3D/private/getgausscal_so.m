@@ -11,10 +11,13 @@ function [gauss,indgood]=getgausscal_so(beads,p)
            sx=beads(B).loc.PSFxpix; 
            sy=beads(B).loc.PSFypix; 
            z=beadz; phot=beads(B).loc.phot;  
-        inzr=z>=p.gaussrange(1)&z<=p.gaussrange(2);
+        
         curves(B).sx=double(sx(inzr));
         curves(B).sy=double(sy(inzr));
-        curves(B).z=double(z(inzr));
+        curves(B).z=double(z);
+        curves(B).sxa=double(sx);
+        curves(B).sya=double(sy);
+        curves(B).za=double(z);
         curves(B).phot=double(phot(inzr));
         curves(B).xpos=beads(B).pos(1);
         curves(B).ypos=beads(B).pos(2);
