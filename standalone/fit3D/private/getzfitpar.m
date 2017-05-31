@@ -36,7 +36,8 @@ fpy(5)=-fpy(5);
 syf=sigmafromz(fpy,zt,B0);
 plot(ax,zt,syf,'k')
 % hold off
-axis tight
+% axis tight
+ylim([0 quantile(sx,.9)*1.1])
 ylabel(ax,'PSFx,PSFy')
 end
 %zpar=[sigma0x,Ax,Ay,Bx,By,gamma,d,sigma0y)

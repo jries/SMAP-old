@@ -46,7 +46,7 @@ for k=1:length(filelist)
             
         catch err
             b(bind).isstack=false;
-            err
+%             err
         end
         bind=bind-1;
     end

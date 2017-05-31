@@ -1,4 +1,4 @@
-function cal= calibrate3Daberrations(locs,p)
+function cal= calibrate3Daberrations(locs,pin)
 
 %loc.filenumber
 %loc.frame
@@ -12,6 +12,7 @@ p.smoothframe=2/10/p.dz;
 p.smoothz=1/1000;
 p.cutoffrefine=150;
 p.maxrange=800;
+p=copyfields(p,pin);
 
 f=figure;
 p.tabgroup=uitabgroup(f);
