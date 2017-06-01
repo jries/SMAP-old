@@ -29,7 +29,7 @@ classdef calibrate3D_GUI<handle
             
             obj.guihandles.corrzt=uicontrol('style','text','String','Correct bead z-positions using ','Position',[xpos1,top-10*vsep,xw*2.5,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
             obj.guihandles.corrzselect=uicontrol('style','popupmenu','String',{'none','cross-correlation','shape (astig)'},...
-                'Value',2,'Position',[xpos1+2.5*xw,top-10*vsep,xw*1.5,vsep],'FontSize',fontsize,'Callback',@obj.zcorr_callback);
+                'Value',3,'Position',[xpos1+2.5*xw,top-10*vsep,xw*1.5,vsep],'FontSize',fontsize,'Callback',@obj.zcorr_callback);
             
             obj.guihandles.zcorrframest=uicontrol('style','text','String','frames to use for CC: ','Position',[xpos1+1.5*xw,top-11*vsep,xw*2,vsep],'FontSize',fontsize,'Visible','off','HorizontalAlignment',ha);
             obj.guihandles.zcorrframes=uicontrol('style','edit','String','30','Position',[xpos1+3.5*xw,top-11*vsep,xw*.5,vsep],'FontSize',fontsize,'Visible','off');

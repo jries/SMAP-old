@@ -11,13 +11,13 @@ function [gauss,indgood]=getgausscal_so(beads,p)
            sx=beads(B).loc.PSFxpix; 
            sy=beads(B).loc.PSFypix; 
            z=beadz; phot=beads(B).loc.phot;  
-        
+        inzr=z>=p.gaussrange(1)&z<=p.gaussrange(2);
         curves(B).sx=double(sx(inzr));
         curves(B).sy=double(sy(inzr));
-        curves(B).z=double(z);
-        curves(B).sxa=double(sx);
-        curves(B).sya=double(sy);
-        curves(B).za=double(z);
+        curves(B).z=double(z(inzr));
+%         curves(B).sxa=double(sx);
+%         curves(B).sya=double(sy);
+%         curves(B).za=double(z);
         curves(B).phot=double(phot(inzr));
         curves(B).xpos=beads(B).pos(1);
         curves(B).ypos=beads(B).pos(2);
@@ -68,7 +68,7 @@ warning('on','curvefit:fit:iterationLimitReached');
 hold off
 for k=length(curves):-1:1
     w=(curves(k).phot);
-%     w=1;
+    w=1;
     zh=curves(k).z;
     indzh=zh>p.gaussrange(1)&zh<p.gaussrange(2);
     w=w.*indzh;
@@ -93,7 +93,7 @@ end
 if isnan(es), es=em; end
 % if isnan(es2), es2=em2; end
 % if isnan(es3), es3=em3; end
-indgood2=err<em+2*es & err2+err3<.15;
+indgood2=err<em+2.5*es & err2+err3<.2;
 if sum(indgood2)==0
     indgood2=true(1,length(curves));
 end
@@ -320,16 +320,17 @@ function fitpsx=fitsx2sy2_so(sx,sy,z,zrange,ax)
 indf=z>zrange(1)&z<zrange(2);
 
 ds=sx.^2-sy.^2;
-q=quantile(ds(indf),[0.01 0.99]);
+q=quantile(ds(indf),[0.05 0.95])+[-2 2];
 
 inds=ds>q(1)&ds<q(2);
-% indf=indf&inds;
+inds=indf&inds;
 
 
 if sum(indf)>5
 % fitpsx=fit(sx(indf).^2-sy(indf).^2,z(indf),'smoothingSpline','Normalize','on','SmoothingParam',0.95);
 warning('off','curvefit:fit:iterationLimitReached');
-fitpsx=fit(sx(inds).^2-sy(inds).^2,z(inds),'poly6','Robust','LAR','Normalize','on');
+% fitpsx=fit(sx(inds).^2-sy(inds).^2,z(inds),'poly6','Robust','LAR','Normalize','on');
+fitpsx=fit(sx(inds).^2-sy(inds).^2,z(inds),'smoothingspline','Normalize','on','SmoothingParam',0.8);
 % lastwarn
 % yyaxis right
 % hold on
