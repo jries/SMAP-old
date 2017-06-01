@@ -112,14 +112,14 @@ plot(h2.BinEdges+h2.BinWidth*0.5,r2.pdf(h2.BinEdges+h2.BinWidth*0.5)*sum(h2.BinC
 hold off
 xlabel('distance (nm)')
 % legend('projected distance','raw distance')
-xlim([0 max(max(len),max(lenc))+h1.BinWidth])
+xlim([0 max(max(len))+h1.BinWidth])
 
 title(['raw: d=' num2str(r2.s,'%1.1f') ' , sig=' num2str(r2.sigma,'%1.1f')])
 subplot(2,3,4)
 nang=-180:10:180;
 histogram(arel*180/pi,nang)
 xlabel('angle relative to cell axis (deg)')
-title(['medP=' num2str(median(lenc),3) ', medr=' num2str(median(len),3) ', avP=' num2str(mean(lenc),3) ', avr=' num2str(mean(len),3)])
+title(['medP=' num2str(median(lencd),3) ', medr=' num2str(median(len),3) ', avP=' num2str(mean(lencd),3) ', avr=' num2str(mean(len),3)])
 xlim([-180 180])
 subplot(2,3,5)
 % dy=len.*sind(angle);dx=len.*cosd(angle);
