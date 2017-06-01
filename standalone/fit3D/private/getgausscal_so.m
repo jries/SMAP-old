@@ -314,7 +314,7 @@ fitzpar=getzfitpar(Sx,Sy,z,zrange,0,true,ax);
 
 end
 
-function fitpsx=fitsx2sy2_so(sx,sy,z,zrange,ax)
+function out=fitsx2sy2_so(sx,sy,z,zrange,ax)
 
 % indf=abs(z)<zrange;
 indf=z>zrange(1)&z<zrange(2);
@@ -331,6 +331,8 @@ if sum(indf)>5
 warning('off','curvefit:fit:iterationLimitReached');
 % fitpsx=fit(sx(inds).^2-sy(inds).^2,z(inds),'poly6','Robust','LAR','Normalize','on');
 fitpsx=fit(sx(inds).^2-sy(inds).^2,z(inds),'smoothingspline','Normalize','on','SmoothingParam',0.8);
+indgood=fitpsx(ds)>zrange(1)&fitpsx(ds)<zrange(2);
+ds2range=[min(ds(indgood)) max(ds(indgood))];
 % lastwarn
 % yyaxis right
 % hold on
@@ -344,14 +346,17 @@ if nargin>4
     zsort=feval(fitpsx,sxsort);
 
     plot(ax,zsort,sxsort,'k')
+    plot(zrange,[ds2range(1) ds2range(1)],zrange,[ds2range(2) ds2range(2)])
     ylabel(ax,'sx^2-sy^2')
-    ylim([q(1) q(2)]);
+     ylim([q(1) q(2)]);
     % plot(zcorr,polyval(fitpsx,zcorr),'.')
 
 end
 
 % xlim([-6 6])
 else
-    fitpsx=zeros(2,1);
+    fitpsx=[];
 end
+out.function=fitpsx;
+out.ds2range=ds2range;
 end

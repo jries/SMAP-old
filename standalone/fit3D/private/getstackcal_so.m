@@ -65,8 +65,10 @@ sstack=size(beads(1).stack.image);
 
     midrange=halfstoreframes;%+round(median(dframe))+1;
     
-    [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D_so(allrois,struct('framerange',midrange-fw2:midrange+fw2,'alignz',zcorr,'zshiftf0',zshift,'beadfilterf0',false),{ax});
-
+    filenumber=[beads(:).filenumber];
+    [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D_so(allrois,struct('framerange',midrange-fw2:midrange+fw2,'alignz',zcorr,'zshiftf0',zshift,'beadfilterf0',false),{ax},filenumber(sortinddev));
+    
+    
     %undo sorting by deviation to associate beads again to their
     %bead number
     [~,sortback]=sort(sortinddev);

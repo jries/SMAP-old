@@ -56,13 +56,17 @@ end
 if contains(p.modality,'astig')
     %get calibration for Gaussian fit
     [gausscal,indgoodc]=getgausscal_so(beads,p); 
+    drawnow
 else
     indgoodc=true(size(beads));
     gausscal=[];
 end
 % get cspline calibration
 [csplinecal,indgoods]=getstackcal_so(beads(indgoodc),p);
-save(p.outputfile,'gausscal','csplinecal');
+cspline_coeff=single(csplinecal.cspline.coeff);
+gauss_zfit=single(gausscal.fitzpar);
+gauss_sx2_sy2=gausscal.Sx2_Sy2;
+save(p.outputfile,'gausscal','csplinecal','gauss_sx2_sy2','gauss_zfit','cspline_coeff');
 end
 
 

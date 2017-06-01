@@ -67,9 +67,11 @@ classdef calibrate3D_GUI<handle
             sf.guihandles.filelist.String=(obj.guihandles.filelist.String);
             waitfor(sf.handle);
             obj.guihandles.filelist.String=sf.filelist;
+            obj.guihandles.filelist.Value=1;
             if isempty(obj.guihandles.outputfile.String)
                 [path,file]=fileparts(sf.filelist{1});
                 obj.guihandles.outputfile.String=[path file '_3Dcorr.mat'];
+                
             end
         end
         function selectoutputfile_callback(obj,a,b)

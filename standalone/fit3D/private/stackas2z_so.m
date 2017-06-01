@@ -1,14 +1,19 @@
-function zas=stackas2z_so(sx,sy,z,n,p)
+function zas=stackas2z_so(sxa,sya,za,na,p)
 wind=4;
 windn=10;
 
 wind=wind/p.dz*50;
 windn=windn/p.dz*50;
 midp=mean(p.fminmax);
-range=find(abs(z-midp)<700/p.dz); %only consider vicinity of glass
+range=find(abs(za-midp)<500/p.dz); %only consider vicinity of glass
+sx=sxa(range);
+sy=sya(range);
+z=za(range);
+n=na(range);
 
-[~, indm]=max(n(range)./max(0.5,sx(range))./max(0.5,sy(range)));
-indm=indm+range(1);
+
+[~, indm]=max(n./max(0.5,sx)./max(0.5,sy));
+
 winstd=round(500./p.dz);
 range=max(1,indm-winstd):min(indm+winstd,length(n));
 

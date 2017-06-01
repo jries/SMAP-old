@@ -6,22 +6,34 @@
 %save as data/bead_3dcal.mat
 
 calibrate3D_GUI
+
+
 %% fit
-file='c:xxx' %simulated test data, based on real bead file. 
-imstack=readfile_ome(file); % Stack of ROIs in photons. if necessary, convert ADU into photons.
+file='data/single_bead.tif'; %simulated test data, based on real bead file. 
+imstack=readfile_ome(file); % Stack of ROIs in photons. 
+imstack=single(imstack-400)/5;% if necessary, convert ADU into photons.
 
 cal=load('data/bead_3dcal.mat');
-coeff
-zfit_par
+
 %fit cspline, emCCD mode
-[P,CRLB]=mleFit_LM(imstack,5,50,coeff);
+[P,CRLB]=mleFit_LM(imstack,5,50,single(cal.cspline_coeff));
+
+z1=(P(:,5)-cal.csplinecal.cspline.z0)*cal.csplinecal.cspline.dz;
 
 %fit z, Gaussian model, emCCD mode
-[P,CRLB]=mleFit_LM(imstack,3,50,zfit_par);
+[P,CRLB]=mleFit_LM(imstack,3,50,cal.gauss_zfit);
 
 x=P(:,1);y=P(:,2); %x,y in pixels 
 %correct for refractive index mismatch:
-z=P(:,5)*RI_mismatch_factor;
+z=P(:,5)*1000*RI_mismatch_factor;
+
+%fit sx,sy, Gaussian model, emCCD mode
+[P,CRLB]=mleFit_LM(imstack,4,50);
+
+x=P(:,1);y=P(:,2); %x,y in pixels 
+sx=P(:,5);sy=P(:,6);
+z=sxsy2z(sx,sy,cal.gauss_sx2_sy2); %z from sx, sy
+
 
 %% depth-dependent calibration
 % fit your data with a 3D method of choice (example saved in

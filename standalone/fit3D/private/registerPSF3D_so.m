@@ -1,4 +1,4 @@
-function [imout,shiftedstackn,shift,indgood]=registerPSF3D_so(imin,p,axs)
+function [imout,shiftedstackn,shift,indgood]=registerPSF3D_so(imin,p,axs,filenumber)
 if nargin<3
     axs={};
 end
@@ -101,13 +101,27 @@ imout=nanmean(shiftedstackn(:,:,:,indgood),4);
 shiftedstackn(1,end,:,~indgood)=nanmax(shiftedstackn(:));
 shiftedstackn(1,:,1,~indgood)=nanmax(shiftedstackn(:));
 
+col=lines(max(filenumber));
 if length(axs)>0
-hold(axs{1},'off')
-plot(axs{1},(res(~indgood)),cc2(~indgood),'g*');title(co)
-hold(axs{1},'on')
-plot(axs{1},(res(indgood)),cc2(indgood),'rx');title(co)
-xlabel(axs{1},'residulas')
-ylabel(axs{1},'cross-correlation value')
+    leg={};
+    hold(axs{1},'off')
+    for k=1:max(filenumber)
+        fh=filenumber==k;
+        if any((~indgood)&fh)
+            plot(axs{1},(res((~indgood)&fh)),cc2((~indgood)&fh),'x','Color',col(k,:));
+            hold(axs{1},'on')
+            leg{end+1}=['x' num2str(k) ':' num2str(sum((~indgood)&fh))];
+        end
+        if any(indgood&fh) 
+            plot(axs{1},(res(indgood&fh)),cc2(indgood&fh),'*','Color',col(k,:));
+            hold(axs{1},'on')
+            leg{end+1}=[num2str(k) ':' num2str(sum((indgood)&fh))];
+        end
+    end
+    legend(leg);
+    xlabel(axs{1},'residulas')
+    ylabel(axs{1},'cross-correlation value')
+    drawnow
 end
 
 if length(axs)>1
