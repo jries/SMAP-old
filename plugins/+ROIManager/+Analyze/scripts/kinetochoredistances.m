@@ -89,7 +89,7 @@ nx=h1.BinEdges(1:end-1)'+h1.BinWidth*0.5;
 % f2g=fit(nx,h1.Values',model,'Lower',[0 0 0 0],'StartPoint',[max(h1.Values), max(h1.Values),-30 10]);
 %now: cells and sites aligned: single Gauss only
 model='a1*exp(-(x-b1).^2/2/c1^2)';
-f2g=fit(nx,h1.Values',model,'Lower',[0 0 0],'StartPoint',[max(h1.Values),mean(h1.Data), 10]);
+f2g=fit(nx,h1.Values',model,'Lower',[0 -inf 0],'StartPoint',[max(h1.Values),mean(h1.Data), 10]);
 
 
 hold on

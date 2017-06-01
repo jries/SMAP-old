@@ -144,8 +144,10 @@ classdef SEExploreGui<interfaces.SEProcessor
             sites(k).image=[];
             obj.SE.plotsite(sites(k),obj.guihandles.siteax,obj.guihandles.cellax);
             obj.SE.processors.eval.evaluate(sites(k));
+            if ~obj.getPar('se_keeptempimages')
             sites(k).image.composite=[];
             sites(k).image.layers=[];
+            end
             sites(k).image.image=single(sites(k).image.image);
             if SMAP_stopnow
                 break
@@ -436,7 +438,7 @@ end
 obj.SE.processors.annotation.sitechange(obj.SE.currentsite);
 obj.SE.processors.eval.evaluate(obj.SE.currentsite);
 
-if ~obj.getPar('se_keeptempimgs')
+if ~obj.getPar('se_keeptempimages')
     obj.SE.currentsite.image.composite=[];
     obj.SE.currentsite.image.layers=[];
 end

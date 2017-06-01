@@ -175,6 +175,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                 end
             else
                 value=[];
+               
             end      
         end
         
