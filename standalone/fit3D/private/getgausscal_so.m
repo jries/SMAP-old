@@ -27,7 +27,7 @@ function [gauss,indgood]=getgausscal_so(beads,p)
     %get calibrations
     bh=curves;
 %     tgt=[num2str(X) num2str(Y) num2str(Z) num2str(p.iter)];
-    ax=axes(uitab(p.tabgroup,'Title','sx,sy'));
+    p.ax=axes(uitab(p.tabgroup,'Title','sx,sy'));
      [spline,indg]=getcleanspline(curves,p);
 %      indgoodc(indgoodc)=indgoodc(indgoodc)&indg;
     indgood=indg;
@@ -36,11 +36,11 @@ function [gauss,indgood]=getgausscal_so(beads,p)
 %     SXY(Z)=getsxyinit(p,X,Y,Z);
      gauss.spline=spline;
     
-        ax=axes(uitab(p.tabgroup,'Title','sx^2-sy^2'));
+        p.ax=axes(uitab(p.tabgroup,'Title','sx^2-sy^2'));
         gauss.Sx2_Sy2=cal_Sx2_Sy2(bh,p);
-   drawnow
+   
     
-        ax=axes(uitab(p.tabgroup,'Title','Gauss: fit z'));
+        p.ax=axes(uitab(p.tabgroup,'Title','Gauss: fit z'));
         gauss.fitzpar=cal_fitzpar(bh,p);
     drawnow
 end
@@ -118,19 +118,19 @@ for k=1:length(curves)
     else
         t='g.';
     end
-    plot(curves(k).z,curves(k).sx,t)
-    hold on
-    plot(curves(k).z,curves(k).sy,t)
+    plot(p.ax,curves(k).z,curves(k).sx,t)
+    hold(p.ax ,'on')
+    plot(p.ax,curves(k).z,curves(k).sy,t)
     
 end
 
-plot(zt,splinex(zt),'b')
-plot(zt,spliney(zt),'b')
-plot(zt,splinex2(zt),'k')
-plot(zt,spliney2(zt),'k')
+plot(p.ax,zt,splinex(zt),'b')
+plot(p.ax,zt,spliney(zt),'b')
+plot(p.ax,zt,splinex2(zt),'k')
+plot(p.ax,zt,spliney2(zt),'k')
 
-xlim([zt(1) zt(end)])
-ylim([0 min(5,max(max(splinex2(zt)),max(spliney2(zt))))])
+xlim(p.ax,[zt(1) zt(end)])
+ylim(p.ax,[0 min(5,max(max(splinex2(zt)),max(spliney2(zt))))])
 drawnow
 s.x=splinex2;s.y=spliney2;
 s.zrange=[zt(1) zt(end)];
@@ -293,25 +293,17 @@ Sx=vertcat(b(:).sx);
 Sy=vertcat(b(:).sy);
 % figure(88)
 hold off
-sxp=fitsx2sy2_so(Sx,Sy,z,p.gaussrange,gca);
+sxp=fitsx2sy2_so(Sx,Sy,z,p.gaussrange,p.ax);
 % sxp.ztruepos=p.ztruepos;
-xlim([p.gaussrange])
+xlim(p.ax,[p.gaussrange])
 end
 
 function fitzpar=cal_fitzpar(b,p)
  z=vertcat(b(:).z);
 Sx=vertcat(b(:).sx);
 Sy=vertcat(b(:).sy);
-% ztrue=robustMean([b(:).ztrue]);
-% zrange=spline.maxmaxrange;
-% zrange=zrange+[300 -300];
-
-% midpoint=robustMean([b(:).ztrue]);
-% ztruepos=0;
 zrange=[p.gaussrange(1) p.gaussrange(2)];
-ax=gca;hold off;
-fitzpar=getzfitpar(Sx,Sy,z,zrange,0,true,ax);
-
+fitzpar=getzfitpar(Sx,Sy,z,zrange,0,true,p.ax);
 end
 
 function out=fitsx2sy2_so(sx,sy,z,zrange,ax)

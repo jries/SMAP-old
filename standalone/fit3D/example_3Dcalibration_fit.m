@@ -14,21 +14,29 @@ imstack=readfile_ome(file); % Stack of ROIs in photons.
 imstack=single(imstack-400)/5;% if necessary, convert ADU into photons.
 
 cal=load('data/bead_3dcal.mat');
+numlocs=size(imstack,3);
 
 %fit cspline, emCCD mode
+tic
 [P,CRLB]=mleFit_LM(imstack,5,50,single(cal.cspline_coeff));
-
+tspline=toc;
+disp(['cspline: ' num2str(numlocs/tspline) ' fits/s']);
 z1=(P(:,5)-cal.csplinecal.cspline.z0)*cal.csplinecal.cspline.dz;
 
 %fit z, Gaussian model, emCCD mode
+tic
 [P,CRLB]=mleFit_LM(imstack,3,50,cal.gauss_zfit);
-
+tgz=toc;
+disp(['Gauss z: ' num2str(numlocs/tgz) ' fits/s']);
 x=P(:,1);y=P(:,2); %x,y in pixels 
 %correct for refractive index mismatch:
 z=P(:,5)*1000*RI_mismatch_factor;
 
 %fit sx,sy, Gaussian model, emCCD mode
+tic
 [P,CRLB]=mleFit_LM(imstack,4,50);
+tgsxsy=toc;
+disp(['cspline: ' num2str(numlocs/tgsxsy) ' fits/s']);
 
 x=P(:,1);y=P(:,2); %x,y in pixels 
 sx=P(:,5);sy=P(:,6);
