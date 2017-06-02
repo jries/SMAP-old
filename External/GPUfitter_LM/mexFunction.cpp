@@ -111,9 +111,11 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 				PSFSigma = (float)mxGetScalar(prhs[3]);
 				break;
 			case 3:// fit with z
-				PSFSigma = (float)mxGetScalar(prhs[3]);
+				//PSFSigma = (float)mxGetScalar(prhs[3]);
 				noParameters = mxGetNumberOfElements(prhs[3]);
 				startParameters = mxGetPr(prhs[3]);
+				if (noParameters>0)
+					PSFSigma=(float) startParameters[0];
 				if (noParameters>1)
 					Ax = (float) startParameters[1];
 				if (noParameters>2)
@@ -127,7 +129,7 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 				if (noParameters>6)
 					d = (float) startParameters[6];
 				if (noParameters>7)
-					PSFSigma_y = (float) mxGetScalar(prhs[7]);
+					PSFSigma_y = (float) startParameters[7];
 				else
 					PSFSigma_y =PSFSigma;
 				break;
