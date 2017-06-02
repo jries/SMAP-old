@@ -72,6 +72,7 @@ for k=1:length(p.sr_layerson)
             txt=[txt fn '\n'];
         catch
         end
+        txt=[txt 'rendermode: ' num2str(p.([lp '_']).rendermode.selection) '\n'];
         txt=[txt 'channels: ' num2str(p.([lp '_']).channels) '\n'];
         txt=[txt 'grouping: ' num2str(p.([lp '_']).groupcheck) '\n'];
         txt=[txt 'lut: ' p.([lp '_']).lut.selection '\n'];
@@ -84,6 +85,7 @@ for k=1:length(p.sr_layerson)
         if strcmp(p.([lp '_']).renderfield.selection,'z')
             txt=[txt 'render field: znm'  '\n'];
         end
+        txt=[txt 'shift x,y,z (nm): ' num2str(p.([lp '_']).shiftxy_min) ', ' num2str(p.([lp '_']).shiftxy_max)  ', ' num2str(p.([lp '_']).shiftxy_z) '\n'];
         s=obj.getPar(['layer' num2str(k) '_filtertable']);
         ss=size(s);
         txt=[txt 'filters:'  '\n'];
@@ -95,6 +97,11 @@ for k=1:length(p.sr_layerson)
             end
             
         end
+        
+        txt=[txt 'min gauss nm: ' num2str(p.([lp '_']).mingaussnm) '\n'];
+        txt=[txt 'min gauss pix: ' num2str(p.([lp '_']).mingausspix) '\n'];
+        txt=[txt 'gauss factor: ' num2str(p.([lp '_']).gaussfac) '\n'];
+        txt=[txt 'gamma: ' num2str(p.([lp '_']).gamma) '\n'];
 %         disp(sprintf(txt));
     end
     

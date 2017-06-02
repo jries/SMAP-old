@@ -545,6 +545,10 @@ stat.coverageFraction=statb.coverageFraction;
 stat.coverageArea=stat.coverageFraction*4*pi*rSphere.^2;
 stat.rSphere=rSphere;
 
+stat.coordinates.t=tc2;
+stat.coordinates.p=pc2;
+stat.coordinates.r=rc2;
+
 cbx=statb.centroidx*pixelsize(1)-pi;
 cby=statb.centroidy*pixelsize(2)-1;
 
@@ -561,6 +565,42 @@ stat.topcoverage=~statd.main.istop;
 
 stat.mainFraction=1-statd.main.areacombined/numel(imbw);
 stat.mainArea=stat.mainFraction*4*pi*rSphere.^2;
+
+%determine rotation:smaller area
+if statb.main.area<statd.main.area
+    main=statb.main;
+%     corrt=-pi;
+    corrp=pi*0;
+% zflip=1;
+else
+    main=statd.main;
+%     zflip=-1;
+%     corrt=0;
+    corrp=0;
+end
+   corrt=0;
+%     corrp=1;
+tt=main.centroidx*pixelsize(1)+corrt-pi/2;
+pp=asin((main.centroidy*pixelsize(2)-1))+corrp;
+
+[y2,zcorr]=rotcoord(yc,zc,-tt);
+[xcorr,ycorr]=rotcoord(xc,y2,-pp);
+
+stat.coordinates.xc=xcorr;
+stat.coordinates.yc=ycorr;
+stat.coordinates.zc=zcorr;
+stat.coordinates.x=xc;
+stat.coordinates.y=yc;
+stat.coordinates.z=zc;
+figure(99)
+subplot(1,2,1)
+scatter3(xc,yc,zc,[],zc)
+subplot(1,2,2)
+scatter3(xcorr,ycorr,zcorr,[],zcorr)
+
+stat.thetac=tt;
+stat.phic=pp;
+
       
 if ~isempty(hmap)
     imagesc(rangex,rangey,(imhf)','Parent',hmap);
@@ -573,11 +613,12 @@ if ~isempty(hmap)
     hmap.NextPlot='replace';
     title(['coverage area (nm^2): ' num2str(stat.coverageArea,'%6.0f') ', fraction: ' num2str(stat.coverageFraction)],'Parent',hmap);
 end
+
 end
 
 function stat=areastats(imbw)
 
-main=struct('area',0,'areacombined',0,'istop',0);
+main=struct('area',0,'areacombined',0,'istop',0,'centroidx',NaN,'centroidy',NaN);
 
 stat=struct('coveragepix',0,'coverageFraction',0,'main',main,'centroidx',[],'centroidy',[],'area',[],'valid',false);
 
@@ -603,6 +644,8 @@ stat.main.istop=dtop<dbottom;
 stat.coveragepix=sum(imbw(:));
 stat.coverageFraction=stat.coveragepix/numel(imbw);
 stat.main.area=stat.area(indlargest);
+stat.main.centroidx=stat.centroidx(indlargest);
+stat.main.centroidy=stat.centroidy(indlargest);
 
 areacombined=stat.area(indlargest);
 touchref=stat.touchedge{indlargest};

@@ -49,7 +49,6 @@ avim=nanmean(imin,4);
 
 xn=1:size(imin,1);yn=1:size(imin,2);zn=1:size(imin,3);
 [Xq,Yq,Zq]=meshgrid(yn,xn,zn);
-% meanim=zeros(size(Xq));
 meanim=[];
 refim=avim(p.xrange,p.yrange,p.framerange);
 
@@ -57,7 +56,6 @@ simin=size(imin);
 shiftedstack=zeros(simin(1),simin(2),simin(3),numbeads)+NaN;
 
 for k=1:numbeads
-%     shift(k,:)=get3Dcorrshift(avim,smallim(:,:,:,k));
     goodframes=squeeze(nansum(nansum(smallim(:,:,:,k),1),2))>0;
     if p.alignz
         [shift(k,:),cc(k)]=get3Dcorrshift(refim(:,:,goodframes),smallim(:,:,goodframes,k));
@@ -70,18 +68,7 @@ for k=1:numbeads
     end
     
     shiftedh=interp3(imin(:,:,:,k),Xq-shift(k,2),Yq-shift(k,1),Zq-shift(k,3)-double(zshiftf0(k)),'cubic',0);
-%     if ~isempty(meanim)
-%         ratio=shiftedh(p.xrange,p.yrange,p.framerange)./meanim(p.xrange,p.yrange,p.framerange);
-%         factor=nanmedian(ratio(:));
-%     else
-%         factor=nanmax(shiftedh(:));
-%     end
-%     if factor==0
-%         factor=NaN;
-%     end
-    shiftedstack(:,:,:,k)=shiftedh;%/factor;
-%     shiftedh(isnan(shiftedh))=0;
-%     meanim=shiftedh+meanim;
+    shiftedstack(:,:,:,k)=shiftedh;
     meanim=nanmean(shiftedstack(:,:,:,1:k),4);
     meanim(isnan(meanim))=avim(isnan(meanim));
     
