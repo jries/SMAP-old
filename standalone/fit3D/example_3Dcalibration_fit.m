@@ -1,4 +1,7 @@
 %example script for fitting of 3D data
+%%
+addpath('bfmatlab')
+addpath('shared')
 %% make bead calibration
 %run 3D calibration GUI (alternatively, you can directly call calibrate3D)
 %and make 3D calibration
@@ -21,7 +24,7 @@ tic
 [P,CRLB]=mleFit_LM(imstack,5,50,single(cal.cspline_coeff));
 tspline=toc;
 disp(['cspline: ' num2str(numlocs/tspline) ' fits/s']);
-z1=(P(:,5)-cal.csplinecal.cspline.z0)*cal.csplinecal.cspline.dz;
+zcspline=(P(:,5)-cal.csplinecal.cspline.z0)*cal.csplinecal.cspline.dz;
 
 %fit z, Gaussian model, emCCD mode
 tic
@@ -30,7 +33,7 @@ tgz=toc;
 disp(['Gauss z: ' num2str(numlocs/tgz) ' fits/s']);
 x=P(:,1);y=P(:,2); %x,y in pixels 
 %correct for refractive index mismatch:
-z=P(:,5)*1000*RI_mismatch_factor;
+zgaussz=P(:,5)*1000*RI_mismatch_factor;
 
 %fit sx,sy, Gaussian model, emCCD mode
 tic
@@ -40,7 +43,15 @@ disp(['cspline: ' num2str(numlocs/tgsxsy) ' fits/s']);
 
 x=P(:,1);y=P(:,2); %x,y in pixels 
 sx=P(:,5);sy=P(:,6);
-z=sxsy2z(sx,sy,cal.gauss_sx2_sy2); %z from sx, sy
+zgausssxsy=sxsy2z(sx,sy,cal.gauss_sx2_sy2); %z from sx, sy
+
+% std(z-gt) for all
+
+figure(101)
+% hold off
+plot(zcspline)
+hold on
+plot(zgausssxsy)
 
 
 %% depth-dependent calibration

@@ -184,6 +184,8 @@ if obj.display
     hs4=axes('Parent',hp);subplot(4,6,7,hs4);imagesc(rangex,rangex,immask(1).image,'Parent',hs4); colormap(hs4,hot);
     hs5=axes('Parent',hp);subplot(4,6,8,hs5);imagesc(rangex,rangez,immask(4).image,'Parent',hs5); colormap(hs5,hot);
     hs6=axes('Parent',hp);subplot(4,6,9,hs6);imagesc(rangex,rangez,immask(5).image,'Parent',hs6); colormap(hs6,hot);
+%     hs7=axes('Parent',hp);subplot(4,6,4,hs7);imagesc(rangex,rangez,immask(5).image,'Parent',hs6); colormap(hs6,hot);
+%     hs8=axes('Parent',hp);subplot(4,6,9,hs8);imagesc(rangex,rangez,immask(5).image,'Parent',hs6); colormap(hs6,hot);
 
     hs4.NextPlot='add';
     rectangle('Position',[qx(1)-dx,qy(1)-dy,qx(3)-qx(1),qy(3)-qy(1)],'EdgeColor',[1 1 1],'Parent',hs4)
@@ -267,6 +269,9 @@ if 1 %p.refit||~isfield(obj.site.evaluation,'CME3DDSpherefit')
      hsc=axes('Parent',hp);subplot(3,4,11,hsc);
       hmap2=axes('Parent',hp);subplot(3,4,7,hmap2);
        hmap3=axes('Parent',hp);subplot(3,4,3,hmap3);
+        hmap3b=axes('Parent',hp);subplot(3,4,4,hmap3b);
+        hmap3c=axes('Parent',hp);subplot(3,4,8,hmap3c);
+        hmap3all={hmap3,hmap3b,hmap3c};
         else
             hsc=[];
             hmap2=[];
@@ -279,7 +284,7 @@ if 1 %p.refit||~isfield(obj.site.evaluation,'CME3DDSpherefit')
 %         out.fitcoverage_thetabottom=min(fitp(3));
         
         out.map2D=mapanalysis2D(xc,yc,zc,rSphere,hmap2);
-        out.map3D=mapanalysis3D(xc,yc,zc,rSphere,hmap3);
+        out.map3D=mapanalysis3D(xc,yc,zc,rSphere,hmap3all);
         
        
        
@@ -568,24 +573,39 @@ stat.mainArea=stat.mainFraction*4*pi*rSphere.^2;
 
 %determine rotation:smaller area
 if statb.main.area<statd.main.area
+    mainbw=statb.main.image;
     main=statb.main;
-%     corrt=-pi;
-    corrp=pi*0;
-% zflip=1;
+    corrt=0;
 else
+    mainbw=~statd.main.image;
     main=statd.main;
-%     zflip=-1;
-%     corrt=0;
-    corrp=0;
+    corrt=pi;
 end
-   corrt=0;
-%     corrp=1;
-tt=main.centroidx*pixelsize(1)+corrt-pi/2;
-pp=asin((main.centroidy*pixelsize(2)-1))+corrp;
+%    corrt=0;
+% %     corrp=1;
+tfrac=pi-(acos((1-2*stat.mainFraction)));
 
-[y2,zcorr]=rotcoord(yc,zc,-tt);
-[xcorr,ycorr]=rotcoord(xc,y2,-pp);
+pp=main.centroidx*pixelsize(1)-pi/2;
+tt=asin((main.centroidy*pixelsize(2)-1))+corrt;
+% 
 
+
+fitp=fitcoverageangle_bw(mainbw,[-tt,pp,tfrac],hmap{2});
+fitp2=fitcoverageangle_image(imhf,fitp,hmap{3});
+
+stat.bwfit.theta0=fitp(1);
+stat.bwfit.phi0=fitp(2);
+stat.bwfit.thetacoverage=fitp(3);
+stat.bwfit.fraction=0.5*(1-cos(pi-fitp(3)));
+
+stat.imfit.theta0=fitp2(1);
+stat.imfit.phi0=fitp2(2);
+stat.imfit.thetacoverage=fitp2(3);
+stat.imfit.fraction=0.5*(1-cos(pi-fitp2(3)));
+
+
+[z2,ycorr]=rotcoord(zc,yc,(fitp2(2)-pi));
+[xcorr,zcorr]=rotcoord(xc,z2,-(fitp2(1)));
 stat.coordinates.xc=xcorr;
 stat.coordinates.yc=ycorr;
 stat.coordinates.zc=zcorr;
@@ -595,30 +615,32 @@ stat.coordinates.z=zc;
 figure(99)
 subplot(1,2,1)
 scatter3(xc,yc,zc,[],zc)
+axis equal
 subplot(1,2,2)
 scatter3(xcorr,ycorr,zcorr,[],zcorr)
+axis equal
 
-stat.thetac=tt;
-stat.phic=pp;
+% stat.thetac=tt;
+% stat.phic=pp;
 
       
 if ~isempty(hmap)
-    imagesc(rangex,rangey,(imhf)','Parent',hmap);
-    hmap.NextPlot='add';
-    colormap(hmap,'jet')
-    imagesc(rangex,rangey,(1-imbw')*max(imhf(:)*.5),'AlphaData',0.25,'Parent',hmap);
-    plot(hmap,[-pi/2 pi/2],[0 0],'wo')
-    plot(hmap,cbx,cby,'wx')
-     plot(hmap,cdx,cdy,'w+')
-    hmap.NextPlot='replace';
-    title(['coverage area (nm^2): ' num2str(stat.coverageArea,'%6.0f') ', fraction: ' num2str(stat.coverageFraction)],'Parent',hmap);
+    imagesc(rangex,rangey,(imhf)','Parent',hmap{1});
+    hmap{1}.NextPlot='add';
+    colormap(hmap{1},'jet')
+    imagesc(rangex,rangey,(1-imbw')*max(imhf(:)*.5),'AlphaData',0.25,'Parent',hmap{1});
+    plot(hmap{1},[-pi/2 pi/2],[0 0],'wo')
+    plot(hmap{1},cbx,cby,'wx')
+     plot(hmap{1},cdx,cdy,'w+')
+    hmap{1}.NextPlot='replace';
+    title(['coverage area (nm^2): ' num2str(stat.coverageArea,'%6.0f') ', fraction: ' num2str(stat.coverageFraction)],'Parent',hmap{1});
 end
 
 end
 
 function stat=areastats(imbw)
 
-main=struct('area',0,'areacombined',0,'istop',0,'centroidx',NaN,'centroidy',NaN);
+main=struct('area',0,'areacombined',0,'istop',0,'centroidx',NaN,'centroidy',NaN,'image',[]);
 
 stat=struct('coveragepix',0,'coverageFraction',0,'main',main,'centroidx',[],'centroidy',[],'area',[],'valid',false);
 
@@ -637,6 +659,16 @@ for k=1:length(struc)
     stat.area(k)=struc(k).Area;
     stat.valid=true;
 end
+
+% XXSX this does not select the largest one! careful! Above: do for bright
+% and dark, and take only smaller of those (truly connected
+CC=bwconncomp(imbw);
+numpix=cellfun(@numel,CC.PixelIdxList);
+[~,idx]=max(numpix);
+mainim=false(size(imbw));
+mainim(CC.PixelIdxList{idx})=true;
+stat.main.image=mainim;
+
 [~,indlargest]=max(stat.area);
 dtop=sqrt((stat.centroidx(indlargest)-toppix(1)).^2+(stat.centroidy(indlargest)-toppix(2)).^2);
 dbottom=sqrt((stat.centroidx(indlargest)-bottompix(1)).^2+(stat.centroidy(indlargest)-bottompix(2)).^2);

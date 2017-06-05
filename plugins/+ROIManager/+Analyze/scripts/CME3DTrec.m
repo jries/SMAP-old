@@ -5,7 +5,7 @@ sites=se.sites;
 mainFraction=getFieldAsVector(sites,'evaluation','CME3DDSpherefit','map3D','mainFraction');
 
 [~,indsort]=sort(mainFraction);
-timpoints=10;
+timpoints=3;
 dN=round(length(indsort)/timpoints);
 sitessort=sites(indsort);
 sitessort(1:10)=[];
@@ -39,10 +39,10 @@ for k=1:length(range)-1
 %         end
 %         pcorr=0;
 % %         tcorr=-thetac(s);pcorr=-phic(s);
-        xh=sitessort(s).evaluation.CME3DDSpherefit.map3D.coordinates.x;
+        xh=sitessort(s).evaluation.CME3DDSpherefit.map3D.coordinates.xc;
         x(ind:ind+length(xh)-1)=xh*rcorr(s);
-        y(ind:ind+length(xh)-1)=sitessort(s).evaluation.CME3DDSpherefit.map3D.coordinates.y*rcorr(s);
-        z(ind:ind+length(xh)-1)=sitessort(s).evaluation.CME3DDSpherefit.map3D.coordinates.z*rcorr(s);
+        y(ind:ind+length(xh)-1)=sitessort(s).evaluation.CME3DDSpherefit.map3D.coordinates.yc*rcorr(s);
+        z(ind:ind+length(xh)-1)=sitessort(s).evaluation.CME3DDSpherefit.map3D.coordinates.zc*rcorr(s);
 %         x(ind:ind+length(r)-1)=r;
 %         rch(ind:ind+length(r)-1)=r*rcorr(s);
 %         th(ind:ind+length(r)-1)=sitessort(s).evaluation.CME3DDSpherefit.map3D.coordinates.t+tcorr;
@@ -61,6 +61,7 @@ end
 function plotcoords(x,y,z)
 figure(88)
 scatter3(x,y,z,[],z)
+axis equal
 [t,p,r]=cart2sph(x,y,z);
 figure(89)
 polarplot(p,r,'.')

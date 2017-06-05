@@ -39,7 +39,10 @@ if isempty(fitter)
     disp(['using: ' char(allfitters{fitter})]);
 end
 
-
+if isempty(varargin{1})
+    P=[];CRLB=[];LogL=[];
+    return
+end
 [P,CRLB,LogL]=allfitters{fitter}(varargin{:});
  clear(allfittersnames{fitter})
 
