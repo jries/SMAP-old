@@ -17,6 +17,10 @@ if length(startp)<4
     startp(4)=max(imin(:));%amplitude
 %     startp(5)=0;%offset
 end
+if any(isnan(startp))
+    fitp=[0 0 0];
+    return
+end
 % if nargin==1 || isempty(startp)
 %     startph1=[pi/4,0,pi/2];
 %     imstart=coverage_sphere(startph1(1),startph1(2),startph1(3),Theta,Phi);
@@ -36,7 +40,12 @@ options=optimset('lsqnonlin');
 % options.Algorithm='levenberg-marquardt';
 
 imstart=startp(4)*(coverage_sphere(startp(1),startp(2),startp(3),Theta,Phi)+1);
+try
 [fitp,resnorm]=lsqnonlin(@coverageerr,startp,[],[],options,Theta,Phi,imin);
+catch
+    startp
+    fitp=[0 0 0];
+end
 
 % [fitp2,resnorm2]=lsqnonlin(@coverageerr,startph,[],[],options,Theta,Phi,-bwim);
 
