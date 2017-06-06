@@ -1,37 +1,51 @@
 %mammalian cells: temporal reconstruction
 global se
 sites=se.sites;
+
+rot=true;
 % rSphere=getFieldAsVector(sites,'evaluation','CME3DDSpherefit','map3D','rSphere');
 mainFraction=getFieldAsVector(sites,'evaluation','CME3DDSpherefit','map3D','mainFraction');
 
 [~,indsort]=sort(mainFraction);
-timpoints=3;
-dN=round(length(indsort)/timpoints);
+
 sitessort=sites(indsort);
-sitessort(1:10)=[];
+% sitessort(1:10)=[];
 rSphere=getFieldAsVector(sitessort,'evaluation','CME3DDSpherefit','map3D','rSphere');
 mainFraction=getFieldAsVector(sitessort,'evaluation','CME3DDSpherefit','map3D','mainFraction');
 topcoverage=getFieldAsVector(sitessort,'evaluation','CME3DDSpherefit','map3D','topcoverage');
 thetac=getFieldAsVector(sitessort,'evaluation','CME3DDSpherefit','map3D','thetac');
 phic=getFieldAsVector(sitessort,'evaluation','CME3DDSpherefit','map3D','phic');
 
-range=1:dN:length(indsort)+dN;
+timewindows=10;
+timepoints=50;
+dN=round(length(indsort)/timewindows);
+df=round(length(indsort)/timepoints);
+
+range=1:df:length(indsort)-dN+df;
+range(end)=min(range(end),length(sitessort)-dN);
+
 rmean=zeros(1,length(indsort));
 rcorr=zeros(1,length(indsort));
-for k=1:length(range)-1
+for k=1:length(range)
     numloc=0;
-    for s=range(k):range(k+1)-1
+    
+    indh=range(k):range(k)+dN;
+    
+    for s=indh
         numloc=numloc+length(sitessort(s).evaluation.CME3DDSpherefit.map3D.coordinates.r);  
     end
     
-        indh=range(k):range(k+1)-1;
-    rmean(indh)=mean(rSphere(indh));
+        
+
+    Rhere=mean(rSphere(indh));
+        rmean(indh)=Rhere;
+
     rcorr(indh)=rmean(indh)./rSphere(indh);
     
 %     rh=zeros(1,numloc);rch=zeros(1,numloc);th=zeros(1,numloc);ph=zeros(1,numloc);
     x=zeros(1,numloc);y=zeros(1,numloc);z=zeros(1,numloc);
     ind=1;
-    for s=range(k):range(k+1)-1
+    for s=indh
 %         if topcoverage(s)
 %             tcorr=0;
 %         else
@@ -39,6 +53,7 @@ for k=1:length(range)-1
 %         end
 %         pcorr=0;
 % %         tcorr=-thetac(s);pcorr=-phic(s);
+if rot
         xh=sitessort(s).evaluation.CME3DDSpherefit.map3D.coordinates.xc;
         x(ind:ind+length(xh)-1)=xh*rcorr(s);
         y(ind:ind+length(xh)-1)=sitessort(s).evaluation.CME3DDSpherefit.map3D.coordinates.yc*rcorr(s);
@@ -47,24 +62,53 @@ for k=1:length(range)-1
 %         rch(ind:ind+length(r)-1)=r*rcorr(s);
 %         th(ind:ind+length(r)-1)=sitessort(s).evaluation.CME3DDSpherefit.map3D.coordinates.t+tcorr;
 %         ph(ind:ind+length(r)-1)=sitessort(s).evaluation.CME3DDSpherefit.map3D.coordinates.p+pcorr;
+
+else
+        xh=sitessort(s).evaluation.CME3DDSpherefit.map3D.coordinates.x;
+        x(ind:ind+length(xh)-1)=xh*rcorr(s);
+        y(ind:ind+length(xh)-1)=sitessort(s).evaluation.CME3DDSpherefit.map3D.coordinates.y*rcorr(s);
+        z(ind:ind+length(xh)-1)=sitessort(s).evaluation.CME3DDSpherefit.map3D.coordinates.z*rcorr(s);
+        
+end        
         ind=ind+length(xh);
         
         
     end
-    plotcoords(x,y,z)
+    plotcoords(x,y,z,Rhere)
     
 
     
 end
 
 
-function plotcoords(x,y,z)
-figure(88)
-scatter3(x,y,z,[],z)
+function plotcoords(x,y,z,R)
+% figure(88)
+% scatter3(x,y,z+R,[],z+R)
+% axis equal
+% [t,p,r]=cart2sph(x,y,z);
+% figure(89)
+% polarplot(p,r,'.')
+
+V=myhist3(x,y,z+R,10,[-000,200],[-200,200],[-200,200]);
+Vs=smooth3(V,'gaussian',[1 1 1]*3,1);
+
+co=max(V(:))/8;
+figure(90);
+clf
+hiso=patch(isosurface(Vs,co),'EdgeColor','none','FaceColor',[1,.75,.65]);
+isonormals(Vs,hiso);
+
+hcap=patch(isocaps(Vs,co),'FaceColor','interp','EdgeColor','none');
 axis equal
-[t,p,r]=cart2sph(x,y,z);
-figure(89)
-polarplot(p,r,'.')
+view(35,30)
+
+limvals=[0 50];
+xlim(limvals)
+ylim(limvals)
+zlim(limvals)
+
+lightangle(45,30);
+lighting gouraud
 
 % indg=r~=0;
 % % [z,x]=pol2cart(p(indg),r(indg));
@@ -95,6 +139,7 @@ polarplot(p,r,'.')
 % figure(88);polarplot(th,rch,'.')
 % rlim([0,max(rmean)*1.1])
 drawnow;
-waitforbuttonpress
+% waitforbuttonpress
+pause(.2)
 
 end

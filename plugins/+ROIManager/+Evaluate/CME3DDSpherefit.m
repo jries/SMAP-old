@@ -612,13 +612,13 @@ stat.coordinates.zc=zcorr;
 stat.coordinates.x=xc;
 stat.coordinates.y=yc;
 stat.coordinates.z=zc;
-figure(99)
-subplot(1,2,1)
-scatter3(xc,yc,zc,[],zc)
-axis equal
-subplot(1,2,2)
-scatter3(xcorr,ycorr,zcorr,[],zcorr)
-axis equal
+% figure(99)
+% subplot(1,2,1)
+% scatter3(xc,yc,zc,[],zc)
+% axis equal
+% subplot(1,2,2)
+% scatter3(xcorr,ycorr,zcorr,[],zcorr)
+% axis equal
 
 % stat.thetac=tt;
 % stat.phic=pp;
