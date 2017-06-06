@@ -8,7 +8,7 @@ addpath('shared')
 %e.g. using bead files: xxx
 %save as data/bead_3dcal.mat
 
-calibrate3D_GUI
+% calibrate3D_GUI
 
 
 %% fit
@@ -21,7 +21,9 @@ numlocs=size(imstack,3);
 
 %fit cspline, emCCD mode
 tic
-[P,CRLB]=mleFit_LM(imstack,5,50,single(cal.cspline_coeff));
+% [P,CRLB]=GPUmleFit_LM(imstack,5,50,single(cal.cspline_coeff));
+[P,CRLB]=CPUmleFit_LM(imstack,5,50,single(cal.cspline_coeff));
+% [P,CRLB]=mleFit_LM(imstack,5,50,single(cal.cspline_coeff));
 tspline=toc;
 disp(['cspline: ' num2str(numlocs/tspline) ' fits/s']);
 zcspline=(P(:,5)-cal.csplinecal.cspline.z0)*cal.csplinecal.cspline.dz;
