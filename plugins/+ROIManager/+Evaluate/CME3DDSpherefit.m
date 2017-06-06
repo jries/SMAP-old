@@ -22,9 +22,9 @@ classdef CME3DDSpherefit<interfaces.SEEvaluationProcessor
 end
 
 function pard=guidef
-pard.layer.object=struct('Style','popupmenu','String','layer1|layer2|layer3|layer4|layer5|layer6');
-pard.layer.position=[1,1];
-pard.layer.Width=2;
+% pard.layer.object=struct('Style','popupmenu','String','layer1|layer2|layer3|layer4|layer5|layer6');
+% pard.layer.position=[1,1];
+% pard.layer.Width=2;
 
 pard.text1.object=struct('Style','text','String','slice thickness (nm)');
 pard.text1.position=[2,1];
@@ -97,7 +97,9 @@ function out=runintern(obj,p)
 % obj.site.sePar.Settings
 % roisize=obj.site.sePar.Settings.siteroi/2;
 roisize=p.se_siteroi/2;
-locs=obj.getLocs({'xnm','ynm','znm'},'layer',p.layer.Value,'size',roisize);
+locs=obj.getLocs({'xnm','ynm','znm'},'layer',1,'size',roisize);
+    locs2=obj.getLocs({'xnm','ynm','znm'},'layer',2,'size',roisize);
+
 
 lenbar=20;
 ranger=[0 roisize];
@@ -116,6 +118,11 @@ x=locs.xnm-obj.site.pos(1);
 y=locs.ynm-obj.site.pos(2);
 z=locs.znm-medianz;
 
+    x2=locs2.xnm-obj.site.pos(1);
+    y2=locs2.ynm-obj.site.pos(2);
+    z2=locs2.znm-medianz;
+
+
 xr=locs.xnmrot-obj.site.pos(1);
 yr=locs.ynmrot-obj.site.pos(2);
 
@@ -132,6 +139,15 @@ xn=x(im);
 yn=y(im);
 zn=z(im);
 
+%also for channel 2
+    mask2=imdilate3(mask,2);
+    im2=withinmask(mask2,(x2-rangex(1))/10,(y2-rangex(1))/10,(z2-rangez(1))/10); %pixelsize 10
+    xn2=x2(im2);
+    yn2=y2(im2);
+    zn2=z2(im2);
+%         xn2=x2;
+%         yn2=y2;
+%         zn2=z2;
 %determine quantiles.
 qx=myquantile(xn,[0.05,0.5,0.95]);
 qy=myquantile(yn,[0.05,0.5,0.95]);
@@ -258,7 +274,10 @@ if 1 %p.refit||~isfield(obj.site.evaluation,'CME3DDSpherefit')
         xc=xn-fitp(2);
         yc=yn-fitp(3);
         zc=zn-fitp(4);
-
+            xc2=xn2-fitp(2);
+            yc2=yn2-fitp(3);
+            zc2=zn2-fitp(4);
+        
         [tc,pc,rc]=cart2sph(xc,yc,zc);
         out.allqtheta=myquantile(pc,qrangeall);
         
@@ -271,7 +290,8 @@ if 1 %p.refit||~isfield(obj.site.evaluation,'CME3DDSpherefit')
        hmap3=axes('Parent',hp);subplot(3,4,3,hmap3);
         hmap3b=axes('Parent',hp);subplot(3,4,4,hmap3b);
         hmap3c=axes('Parent',hp);subplot(3,4,8,hmap3c);
-        hmap3all={hmap3,hmap3b,hmap3c};
+        hmap3d=axes('Parent',hp);subplot(3,4,12,hmap3d);
+        hmap3all={hmap3,hmap3b,hmap3c,hmap3d};
         else
             hsc=[];
             hmap2=[];
@@ -284,7 +304,7 @@ if 1 %p.refit||~isfield(obj.site.evaluation,'CME3DDSpherefit')
 %         out.fitcoverage_thetabottom=min(fitp(3));
         
         out.map2D=mapanalysis2D(xc,yc,zc,rSphere,hmap2);
-        out.map3D=mapanalysis3D(xc,yc,zc,rSphere,hmap3all);
+        out.map3D=mapanalysis3D(xc,yc,zc,rSphere,hmap3all,xc2,yc2,zc2);
         
        
        
@@ -524,8 +544,9 @@ if ~isempty(hmap)
 end
 end
 
-function stat=mapanalysis3D(xc,yc,zc,rSphere,hmap)
-[tc2,pc2,rc2]=cart2sph(zc,yc,xc);
+function stat=mapanalysis3D(xc,yc,zc,rSphere,hmap,xc2,yc2,zc2)
+[tcB,pcB,rcB]=cart2sph(zc,yc,xc);
+    [tcB2,pcB2,rcB2]=cart2sph(zc2,yc2,xc2);
 nump=128; %side length of reconstruction in pixels
 sigma=3.5;
 cutofffactor=1.1;
@@ -534,11 +555,17 @@ rangex=[-pi pi];
 rangey=[-1 1+1/nump];
 pixelsize=[2*pi/nump,2/nump];
       
-imh=myhist2(tc2,sin(pc2),pixelsize(1),pixelsize(2),rangex,rangey);
+imh=myhist2(tcB,sin(pcB),pixelsize(1),pixelsize(2),rangex,rangey);
 imh=[imh ;imh];
 hk=fspecial('gauss',ceil(4*sigma),sigma);
 imhf=imfilter(sqrt(imh),hk,'replicate');
 imhf=imhf(nump/4+1:2.5*nump/2,:);
+
+    imh2=myhist2(tcB2,sin(pcB2),pixelsize(1),pixelsize(2),rangex,rangey);
+    imh2=[imh2 ;imh2];
+%     hk=fspecial('gauss',ceil(4*sigma),sigma);
+    imhf2=imfilter(sqrt(imh2),hk,'replicate');
+    imhf2=imhf2(nump/4+1:2.5*nump/2,:);
 
 cutoffone=max(hk(:))*cutofffactor;
 imbw=imhf>cutoffone;
@@ -550,9 +577,9 @@ stat.coverageFraction=statb.coverageFraction;
 stat.coverageArea=stat.coverageFraction*4*pi*rSphere.^2;
 stat.rSphere=rSphere;
 
-stat.coordinates.t=tc2;
-stat.coordinates.p=pc2;
-stat.coordinates.r=rc2;
+stat.coordinates.t=tcB;
+stat.coordinates.p=pcB;
+stat.coordinates.r=rcB;
 
 cbx=statb.centroidx*pixelsize(1)-pi;
 cby=statb.centroidy*pixelsize(2)-1;
@@ -604,14 +631,26 @@ stat.imfit.thetacoverage=fitp2(3);
 stat.imfit.fraction=0.5*(1-cos(pi-fitp2(3)));
 
 
-[z2,ycorr]=rotcoord(zc,yc,(fitp2(2)-pi));
-[xcorr,zcorr]=rotcoord(xc,z2,-(fitp2(1)));
+[ztemp,ycorr]=rotcoord(zc,yc,(fitp2(2)-pi));
+[xcorr,zcorr]=rotcoord(xc,ztemp,-(fitp2(1)));
+
+    [ztemp2,ycorr2]=rotcoord(zc2,yc2,(fitp2(2)-pi));
+    [xcorr2,zcorr2]=rotcoord(xc2,ztemp2,-(fitp2(1)));
+
+
 stat.coordinates.xc=xcorr;
 stat.coordinates.yc=ycorr;
 stat.coordinates.zc=zcorr;
 stat.coordinates.x=xc;
 stat.coordinates.y=yc;
 stat.coordinates.z=zc;
+
+stat.coordinates2.xc=xcorr2;
+stat.coordinates2.yc=ycorr2;
+stat.coordinates2.zc=zcorr2;
+stat.coordinates2.x=xc2;
+stat.coordinates2.y=yc2;
+stat.coordinates2.z=zc2;
 % figure(99)
 % subplot(1,2,1)
 % scatter3(xc,yc,zc,[],zc)
@@ -634,6 +673,16 @@ if ~isempty(hmap)
      plot(hmap{1},cdx,cdy,'w+')
     hmap{1}.NextPlot='replace';
     title(['coverage area (nm^2): ' num2str(stat.coverageArea,'%6.0f') ', fraction: ' num2str(stat.coverageFraction)],'Parent',hmap{1});
+    
+    sss=size(imhf);
+    outdc=zeros(sss(2),sss(1),3);
+    outdc(:,:,1)=imhf'/quantile(imhf(:),.98);
+    oneloc=1/sigma^2/2/pi;
+    outdc(:,:,2)=imhf2'/max(quantile(imhf2(:),.995),oneloc*1.5);
+    outdc(:,:,3)=mainbw'/2;
+    
+    imagesc(rangex,rangey,outdc,'Parent',hmap{4});
+    
 end
 
 end
