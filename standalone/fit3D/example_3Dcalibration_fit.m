@@ -35,7 +35,7 @@ tgz=toc;
 disp(['Gauss z: ' num2str(numlocs/tgz) ' fits/s']);
 x=P(:,1);y=P(:,2); %x,y in pixels 
 %correct for refractive index mismatch:
-zgaussz=P(:,5)*1000*RI_mismatch_factor;
+zgaussz=P(:,5)*1000;
 
 %fit sx,sy, Gaussian model, emCCD mode
 tic
@@ -54,6 +54,7 @@ figure(101)
 plot(zcspline)
 hold on
 plot(zgausssxsy)
+plot(zgaussz)
 
 
 %% depth-dependent calibration
