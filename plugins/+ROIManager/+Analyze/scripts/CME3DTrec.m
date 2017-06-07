@@ -121,20 +121,20 @@ for k=1:length(range)
 end
 
 temp=polall(:,:,1,:);
-m1=quantile(temp(:),0.99);
+m1=quantile(temp(:),0.998);
 temp=polall(:,:,2,:);
-m2=quantile(temp(:),0.99);
+m2=quantile(temp(:),0.999);
 polalln=polall;
 polalln(:,:,1,:)=polalln(:,:,1,:)/m1;
 polalln(:,:,2,:)=polalln(:,:,2,:)/m2;
 
-h=fspecial('gauss',5,.7);
+h=fspecial('gauss',5,1.2);
 if 1 %if you want to save polar plot
     for k=1:size(polall,4)
         imh=polalln(:,:,:,k);
         imhf=imfilter(imh,h);
         f=figure(111);
-        imagesc(imhf);
+        imagesc([-1 1]*p.winsize,[-1 1]*p.winsize,imhf);
         drawnow
         
         F(k)=getframe(f);
