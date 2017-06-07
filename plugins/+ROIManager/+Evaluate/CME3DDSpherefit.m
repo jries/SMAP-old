@@ -662,7 +662,7 @@ stat.coordinates2.z=zc2;
 % stat.thetac=tt;
 % stat.phic=pp;
 
-      
+      try
 if ~isempty(hmap)
     imagesc(rangex,rangey,(imhf)','Parent',hmap{1});
     hmap{1}.NextPlot='add';
@@ -684,6 +684,8 @@ if ~isempty(hmap)
     imagesc(rangex,rangey,outdc,'Parent',hmap{4});
     
 end
+      catch
+      end
 
 end
 

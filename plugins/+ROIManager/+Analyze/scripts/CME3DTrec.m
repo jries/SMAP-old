@@ -1,4 +1,17 @@
 %mammalian cells: temporal reconstruction
+%parameters
+p.cutoff=8; % for isosurface, at max(V(:))/cutoff
+p.sgauss=1;%smoothing of volume
+p.winsize=200; %plotting
+p.minx=0; %x: use 0 for central cut
+p.pixelsize=10; %nm, for volume reconstruction
+p.limxy=[0 40]; % for plotting, in volume pixels
+p.limz=[0 40];
+
+timewindows=10;
+timepoints=50;
+framerate=10;
+
 global se
 sites=se.sites;
 
@@ -16,8 +29,7 @@ topcoverage=getFieldAsVector(sitessort,'evaluation','CME3DDSpherefit','map3D','t
 thetac=getFieldAsVector(sitessort,'evaluation','CME3DDSpherefit','map3D','thetac');
 phic=getFieldAsVector(sitessort,'evaluation','CME3DDSpherefit','map3D','phic');
 
-timewindows=10;
-timepoints=50;
+
 dN=round(length(indsort)/timewindows);
 df=round(length(indsort)/timepoints);
 
@@ -26,6 +38,7 @@ range(end)=min(range(end),length(sitessort)-dN);
 
 rmean=zeros(1,length(indsort));
 rcorr=zeros(1,length(indsort));
+F(length(range))=struct('cdata',[],'colormap',[]);
 for k=1:length(range)
     numloc=0;
     
@@ -74,14 +87,28 @@ end
         
         
     end
-    plotcoords(x,y,z,Rhere)
+    plotcoords(x,y,z,Rhere,p)
+    F(k)=getframe(gcf);
     
 
     
 end
+path=fileparts(se.files(1).name);
+[f,path]=uiputfile([path filesep 'movie.mp4']);
+if f
+    v=VideoWriter([path f],'MPEG-4');
+    v.FrameRate=framerate;
+    open(v)
+    for k=1:length(F)
+        writeVideo(v,F(k));
+    end
+    close(v);
+end
+f=figure(123);movie(f,F,2)
 
 
-function plotcoords(x,y,z,R)
+
+function plotcoords(x,y,z,R,p)
 % figure(88)
 % scatter3(x,y,z+R,[],z+R)
 % axis equal
@@ -89,10 +116,10 @@ function plotcoords(x,y,z,R)
 % figure(89)
 % polarplot(p,r,'.')
 
-V=myhist3(x,y,z+R,10,[-000,200],[-200,200],[-200,200]);
-Vs=smooth3(V,'gaussian',[1 1 1]*3,1);
+V=myhist3(x,y,z+R,p.pixelsize,[-p.minx,p.winsize],[-p.winsize,p.winsize],[-p.winsize,p.winsize]+p.winsize/2);
+Vs=smooth3(V,'gaussian',[1 1 1]*(round(2*p.sgauss/2)*2+1),p.sgauss);
 
-co=max(V(:))/8;
+co=max(V(:))/p.cutoff;
 figure(90);
 clf
 hiso=patch(isosurface(Vs,co),'EdgeColor','none','FaceColor',[1,.75,.65]);
@@ -102,10 +129,10 @@ hcap=patch(isocaps(Vs,co),'FaceColor','interp','EdgeColor','none');
 axis equal
 view(35,30)
 
-limvals=[0 50];
-xlim(limvals)
-ylim(limvals)
-zlim(limvals)
+
+xlim(p.limxy)
+ylim(p.limxy)
+zlim(p.limz)
 
 lightangle(45,30);
 lighting gouraud
@@ -140,6 +167,6 @@ lighting gouraud
 % rlim([0,max(rmean)*1.1])
 drawnow;
 % waitforbuttonpress
-pause(.2)
+% pause(.2)
 
 end
