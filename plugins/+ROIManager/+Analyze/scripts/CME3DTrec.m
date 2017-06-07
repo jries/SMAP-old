@@ -19,6 +19,12 @@ global se
 sites=se.sites;
 
 
+if ~isfield(sites(1).evaluation.CME3DDSpherefit.map3D,'coordinates2')
+    for k=1:length(sites)
+        sites(k).evaluation.CME3DDSpherefit.map3D.coordinates2=struct('x',[],'xc',[],'y',[],'yc',[],'z',[],'zc',[]);
+    end
+end
+
 % rSphere=getFieldAsVector(sites,'evaluation','CME3DDSpherefit','map3D','rSphere');
 mainFraction=getFieldAsVector(sites,'evaluation','CME3DDSpherefit','map3D','mainFraction');
 
@@ -168,18 +174,18 @@ lighting gouraud
 
 f2=figure(91);
 clf
-hiso=patch(isosurface(X,Y,Z,Vs,codc),'EdgeColor','none','FaceColor',[1,.75,.65],'FaceAlpha',1);
+hiso=patch(isosurface(X,Y,Z,Vs,codc),'EdgeColor','none','FaceColor',[1,.75,.65],'FaceAlpha',0.75);
 isonormals(X,Y,Z,Vs,hiso);
 hold on
 if 0
 indin=x2>0;
 scatter3(y2(indin),x2(indin),-z2(indin)-dz,2,'k')
 else
-% codc=max(V2(:))/6;
-codc=.5;
-hiso2=patch(isosurface(X,Y,Z,Vs2,codc),'EdgeColor','none','FaceColor',[0,.75,1]);
+codc2=max(Vs2(:))/p.cutoffdc;
+% codc2=.5;
+hiso2=patch(isosurface(X,Y,Z,Vs2,codc2),'EdgeColor','none','FaceColor',[0,.75,1]);
 isonormals(X,Y,Z,Vs2,hiso2);
-hcap2=patch(isocaps(X,Y,Z,Vs2,co),'FaceColor','interp','EdgeColor','none');
+hcap2=patch(isocaps(X,Y,Z,Vs2,codc2),'FaceColor','interp','EdgeColor','none');
 end
 
 axis equal
@@ -192,7 +198,9 @@ zlim(zrange)
 lightangle(45,30);
 lighting gouraud
 
-f=f1;
+f=f1; %select which figure is saved
+
+
 % indg=r~=0;
 % % [z,x]=pol2cart(p(indg),r(indg));
 % [z,x,y]=sph2cart(t(indg),p(indg),r(indg));
