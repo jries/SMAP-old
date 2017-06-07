@@ -2,9 +2,12 @@ global path
 [f,path]=uigetfile([path filesep '*.tif']);
 %%
 imgr=imageloaderAll([path f]);
-img=imgr.getmanyimages(1:100,'mat');
-%%
-
+imga=double(imgr.getmanyimages(1:100,'mat'));
+%
+offset=10000;
+cutoffmin=200;
+img=imga-offset;
+quantile(img(:),0.02)
 %%
 imghr=imresize(img,1);
 
@@ -16,22 +19,36 @@ mask=createMask(h);
 mimg=double(mimgr).*double(mask);
 figure(39)
 imagesc(mimg);
-
+mmmm=mimg(mimg~=0);
+background=quantile(mmmm(:),0.2);
+mimg=mimg-background;
+%%
+numbins=100; 
 maxima=maximumfindcall(mimg);
 mint=maxima(:,3);
-cutoff=600;
-mintc=mint(mint>cutoff);
+% cutoffmin=600;
+mintc=mint(mint>cutoffmin);
 figure(33);
-h=histogram(mintc,50);
-cftool(h.BinEdges(1:end-1),h.Values)
+hold off
+h=histogram(mintc,numbins);
+% cftool(h.BinEdges(1:end-1)+h.BinWidth/2,h.Values)
+xfit=h.BinEdges(1:end-1)+h.BinWidth/2;
+yfit=h.Values;
+fitp=fit(xfit',yfit','gauss1','Robust','LAR');
+hold on
+plot(xfit,fitp(xfit))
+title(['maximum at ' num2str(fitp.b1,4) ', bg ' num2str(background)])
+% cftool(h.BinEdges(1:end-1),h.Values)
 
-maximac=maxima(mint>cutoff,:);
+%%
+
+maximac=maxima(mint>cutoffmin,:);
 roih=3;
 [X,Y]=meshgrid(-roih:roih);
 intensity=[];stdx=[];stdy=[];as=[];
 for k=size(maximac,1):-1:1
     x=maximac(k,2);y=maximac(k,1);
-    if x>roih&& x < size(imgh,2)-roih &&y > roih &&y<size(imgh,1)-roih 
+    if x>roih&& x < size(imghr,2)-roih &&y > roih &&y<size(imghr,1)-roih 
         imsmall=double(mimg(x-roih:x+roih,y-roih:y+roih));
         imsmall=imsmall-min(imsmall(:));
         [as(k),alpha(k)]=asymmetry(imsmall);
@@ -72,7 +89,17 @@ ylabel('intensity');
 
 ascutoff=0.15; stdcutoff=3.2;
 badind=as>ascutoff|stdx>stdcutoff|stdy>stdcutoff;
+badind=badind+mintc'<cutoffmin;
 
-figure(33);
-h=histogram(mintc(~badind),50);
-cftool(h.BinEdges(1:end-1),h.Values)
+figure(35);
+hold off
+h=histogram(mintc(~badind),numbins);
+% cftool(h.BinEdges(1:end-1),h.Values)
+
+% cftool(h.BinEdges(1:end-1)+h.BinWidth/2,h.Values)
+xfit=h.BinEdges(1:end-1)+h.BinWidth/2;
+yfit=h.Values;
+fitp=fit(xfit',yfit','gauss1','Robust','LAR');
+hold on
+plot(xfit,fitp(xfit))
+title(['Filtered. Maximum at ' num2str(fitp.b1,5) ', bg ' num2str(background)])
