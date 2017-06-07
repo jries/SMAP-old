@@ -9,6 +9,8 @@ p.minx=0; %x: use 0 for central cut
 p.pixelsize=5; %nm, for volume reconstruction
 % p.limxy=[0 40]; % for plotting, in volume pixels
 % p.limz=[0 40];
+
+p.polarfactor=[.5 1]; %intensity factor for layer1, layer2
 rot=1; % rotate sites to align bottom holes
 
 timewindows=20; % number of sites per average: (number of sites / this number)
@@ -48,6 +50,7 @@ range(end)=min(range(end),length(sitessort)-dN);
 rmean=zeros(1,length(indsort));
 rcorr=zeros(1,length(indsort));
 F(length(range))=struct('cdata',[],'colormap',[]);
+polall=[];
 for k=1:length(range)
     numloc=0;
     numloc2=0;
@@ -107,12 +110,37 @@ for k=1:length(range)
         ind2=ind2+length(xh2);
         
     end
-    f=plotcoords(x,y,z,Rhere,thcov,p,x2,y2,z2);
+    [f,imcomp]=plotcoords(x,y,z,Rhere,thcov,p,x2,y2,z2);
+    if isempty(polall)
+        s=size(imcomp);
+        polall=zeros(s(1),s(2),s(3),length(range));
+    end
+    polall(:,:,:,k)=imcomp;
+   
     F(k)=getframe(f);
-    
-
-    
 end
+
+temp=polall(:,:,1,:);
+m1=quantile(temp(:),0.99);
+temp=polall(:,:,2,:);
+m2=quantile(temp(:),0.99);
+polalln=polall;
+polalln(:,:,1,:)=polalln(:,:,1,:)/m1;
+polalln(:,:,2,:)=polalln(:,:,2,:)/m2;
+
+h=fspecial('gauss',5,.7);
+if 1 %if you want to save polar plot
+    for k=1:size(polall,4)
+        imh=polalln(:,:,:,k);
+        imhf=imfilter(imh,h);
+        f=figure(111);
+        imagesc(imhf);
+        drawnow
+        
+        F(k)=getframe(f);
+    end
+end
+
 path=fileparts(se.files(1).name);
 [f,path]=uiputfile([path filesep 'movie.mp4']);
 if f
@@ -128,7 +156,7 @@ end
 
 
 
-function f=plotcoords(x,y,z,R,thcov,p,x2,y2,z2)
+function [f,imcomp]=plotcoords(x,y,z,R,thcov,p,x2,y2,z2)
 % figure(88)
 % scatter3(x,y,z+R,[],z+R)
 % axis equal
@@ -198,9 +226,21 @@ zlim(zrange)
 lightangle(45,30);
 lighting gouraud
 
+
+
+%2D analysis
+
+img=getpolarimage(x,y,z,R,p)*p.polarfactor(1);
+img2=getpolarimage(x2,y2,z2,R,p)*p.polarfactor(2);
+s=size(img);
+imcomp=zeros(s(2),s(1),3);
+imcomp(:,:,1)=img';
+imcomp(:,:,2)=img2';
+f3=figure(45);
+imagesc(imcomp);
+axis equal
+
 f=f1; %select which figure is saved
-
-
 % indg=r~=0;
 % % [z,x]=pol2cart(p(indg),r(indg));
 % [z,x,y]=sph2cart(t(indg),p(indg),r(indg));
@@ -233,4 +273,15 @@ drawnow;
 % waitforbuttonpress
 % pause(.2)
 
+end
+
+
+
+function imgo=getpolarimage(x,y,z,R,p)
+[a,e,r]=cart2sph(x,y,z);
+[xp,zp]=pol2cart(e,r);
+zp2=zp+R;
+w=1./(abs(cos(e))+pi/128)/R;
+img=myhist2(xp,zp2,p.pixelsize,p.pixelsize,[0 1]*p.winsize,[-1 1]*p.winsize,w');
+imgo=vertcat(img(end:-1:2,:),img);
 end
