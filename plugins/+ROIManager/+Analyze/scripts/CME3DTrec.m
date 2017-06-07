@@ -101,8 +101,8 @@ for k=1:length(range)
         ind2=ind2+length(xh2);
         
     end
-    plotcoords(x,y,z,Rhere,thcov,p,x2,y2,z2)
-    F(k)=getframe(gcf);
+    f=plotcoords(x,y,z,Rhere,thcov,p,x2,y2,z2);
+    F(k)=getframe(f);
     
 
     
@@ -122,7 +122,7 @@ end
 
 
 
-function plotcoords(x,y,z,R,thcov,p,x2,y2,z2)
+function f=plotcoords(x,y,z,R,thcov,p,x2,y2,z2)
 % figure(88)
 % scatter3(x,y,z+R,[],z+R)
 % axis equal
@@ -130,9 +130,10 @@ function plotcoords(x,y,z,R,thcov,p,x2,y2,z2)
 % figure(89)
 % polarplot(p,r,'.')
 dz=R*cos(thcov);
+dz=R;
 xrange=[-p.minx,p.winsize];
 yrange=[-p.winsize,p.winsize];
-zrange=[-p.winsize,p.winsize]+p.winsize/2;
+zrange=[-p.winsize,p.winsize]-p.winsize/2;
 
 xr=xrange(1)+p.pixelsize:p.pixelsize:xrange(2)-p.pixelsize;
 yr=yrange(1)+p.pixelsize:p.pixelsize:yrange(2)-p.pixelsize;
@@ -148,7 +149,8 @@ Vs2=smooth3(V2,'gaussian',[1 1 1]*(round(2*p.sgauss/2)*2+1),p.sgauss2);
 
 co=max(Vs(:))/p.cutoff;
 codc=max(Vs(:))/p.cutoffdc;
-figure(90);
+
+f1=figure(90);
 clf
 hiso=patch(isosurface(X,Y,Z,Vs,co),'EdgeColor','none','FaceColor',[1,.75,.65]);
 isonormals(X,Y,Z,Vs,hiso);
@@ -164,9 +166,9 @@ zlim(zrange)
 lightangle(45,30);
 lighting gouraud
 
-figure(91);
+f2=figure(91);
 clf
-hiso=patch(isosurface(X,Y,Z,Vs,codc),'EdgeColor','none','FaceColor',[1,.75,.65],'FaceAlpha',0.75);
+hiso=patch(isosurface(X,Y,Z,Vs,codc),'EdgeColor','none','FaceColor',[1,.75,.65],'FaceAlpha',1);
 isonormals(X,Y,Z,Vs,hiso);
 hold on
 if 0
@@ -181,16 +183,16 @@ hcap2=patch(isocaps(X,Y,Z,Vs2,co),'FaceColor','interp','EdgeColor','none');
 end
 
 axis equal
-view(30,-15)
+view(-35,30)
 
 xlim(yrange)
 ylim(xrange)
 zlim(zrange)
 
-lightangle(45,0);
+lightangle(45,30);
 lighting gouraud
 
-
+f=f1;
 % indg=r~=0;
 % % [z,x]=pol2cart(p(indg),r(indg));
 % [z,x,y]=sph2cart(t(indg),p(indg),r(indg));
