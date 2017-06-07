@@ -1,21 +1,22 @@
 %mammalian cells: temporal reconstruction
 %parameters
-p.cutoff=8; % for isosurface, at max(V(:))/cutoff
+p.cutoff=4; % for isosurface, at max(V(:))/cutoff
 p.sgauss=1;%smoothing of volume
 p.winsize=200; %plotting
 p.minx=0; %x: use 0 for central cut
 p.pixelsize=10; %nm, for volume reconstruction
 p.limxy=[0 40]; % for plotting, in volume pixels
 p.limz=[0 40];
+rot=0; % rotate sites to align bottom holes
 
-timewindows=10;
-timepoints=50;
-framerate=10;
+timewindows=20; % number of sites per average: (number of sites / this number)
+timepoints=100; % increment: (number of sites / this number)
+framerate=25;
 
 global se
 sites=se.sites;
 
-rot=true;
+
 % rSphere=getFieldAsVector(sites,'evaluation','CME3DDSpherefit','map3D','rSphere');
 mainFraction=getFieldAsVector(sites,'evaluation','CME3DDSpherefit','map3D','mainFraction');
 
@@ -104,7 +105,7 @@ if f
     end
     close(v);
 end
-f=figure(123);movie(f,F,2)
+%f=figure(123);movie(f,F,2)
 
 
 
