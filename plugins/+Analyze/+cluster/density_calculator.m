@@ -31,12 +31,12 @@ classdef density_calculator<interfaces.DialogProcessor
 %            [locs,indin]=obj.locData.getloc({'xnm','ynm','filenumber','channel','frame','znm','ingrouped','inungrouped'},'layer',find(p.sr_layerson),'position','all');
             for lay=1:length(locall)
                 neighbourstot=zeros(length(obj.locData.loc.xnm),1);
-                sortmall=horzcat(locall(lay).filenumber,locall(lay).xnm,(1:length(locall(lay).frame))');
+                sortmall=horzcat(double(locall(lay).filenumber),locall(lay).xnm,(1:length(locall(lay).frame))');
                 [sortedm,sortind]=sortrows(sortmall);
                 xa=locall(lay).xnm(sortind);
                 ya=locall(lay).ynm(sortind);
                 
-                sortmallr=horzcat(locref(lay).filenumber,locref(lay).xnm,(1:length(locref(lay).frame))');
+                sortmallr=horzcat(double(locref(lay).filenumber),locref(lay).xnm,(1:length(locref(lay).frame))');
                 [sortedmr,sortindr]=sortrows(sortmallr);
                 xr=locref(lay).xnm(sortindr);
                 yr=locref(lay).ynm(sortindr);
@@ -62,12 +62,12 @@ classdef density_calculator<interfaces.DialogProcessor
                 end
                 [~,sortbackind]=sort(sortedm(:,3));
                 neighboursback=neighbours(sortbackind);
-                if sum(locall(lay).inungrouped)==length(locall(lay).xnm) %ungrouped data
+%                 if sum(locall(lay).-inungrouped)==length(locall(lay).xnm) %ungrouped data
                      neighbourstot(locall(lay).inungrouped)=neighboursback;
-                else
-                    nbbackug=obj.locData.grouped2ungrouped(locall(lay).ingrouped,neighboursback);
-                    neighbourstot=nbbackug;
-                end
+%                 else
+%                     nbbackug=obj.locData.grouped2ungrouped(locall(lay).ingrouped,neighboursback);
+%                     neighbourstot=nbbackug;
+%                 end
                 neighbourstotall=max(neighbourstotall,neighbourstot);
             end
             
