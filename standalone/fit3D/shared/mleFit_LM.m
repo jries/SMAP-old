@@ -19,6 +19,15 @@ function [P,CRLB,LogL]=mleFit_LM(varargin)
 %       no sCMOS correction is used. Default= emCCD
 % 6. silent (if 1)
 
+%Output:
+%P
+%1. X, Y, Photons, Background, Iterations
+%2. X, Y, Photons, Background, PSFxy, Iterations
+%3. X, Y, Photons, Background, Z, Iterations
+%4. X, Y, Photons, Background, PSFx, PSFy, Iterations
+%5. X, Y, Photons, Background, Z, Iterations
+%CRLB: cramer-rao lower bounds, as in P
+%LogL: log-likelihood.
 
 %imstack, startpsf/coeff, iterations, fitmode, isemccd, hidereport
 
@@ -39,10 +48,7 @@ if isempty(fitter)
     disp(['using: ' char(allfitters{fitter})]);
 end
 
-if isempty(varargin{1})
-    P=[];CRLB=[];LogL=[];
-    return
-end
+
 [P,CRLB,LogL]=allfitters{fitter}(varargin{:});
  clear(allfittersnames{fitter})
 
