@@ -18,7 +18,10 @@ timepoints=100; % increment: (number of sites / this number)
 framerate=25;
 
 global se
-sites=se.sites;
+sites=[];
+use=[];
+use=getFieldAsVector(se.sites,'annotation','use');
+sites=se.sites(use);
 
 
 if ~isfield(sites(1).evaluation.CME3DDSpherefit.map3D,'coordinates2')
@@ -30,7 +33,7 @@ end
 % rSphere=getFieldAsVector(sites,'evaluation','CME3DDSpherefit','map3D','rSphere');
 mainFraction=getFieldAsVector(sites,'evaluation','CME3DDSpherefit','map3D','mainFraction');
 
-[~,indsort]=sort(-mainFraction);
+[~,indsort]=sort(mainFraction);
 
 sitessort=sites(indsort);
 % sitessort(1:10)=[];
@@ -127,6 +130,7 @@ m2=quantile(temp(:),0.999);
 polalln=polall;
 polalln(:,:,1,:)=polalln(:,:,1,:)/m1;
 polalln(:,:,2,:)=polalln(:,:,2,:)/m2;
+%polalln(polalln>1)=1;
 
 h=fspecial('gauss',5,1.2);
 if 1 %if you want to save polar plot
@@ -281,7 +285,7 @@ function imgo=getpolarimage(x,y,z,R,p)
 [a,e,r]=cart2sph(x,y,z);
 [xp,zp]=pol2cart(e,r);
 zp2=zp+R;
-w=1./(abs(cos(e))+pi/128)/R;
+w=1./(abs(cos(e))+0.2)/R;
 img=myhist2(xp,zp2,p.pixelsize,p.pixelsize,[0 1]*p.winsize,[-1 1]*p.winsize,w');
 imgo=vertcat(img(end:-1:2,:),img);
 end
