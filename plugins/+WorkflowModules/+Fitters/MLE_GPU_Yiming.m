@@ -21,8 +21,9 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             img=zeros(11,'single');img(5,5)=1;
             
             try
-                fitp=callYimingFitter(img,single(1),single(10),single(2),single(0),0);
-                obj.fitpar.fitfunction=@callYimingFitter;
+%                 fitp=callYimingFitter(img,single(1),single(10),single(2),single(0),0);
+                fitp=mleFit_LM(img,1);
+                obj.fitpar.fitfunction=@mleFit_LM;
 %                 obj.fitpar.fitfunction=@callYimingFitter;
                  reporttext='GPUmleFit_LM works';
             end
@@ -191,20 +192,22 @@ if isempty(EMexcess)
     EMexcess=1;
 end
 
+arguments{2}=fitpar.fitmode;
 arguments{3}=fitpar.iterations;
-arguments{4}=fitpar.fitmode;
+
 arguments{5}=fitpar.issCMOS;
 arguments{6}=1;
 % try   
     switch fitpar.fitmode
         case {1,2,4} %fix
-            arguments{2}=fitpar.PSFx0;
+            arguments{4}=fitpar.PSFx0;
             arguments{1}=single(imstack/EMexcess);
 %         case 2 %free
         case 3 %z
             arguments{1}=single(imstack/EMexcess);
-            arguments{2}=fitpar.zparhere(1);
-            arguments(7:13)=num2cell(fitpar.zparhere(2:8));
+            arguments{4}=single(fitpar.zparhere);
+%             arguments{2}=fitpar.zparhere(1);
+%             arguments(7:13)=num2cell(fitpar.zparhere(2:8));
 %         case 4 %sx sy
         case 5 %spline   
             if fitpar.mirrorstack
@@ -212,7 +215,7 @@ arguments{6}=1;
             else
                 arguments{1}=single(imstack/EMexcess);
             end
-            arguments{2}=single(fitpar.splinefithere.cspline.coeff);
+            arguments{4}=single(fitpar.splinefithere.cspline.coeff);
     end
     
     [P CRLB LogL]=fitpar.fitfunction(arguments{:});
