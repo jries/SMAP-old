@@ -682,6 +682,7 @@ if ~isempty(hmap)
     outdc(:,:,3)=mainbw'/2;
     
     imagesc(rangex,rangey,outdc,'Parent',hmap{4});
+    title(hmap{4},['N1: ' num2str(length(xc)) ', N2: ' num2str(length(xc2))])
     
 end
       catch

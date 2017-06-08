@@ -36,6 +36,8 @@ mainFraction=getFieldAsVector(sites,'evaluation','CME3DDSpherefit','map3D','main
 [~,indsort]=sort(mainFraction);
 
 sitessort=sites(indsort);
+
+% sitessort=sites;
 % sitessort(1:10)=[];
 rSphere=getFieldAsVector(sitessort,'evaluation','CME3DDSpherefit','map3D','rSphere');
 mainFraction=getFieldAsVector(sitessort,'evaluation','CME3DDSpherefit','map3D','mainFraction');
