@@ -382,7 +382,7 @@ hx=zeros(1,length(xr)-1);
 hy=hx;
 while toc(tt)<30
     nn=rand(11,11,10000,'single');
-    P=callYimingFitter(nn,single(coeff),50,5,0,0);
+    P=fitterGPU(nn,single(coeff),50,5,0,0);
     
     hz=histcounts(P(:,5),zr)+hz;
     hx=histcounts(P(:,1),xr)+hx;
@@ -426,8 +426,8 @@ d=round((size(teststack,1)-p.roisize)/2);
 %     fitterCPU=@kernel_MLEfit_Spline_LM_SMAP_v2;
 % else
     coefffak=1;
-    fitterGPU=@callYimingFitter;
-    fitterCPU=@kernel_MLEfit_Spline_LM_SMAP_v2_nointerp;
+    fitterGPU=@mleFit_LM;
+%     fitterCPU=@kernel_MLEfit_Spline_LM_SMAP_v2_nointerp;
 % end  
 numstack=size(teststack,4);
 fprintf('fitting test stacks: 0.00')
