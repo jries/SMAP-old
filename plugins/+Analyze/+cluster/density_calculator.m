@@ -11,32 +11,65 @@ classdef density_calculator<interfaces.DialogProcessor
         
         function out=run(obj,p)
             out=[];
+            if p.allfiles
+                fieldremref={'filenumber'};
+                fieldremall={'channel'};
+                indl=1;
+            else 
+                fieldremref={};
+                fieldremall={'filenumber','channel'};
+            end
+            
+            
             %obj.locData.sort('filenumber','channel','xnm');
             %problem on filtered data, somehow it gets confused.
             %[locs,indin]=obj.locData.getloc({'xnm','ynm','channel','frame','znm','ingrouped','inungrouped'},'position','all');
             if contains(p.countwhat.selection,'layer')
                 activelayers=find(p.sr_layerson);
                 for k=1:length(activelayers)
-                    fieldrem=setdiff(fieldnames(obj.locData.layer(k).filter),{'filenumber','channel'})';
-                    locall(k)=obj.locData.getloc({'xnm','ynm','filenumber','channel','frame','znm','ingrouped','inungrouped'},'layer',activelayers(k),'position','all','removeFilter',fieldrem,'grouping','ungrouped');
-                    locref(k)=obj.locData.getloc({'xnm','ynm','filenumber','channel','frame','znm','ingrouped','inungrouped'},'layer',activelayers(k),'position','all');
+                    fieldrem=setdiff(fieldnames(obj.locData.layer(k).filter),fieldremall)';
+%                     fieldrem=setdiff(fieldrem,fieldremref);
+                    locallh=obj.locData.getloc({'xnm','ynm','filenumber','channel','frame','znm','ingrouped','inungrouped'},'layer',activelayers(k),'position','all','removeFilter',fieldrem,'grouping','ungrouped');
+                    locrefh=obj.locData.getloc({'xnm','ynm','filenumber','channel','frame','znm','ingrouped','inungrouped'},'layer',activelayers(k),'position','all','removeFilter',fieldremref);
+                    fiu=find(locallh.inungrouped);
+                    if p.allfiles
+                        for f=1:max(locallh.filenumber)
+                            infiles=locallh.filenumber==f;
+                            locall(indl)=copystructReduce(locallh,infiles);
+                            
+                            
+                            fiu2=fiu(infiles);
+                            inung=false(length(locallh.inungrouped),1);
+                            inung(fiu2)=true;
+                            locall(indl).inungrouped=inung;
+                            
+                            infilesr=locrefh.filenumber==f;
+                            locref(indl)=copystructReduce(locrefh,infilesr);
+%                             locref(indl).inungrouped=locallh.inungrouped&infiles;                           
+                            indl=indl+1;
+                        end
+                    else   
+                        locall(k)=locallh;
+                        locref(k)=locallh;
+                    end
                 end
             else
                 locall=obj.locData.loc;
                 locref=obj.locData.loc;
             end
             
-            
+           
+                
             neighbourstotall=zeros(length(obj.locData.loc.xnm),1);
 %            [locs,indin]=obj.locData.getloc({'xnm','ynm','filenumber','channel','frame','znm','ingrouped','inungrouped'},'layer',find(p.sr_layerson),'position','all');
             for lay=1:length(locall)
                 neighbourstot=zeros(length(obj.locData.loc.xnm),1);
-                sortmall=horzcat(double(locall(lay).filenumber),locall(lay).xnm,(1:length(locall(lay).frame))');
+                sortmall=horzcat(locall(lay).xnm,(1:length(locall(lay).frame))');
                 [sortedm,sortind]=sortrows(sortmall);
                 xa=locall(lay).xnm(sortind);
                 ya=locall(lay).ynm(sortind);
                 
-                sortmallr=horzcat(double(locref(lay).filenumber),locref(lay).xnm,(1:length(locref(lay).frame))');
+                sortmallr=horzcat(locref(lay).xnm,(1:length(locref(lay).frame))');
                 [sortedmr,sortindr]=sortrows(sortmallr);
                 xr=locref(lay).xnm(sortindr);
                 yr=locref(lay).ynm(sortindr);
@@ -60,7 +93,7 @@ classdef density_calculator<interfaces.DialogProcessor
                         neighbours=countneighbours2Dcirc2(double(xa),double(ya),double(xr),double(yr),double(dx));
                     end
                 end
-                [~,sortbackind]=sort(sortedm(:,3));
+                [~,sortbackind]=sort(sortedm(:,2));
                 neighboursback=neighbours(sortbackind);
 %                 if sum(locall(lay).-inungrouped)==length(locall(lay).xnm) %ungrouped data
                      neighbourstot(locall(lay).inungrouped)=neighboursback;
@@ -97,8 +130,12 @@ pard.countingregion.Width=2;
 pard.countwhat.object=struct('String','all|layers','Style','popupmenu','Value',2);
 pard.countwhat.object.TooltipString=sprintf('count all localizations or per layer (use visible ones as reference)');
 pard.countwhat.position=[2,1];
-pard.countwhat.Width=2;
+pard.countwhat.Width=1;
 
+pard.allfiles.object=struct('String','on all files','Style','checkbox','Value',0);
+pard.allfiles.object.TooltipString=sprintf('Apply on all files together');
+pard.allfiles.position=[2,2];
+pard.allfiles.Width=1;
 
 pard.texta.object=struct('String','size in x,y (nm)','Style','text');
 pard.texta.position=[3,1];
