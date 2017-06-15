@@ -2,7 +2,7 @@ function beadlocs=getBeadLocs(x,y,p)
 pos.x=x;
 pos.y=y;
 % dx=p.camPixSizeNm;
-dx=p.cam_pixelsize_nm;
+dx=p.cam_pixelsize_nm(1);
 rangex=dx*round([min(pos.x)-5*dx max(pos.x)+5*dx]/dx);
 rangey=dx*round([min(pos.y)-5*dx max(pos.y)+5*dx]/dx);
 

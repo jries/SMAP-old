@@ -1,6 +1,9 @@
 function bead=segmentb(obj,p)
-
+if isfield(p,'zrangeuse')
 minframes=(p.zrangeuse(2)-p.zrangeuse(1))/ p.dz/2;
+else
+    minframes=800/p.dz;
+end
 % minframes=(p.zrangeuse(2)-p.zrangeuse(1))/ p.dz/5;
 
 locDatacopy=obj.locData.copy;
@@ -38,7 +41,7 @@ for k=1:length(beadind)
     for l=k+1:length(beadind)
         d2=sum((bead(k).pos-bead(l).pos).^2);
         df=mean(bead(k).loc.frame)-mean(bead(l).loc.frame);
-        if bead(k).filenumber==bead(l).filenumber && d2<mindist^2 && df<p.zrangeuse(2)-p.zrangeuse(1)
+        if bead(k).filenumber==bead(l).filenumber && d2<mindist^2 %&& df<p.zrangeuse(2)-p.zrangeuse(1)
             goodind(k)=false;
             goodind(l)=false;
         end

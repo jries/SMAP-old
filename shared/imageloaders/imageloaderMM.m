@@ -12,6 +12,9 @@ classdef imageloaderMM<interfaces.imageloaderSMAP
         end
         function open(obj,file)
             initMM(obj);
+            try
+                obj.reader.close;
+            end
             obj.reader = javaObjectEDT('org.micromanager.acquisition.TaggedImageStorageMultipageTiff',fileparts(file), false, [], false, false, true);
             obj.file=file;
 %             obj.reader=bfGetReader(file);

@@ -382,7 +382,8 @@ hx=zeros(1,length(xr)-1);
 hy=hx;
 while toc(tt)<30
     nn=rand(11,11,10000,'single');
-    P=callYimingFitter(nn,single(coeff),50,5,0,0);
+    [P] =  mleFit_LM(single(nn),5,100,single(coeff),0,1);
+%     P=fitterGPU(nn,single(coeff),50,5,0,0);
     
     hz=histcounts(P(:,5),zr)+hz;
     hx=histcounts(P(:,1),xr)+hx;
@@ -425,21 +426,21 @@ d=round((size(teststack,1)-p.roisize)/2);
 %     fitterGPU=@GPUmleFit_LM_v2;
 %     fitterCPU=@kernel_MLEfit_Spline_LM_SMAP_v2;
 % else
-    coefffak=1;
-    fitterGPU=@callYimingFitter;
-    fitterCPU=@kernel_MLEfit_Spline_LM_SMAP_v2_nointerp;
+%     coefffak=1;
+%     fitterGPU=@mleFit_LM;
+%     fitterCPU=@kernel_MLEfit_Spline_LM_SMAP_v2_nointerp;
 % end  
 numstack=size(teststack,4);
 fprintf('fitting test stacks: 0.00')
     for k=1:size(teststack,4)
         fprintf([ '\b\b\b\b' num2str(k/numstack,'%1.2f')])
-        try
-          [P] =  fitterGPU(single(squeeze(teststack(range,range,:,k))),single(coefffak*coeff),100,5,0);
-        catch err
-%             err
-            disp('run on CPU')        
-            [P] =  fitterCPU(teststack(range,range,:,k),(coefffak*coeff),single(p.roisize),100);
-        end
+%         try
+          [P] =  mleFit_LM(single(squeeze(teststack(range,range,:,k))),5,100,single(coeff),0,1);
+%         catch err
+% %             err
+%             disp('run on CPU')        
+%             [P] =  fitterCPU(teststack(range,range,:,k),(coefffak*coeff),single(p.roisize),100);
+%         end
     z=(1:size(P,1))'-1;
     plot(ax,z,P(:,5),linepar{:})
     hold(ax,'on')

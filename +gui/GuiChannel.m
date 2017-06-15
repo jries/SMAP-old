@@ -329,6 +329,9 @@ classdef GuiChannel< interfaces.LayerInterface
                 obj.updateLayerField;
                 
             end
+            if isfield(varargin{1},'rec_addparval')
+                    obj.rec_addparval=varargin{1}.rec_addparval;
+            end
 %             obj.updatelayer_callback;
         end
         
@@ -711,7 +714,7 @@ end
 
 
 function [paro,settings]=renderpardialog(par,default)
-if nargin==0 || isempty(par)
+if nargin==0 || isempty(par) || ~isfield(par,'mingaussnm')
 %     if isempty(obj.rec_addparval)
     par.mingaussnm=3;
     par.mingausspix=.7;

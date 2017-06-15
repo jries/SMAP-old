@@ -34,7 +34,7 @@ classdef calibrate3Daberrations<interfaces.DialogProcessor
                 beads(k).phot=beads(k).loc.phot(min(length(beads(k).loc.phot),max(1,round(beads(k).f0))));
             end
             f0all=([beads(:).f0]);
-            badind=f0all<frange(1)|f0all>frange(2)|isnan(f0all);
+            badind=f0all<frange(1)|isnan(f0all); %|f0all>frange(2)
             beads(badind)=[];
             
             % * determine fglass, glass
@@ -63,7 +63,10 @@ classdef calibrate3Daberrations<interfaces.DialogProcessor
                 beads(k).loc.dzcorr=beads(k).loc.z0relative-beads(k).loc.znm;
                 beads(k).f0glass=beads(k).f0-f0glass(beads(k).filenumber);
                 beads(k).loc.z0glass=beads(k).f0glass*p.dz+0*beads(k).loc.zglass;
-                indplot=(beads(k).loc.z0relative)>p.zrangeuse(1)&(beads(k).loc.z0relative)<p.zrangeuse(2);
+                 indplot=abs(beads(k).loc.z0relative)<800;
+%                 indplot=(beads(k).loc.z0relative)>p.zrangeuse(1)&(beads(k).loc.z0relative)<p.zrangeuse(2);
+%                 indplot=true(size(beads(k).f0glass));
+%                 indplot=(beads(k).loc.z0relative)>p.zrangeuse(1)&(beads(k).loc.z0relative)<p.zrangeuse(2);
 %                 plot(axh,beads(k).loc.frame,beads(k).loc.znm,'.')
                 plot(axh,beads(k).loc.zglass(indplot),beads(k).loc.znm(indplot),'.')
 %                 beads(k).stddz=std(diff(beads(k).loc.znm(indplot)));
@@ -117,7 +120,7 @@ classdef calibrate3Daberrations<interfaces.DialogProcessor
        
             minv=inf;
             maxv=-inf;
-           for k=1:length(beads)
+           for k=length(beads):-1:1
 
                dZ=ZcorrInterp.interp(beads(k).loc.zglass,beads(k).loc.znm);
 %                 z0glass=beads(k).loc.zglass-(beads(k).loc.frame)*p.dz
@@ -216,19 +219,20 @@ end
                 zzax=zglassall;
             end
             
-            if p.setzero
-                zplot(z0glassall<150)=0;
+            if 0%p.setzero
+                zplot(z0glassall<100)=0;
             end
 %             zglassall=z0glassall;
 %             zglassall=zglassall-
             qzfit=myquantile(zfitall,[0.05,0.95]);
             qzfit(1)=qzfit(1)+p.dz;qzfit(2)=qzfit(2)-p.dz;
-            
+%             qzfit(1)=max(qzfit(1),p.zrangeuse(1));
+%             qzfit(2)=min(qzfit(2),p.zrangeuse(2));
             %for now don't follow up, later: remove single wrong
             %localizations.
             
             %determine range/outliers
-            
+%             inz=z0relativeall>p.zrangeuse(1)&z0relativeall<p.zrangeuse(2);
             inz=abs(z0relativeall)<800;
 %             inz=inz&z0glassall>-50;
             inz=inz&(zfitall)<qzfit(2)&(zfitall)>qzfit(1);
@@ -241,7 +245,8 @@ end
 
                 inz=inz&abs(dz)<p.cutoffrefine;
                 h=histcounts(idall(inz),(1:max(idall)+1))';
-                minpoints=(p.zrangeuse(2)-p.zrangeuse(1))/p.dz/2;
+%                 minpoints=(p.zrangeuse(2)-p.zrangeuse(1))/p.dz/2; %ONLY relevant use of zrangeuse. remove!
+                minpoints=800/p.dz;
                 innump=h(idall)>minpoints;
                 inz=inz&innump;
             end
@@ -352,25 +357,7 @@ function [err1,dzerr]=geterrors(beads,Zint,p)
    end
 end
 %
-function  f0=getf0Z(loc,p)
-frames=loc.frame;
-z=loc.znm;
-window=round(100/p.dz);
-az=abs(z);
-nn=loc.phot./(az+p.dz);
-[~,maxind]=max(nn);
 
-range=max(1,maxind-window):min(maxind+window,length(z));
-if sum(abs(z(range))<2*p.dz)<4
-    f0=NaN;
-else
-
-    zs=double(z(range));
-    fs=double(frames(range));
-    fp=fit(zs,fs,'poly1');
-    f0=fp(0);
-end
-end
 
 
 
@@ -425,12 +412,12 @@ pard.dz.Width=.35;
 % pard.alignz.Width=1.2;
 
 
-pard.zrangeuset.object=struct('String','zrange (nm)','Style','text');
-pard.zrangeuset.position=[3,1];
-pard.zrangeuset.Width=1.5;
-pard.zrangeuse.object=struct('String','-800 800','Style','edit');
-pard.zrangeuse.position=[3,2.5];
-pard.zrangeuse.Width=1;
+% pard.zrangeuset.object=struct('String','zrange (nm)','Style','text');
+% pard.zrangeuset.position=[3,1];
+% pard.zrangeuset.Width=1.5;
+% pard.zrangeuse.object=struct('String','-800 800','Style','edit');
+% pard.zrangeuse.position=[3,2.5];
+% pard.zrangeuse.Width=1;
 
 pard.smoothingt.object=struct('String','Smoothing (frame, zfit)','Style','text');
 pard.smoothingt.position=[4,1];

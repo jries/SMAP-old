@@ -112,7 +112,7 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                     f={f};
                 end
                 try
-                loader.clear([pfad f{1}],isadd)
+                 loader.clear([pfad f{1}],isadd)
                 catch
                     obj.status('file type not recognized');
                     warning('file type not recognized');
@@ -134,7 +134,12 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                     end
                     obj.status(['load: ' f{k}])
                     drawnow
+                    try
                     loadfiles(obj,loader,f{k},pfad)
+                    catch err
+                        err
+                        disp([f{k} ' could not be loaded'])
+                    end
                 end
 
                 obj.status('file loaded')
