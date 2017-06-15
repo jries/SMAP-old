@@ -76,8 +76,11 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
         else
             allmd=[];
         end
+        try
         allcore=getallcoremtadata(obj.reader.getCoreMetadataList);
         allmd=vertcat(allmd,allcore);
+        catch
+        end
         obj.allmetadatatags=allmd;
         end
         

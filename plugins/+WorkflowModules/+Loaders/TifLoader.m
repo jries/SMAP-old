@@ -1,5 +1,6 @@
 classdef TifLoader<interfaces.WorkflowModule
     properties     
+        loaders
         imloader
         framestop
         framestart
@@ -17,10 +18,12 @@ classdef TifLoader<interfaces.WorkflowModule
             pard=guidef(obj);
         end
         function initGui(obj)
+             obj.loaders={'auto',@imageloaderAll;'MMStack',@imageloaderMM;'MMSingle',@imageloaderMMsingle;'OME',@imageloaderOME;'simple Tif',@imageloaderTifSimple};
             initGui@interfaces.WorkflowModule(obj);
             obj.inputParameters={'loc_subtractbg','loc_blocksize_frames'};            
             obj.guihandles.loadtifbutton.Callback={@loadtif_callback,obj};
             obj.addSynchronization('filelist_localize',obj.guihandles.tiffile,'String',{@loadtif_ext,obj});
+            obj.guihandles.loaderclass.String=obj.loaders(:,1);
         end
         function prerun(obj,p)
             if ~exist(p.tiffile,'file')
@@ -175,7 +178,11 @@ classdef TifLoader<interfaces.WorkflowModule
             catch err
 %                 err
             end
-            obj.imloader=imageloaderAll(file,obj.getPar('loc_fileinfo'),obj.P);
+             lc=obj.getSingleGuiParameter('loaderclass');
+            loader=obj.loaders{lc.Value,2};
+            obj.imloader=loader(file,obj.getPar('loc_fileinfo'),obj.P);
+            
+%             obj.imloader=imageloaderAll(file,obj.getPar('loc_fileinfo'),obj.P);
 %             if ~isempty(obj.imloader.info.metafile)
             if ~isempty(obj.imloader.metadata.allmetadata)&&isfield(obj.imloader.metadata.allmetadata,'metafile')
              obj.setPar('loc_metadatafile',obj.imloader.metadata.allmetadata.metafile);
@@ -243,6 +250,18 @@ str={'essential metadata missing (set manually in camera settings): ', missing{:
 warndlg(str)
 end
 
+function changeloader(a,b,obj)
+file=obj.getSingleGuiParameter('tiffile');
+try
+addFile(obj,file)
+catch err
+    obj.status('error in loading file. Choose different tiff loader')
+    err
+end
+    
+
+end
+
 function pard=guidef(obj)
 pard.text.object=struct('Style','text','String','Image source file:');
 pard.text.position=[1,1];
@@ -255,7 +274,12 @@ pard.loadtifbutton.TooltipString=sprintf('Open raw camera image tif files. \n Ei
 
 pard.tiffile.object=struct('Style','edit','String',' ','HorizontalAlignment','right');
 pard.tiffile.position=[2,1];
-pard.tiffile.Width=4;
+pard.tiffile.Width=3;
+
+pard.loaderclass.object=struct('Style','popupmenu','String','auto','Callback',{{@changeloader,obj}});
+pard.loaderclass.position=[2,4];
+pard.loaderclass.Width=1;
+pard.loaderclass.Optional=true;
 
 pard.onlineanalysis.object=struct('Style','checkbox','String','Online analysis. Waittime (s):','Value',0);
 pard.onlineanalysis.position=[3,2];
@@ -267,7 +291,6 @@ pard.onlineanalysiswaittime.position=[3,3.75];
 pard.onlineanalysiswaittime.Width=0.5;
 pard.onlineanalysiswaittime.TooltipString='Waiting time for online analysis.';
 pard.onlineanalysiswaittime.Optional=true;
-
 
 pard.parallelload.object=struct('Style','checkbox','String','parallel','Value',0);
 pard.parallelload.position=[3,4.25];

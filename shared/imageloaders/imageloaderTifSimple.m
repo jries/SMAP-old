@@ -43,6 +43,9 @@ classdef imageloaderTifSimple<interfaces.imageloaderSMAP
         
         function allmd=getmetadatatags(obj)
             allmd={'Format','SimpleTif'};
+            imtest=imread(obj.file,'Index',1);
+            allmd(end+1,:)={'Width info',size(imtest,1)};
+            allmd(end+1,:)={'Height info',size(imtest,2)};
             obj.allmetadatatags=allmd;
                 
         

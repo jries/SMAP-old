@@ -149,8 +149,9 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
         function update_slider(obj,a,b)        
             fi=obj.getPar('loc_fileinfo');
             nf=fi.numberOfFrames;
-            if isempty(nf)||isinf(nf)
+            if isempty(nf)||isinf(nf)||isnan(nf)
                 nf=obj.getPar('loc_previewframe')+1;
+%                   nf=2;
             end
             obj.guihandles.previewframeslider.Min=1;
             obj.guihandles.previewframeslider.Max=max(nf,1);

@@ -102,11 +102,13 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
             if isempty(obj.allmetadatatags)
                 obj.allmetadatatags=obj.getmetadatatags;
             end
-            ind=find(strcmp(obj.allmetadatatags(:,1),tag),1,'first');
-            if ~isempty(ind)
-                val=obj.allmetadatatags{ind,2};
-            else
-                val=[];
+            val=[];
+            if ~isempty(obj.allmetadatatags)
+                ind=find(strcmp(obj.allmetadatatags(:,1),tag),1,'first');
+                if ~isempty(ind)
+                    val=obj.allmetadatatags{ind,2};
+                end
+                
             end
           
         end
