@@ -45,10 +45,11 @@ classdef calibrate3D_GUI<handle
             obj.guihandles.roisizezt=uicontrol('style','text','String','Z (frames): ','Position',[xpos1+2.5*xw,top-15*vsep,xw,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
             obj.guihandles.ROIz=uicontrol('style','edit','String','200','Position',[xpos1+3.5*xw,top-15*vsep,xw*.5,vsep],'FontSize',fontsize);
             
-            obj.guihandles.smootht=uicontrol('style','text','String','Smoothing parameter. XY: ','Position',[xpos1,top-16*vsep,xw*2,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
-            obj.guihandles.smoothxy=uicontrol('style','edit','String','0','Position',[xpos1+2*xw,top-16*vsep,xw*.5,vsep],'FontSize',fontsize);
-            obj.guihandles.smoothzt=uicontrol('style','text','String','Z: ','Position',[xpos1+2.5*xw,top-16*vsep,xw,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
-            obj.guihandles.smoothz=uicontrol('style','edit','String','2','Position',[xpos1+3.5*xw,top-16*vsep,xw*.5,vsep],'FontSize',fontsize);
+            obj.guihandles.smootht=uicontrol('style','text','String','Smoothing parameter in Z: ','Position',[xpos1,top-16*vsep,xw*2,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
+%             obj.guihandles.smoothxy=uicontrol('style','edit','String','0','Position',[xpos1+2*xw,top-16*vsep,xw*.5,vsep],'FontSize',fontsize);
+%             obj.guihandles.smoothzt=uicontrol('style','text','String','Z: ','Position',[xpos1+2.5*xw,top-16*vsep,xw,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
+%             obj.guihandles.smoothz=uicontrol('style','edit','String','2','Position',[xpos1+3.5*xw,top-16*vsep,xw*.5,vsep],'FontSize',fontsize);
+            obj.guihandles.smoothz=uicontrol('style','edit','String','2','Position',[xpos1+2*xw,top-16*vsep,xw*.5,vsep],'FontSize',fontsize);
             
             obj.guihandles.gausst=uicontrol('style','text','String','Gauss fit parameters: ','Position',[xpos1,top-18*vsep,xw*4,vsep],'FontSize',fontsize,'HorizontalAlignment',hatitle,'FontWeight','bold');
             obj.guihandles.gaussmint=uicontrol('style','text','String','Range (nm). minimum: ','Position',[xpos1,top-19*vsep,xw*2,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);

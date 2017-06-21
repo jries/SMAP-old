@@ -65,10 +65,14 @@ locs=load('data/depth_example_sml.mat');
 % same, save fitted z-positions and frames
 % z-positions should not be corrected for the refractive index mismatch. If
 % they are, divide by the RI_mismatch_factor.
-beads=load('data/beads_gel_stack_sml.mat');
+beads=(readtable('data/beads_in_gel_2.csv'));
+
+% beads=load('data/beads_gel_stack_sml.mat');
 % paramters
 % determine 3d corrections
-corr=calibrate_3Daberrations(beads,p);
+p.dz=20;
+zcorr=calibrate3Daberrations(beads,p);
+save('data/3Daberrationcorrection.mat','zcorr') %save correction to be used later
 
 % correct for aberrations and refractive index mismatch
-locs.znm_corr=correct_3Daberrations(locs.znm,objective_depth)*RI_mismatch_factor;
+locs.znm_corr=correct_3Daberrations(zcorr,locs.znm,objective_depth)*RI_mismatch_factor;

@@ -14,18 +14,27 @@ for k=1:length(filelist)
     ax=axes(uitab(tg,'Title',num2str(k)));
     imstack=readfile_ome(filelist{k});
     imstack=imstack-min(imstack(:)); %fast fix for offset;
-    mim=mean(imstack,3);
+    mim=max(imstack,[],3);
     mim=filter2(h,mim);
     maxima=maximumfindcall(mim);
 %     figure(88);
     imagesc(mim);
     
     int=maxima(:,3);
-    
+    try
     mimc=mim(roisize:end-roisize,roisize:end-roisize);
     mmed=quantile(mimc(:),0.3);
-    imt=mim(mim<mmed);
-    cutoff=mean(imt(:))+max(3*std(imt(:)),(max(int)-mean(imt(:)))/5);
+    imt=mimc(mimc<mmed);
+        sm=sort(int);
+    mv=mean(sm(end-5:end));
+    cutoff=mean(imt(:))+max(3*std(imt(:)),(mv-mean(imt(:)))/5);
+    catch
+        cutoff=quantile(mimc,.95);
+    end
+%     cutoff=(quantile(mimc(:),0.8)+quantile(mimc(:),0.99))/2;
+
+%    cutoff= (mv+quantile(mimc(:),0.5))/2;
+    
     maxima=maxima(int>cutoff,:);
     hold on
     plot(maxima(:,1),maxima(:,2),'mo')

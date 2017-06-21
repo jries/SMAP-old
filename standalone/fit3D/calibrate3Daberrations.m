@@ -1,4 +1,4 @@
-function cal= calibrate3Daberrations(locs,pin)
+function zcorr= calibrate3Daberrations(locs,pin)
 
 %loc.filenumber
 %loc.frame
@@ -8,11 +8,14 @@ function cal= calibrate3Daberrations(locs,pin)
 %loc.z
 p.glassframe=[]; %automatic
 p.setzero=true;
-p.smoothframe=2/10/p.dz;
+p.dz=10;
 p.smoothz=1/1000;
 p.cutoffrefine=150;
 p.maxrange=800;
 p=copyfields(p,pin);
+if ~isfield(p,'smoothframe')
+ p.smoothframe=2/10/p.dz;
+end
 
 f=figure;
 p.tabgroup=uitabgroup(f);
@@ -124,6 +127,8 @@ ylabel(ax1,'fitted z (nm)')
 
 xlabel(ax2,'true z (nm)')
 ylabel(ax2,'corrected z (nm)')
+
+zcorr=ZcorrInterp.interp;
 
 % file=obj.getPar('lastSMLFile');
 % file=strrep(file,'_sml.mat','.mat');
