@@ -57,10 +57,8 @@ plot(zgausssxsy)
 plot(zgaussz)
 
 
+
 %% depth-dependent calibration
-% fit your data with a 3D method of choice (example saved in
-% 'data/depth_example_sml.mat'
-locs=load('data/depth_example_sml.mat');
 % fit bead stacks in gel as shown above using the same fitter with the
 % same, save fitted z-positions and frames
 % z-positions should not be corrected for the refractive index mismatch. If
@@ -73,6 +71,29 @@ beads=(readtable('data/beads_in_gel_2.csv'));
 p.dz=20;
 zcorr=calibrate3Daberrations(beads,p);
 save('data/3Daberrationcorrection.mat','zcorr') %save correction to be used later
+%%
+load('data/3Daberrationcorrection.mat')
+% fit your data with a 3D method of choice (example saved in
+% 'data/depth_example_sml.mat'
+RI_mismatch_factor=.72;
+h=fspecial('gauss',5,.6);
+
+locs=readtable('data/cme_2um_site_uncorrected_sml.csv');
+[img2d,xedges,yedges]=histcounts2(locs.x,locs.y,'BinWidth',[5 5]);
+figure(55);subplot(2,2,1);imagesc(xedges,yedges,filter2(h,img2d'));
+axis equal
+%plot slice
+ypos=250;
+slicewidth=60;
+iny=locs.y>ypos-slicewidth/2 & locs.y<ypos+slicewidth/2;
+[img2dz,xedges,zedges]=histcounts2(locs.x(iny),locs.z(iny)*RI_mismatch_factor,'BinWidth',[10 10]);
+figure(55);subplot(2,2,2);imagesc(xedges,zedges,filter2(h,img2dz'));
+axis equal
 
 % correct for aberrations and refractive index mismatch
-locs.znm_corr=correct_3Daberrations(zcorr,locs.znm,objective_depth)*RI_mismatch_factor;
+objective_depth=2000;
+
+locs.z_corr=correct_3Daberrations(zcorr,locs.z,objective_depth)*RI_mismatch_factor;
+[img2dz,xedges,zedges]=histcounts2(locs.x(iny),locs.z_corr(iny),'BinWidth',[10 10]);
+figure(55);subplot(2,2,4);imagesc(xedges,zedges,filter2(h,img2dz'));
+axis equal

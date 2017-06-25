@@ -1,8 +1,17 @@
-function lo=saveaspix(locData)
+function lo=saveaspix(locData,varargin)
+if any(contains(varargin,'grouped'))
+    ll=locData.grouploc;
+else
+    ll=locData.loc;
+end
 
-ll=locData.loc;
+if any(contains(varargin,'nm'))
+    cp=[1 1];
+    roi=[0 0];
+else
 cp=locData.files.file(1).info.cam_pixelsize_um*1000;
 roi=locData.files.file(1).info.roi;
+end
 try
     RIM=locData.history{1}.children.fitparamters.fitterGUI.children.MLE_GPU_Yiming.refractive_index_mismatch;
 catch err
