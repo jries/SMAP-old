@@ -1,9 +1,10 @@
 function lo=saveaspix(locData)
+
 ll=locData.loc;
 cp=locData.files.file(1).info.cam_pixelsize_um*1000;
 roi=locData.files.file(1).info.roi;
 try
-    RIM=obj.locData.history{1}.children.fitparamters.fitterGUI.children.MLE_GPU_Yiming.refractive_index_mismatch;
+    RIM=locData.history{1}.children.fitparamters.fitterGUI.children.MLE_GPU_Yiming.refractive_index_mismatch;
 catch err
     disp('could not find history')
     RIM=0.8;

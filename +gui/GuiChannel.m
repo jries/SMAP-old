@@ -185,9 +185,12 @@ classdef GuiChannel< interfaces.LayerInterface
                     value=obj.getSingleGuiParameter(field);
                 end
                 %reads field from gui, writes it in P.par.layerX_.(field)
+                try
                 p=obj.getPar(obj.layerprefix);
                 p.(field)=value;
                 obj.setPar(obj.layerprefix,p);
+                catch err
+                end
             end
         end
         

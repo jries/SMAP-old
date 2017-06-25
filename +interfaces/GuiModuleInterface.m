@@ -123,6 +123,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
             if nargin <3
                 onlyedit=false;
             end
+            try
             hfn=obj.guihandles.(field);
 %             if onlyedit
 %                 switch hfn.Style
@@ -133,6 +134,9 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
 %                 end
 %             else
             par=obj.handle2value(hfn,onlyedit);
+            catch
+                par=[];
+            end
 %             end
         end
         
