@@ -13,6 +13,8 @@ classdef calibrate3D_GUI<handle
             fontsize=14;
             xpos1=10;
             xw=100;
+            obj.guihandles.title=uicontrol('style','text','String','Calibrate PSF model for MLE fit from bead stacks. ','Position',[xpos1,top-vsep,xw*3,vsep],'FontSize',fontsize);
+            
             obj.guihandles.selectfiles=uicontrol('style','pushbutton','String','Select camera files','Position',[xpos1,top-2*vsep,xw*1.5,vsep],'FontSize',fontsize,'Callback',@obj.selectfiles_callback);
             obj.guihandles.filelist=uicontrol('style','listbox','String','','Position',[xpos1+1.5*xw,top-4*vsep,xw*2.5,vsep*3],'FontSize',fontsize);
             obj.guihandles.selectoutputfile=uicontrol('style','pushbutton','String','Select otuput file','Position',[xpos1,top-5*vsep,xw*1.5,vsep],'FontSize',fontsize,'Callback',@obj.selectoutputfile_callback);
@@ -60,7 +62,8 @@ classdef calibrate3D_GUI<handle
             obj.guihandles.gaussroi=uicontrol('style','edit','String','17','Position',[xpos1+2*xw,top-20*vsep,xw*.5,vsep],'FontSize',fontsize);
            
             obj.guihandles.run=uicontrol('style','pushbutton','String','Calculate bead calibration','Position',[xpos1,top-22*vsep,xw*4,vsep],'FontSize',fontsize,'Callback',@obj.run_callback);
-           
+            obj.guihandles.help=uicontrol('style','pushbutton','String','Help','Position',[xpos1+xw,top-24*vsep,xw*2,vsep],'FontSize',fontsize,'Callback',@obj.help_callback);
+                      
             
         end
         function selectfiles_callback(obj,a,b)
@@ -131,6 +134,13 @@ classdef calibrate3D_GUI<handle
             
             calibrate3D(p);
         end    
+        function help_callback(obj,a,b)
+            helpstring={'write documentation'};
+            f=figure;
+            h=uicontrol('Parent',f,'Style','text','Units','normalized','Position',[0 0 1 1],'HorizontalAlignment','Left');
+            h.String=textwrap(h,helpstring);
+            
+        end
     end
 end
 
