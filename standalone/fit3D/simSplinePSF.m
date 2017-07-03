@@ -1,5 +1,5 @@
 function [out] = simSplinePSF(Npixels,coeff,I,bg,cor)
-
+t=tic;
 if (nargin <5)
    error('Minimal usage: simSplinePSF(Npixels,coeff,I,bg,cor)');
 end
@@ -13,7 +13,7 @@ spline_xsize = size(coeff,1);
 spline_ysize = size(coeff,2);
 spline_zsize = size(coeff,3);
 off = floor(((spline_xsize+1)-Npixels)/2);
-data = zeros(Npixels,Npixels,Nfits);
+data = zeros(Npixels,Npixels,Nfits,'single');
 
 
 for kk = 1:Nfits
@@ -44,8 +44,11 @@ for kk = 1:Nfits
              data(ii+1,jj+1,kk)=model;
         end
     end
-    kk
+    if toc(t)>1
+        disp(kk/Nfits)
+        t=tic;
+    end
     
 end
-out = poissrnd(data,Npixels,Npixels,Nfits); 
+out = (poissrnd(data,Npixels,Npixels,Nfits)); 
 

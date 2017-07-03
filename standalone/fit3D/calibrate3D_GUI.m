@@ -121,7 +121,8 @@ classdef calibrate3D_GUI<handle
             p.zcorr=obj.guihandles.corrzselect.String{obj.guihandles.corrzselect.Value};
             p.ROIxy=str2double(obj.guihandles.ROIxy.String);
             p.ROIz=str2double(obj.guihandles.ROIz.String);
-            p.smoothxy=str2double(obj.guihandles.smoothxy.String);
+%             p.smoothxy=str2double(obj.guihandles.smoothxy.String);
+            p.smoothxy=0;
             p.smoothz=str2double(obj.guihandles.smoothz.String);
             p.gaussrange=[str2double(obj.guihandles.gaussmin.String) str2double(obj.guihandles.gaussmax.String)];
             p.filtersize=str2double(obj.guihandles.filter.String);

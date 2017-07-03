@@ -18,11 +18,25 @@ cal=load('data/bead_3dcal.mat'); %load bead calibration
 p.offset=0;
 p.conversion=1;
 %% simulate data
-numlocs=100000;
+numlocs=10000;
+RoiPixelsize=19;
+dz=cal.csplinecal.cspline.dz;
+z0=cal.csplinecal.cspline.z0;
+dx=floor(RoiPixelsize/2);
+z=linspace(-800,800,numlocs)';
+x=linspace(-0.5,0.5,numlocs)';
+y=sin(x*4*pi);
+coordinates=horzcat(x+dx,y+dx,z/dz+z0);
+Intensity=5000;
+background=5;
+imstack = simSplinePSF(RoiPixelsize,cal.cspline_coeff,Intensity,background,coordinates);
+ground_truth.x=x;
+ground_truth.y=y;
+ground_truth.z=z;
 %parameteres
 
-[imstack,ground_truth]=simulate_data(cal.spline_coeff,numlocs);
-save('data/simulation.mat','imstack')
+% [imstack,ground_truth]=simulate_data(cal.spline_coeff,numlocs);
+% save('data/simulation.mat','imstack')
 %% or load simulated data
 load('data/simulation.mat')
 
@@ -40,6 +54,8 @@ tic
 [P,CRLB]=CPUmleFit_LM(imstack,5,50,single(cal.cspline_coeff));
 tspline=toc;
 disp(['cspline: ' num2str(numlocs/tspline) ' fits/s']);
+
+x_cspline=P(:,1);y_cspline=P(:,2); %x,y in pixels 
 z_cspline=(P(:,5)-cal.csplinecal.cspline.z0)*cal.csplinecal.cspline.dz;
 
 %fit z, Gaussian model, emCCD mode
@@ -61,7 +77,7 @@ sx=P(:,5);sy=P(:,6);
 z_gausssxsy=sxsy2z(sx,sy,cal.gauss_sx2_sy2); %z from sx, sy
 
 % calculate error for central part
-
+inz=abs(ground_truth.z)<200;
 
 figure(101)
 hold off
@@ -72,12 +88,14 @@ plot(ground_truth.z,z_gaussz)
 plot(ground_truth.z,z_gausssxsy)
 
 legendtxt{1}='ground truth';
-legendtxt{2}=['spline fit. error: ' num2str(sqrt(nanmean((ground_truth.z-z_cspline).^2)))];
-legendtxt{3}=['Gaussian z fit. error: ' num2str(sqrt(nanmean((ground_truth.z-z_gaussz).^2)))];
-legendtxt{4}=['Gaussian sx, sy fit. error: ' num2str(sqrt(nanmean((ground_truth.z-z_gausssxsy).^2)))];
+legendtxt{2}=['spline fit. error: ' num2str(sqrt(nanmean((ground_truth.z(inz)-z_cspline(inz)).^2)))];
+legendtxt{3}=['Gaussian z fit. error: ' num2str(sqrt(nanmean((ground_truth.z(inz)-z_gaussz(inz)).^2)))];
+legendtxt{4}=['Gaussian sx, sy fit. error: ' num2str(sqrt(nanmean((ground_truth.z(inz)-z_gausssxsy(inz)).^2)))];
 
 legend(legendtxt)
 
+dx_cspline=sqrt(nanmean((ground_truth.x(inz)-x_cspline(inz)).^2))
+dy_cspline=sqrt(nanmean((ground_truth.y(inz)-y_cspline(inz)).^2))
 %% depth-dependent calibration
 % fit bead stacks in gel as shown above using the same fitter with the
 % same, save fitted z-positions and frames

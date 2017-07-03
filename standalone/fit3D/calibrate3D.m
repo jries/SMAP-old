@@ -55,7 +55,8 @@ else
 end
 if contains(p.modality,'astig')
     %get calibration for Gaussian fit
-    [gausscal,indgoodc]=getgausscal_so(beads,p); 
+    [spline_curves,indgoodc,curves]=getspline_so(beads,p); 
+    gausscal.spline_curves=spline_curves;
     drawnow
 else
     indgoodc=true(size(beads));
@@ -63,11 +64,30 @@ else
 end
 % get cspline calibration
 [csplinecal,indgoods]=getstackcal_so(beads(indgoodc),p);
+icf=find(indgoodc);
+icfs=icf(indgoods);
 cspline_coeff=single(csplinecal.cspline.coeff);
-gauss_zfit=single(gausscal.fitzpar);
-gauss_sx2_sy2=gausscal.Sx2_Sy2;
+
+if contains(p.modality,'astig')
+    stackb=csplinecal.PSF;
+    mp=ceil(size(stackb,1)/2);dx=floor(p.gaussroi/2);
+    
+    stack=single(stackb(mp-dx:mp+dx,mp-dx:mp+dx,:));
+    P=mleFit_LM(stack,4,100,1,0,1);
+    ch.sx=double(P(:,5));
+    ch.sy=double(P(:,6));
+    f0m=median([beads(icfs).f0]);
+    ch.z=double(((1:size(stack,3))'-f0m)*p.dz);
+    gausscalh=getgausscal_so(ch,p); 
+%     gausscalh=getgausscal_so(curves(indgoodc),p); 
+    gausscal=copyfields(gausscal,gausscalh);
+    gauss_zfit=single(gausscal.fitzpar);
+    gauss_sx2_sy2=gausscal.Sx2_Sy2;
+else
+end
 save(p.outputfile,'gausscal','csplinecal','gauss_sx2_sy2','gauss_zfit','cspline_coeff');
 end
+
 
 
 
