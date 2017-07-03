@@ -7,7 +7,7 @@ classdef MovieRunningWindow<interfaces.DialogProcessor
     methods
         function obj=MovieRunningWindow(varargin)        
             obj@interfaces.DialogProcessor(varargin{:}) ;
-            obj.inputParameters={'sr_pixrec','linewidth_roi','layer1_'};
+            obj.inputParameters={'sr_pixrec','linewidth_roi','layer1_','sr_layerson'};
             obj.showresults=true;
         end
         function makeGui(obj)
@@ -33,7 +33,7 @@ global SMAP_stopnow
 % figure(f)
 
 lochere=obj.locData.copy;
-[locsout,indout,hroi]=lochere.getloc({'xnm','ynm','znm','xnmline','ynmline','frame'},'position','roi');
+[locsout,indout,hroi]=lochere.getloc({'xnm','ynm','znm','xnmline','ynmline','frame'},'position','roi','layer',find(p.sr_layerson),'grouping','ungrouped');
 lochere.removelocs(~indout);
 
 if ~isempty(locsout.xnmline)
