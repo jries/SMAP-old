@@ -52,13 +52,13 @@ imstack=single(imstack); %the fitters require the stacks in single-format;
 
 %fit cspline, emCCD mode
 tic
-[P,CRLB]=mleFit_LM(imstack,5,50,single(cal.cspline.coeff));
+[Pcspline,CRLB]=mleFit_LM(imstack,5,50,single(cal.cspline.coeff));
 tspline=toc;
 disp(['cspline: ' num2str(numlocs/tspline) ' fits/s']);
 
 dx=floor(size(imstack,1)/2);
-x_cspline=P(:,1)-dx;y_cspline=P(:,2)-dx; %x,y in pixels 
-z_cspline=(P(:,5)-cal.cspline.z0)*cal.cspline.dz;
+x_cspline=Pcspline(:,1)-dx;y_cspline=Pcspline(:,2)-dx; %x,y in pixels 
+z_cspline=(Pcspline(:,5)-cal.cspline.z0)*cal.cspline.dz;
 
 %fit z, Gaussian model, emCCD mode
 tic
