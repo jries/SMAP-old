@@ -52,7 +52,7 @@ sstack=size(beads(1).stack.image);
         fw2=2;
     end
     
-    ax=axes('Parent',uitab(p.tabgroup,'Title','scatter'));
+%     ax=axes('Parent',uitab(p.tabgroup,'Title','scatter'));
 
     [~,sortinddev]=sort(devs);
     allrois=allstacks(:,:,:,sortinddev);
@@ -66,7 +66,7 @@ sstack=size(beads(1).stack.image);
     midrange=halfstoreframes;%+round(median(dframe))+1;
     
     filenumber=[beads(:).filenumber];
-    [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D_so(allrois,struct('framerange',midrange-fw2:midrange+fw2,'alignz',zcorr,'zshiftf0',zshift,'beadfilterf0',false),{ax},filenumber(sortinddev));
+    [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D_so(allrois,struct('framerange',midrange-fw2:midrange+fw2,'alignz',zcorr,'zshiftf0',zshift,'beadfilterf0',false),{},filenumber(sortinddev));
     
     
     %undo sorting by deviation to associate beads again to their
@@ -98,9 +98,10 @@ sstack=size(beads(1).stack.image);
         minPSF=min(centpsf(:));
         corrPSFn=corrPSF-minPSF;
         intglobal=nanmean(nansum(nansum(corrPSFn(rangex,rangey,z-1:z+1),1),2));
-        for k=1:size(corrPSF,3)
-            corrPSFn(:,:,k)=corrPSFn(:,:,k)/intglobal;
-        end
+        corrPSFn=corrPSFn/intglobal;
+%         for k=1:size(corrPSF,3)
+%             corrPSFn(:,:,k)=corrPSFn(:,:,k)/intglobal;
+%         end
         shiftedstack=shiftedstack/intglobal;
         corrPSFn(isnan(corrPSFn))=0;
         corrPSFn(corrPSFn<0)=0;

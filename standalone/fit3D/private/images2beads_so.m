@@ -14,6 +14,7 @@ for k=1:length(filelist)
     ax=axes(uitab(tg,'Title',num2str(k)));
     imstack=readfile_ome(filelist{k});
     imstack=imstack-min(imstack(:)); %fast fix for offset;
+  
     mim=max(imstack,[],3);
     mim=filter2(h,mim);
     maxima=maximumfindcall(mim);

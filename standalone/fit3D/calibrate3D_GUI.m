@@ -84,7 +84,9 @@ classdef calibrate3D_GUI<handle
                 of='_corr3D.mat';
             end
             [f,p]=uiputfile(of);
+            if f
             obj.guihandles.outputfile.String=[p,f];
+            end
         end
         function modality_callback(obj,a,b)
             astigonly={'gausst','gaussmin','gaussmint','gaussmax','gaussmaxt','gaussroi','gaussroit'};

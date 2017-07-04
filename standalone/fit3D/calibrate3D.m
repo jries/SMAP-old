@@ -80,7 +80,7 @@ cspline.x0=csplinecal.cspline.x0;
 if contains(p.modality,'astig')
     photbead=10^5; %corr PSF normalized to 1. As MLE is used, this screws up statistics totally. Thus assign bright signal to bead.
     stackb=csplinecal.PSF;
-    stackb=stackb*photbead;
+    stackb=(stackb)*photbead;
     mp=ceil(size(stackb,1)/2);dx=floor(p.gaussroi/2);
     
     stack=single(stackb(mp-dx:mp+dx,mp-dx:mp+dx,:));
