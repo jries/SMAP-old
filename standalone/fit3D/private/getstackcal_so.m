@@ -1,7 +1,7 @@
 function [splinefit,indgood]=getstackcal_so(beads,p)
 global stackcal_testfit
 isastig=contains(p.modality,'astig');
-alignzastig=isastig&contains(p.modality,'astig');
+alignzastig=isastig&contains(p.zcorr,'astig');
 zcorr=contains(p.zcorr,'corr');
 sstack=size(beads(1).stack.image);
     halfstoreframes=(size(beads(1).stack.image,3)-1)/2;
@@ -131,10 +131,14 @@ sstack=size(beads(1).stack.image);
         cspline.coeff=coeff;
         cspline.z0=round((b3_0.dataSize(3)+1)/2);
         cspline.dz=p.dz;
+        cspline.x0=dRx+1;
         bspline.z0=round((b3_0.dataSize(3)+1)/2);
         bspline.dz=p.dz;            
         splinefit.bspline=bspline;
+        
         splinefit.PSF=corrPSF;
+%         splinefit.PSF=shiftedstack(:,:,:,1)*intglobal;
+        
         splinefit.PSFsmooth=corrPSFhd;
         splinefit.cspline=cspline;
 
@@ -195,8 +199,8 @@ sstack=size(beads(1).stack.image);
                 zref=testfit(corrPSFfit,cspline.coeff,p,{'k','LineWidth',2},ax);
 
                 drawnow
-                 ax=axes(uitab(p.tabgroup,'Title','stripes'));
-                teststripes(cspline.coeff,p,ax);
+%                  ax=axes(uitab(p.tabgroup,'Title','stripes'));
+%                 teststripes(cspline.coeff,p,ax);
             end
         end 
 end

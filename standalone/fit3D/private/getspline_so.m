@@ -27,7 +27,7 @@ function [spline,indgood,curves]=getspline_so(beads,p)
     %get calibrations
     bh=curves;
 %     tgt=[num2str(X) num2str(Y) num2str(Z) num2str(p.iter)];
-    p.ax=axes(uitab(p.tabgroup,'Title','sx,sy'));
+    p.ax=p.ax_z;
      [spline,indgood]=getcleanspline(curves,p);
      drawnow
 end
@@ -98,21 +98,30 @@ spliney2=getspline(syg,zg,1./(abs(syg-spliney(zg))+.1));
 % spliney2=getspline(syg,zg,1,p.splinepar);
 % zt=b(1).zrangeall(1):0.01:b(1).zrangeall(2);
 zt=min(zg):0.01:max(zg);
+z1a=[];z2a=[];x1a=[];x2a=[];
 
 for k=1:length(curves)
     if indgood2(k)
-        t='r.';
+%         t='r.';
+        z1a=[z1a; curves(k).z; curves(k).z];
+        x1a=[x1a; curves(k).sx; curves(k).sy];
+%         y1a=[y1a; curves(k).sy];
     else
-        t='g.';
+        z2a=[z2a; curves(k).z; curves(k).z];
+        x2a=[x2a; curves(k).sx; curves(k).sy];
+%         y2a=[y2a; curves(k).sy];
     end
-    plot(p.ax,curves(k).z,curves(k).sx,t)
-    hold(p.ax ,'on')
-    plot(p.ax,curves(k).z,curves(k).sy,t)
-    
 end
 
-plot(p.ax,zt,splinex(zt),'b')
-plot(p.ax,zt,spliney(zt),'b')
+    plot(p.ax,z2a,x2a,'g.')
+    hold(p.ax ,'on')
+    plot(p.ax,z1a,x1a,'r.')
+    
+    
+
+
+% plot(p.ax,zt,splinex(zt),'b')
+% plot(p.ax,zt,spliney(zt),'b')
 plot(p.ax,zt,splinex2(zt),'k')
 plot(p.ax,zt,spliney2(zt),'k')
 

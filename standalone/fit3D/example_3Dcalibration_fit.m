@@ -7,21 +7,24 @@ addpath('shared')
 %% make bead calibration
 %run 3D calibration GUI (alternatively, you can directly call calibrate3D with proper parameters)
 %and make 3D calibration
-%e.g. using bead files: xxx
+%e.g. using bead files: in /beadstacks (extracted beadstacks.zip)
 %save as data/bead_3dcal.mat
 
 calibrate3D_GUI
+
 %% or load calibration
-cal=load('data/bead_3dcal.mat'); %load bead calibration
+% cal=load('data/bead_3dcal.mat'); %load bead calibration
+cal=load('data/bead_3dcal_temp.mat'); %load bead calibration
+
 
 %% parameters for data
 p.offset=0;
 p.conversion=1;
 %% simulate data
 numlocs=10000;
-RoiPixelsize=19;
-dz=cal.csplinecal.cspline.dz;
-z0=cal.csplinecal.cspline.z0;
+RoiPixelsize=13;
+dz=cal.cspline.dz;
+z0=cal.cspline.z0;
 dx=floor(RoiPixelsize/2);
 z=linspace(-800,800,numlocs)';
 x=linspace(-0.5,0.5,numlocs)';
@@ -29,7 +32,7 @@ y=sin(x*4*pi);
 coordinates=horzcat(x+dx,y+dx,z/dz+z0);
 Intensity=5000;
 background=5;
-imstack = simSplinePSF(RoiPixelsize,cal.cspline_coeff,Intensity,background,coordinates);
+imstack = simSplinePSF(RoiPixelsize,cal.cspline.coeff,Intensity,background,coordinates);
 ground_truth.x=x;
 ground_truth.y=y;
 ground_truth.z=z;
@@ -37,8 +40,6 @@ ground_truth.z=z;
 
 % [imstack,ground_truth]=simulate_data(cal.spline_coeff,numlocs);
 % save('data/simulation.mat','imstack')
-%% or load simulated data
-load('data/simulation.mat')
 
 %% or load experimental tiff file
 file='data/single_bead.tif'; %simulated test data, based on real bead file. 
@@ -51,12 +52,13 @@ imstack=single(imstack); %the fitters require the stacks in single-format;
 
 %fit cspline, emCCD mode
 tic
-[P,CRLB]=CPUmleFit_LM(imstack,5,50,single(cal.cspline_coeff));
+[P,CRLB]=mleFit_LM(imstack,5,50,single(cal.cspline.coeff));
 tspline=toc;
 disp(['cspline: ' num2str(numlocs/tspline) ' fits/s']);
 
-x_cspline=P(:,1);y_cspline=P(:,2); %x,y in pixels 
-z_cspline=(P(:,5)-cal.csplinecal.cspline.z0)*cal.csplinecal.cspline.dz;
+dx=floor(size(imstack,1)/2);
+x_cspline=P(:,1)-dx;y_cspline=P(:,2)-dx; %x,y in pixels 
+z_cspline=(P(:,5)-cal.cspline.z0)*cal.cspline.dz;
 
 %fit z, Gaussian model, emCCD mode
 tic
@@ -77,25 +79,42 @@ sx=P(:,5);sy=P(:,6);
 z_gausssxsy=sxsy2z(sx,sy,cal.gauss_sx2_sy2); %z from sx, sy
 
 % calculate error for central part
-inz=abs(ground_truth.z)<200;
+zrange=400;
+inz=abs(ground_truth.z)<zrange;
 
 figure(101)
 hold off
-plot(ground_truth.z,ground_truth.z,'k')
-hold on
+
+
 plot(ground_truth.z,z_cspline)
+hold on
 plot(ground_truth.z,z_gaussz)
 plot(ground_truth.z,z_gausssxsy)
+plot([-zrange -zrange],[-1000 1000],'c')
+plot([zrange zrange],[-1000 1000],'c')
+plot(ground_truth.z,ground_truth.z,'k')
+
+dz_cspline=nanstd(ground_truth.z(inz)-z_cspline(inz));
+dz_zgauss=nanstd(ground_truth.z(inz)-z_gaussz(inz));
+dz_gausssxsy=nanstd(ground_truth.z(inz)-z_gausssxsy(inz));
 
 legendtxt{1}='ground truth';
-legendtxt{2}=['spline fit. error: ' num2str(sqrt(nanmean((ground_truth.z(inz)-z_cspline(inz)).^2)))];
-legendtxt{3}=['Gaussian z fit. error: ' num2str(sqrt(nanmean((ground_truth.z(inz)-z_gaussz(inz)).^2)))];
-legendtxt{4}=['Gaussian sx, sy fit. error: ' num2str(sqrt(nanmean((ground_truth.z(inz)-z_gausssxsy(inz)).^2)))];
+legendtxt{2}=['spline fit. error: ' num2str(dz_cspline)];
+legendtxt{3}=['Gaussian z fit. error: ' num2str(dz_zgauss)];
+legendtxt{4}=['Gaussian sx, sy fit. error: ' num2str(dz_gausssxsy)];
 
 legend(legendtxt)
 
 dx_cspline=sqrt(nanmean((ground_truth.x(inz)-x_cspline(inz)).^2))
 dy_cspline=sqrt(nanmean((ground_truth.y(inz)-y_cspline(inz)).^2))
+
+numpoints=2000;
+range=1:round(length(ground_truth.z)/numpoints):length(ground_truth.z);
+figure(102);
+hold off
+scatter3(ground_truth.x,ground_truth.y,ground_truth.z);
+hold on
+scatter3(x_cspline,y_cspline,z_cspline);
 %% depth-dependent calibration
 % fit bead stacks in gel as shown above using the same fitter with the
 % same, save fitted z-positions and frames

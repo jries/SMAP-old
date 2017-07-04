@@ -4,9 +4,9 @@ if (nargin <5)
    error('Minimal usage: simSplinePSF(Npixels,coeff,I,bg,cor)');
 end
 
-if (bg == 0)
-    bg = 10^-10;
-end    
+% if (bg == 0)
+%     bg = 10^-10;
+% end    
 
 Nfits = size(cor,1);
 spline_xsize = size(coeff,1);

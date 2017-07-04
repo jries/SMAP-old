@@ -21,6 +21,11 @@ p.tabgroup=uitabgroup(f);
 [beads,p]=images2beads_so(p);
 p.midpoint=round(size(beads(1).stack.image,3)/2); %reference for beads
 p.ploton=false;
+
+% beads=beads([2 3])
+% beads(2)=beads(1);
+% beads(3:end)=[];
+
 if contains(p.modality,'astig')
     %determine sx,sy
     disp('fit beads to get sx,sy')
@@ -55,6 +60,7 @@ else
 end
 if contains(p.modality,'astig')
     %get calibration for Gaussian fit
+    p.ax_z=axes(uitab(p.tabgroup,'Title','sx(z), sy(z)'));
     [spline_curves,indgoodc,curves]=getspline_so(beads,p); 
     gausscal.spline_curves=spline_curves;
     drawnow
@@ -66,26 +72,36 @@ end
 [csplinecal,indgoods]=getstackcal_so(beads(indgoodc),p);
 icf=find(indgoodc);
 icfs=icf(indgoods);
-cspline_coeff=single(csplinecal.cspline.coeff);
+cspline.coeff=single(csplinecal.cspline.coeff);
+cspline.dz=csplinecal.cspline.dz;
+cspline.z0=csplinecal.cspline.z0;
+cspline.x0=csplinecal.cspline.x0;
 
 if contains(p.modality,'astig')
+    photbead=10^5; %corr PSF normalized to 1. As MLE is used, this screws up statistics totally. Thus assign bright signal to bead.
     stackb=csplinecal.PSF;
+    stackb=stackb*photbead;
     mp=ceil(size(stackb,1)/2);dx=floor(p.gaussroi/2);
     
     stack=single(stackb(mp-dx:mp+dx,mp-dx:mp+dx,:));
-    P=mleFit_LM(stack,4,100,1,0,1);
+    P=mleFit_LM(stack,4,200,1,0,1);
     ch.sx=double(P(:,5));
     ch.sy=double(P(:,6));
     f0m=median([beads(icfs).f0]);
     ch.z=double(((1:size(stack,3))'-f0m)*p.dz);
+    
+    p.ax_sxsy=axes(uitab(p.tabgroup,'Title','sx^2-sy^2'));
+    p.ax_z.NextPlot='add';
     gausscalh=getgausscal_so(ch,p); 
+    legend(p.ax_z,'all bead data','good bead data','spline fit sx','spline fit sy','average PSF','average PSF','Gauss zfit','Gauss zfit')
 %     gausscalh=getgausscal_so(curves(indgoodc),p); 
     gausscal=copyfields(gausscal,gausscalh);
     gauss_zfit=single(gausscal.fitzpar);
     gauss_sx2_sy2=gausscal.Sx2_Sy2;
 else
 end
-save(p.outputfile,'gausscal','csplinecal','gauss_sx2_sy2','gauss_zfit','cspline_coeff');
+cspline_all=csplinecal;
+save(p.outputfile,'gausscal','cspline_all','gauss_sx2_sy2','gauss_zfit','cspline');
 end
 
 

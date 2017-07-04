@@ -1,11 +1,12 @@
 function [gauss]=getgausscal_so(curves,p)
 
     
-        p.ax=axes(uitab(p.tabgroup,'Title','sx^2-sy^2'));
+%         p.ax=axes(uitab(p.tabgroup,'Title','sx^2-sy^2'));
+        p.ax=p.ax_sxsy;
         gauss.Sx2_Sy2=cal_Sx2_Sy2(curves,p);
    
-    
-        p.ax=axes(uitab(p.tabgroup,'Title','Gauss: fit z'));
+        p.ax=p.ax_z;
+%         p.ax=axes(uitab(p.tabgroup,'Title','Gauss: fit z'));
         gauss.fitzpar=cal_fitzpar(curves,p);
     drawnow
 end
@@ -185,9 +186,9 @@ if nargin>4
     zsort=feval(fitpsx,sxsort);
 
     plot(ax,zsort,sxsort,'k')
-    plot(zrange,[ds2range(1) ds2range(1)],zrange,[ds2range(2) ds2range(2)])
+    plot(ax,zrange,[ds2range(1) ds2range(1)],zrange,[ds2range(2) ds2range(2)])
     ylabel(ax,'sx^2-sy^2')
-     ylim([q(1) q(2)]);
+     ylim(ax,[q(1) q(2)]);
     % plot(zcorr,polyval(fitpsx,zcorr),'.')
 
 end

@@ -45,7 +45,7 @@ classdef calibrate3D_GUI<handle
             obj.guihandles.roisizet=uicontrol('style','text','String','ROI size: X,Y (pixels): ','Position',[xpos1,top-15*vsep,xw*2,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
             obj.guihandles.ROIxy=uicontrol('style','edit','String','21','Position',[xpos1+2*xw,top-15*vsep,xw*.5,vsep],'FontSize',fontsize);
             obj.guihandles.roisizezt=uicontrol('style','text','String','Z (frames): ','Position',[xpos1+2.5*xw,top-15*vsep,xw,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
-            obj.guihandles.ROIz=uicontrol('style','edit','String','200','Position',[xpos1+3.5*xw,top-15*vsep,xw*.5,vsep],'FontSize',fontsize);
+            obj.guihandles.ROIz=uicontrol('style','edit','String','201','Position',[xpos1+3.5*xw,top-15*vsep,xw*.5,vsep],'FontSize',fontsize);
             
             obj.guihandles.smootht=uicontrol('style','text','String','Smoothing parameter in Z: ','Position',[xpos1,top-16*vsep,xw*2,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
 %             obj.guihandles.smoothxy=uicontrol('style','edit','String','0','Position',[xpos1+2*xw,top-16*vsep,xw*.5,vsep],'FontSize',fontsize);

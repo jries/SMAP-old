@@ -26,10 +26,12 @@ if numbeads==1
     indgood=true;
     return
 end
-if ~p.beadfilterf0
-    
-    p.framerange=3:size(imin,3)-3;
-end
+% if ~p.beadfilterf0
+%     
+%     p.framerange=3:size(imin,3)-3;
+% end
+
+
 smallim=zeros(length(p.xrange),length(p.yrange),length(p.framerange),size(imin,4));
 
 if ~isempty(p.zshiftf0)
@@ -77,11 +79,10 @@ end
 
 shiftedstackn=normalizstack(shiftedstack,p);
 
-
-[indgood]=getoverlap(shiftedstackn,shift,p,true(1,size(shiftedstackn,4)));
+indgood=true(1,size(shiftedstackn,4));
+[indgood]=getoverlap(shiftedstackn,shift,p,indgood);
 [indgood]=getoverlap(shiftedstackn,shift,p,indgood);
 [indgood,res,normglobal,co,cc2]=getoverlap(shiftedstackn,shift,p,indgood);
-
 shiftedstackn=shiftedstackn/normglobal;
 
 imout=nanmean(shiftedstackn(:,:,:,indgood),4);
@@ -140,7 +141,7 @@ if isnan(b)
     a=nanmean(rescc);b=nanstd(rescc);
 end
 co=a+2.5.*b;
-indgood=rescc<co;
+indgood=rescc<=co;
 end
 
 function out=normalizstack(in,p)

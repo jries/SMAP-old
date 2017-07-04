@@ -34,8 +34,13 @@ for k=1:length(filelist)
 %     cutoff=(quantile(mimc(:),0.8)+quantile(mimc(:),0.99))/2;
 
 %    cutoff= (mv+quantile(mimc(:),0.5))/2;
+    if any(int>cutoff)
+        maxima=maxima(int>cutoff,:);
+    else
+        [~,indm]=max(int);
+        maxima=maxima(indm,:);
+    end
     
-    maxima=maxima(int>cutoff,:);
     hold on
     plot(maxima(:,1),maxima(:,2),'mo')
     hold off

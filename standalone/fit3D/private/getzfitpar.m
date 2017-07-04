@@ -26,18 +26,18 @@ sxf=sigmafromz(fitp([1 2 4 6 8 9]),zt,B0);
 % startpy(5)=-startpy(5);
 % syfs=sigmafromz(startpy,zt,B0);
 
-plot(ax,z,sx,'r.')
+plot(ax,z*1000,sx,'b*')
 hold on
-plot(ax,z,sy,'r.')
-plot(ax,zt,sxf,'k')
+plot(ax,z*1000,sy,'b*')
+plot(ax,zt*1000,sxf,'b-')
 % plot(ax,zt,sxfs,'c',zt,syfs,'g')
 fpy=fitp([1 3 5 7 8 9]);
 fpy(5)=-fpy(5);
 syf=sigmafromz(fpy,zt,B0);
-plot(ax,zt,syf,'k')
+plot(ax,zt*1000,syf,'b-')
 % hold off
 % axis tight
-ylim([min(sx)-0.1 quantile(sx,.9)*1.1])
+% ylim([min(sx)-0.1 quantile(sx,.9)*1.1])
 ylabel(ax,'PSFx,PSFy')
 end
 %zpar=[sigma0x,Ax,Ay,Bx,By,gamma,d,sigma0y)
