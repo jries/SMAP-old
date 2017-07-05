@@ -19,30 +19,33 @@ cal=load('data/bead_3dcal.mat'); %load bead calibration
 
 
 
-%% either simulate data
-p.offset=0;
-p.conversion=1;
-
-numlocs=1000; %number of simulated molecules. To test fitter performance on GPU, it should be >10^5
-RoiPixelsize=17; %ROI in pixels for simulation
-dz=cal.cspline.dz;  %coordinate system of spline PSF is corner based and in units pixels / planes
-z0=cal.cspline.z0; % distance and midpoint of stack in spline PSF, needed to translate into nm coordinates
-dx=floor(RoiPixelsize/2); %distance of center from edge
-ground_truth.z=linspace(-800,800,numlocs)'; %define some coordinates. Alternatively, use rand
-ground_truth.x=linspace(-0.5,0.5,numlocs)';
-ground_truth.y=sin(ground_truth.x*4*pi);
-coordinates=horzcat(ground_truth.x+dx,ground_truth.y+dx,ground_truth.z/dz+z0);
-Intensity=5000; %number of photons / localization
-background=5; %number of background photons per pixel
-imstack = simSplinePSF(RoiPixelsize,cal.cspline.coeff,Intensity,background,coordinates);
-
-
-%% or load experimental tiff file
-file='data/single_bead.tif'; %simulated test data, based on real bead file. 
-imstackadu=readfile_ome(file); % Stack of ROIs in photons. 
-p.offset=400;p.conversion=.1;
-imstack=(single(imstackadu)-p.offset)/p.conversion;% if necessary, convert ADU into photons.
-ground_truth.z=((1:size(imstack,3))'-size(imstack,3)/2+1)*10; %dz=10 nm;
+%% either simulate data or load experimental tiff file
+mode =0;
+if mode ==1 % simulate data
+    p.offset=0;
+    p.conversion=1;
+    
+    numlocs=1000; %number of simulated molecules. To test fitter performance on GPU, it should be >10^5
+    RoiPixelsize=17; %ROI in pixels for simulation
+    dz=cal.cspline.dz;  %coordinate system of spline PSF is corner based and in units pixels / planes
+    z0=cal.cspline.z0; % distance and midpoint of stack in spline PSF, needed to translate into nm coordinates
+    dx=floor(RoiPixelsize/2); %distance of center from edge
+    ground_truth.z=linspace(-800,800,numlocs)'; %define some coordinates. Alternatively, use rand
+    ground_truth.x=linspace(-0.5,0.5,numlocs)';
+    ground_truth.y=sin(ground_truth.x*4*pi);
+    coordinates=horzcat(ground_truth.x+dx,ground_truth.y+dx,ground_truth.z/dz+z0);
+    Intensity=5000; %number of photons / localization
+    background=5; %number of background photons per pixel
+    imstack = simSplinePSF(RoiPixelsize,cal.cspline.coeff,Intensity,background,coordinates);
+    
+else %experimental data
+    
+    file='data/single_bead.tif'; %simulated test data, based on real bead file.
+    imstackadu=readfile_ome(file); % Stack of ROIs in photons.
+    p.offset=400;p.conversion=.1;
+    imstack=(single(imstackadu)-p.offset)/p.conversion;% if necessary, convert ADU into photons.
+    ground_truth.z=((1:size(imstack,3))'-size(imstack,3)/2+1)*10; %dz=10 nm;
+end
 
 %% fit
 numlocs=size(imstack,3); %imstack needs to be in photons
@@ -59,7 +62,7 @@ cspline.z=(Pcspline(:,5)-cal.cspline.z0)*cal.cspline.dz;
 
 %fit z, Gaussian model, emCCD mode
 tic
-[P,CRLB]=mleFit_LM(imstack,3,50,double(cal.gauss_zfit));
+[P,CRLB]=mleFit_LM(imstack,3,50,single(cal.gauss_zfit));
 tgz=toc;
 disp(['Gauss z: ' num2str(numlocs/tgz) ' fits/s']);
 gaussz.x=P(:,1);gaussz.y=P(:,2); %x,y in pixels 
