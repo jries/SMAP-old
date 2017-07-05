@@ -181,7 +181,7 @@ ds2range=[min(ds(indgood)) max(ds(indgood))];
 if nargin>4
     
     plot(ax,z(inds),sx(inds).^2-sy(inds).^2,'.')
-    hold on
+    hold(ax,'on')
     sxsort=sort(sx.^2-sy.^2);
     zsort=feval(fitpsx,sxsort);
 

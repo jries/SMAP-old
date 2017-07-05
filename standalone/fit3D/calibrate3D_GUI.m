@@ -18,7 +18,7 @@ classdef calibrate3D_GUI<handle
             obj.guihandles.selectfiles=uicontrol('style','pushbutton','String','Select camera files','Position',[xpos1,top-2*vsep,xw*1.5,vsep],'FontSize',fontsize,'Callback',@obj.selectfiles_callback);
             obj.guihandles.filelist=uicontrol('style','listbox','String','','Position',[xpos1+1.5*xw,top-4*vsep,xw*2.5,vsep*3],'FontSize',fontsize);
             obj.guihandles.selectoutputfile=uicontrol('style','pushbutton','String','Select otuput file','Position',[xpos1,top-5*vsep,xw*1.5,vsep],'FontSize',fontsize,'Callback',@obj.selectoutputfile_callback);
-            obj.guihandles.outputfile=uicontrol('style','edit','String','','Position',[xpos1+1.5*xw,top-5*vsep,xw*2.5,vsep],'FontSize',fontsize);
+            obj.guihandles.outputfile=uicontrol('style','edit','String','/data/bead_3dcal.mat','Position',[xpos1+1.5*xw,top-5*vsep,xw*2.5,vsep],'FontSize',fontsize);
             
             hatitle='left';
             ha='right';

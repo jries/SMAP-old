@@ -18,13 +18,13 @@ cal=load('data/bead_3dcal.mat'); %load bead calibration
 % cal=load('data/bead_3dcal_temp.mat'); %load bead calibration
 
 
-%% parameters for data
+
+%% either simulate data
 p.offset=0;
 p.conversion=1;
 
-%% either simulate data
 numlocs=1000; %number of simulated molecules. To test fitter performance on GPU, it should be >10^5
-RoiPixelsize=13; %ROI in pixels for simulation
+RoiPixelsize=17; %ROI in pixels for simulation
 dz=cal.cspline.dz;  %coordinate system of spline PSF is corner based and in units pixels / planes
 z0=cal.cspline.z0; % distance and midpoint of stack in spline PSF, needed to translate into nm coordinates
 dx=floor(RoiPixelsize/2); %distance of center from edge
@@ -40,6 +40,7 @@ imstack = simSplinePSF(RoiPixelsize,cal.cspline.coeff,Intensity,background,coord
 %% or load experimental tiff file
 file='data/single_bead.tif'; %simulated test data, based on real bead file. 
 imstackadu=readfile_ome(file); % Stack of ROIs in photons. 
+p.offset=400;p.conversion=.1;
 imstack=(single(imstackadu)-p.offset)/p.conversion;% if necessary, convert ADU into photons.
 ground_truth.z=((1:size(imstack,3))'-size(imstack,3)/2+1)*10; %dz=10 nm;
 
@@ -85,18 +86,20 @@ plot(ground_truth.z,cspline.z)
 hold on
 plot(ground_truth.z,gaussz.z)
 plot(ground_truth.z,gausssxsy.z)
+
+plot(ground_truth.z,ground_truth.z,'k')
 plot([-zrange -zrange],[-1000 1000],'c')
 plot([zrange zrange],[-1000 1000],'c')
-plot(ground_truth.z,ground_truth.z,'k')
+
 
 cspline.dz=nanstd(ground_truth.z(inz)-cspline.z(inz));
 zgauss.dz=nanstd(ground_truth.z(inz)-gaussz.z(inz));
 gausssxsy.dz=nanstd(ground_truth.z(inz)-gausssxsy.z(inz));
 
-legendtxt{1}='ground truth';
-legendtxt{2}=['spline fit. error: ' num2str(cspline.dz)];
-legendtxt{3}=['Gaussian z fit. error: ' num2str(zgauss.dz)];
-legendtxt{4}=['Gaussian sx, sy fit. error: ' num2str(gausssxsy.dz)];
+legendtxt{4}='ground truth';
+legendtxt{1}=['spline fit. error: ' num2str(cspline.dz)];
+legendtxt{2}=['Gaussian z fit. error: ' num2str(zgauss.dz)];
+legendtxt{3}=['Gaussian sx, sy fit. error: ' num2str(gausssxsy.dz)];
 legend(legendtxt)
 
 %calculate lateral error

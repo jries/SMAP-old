@@ -41,7 +41,7 @@ else
 end
 
 for k=1:size(imin,4)
-    frh=round(p.framerange-zshiftf0(k));
+    frh=round(p.framerange-zshiftf0(k)); %makes sure, all beads are at same z position
     try
     smallim(:,:,:,k)=imin(p.xrange,p.yrange,frh,k);
     catch err %range out 
@@ -51,6 +51,10 @@ avim=nanmean(imin,4);
 
 xn=1:size(imin,1);yn=1:size(imin,2);zn=1:size(imin,3);
 [Xq,Yq,Zq]=meshgrid(yn,xn,zn);
+
+% xns=1:size(smallim,1);yns=1:size(smallim,2);zns=1:size(smallim,3);
+% [Xqs,Yqs,Zqs]=meshgrid(yns,xns,zns);
+
 meanim=[];
 refim=avim(p.xrange,p.yrange,p.framerange);
 
@@ -63,7 +67,9 @@ for k=1:numbeads
         [shift(k,:),cc(k)]=get3Dcorrshift(refim(:,:,goodframes),smallim(:,:,goodframes,k));
     else
         if any(goodframes)
+%             smallimshiftf0=interp3(smallim(:,:,:,k),Xqs,Yqs,Zqs-double(zshiftf0(k)),'cubic',0);
             [shift(k,:),cc(k)]=get2Dcorrshift(refim(:,:,goodframes),smallim(:,:,goodframes,k));
+%             [shift(k,:),cc(k)]=get2Dcorrshift(refim(:,:,goodframes),smallimshiftf0);
         else
             shift(k,:)=[0 0 0];cc(k)=NaN;
         end
