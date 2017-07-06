@@ -20,7 +20,7 @@ cal=load('data/bead_3dcal.mat'); %load bead calibration
 
 
 %% either simulate data or load experimental tiff file
-mode =0;
+mode =1;
 if mode ==1 % simulate data
     p.offset=0;
     p.conversion=1;
