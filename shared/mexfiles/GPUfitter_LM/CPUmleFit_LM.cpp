@@ -792,6 +792,12 @@
 		newTheta[4]=PSFSigma;
 		newTheta[5]=PSFSigma;
 
+		newClamp[2]=max(newTheta[2],newClamp[2]);
+		oldClamp[2]=newClamp[2];
+
+		newClamp[3]=max(newTheta[3],newClamp[3]);
+		oldClamp[3]=newClamp[3];
+
 		for (ii=0;ii<NV;ii++)oldTheta[ii]=newTheta[ii];
 
 		//updateFitValues3D
@@ -2083,6 +2089,13 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 		kernel_GaussFMaxMin2D(sz, PSFSigma, s_data, &Nmax, &newTheta[3]);
 		newTheta[2]=max(0.0, (Nmax-newTheta[3])*2*PI*PSFSigma*PSFSigma);
 		newTheta[3] = max(newTheta[3],0.01);
+
+		newClamp[2]=max(newTheta[2],newClamp[2]);
+		oldClamp[2]=newClamp[2];
+
+		newClamp[3]=max(newTheta[3],newClamp[3]);
+		oldClamp[3]=newClamp[3];
+
 		newTheta[4]=PSFSigma;
 		newTheta[5]=PSFSigma;
 
