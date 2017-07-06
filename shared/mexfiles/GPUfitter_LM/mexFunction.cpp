@@ -47,12 +47,12 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 	int blockx=0;
 	int threadx=0;
 	const mwSize *datasize=0;
-	float PSFSigma=1, Ax=0, Ay=0, Bx=0, By=0, gamma=0, d=0, PSFSigma_y=0;
+	float PSFSigma=1, Ax=0, Ay=0, Bx=0, By=0, gamma=0.5, d=0.5, PSFSigma_y=1;
 	int iterations=50;
-	double * startParameters = 0;
-	float *data=0;
+	float * startParameters = 0;
+	float *data=0, *d_data=0;
 	float *Parameters=0,*CRLBs=0,*LogLikelihood=0;
-	size_t Ndim, Nfitraw, fittype, sz, cameratype;
+	size_t Ndim, Nfitraw, fittype, sz, cameratype=0;//default cameratype 0 EMCCD
 	mwSize noParameters;
 	//sCMOS
 	float *varim=0;
@@ -111,25 +111,32 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 				PSFSigma = (float)mxGetScalar(prhs[3]);
 				break;
 			case 3:// fit with z
-				PSFSigma = (float)mxGetScalar(prhs[3]);
+				//PSFSigma = (float)mxGetScalar(prhs[3]);
 				noParameters = mxGetNumberOfElements(prhs[3]);
-				startParameters = mxGetPr(prhs[3]);
-				if (noParameters>1)
-					Ax = (float) startParameters[1];
-				if (noParameters>2)
-					Ay = (float) startParameters[2];
-				if (noParameters>3)
-					Bx = (float) startParameters[3];
-				if (noParameters>4)
-					By = (float) startParameters[4];
-				if (noParameters>5)
-					gamma = (float) startParameters[5];
-				if (noParameters>6)
-					d = (float) startParameters[6];
-				if (noParameters>7)
-					PSFSigma_y = (float) mxGetScalar(prhs[7]);
+				if (mxGetClassID(prhs[3])!=mxSINGLE_CLASS)
+					mexErrMsgIdAndTxt("CPUmleFit_LM:WrongNoArgs","Parameters should be single. \n");
 				else
-					PSFSigma_y =PSFSigma;
+				{
+					startParameters = (float*)mxGetData(prhs[3]);
+					if (noParameters>0)
+						PSFSigma=(float) startParameters[0];
+					if (noParameters>1)
+						Ax = (float) startParameters[1];
+					if (noParameters>2)
+						Ay = (float) startParameters[2];
+					if (noParameters>3)
+						Bx = (float) startParameters[3];
+					if (noParameters>4)
+						By = (float) startParameters[4];
+					if (noParameters>5)
+						gamma = (float) startParameters[5];
+					if (noParameters>6)
+						d = (float) startParameters[6];
+					if (noParameters>7)
+						PSFSigma_y = (float) startParameters[7];
+					else
+						PSFSigma_y =PSFSigma;
+				}
 				break;
 			case 5://spline fit
 				iterations=(int) mxGetScalar(prhs[2]);
