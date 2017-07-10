@@ -82,17 +82,33 @@ gausssxsy.z=sxsy2z(sx,sy,cal.gauss_sx2_sy2); %z from sx, sy
 zrange=400;
 inz=abs(ground_truth.z)<zrange;
 
+cspline.zrel=cspline.z-ground_truth.z;
+gaussz.zrel=gaussz.z-ground_truth.z;
+gausssxsy.zrel=gausssxsy.z-ground_truth.z;
+gausssxsy.zrel(isnan(gausssxsy.zrel))=0;
 %plot fitted z vs ground-truth z
 figure(101)
 hold off
-plot(ground_truth.z,cspline.z)
+plot(ground_truth.z,gaussz.zrel-mean(gaussz.zrel(inz)),'r.')
 hold on
-plot(ground_truth.z,gaussz.z)
-plot(ground_truth.z,gausssxsy.z)
+plot(ground_truth.z,gausssxsy.zrel-mean(gausssxsy.zrel(inz)),'.','Color',[0.,0.8,0])
+plot(ground_truth.z,cspline.zrel-mean(cspline.zrel(inz)),'b.')
+gs=fit(ground_truth.z,gaussz.zrel-mean(gaussz.zrel(inz)),'smoothingspline','SmoothingParam',.00001);
+gss=fit(ground_truth.z,gausssxsy.zrel-mean(gausssxsy.zrel(inz)),'smoothingspline','SmoothingParam',.001);
+gz=fit(ground_truth.z,cspline.zrel-mean(cspline.zrel(inz)),'smoothingspline','SmoothingParam',.0001);
 
-plot(ground_truth.z,ground_truth.z,'k')
+plot(ground_truth.z,ground_truth.z*0,'k','LineWidth',3)
+plot(ground_truth.z,gs(ground_truth.z),'r','LineWidth',3)
+plot(ground_truth.z,gss(ground_truth.z),'Color',[0.7,0.7,0],'LineWidth',3)
+plot(ground_truth.z,gz(ground_truth.z),'b','LineWidth',3)
+
 plot([-zrange -zrange],[-1000 1000],'c')
 plot([zrange zrange],[-1000 1000],'c')
+
+ss=std(cspline.zrel(inz))*10;
+ylim([-ss ss])
+xlabel('ground truth z')
+ylabel('zfit - z (ground truth)')
 
 
 cspline.dz=nanstd(ground_truth.z(inz)-cspline.z(inz));
@@ -100,9 +116,9 @@ zgauss.dz=nanstd(ground_truth.z(inz)-gaussz.z(inz));
 gausssxsy.dz=nanstd(ground_truth.z(inz)-gausssxsy.z(inz));
 
 legendtxt{4}='ground truth';
-legendtxt{1}=['spline fit. error: ' num2str(cspline.dz)];
-legendtxt{2}=['Gaussian z fit. error: ' num2str(zgauss.dz)];
-legendtxt{3}=['Gaussian sx, sy fit. error: ' num2str(gausssxsy.dz)];
+legendtxt{3}=['spline fit. error: ' num2str(cspline.dz)];
+legendtxt{1}=['Gaussian z fit. error: ' num2str(zgauss.dz)];
+legendtxt{2}=['Gaussian sx, sy fit. error: ' num2str(gausssxsy.dz)];
 legend(legendtxt)
 
 %calculate lateral error
