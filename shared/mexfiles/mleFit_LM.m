@@ -1,4 +1,4 @@
-function [P,CRLB,LogL]=mleFit_LM(varargin)
+function [P,CRLB,LogL,P2,CRLB2,LogL2]=mleFit_LM(varargin)
 % varargin:
 % 1. imagestack (single)
 % 2. fitmode
@@ -48,8 +48,12 @@ if isempty(fitter)
     disp(['using: ' char(allfitters{fitter})]);
 end
 
-
+if varargin{2}==6
+    [P,CRLB,LogL,P2,CRLB2,LogL2]=allfitters{fitter}(varargin{:});
+else
 [P,CRLB,LogL]=allfitters{fitter}(varargin{:});
+P2=[];CRLB2=[];LogL2=[];
+end
 %%
 % 
 % <latex>

@@ -30,7 +30,7 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             roisize=obj.getPar('loc_ROIsize');
             obj.numberInBlock=round(obj.fitpar.roisperfit*100/roisize^2);
             
-            if obj.fitpar.fitmode==5
+            if obj.fitpar.fitmode==5 ||obj.fitpar.fitmode==6
                 EMfile=obj.getPar('loc_fileinfo').EMon;
                 EMcal=obj.fitpar.splinefit{1}.cspline.isEM;
                 if obj.getSingleGuiParameter('automirror')
@@ -59,7 +59,7 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             if obj.fitpar.fitmode==3
                 X=stackinfo.X;Y=stackinfo.Y;
                 obj.fitpar.zparhere=[obj.fitpar.zpar{X,Y}(:)];
-            elseif obj.fitpar.fitmode==5
+            elseif obj.fitpar.fitmode==5 || obj.fitpar.fitmode==6
                 X=stackinfo.X;Y=stackinfo.Y;
                 obj.fitpar.splinefithere=[obj.fitpar.splinefit{X,Y}(:)];
             end
@@ -209,7 +209,7 @@ arguments{6}=1;
 %             arguments{2}=fitpar.zparhere(1);
 %             arguments(7:13)=num2cell(fitpar.zparhere(2:8));
 %         case 4 %sx sy
-        case 5 %spline   
+        case {5,6} %spline   
             if fitpar.mirrorstack
                 arguments{1}=single(imstack(:,end:-1:1,:)/EMexcess);
             else
@@ -218,7 +218,11 @@ arguments{6}=1;
             arguments{4}=single(fitpar.splinefithere.cspline.coeff);
     end
     
-    [P CRLB LogL]=fitpar.fitfunction(arguments{:});
+    if fitpar.fitmode==6
+        [P CRLB LogL P2 CRLB2 LogL2 ]=fitpar.fitfunction(arguments{:});
+    else
+        [P CRLB LogL]=fitpar.fitfunction(arguments{:});
+    end
    
 
 out.P=P;
@@ -246,6 +250,11 @@ fitpar.iterations=p.iterations;
 fitpar.fitmode=p.fitmode.Value;
 fitpar.roisperfit=p.roisperfit;
 if fitpar.fitmode==3||fitpar.fitmode==5
+    fitpar.PSF2D=p.fit2D;
+    if p.fit2D
+        fitpar.fitmode=6;
+    end
+    
     calfile=p.cal_3Dfile;
     cal=load(calfile);
     if 0% p.useObjPos
@@ -327,7 +336,7 @@ end
 function fitmode_callback(a,b,obj)
 p=obj.getGuiParameters;
 fitmode=p.fitmode.Value;
-fitz={'loadcal','cal_3Dfile','useObjPos','objPos','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','pixelsizex','pixelsizey','automirror'};
+fitz={'loadcal','cal_3Dfile','useObjPos','objPos','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','pixelsizex','pixelsizey','automirror','fit2D'};
 fitxy={'PSFx0','tPSFx0'};
 switch fitmode
     case {3,5}
@@ -360,6 +369,8 @@ pard.fitmode.position=[1,1];
 pard.fitmode.Width=2;
 pard.fitmode.TooltipString=sprintf('Fit mode. Fit with constant PSF, free PSF, 3D with astigmatism, asymmetric PSF (for calibrating astigmatic 3D)');
 
+
+
 pard.text.object=struct('Style','text','String','Iterations:');
 pard.text.position=[1,3.3];
 pard.text.Width=0.7;
@@ -389,6 +400,12 @@ pard.PSFx0.position=[2,2.25];
 pard.PSFx0.Width=0.75;
 pard.PSFx0.TooltipString=sprintf('start value for PSF, or size of PSF when PSF fixed (in camera pixels)');
 pard.PSFx0.Optional=true;
+
+pard.fit2D.object=struct('Style','checkbox','String','2D PSF','Value',0);
+pard.fit2D.position=[2,1];
+pard.fit2D.Width=2;
+pard.fit2D.TooltipString=sprintf('Check if PSF model is 2D (no specific PSF engineering), or displays a high degree of similarity above and below the focal plane');
+
 
 pard.loadcal.object=struct('Style','pushbutton','String','Load 3D cal');
 pard.loadcal.position=[3,1];
