@@ -99,6 +99,9 @@ if contains(p.modality,'astig')
     gauss_zfit=single(gausscal.fitzpar);
     gauss_sx2_sy2=gausscal.Sx2_Sy2;
 else
+    gausscal=[];
+    gauss_sx2_sy2=[];
+    gauss_zfit=[];
 end
 cspline_all=csplinecal;
 save(p.outputfile,'gausscal','cspline_all','gauss_sx2_sy2','gauss_zfit','cspline');

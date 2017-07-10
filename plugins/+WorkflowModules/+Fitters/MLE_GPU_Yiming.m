@@ -25,7 +25,7 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
                 fitp=mleFit_LM(img,1);
                 obj.fitpar.fitfunction=@mleFit_LM;
 %                 obj.fitpar.fitfunction=@callYimingFitter;
-                 reporttext='GPUmleFit_LM works';
+                 reporttext='mleFit_LM works';
             end
             roisize=obj.getPar('loc_ROIsize');
             obj.numberInBlock=round(obj.fitpar.roisperfit*100/roisize^2);
@@ -232,7 +232,7 @@ p=obj.getAllParameters;
 [f,p]=uigetfile(p.cal_3Dfile);
 if f
     l=load([p f]);
-    if ~isfield(l,'outforfit') && ~isfield(l,'SXY')
+    if ~isfield(l,'outforfit') && ~isfield(l,'SXY') && ~isfield(l,'cspline')
         msgbox('no 3D data recognized. Select other file.');
     end
     obj.setGuiParameters(struct('cal_3Dfile',[p f]));
@@ -255,7 +255,7 @@ if fitpar.fitmode==3||fitpar.fitmode==5
         fitpar.objPos=p.objPos;
         if isfield(cal,'outforfit')
             fitpar.zpar{1,1}=cal.outforfit;
-        else
+        elseif isfield(cal,'SXY')
             s=size(cal.SXY);
             Z=1;
             if p.useObjPos
@@ -288,6 +288,17 @@ if fitpar.fitmode==3||fitpar.fitmode==5
             yr(1)=-inf;yr(end)=inf;
             obj.spatialXrange=xr;
             obj.spatialYrange=yr;
+        elseif isfield(cal,'cspline')
+            fitpar.zpar=cal.gauss_zfit;
+            fitpar.dz=cal.cspline.dz;
+            fitpar.z0=cal.cspline.z0;
+            fitpar.splinefit{1}=cal.cspline_all;
+            if ~isfield(fitpar.splinefit{1}.cspline,'isEM')
+                fitpar.splinefit{1}.cspline.isEM=false;
+            end
+           
+        else
+            disp('no calibration found')
                 
         end
         fitpar.refractive_index_mismatch=p.refractive_index_mismatch;
