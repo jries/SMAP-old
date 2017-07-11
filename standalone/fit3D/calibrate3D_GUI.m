@@ -10,7 +10,11 @@ classdef calibrate3D_GUI<handle
             h.Position(3:4)=[450, 600];
             top=h.Position(4);
             vsep=24;
-            fontsize=14;
+            if ispc
+                fontsize=12;
+            else 
+                fontsize=14;
+            end
             xpos1=10;
             xw=100;
             obj.guihandles.title=uicontrol('style','text','String','Calibrate PSF model for MLE fit from bead stacks. ','Position',[xpos1,top-vsep,xw*3,vsep],'FontSize',fontsize);
@@ -27,7 +31,7 @@ classdef calibrate3D_GUI<handle
             obj.guihandles.dz=uicontrol('style','edit','String','10','Position',[xpos1+2.5*xw,top-8*vsep,xw*1,vsep],'FontSize',fontsize);
             
             obj.guihandles.modalityt=uicontrol('style','text','String','3D modality ','Position',[xpos1,top-9*vsep,xw*2.5,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
-            obj.guihandles.modality=uicontrol('style','popupmenu','String',{'astigmatism','arbitrary'},'Position',[xpos1+2.5*xw,top-9*vsep,xw*1.5,vsep],'FontSize',fontsize,'Callback',@obj.modality_callback);
+            obj.guihandles.modality=uicontrol('style','popupmenu','String',{'astigmatism','arbitrary','2D PSF'},'Position',[xpos1+2.5*xw,top-9*vsep,xw*1.5,vsep],'FontSize',fontsize,'Callback',@obj.modality_callback);
             
             obj.guihandles.corrzt=uicontrol('style','text','String','Correct bead z-positions using ','Position',[xpos1,top-10*vsep,xw*2.5,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
             obj.guihandles.corrzselect=uicontrol('style','popupmenu','String',{'none','cross-correlation','shape (astig)'},...
@@ -62,8 +66,9 @@ classdef calibrate3D_GUI<handle
             obj.guihandles.gaussroi=uicontrol('style','edit','String','17','Position',[xpos1+2*xw,top-20*vsep,xw*.5,vsep],'FontSize',fontsize);
            
             obj.guihandles.run=uicontrol('style','pushbutton','String','Calculate bead calibration','Position',[xpos1,top-22*vsep,xw*4,vsep],'FontSize',fontsize,'Callback',@obj.run_callback);
-            obj.guihandles.help=uicontrol('style','pushbutton','String','Help','Position',[xpos1+xw,top-24*vsep,xw*2,vsep],'FontSize',fontsize,'Callback',@obj.help_callback);
+            obj.guihandles.help=uicontrol('style','pushbutton','String','Help','Position',[xpos1+xw,top-23*vsep,xw*2,vsep],'FontSize',fontsize,'Callback',@obj.help_callback);
                       
+            obj.guihandles.status=uicontrol('style','text','String','Status','Position',[xpos1,top-25*vsep,xw*4,vsep],'FontSize',fontsize,'HorizontalAlignment','left');
             
         end
         function selectfiles_callback(obj,a,b)
@@ -130,6 +135,7 @@ classdef calibrate3D_GUI<handle
             p.filtersize=str2double(obj.guihandles.filter.String);
             p.zcorrframes=str2double(obj.guihandles.zcorrframes.String);
             p.gaussroi=str2double(obj.guihandles.gaussroi.String);
+            p.status=obj.guihandles.status;
             if isempty(p.filelist)
                 warndlg('please select image files first')
                 return
