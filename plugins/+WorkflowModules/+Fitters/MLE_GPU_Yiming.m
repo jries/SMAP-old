@@ -151,7 +151,7 @@ switch fitpar.fitmode
         locs.PSFxerr=sqrt(CRLB(:,5));
         locs.PSFypix=P(:,6);
         locs.PSFyerr=sqrt(CRLB(:,6));  
-    case 5
+    case {5,6}
         
         %         locs.znm=(P(:,5)*1000+fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
         locs.znm=((P(:,5)-fitpar.z0)*fitpar.dz)*fitpar.refractive_index_mismatch;
@@ -219,7 +219,14 @@ arguments{6}=1;
     end
     
     if fitpar.fitmode==6
-        [P CRLB LogL P2 CRLB2 LogL2 ]=fitpar.fitfunction(arguments{:});
+        [P1 CRLB1 LL1 P2 CRLB2 LL2 ]=fitpar.fitfunction(arguments{:});
+        P = repmat(single(LL1>=LL2),1,7).*P1+repmat(single(LL1<LL2),1,7).*P2;
+        CRLB = repmat(single(LL1>=LL2),1,5).*CRLB1+repmat(single(LL1<LL2),1,5).*CRLB2;
+        LogL = repmat(single(LL1>=LL2),1,1).*LL1+repmat(single(LL1<LL2),1,1).*LL2;
+        
+        
+        
+        
     else
         [P CRLB LogL]=fitpar.fitfunction(arguments{:});
     end
