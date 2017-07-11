@@ -19,7 +19,7 @@ for k=1:length(filelist)
     mim=filter2(h,mim);
     maxima=maximumfindcall(mim);
 %     figure(88);
-    imagesc(mim);
+    imagesc(ax,mim);
     
     int=maxima(:,3);
     try
