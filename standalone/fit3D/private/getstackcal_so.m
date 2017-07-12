@@ -65,8 +65,8 @@ sstack=size(beads(1).stack.image);
     end
     
 %     focusreference=round(median(dframe));
-    midrange=halfstoreframes+1+round(median(dframe));
-    
+    midrange=halfstoreframes+1-round(median(dframe));
+    p.status.String='calculate shift of individual PSFs';drawnow
     filenumber=[beads(:).filenumber];
     [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D_so(allrois,struct('framerange',midrange-fw2:midrange+fw2,'alignz',zcorr,'zshiftf0',zshift,'beadfilterf0',false),{},filenumber(sortinddev));
     
@@ -94,7 +94,7 @@ sstack=size(beads(1).stack.image);
 
         z=midrange;%always same reference: z=f0
         rangez=max(1,z-dzroi):min(size(corrPSF,3),z+dzroi);
-        z0reference=find(z>=rangez,1,'first');
+        z0reference=find(rangez>=z,1,'first');
         
         %normalize PSF
         centpsf=corrPSF(2:end-1,2:end-1,2:end-1); %cut out rim from shift
@@ -124,6 +124,7 @@ sstack=size(beads(1).stack.image);
         zhd=1:1:b3_0.dataSize(3);
         dxxhd=1;
         [XX,YY,ZZ]=meshgrid(1:dxxhd:b3_0.dataSize(1),1:dxxhd:b3_0.dataSize(2),zhd);
+        p.status.String='calculate cspline coefficients';drawnow
         corrPSFhd = interp3_0(b3_0,XX,YY,ZZ,0);
         
         %calculate cspline coefficients
@@ -139,6 +140,7 @@ sstack=size(beads(1).stack.image);
         bspline.z0=round((b3_0.dataSize(3)+1)/2);
         bspline.dz=p.dz;            
         splinefit.bspline=bspline;
+        p.z0=cspline.z0;
         
         splinefit.PSF=corrPSF;
 %         splinefit.PSF=shiftedstack(:,:,:,1)*intglobal;
@@ -260,13 +262,21 @@ d=round((size(teststack,1)-p.ROIxy)/2);
             range=d+1:d+p.ROIxy;
 
 numstack=size(teststack,4);
-fprintf('fitting test stacks: 0.00')
+t=tic;
     for k=1:size(teststack,4)
-        fprintf([ '\b\b\b\b' num2str(k/numstack,'%1.2f')])
+        if toc(t)>1
+            p.status.String=['fitting test stacks: ' num2str(k/numstack,'%1.2f')];drawnow
+            t=tic;
+        end
+%         fprintf([ '\b\b\b\b' num2str(k/numstack,'%1.2f')])
           [P] =  mleFit_LM(single(squeeze(teststack(range,range,:,k))),5,100,single(coeff),0,1);
     z=(1:size(P,1))'-1;
-    plot(ax,z,P(:,5),linepar{:})
+    
+    znm=(z-p.z0)*p.dz;
+    plot(ax,znm,P(:,5),linepar{:})
     hold(ax,'on')
+    xlabel(ax,'frame')
+    ylabel(ax,'zfit (nm)')
     zs(:,k)=P(:,5);
     end
     
