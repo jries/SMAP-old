@@ -1,6 +1,6 @@
 function [splinefit,indgood]=getstackcal_so(beads,p)
 global stackcal_testfit
-isastig=contains(p.modality,'astig');
+isastig=contains(p.modality,'astig')||contains(p.modality,'2D');
 alignzastig=isastig&contains(p.zcorr,'astig');
 zcorr=contains(p.zcorr,'corr');
 sstack=size(beads(1).stack.image);
@@ -23,6 +23,7 @@ sstack=size(beads(1).stack.image);
         dpsfx=(psfx-median(psfx(~isnan(psfx))))*10;
         dpsfy=(psfy-median(psfy(~isnan(psfy))))*10;
     else
+        dframe=0;
         dpsfx=0;dpsfy=0;
     end
     
@@ -62,8 +63,9 @@ sstack=size(beads(1).stack.image);
     else
         zshift=[];
     end
-
-    midrange=halfstoreframes;%+round(median(dframe))+1;
+    
+%     focusreference=round(median(dframe));
+    midrange=halfstoreframes+1+round(median(dframe));
     
     filenumber=[beads(:).filenumber];
     [corrPSF,shiftedstack,shift,beadgood]=registerPSF3D_so(allrois,struct('framerange',midrange-fw2:midrange+fw2,'alignz',zcorr,'zshiftf0',zshift,'beadfilterf0',false),{},filenumber(sortinddev));
@@ -86,12 +88,13 @@ sstack=size(beads(1).stack.image);
         x=round((scorrPSF(1)+1)/2);y=round((scorrPSF(2)+1)/2);
 
         dRx=round((p.ROIxy-1)/2);
-        dz=round((p.ROIz-1)/2);
+        dzroi=round((p.ROIz-1)/2);
         rangex=x-dRx:x+dRx;
         rangey=y-dRx:y+dRx;
 
         z=midrange;%always same reference: z=f0
-        rangez=max(1,z-dz):min(size(corrPSF,3),z+dz);
+        rangez=max(1,z-dzroi):min(size(corrPSF,3),z+dzroi);
+        z0reference=find(z>=rangez,1,'first');
         
         %normalize PSF
         centpsf=corrPSF(2:end-1,2:end-1,2:end-1); %cut out rim from shift
@@ -130,7 +133,7 @@ sstack=size(beads(1).stack.image);
         %assemble output structure for saving
         bspline.bslpine=b3_0;
         cspline.coeff=coeff;
-        cspline.z0=round((b3_0.dataSize(3)+1)/2);
+        cspline.z0=z0reference;%round((b3_0.dataSize(3)+1)/2);
         cspline.dz=p.dz;
         cspline.x0=dRx+1;
         bspline.z0=round((b3_0.dataSize(3)+1)/2);
