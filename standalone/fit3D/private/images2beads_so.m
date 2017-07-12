@@ -42,9 +42,10 @@ for k=1:length(filelist)
         maxima=maxima(indm,:);
     end
     
-    hold on
-    plot(maxima(:,1),maxima(:,2),'mo')
-    hold off
+    
+    hold (ax,'on')
+    plot(ax,maxima(:,1),maxima(:,2),'mo')
+    hold (ax,'off')
     drawnow
     numframes=size(imstack,3);
     bind=length(b)+size(maxima,1);
