@@ -305,7 +305,7 @@ if fitpar.fitmode==3||fitpar.fitmode==5
             obj.spatialXrange=xr;
             obj.spatialYrange=yr;
         elseif isfield(cal,'cspline')
-            fitpar.zpar=cal.gauss_zfit;
+            fitpar.zpar{1}=cal.gauss_zfit;
             fitpar.dz=cal.cspline.dz;
             fitpar.z0=cal.cspline.z0;
             fitpar.splinefit{1}=cal.cspline_all;
