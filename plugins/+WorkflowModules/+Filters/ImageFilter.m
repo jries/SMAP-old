@@ -85,7 +85,11 @@ if f
 
     
     l=load([p f]);
+    if isfield(l,'SXY')
     PSF=l.SXY(1).splinefit.PSF;
+    elseif isfield(l,'cspline_all')
+        PSF=l.cspline_all.PSF;
+    end    
         rs=obj.getPar('loc_ROIsize');
     if isempty(rs)
         disp('preview once to set roisize')

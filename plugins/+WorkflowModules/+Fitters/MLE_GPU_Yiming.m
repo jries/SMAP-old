@@ -109,12 +109,22 @@ LogL=results.LogL;
            
            
 % locs.xpix=P(:,2)-dn+posx;
+% if (fitpar.fitmode==5||fitpar.fitmode==6) && fitpar.mirrorstack
+%     locs.xpix=dn-P(:,2)+1+posx;
+% else
+%     locs.xpix=P(:,2)-dn+posx;
+% end
+% locs.ypix=P(:,1)-dn+posy;
+
+
 if (fitpar.fitmode==5||fitpar.fitmode==6) && fitpar.mirrorstack
-    locs.xpix=dn-P(:,2)+1+posx;
+    
+    locs.ypix=dn-P(:,1)+1+posy;
 else
-    locs.xpix=P(:,2)-dn+posx;
+    locs.ypix=P(:,1)-dn+posy;
 end
-locs.ypix=P(:,1)-dn+posy;
+
+locs.xpix=P(:,2)-dn+posx;
 
 locs.phot=P(:,3)*EMexcess;
 locs.bg=P(:,4)*EMexcess;
@@ -169,15 +179,6 @@ locs.locpthompson=sqrt((locs.PSFxpix.*locs.PSFypix+1/12*v1)./( locs.phot/EMexces
 end
 
 function out=fitwrapper(imstack,fitpar)
-
-
-%             if any(imstack(:)<0)
-%                 figure(88);
-%                 imageslicer(imstack);
-% 
-%                 
-%             end
-            
 s=size(imstack);
 if length(s)==2 
  s(3)=1;
