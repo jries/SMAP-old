@@ -14,7 +14,7 @@ function calibrate3D(p)
 % p.gaussroi
 
 %get bead positions
-p.status.String='get bead position';drawnow
+p.status.String='load files and segmet beads';drawnow
 f=figure;
 p.tabgroup=uitabgroup(f);
 %get beads from images

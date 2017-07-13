@@ -30,7 +30,7 @@ for k=1:length(filelist)
     mv=mean(sm(end-5:end));
     cutoff=mean(imt(:))+max(3*std(imt(:)),(mv-mean(imt(:)))/5);
     catch
-        cutoff=quantile(mimc,.95);
+        cutoff=quantile(mimc(:),.95);
     end
 %     cutoff=(quantile(mimc(:),0.8)+quantile(mimc(:),0.99))/2;
 

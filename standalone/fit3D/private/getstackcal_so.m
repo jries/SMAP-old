@@ -180,8 +180,8 @@ sstack=size(beads(1).stack.image);
              hold(ax,'on')
             plot(ax,framerange0',zprofile(1:length(framerange0)),'k*')
             plot(ax,zzz+rangez(1)+framerange0(1)-2,zbs,'b','LineWidth',2)
-            xlabel('frames')
-            ylabel('intensity')
+            xlabel(ax,'frames')
+            ylabel(ax,'intensity')
             
             xrange=-halfroisizebig:halfroisizebig;
              ax=axes(uitab(p.tabgroup,'Title','PSFx'));
@@ -190,8 +190,8 @@ sstack=size(beads(1).stack.image);
             hold(ax,'on')
             plot(ax,xrange,xprofile,'k*-')
             plot(ax,(xxx-(b3_0.dataSize(1)+1)/2),xbs,'b','LineWidth',2)
-            xlabel('x (pixel)')
-            ylabel('intensity')
+            xlabel(ax,'x (pixel)')
+            ylabel(ax,'intensity')
             
             drawnow
             
@@ -272,8 +272,8 @@ t=tic;
           [P] =  mleFit_LM(single(squeeze(teststack(range,range,:,k))),5,100,single(coeff),0,1);
     z=(1:size(P,1))'-1;
     
-    znm=(z-p.z0)*p.dz;
-    plot(ax,znm,P(:,5),linepar{:})
+    znm=(P(:,5)-p.z0)*p.dz;
+    plot(ax,z,znm,linepar{:})
     hold(ax,'on')
     xlabel(ax,'frame')
     ylabel(ax,'zfit (nm)')
