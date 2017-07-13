@@ -109,7 +109,7 @@ LogL=results.LogL;
            
            
 % locs.xpix=P(:,2)-dn+posx;
-if fitpar.fitmode==5&& fitpar.mirrorstack
+if (fitpar.fitmode==5||fitpar.fitmode==6) && fitpar.mirrorstack
     locs.xpix=dn-P(:,2)+1+posx;
 else
     locs.xpix=P(:,2)-dn+posx;
