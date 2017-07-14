@@ -40,6 +40,16 @@ classdef RoiCutterWF<interfaces.WorkflowModule
             kernelSize=obj.loc_ROIsize;
             dn=ceil((kernelSize-1)/2);
             sim=size(image);
+            
+            if p.loc_filterforfit>0
+            %test: filter image befor fitting for z from 2D
+            %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+            h=fspecial('gaussian',3,p.loc_filterforfit);
+           
+            image=filter2(h,image);
+            %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+            end
+            
             cutoutimages=zeros(kernelSize,kernelSize,length(maxima.x),'single');
           
             
@@ -127,9 +137,15 @@ pard.text.position=[1,1];
 
 pard.loc_ROIsize.object=struct('Style','edit','String','7');
 pard.loc_ROIsize.position=[2,1];
+pard.loc_ROIsize.Width=0.7;
 pard.loc_ROIsize.TooltipString=sprintf('Size (pixels) of regions around each peak candidate which are used for fitting. \n Depends on fitter. Use larger ROIs for 3D data.');
 
-pard.syncParameters={{'loc_ROIsize','loc_ROIsize',{'String'}}};
+pard.loc_filterforfit.object=struct('Style','edit','String','0');
+pard.loc_filterforfit.position=[2,1.7];
+pard.loc_filterforfit.TooltipString=sprintf('Filter before fit. Sigma of Gaussian kernel in pixels (0: no filter).');
+pard.loc_filterforfit.Width=0.3;
+
+pard.syncParameters={{'loc_ROIsize','loc_ROIsize',{'String'}},{'loc_filterforfit','loc_filterforfit',{'String'}}};
 
 pard.plugininfo.type='WorkflowModule'; 
 pard.plugininfo.description='This plugin cuts out regions of interest of a defined size around the candidate positions and passes these on to the fitter';

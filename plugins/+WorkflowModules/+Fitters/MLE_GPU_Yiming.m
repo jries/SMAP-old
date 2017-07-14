@@ -109,22 +109,22 @@ LogL=results.LogL;
            
            
 % locs.xpix=P(:,2)-dn+posx;
-% if (fitpar.fitmode==5||fitpar.fitmode==6) && fitpar.mirrorstack
-%     locs.xpix=dn-P(:,2)+1+posx;
-% else
-%     locs.xpix=P(:,2)-dn+posx;
-% end
-% locs.ypix=P(:,1)-dn+posy;
-
-
 if (fitpar.fitmode==5||fitpar.fitmode==6) && fitpar.mirrorstack
-    
-    locs.ypix=dn-P(:,1)+1+posy;
+    locs.xpix=dn-P(:,2)+posx;
 else
-    locs.ypix=P(:,1)-dn+posy;
+    locs.xpix=P(:,2)-dn+posx;
 end
+locs.ypix=P(:,1)-dn+posy;
 
-locs.xpix=P(:,2)-dn+posx;
+
+% if (fitpar.fitmode==5||fitpar.fitmode==6) && fitpar.mirrorstack
+%     
+%     locs.ypix=dn-P(:,1)+1+posy;
+% else
+%     locs.ypix=P(:,1)-dn+posy;
+% end
+
+% locs.xpix=P(:,2)-dn+posx;
 
 locs.phot=P(:,3)*EMexcess;
 locs.bg=P(:,4)*EMexcess;
@@ -218,8 +218,10 @@ arguments{6}=1;
             end
             arguments{4}=single(fitpar.splinefithere.cspline.coeff);
     end
-    
+   
     if fitpar.fitmode==6
+        
+        
         [P1 CRLB1 LL1 P2 CRLB2 LL2 ]=fitpar.fitfunction(arguments{:});
         P = repmat(single(LL1>=LL2),1,7).*P1+repmat(single(LL1<LL2),1,7).*P2;
         CRLB = repmat(single(LL1>=LL2),1,5).*CRLB1+repmat(single(LL1<LL2),1,5).*CRLB2;
