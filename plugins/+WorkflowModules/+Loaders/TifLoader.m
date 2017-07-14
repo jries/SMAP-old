@@ -119,6 +119,9 @@ classdef TifLoader<interfaces.WorkflowModule
                     imgo(dr+1:end-dr,dr+1:end-dr)=image;
                     image=imgo;
                 end
+                if p.mirrorimage
+                    image=image(:,end:-1:1);
+                end
                 datout.data=image;
 
                 datout.frame=imloader.currentImageNumber;
@@ -305,24 +308,30 @@ pard.textf.Width=0.75;
 pard.textf.Optional=true;
 pard.framestart.object=struct('Style','edit','String','1');
 pard.framestart.position=[4.2,2];
-pard.framestart.Width=0.7;
+pard.framestart.Width=0.5;
 pard.framestart.Optional=true;
 pard.framestop.object=struct('Style','edit','String','1000000');
-pard.framestop.position=[4.2,2.7];
-pard.framestop.Width=0.7;
+pard.framestop.position=[4.2,2.5];
+pard.framestop.Width=0.5;
 pard.framestop.Optional=true;
 
 pard.padedges.object=struct('Style','checkbox','String','Pad edges','Value',0,'Callback',@obj.loadedges);
-pard.padedges.position=[4.2,3.5];
+pard.padedges.position=[4.2,3];
 pard.padedges.Width=1;
 pard.padedges.Optional=true;
 pard.padedges.TooltipString='Pad edges with minimum values to allow detection of localizations close to edges. Usually not necessary.';
 
 pard.padedgesdr.object=struct('Style','edit','String','9','Callback',@obj.loadedges);
-pard.padedgesdr.position=[4.2,4.5];
-pard.padedgesdr.Width=.5;
+pard.padedgesdr.position=[4.2,4];
+pard.padedgesdr.Width=.3;
 pard.padedgesdr.Optional=true;
 pard.padedgesdr.TooltipString='Pad edges with minimum values to allow detection of localizations close to edges. Usually not necessary.';
+
+pard.mirrorimage.object=struct('Style','checkbox','String','mirror');
+pard.mirrorimage.position=[4.2,4.3];
+pard.mirrorimage.Width=.7;
+pard.mirrorimage.Optional=true;
+pard.mirrorimage.TooltipString='Mirror image. Useful for conventional vs EM gain, that swaps image.';
 
 % pard.locdata_empty.object=struct('Style','checkbox','String','Empty localizations','Value',1);
 % pard.locdata_empty.position=[4.2,3.5];
