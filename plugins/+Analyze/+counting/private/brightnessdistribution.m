@@ -66,7 +66,7 @@ if strcmp(blinkmode,'Poisson')
     end
 elseif strcmp(blinkmode,'Exponential')&&pblink>0&&pblink<1
     if isempty(sumk)
-        sumk=makesumk(1000,100);
+        sumk=makesumk(1000,500);
     end
     h=zeros(size(k));
     for B=0:N0

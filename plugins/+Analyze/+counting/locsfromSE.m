@@ -33,7 +33,7 @@ classdef locsfromSE<interfaces.DialogProcessor
             locprecnm(ind:end)=[];
             psf(ind:end)=[];
             localizations(ind:end)=[];
-            
+            length(psf)
             
             nonnan=~isnan(psf)&~isnan(locprecnm);
             indgood=psf>p.c_PSFmin&psf<p.c_PSFmax&nonnan;
