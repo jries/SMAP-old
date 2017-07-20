@@ -6,8 +6,10 @@ classdef calibrate3D_GUI<handle
         function obj=calibrate3D_GUI(varargin)  
             %constructur: make GUI
             addpath('shared')
+            addpath('bfmatlab')
             h=figure('Name','3D calibration','MenuBar','none','ToolBar','none');
-            h.Position(3:4)=[450, 600];
+            initPosition = h.Position;
+            h.Position=[initPosition(1), initPosition(2)- 600+initPosition(4),450, 600];
             top=h.Position(4);
             vsep=24;
             if ispc
@@ -69,7 +71,7 @@ classdef calibrate3D_GUI<handle
             obj.guihandles.help=uicontrol('style','pushbutton','String','Help','Position',[xpos1+xw,top-23*vsep,xw*2,vsep],'FontSize',fontsize,'Callback',@obj.help_callback);
                       
             obj.guihandles.status=uicontrol('style','text','String','Status','Position',[xpos1,top-25*vsep,xw*4,vsep],'FontSize',fontsize,'HorizontalAlignment','left');
-            
+            set(h, 'HandleVisibility', 'off');
         end
         function selectfiles_callback(obj,a,b)
             sf=selectManyFiles;
