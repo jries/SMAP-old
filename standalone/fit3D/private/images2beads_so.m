@@ -67,7 +67,6 @@ for k=1:length(filelist)
         bind=bind-1;
     end
     fmax=max(fmax,numframes);
-%     b(bold:bind)=[];
 end
 b=b([b(:).isstack]);
 

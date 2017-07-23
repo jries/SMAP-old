@@ -1,22 +1,21 @@
 %% example script for fitting of 3D data
 % put disclaimer
 
-% add path to helper functions
+%% add path to helper functions
 addpath('bfmatlab')
 addpath('shared')
 
 %% make bead calibration
 %run 3D calibration GUI (alternatively, you can directly call calibrate3D with proper parameters)
 %and make 3D calibration
-%e.g. using bead files: in /beadstacks (extracted beadstacks.zip)
+%e.g. using bead files: in data/beadstacks_3D_astig (extracted beadstacks_3D_astig.zip)
 % save e.g. as data/bead_3dcal.mat
+%For fitting 2D datasets, create 3D calibration from 2D PSF stack (e.g. data/beadstacks_2D)
 
 calibrate3D_GUI
 
-%% or load calibration
+%% load bead calibration
 cal=load('data/bead_3dcal.mat'); %load bead calibration
-% cal=load('data/bead_3dcal_temp.mat'); %load bead calibration
-
 
 
 %% either simulate data or load experimental tiff file
@@ -25,7 +24,10 @@ if mode ==1 % simulate data
     p.offset=0;
     p.conversion=1;
     
-    numlocs=1000; %number of simulated molecules. To test fitter performance on GPU, it should be >10^5
+    %numlocs: number of simulated molecules. For maximum fitting speeds on  the GPU, 
+    %it should be >10^5. For smaller GPUs, adust to avoid memory overflow
+    %error to 10^5-10^5. For CPU fitter, use 10^3-10^4.
+    numlocs=1000;
     RoiPixelsize=17; %ROI in pixels for simulation
     dz=cal.cspline.dz;  %coordinate system of spline PSF is corner based and in units pixels / planes
     z0=cal.cspline.z0; % distance and midpoint of stack in spline PSF, needed to translate into nm coordinates
@@ -36,22 +38,22 @@ if mode ==1 % simulate data
     coordinates=horzcat(ground_truth.x+dx,ground_truth.y+dx,ground_truth.z/dz+z0);
     Intensity=5000; %number of photons / localization
     background=5; %number of background photons per pixel
-    imstack = simSplinePSF(RoiPixelsize,cal.cspline.coeff,Intensity,background,coordinates);
+    imstack = simSplinePSF(RoiPixelsize,cal.cspline.coeff,Intensity,background,coordinates); %simulate images
     
 else %experimental data
     
-    file='data/single_bead.tif'; %simulated test data, based on real bead file.
+    file='data/single_bead.tif'; %experimental astgmatic bead stack.
     imstackadu=readfile_ome(file); % Stack of ROIs in photons.
     p.offset=400;p.conversion=.1;
     imstack=(single(imstackadu)-p.offset)/p.conversion;% if necessary, convert ADU into photons.
-    ground_truth.z=((1:size(imstack,3))'-size(imstack,3)/2+1)*10; %dz=10 nm;
+    ground_truth.z=((1:size(imstack,3))'-size(imstack,3)/2+1)*10; %dz=10 nm; convert frame to nm
 end
 
-%% fit
-numlocs=size(imstack,3); %imstack needs to be in photons
-imstack=single(imstack); %the fitters require the stacks in single-format;
+%% fit image stacks
+numlocs=size(imstack,3); 
+imstack=single(imstack); %imstack needs to be in photons. The fitters require the stacks in single-format;
 
-%fit cspline, emCCD mode
+%fit experimental astigmatic PSF, cspline, emCCD mode
 tic
 [Pcspline,CRLB]=mleFit_LM(imstack,5,50,single(cal.cspline.coeff));
 tspline=toc;
@@ -60,7 +62,7 @@ dx=floor(size(imstack,1)/2);
 cspline.x=Pcspline(:,1)-dx;cspline.y=Pcspline(:,2)-dx; %x,y in pixels 
 cspline.z=(Pcspline(:,5)-cal.cspline.z0)*cal.cspline.dz;
 
-%fit z, Gaussian model, emCCD mode
+%fit Gaussian model, direct z fit, emCCD mode
 tic
 [P,CRLB]=mleFit_LM(imstack,3,50,single(cal.gauss_zfit));
 tgz=toc;
@@ -68,7 +70,7 @@ disp(['Gauss z: ' num2str(numlocs/tgz) ' fits/s']);
 gaussz.x=P(:,1);gaussz.y=P(:,2); %x,y in pixels 
 gaussz.z=P(:,5)*1000;
 
-%fit sx,sy, Gaussian model, emCCD mode
+%fit elliptical Gaussian model, extract z from sx, sy. emCCD mode
 tic
 [P,CRLB]=mleFit_LM(imstack,4,50);
 tgsxsy=toc;
@@ -78,14 +80,16 @@ gausssxsy.x=P(:,1);gausssxsy.y=P(:,2); %x,y in pixels
 sx=P(:,5);sy=P(:,6);
 gausssxsy.z=sxsy2z(sx,sy,cal.gauss_sx2_sy2); %z from sx, sy
 
-% calculate error for central part
-zrange=400;
+% calculate error for all fits. 
+zrange=400; %Only take into accoutn central part. Focus +/- zrange
 inz=abs(ground_truth.z)<zrange;
 
+%difference between fitted z and ground truth
 cspline.zrel=cspline.z-ground_truth.z;
 gaussz.zrel=gaussz.z-ground_truth.z;
 gausssxsy.zrel=gausssxsy.z-ground_truth.z;
 gausssxsy.zrel(isnan(gausssxsy.zrel))=0;
+
 %plot fitted z vs ground-truth z
 figure(101)
 hold off
@@ -139,57 +143,54 @@ scatter3(ground_truth.x,ground_truth.y,ground_truth.z);
 hold on
 scatter3(cspline.x,cspline.y,cspline.z);
 
-%% or load 2D calibration
-cal=load('data/bead_2dcal.mat'); %load bead calibration
+%% fit 2D dataset with cspline
+% Here we simulate Nfits positions per data point and calculate the
+% z-dependent error
+cal=load('data/bead2D_3dcal.mat'); %load bead calibration
 
-ztruth = -275:50:275;
-Nfits = 1000;
-Nphotons = 2000;
-Npixels = 17;
-bg = 10;
-dx = 132; %nm
+ztruth = -275:50:275; %z positions for which we want to simulate fluorophores
+Nfits = 1000; %fits per data points
+Nphotons = 2000; %photons/localizations
+Npixels = 17; %size of the ROI
+bg = 10; %bg photons per pixel
+dx = 132; %nm pixel size
 dy = 132; %nm
 dz=cal.cspline.dz;  %coordinate system of spline PSF is corner based and in units pixels / planes
 z0=cal.cspline.z0; % distance and midpoint of stack in spline PSF, needed to translate into nm coordinates
 for i = 1: length(ztruth)
-    i
-    coordsxy = Npixels/2 -1 +2*rand([Nfits 2]);
+    disp([num2str(i) ' of ' num2str(length(ztruth))])
+    coordsxy = Npixels/2 -1 +2*rand([Nfits 2]); %random x, y positions
     coordsz = ztruth(i)/dz+z0*ones(Nfits,1);
     coordinates = [coordsxy coordsz];
     imstack = simSplinePSF(Npixels,cal.cspline.coeff,Nphotons,bg,coordinates);
-    tic
-    [P1 CRLB1 LL1 P2 CRLB2 LL2]=mleFit_LM(imstack,6,50,single(cal.cspline.coeff));
-    tspline2D=toc;
-    P = repmat(single(LL1>=LL2),1,7).*P1+repmat(single(LL1<LL2),1,7).*P2;
-    CRLB = repmat(single(LL1>=LL2),1,5).*CRLB1+repmat(single(LL1<LL2),1,5).*CRLB2;
-    LL = repmat(single(LL1>=LL2),1,1).*LL1+repmat(single(LL1<LL2),1,1).*LL2;
+
+    [P1 CRLB1 LL1 P2 CRLB2 LL2]=mleFit_LM(imstack,6,50,single(cal.cspline.coeff)); %fit mode 6
+    
+    %select fit output with higher likelihood
+    ind1=LL1>=LL2;
+    ind2=LL1<LL2;
+    P=zeros(size(P1),'single');CRLB=zeros(size(P1),'single');LL=zeros(size(P1),'single');
+    P(ind1,:)=P1(ind1,:);P(ind2,:)=P2(ind2,:);
+    CRLB(ind1,:)=CRLB1(ind1,:);CRLB(ind2,:)=CRLB2(ind2,:);
+    LL(ind1,:)=LL1(ind1,:);LL(ind2,:)=LL2(ind2,:);
+    
+%     P = repmat(single(LL1>=LL2),1,7).*P1+repmat(single(LL1<LL2),1,7).*P2;
+%     CRLB = repmat(single(LL1>=LL2),1,5).*CRLB1+repmat(single(LL1<LL2),1,5).*CRLB2;
+%     LL = repmat(single(LL1>=LL2),1,1).*LL1+repmat(single(LL1<LL2),1,1).*LL2;
     
     z=(P(:,5)-z0).*dz;
-    misassigned=sign(ztruth(i))~=sign(z);
-    fractionmisassigned(i)=sum(misassigned)/length(misassigned)
+    %determine fraction of misassigned localizations
+    misassigned=sign(ztruth(i))~=sign(z); 
+    fractionmisassigned(i)=sum(misassigned)/length(misassigned);
     s(i)=std(z(~misassigned)-ztruth(i));
-    
-%     if ztruth(i)>0
-%         PF=P1;
-%         CRLBF=CRLB1;
-%         LLF = LL1;
-%     else
-%         PF=P2;
-%         CRLBF=CRLB2;
-%         LLF = LL2;
-%     end
-
-    
-    
-%     misAsign(i) = sum(LL~=LLF)/length(LL);
     
     Cspline2D.x = P(:,1);
     Cspline2D.y = P(:,2);
-    Cspline2D.z=(P(:,5)-z0).*dz;
+    Cspline2D.z = (P(:,5)-z0).*dz;
     
     Cspline2D.CRLBx = CRLB(:,1);
     Cspline2D.CRLBy = CRLB(:,2);
-    Cspline2D.CRLBz=CRLB(:,5);
+    Cspline2D.CRLBz = CRLB(:,5);
     
     
     Cspline2D.s_x_found(i,1) = std( Cspline2D.x-coordsxy(:,1));
@@ -212,9 +213,7 @@ for i = 1: length(ztruth)
     
     Cspline2DF.CRLBx = CRLB(~misassigned,1);
     Cspline2DF.CRLBy = CRLB(~misassigned,2);
-    Cspline2DF.CRLBz=CRLB(~misassigned,5);
-    
-    
+    Cspline2DF.CRLBz = CRLB(~misassigned,5);
     
     Cspline2DF.s_x_found(i,1) = std( Cspline2DF.x-coordsxy(~misassigned,1));
     Cspline2DF.s_y_found(i,1) = std( Cspline2DF.y-coordsxy(~misassigned,2));
@@ -231,26 +230,32 @@ for i = 1: length(ztruth)
 
 end
 
-figure,plot(ztruth,Cspline2D.meanCRLBx*dx,'-');
+%XXX getting long. Maybe only calcualte filtered ones here
+figure(103);subplot(1,2,1);
+plot(ztruth,Cspline2D.meanCRLBx*dx,'-');
 hold on
 plot(ztruth,Cspline2D.meanCRLBy*dy,'-');
 plot(ztruth,Cspline2D.meanCRLBz,'-');
 plot(ztruth,Cspline2D.s_x_found*dx,'o');
 plot(ztruth,Cspline2D.s_y_found*dy,'o');
 plot(ztruth,Cspline2D.s_z_found,'o');
+xlabel('xnm')
+ylabel('localization precision')
+legend('CRLBx','CRLBy','CRLBz','std(x)','std(y)','std(z)');
+title('misassignments not filtered')
 
-figure,plot(ztruth,Cspline2DF.meanCRLBx*dx,'-');
+subplot(1,2,2);
+plot(ztruth,Cspline2DF.meanCRLBx*dx,'-');
 hold on
 plot(ztruth,Cspline2DF.meanCRLBy*dy,'-');
 plot(ztruth,Cspline2DF.meanCRLBz,'-');
 plot(ztruth,Cspline2DF.s_x_found*dx,'o');
 plot(ztruth,Cspline2DF.s_y_found*dy,'o');
 plot(ztruth,Cspline2DF.s_z_found,'o');
-
-
-
-
-
+xlabel('xnm')
+ylabel('localization precision')
+legend('CRLBx','CRLBy','CRLBz','std(x)','std(y)','std(z)');
+title('misassignments filtered out');
 
 
 %% depth-dependent calibration
@@ -277,7 +282,7 @@ RI_mismatch_factor=.75; %refractive index mismatch correction
 
 [img2d,xedges,yedges]=histcounts2(locs.x,locs.y,'BinWidth',[5 5]); %reconstruct superresolution image
 h=fspecial('gauss',5,.6); %and blur a bit for rendering
-figure(55);subplot(2,2,1);imagesc(xedges,yedges,filter2(h,img2d'));
+figure(104);subplot(2,2,1);imagesc(xedges,yedges,filter2(h,img2d'));
 axis equal
 
 %%plot side view reconstruction
@@ -285,7 +290,7 @@ ypos=250; %position of slice in nm
 slicewidth=60; %width of slice in nm
 iny=locs.y>ypos-slicewidth/2 & locs.y<ypos+slicewidth/2; 
 [img2dz,xedges,zedges]=histcounts2(locs.x(iny),locs.z(iny)*RI_mismatch_factor,'BinWidth',[10 10]);
-figure(55);subplot(2,2,2);imagesc(xedges,zedges,filter2(h,img2dz'));
+figure(104);subplot(2,2,2);imagesc(xedges,zedges,filter2(h,img2dz'));
 axis equal
 
 % correct for aberrations and refractive index mismatch
