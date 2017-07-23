@@ -139,6 +139,7 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 				}
 				break;
 			case 5://spline fit
+			case 6:
 				iterations=(int) mxGetScalar(prhs[2]);
 				if (mxGetClassID(prhs[3])!=mxSINGLE_CLASS)
 					mexErrMsgIdAndTxt("GPUmleFit_LM:WrongDataType","coeff must be comprised of single floats!\n");
@@ -149,6 +150,17 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 				spline_ysize = datasize_spline[1];
 				spline_zsize = datasize_spline[2];
 				break;
+			//case 6:
+			//	//iterations=(int) mxGetScalar(prhs[2]);
+			//	if (mxGetClassID(prhs[3])!=mxSINGLE_CLASS)
+			//		mexErrMsgIdAndTxt("GPUmleFit_LM:WrongDataType","coeff must be comprised of single floats!\n");
+
+			//	coeff =(float *) mxGetData(prhs[3]);
+			//	datasize_spline=mxGetDimensions(prhs[3]);
+			//	spline_xsize = datasize_spline[0];
+			//	spline_ysize = datasize_spline[1];
+			//	spline_zsize = datasize_spline[2];
+			//	break;
 			}
 		}
 
@@ -168,137 +180,6 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 			silent = (int) mxGetScalar(prhs[5]);
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	////input checks
-	//if (nrhs<3)
-	//	mexErrMsgIdAndTxt("cGaussMLEv2:WrongNoArgs","Inputs must include: cGaussMLEv2(data,PSFSigma,iterations,fittype) !\n");
-
-	//if (mxGetClassID(prhs[0])!=mxSINGLE_CLASS)
-	//	mexErrMsgIdAndTxt("cGaussMLEv2:WrongDataType","Data must be comprised of single floats!\n");
-
-	//silent = (int) mxGetScalar(prhs[5]);
-	//datasize=mxGetDimensions(prhs[0]);
-	//Ndim=mxGetNumberOfDimensions(prhs[0]);
-
-	//if (Ndim==2)Nfitraw=1;else Nfitraw=datasize[2];
-
-	//if (datasize[0] > IMSZBIG)
-	//	mexErrMsgIdAndTxt("cGaussMLEv2:SubregionSize","X,Y dimension of data must be smaller than 21.\n");
-	//if (datasize[1]!=datasize[0])
-	//	mexErrMsgIdAndTxt("cGaussMLEv2:SubregionShape","Fit Box must be square");
-	//sz=datasize[0];
-	//// mexPrintf("c sizeX: %d Ndims: %d\n",sz,Ndim);
-
-	////query CPU cores
-
-	////put as many images as fit into a block
-	////float szsqaure = sz*sz;
-	////int BlockSize = (int) floor((float)15000/4/sz/sz);
-	////int BlockSize = (int) floor((float)MEM/(sz*sz));
-	////int BlockSize = (int) floor((float)(deviceProp.sharedMemPerBlock-1024)/(sizeof(float)*sz*sz)); // assumes allocating all of shared
-	////mexPrintf("BlockSize %d = (int) floor((float)(%d-1024)/sizeof(%d)*%d*%d\n",BlockSize,deviceProp.sharedMemPerBlock,sizeof(float),sz,sz);
-	////BlockSize = max(4, BlockSize);
-	////BlockSize = min(BSZ, BlockSize);
-	//int BlockSize = BSZ; //for no shared scenario, we don't care!
-	//
-
-	////int Nfitspad= BlockSize*(int) ceil( (float) Nfitraw/BlockSize);
-	////const int Nfitspad=(int) Nfitraw; //kernel auto aborts when thread > Nfitspad?
-
-
-    
-
-
-	////get variables
-	//data=(float *) mxGetData(prhs[0]);
-	////PSFSigma=(float)mxGetScalar(prhs[1]); //matlab-dip_image convention
-	//iterations=(int) mxGetScalar(prhs[2]);
-	//fittype = (int) mxGetScalar(prhs[3]);
-	//cameratype = (int) mxGetScalar(prhs[4]);
-
-	//if (fittype != 5){
-	//	PSFSigma=(float)mxGetScalar(prhs[1]);
-	//	if (cameratype ==0){//EMCCD
-	//		if (nrhs>6)
-	//			Ax = (float) mxGetScalar(prhs[6]);
-	//		if (nrhs>7)
-	//			Ay = (float) mxGetScalar(prhs[7]);
-	//		if (nrhs>8)
-	//			Bx = (float) mxGetScalar(prhs[8]);
-	//		if (nrhs>9)
-	//			By = (float) mxGetScalar(prhs[9]);
-	//		if (nrhs>10)
-	//			gamma = (float) mxGetScalar(prhs[10]);
-	//		if (nrhs>11)
-	//			d = (float) mxGetScalar(prhs[11]);
-	//		if (nrhs>12)
-	//			PSFSigma_y = (float) mxGetScalar(prhs[12]);
-	//		else
-	//			PSFSigma_y =PSFSigma;
-	//	}
-	//	else if (cameratype ==1){//sCMOS
-	//		varim=(float *) mxGetData(prhs[6]);
-	//		gainim=(float *) mxGetData(prhs[7]);
-	//		if (nrhs>8)
-	//			Ax = (float) mxGetScalar(prhs[8]);
-	//		if (nrhs>9)
-	//			Ay = (float) mxGetScalar(prhs[9]);
-	//		if (nrhs>10)
-	//			Bx = (float) mxGetScalar(prhs[10]);
-	//		if (nrhs>11)
-	//			By = (float) mxGetScalar(prhs[11]);
-	//		if (nrhs>12)
-	//			gamma = (float) mxGetScalar(prhs[12]);
-	//		if (nrhs>13)
-	//			d = (float) mxGetScalar(prhs[13]);
-	//		if (nrhs>14)
-	//			PSFSigma_y = (float) mxGetScalar(prhs[14]);
-	//	}
-	//} 
-
-	//if (fittype == 5){
-	//	coeff =(float *) mxGetData(prhs[1]);
-	//	datasize_spline=mxGetDimensions(prhs[1]);
-	//	spline_xsize = datasize_spline[0];
-	//	spline_ysize = datasize_spline[1];
-	//	spline_zsize = datasize_spline[2];
-	//	if (cameratype ==1){//sCMOS
-	//		varim=(float *) mxGetData(prhs[6]);
-	//		//gainim=(float *) mxGetData(prhs[7]);
-	//	}
-	//	//cudaMalloc((void**)&d_coeff, spline_xsize*spline_ysize*spline_zsize*64*sizeof(float));
-	//	//cudaMemset(d_coeff, 0, spline_xsize*spline_ysize*spline_zsize*64*sizeof(float));
-	//	//cudaMemcpy(d_coeff, coeff, spline_xsize*spline_ysize*spline_zsize*64*sizeof(float), cudaMemcpyHostToDevice);
-	//}
 if  (silent==0)
 {
 	mexPrintf("subregion size: %d fittype: %d\n", sz, fittype);
@@ -325,6 +206,13 @@ if  (silent==0)
 	case 5:
 		plhs[0]=mxCreateNumericMatrix(Nfitraw, NV_PSP+1, mxSINGLE_CLASS, mxREAL);
 		plhs[1]=mxCreateNumericMatrix(Nfitraw, NV_PSP, mxSINGLE_CLASS, mxREAL);
+		break;
+	case 6:
+		plhs[0]=mxCreateNumericMatrix(Nfitraw, (NV_PS+2), mxSINGLE_CLASS, mxREAL);
+		plhs[1]=mxCreateNumericMatrix(Nfitraw, NV_PS, mxSINGLE_CLASS, mxREAL);
+		plhs[3]=mxCreateNumericMatrix(Nfitraw, (NV_PS+2), mxSINGLE_CLASS, mxREAL);
+		plhs[4]=mxCreateNumericMatrix(Nfitraw, NV_PS, mxSINGLE_CLASS, mxREAL);
+		plhs[5]=mxCreateNumericMatrix(Nfitraw, 1, mxSINGLE_CLASS, mxREAL);
 		break;
 	}
 	plhs[2]=mxCreateNumericMatrix(Nfitraw, 1, mxSINGLE_CLASS, mxREAL);
@@ -404,6 +292,26 @@ if  (silent==0)
 			else if (cameratype ==1){
 				for (int ii = 0; ii<Nfitraw; ii++)
 					kernel_splineMLEFit_z_sCMOS(ii,data,coeff,spline_xsize,spline_ysize,spline_zsize,(int) sz,iterations,Parameters,CRLBs,LogLikelihood,(const int) Nfitraw,varim);
+			}
+		case 6:
+			if (cameratype==0){
+				for (int ii = 0; ii<Nfitraw; ii++)
+				kernel_splineMLEFit2D_z_EMCCD(ii, data, coeff, spline_xsize, spline_ysize,  spline_zsize,  (int)sz,  iterations, 
+					Parameters,  CRLBs,  LogLikelihood, spline_zsize/4.0f*3.0f,(const int)Nfitraw);
+
+				for (int ii = 0; ii<Nfitraw; ii++)
+				kernel_splineMLEFit2D_z_EMCCD(ii, data, coeff, spline_xsize, spline_ysize,  spline_zsize,  (int)sz,  iterations, 
+					(float*)mxGetData(plhs[3]),  (float*)mxGetData(plhs[4]),  (float*)mxGetData(plhs[5]), spline_zsize/4.0f,(const int)Nfitraw);
+			}
+			else if (cameratype ==1){
+				for (int ii = 0; ii<Nfitraw; ii++)
+				kernel_splineMLEFit2D_z_sCMOS(ii, data, coeff, spline_xsize, spline_ysize,  spline_zsize,  (int)sz,  iterations, 
+					Parameters,  CRLBs,  LogLikelihood, spline_zsize/4.0f*3.0f,(const int)Nfitraw,varim);
+
+				for (int ii = 0; ii<Nfitraw; ii++)
+				kernel_splineMLEFit2D_z_sCMOS(ii, data, coeff, spline_xsize, spline_ysize,  spline_zsize,  (int)sz,  iterations, 
+					(float*)mxGetData(plhs[3]),  (float*)mxGetData(plhs[4]),  (float*)mxGetData(plhs[5]), spline_zsize/4.0f,(const int)Nfitraw,varim);
+				
 			}
 
 			//kernel_MLEFit_LM_sigmaxy_EMCCD(ii, data, PSFSigma, (int) sz, iterations, Parameters, CRLBs, LogLikelihood, (const int) Nfitraw);

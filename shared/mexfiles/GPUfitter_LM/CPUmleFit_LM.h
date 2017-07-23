@@ -18,6 +18,9 @@
  void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const float *d_coeff, const int spline_xsize, const int spline_ysize, const int spline_zsize, const int sz, const int iterations, 
         float *d_Parameters, float *d_CRLBs, float *d_LogLikelihood,const int Nfits);
 
+ void kernel_splineMLEFit2D_z_EMCCD(const int subregion,const float *d_data,const float *d_coeff, const int spline_xsize, const int spline_ysize, const int spline_zsize, const int sz, const int iterations, 
+        float *d_Parameters, float *d_CRLBs, float *d_LogLikelihood,float initZ, const int Nfits);
+
   void kernel_MLEFit_LM_sCMOS(const int subregion,const float *d_data,const float PSFSigma, const int sz, const int iterations, 
 	float *d_Parameters, float *d_CRLBs, float *d_LogLikelihood,const int Nfits,const float *d_varim);
 //__global__ void kernel_MLEFit_LM_EMCCD(const float *d_data,const float PSFSigma, const int sz, const int iterations, 
@@ -34,5 +37,7 @@
 
  void kernel_splineMLEFit_z_sCMOS(const int subregion,const float *d_data,const float *d_coeff, const int spline_xsize, const int spline_ysize, const int spline_zsize, const int sz, const int iterations, 
         float *d_Parameters, float *d_CRLBs, float *d_LogLikelihood,const int Nfits,const float *d_varim);
+ void kernel_splineMLEFit2D_z_sCMOS(const int subregion,const float *d_data,const float *d_coeff, const int spline_xsize, const int spline_ysize, const int spline_zsize, const int sz, const int iterations, 
+	 float *d_Parameters, float *d_CRLBs, float *d_LogLikelihood,float initZ, const int Nfits, const float *d_varim);
 
 #endif

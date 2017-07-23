@@ -1,4 +1,4 @@
-function [P,CRLB,LogL]=mleFit_LM(varargin)
+function [P,CRLB,LogL,P2,CRLB2,LogL2]=mleFit_LM(varargin)
 % varargin:
 % 1. imagestack (single)
 % 2. fitmode
@@ -48,7 +48,22 @@ if isempty(fitter)
     disp(['using: ' char(allfitters{fitter})]);
 end
 
-
+if varargin{2}==6
+    [P,CRLB,LogL,P2,CRLB2,LogL2]=allfitters{fitter}(varargin{:});
+else
 [P,CRLB,LogL]=allfitters{fitter}(varargin{:});
+P2=[];CRLB2=[];LogL2=[];
+end
+%%
+% 
+% <latex>
+% \begin{tabular}{|c|c|} \hline
+% $n$ & $n!$ \\ \hline
+% 1 & 1 \\
+% 2 & 2 \\
+% 3 & 6 \\ \hline
+% \end{tabular}
+% </latex>
+% 
  clear(allfittersnames{fitter})
 

@@ -139,6 +139,120 @@ scatter3(ground_truth.x,ground_truth.y,ground_truth.z);
 hold on
 scatter3(cspline.x,cspline.y,cspline.z);
 
+%% or load 2D calibration
+cal=load('data/bead_2dcal.mat'); %load bead calibration
+
+ztruth = -275:50:275;
+Nfits = 1000;
+Nphotons = 2000;
+Npixels = 17;
+bg = 10;
+dx = 132; %nm
+dy = 132; %nm
+dz=cal.cspline.dz;  %coordinate system of spline PSF is corner based and in units pixels / planes
+z0=cal.cspline.z0; % distance and midpoint of stack in spline PSF, needed to translate into nm coordinates
+for i = 1: length(ztruth)
+    i
+    coordsxy = Npixels/2 -1 +2*rand([Nfits 2]);
+    coordsz = ztruth(i)/dz+z0*ones(Nfits,1);
+    coordinates = [coordsxy coordsz];
+    imstack = simSplinePSF(Npixels,cal.cspline.coeff,Nphotons,bg,coordinates);
+    tic
+    [P1 CRLB1 LL1 P2 CRLB2 LL2]=mleFit_LM(imstack,6,50,single(cal.cspline.coeff));
+    tspline2D=toc;
+    P = repmat(single(LL1>=LL2),1,7).*P1+repmat(single(LL1<LL2),1,7).*P2;
+    CRLB = repmat(single(LL1>=LL2),1,5).*CRLB1+repmat(single(LL1<LL2),1,5).*CRLB2;
+    LL = repmat(single(LL1>=LL2),1,1).*LL1+repmat(single(LL1<LL2),1,1).*LL2;
+    
+    z=(P(:,5)-z0).*dz;
+    misassigned=sign(ztruth(i))~=sign(z);
+    fractionmisassigned(i)=sum(misassigned)/length(misassigned)
+    s(i)=std(z(~misassigned)-ztruth(i));
+    
+%     if ztruth(i)>0
+%         PF=P1;
+%         CRLBF=CRLB1;
+%         LLF = LL1;
+%     else
+%         PF=P2;
+%         CRLBF=CRLB2;
+%         LLF = LL2;
+%     end
+
+    
+    
+%     misAsign(i) = sum(LL~=LLF)/length(LL);
+    
+    Cspline2D.x = P(:,1);
+    Cspline2D.y = P(:,2);
+    Cspline2D.z=(P(:,5)-z0).*dz;
+    
+    Cspline2D.CRLBx = CRLB(:,1);
+    Cspline2D.CRLBy = CRLB(:,2);
+    Cspline2D.CRLBz=CRLB(:,5);
+    
+    
+    Cspline2D.s_x_found(i,1) = std( Cspline2D.x-coordsxy(:,1));
+    Cspline2D.s_y_found(i,1) = std( Cspline2D.y-coordsxy(:,2));
+    Cspline2D.s_z_found(i,1) = std( Cspline2D.z-ztruth(i));
+    
+    Cspline2D.meanCRLBx(i,1) = mean(sqrt(Cspline2D.CRLBx));
+    Cspline2D.meanCRLBy(i,1) = mean(sqrt(Cspline2D.CRLBy));
+    Cspline2D.meanCRLBz(i,1) = mean(sqrt(Cspline2D.CRLBz))*dz;
+    
+    
+    Cspline2D.RMSEX(i,1) = sqrt(mean((Cspline2D.x-coordsxy(:,1)).^2));
+    Cspline2D.RMSEY(i,1) = sqrt(mean((Cspline2D.y-coordsxy(:,2)).^2));
+    Cspline2D.RMSEZ(i,1) = sqrt(mean((Cspline2D.z-ztruth(i)).^2));
+    
+    %Filter
+    Cspline2DF.x = P(~misassigned,1);
+    Cspline2DF.y = P(~misassigned,2);
+    Cspline2DF.z= (P(~misassigned,5)-z0).*dz;
+    
+    Cspline2DF.CRLBx = CRLB(~misassigned,1);
+    Cspline2DF.CRLBy = CRLB(~misassigned,2);
+    Cspline2DF.CRLBz=CRLB(~misassigned,5);
+    
+    
+    
+    Cspline2DF.s_x_found(i,1) = std( Cspline2DF.x-coordsxy(~misassigned,1));
+    Cspline2DF.s_y_found(i,1) = std( Cspline2DF.y-coordsxy(~misassigned,2));
+    Cspline2DF.s_z_found(i,1) = std( Cspline2DF.z-ztruth(i));
+    
+    Cspline2DF.meanCRLBx(i,1) = mean(sqrt(Cspline2DF.CRLBx));
+    Cspline2DF.meanCRLBy(i,1) = mean(sqrt(Cspline2DF.CRLBy));
+    Cspline2DF.meanCRLBz(i,1) = mean(sqrt(Cspline2DF.CRLBz))*dz;
+    
+    
+    Cspline2DF.RMSEX(i,1) = sqrt(mean((Cspline2DF.x-coordsxy(~misassigned,1)).^2));
+    Cspline2DF.RMSEY(i,1) = sqrt(mean((Cspline2DF.y-coordsxy(~misassigned,2)).^2));
+    Cspline2DF.RMSEZ(i,1) = sqrt(mean((Cspline2DF.z-ztruth(i)).^2));
+
+end
+
+figure,plot(ztruth,Cspline2D.meanCRLBx*dx,'-');
+hold on
+plot(ztruth,Cspline2D.meanCRLBy*dy,'-');
+plot(ztruth,Cspline2D.meanCRLBz,'-');
+plot(ztruth,Cspline2D.s_x_found*dx,'o');
+plot(ztruth,Cspline2D.s_y_found*dy,'o');
+plot(ztruth,Cspline2D.s_z_found,'o');
+
+figure,plot(ztruth,Cspline2DF.meanCRLBx*dx,'-');
+hold on
+plot(ztruth,Cspline2DF.meanCRLBy*dy,'-');
+plot(ztruth,Cspline2DF.meanCRLBz,'-');
+plot(ztruth,Cspline2DF.s_x_found*dx,'o');
+plot(ztruth,Cspline2DF.s_y_found*dy,'o');
+plot(ztruth,Cspline2DF.s_z_found,'o');
+
+
+
+
+
+
+
 %% depth-dependent calibration
 % fit bead stacks in gel as shown above using the same fitter with the
 % same, save fitted z-positions and frames
