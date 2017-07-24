@@ -146,10 +146,10 @@ scatter3(cspline.x,cspline.y,cspline.z);
 %% fit 2D dataset with cspline
 % Here we simulate Nfits positions per data point and calculate the
 % z-dependent error
-cal=load('data/bead2D_3dcal.mat'); %load bead calibration
+cal=load('data/bead_2dcal.mat'); %load bead calibration
 
 ztruth = -275:50:275; %z positions for which we want to simulate fluorophores
-Nfits = 1000; %fits per data points
+Nfits = 100; %fits per data points
 Nphotons = 2000; %photons/localizations
 Npixels = 17; %size of the ROI
 bg = 10; %bg photons per pixel
@@ -169,7 +169,7 @@ for i = 1: length(ztruth)
     %select fit output with higher likelihood
     ind1=LL1>=LL2;
     ind2=LL1<LL2;
-    P=zeros(size(P1),'single');CRLB=zeros(size(P1),'single');LL=zeros(size(P1),'single');
+    P=zeros(size(P1),'single');CRLB=zeros(size(CRLB1),'single');LL=zeros(size(LL1),'single');
     P(ind1,:)=P1(ind1,:);P(ind2,:)=P2(ind2,:);
     CRLB(ind1,:)=CRLB1(ind1,:);CRLB(ind2,:)=CRLB2(ind2,:);
     LL(ind1,:)=LL1(ind1,:);LL(ind2,:)=LL2(ind2,:);
