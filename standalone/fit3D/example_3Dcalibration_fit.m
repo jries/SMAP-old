@@ -91,58 +91,59 @@ gausssxsy.zrel=gausssxsy.z-ground_truth.z;
 gausssxsy.zrel(isnan(gausssxsy.zrel))=0;
 
 %plot fitted z vs ground-truth z
-figure(101)
-hold off
-plot(ground_truth.z,gaussz.zrel-mean(gaussz.zrel(inz)),'r.')
-hold on
-plot(ground_truth.z,gausssxsy.zrel-mean(gausssxsy.zrel(inz)),'.','Color',[0.,0.8,0])
-plot(ground_truth.z,cspline.zrel-mean(cspline.zrel(inz)),'b.')
-gs=fit(ground_truth.z,gaussz.zrel-mean(gaussz.zrel(inz)),'smoothingspline','SmoothingParam',.00001);
-gss=fit(ground_truth.z,gausssxsy.zrel-mean(gausssxsy.zrel(inz)),'smoothingspline','SmoothingParam',.001);
-gz=fit(ground_truth.z,cspline.zrel-mean(cspline.zrel(inz)),'smoothingspline','SmoothingParam',.0001);
+    figure(101)
+    hold off
+    plot(ground_truth.z,gaussz.zrel-mean(gaussz.zrel(inz)),'r.')
+    hold on
+    plot(ground_truth.z,gausssxsy.zrel-mean(gausssxsy.zrel(inz)),'.','Color',[0.7,0.7,0])
+    plot(ground_truth.z,cspline.zrel-mean(cspline.zrel(inz)),'b.')
+    gs=fit(ground_truth.z,gaussz.zrel-mean(gaussz.zrel(inz)),'smoothingspline','SmoothingParam',.00001);
+    gss=fit(ground_truth.z,gausssxsy.zrel-mean(gausssxsy.zrel(inz)),'smoothingspline','SmoothingParam',.00001);
+    gz=fit(ground_truth.z,cspline.zrel-mean(cspline.zrel(inz)),'smoothingspline','SmoothingParam',.00001);
 
-plot(ground_truth.z,ground_truth.z*0,'k','LineWidth',3)
-plot(ground_truth.z,gs(ground_truth.z),'r','LineWidth',3)
-plot(ground_truth.z,gss(ground_truth.z),'Color',[0.7,0.7,0],'LineWidth',3)
-plot(ground_truth.z,gz(ground_truth.z),'b','LineWidth',3)
+    plot(ground_truth.z,ground_truth.z*0,'k','LineWidth',3)
+    plot(ground_truth.z,gs(ground_truth.z),'r','LineWidth',3)
+    plot(ground_truth.z,gss(ground_truth.z),'Color',[0.7,0.7,0],'LineWidth',3)
+    plot(ground_truth.z,gz(ground_truth.z),'b','LineWidth',3)
 
-plot([-zrange -zrange],[-1000 1000],'c')
-plot([zrange zrange],[-1000 1000],'c')
+    plot([-zrange -zrange],[-1000 1000],'c')
+    plot([zrange zrange],[-1000 1000],'c')
 
-ss=std(cspline.zrel(inz))*10;
-ylim([-ss ss])
-xlabel('ground truth z')
-ylabel('zfit - z (ground truth)')
+    ss=std(cspline.zrel(inz))*10;
+    ylim([-ss ss])
+    xlabel('ground truth z')
+    ylabel('zfit - z (ground truth)')
 
+    title('Accuracy')
 
-cspline.dz=nanstd(ground_truth.z(inz)-cspline.z(inz));
-zgauss.dz=nanstd(ground_truth.z(inz)-gaussz.z(inz));
-gausssxsy.dz=nanstd(ground_truth.z(inz)-gausssxsy.z(inz));
+    cspline.dz=nanstd(ground_truth.z(inz)-cspline.z(inz));
+    zgauss.dz=nanstd(ground_truth.z(inz)-gaussz.z(inz));
+    gausssxsy.dz=nanstd(ground_truth.z(inz)-gausssxsy.z(inz));
 
-legendtxt{4}='ground truth';
-legendtxt{3}=['spline fit. error: ' num2str(cspline.dz)];
-legendtxt{1}=['Gaussian z fit. error: ' num2str(zgauss.dz)];
-legendtxt{2}=['Gaussian sx, sy fit. error: ' num2str(gausssxsy.dz)];
-legend(legendtxt)
+    legendtxt{4}='smoothing spline';
+    legendtxt{3}=['spline fit. error: ' num2str(cspline.dz, '%3.1f') ' nm'];
+    legendtxt{1}=['Gaussian z fit. error: ' num2str(zgauss.dz, '%3.1f') ' nm'];
+    legendtxt{2}=['Gaussian sx, sy fit. error: ' num2str(gausssxsy.dz, '%3.1f') ' nm'];
+    legend(legendtxt)
 
 %calculate lateral error
-cspline.dx=nanstd(ground_truth.x(inz)-cspline.x(inz));
+cspline.dx=nanstd(ground_truth.x(inz)-cspline.x(inz)); %in pixels
 cspline.dy=nanstd(ground_truth.y(inz)-cspline.y(inz));
-
 dx_gaussz=nanstd(ground_truth.x(inz)-gaussz.x(inz));
 dy_gaussz=nanstd(ground_truth.y(inz)-gaussz.y(inz));
 gausssxsy.dx=nanstd(ground_truth.x(inz)-gausssxsy.x(inz));
 gausssxsy.dy=nanstd(ground_truth.y(inz)-gausssxsy.y(inz));
 
 %plot 3D scatter plot
-numpoints=2000;
-range=1:round(length(ground_truth.z)/numpoints):length(ground_truth.z);
-figure(102);
-hold off
-scatter3(ground_truth.x,ground_truth.y,ground_truth.z);
-hold on
-scatter3(cspline.x,cspline.y,cspline.z);
-
+    numpoints=2000;
+    range=1:round(length(ground_truth.z)/numpoints):length(ground_truth.z);
+    figure(102);
+    hold off
+    scatter3(ground_truth.x,ground_truth.y,ground_truth.z);
+    hold on
+    scatter3(cspline.x,cspline.y,cspline.z);
+    xlabel('x (nm)');ylabel('y (nm)');zlabel('z (nm)');
+    legend('ground truth','cspline fit')
 %% fit 2D dataset with cspline
 % Here we simulate Nfits positions per data point and calculate the
 % z-dependent error
