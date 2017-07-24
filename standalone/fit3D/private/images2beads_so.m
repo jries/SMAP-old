@@ -20,7 +20,7 @@ for k=1:length(filelist)
     maxima=maximumfindcall(mim);
 %     figure(88);
     imagesc(ax,mim);
-    
+    axis(ax,'equal');
     int=maxima(:,3);
     try
     mimc=mim(roisize:end-roisize,roisize:end-roisize);

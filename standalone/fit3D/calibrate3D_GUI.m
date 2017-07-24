@@ -61,11 +61,11 @@ classdef calibrate3D_GUI<handle
             
             obj.guihandles.gausst=uicontrol('style','text','String','Gauss fit parameters: ','Position',[xpos1,top-18*vsep,xw*4,vsep],'FontSize',fontsize,'HorizontalAlignment',hatitle,'FontWeight','bold');
             obj.guihandles.gaussmint=uicontrol('style','text','String','Range (nm). minimum: ','Position',[xpos1,top-19*vsep,xw*2,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
-            obj.guihandles.gaussmin=uicontrol('style','edit','String','-500','Position',[xpos1+2*xw,top-19*vsep,xw*.5,vsep],'FontSize',fontsize);
+            obj.guihandles.gaussmin=uicontrol('style','edit','String','-700','Position',[xpos1+2*xw,top-19*vsep,xw*.5,vsep],'FontSize',fontsize);
             obj.guihandles.gaussmaxt=uicontrol('style','text','String','maximum: ','Position',[xpos1+2.5*xw,top-19*vsep,xw,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
-            obj.guihandles.gaussmax=uicontrol('style','edit','String','500','Position',[xpos1+3.5*xw,top-19*vsep,xw*.5,vsep],'FontSize',fontsize);
+            obj.guihandles.gaussmax=uicontrol('style','edit','String','700','Position',[xpos1+3.5*xw,top-19*vsep,xw*.5,vsep],'FontSize',fontsize);
              obj.guihandles.gaussroit=uicontrol('style','text','String','ROI size (pixels): ','Position',[xpos1,top-20*vsep,xw*2,vsep],'FontSize',fontsize,'HorizontalAlignment',ha);
-            obj.guihandles.gaussroi=uicontrol('style','edit','String','17','Position',[xpos1+2*xw,top-20*vsep,xw*.5,vsep],'FontSize',fontsize);
+            obj.guihandles.gaussroi=uicontrol('style','edit','String','19','Position',[xpos1+2*xw,top-20*vsep,xw*.5,vsep],'FontSize',fontsize);
            
             obj.guihandles.run=uicontrol('style','pushbutton','String','Calculate bead calibration','Position',[xpos1,top-22*vsep,xw*4,vsep],'FontSize',fontsize,'Callback',@obj.run_callback);
             obj.guihandles.help=uicontrol('style','pushbutton','String','Help','Position',[xpos1+xw,top-23*vsep,xw*2,vsep],'FontSize',fontsize,'Callback',@obj.help_callback);
