@@ -1,3 +1,9 @@
+//author: Yiming Li
+//email: yiming.li@embl.de
+//date: 2017.07.24
+
+//Using Lidke's template
+
 /*!
 * \file mexFunction.cpp
 * \author Keith Lidke
@@ -208,9 +214,9 @@ if  (silent==0)
 		plhs[1]=mxCreateNumericMatrix(Nfitraw, NV_PSP, mxSINGLE_CLASS, mxREAL);
 		break;
 	case 6:
-		plhs[0]=mxCreateNumericMatrix(Nfitraw, (NV_PS+2), mxSINGLE_CLASS, mxREAL);
+		plhs[0]=mxCreateNumericMatrix(Nfitraw, (NV_PS+1), mxSINGLE_CLASS, mxREAL);
 		plhs[1]=mxCreateNumericMatrix(Nfitraw, NV_PS, mxSINGLE_CLASS, mxREAL);
-		plhs[3]=mxCreateNumericMatrix(Nfitraw, (NV_PS+2), mxSINGLE_CLASS, mxREAL);
+		plhs[3]=mxCreateNumericMatrix(Nfitraw, (NV_PS+1), mxSINGLE_CLASS, mxREAL);
 		plhs[4]=mxCreateNumericMatrix(Nfitraw, NV_PS, mxSINGLE_CLASS, mxREAL);
 		plhs[5]=mxCreateNumericMatrix(Nfitraw, 1, mxSINGLE_CLASS, mxREAL);
 		break;
@@ -287,30 +293,30 @@ if  (silent==0)
 		case 5: //fit x,y,bg,I,sigmax,sigmay
 			if (cameratype==0){
 				for (int ii = 0; ii<Nfitraw; ii++)
-					kernel_splineMLEFit_z_EMCCD(ii,data,coeff,spline_xsize,spline_ysize,spline_zsize,(int) sz,iterations,Parameters,CRLBs,LogLikelihood,(const int) Nfitraw);
+					kernel_splineMLEFit_z_EMCCD(ii,data,coeff,spline_xsize,spline_ysize,spline_zsize,(int) sz,iterations,Parameters,CRLBs,LogLikelihood,spline_zsize/2.0f,(const int) Nfitraw);
 			}
 			else if (cameratype ==1){
 				for (int ii = 0; ii<Nfitraw; ii++)
-					kernel_splineMLEFit_z_sCMOS(ii,data,coeff,spline_xsize,spline_ysize,spline_zsize,(int) sz,iterations,Parameters,CRLBs,LogLikelihood,(const int) Nfitraw,varim);
+					kernel_splineMLEFit_z_sCMOS(ii,data,coeff,spline_xsize,spline_ysize,spline_zsize,(int) sz,iterations,Parameters,CRLBs,LogLikelihood,spline_zsize/2.0f,(const int) Nfitraw,varim);
 			}
 			break;
 		case 6:
 			if (cameratype==0){
 				for (int ii = 0; ii<Nfitraw; ii++)
-				kernel_splineMLEFit2D_z_EMCCD(ii, data, coeff, spline_xsize, spline_ysize,  spline_zsize,  (int)sz,  iterations, 
+				kernel_splineMLEFit_z_EMCCD(ii, data, coeff, spline_xsize, spline_ysize,  spline_zsize,  (int)sz,  iterations, 
 					Parameters,  CRLBs,  LogLikelihood, spline_zsize/4.0f*3.0f,(const int)Nfitraw);
 
 				for (int ii = 0; ii<Nfitraw; ii++)
-				kernel_splineMLEFit2D_z_EMCCD(ii, data, coeff, spline_xsize, spline_ysize,  spline_zsize,  (int)sz,  iterations, 
+				kernel_splineMLEFit_z_EMCCD(ii, data, coeff, spline_xsize, spline_ysize,  spline_zsize,  (int)sz,  iterations, 
 					(float*)mxGetData(plhs[3]),  (float*)mxGetData(plhs[4]),  (float*)mxGetData(plhs[5]), spline_zsize/4.0f,(const int)Nfitraw);
 			}
 			else if (cameratype ==1){
 				for (int ii = 0; ii<Nfitraw; ii++)
-				kernel_splineMLEFit2D_z_sCMOS(ii, data, coeff, spline_xsize, spline_ysize,  spline_zsize,  (int)sz,  iterations, 
+				kernel_splineMLEFit_z_sCMOS(ii, data, coeff, spline_xsize, spline_ysize,  spline_zsize,  (int)sz,  iterations, 
 					Parameters,  CRLBs,  LogLikelihood, spline_zsize/4.0f*3.0f,(const int)Nfitraw,varim);
 
 				for (int ii = 0; ii<Nfitraw; ii++)
-				kernel_splineMLEFit2D_z_sCMOS(ii, data, coeff, spline_xsize, spline_ysize,  spline_zsize,  (int)sz,  iterations, 
+				kernel_splineMLEFit_z_sCMOS(ii, data, coeff, spline_xsize, spline_ysize,  spline_zsize,  (int)sz,  iterations, 
 					(float*)mxGetData(plhs[3]),  (float*)mxGetData(plhs[4]),  (float*)mxGetData(plhs[5]), spline_zsize/4.0f,(const int)Nfitraw,varim);
 				
 			}
