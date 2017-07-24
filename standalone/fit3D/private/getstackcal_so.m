@@ -268,16 +268,23 @@ t=tic;
             p.status.String=['fitting test stacks: ' num2str(k/numstack,'%1.2f')];drawnow
             t=tic;
         end
-%         fprintf([ '\b\b\b\b' num2str(k/numstack,'%1.2f')])
-          [P] =  mleFit_LM(single(squeeze(teststack(range,range,:,k))),5,100,single(coeff),0,1);
-    z=(1:size(P,1))'-1;
-    
-    znm=(P(:,5)-p.z0)*p.dz;
-    plot(ax,z,znm,linepar{:})
-    hold(ax,'on')
-    xlabel(ax,'frame')
-    ylabel(ax,'zfit (nm)')
-    zs(:,k)=P(:,5);
+        if contains(p.modality,'2D')
+            [P1 CRLB1 LL1 P2 CRLB2 LL2]=mleFit_LM(single(squeeze(teststack(range,range,:,k))),6,100,single(coeff),0,1); %fit mode 6
+            %select fit output with higher likelihood
+            ind1=LL1>=LL2;ind2=LL1<LL2;
+            P=zeros(size(P1),'single');
+            P(ind1,:)=P1(ind1,:);P(ind2,:)=P2(ind2,:);
+        else
+            [P] =  mleFit_LM(single(squeeze(teststack(range,range,:,k))),5,100,single(coeff),0,1);
+        end
+        z=(1:size(P,1))'-1;
+
+        znm=(P(:,5)-p.z0)*p.dz;
+        plot(ax,z,znm,linepar{:})
+        hold(ax,'on')
+        xlabel(ax,'frame')
+        ylabel(ax,'zfit (nm)')
+        zs(:,k)=P(:,5);
     end
     
 end

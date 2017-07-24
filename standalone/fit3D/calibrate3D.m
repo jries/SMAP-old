@@ -30,7 +30,7 @@ if contains(p.modality,'astig') || contains(p.modality,'2D')
     %determine sx,sy
 %     disp('fit beads to get sx,sy')
     t=tic;
-    p.status.String=['fit beads to get sx, sy '];drawnow
+    p.status.String=['Gaussian fit of beads to get spatial paramters '];drawnow
     for k=1:length(beads)
         stackh=single(beads(k).stack.image);
         s=size(stackh); 
@@ -61,7 +61,7 @@ if contains(p.modality,'astig') || contains(p.modality,'2D')
         beads(k).psfx0=beads(k).loc.PSFxpix(ind);
         beads(k).psfy0=beads(k).loc.PSFypix(ind);
         if toc(t)>1
-            p.status.String=['fit beads to get sx, sy: ' num2str(k) ' of ' num2str(length(beads))];
+            p.status.String=['Gaussian fit of beads to get spatial paramters: ' num2str(k) ' of ' num2str(length(beads))];
             drawnow
             t=tic;
         end
