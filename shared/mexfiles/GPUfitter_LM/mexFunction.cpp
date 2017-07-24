@@ -293,6 +293,7 @@ if  (silent==0)
 				for (int ii = 0; ii<Nfitraw; ii++)
 					kernel_splineMLEFit_z_sCMOS(ii,data,coeff,spline_xsize,spline_ysize,spline_zsize,(int) sz,iterations,Parameters,CRLBs,LogLikelihood,(const int) Nfitraw,varim);
 			}
+			break;
 		case 6:
 			if (cameratype==0){
 				for (int ii = 0; ii<Nfitraw; ii++)
@@ -313,6 +314,7 @@ if  (silent==0)
 					(float*)mxGetData(plhs[3]),  (float*)mxGetData(plhs[4]),  (float*)mxGetData(plhs[5]), spline_zsize/4.0f,(const int)Nfitraw,varim);
 				
 			}
+			break;
 
 			//kernel_MLEFit_LM_sigmaxy_EMCCD(ii, data, PSFSigma, (int) sz, iterations, Parameters, CRLBs, LogLikelihood, (const int) Nfitraw);
 
