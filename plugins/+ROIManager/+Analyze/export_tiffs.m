@@ -49,6 +49,25 @@ classdef export_tiffs<interfaces.DialogProcessor&interfaces.SEProcessor
                 end
                 site.image.layers=[];site.image.composite=[];
             end
+            
+            if p.export_cells
+                cells=obj.SE.cells;
+                for k=1:length(cells)
+                    cell=cells(k);
+                    imold=cell.image.image;
+                    cell.image=[];
+                    cell.image=obj.SE.plotsite(cell,-1);
+                    cell.image.image=imold;
+                    options.color=true;
+                    options.comp='lzw';
+                    filen=[f 'cell_C' num2str(cell.ID)  '_F' num2str(cell.info.filenumber)];
+                    fhere= [filen '.tif'];
+                    imout=uint8(cell.image.image*255);
+
+                    saveastiff(imout,[path fhere],options);
+                end
+            end
+            
             out=0;
         end
         function pard=guidef(obj)
@@ -65,6 +84,10 @@ function pard=guidef
 pard.export_selected.object=struct('String','exprot only selected sites','Style','checkbox');
 pard.export_selected.position=[1,1];
 pard.export_selected.Width=2;
+
+pard.export_cells.object=struct('String','export cell images as well','Style','checkbox');
+pard.export_cells.position=[2,1];
+pard.export_cells.Width=2;
 pard.plugininfo.type='ROI_Analyze';
 
 end
