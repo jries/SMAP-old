@@ -2533,7 +2533,7 @@ void kernel_splineMLEFit_z_sCMOS(const int subregion,const float *d_data,const f
     //write to global arrays
     for (kk=0;kk<NV;kk++) d_Parameters[Nfits*kk+subregion]=newTheta[kk];
    for (kk=0;kk<NV;kk++) d_CRLBs[Nfits*kk+subregion]=Diag[kk];
-   //d_LogLikelihood[subregion] = Div;
+   d_LogLikelihood[subregion] = Div;
 	//d_LogLikelihood[BlockSize*bx+tx] = 1;
     
     
