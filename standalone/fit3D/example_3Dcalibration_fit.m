@@ -1,6 +1,31 @@
-%% example script for fitting of 3D data
-% put disclaimer
+%  Copyright (c)2017 Ries Lab, European Molecular Biology Laboratory,
+%  Heidelberg.
+%  
+%  This file is part of GPUmleFit_LM Fitter.
+%  
+%  GPUmleFit_LM Fitter is free software: you can redistribute it and/or modify
+%  it under the terms of the GNU General Public License as published by
+%  the Free Software Foundation, either version 3 of the License, or
+%  (at your option) any later version.
+%  
+%  GPUmleFit_LM Fitter is distributed in the hope that it will be useful,
+%  but WITHOUT ANY WARRANTY; without even the implied warranty of
+%  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%  GNU General Public License for more details.
+%  
+%  You should have received a copy of the GNU General Public License
+%  along with GPUmleFit_LM Fitter.  If not, see <http://www.gnu.org/licenses/>.
+%  
+%  
+%  Additional permission under GNU GPL version 3 section 7
+%  
+%  If you modify this Program, or any covered work, by
+%  linking or combining it with libraries required for interaction
+%  with analysis programs such as Igor Pro or Matlab,
+%  the licensors of this Program grant you additional permission
+%  to convey the resulting work.
 
+%% example script for fitting of 3D data
 %% add path to helper functions
 addpath('bfmatlab')
 addpath('shared')
@@ -28,8 +53,8 @@ if mode ==1 % simulate data
     %numlocs: number of simulated molecules. For maximum fitting speeds on  the GPU, 
     %it should be >10^5. For smaller GPUs, adust to avoid memory overflow
     %error to 10^5-10^5. For CPU fitter, use 10^3-10^4.
-    numlocs=1000;
-    RoiPixelsize=17; %ROI in pixels for simulation
+    numlocs=50000;
+    RoiPixelsize=13; %ROI in pixels for simulation
     dz=cal.cspline.dz;  %coordinate system of spline PSF is corner based and in units pixels / planes
     z0=cal.cspline.z0; % distance and midpoint of stack in spline PSF, needed to translate into nm coordinates
     dx=floor(RoiPixelsize/2); %distance of center from edge
@@ -50,23 +75,13 @@ else %experimental data
     ground_truth.z=((1:size(imstack,3))'-size(imstack,3)/2+1)*10; %dz=10 nm; convert frame to nm
 end
 %% load sCMOS varmap or set sCMOSvarmap to zero
-%sCMOSvarmap=ones(size(imstack),'single'); %the variance map, same size as imstack, single format. 
+% sCMOSvarmap=ones(size(imstack),'single'); %the variance map, same size as imstack, single format. 
 sCMOSvarmap=0; %if scalar: use EMCCD fitter;
 
 %% fit image stacks
 numlocs=size(imstack,3); 
 imstack=single(imstack); %imstack needs to be in photons. The fitters require the stacks in single-format;
 
-
-
-%fit experimental astigmatic PSF, cspline, emCCD mode
-tic
-[Pcspline,CRLB]=mleFit_LM(imstack,5,50,single(cal.cspline.coeff),sCMOSvarmap,1);
-tspline=toc;
-disp(['cspline: ' num2str(numlocs/tspline) ' fits/s']);
-dx=floor(size(imstack,1)/2);
-cspline.x=Pcspline(:,1)-dx;cspline.y=Pcspline(:,2)-dx; %x,y in pixels 
-cspline.z=(Pcspline(:,5)-cal.cspline.z0)*cal.cspline.dz;
 
 %fit Gaussian model, direct z fit, emCCD mode
 tic
@@ -80,11 +95,21 @@ gaussz.z=P(:,5)*1000;
 tic
 [P,CRLB]=mleFit_LM(imstack,4,50,1,sCMOSvarmap,1);
 tgsxsy=toc;
-disp(['cspline: ' num2str(numlocs/tgsxsy) ' fits/s']);
+disp(['Gaussxy: ' num2str(numlocs/tgsxsy) ' fits/s']);
 
 gausssxsy.x=P(:,1);gausssxsy.y=P(:,2); %x,y in pixels 
 sx=P(:,5);sy=P(:,6);
 gausssxsy.z=sxsy2z(sx,sy,cal.gauss_sx2_sy2); %z from sx, sy
+
+%fit experimental astigmatic PSF, cspline, emCCD mode
+tic
+[Pcspline,CRLB]=mleFit_LM(imstack,5,50,single(cal.cspline.coeff),sCMOSvarmap,1);
+tspline=toc;
+disp(['cspline: ' num2str(numlocs/tspline) ' fits/s']);
+dx=floor(size(imstack,1)/2);
+cspline.x=Pcspline(:,1)-dx;cspline.y=Pcspline(:,2)-dx; %x,y in pixels 
+cspline.z=(Pcspline(:,5)-cal.cspline.z0)*cal.cspline.dz;
+
 
 % calculate error for all fits. 
 zrange=400; %Only take into accoutn central part. Focus +/- zrange
@@ -96,21 +121,24 @@ gaussz.zrel=gaussz.z-ground_truth.z;
 gausssxsy.zrel=gausssxsy.z-ground_truth.z;
 gausssxsy.zrel(isnan(gausssxsy.zrel))=0;
 
+%numpoints
+numpoints=2000;
+range=1:round(length(ground_truth.z)/numpoints):length(ground_truth.z);
 %plot fitted z vs ground-truth z
     figure(101)
     hold off
-    plot(ground_truth.z,gaussz.zrel-mean(gaussz.zrel(inz)),'r.')
+    plot(ground_truth.z(range),gaussz.zrel(range)-mean(gaussz.zrel(inz)),'r.')
     hold on
-    plot(ground_truth.z,gausssxsy.zrel-mean(gausssxsy.zrel(inz)),'.','Color',[0.7,0.7,0])
-    plot(ground_truth.z,cspline.zrel-mean(cspline.zrel(inz)),'b.')
-    gs=fit(ground_truth.z,double(gaussz.zrel-mean(gaussz.zrel(inz))),'smoothingspline','SmoothingParam',.00001);
-    gss=fit(ground_truth.z,double(gausssxsy.zrel-mean(gausssxsy.zrel(inz))),'smoothingspline','SmoothingParam',.00001);
-    gz=fit(ground_truth.z,double(cspline.zrel-mean(cspline.zrel(inz))),'smoothingspline','SmoothingParam',.00001);
+    plot(ground_truth.z(range),gausssxsy.zrel(range)-mean(gausssxsy.zrel(inz)),'.','Color',[0.7,0.7,0])
+    plot(ground_truth.z(range),cspline.zrel(range)-mean(cspline.zrel(inz)),'b.')
+    gs=fit(ground_truth.z(range),double(gaussz.zrel(range)-mean(gaussz.zrel(inz))),'smoothingspline','SmoothingParam',.00001);
+    gss=fit(ground_truth.z(range),double(gausssxsy.zrel(range)-mean(gausssxsy.zrel(inz))),'smoothingspline','SmoothingParam',.00001);
+    gz=fit(ground_truth.z(range),double(cspline.zrel(range)-mean(cspline.zrel(inz))),'smoothingspline','SmoothingParam',.00001);
 
-    plot(ground_truth.z,ground_truth.z*0,'k','LineWidth',3)
-    plot(ground_truth.z,gs(ground_truth.z),'r','LineWidth',3)
-    plot(ground_truth.z,gss(ground_truth.z),'Color',[0.7,0.7,0],'LineWidth',3)
-    plot(ground_truth.z,gz(ground_truth.z),'b','LineWidth',3)
+    plot(ground_truth.z(range),ground_truth.z(range)*0,'k','LineWidth',3)
+    plot(ground_truth.z(range),gs(ground_truth.z(range)),'r','LineWidth',3)
+    plot(ground_truth.z(range),gss(ground_truth.z(range)),'Color',[0.7,0.7,0],'LineWidth',3)
+    plot(ground_truth.z(range),gz(ground_truth.z(range)),'b','LineWidth',3)
 
     plot([-zrange -zrange],[-1000 1000],'c')
     plot([zrange zrange],[-1000 1000],'c')
@@ -141,13 +169,12 @@ gausssxsy.dx=nanstd(ground_truth.x(inz)-gausssxsy.x(inz));
 gausssxsy.dy=nanstd(ground_truth.y(inz)-gausssxsy.y(inz));
 
 %plot 3D scatter plot
-    numpoints=2000;
-    range=1:round(length(ground_truth.z)/numpoints):length(ground_truth.z);
+   
     figure(102);
     hold off
-    scatter3(ground_truth.x,ground_truth.y,ground_truth.z,3);
+    scatter3(ground_truth.x(range),ground_truth.y(range),ground_truth.z(range),3);
     hold on
-    scatter3(cspline.x,cspline.y,cspline.z,5);
+    scatter3(cspline.x(range),cspline.y(range),cspline.z(range),5);
     xlabel('x (nm)');ylabel('y (nm)');zlabel('z (nm)');
     legend('ground truth','cspline fit')
     title('fitted vs ground truth positions')
