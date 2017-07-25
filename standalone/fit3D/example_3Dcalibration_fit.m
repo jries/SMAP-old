@@ -49,13 +49,15 @@ else %experimental data
     imstack=(single(imstackadu)-p.offset)/p.conversion;% if necessary, convert ADU into photons.
     ground_truth.z=((1:size(imstack,3))'-size(imstack,3)/2+1)*10; %dz=10 nm; convert frame to nm
 end
+%% load sCMOS varmap or set sCMOSvarmap to zero
+%sCMOSvarmap=ones(size(imstack),'single'); %the variance map, same size as imstack, single format. 
+sCMOSvarmap=0; %if scalar: use EMCCD fitter;
 
 %% fit image stacks
 numlocs=size(imstack,3); 
 imstack=single(imstack); %imstack needs to be in photons. The fitters require the stacks in single-format;
 
-sCMOSvarmap=ones(size(imstack),'single'); %the variance map, same size as imstack, single format. 
-%sCMOSvarmap=0; %if scalar: use EMCCD fitter;
+
 
 %fit experimental astigmatic PSF, cspline, emCCD mode
 tic
@@ -154,8 +156,8 @@ gausssxsy.dy=nanstd(ground_truth.y(inz)-gausssxsy.y(inz));
 % z-dependent error
 cal=load('data/bead2d_3dcal.mat'); %load bead calibration
 
-ztruth = -275:50:275; %z positions for which we want to simulate fluorophores
-Nfits = 100; %fits per data points
+ztruth = -475:50:475; %z positions for which we want to simulate fluorophores
+Nfits = 300; %fits per data points
 Nphotons = 2000; %photons/localizations
 Npixels = 17; %size of the ROI
 bg = 10; %bg photons per pixel
@@ -163,6 +165,7 @@ dx = 132; %nm pixel size
 dy = 132; %nm
 dz=cal.cspline.dz;  %coordinate system of spline PSF is corner based and in units pixels / planes
 z0=cal.cspline.z0; % distance and midpoint of stack in spline PSF, needed to translate into nm coordinates
+clear Cspline2DF fractionmisassigned
 for i = 1: length(ztruth)
     disp([num2str(i) ' of ' num2str(length(ztruth))])
     coordsxy = Npixels/2 -1 +2*rand([Nfits 2]); %random x, y positions
@@ -170,44 +173,13 @@ for i = 1: length(ztruth)
     coordinates = [coordsxy coordsz];
     imstack = simSplinePSF(Npixels,cal.cspline.coeff,Nphotons,bg,coordinates);
 
-    [P1 CRLB1 LL1 P2 CRLB2 LL2]=mleFit_LM(imstack,6,50,single(cal.cspline.coeff)); %fit mode 6
-    
-    %select fit output with higher likelihood
-    ind1=LL1>=LL2;
-    ind2=LL1<LL2;
-    P=zeros(size(P1),'single');CRLB=zeros(size(CRLB1),'single');LL=zeros(size(LL1),'single');
-    P(ind1,:)=P1(ind1,:);P(ind2,:)=P2(ind2,:);
-    CRLB(ind1,:)=CRLB1(ind1,:);CRLB(ind2,:)=CRLB2(ind2,:);
-    LL(ind1,:)=LL1(ind1,:);LL(ind2,:)=LL2(ind2,:);
+    [P CRLB LL ]=mleFit_LM(imstack,6,50,single(cal.cspline.coeff),sCMOSvarmap,1); %fit mode 6
     
     
     z=(P(:,5)-z0).*dz;
     %determine fraction of misassigned localizations
-    misassigned=sign(ztruth(i))~=sign(z); 
+    misassigned=sign(ztruth(i))~=sign(z) & abs(z)> 50; %those close to the focus cannot be distinguished and scatter around zero.
     fractionmisassigned(i)=sum(misassigned)/length(misassigned);
-    s(i)=std(z(~misassigned)-ztruth(i));
-    
-%     Cspline2D.x = P(:,1);
-%     Cspline2D.y = P(:,2);
-%     Cspline2D.z = (P(:,5)-z0).*dz;
-%     
-%     Cspline2D.CRLBx = CRLB(:,1);
-%     Cspline2D.CRLBy = CRLB(:,2);
-%     Cspline2D.CRLBz = CRLB(:,5);
-%     
-%     
-%     Cspline2D.s_x_found(i,1) = std( Cspline2D.x-coordsxy(:,1));
-%     Cspline2D.s_y_found(i,1) = std( Cspline2D.y-coordsxy(:,2));
-%     Cspline2D.s_z_found(i,1) = std( Cspline2D.z-ztruth(i));
-%     
-%     Cspline2D.meanCRLBx(i,1) = mean(sqrt(Cspline2D.CRLBx));
-%     Cspline2D.meanCRLBy(i,1) = mean(sqrt(Cspline2D.CRLBy));
-%     Cspline2D.meanCRLBz(i,1) = mean(sqrt(Cspline2D.CRLBz))*dz;
-%     
-%     
-%     Cspline2D.RMSEX(i,1) = sqrt(mean((Cspline2D.x-coordsxy(:,1)).^2));
-%     Cspline2D.RMSEY(i,1) = sqrt(mean((Cspline2D.y-coordsxy(:,2)).^2));
-%     Cspline2D.RMSEZ(i,1) = sqrt(mean((Cspline2D.z-ztruth(i)).^2));
     
     %Filter
     %to calculate localization accuracy and precision we here exclude the
@@ -238,20 +210,8 @@ for i = 1: length(ztruth)
 end
 
 %Plot localization precision and fraction of misassigned localizations
-    figure(103);subplot(1,2,1);
-    plot(ztruth,Cspline2D.meanCRLBx*dx,'-');
-    hold on
-    plot(ztruth,Cspline2D.meanCRLBy*dy,'-');
-    plot(ztruth,Cspline2D.meanCRLBz,'-');
-    plot(ztruth,Cspline2D.s_x_found*dx,'o');
-    plot(ztruth,Cspline2D.s_y_found*dy,'o');
-    plot(ztruth,Cspline2D.s_z_found,'o');
-    xlabel('xnm')
-    ylabel('localization precision')
-    legend('CRLBx','CRLBy','CRLBz','std(x)','std(y)','std(z)');
-    title('misassignments not filtered')
-
-    subplot(1,2,2);
+    figure(103);subplot(1,2,1)
+    hold off
     plot(ztruth,Cspline2DF.meanCRLBx*dx,'-');
     hold on
     plot(ztruth,Cspline2DF.meanCRLBy*dy,'-');
@@ -259,10 +219,15 @@ end
     plot(ztruth,Cspline2DF.s_x_found*dx,'o');
     plot(ztruth,Cspline2DF.s_y_found*dy,'o');
     plot(ztruth,Cspline2DF.s_z_found,'o');
-    xlabel('xnm')
-    ylabel('localization precision')
+    xlabel('z (nm)')
+    ylabel('x,y,z localization precision (nm)')
     legend('CRLBx','CRLBy','CRLBz','std(x)','std(y)','std(z)');
-    title('misassignments filtered out');
+    title('localization precision 2D PSF');
+    subplot(1,2,2)
+    plot(ztruth, fractionmisassigned)
+    title('fraction of misassigned localizations')
+    xlabel('z (nm)')
+    ylabel('fraction')
     
 %% depth-dependent calibration
 % fit bead stacks in gel as shown above using the same fitter with the

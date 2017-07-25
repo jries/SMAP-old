@@ -15,7 +15,7 @@ function calibrate3D(p)
 
 %get bead positions
 p.status.String='load files and segmet beads';drawnow
-f=figure;
+f=figure('Name','Bead calibration');
 p.tabgroup=uitabgroup(f);
 %get beads from images
 [beads,p]=images2beads_so(p);
@@ -113,8 +113,8 @@ if contains(p.modality,'astig')
     p.ax_z.NextPlot='add';
     p.status.String='get Gauss model calibration';drawnow
     gausscalh=getgausscal_so(ch,p); 
-    legend(p.ax_z,'all bead data','good bead data','spline fit sx','spline fit sy','average PSF','average PSF','Gauss zfit','Gauss zfit')
-%     gausscalh=getgausscal_so(curves(indgoodc),p); 
+    legend(p.ax_z,'bad bead data','good bead data','spline fit sx','spline fit sy','average PSF','average PSF','Gauss zfit','Gauss zfit')
+
     gausscal=copyfields(gausscal,gausscalh);
     gauss_zfit=single(gausscal.fitzpar);
     gauss_sx2_sy2=gausscal.Sx2_Sy2;

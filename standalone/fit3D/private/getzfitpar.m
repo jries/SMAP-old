@@ -8,7 +8,6 @@ sy=sy(ind);
 znm=znm(ind);
 z=znm/1000;
 
-
 options=optimset('lsqnonlin');
 options.Display='off';
 fitp=lsqnonlin(@sbothfromsigmaerr,startp,[],[],options,[z z],[sx sy],0);
@@ -19,26 +18,18 @@ end
 zt=min(z):0.01:max(z);
 if nargin>6
     
-    
-%     sxfs=sigmafromz(startp([1 2 4 6 8 9]),zt,B0);
 sxf=sigmafromz(fitp([1 2 4 6 8 9]),zt,B0);
-% startpy=startp([1 3 5 7 8 9]);
-% startpy(5)=-startpy(5);
-% syfs=sigmafromz(startpy,zt,B0);
+
 
 plot(ax,z*1000,sx,'b*')
 hold on
 plot(ax,z*1000,sy,'b*')
 plot(ax,zt*1000,sxf,'b-')
-% plot(ax,zt,sxfs,'c',zt,syfs,'g')
+
 fpy=fitp([1 3 5 7 8 9]);
 fpy(5)=-fpy(5);
 syf=sigmafromz(fpy,zt,B0);
 plot(ax,zt*1000,syf,'b-')
-% hold off
-% axis tight
-% ylim([min(sx)-0.1 quantile(sx,.9)*1.1])
-ylabel(ax,'PSFx,PSFy')
 end
 %zpar=[sigma0x,Ax,Ay,Bx,By,gamma,d,sigma0y)
 zfit=real(fitp([2 4 5 6 7 8 1 3]));
@@ -64,7 +55,5 @@ end
 function err=sbothfromsigmaerr(par,z,sx,B0)
 sf=sbothfromsigma(par,z,B0);
 err=sf-sx;
-
-% stderr=std(err);
 err=err./sqrt(abs(err));
 end

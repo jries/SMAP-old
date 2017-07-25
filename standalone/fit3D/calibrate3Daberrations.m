@@ -17,7 +17,7 @@ if ~isfield(p,'smoothframe')
  p.smoothframe=2/10/p.dz;
 end
 
-f=figure;
+f=figure('Name','Calibrate depht-induced aberrations');
 p.tabgroup=uitabgroup(f);
 
 %get beads from localizations
@@ -44,8 +44,7 @@ p.f0glass=p.glassframe;% *ones(1,max([beads(:).filenumber]));
 
 %calculate relevant other coordinates
 axh=axes(uitab(p.tabgroup,'Title','z vs f0'));
-xlabel('frame')
-ylabel('fitted z position (nm)')
+
 hold off
 for k=1:length(beads)
     beads(k).loc.zglass=(beads(k).loc.frame-p.f0glass)*p.dz;
@@ -57,7 +56,8 @@ for k=1:length(beads)
     plot(axh,beads(k).loc.zglass(indplot),beads(k).loc.z(indplot),'.')
     hold on
 end
-
+xlabel('frame')
+ylabel('fitted z position (nm)')
 p.axhere=[];
 phere=p;
 phere.smoothing=[0.05 0.002];
@@ -102,19 +102,26 @@ for k=length(beads):-1:1
    dZ=ZcorrInterp.interp(beads(k).loc.zglass,beads(k).loc.z);
    beads(k).loc.zcorrected=beads(k).loc.z+dZ;
    if any(goodind==k)
-       col='k.';
        inr=abs(beads(k).loc.z0relative)<1000;
        if sum(inr)>0
-       minv=min(min(minv,min(beads(k).loc.z(inr))),min(beads(k).loc.zcorrected(inr)));
-       maxv=max(max(maxv,max(beads(k).loc.z(inr))),max(beads(k).loc.zcorrected(inr)));
+           minv=min(min(minv,min(beads(k).loc.z(inr))),min(beads(k).loc.zcorrected(inr)));
+           maxv=max(max(maxv,max(beads(k).loc.z(inr))),max(beads(k).loc.zcorrected(inr)));
        end
    else
        col='r.';
+       plot(ax1,beads(k).loc.z0relative,beads(k).loc.z,col)
+       plot(ax2,beads(k).loc.z0relative,beads(k).loc.zcorrected,col)
+       hold(ax1,'on');
+       hold(ax2,'on');
    end
-   plot(ax1,beads(k).loc.z0relative,beads(k).loc.z,col)
-   plot(ax2,beads(k).loc.z0relative,beads(k).loc.zcorrected,col)
-   hold(ax1,'on');
-   hold(ax2,'on');
+end
+for k=length(beads):-1:1
+    if any(goodind==k)
+       plot(ax1,beads(k).loc.z0relative,beads(k).loc.z,'k.')
+       plot(ax2,beads(k).loc.z0relative,beads(k).loc.zcorrected,'k.')
+       hold(ax1,'on');
+       hold(ax2,'on');
+    end
 end
 
 xlim(ax1,[-1000 1000])
@@ -128,29 +135,7 @@ ylabel(ax1,'fitted z (nm)')
 xlabel(ax2,'true z (nm)')
 ylabel(ax2,'corrected z (nm)')
 
-zcorr=ZcorrInterp.interp;
-
-% file=obj.getPar('lastSMLFile');
-% file=strrep(file,'_sml.mat','.mat');
-% file=strrep(file,'.mat','_3Dcorr.mat');
-% [f,p]=uiputfile(file);
-% 
-% if f
-%    save([p f],'ZcorrInterp')
-% end
-%get image stacks if needed
-
-   % * zfitted(z0-zglass,ZObjective)
-%     * also for xfitted, yfitted, 
-%     * also spatially resolved
-% * z0-zglass=ztrue(zfitted, zObjective): interpolated or lookup table
-% * use for correction
-% * save with 3Dcal.mat
-% * fitter: instead of refractive index mismatch choose this correction.
-
-%save: either select existing 3Dcal:then it is appended. Or
-%save new (correction then with plugin)
-           
+zcorr=ZcorrInterp.interp;    
 
 end
 
@@ -208,7 +193,7 @@ if ~isempty(p.axhere)
     minzp=min(zfitall(inz));
     Zplot(Zplot<minzp)=minzp-10;
     error=abs(Zint.interp(zzax(inz),zfitall(inz))-zplot(inz));
-    scatter3(p.axhere,zzax(inz),zfitall(inz),zplot(inz),[],(1-error/max(error))*min(Zplot(:)))
+    scatter3(p.axhere,zzax(inz),zfitall(inz),zplot(inz),5,(1-error/max(error))*min(Zplot(:)))
     xlabel(p.axhere,'objective position above glass (nm)');ylabel(p.axhere,'zfit (nm)'); zlabel(p.axhere,'correction (nm)');
     hold(p.axhere,'on')
     s=surf(p.axhere,X,Y,Zplot);

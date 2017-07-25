@@ -102,9 +102,7 @@ sstack=size(beads(1).stack.image);
         corrPSFn=corrPSF-minPSF;
         intglobal=nanmean(nansum(nansum(corrPSFn(rangex,rangey,z-1:z+1),1),2));
         corrPSFn=corrPSFn/intglobal;
-%         for k=1:size(corrPSF,3)
-%             corrPSFn(:,:,k)=corrPSFn(:,:,k)/intglobal;
-%         end
+
         shiftedstack=shiftedstack/intglobal;
         corrPSFn(isnan(corrPSFn))=0;
         corrPSFn(corrPSFn<0)=0;
@@ -124,7 +122,7 @@ sstack=size(beads(1).stack.image);
         zhd=1:1:b3_0.dataSize(3);
         dxxhd=1;
         [XX,YY,ZZ]=meshgrid(1:dxxhd:b3_0.dataSize(1),1:dxxhd:b3_0.dataSize(2),zhd);
-        p.status.String='calculate cspline coefficients';drawnow
+        p.status.String='calculating cspline coefficients in progress';drawnow
         corrPSFhd = interp3_0(b3_0,XX,YY,ZZ,0);
         
         %calculate cspline coefficients
@@ -143,7 +141,6 @@ sstack=size(beads(1).stack.image);
         p.z0=cspline.z0;
         
         splinefit.PSF=corrPSF;
-%         splinefit.PSF=shiftedstack(:,:,:,1)*intglobal;
         
         splinefit.PSFsmooth=corrPSFhd;
         splinefit.cspline=cspline;
@@ -175,13 +172,14 @@ sstack=size(beads(1).stack.image);
             xbs= interp3_0(b3_0,0*xxx+b3_0.dataSize(1)/2+.5,xxx,zzzt);
             zzz=1:dxxx:b3_0.dataSize(3);xxxt=0*zzz+b3_0.dataSize(1)/2+.5;
             zbs= interp3_0(b3_0,xxxt,xxxt,zzz); 
-           hold(ax,'off')
+            hold(ax,'off')
              plot(ax,framerange0,zpall(1:length(framerange0),:),'c')
              hold(ax,'on')
             plot(ax,framerange0',zprofile(1:length(framerange0)),'k*')
             plot(ax,zzz+rangez(1)+framerange0(1)-2,zbs,'b','LineWidth',2)
             xlabel(ax,'frames')
             ylabel(ax,'intensity')
+            ax.XLim(2)=max(framerange0);ax.XLim(1)=min(framerange0);
             
             xrange=-halfroisizebig:halfroisizebig;
              ax=axes(uitab(p.tabgroup,'Title','PSFx'));
@@ -203,12 +201,45 @@ sstack=size(beads(1).stack.image);
                 zall=testfit(testallrois,cspline.coeff,p,{},ax);
                 corrPSFfit=corrPSF/max(corrPSF(:))*max(testallrois(:)); %bring back to some reasonable photon numbers;
                 zref=testfit(corrPSFfit,cspline.coeff,p,{'k','LineWidth',2},ax);
-
                 drawnow
-%                  ax=axes(uitab(p.tabgroup,'Title','stripes'));
-%                 teststripes(cspline.coeff,p,ax);
             end
         end 
+end
+
+function zs=testfit(teststack,coeff,p,linepar,ax)
+if nargin<4
+    linepar={};
+elseif ~iscell(linepar)
+    linepar={linepar};
+end
+d=round((size(teststack,1)-p.ROIxy)/2);
+            range=d+1:d+p.ROIxy;
+
+numstack=size(teststack,4);
+t=tic;
+    for k=1:size(teststack,4)
+        if toc(t)>1
+            p.status.String=['fitting test stacks: ' num2str(k/numstack,'%1.2f')];drawnow
+            t=tic;
+        end
+        if contains(p.modality,'2D')
+            fitmode=6;
+        else
+            fitmode=5;
+        end
+
+        [P] =  mleFit_LM(single(squeeze(teststack(range,range,:,k))),fitmode,100,single(coeff),0,1);
+        
+        z=(1:size(P,1))'-1;
+
+        znm=(P(:,5)-p.z0)*p.dz;
+        plot(ax,z,znm,linepar{:})
+        hold(ax,'on')
+        xlabel(ax,'frame')
+        ylabel(ax,'zfit (nm)')
+        zs(:,k)=P(:,5);
+    end
+    
 end
 
 function teststripes(coeff,p,ax)
@@ -250,41 +281,4 @@ plot(ax,zr(2:end-2),hz,zr(2:end-2),hzx/max(hzx)*(quantile(hz,.99)));
 ax.YLim(2)=(quantile(hz,.99))*1.1;
 ax.YLim(1)=min(quantile(hz,.01),quantile(hzx/max(hzx)*(quantile(hz,.99)),.01));
 plot(ax2,xr(findx(2:end-1)),hx,xr(findx(2:end-1)),hxx/max(hxx)*max(hx),xr(findy(2:end-1)),hy,xr(findy(2:end-1)),hyx/max(hyx)*max(hy));
-end
-
-function zs=testfit(teststack,coeff,p,linepar,ax)
-if nargin<4
-    linepar={};
-elseif ~iscell(linepar)
-    linepar={linepar};
-end
-d=round((size(teststack,1)-p.ROIxy)/2);
-            range=d+1:d+p.ROIxy;
-
-numstack=size(teststack,4);
-t=tic;
-    for k=1:size(teststack,4)
-        if toc(t)>1
-            p.status.String=['fitting test stacks: ' num2str(k/numstack,'%1.2f')];drawnow
-            t=tic;
-        end
-        if contains(p.modality,'2D')
-            [P1 CRLB1 LL1 P2 CRLB2 LL2]=mleFit_LM(single(squeeze(teststack(range,range,:,k))),6,100,single(coeff),0,1); %fit mode 6
-            %select fit output with higher likelihood
-            ind1=LL1>=LL2;ind2=LL1<LL2;
-            P=zeros(size(P1),'single');
-            P(ind1,:)=P1(ind1,:);P(ind2,:)=P2(ind2,:);
-        else
-            [P] =  mleFit_LM(single(squeeze(teststack(range,range,:,k))),5,100,single(coeff),0,1);
-        end
-        z=(1:size(P,1))'-1;
-
-        znm=(P(:,5)-p.z0)*p.dz;
-        plot(ax,z,znm,linepar{:})
-        hold(ax,'on')
-        xlabel(ax,'frame')
-        ylabel(ax,'zfit (nm)')
-        zs(:,k)=P(:,5);
-    end
-    
 end
