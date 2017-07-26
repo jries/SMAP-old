@@ -25,6 +25,8 @@
 %  the licensors of this Program grant you additional permission
 %  to convey the resulting work.
 
+%  Requires Matlab 2017a or newer
+
 %% example script for fitting of 3D data
 %% add path to helper functions
 addpath('bfmatlab')
