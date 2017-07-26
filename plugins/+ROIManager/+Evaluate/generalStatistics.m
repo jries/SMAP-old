@@ -11,7 +11,7 @@ classdef generalStatistics<interfaces.SEEvaluationProcessor
 %             roisize=obj.site.sePar.Settings.siteroi/2;
             roisize=p.se_siteroi;
             if ~p.circularroi
-                roisizeh=[roisize,roisize]/2;
+                roisizeh=[roisize,roisize];
             else
                 roisizeh=roisize/2;
             end

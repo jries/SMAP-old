@@ -65,7 +65,8 @@ classdef Get2CIntImagesWF<interfaces.DialogProcessor
             end
 %             tiffile='/Users/ries/Documents/Data/3Ddc/MTActin/02_MT680_phalloidin647_1/img_000039971_Default_000.tif';
             wf.module('TifLoader').addFile(tiffile);
-
+            p.framestop=max(obj.locData.loc.frame)-1;
+             wf.module('TifLoader').setGuiParameters(p);
              
             p.loc_blocksize_frames=p.filtert;
             p.loc_bg_dx=p.filterx;

@@ -22,7 +22,7 @@ classdef MathParser<interfaces.DialogProcessor
             fn=fn(sortind);
             for k = 1:length (fn)
                 ind=strfind(evalstr,fn{k});
-                for m=1:length(ind)
+                for m=length(ind):-1:1
                     if ind(m)>1
                         lbefore=evalstr(ind(m)-1);
                     else
