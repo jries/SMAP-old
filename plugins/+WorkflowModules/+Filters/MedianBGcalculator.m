@@ -75,9 +75,14 @@ classdef MedianBGcalculator<interfaces.WorkflowModule
                     end
                     bgIm(isnan(bgIm))=0;
                     for k=1:blockIndexP
+                        try
                         dato=datablock{pulsenumber}(k);
+
                         dato.data=bgIm;  
                         obj.output(dato);
+                        catch
+                            disp('problem')
+                        end
                     end
                     blockIndexh(pulsenumber)=0;
                 end

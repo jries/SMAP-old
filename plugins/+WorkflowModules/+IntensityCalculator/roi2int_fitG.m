@@ -41,7 +41,7 @@ if roi2int_fitG_parameters.fixpsf
     PSFxpix=zeros(sim(3),1,'single')+roi2int_fitG_parameters.psfsize_fit;
     PSFypix=PSFxpix;
 end
-
+ nrange=-dn:dn;
 if ~roi2int_fitG_parameters.fitonbg%nargin<7||isempty(bgroi)
 
     for k=1:sim(3)
