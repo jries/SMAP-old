@@ -47,7 +47,7 @@ cal=load('data/bead_3dcal.mat'); %load bead calibration
 
 
 %% either simulate data or load experimental tiff file
-mode =0;
+mode =1;
 if mode ==1 % simulate data
     p.offset=0;
     p.conversion=1;
@@ -60,12 +60,12 @@ if mode ==1 % simulate data
     dz=cal.cspline.dz;  %coordinate system of spline PSF is corner based and in units pixels / planes
     z0=cal.cspline.z0; % distance and midpoint of stack in spline PSF, needed to translate into nm coordinates
     dx=floor(RoiPixelsize/2); %distance of center from edge
-    ground_truth.z=linspace(-800,800,numlocs)'; %define some coordinates. Alternatively, use rand
+    ground_truth.z=linspace(-500,500,numlocs)'; %define some coordinates. Alternatively, use rand
     ground_truth.x=linspace(-0.5,0.5,numlocs)';
     ground_truth.y=sin(ground_truth.x*4*pi);
     coordinates=horzcat(ground_truth.x+dx,ground_truth.y+dx,ground_truth.z/dz+z0);
-    Intensity=5000; %number of photons / localization
-    background=5; %number of background photons per pixel
+    Intensity=2000; %number of photons / localization
+    background=10; %number of background photons per pixel
     imstack = simSplinePSF(RoiPixelsize,cal.cspline.coeff,Intensity,background,coordinates); %simulate images
     
 else %experimental data
