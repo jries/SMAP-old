@@ -124,7 +124,7 @@ gausssxsy.zrel=gausssxsy.z-ground_truth.z;
 gausssxsy.zrel(isnan(gausssxsy.zrel))=0;
 
 %numpoints
-numpoints=2000;
+numpoints=min(2000,size(imstack,3));
 range=1:round(length(ground_truth.z)/numpoints):length(ground_truth.z);
 %plot fitted z vs ground-truth z
     figure(101)
