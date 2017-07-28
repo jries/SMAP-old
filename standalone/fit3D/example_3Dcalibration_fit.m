@@ -43,7 +43,7 @@ addpath('shared')
 calibrate3D_GUI
 
 %% load bead calibration
-cal=load('data/bead_3dcal_old.mat'); %load bead calibration
+cal=load('data/bead_3dcal.mat'); %load bead calibration
 
 
 %% either simulate data or load experimental tiff file
