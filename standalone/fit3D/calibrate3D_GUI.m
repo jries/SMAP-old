@@ -47,7 +47,7 @@ classdef calibrate3D_GUI<handle
             xpos1=10;
             xw=100;
               hatitle='left';
-            obj.guihandles.title=uicontrol('style','text','String','Calibrate PSF model for MLE fit from bead stacks. (c) Ries lab','Position',[xpos1,top-vsep+10,xw*4.5,vsep],'FontSize',fontsize,'HorizontalAlignment',hatitle,'FontWeight','bold');
+            obj.guihandles.title=uicontrol('style','text','String','Calibrate PSF model for MLE fit from bead stacks. (c) Ries lab','Position',[xpos1,top-vsep+10,xw*4.5,vsep],'FontSize',10,'HorizontalAlignment',hatitle,'FontWeight','bold');
             
             obj.guihandles.selectfiles=uicontrol('style','pushbutton','String','Select camera files','Position',[xpos1,top-2*vsep,xw*1.5,vsep],'FontSize',fontsize,'Callback',@obj.selectfiles_callback);
             obj.guihandles.selectfiles.TooltipString='Select image files with bead stacks. You can select several files from different locations with the file select dialog box opend';

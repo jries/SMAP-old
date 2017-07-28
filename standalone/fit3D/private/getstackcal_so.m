@@ -126,8 +126,9 @@ sstack=size(beads(1).stack.image);
         corrPSFhd = interp3_0(b3_0,XX,YY,ZZ,0);
         
         %calculate cspline coefficients
-        spline = Spline3D_v2(corrPSFhd);
-        coeff = spline.coeff;
+%         spline = Spline3D_v2(corrPSFhd);
+%         coeff = spline.coeff;
+        coeff = Spline3D_interp(corrPSFhd);
        
         %assemble output structure for saving
         bspline.bslpine=b3_0;

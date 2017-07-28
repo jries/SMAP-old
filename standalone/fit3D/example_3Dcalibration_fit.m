@@ -43,11 +43,11 @@ addpath('shared')
 calibrate3D_GUI
 
 %% load bead calibration
-cal=load('data/bead_3dcal.mat'); %load bead calibration
+cal=load('data/bead_3dcal_old.mat'); %load bead calibration
 
 
 %% either simulate data or load experimental tiff file
-mode =1;
+mode =0;
 if mode ==1 % simulate data
     p.offset=0;
     p.conversion=1;
@@ -74,7 +74,7 @@ else %experimental data
     imstackadu=readfile_ome(file); % Stack of ROIs in photons.
     p.offset=400;p.conversion=.1;
     imstack=(single(imstackadu)-p.offset)/p.conversion;% if necessary, convert ADU into photons.
-    ground_truth.z=((1:size(imstack,3))'-size(imstack,3)/2+1)*10; %dz=10 nm; convert frame to nm
+    ground_truth.z=((1:size(imstack,3))'-size(imstack,3)/2+1)*10; %dz=10 nm; convert frame to nm   
 end
 %% load sCMOS varmap or set sCMOSvarmap to zero
 % sCMOSvarmap=ones(size(imstack),'single'); %the variance map, same size as imstack, single format. 
@@ -163,14 +163,14 @@ range=1:round(length(ground_truth.z)/numpoints):length(ground_truth.z);
     legend(legendtxt)
 
 %calculate lateral error
-cspline.dx=nanstd(ground_truth.x(inz)-cspline.x(inz)); %in pixels
-cspline.dy=nanstd(ground_truth.y(inz)-cspline.y(inz));
-dx_gaussz=nanstd(ground_truth.x(inz)-gaussz.x(inz));
-dy_gaussz=nanstd(ground_truth.y(inz)-gaussz.y(inz));
-gausssxsy.dx=nanstd(ground_truth.x(inz)-gausssxsy.x(inz));
-gausssxsy.dy=nanstd(ground_truth.y(inz)-gausssxsy.y(inz));
-
-%plot 3D scatter plot
+if mode == 1
+    cspline.dx=nanstd(ground_truth.x(inz)-cspline.x(inz)); %in pixels
+    cspline.dy=nanstd(ground_truth.y(inz)-cspline.y(inz));
+    dx_gaussz=nanstd(ground_truth.x(inz)-gaussz.x(inz));
+    dy_gaussz=nanstd(ground_truth.y(inz)-gaussz.y(inz));
+    gausssxsy.dx=nanstd(ground_truth.x(inz)-gausssxsy.x(inz));
+    gausssxsy.dy=nanstd(ground_truth.y(inz)-gausssxsy.y(inz));
+    %plot 3D scatter plot
    
     figure(102);
     hold off
@@ -180,6 +180,15 @@ gausssxsy.dy=nanstd(ground_truth.y(inz)-gausssxsy.y(inz));
     xlabel('x (nm)');ylabel('y (nm)');zlabel('z (nm)');
     legend('ground truth','cspline fit')
     title('fitted vs ground truth positions')
+else
+    cspline.dx=nanstd(cspline.x(inz)); %in pixels
+    cspline.dy=nanstd(cspline.y(inz));
+    dx_gaussz=nanstd(gaussz.x(inz));
+    dy_gaussz=nanstd(gaussz.y(inz));
+    gausssxsy.dx=nanstd(gausssxsy.x(inz));
+    gausssxsy.dy=nanstd(gausssxsy.y(inz));
+end
+
 %% fit 2D dataset with cspline
 % Here we simulate Nfits positions per data point and calculate the
 % z-dependent error
