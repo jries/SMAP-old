@@ -50,12 +50,14 @@ classdef density_calculator<interfaces.DialogProcessor
                         end
                     else   
                         locall(k)=locallh;
-                        locref(k)=locallh;
+                        locref(k)=locrefh;
                     end
                 end
             else
-                locall=obj.locData.loc;
-                locref=obj.locData.loc;
+                locall=obj.locData.getloc({'xnm','ynm','filenumber','channel','frame','znm','ingrouped','inungrouped'},'grouping','ungrouped');
+                locref=locall;
+%                 locall=obj.locData.loc;
+%                 locref=obj.locData.loc;
             end
             
            
@@ -76,7 +78,7 @@ classdef density_calculator<interfaces.DialogProcessor
 
                 dx=p.countingsize_xy;
                 dz=p.countingsize_z;
-                if ~isempty(locall(lay).znm)&&~isempty(locref(lay).znm)
+                if isfield(locall(lay),'znm') && ~isempty(locall(lay).znm)&&~isempty(locref(lay).znm)
                     za=locall(lay).znm(sortind);
                     zr=locref(lay).znm(sortindr);
                     if p.countingregion.Value==1 %Gauss
