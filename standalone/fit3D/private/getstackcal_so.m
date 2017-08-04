@@ -97,9 +97,11 @@ sstack=size(beads(1).stack.image);
         z0reference=find(rangez>=z,1,'first');
         
         %normalize PSF
-        centpsf=corrPSF(2:end-1,2:end-1,2:end-1); %cut out rim from shift
-        minPSF=min(centpsf(:));
+        centpsf=corrPSF(rangex,rangey,z-1:z+1); %cut out rim from shift
+%         centpsf=corrPSF(2:end-1,2:end-1,2:end-1); %cut out rim from shift
+        minPSF=nanmin(centpsf(:));
         corrPSFn=corrPSF-minPSF;
+%         corrPSFn=corrPSF;
         intglobal=nanmean(nansum(nansum(corrPSFn(rangex,rangey,z-1:z+1),1),2));
         corrPSFn=corrPSFn/intglobal;
 
@@ -218,6 +220,7 @@ d=round((size(teststack,1)-p.ROIxy)/2);
 
 numstack=size(teststack,4);
 t=tic;
+% f=figure(989);ax2=gca;hold off
     for k=1:size(teststack,4)
         if toc(t)>1
             p.status.String=['fitting test stacks: ' num2str(k/numstack,'%1.2f')];drawnow
@@ -239,6 +242,13 @@ t=tic;
         xlabel(ax,'frame')
         ylabel(ax,'zfit (nm)')
         zs(:,k)=P(:,5);
+% test for the returned photons and photons in the raw image        
+%         phot=P(:,3); bg=P(:,4);
+%         totsum=squeeze(nansum( nansum(teststack(range,range,:,k),1),2));
+%         totsum=totsum-squeeze(min(min(teststack(range,range,:,k),[],1),[],2))*length(range)^2;
+%         photsum=phot+0*bg*length(range)^2;
+%         plot(ax2,z,(photsum-totsum)./totsum,'.')
+%         hold(ax2,'on')
     end
     
 end
