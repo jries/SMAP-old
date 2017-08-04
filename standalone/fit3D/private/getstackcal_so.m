@@ -254,6 +254,7 @@ t=tic;
 end
 
 function teststripes(coeff,p,ax)
+%not used, can be called to test for stripe artifacts.
 tt=tic;
 
 zr=0:0.2:p.ROIz;

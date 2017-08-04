@@ -25,9 +25,15 @@
 %  the licensors of this Program grant you additional permission
 %  to convey the resulting work.
 
-%  Requires Matlab 2017a or newer
-
 %% example script for fitting of 3D data
+%Installation instructions
+%  Requires Matlab 2017a or newer including the following tool boxes:
+%  image analysis, curve fitting, optimization, statistics
+%  GPU support for CUDA 8
+%  for Matlab 2016a or 2016b rename: private/contains_2016.m to
+%  private/contains.m
+
+
 %% add path to helper functions
 addpath('bfmatlab')
 addpath('shared')
