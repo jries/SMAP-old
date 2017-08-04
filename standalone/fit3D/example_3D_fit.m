@@ -53,7 +53,7 @@ cal=load('data/bead_3dcal.mat'); %load bead calibration
 
 
 %% either simulate data or load experimental tiff file
-mode =1;
+mode =0;
 if mode ==1 % simulate data
     p.offset=0;
     p.conversion=1;
@@ -61,12 +61,12 @@ if mode ==1 % simulate data
     %numlocs: number of simulated molecules. For maximum fitting speeds on  the GPU, 
     %it should be >10^5. For smaller GPUs, adust to avoid memory overflow
     %error to 10^5-10^5. For CPU fitter, use 10^3-10^4.
-    numlocs=5000;
+    numlocs=50000;
     RoiPixelsize=13; %ROI in pixels for simulation
     dz=cal.cspline.dz;  %coordinate system of spline PSF is corner based and in units pixels / planes
     z0=cal.cspline.z0; % distance and midpoint of stack in spline PSF, needed to translate into nm coordinates
     dx=floor(RoiPixelsize/2); %distance of center from edge
-    ground_truth.z=linspace(-200,-200,numlocs)'; %define some coordinates. Alternatively, use rand
+    ground_truth.z=linspace(-500,500,numlocs)'; %define some coordinates. Alternatively, use rand
     ground_truth.x=linspace(-0.5,0.5,numlocs)';
     ground_truth.y=sin(ground_truth.x*4*pi);
     coordinates=horzcat(ground_truth.x+dx,ground_truth.y+dx,ground_truth.z/dz+z0);
@@ -268,7 +268,7 @@ end
     legend('CRLBx','CRLBy','CRLBz','std(x)','std(y)','std(z)');
     title('localization precision 2D PSF');
     subplot(1,2,2)
-    plot(ztruth, fractionmisassigned)
+    plot(ztruth, fractionmisassigned,'-o')
     title('fraction of misassigned localizations')
     xlabel('z (nm)')
     ylabel('fraction')
