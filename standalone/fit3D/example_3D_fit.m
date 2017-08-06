@@ -90,24 +90,30 @@ sCMOSvarmap=0; %if scalar: use EMCCD fitter;
 numlocs=size(imstack,3); 
 imstack=single(imstack); %imstack needs to be in photons. The fitters require the stacks in single-format;
 
+if isfield(cal,'gauss_zfit')&&~isempty(cal.gauss_zfit)
+    %fit Gaussian model, direct z fit, emCCD mode
+    tic
+    [P,CRLB]=mleFit_LM(imstack,3,50,single(cal.gauss_zfit),sCMOSvarmap,1);
+    tgz=toc;
+    disp(['Gauss z: ' num2str(numlocs/tgz) ' fits/s']);
+    gaussz.x=P(:,1);gaussz.y=P(:,2); %x,y in pixels 
+    gaussz.z=P(:,5)*1000;
 
-%fit Gaussian model, direct z fit, emCCD mode
-tic
-[P,CRLB]=mleFit_LM(imstack,3,50,single(cal.gauss_zfit),sCMOSvarmap,1);
-tgz=toc;
-disp(['Gauss z: ' num2str(numlocs/tgz) ' fits/s']);
-gaussz.x=P(:,1);gaussz.y=P(:,2); %x,y in pixels 
-gaussz.z=P(:,5)*1000;
 
-%fit elliptical Gaussian model, extract z from sx, sy. emCCD mode
-tic
-[P,CRLB]=mleFit_LM(imstack,4,50,1,sCMOSvarmap,1);
-tgsxsy=toc;
-disp(['Gaussxy: ' num2str(numlocs/tgsxsy) ' fits/s']);
+    %fit elliptical Gaussian model, extract z from sx, sy. emCCD mode
+    tic
+    [P,CRLB]=mleFit_LM(imstack,4,50,1,sCMOSvarmap,1);
+    tgsxsy=toc;
+    disp(['Gaussxy: ' num2str(numlocs/tgsxsy) ' fits/s']);
 
-gausssxsy.x=P(:,1);gausssxsy.y=P(:,2); %x,y in pixels 
-sx=P(:,5);sy=P(:,6);
-gausssxsy.z=sxsy2z(sx,sy,cal.gauss_sx2_sy2); %z from sx, sy
+    gausssxsy.x=P(:,1);gausssxsy.y=P(:,2); %x,y in pixels 
+    sx=P(:,5);sy=P(:,6);
+    gausssxsy.z=sxsy2z(sx,sy,cal.gauss_sx2_sy2); %z from sx, sy
+
+else
+    gaussz.x=zeros(size(imstack,3),1);gaussz.y=zeros(size(imstack,3),1); gaussz.z=zeros(size(imstack,3),1);
+    gausssxsy.x=zeros(size(imstack,3),1);gausssxsy.y=zeros(size(imstack,3),1); gausssxsy.z=zeros(size(imstack,3),1);
+end
 
 %fit experimental astigmatic PSF, cspline, emCCD mode
 tic
