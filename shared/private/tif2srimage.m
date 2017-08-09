@@ -43,8 +43,11 @@ positionc(3:4)=position(3:4)-roi(2);
 coim=cutoutim(permute(double(fileh.(form)(tnum).image),[2 1 3]),positionc);
 
 magnification=pixsize/p.sr_pixrec*1000;
+if numel(magnification)>2
+    warning('problem in tif2srimage')
+end
 %%%XXX pixresize: here it is not clear if indices are correct.
-disp('tif2srimage: check rescale line 47')
+% disp('tif2srimage: check rescale line 47')
 s=size(coim);
 srcoim=imresize(coim,magnification.*s(1:2),'nearest');
 
