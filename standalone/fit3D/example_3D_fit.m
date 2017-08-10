@@ -27,11 +27,9 @@
 
 %% example script for fitting of 3D data
 %Installation instructions
-%  Requires Matlab 2017a or newer including the following tool boxes:
+%  Requires Matlab 2016a or newer including the following tool boxes:
 %  image analysis, curve fitting, optimization, statistics
 %  GPU support for CUDA 8
-%  for Matlab 2016a or 2016b rename: private/contains_2016.m to
-%  private/contains.m
 
 
 %% add path to helper functions
@@ -53,7 +51,7 @@ cal=load('data/bead_3dcal.mat'); %load bead calibration
 
 
 %% either simulate data or load experimental tiff file
-mode =0;
+mode = 1;
 if mode ==1 % simulate data
     p.offset=0;
     p.conversion=1;
@@ -90,7 +88,7 @@ sCMOSvarmap=0; %if scalar: use EMCCD fitter;
 numlocs=size(imstack,3); 
 imstack=single(imstack); %imstack needs to be in photons. The fitters require the stacks in single-format;
 
-if isfield(cal,'gauss_zfit')&&~isempty(cal.gauss_zfit)
+if isfield(cal,'gauss_zfit')&&~isempty(cal.gauss_zfit) %only if Gaussian PSF model was calibrated in the calibrate3D_GUI, we can test the Gaussian fit
     %fit Gaussian model, direct z fit, emCCD mode
     tic
     [P,CRLB]=mleFit_LM(imstack,3,50,single(cal.gauss_zfit),sCMOSvarmap,1);
@@ -208,7 +206,7 @@ cal=load('data/bead2d_3dcal.mat'); %load bead calibration
 
 ztruth = -475:50:475; %z positions for which we want to simulate fluorophores
 Nfits = 300; %fits per data points
-Nphotons = 2000; %photons/localizations
+Nphotons = 5000; %photons/localizations
 Npixels = 17; %size of the ROI
 bg = 10; %bg photons per pixel
 dx = 132; %nm pixel size
@@ -227,8 +225,9 @@ for i = 1: length(ztruth)
     
     
     z=(P(:,5)-z0).*dz;
+    locprecz=CRLB(:,5)*dz;
     %determine fraction of misassigned localizations
-    misassigned=sign(ztruth(i))~=sign(z) & abs(z)> 50; %those close to the focus cannot be distinguished and scatter around zero.
+    misassigned=sign(ztruth(i))~=sign(z) & abs(z)> locprecz; %those close to the focus cannot be distinguished and scatter around zero. By excluding only those within their localization precision, we probably overestimate the misassignments.
     fractionmisassigned(i)=sum(misassigned)/length(misassigned);
     
     %Filter
