@@ -31,8 +31,8 @@ classdef ShuffelClusterIndex<interfaces.DialogProcessor
             obj.locData.regroup;
         end
         
-        function pardef=guipar(obj)
-            pardef.plugininfo.name='Shuffle cluster indices';
+        function pardef=guidef(obj)
+            pardef.plugininfo.name='ShuffleClusterIndices';
             pardef.plugininfo.description='ShuffelClusterIndex randomizes the index of clusters. This is useful for color-coded plotting of clusters.';
             pardef.plugininfo.type='ProcessorPlugin';
         end

@@ -50,6 +50,14 @@ end
 findin=find(indin);
 idall(findin(iAa))=id+minID;
 obj.locData.setloc('track_id',idall);
+
+tracklength=zeros(size(indin),'single');
+for k=1:max(idall)
+    indt=idall==k;
+    tracklength(indt)=sum(indt);
+end
+obj.locData.setloc('track_length',tracklength);
+
 out=[];
 obj.locData.regroup;
 obj.setPar('locFields',fieldnames(obj.locData.loc))
@@ -98,7 +106,7 @@ pard.good.Width=.5;
 pard.good.TooltipString=pard.goodt.TooltipString;
 
 
-pard.overwritetracks.object=struct('String','overwrite tracks','Style','checkbox');
+pard.overwritetracks.object=struct('String','overwrite tracks','Style','checkbox','Value',1);
 pard.overwritetracks.position=[5,1];
 pard.overwritetracks.Width=1.5;
 % pard.overwritetracks.TooltipString=pard.goodt.TooltipString;
