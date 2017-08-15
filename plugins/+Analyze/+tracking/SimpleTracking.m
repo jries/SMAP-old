@@ -29,17 +29,22 @@ end
 p.quiet=false;
 tracks=mytrack(xyzt,p.maxdisp,p);
 llocs.x=locs.xnm;llocs.y=locs.ynm;llocs.frame=locs.frame;
-ltracks.x=tracks(:,1);
-ltracks.y=tracks(:,2);
-ltracks.frame=tracks(:,end-1);
+
+ftracks=tracks(:,end-1);
+[~,trackssort]=sort(ftracks);
+ltracks.x=tracks(trackssort,1);
+ltracks.y=tracks(trackssort,2);
+ltracks.frame=tracks(trackssort,end-1);
+trackids=tracks(trackssort,end);
 [iAa,iBa,nA,nB,nseen]=matchlocsall(llocs,ltracks,0,0,1);
 
-id=tracks(iBa,end);
-if isempty(locs.track_id)
+% id=tracks(iBa,end);
+id=trackids(iBa);
+if isempty(locs.track_id)||p.overwritetracks
     idall=zeros(size(indin),'single');
     minID=0;
 else
-    idall=obj.locData.loc.track_id;
+    idall=obj.locData.loc.track_id; 
     minID=max(idall);
 end
 findin=find(indin);
@@ -91,6 +96,13 @@ pard.good.object=struct('String','2','Style','edit');
 pard.good.position=[4,2.5];
 pard.good.Width=.5;
 pard.good.TooltipString=pard.goodt.TooltipString;
+
+
+pard.overwritetracks.object=struct('String','overwrite tracks','Style','checkbox');
+pard.overwritetracks.position=[5,1];
+pard.overwritetracks.Width=1.5;
+% pard.overwritetracks.TooltipString=pard.goodt.TooltipString;
+
 
 pard.plugininfo.description=sprintf('uTrack');
 pard.plugininfo.type='ProcessorPlugin';

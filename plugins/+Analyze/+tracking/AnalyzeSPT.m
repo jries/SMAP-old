@@ -30,8 +30,17 @@ loct.x=locs.xnm(intrack(longtrack));
 loct.y=locs.ynm(intrack(longtrack));
 loct.frame=locs.frame(intrack(longtrack));
 loct.track_id=locs.track_id(intrack(longtrack));
+
+[~,sortid]=sort(loct.track_id);
+
+loct.x=loct.x(sortid);
+loct.y=loct.y(sortid);
+loct.frame=loct.frame(sortid);
+loct.track_id=loct.track_id(sortid);
+
 if ~isempty(locs.znm)
     loct.z=locs.znm(intrack(longtrack));
+    loct.z=loct.z(sortid);
 end
 
 

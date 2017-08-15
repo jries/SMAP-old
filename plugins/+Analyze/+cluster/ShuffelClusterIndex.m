@@ -10,7 +10,15 @@ classdef ShuffelClusterIndex<interfaces.DialogProcessor
         end
         function out=run(obj,p)
             out=[];
-            clusterindex=obj.locData.loc.clusterindex;
+            
+            if isfield(obj.locData.loc,'clusterindex')
+                field='clusterindex';
+            elseif isfield(obj.locData.loc,'track_id')
+                field='track_id';
+            else
+                disp('no clusterindex found');
+            end
+            clusterindex=obj.locData.loc.(field);
             posind=clusterindex>0;
             
             mi=max(clusterindex);
@@ -19,7 +27,7 @@ classdef ShuffelClusterIndex<interfaces.DialogProcessor
             indsort=vertcat(1,indsort);
             clusterindexnew=zeros(size(clusterindex),'single');
             clusterindexnew(posind) = indsort(clusterindex(posind));
-            obj.locData.loc.clusterindex=clusterindexnew;
+            obj.locData.loc.(field)=clusterindexnew;
             obj.locData.regroup;
         end
         
