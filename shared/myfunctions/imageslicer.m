@@ -290,8 +290,8 @@ changeaxis(0,0,0);
             ax.YLim=a2([1 end])+[-1 1]*d2/2;
         end
         colormap(ax,hlut.String{hlut.Value})
-       
-        ax.CLim=[0 imax];
+        imin=nanmin(img(:));
+        ax.CLim=[imin imax];
         if ~isempty(p.Title)
             title(ax,p.Title);
         end
