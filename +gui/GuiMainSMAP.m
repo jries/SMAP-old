@@ -32,6 +32,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             handle=figure(199);
 %             clf(handle,'reset')
              delete(handle.Children)
+             set(handle, 'HandleVisibility', 'off');
 
             obj.setPar('mainGuihandle',handle);
             obj.setPar('mainGui',obj);
