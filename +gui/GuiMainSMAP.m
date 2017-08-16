@@ -32,7 +32,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             handle=figure(199);
 %             clf(handle,'reset')
              delete(handle.Children)
-             set(handle, 'HandleVisibility', 'off');
+%              
 
             obj.setPar('mainGuihandle',handle);
             obj.setPar('mainGui',obj);
@@ -218,6 +218,7 @@ drawnow
 %             sizechanged_callback(obj.handle, 0, obj)
             obj.status('all initialized')
             drawnow  
+            set(handle, 'HandleVisibility', 'off');
         end
         function psaved=saveParameters(obj)
             psaved=obj.getGuiParameters(true);
