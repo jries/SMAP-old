@@ -607,8 +607,8 @@ p=obj.getAllParameters;
 
 % z data?
 fh={'PSFxnmb','PSFxnm_min','PSFxnm_max','znmb','znm_min','znm_max','locprecznmb','locprecznm_min','locprecznm_max',...
-    'channels','text1','renderfield','groupcheck',...
-    'locprecnmb','locprecnm_min','locprecnm_max','intensitycoding','intensitytxt'};
+    'channels','text1','renderfield','groupcheck','frameb','frame_min','frame_max'...
+    'locprecnmb','locprecnm_min','locprecnm_max','intensitycoding','intensitytxt','colortxt'};
 %tiff
 if strcmp(p.rendermode.selection,'tiff')||strcmp(p.rendermode.selection,'raw') %obj.fileinfo(fileselect).istiff
     obj.fieldvisibility('off',fh);
@@ -820,6 +820,11 @@ pard.parbutton.position=[3,p3];
 pard.parbutton.Width=w3;
 pard.parbutton.TooltipString='Additional render paramters';
 pard.parbutton.Optional=true;
+
+
+pard.tiftxt.object=struct('Style','text','String','Image:');
+pard.tiftxt.position=[4,p1];
+pard.tiftxt.Width=w1;  
 
 pard.colortxt.object=struct('Style','text','String','Colormode:');
 pard.colortxt.position=[4,p1];
