@@ -21,10 +21,10 @@ classdef GuiHistSlider< interfaces.LayerInterface
             h.filteron=uicontrol('Parent',obj.handle,'Units','normalized','Style','checkbox','Position',[0.8,0.7,0.2,height],'String','filter','FontSize',fontsize*0.7,'Callback',{@showchanged_callback,obj});
             h.filteron.TooltipString='if checked, this field is filtered';
             
-            h.lockrange=uicontrol('Parent',obj.handle,'Units','normalized','Style','checkbox','Position',[0.8,0.42,0.2,height],'String','range fix','FontSize',fontsize*0.7);
+            h.lockrange=uicontrol('Parent',obj.handle,'Units','normalized','Style','checkbox','Position',[0.8,0.5,0.2,height],'String','range fix','FontSize',fontsize*0.7);
             h.lockrange.TooltipString='if checked, the range will be restricted to the width given here';
             
-            h.range=uicontrol('Parent',obj.handle,'Units','normalized','Style','edit','Position',[0.8,0.3,0.2,height],'String','0','FontSize',fontsize);
+            h.range=uicontrol('Parent',obj.handle,'Units','normalized','Style','edit','Position',[0.8,0.4,0.2,height],'String','0','FontSize',fontsize);
             h.range.TooltipString='width of range of values';
             
             h.vmin=uicontrol('Parent',obj.handle,'Units','normalized','Style','edit','Position',[0.85,0.16,0.15,height],'String','0','FontSize',fontsize);
@@ -35,7 +35,11 @@ classdef GuiHistSlider< interfaces.LayerInterface
             set(h.smin, 'Callback',{@slider_callback,obj,'min'});
             set(h.smax, 'Callback',{@slider_callback,obj,'max'});
             
-            h.autoupdate=uicontrol('Parent',obj.handle,'Units','normalized','Style','checkbox','Position',[0.8,0.55,0.2,height],'String','auto update','FontSize',fontsize*0.7);
+            h.autoupdate=uicontrol('Parent',obj.handle,'Units','normalized','Style','checkbox','Position',[0.8,0.6,0.2,height],'String','auto update','FontSize',fontsize*0.7);
+            
+            h.invert=uicontrol('Parent',obj.handle,'Units','normalized','Style','checkbox','Position',[0.8,0.3,0.2,height],'String','invert','FontSize',fontsize*.7,'Callback',{@showchanged_callback,obj});
+            h.invert.TooltipString='Invert selection. Good for trying out filters.';
+            
             
             h.handle=obj.handle;
             obj.guihandles=h;
@@ -99,7 +103,10 @@ classdef GuiHistSlider< interfaces.LayerInterface
                 end
 
             if length(sfield)>3&&~isempty(sfield{4})
-                obj.guihandles.filteron.Value=sfield{4};
+                obj.guihandles.filteron.Value=sfield{4}(1);
+                if length(sfield{4})>1
+                    obj.guihandles.invert.Value=sfield{4}(2);
+                end
             end
             
             if isfield(obj.backup,fieldh)&& myisfield(obj.locData,fieldh)&&~strcmpi(fieldh,'colorfield')...
@@ -323,9 +330,11 @@ end
 
 function showchanged_callback(object,data,obj)
 p=obj.getGuiParameters;
-sf={obj.field,p.vmin,p.vmax,p.filteron,true};
+sf={obj.field,p.vmin,p.vmax,[p.filteron,p.invert],true};
 obj.setPar('selectedField',sf,'layer',obj.layer)
-
+    if obj.guihandles.autoupdate.Value 
+        notify(obj.P,'sr_render')
+    end
 end
 % 
 % function checkbox_callback(object,data,name,obj)

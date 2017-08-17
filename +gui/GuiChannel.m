@@ -230,7 +230,7 @@ classdef GuiChannel< interfaces.LayerInterface
             allfields={'PSFxnm','znm','locprecznm','locprecnm','frame'};
             if any(strcmp(allfields,field))
                 if ~isempty(sfield{4})
-                    if sfield{4}
+                    if sfield{4}(1)
                         color=[1 1 1]*.94;
                     else
                         color=[1 1 1]*.7;
