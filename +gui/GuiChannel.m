@@ -608,7 +608,7 @@ p=obj.getAllParameters;
 % z data?
 fh={'PSFxnmb','PSFxnm_min','PSFxnm_max','znmb','znm_min','znm_max','locprecznmb','locprecznm_min','locprecznm_max',...
     'channels','text1','renderfield','groupcheck',...
-    'locprecnmb','locprecnm_min','locprecnm_max'};
+    'locprecnmb','locprecnm_min','locprecnm_max','intensitycoding','intensitytxt'};
 %tiff
 if strcmp(p.rendermode.selection,'tiff')||strcmp(p.rendermode.selection,'raw') %obj.fileinfo(fileselect).istiff
     obj.fieldvisibility('off',fh);
