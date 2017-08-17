@@ -5,7 +5,7 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
         end
         function out=run(obj,p)
             out=[];
-            lw=200;
+            lw=p.width/2;
             locs=obj.getLocs({'locprecnm','PSFxnm','xnm','ynm','frame'},'layer',1,'size',p.se_siteroi);  
             pol=obj.site.annotation.rotationpos.pos;
             
@@ -47,6 +47,7 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
 %              imbw=bwareaopen(imbw,round(sum(imbw(:))/4));
             imbw=imdilate(imbw,seb);
             imbw=imerode(imbw,seb);
+            imbw=imdilate(imbw,seb);
              h=obj.setoutput('images');
              himp=him/max(him(:));
              imagesc(h,horzcat(himp,himf,double(imbw)))
@@ -103,10 +104,16 @@ pard.dxt.object=struct('Style','text','String','dx (nm), dt (frames)');
 pard.dxt.position=[1,1];
 pard.dxt.Width=2;
 pard.dx.object=struct('Style','edit','String','10');
-pard.dx.position=[2,1];
+pard.dx.position=[1,3];
 pard.df.object=struct('Style','edit','String','1000');
-pard.df.position=[2,2];
+pard.df.position=[1,4];
 
+pard.widtht.object=struct('Style','text','String','width (nm)');
+pard.widtht.position=[2,1];
+pard.widtht.Width=2;
+pard.width.object=struct('Style','edit','String','400');
+pard.width.position=[2,3];
+pard.width.Width=2;
 % pard.dxt.Width=3;
 pard.inputParameters={'numberOfLayers','sr_layerson','se_cellfov','se_sitefov','se_siteroi'};
 pard.plugininfo.type='ROI_Evaluate';
