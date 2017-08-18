@@ -78,4 +78,5 @@ pard.dz.position=[1,2];
 
 pard.inputParameters={'cam_pixelsize_um'};
 pard.plugininfo.type='ProcessorPlugin';
+pard.plugininfo.description=sprintf('Plugin to calibrate 3D PSF. \n According to Li et al, 2017');
 end
