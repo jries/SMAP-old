@@ -154,7 +154,15 @@ classdef LocSaver<interfaces.WorkflowModule
                 nosave=intersect(fieldnames(obj.locDatatemp.loc),obj.savefields.notsave);
                 obj.locDatatemp.loc=rmfield(obj.locDatatemp.loc,nosave);
                 obj.locDatatemp.files.file.raw=obj.frames;
-                obj.locDatatemp.savelocs(filename,[],struct('fitparameters',fitpar));
+                try
+                     obj.locDatatemp.savelocs(filename,[],struct('fitparameters',fitpar));
+                catch err
+                    [~,name,ext]=fileparts(filename);
+                    filenamenew=[pwd filesep name ext];
+                    obj.locDatatemp.savelocs(filenamenew,[],struct('fitparameters',fitpar));
+                    warndlg('could not save sml file. Saved in local directory')
+                    err
+                end
                 
                 if p.savelocal
                     movefile(filename,filenameremote);
