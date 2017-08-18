@@ -47,7 +47,7 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
 %         end
         function seout=copy(obj)
             seout=interfaces.SiteExplorer;
-            pp=properties(obj)
+            pp=properties(obj);
             direct={'P','locData'};
             for k=1:length(pp)
                 if isa(obj.(pp{k}),'handle')&&~any(strcmp(pp{k},direct))
