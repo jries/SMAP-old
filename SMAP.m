@@ -7,7 +7,7 @@ if exist('g','var')
 end
 
 try
-g=gui.GuiMainSMAP;g.makeGui;       
+    g=gui.GuiMainSMAP;g.makeGui;       
 catch err
     disp('ESMAPrror making the GUI. Try deleting plugins/plugin.m and the settings/temp directory.')
     err.rethrow

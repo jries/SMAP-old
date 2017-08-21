@@ -32,7 +32,8 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             
             if obj.fitpar.fitmode==5 ||obj.fitpar.fitmode==6
                 EMfile=obj.getPar('loc_fileinfo').EMon;
-                EMcal=obj.fitpar.splinefit{1}.cspline.isEM;
+                EMcal=obj.fitpar.EMon;
+%                 EMcal=obj.fitpar.splinefit{1}.isEM;
                 if obj.getSingleGuiParameter('automirror')
                     obj.fitpar.mirrorstack=~(EMfile==EMcal);
                 else
@@ -284,8 +285,8 @@ if fitpar.fitmode==3||fitpar.fitmode==5
             end
             for X=s(1):-1:1
                 for Y=s(2):-1:1
-                    zpar{X,Y}=cal.SXY(X,Y,Z).fitzpar;
-                    splinefit{X,Y}=cal.SXY(X,Y,Z).splinefit;
+                    zpar{X,Y}=cal.SXY(X,Y,Z).gauss_zfit;
+                    splinefit{X,Y}=cal.SXY(X,Y,Z).cspline_all;
                     
                 end
             end
@@ -307,6 +308,7 @@ if fitpar.fitmode==3||fitpar.fitmode==5
             yr(1)=-inf;yr(end)=inf;
             obj.spatialXrange=xr;
             obj.spatialYrange=yr;
+            fitpar.EMon=cal.SXY(1).EMon;
         elseif isfield(cal,'cspline')
             fitpar.zpar{1}=cal.gauss_zfit;
             fitpar.dz=cal.cspline.dz;

@@ -11,11 +11,11 @@ classdef GuiFilterTable< interfaces.LayerInterface
         end
         function makeGui(obj)
            obj.excludefields={'peakfindxnm','peakfindynm','groupindex','photerr'};
-           columnname = {'Name','min set','min','mean','max','max set','filter'};
-           columnformat = {'char','short g','short g','short g','short g','short g','logical'};
-           columnedit=[false, true, false, false, false, true, true];
+           columnname = {'Name','min set','min','mean','max','max set','filt','inv'};
+           columnformat = {'char','short g','short g','short g','short g','short g','logical','logical'};
+           columnedit=[false, true, false, false, false, true, true, true];
            
-           s{1,7}=false;
+           s{1,8}=false;
            h.table = uitable('Parent',obj.handle,'Data', s,... 
             'ColumnName', columnname,'Units','normalized',...
             'ColumnFormat', columnformat,...
@@ -28,7 +28,7 @@ classdef GuiFilterTable< interfaces.LayerInterface
            ppix=h.table.Position;
            h.table.Units='normalized';
            w=ppix(3)*.95;
-           widths=[2 1 1 1 1 1 0.5];
+           widths=[2 1 1 1 1 1 0.5 0.5];
            widths=widths/sum(widths);
            h.table.ColumnWidth=num2cell(w*widths);
            h.handle=obj.handle;
@@ -66,19 +66,30 @@ classdef GuiFilterTable< interfaces.LayerInterface
             if length(sfield)<4||isempty(sfield{4})
                 fauto=[];
             else
-                fauto=sfield{4};
+                fauto=sfield{4}(1);
                 obj.filter.(field).auto=fauto;
             end
             s=obj.getPar('filtertable','layer',obj.layer);
-            sold=s;
+            sold=s;            
+
             if ~isempty(s)
             indf=find(strcmp(s(:,1),field));
             else
                 indf=[];
             end
+            
             if ~isempty(indf)
+                if length(sfield)>3&&length(sfield{4})>1
+                    s{indf,8}=logical(sfield{4}(2));
+                    obj.filter.(field).invert=s{indf,8};
+                else
+                    
+                end
+            
                 s{indf,2}=fmin;
                 s{indf,6}=fmax;
+                
+                
                 if ~isempty(fauto)
                     s{indf,7}=logical(fauto);
                     if ~fauto
@@ -88,7 +99,7 @@ classdef GuiFilterTable< interfaces.LayerInterface
 
                 obj.guihandles.table.Data=s;
                 obj.setPar('filtertable',s,'layer',obj.layer);
-                if  s{indf,2}~=sold{indf,2} || s{indf,6}~=sold{indf,6}||s{indf,7}~=sold{indf,7}
+                if  s{indf,2}~=sold{indf,2} || s{indf,6}~=sold{indf,6}||s{indf,7}~=sold{indf,7}||s{indf,8}~=sold{indf,8}
                     refilter(obj,field)
                 end
             end          
@@ -100,12 +111,13 @@ classdef GuiFilterTable< interfaces.LayerInterface
                fnall=fieldnames(locs);
                fn=setdiff(fnall,obj.excludefields);
                for k=1:length(fn)
-                   if ~isfield(obj.filter,fn{k})||~isfield(obj.filter.(fn{k}),'auto')||~isfield(obj.filter.(fn{k}),'minmax')||...
+                   if ~isfield(obj.filter,fn{k})||~isfield(obj.filter.(fn{k}),'auto')||~isfield(obj.filter.(fn{k}),'minmax')||~isfield(obj.filter.(fn{k}),'invert')||...
                            isempty(obj.filter.(fn{k}).auto)||isempty(obj.filter.(fn{k}).minmax)
 %                    if isfield(obj.filter,fn{k})&&~isempty(obj.filter.(fn{k}).minmax)&&~isempty(obj.filter.(fn{k}).auto)
 %                    else
                        obj.filter.(fn{k}).minmax=[-inf inf];
                        obj.filter.(fn{k}).auto=false;
+                       obj.filter.(fn{k}).invert=false;
                    end
                end
                for k=1:length(fn)
@@ -117,6 +129,7 @@ classdef GuiFilterTable< interfaces.LayerInterface
                    s{k,4}=mean(val);
                    s{k,5}=max(val);
                    s{k,7}=logical(obj.filter.(fn{k}).auto);
+                   s{k,8}=obj.filter.(fn{k}).invert;
                end
                obj.guihandles.table.Data=s;
                 obj.setPar('filtertable',s,'layer',obj.layer);
@@ -165,7 +178,7 @@ function cellEdit_callback(object,data,obj)
     s=obj.guihandles.table.Data;
     if ~isempty(ind)
         fn=s{data.Indices(1),1};
-        sf={fn,s{data.Indices(1),2},s{data.Indices(1),6},s{data.Indices(1),7},true,true};
+        sf={fn,s{data.Indices(1),2},s{data.Indices(1),6},[s{data.Indices(1),7},s{data.Indices(1),8}],true,true};
         obj.setPar('selectedField',sf,'layer',obj.layer)
         obj.selectedField_callback
     end

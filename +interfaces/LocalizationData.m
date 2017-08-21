@@ -274,11 +274,15 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                     fn={};
                 end
                 for f=1:length(fields)
+                    invert=false;
                     ind=find(strcmp(fn,fields{f}));
                     if (~isempty(ind) && (s{ind,7})) ||(~filterall&&isfield(obj.loc,fields{f})&&nargin>3) %if field specified: filter for sure
                         if nargin<4
                             minmax=s(ind,[2,6]);
                             filtermode='minmax';
+                        end
+                        if s{ind,8}
+                            invert=true;
                         end
                     elseif strcmp(fields{f},'channel')
                         filtermode='inlist';
@@ -288,9 +292,18 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                     else 
                         continue
                     end   
-                    obj.layer(layerh).filter.(fields{f})=anyfilter(obj.loc.(fields{f}),filtermode,minmax);
+                    if invert
+                        obj.layer(layerh).filter.(fields{f})=~anyfilter(obj.loc.(fields{f}),filtermode,minmax);
+                    else
+                        obj.layer(layerh).filter.(fields{f})=anyfilter(obj.loc.(fields{f}),filtermode,minmax);
+                    end
                     if ~isempty(obj.grouploc)
-                        obj.layer(layerh).groupfilter.(fields{f})=anyfilter(obj.grouploc.(fields{f}),filtermode,minmax);
+                        if invert
+                            obj.layer(layerh).groupfilter.(fields{f})=~anyfilter(obj.grouploc.(fields{f}),filtermode,minmax);
+                        else
+                            obj.layer(layerh).groupfilter.(fields{f})=anyfilter(obj.grouploc.(fields{f}),filtermode,minmax);
+                        end
+                        
                     end
                 end
             end            
