@@ -25,7 +25,7 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
                 fitp=mleFit_LM(img,1);
                 obj.fitpar.fitfunction=@mleFit_LM;
 %                 obj.fitpar.fitfunction=@callYimingFitter;
-                 reporttext='mleFit_LM works';
+                reporttext='mleFit_LM works';
             end
             roisize=obj.getPar('loc_ROIsize');
             obj.numberInBlock=round(obj.fitpar.roisperfit*100/roisize^2);

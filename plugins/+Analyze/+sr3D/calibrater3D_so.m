@@ -44,7 +44,9 @@ classdef calibrater3D_so<interfaces.DialogProcessor
                 posall{k}=horzcat(file{k}.posx,file{k}.posy);
              end
              
-             cg=calibrate3D_GUI(posall);
+             smappos.positions=posall;
+             smappos.imageROI=roi;
+             cg=calibrate3D_GUI(smappos);
              cg.guihandles.dz.String=num2str(p.dz);
              cg.guihandles.filelist.String={file{:}.name};
              [p, f]=fileparts(file{1}.name);
