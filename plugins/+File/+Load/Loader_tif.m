@@ -56,10 +56,17 @@ if length(obj.locData.files.file)>1
 else
     f=1;
 end
-obj.locData.files.file(f).numberOfTif=obj.locData.files.file(f).numberOfTif+1;
-imout=gettif(file);
-imout.info.cam_pixelsize_um=obj.locData.files.file(f).info.cam_pixelsize_um;
-obj.locData.files.file(f).tif(obj.locData.files.file(f).numberOfTif)=imout;
+
+images=chooseTifImage(file);
+numimages=length(images);
+tiffold=obj.locData.files.file(f).numberOfTif;
+obj.locData.files.file(f).numberOfTif=tiffold+numimages;
+% imout=gettif(file);
+for k=1:numimages
+    images(k).info.cam_pixelsize_um=obj.locData.files.file(f).info.cam_pixelsize_um;
+end
+
+obj.locData.files.file(f).tif(tiffold+1:obj.locData.files.file(f).numberOfTif)=images;
 
   initGuiAfterLoad(obj)    
 end
