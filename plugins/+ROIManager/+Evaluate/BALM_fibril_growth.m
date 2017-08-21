@@ -30,7 +30,7 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
             h=fspecial('gaussian',12,sigma);
             max1=mean(him(:));
             
-            himf=fibermetric(him,15,'StructureSensitivity',max1/3);
+            himf=fibermetric(him,round(p.fiberw/pixrec),'StructureSensitivity',max1/3);
             himf=filter2(h,himf);
              max1=mean(himf(:));
 %             max1=1/sigma^2/pi/2;
@@ -69,6 +69,7 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
             yr=round((ynmline+lw)/pixrec)+1;
             indlin=sub2ind(size(imbw),xr,yr);
             indgood=imbw(indlin);
+            out.mask=imbw;
             
             %
 %             h2=fspecial('gaussian',12,1.5);
@@ -81,13 +82,15 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
 %             mf=max(h2(:));
 %             hxfb=hxf>mf*1.1;
             
-            
+            out.kimograph=him;
             co=quantile(him(:),0.999);
             him(him>co)=co;
             h=obj.setoutput('kimograph');
             imagesc(h,xr,fr,(him))
             xlabel(h,'xnm')
             ylabel(h,'frame')
+            
+            
             
 
 
@@ -114,6 +117,14 @@ pard.widtht.Width=2;
 pard.width.object=struct('Style','edit','String','400');
 pard.width.position=[2,3];
 pard.width.Width=2;
+
+pard.fiberwt.object=struct('Style','text','String','fiber width (nm)');
+pard.fiberwt.position=[3,1];
+pard.fiberwt.Width=2;
+pard.fiberw.object=struct('Style','edit','String','150');
+pard.fiberw.position=[3,3];
+pard.fiberw.Width=2;
+
 % pard.dxt.Width=3;
 pard.inputParameters={'numberOfLayers','sr_layerson','se_cellfov','se_sitefov','se_siteroi'};
 pard.plugininfo.type='ROI_Evaluate';
