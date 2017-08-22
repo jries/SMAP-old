@@ -62,7 +62,7 @@ classdef imageloaderMM<interfaces.imageloaderSMAP
             allmd(end+1,:)={'ROI direct',num2str(troi{:}')};
             catch err
             end
-            framesd=max(img.lastAcquiredFrame,summarymetadata.get('Slices'));
+            framesd=max([img.lastAcquiredFrame,summarymetadata.get('Slices'),summarymetadata.get('Frames')]);
             allmd(end+1,:)={'frames direct',num2str(framesd)};
             
             allmd=vertcat(allmd,alls);
