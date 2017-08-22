@@ -140,7 +140,7 @@ function loadfile(obj,p,file,mode)
 
 [~,~,ext]=fileparts(file);
 switch ext
-    case '.csv'
+    case {'.csv','.txt'}
         tab=readtable(file);
     case '.mat'
         tab=load(file);
@@ -342,7 +342,7 @@ end
 
 function pard=guidef
 info.name='Import CSV/MAT/HDF5';
-info.extensions={'*.csv;*.xls;*.mat;*.hdf5','*.*'};
+info.extensions={'*.csv;*.xls;*.mat;*.hdf5;*.txt','*.*'};
 info.dialogtitle='select any .csv .mat or .hdf5 file';
 pard.plugininfo=info;  
 pard.plugininfo.type='LoaderPlugin';
