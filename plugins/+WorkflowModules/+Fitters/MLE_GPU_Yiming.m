@@ -317,6 +317,7 @@ if fitpar.fitmode==3||fitpar.fitmode==5
             if ~isfield(fitpar.splinefit{1}.cspline,'isEM')
                 fitpar.splinefit{1}.cspline.isEM=false;
             end
+            fitpar.EMon=false;
            
         else
             disp('no calibration found')
