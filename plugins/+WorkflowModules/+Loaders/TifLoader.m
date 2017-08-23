@@ -119,9 +119,9 @@ classdef TifLoader<interfaces.WorkflowModule
                     imgo(dr+1:end-dr,dr+1:end-dr)=image;
                     image=imgo;
                 end
-                if p.mirrorimage
-                    image=image(:,end:-1:1);
-                end
+%                 if p.mirrorimage
+%                     image=image(:,end:-1:1);
+%                 end
                 datout.data=image;
 
                 datout.frame=imloader.currentImageNumber;
@@ -327,11 +327,11 @@ pard.padedgesdr.Width=.3;
 pard.padedgesdr.Optional=true;
 pard.padedgesdr.TooltipString='Pad edges with minimum values to allow detection of localizations close to edges. Usually not necessary.';
 
-pard.mirrorimage.object=struct('Style','checkbox','String','mirror');
-pard.mirrorimage.position=[4.2,4.3];
-pard.mirrorimage.Width=.7;
-pard.mirrorimage.Optional=true;
-pard.mirrorimage.TooltipString='Mirror image. Useful for conventional vs EM gain, that swaps image.';
+% pard.mirrorimage.object=struct('Style','checkbox','String','mirror','Visible','off');
+% pard.mirrorimage.position=[4.2,4.3];
+% pard.mirrorimage.Width=.7;
+% pard.mirrorimage.Optional=true;
+% pard.mirrorimage.TooltipString='Mirror image. Useful for conventional vs EM gain, that swaps image.';
 
 % pard.locdata_empty.object=struct('Style','checkbox','String','Empty localizations','Value',1);
 % pard.locdata_empty.position=[4.2,3.5];
