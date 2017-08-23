@@ -34,11 +34,20 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
                 EMfile=obj.getPar('loc_fileinfo').EMon;
                 EMcal=obj.fitpar.EMon;
 %                 EMcal=obj.fitpar.splinefit{1}.isEM;
-                if obj.getSingleGuiParameter('automirror')
-                    obj.fitpar.mirrorstack=~(EMfile==EMcal);
-                else
-                    obj.fitpar.mirrorstack=false;
+                mirrorstack=obj.getSingleGuiParameter('automirror');
+                switch mirrorstack.selection
+                    case 'auto'
+                        obj.fitpar.mirrorstack=~(EMfile==EMcal);
+                    case 'mirror'
+                        obj.fitpar.mirrorstack=true;
+                    otherwise
+                        obj.fitpar.mirrorstack=false;
                 end
+%                 if obj.getSingleGuiParameter('automirror')
+%                     
+%                 else
+%                     obj.fitpar.mirrorstack=false;
+%                 end
                 p=obj.getAllParameters;
                 if p.overwritePixelsize
                     obj.setPar('overwrite_pixelsize',[p.pixelsizex p.pixelsizey])
@@ -199,7 +208,7 @@ arguments{3}=fitpar.iterations;
 
 arguments{5}=fitpar.issCMOS;
 arguments{6}=1;
-% try   
+
     switch fitpar.fitmode
         case {1,2,4} %fix
             arguments{4}=fitpar.PSFx0;
@@ -208,8 +217,6 @@ arguments{6}=1;
         case 3 %z
             arguments{1}=single(imstack/EMexcess);
             arguments{4}=single(fitpar.zparhere);
-%             arguments{2}=fitpar.zparhere(1);
-%             arguments(7:13)=num2cell(fitpar.zparhere(2:8));
 %         case 4 %sx sy
         case {5,6} %spline   
             if fitpar.mirrorstack
@@ -221,20 +228,14 @@ arguments{6}=1;
     end
    
     if fitpar.fitmode==6
-        
-        
+          
         [P1 CRLB1 LL1 P2 CRLB2 LL2 ]=fitpar.fitfunction(arguments{:});
         P = repmat(single(LL1>=LL2),1,6).*P1+repmat(single(LL1<LL2),1,6).*P2;
         CRLB = repmat(single(LL1>=LL2),1,5).*CRLB1+repmat(single(LL1<LL2),1,5).*CRLB2;
         LogL = repmat(single(LL1>=LL2),1,1).*LL1+repmat(single(LL1<LL2),1,1).*LL2;
-        
-        
-        
-        
     else
         [P CRLB LogL]=fitpar.fitfunction(arguments{:});
     end
-   
 
 out.P=P;
 out.CRLB=CRLB;
@@ -397,7 +398,7 @@ pard.roisperfitt.object=struct('Style','text','String','ROIs per fit:');
 pard.roisperfitt.position=[2,3.3];
 pard.roisperfitt.Width=0.7;
 pard.roisperfitt.Optional=true;
-pard.roisperfit.object=struct('Style','edit','String','5000');
+pard.roisperfit.object=struct('Style','edit','String','15000');
 pard.roisperfit.position=[2,4];
 pard.roisperfit.TooltipString=sprintf('Number of 10 x 10 pixel ROIs passed to GPU for fitting. For other ROI sizes, the number is adjusted accordingly.');
 pard.roisperfit.Optional=true;
@@ -427,12 +428,12 @@ pard.cal_3Dfile.position=[3,2];
 pard.cal_3Dfile.Width=3;
 pard.cal_3Dfile.TooltipString=sprintf('3D calibration file for astigmtic 3D. \n Generate from bead stacks with plugin: Analyze/sr3D/CalibrateAstig');
 
-pard.useObjPos.object=struct('Style','checkbox','String','Use objective position:');
+pard.useObjPos.object=struct('Style','checkbox','String','Use objective position:','Visible','off');
 pard.useObjPos.position=[4,1];
 pard.useObjPos.Width=1.5;
 pard.useObjPos.Optional=true;
 
-pard.objPos.object=struct('Style','edit','String','0');
+pard.objPos.object=struct('Style','edit','String','0','Visible','off');
 pard.objPos.position=[4,2.5];
 pard.objPos.TooltipString=sprintf('Position of the objective above the coverslip (nm, piezo position). \n Only used in combination with CalibrateAstigDeep.');
 pard.objPos.Optional=true;
@@ -464,7 +465,7 @@ pard.pixelsizey.position=[5,3];
 pard.pixelsizey.Width=0.5;
 pard.pixelsizey.Optional=true;
 
-pard.automirror.object=struct('Style','checkbox','String','mirror if needed','Value',1);
+pard.automirror.object=struct('Style','popupmenu','String',{{'auto','no mirror','mirror'}});
 pard.automirror.position=[5,4];
 pard.automirror.Width=1;
 pard.automirror.Optional=true;
