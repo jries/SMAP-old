@@ -1,4 +1,12 @@
 classdef calibrateDHPSF<interfaces.DialogProcessor
+%  Copyright (c)2017 Ries Lab, European Molecular Biology Laboratory,
+%  Heidelberg. This file is part of Single Molecule Analysis Platform (SMAP).
+
+%3D calibration using a double helical PSF. This plugin is based on:
+%Lew et al., Easy-DHPSF open-source software for three-dimensional
+%localization of single molecules with precision beyond the optical
+%diffraction limit., Protocol Exchange (2013).
+    
     properties
         zold
     end
@@ -115,5 +123,6 @@ pard.loadb.position=[6,4];
 pard.syncParameters={{'dhpsf_conversion','conversion',{'String'}},{'dhpsf_EMgain','EMgain',{'String'}},{'dhpsf_nmPerPixel','nmPerPixel',{'String'}},{'dhpsf_offsetADU','offsetADU',{'String'}}};
 
 pard.plugininfo.name='calibrate 3D';
+pard.plugininfo.description=sprintf('3D calibration using a double helical PSF. This plugin is based on: \n Lew et al., Easy-DHPSF open-source software for three-dimensional \n localization of single molecules with precision beyond the optical \n diffraction limit., Protocol Exchange (2013).');
 pard.plugininfo.type='ProcessorPlugin';
 end
