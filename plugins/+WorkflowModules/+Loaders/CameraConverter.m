@@ -94,7 +94,7 @@ classdef CameraConverter<interfaces.WorkflowModule
         function datao=run(obj,data,p)
             
             %calibrate gain offset from images
-            global SMAP_stopnow           
+%             global SMAP_stopnow           
              
 %             if obj.calibrategain
 %                 datao=[];
