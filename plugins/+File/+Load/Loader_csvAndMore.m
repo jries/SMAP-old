@@ -235,7 +235,11 @@ fieldsxy=intersect(fieldnames(locData.loc),{'xnm','ynm','locprecnm','PSFxnm','PS
 fieldsz=intersect(fieldnames(locData.loc),{'znm','locprecznm'});
 if isfield(pfile,'factor')&&any(pfile.factor~=1)
     facxy=pfile.factor(1);
-    facz=pfile.factor(end);
+    if length(pfile.factor)>1
+        facz=pfile.factor(end);
+    else
+        facz=1;
+    end
     for k=1:length(fieldsxy)
         locData.loc.(fieldsxy{k})=locData.loc.(fieldsxy{k})*facxy;
     end
