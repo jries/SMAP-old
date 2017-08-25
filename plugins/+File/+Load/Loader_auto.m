@@ -74,8 +74,8 @@ obj.notfound=false;
        
             case 'workflow'
                 loadername='Loader_workflow';
-            case 'csv'
-                loadername='Loader_csv';
+            case {'csv','hdf5','txt'}
+                loadername='Loader_csvAndMore';
               
             otherwise
                 warning('file type not recognized')
