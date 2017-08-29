@@ -79,13 +79,22 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
         try
         allcore=getallcoremtadata(obj.reader.getCoreMetadataList);
         allmd=vertcat(allmd,allcore);
+
         catch
         end
+        f=getnumberofframes(allmd);
+        allmd(end+1,:)={'frames direct',num2str(f)};        
         obj.allmetadatatags=allmd;
         end
         
     end
     
+end
+
+function f=getnumberofframes(allmd)
+numf=contains(allmd(:,1),{'sizeZ','sizeC','sizeT','imageCount'});
+f=nanmax(str2double(allmd(numf,2)));
+% obj.metadata.allmetadata(end+1,:)={'frames direct',num2str(f)};
 end
 
 function out=getallcoremtadata(cm)
