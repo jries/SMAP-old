@@ -35,6 +35,13 @@ function pard=guidef
 info.name='tif loader';
 info.extensions={'*.tif';'*.*'};
 info.dialogtitle='select any Tif file';
+
+pard.stack.object=struct('Style','checkbox','String','load stack');
+pard.stack.position=[1,1];
+pard.stack.Width=2;
+pard.stack.TooltipString='Load image stack (otherwise load single image)';
+
+
 pard.plugininfo=info;
 pard.plugininfo.type='LoaderPlugin';
 end
@@ -46,8 +53,8 @@ if ~strcmp(mode,'tif')
 end
 
 if obj.locData.files.filenumberEnd==0
-    [p,f]=fileparts(file);
-    filename=[p filesep f];
+    [path,f]=fileparts(file);
+    filename=[path filesep f];
    obj.locData.addfile(filename) 
 end
 if length(obj.locData.files.file)>1
@@ -57,7 +64,11 @@ else
     f=1;
 end
 
-images=chooseTifImage(file);
+if isfield(p,'stack')&&p.stack
+    images=chooseTifImage(file);
+else
+    images=gettif(file);
+end
 numimages=length(images);
 tiffold=obj.locData.files.file(f).numberOfTif;
 obj.locData.files.file(f).numberOfTif=tiffold+numimages;
