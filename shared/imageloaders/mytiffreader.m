@@ -5,6 +5,7 @@ classdef mytiffreader<handle
     end
     methods
         function obj=mytiffreader(varargin)
+            warning('off','MATLAB:imagesci:tiffmexutils:libtiffWarning')
             obj.reader=Tiff(varargin{1},'r');
             obj.info.name=varargin{1};
             obj.getinfo;
@@ -46,10 +47,14 @@ classdef mytiffreader<handle
             obj.info.Width=size(img,1);
             obj.info.Height=size(img,2);
             obj.info.roi=getRoiTif(obj.info.name);
+            if all(obj.info.roi(1:2)==[0 0])
+                obj.info.roi=[0 0 obj.info.Width obj.info.Height];
+            end
             
         end
         function close(obj)
             obj.reader.close;
+            warning('on','MATLAB:imagesci:tiffmexutils:libtiffWarning')
         end
          
     end

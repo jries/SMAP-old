@@ -48,7 +48,7 @@ classdef calibrater3D_so<interfaces.DialogProcessor
              smappos.imageROI=roi;
              cg=calibrate3D_GUI(smappos);
              cg.guihandles.dz.String=num2str(p.dz);
-             cg.guihandles.filelist.String={file{:}.name};
+             cg.guihandles.filelist.String=getFieldAsVector(file,'name');
              [p, f]=fileparts(file{1}.name);
              cg.guihandles.outputfile.String=[p fileparts(f) '_3dcal.mat'];
              if length(xb)>0
