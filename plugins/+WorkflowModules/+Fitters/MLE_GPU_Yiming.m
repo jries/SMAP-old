@@ -286,7 +286,11 @@ if fitpar.fitmode==3||fitpar.fitmode==5
             end
             for X=s(1):-1:1
                 for Y=s(2):-1:1
+%                     if isfield(cal.SXY(X,Y,Z),'gauss_zfit')
                     zpar{X,Y}=cal.SXY(X,Y,Z).gauss_zfit;
+%                     else
+%                         zpar{X,Y}=[];
+%                     end
                     splinefit{X,Y}=cal.SXY(X,Y,Z).cspline_all;
                     
                 end

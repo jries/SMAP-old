@@ -146,12 +146,12 @@ classdef Grouper< interfaces.LocDataInterface
                 end
             end
             
-            v=obj.locData.getloc(field).(field);
+            v=single(obj.locData.getloc(field).(field));
           
             list=obj.locData.getloc('groupindex').groupindex;
             
             if nargin <4
-                weights=ones(size(v));              
+                weights=ones(size(v),'like',v);              
             end          
             mode=0;
             switch combinemode
