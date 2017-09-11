@@ -1,4 +1,7 @@
 classdef density_calculator<interfaces.DialogProcessor
+    %  Copyright (c)2017 Ries Lab, European Molecular Biology Laboratory,
+    %  Heidelberg. This file is part of Single Molecule Analysis Platform (SMAP).
+    
     % density_calculator looks at the neighborhood and counts number of
     % neighbours. locData.clusterdensity=neighbours
     methods
@@ -156,4 +159,5 @@ pard.countingsize_z.object.TooltipString=sprintf('size of cylinder or sigma of g
 pard.plugininfo.name='density calculator (number of neighbours)';
 pard.plugininfo.description= 'density_calculator looks at the neighborhood and counts number of neighbours. If grouped or ungrouped data is used depends on setting in layers.';
 pard.plugininfo.type='ProcessorPlugin';
+
 end

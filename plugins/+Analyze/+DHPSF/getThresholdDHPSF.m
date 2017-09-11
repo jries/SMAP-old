@@ -1,4 +1,11 @@
 classdef getThresholdDHPSF<interfaces.DialogProcessor
+    %  Copyright (c)2017 Ries Lab, European Molecular Biology Laboratory,
+    %  Heidelberg. This file is part of Single Molecule Analysis Platform (SMAP).
+    % Get threshold belongs to the DHPSF analysis. This plugin is based on:
+    % Lew et al., Easy-DHPSF open-source software for three-dimensional
+    % localization of single molecules with precision beyond the optical
+    % diffraction limit., Protocol Exchange (2013). 
+
     properties
         threshold
     end
@@ -188,5 +195,7 @@ pard.syncParameters={{'dhpsf_conversion','conversion',{'String'}},{'dhpsf_EMgain
     {'dhpsf_nmPerPixel','nmPerPixel',{'String'}},{'dhpsf_offsetADU','offsetADU',{'String'}},...
     {'dhpsf_datafile','dhpsf_datafile',{'String'}},{'dhpsf_calfile','dhpsf_calfile',{'String'}}};
 pard.plugininfo.name='get threshold for DHPSF ';
+pard.plugininfo.description=sprintf('Gets Threshold for 3D calibration model to fit a double helical PSF. This plugin is based on: \n Lew et al., Easy-DHPSF open-source software for three-dimensional \n localization of single molecules with precision beyond the optical \n diffraction limit., Protocol Exchange (2013).');
+
 pard.plugininfo.type='ProcessorPlugin';
 end

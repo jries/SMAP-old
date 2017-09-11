@@ -12,7 +12,9 @@ classdef calibrater3D_so<interfaces.DialogProcessor
             
             fit3ddir=strrep(pwd,'SMAP','fit3D');
             addpath(fit3ddir);
-            
+            fit3ddir=strrep(pwd,'SMAP','fit3Dcspline');
+            addpath(fit3ddir);
+                       
              %get bead positions
              minframes=800/p.dz;
             locDatacopy=obj.locData.copy;

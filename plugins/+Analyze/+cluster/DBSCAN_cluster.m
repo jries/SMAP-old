@@ -1,9 +1,11 @@
 classdef DBSCAN_cluster<interfaces.DialogProcessor
-    %DBSCAN_cluster is an optimized version of the DBSCAN algorithm from 
-    %F. A. Caetano, B. S. Dirk, J. H. K. Tam, P. C. Cavanagh, M. Goiko, S. S. G. Ferguson, S. H. Pasternak, 
-    %J. D. Dikeakos, J. R. de Bruyn, and B. Heit, ?MIiSR: Molecular Interactions in Super-Resolution Imaging 
-    %Enables the Analysis of Protein Interactions, Dynamics and Formation of Multi-protein Structures.,? 
-    %PLoS Comput. Biol., vol. 11, no. 12, p. e1004634, Dec. 2015.
+    %   Copyright (c)2017 Ries Lab, European Molecular Biology Laboratory,
+    %   Heidelberg. This file is part of Single Molecule Analysis Platform (SMAP).
+    %   DBSCAN_cluster is an optimized version of the DBSCAN algorithm from 
+    %   F. A. Caetano, B. S. Dirk, J. H. K. Tam, P. C. Cavanagh, M. Goiko, S. S. G. Ferguson, S. H. Pasternak, 
+    %   J. D. Dikeakos, J. R. de Bruyn, and B. Heit, ?MIiSR: Molecular Interactions in Super-Resolution Imaging 
+    %   Enables the Analysis of Protein Interactions, Dynamics and Formation of Multi-protein Structures.,? 
+    %   PLoS Comput. Biol., vol. 11, no. 12, p. e1004634, Dec. 2015.
     methods
         function obj=DBSCAN_cluster(varargin)        
             obj@interfaces.DialogProcessor(varargin{:}) ;

@@ -1,4 +1,9 @@
 classdef cfithist<interfaces.DialogProcessor
+    %  Copyright (c)2017 Ries Lab, European Molecular Biology Laboratory,
+    %  Heidelberg. This file is part of Single Molecule Analysis Platform (SMAP).
+    
+    % cfithist fits a histogram 
+    
     methods
         function obj=cfithist(varargin)        
                 obj@interfaces.DialogProcessor(varargin{:});
