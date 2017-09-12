@@ -284,10 +284,10 @@ pard.drift_reference.object.TooltipString=sprintf('If checked, drift at end of d
 pard.drift_reference.Width=2;
 pard.drift_reference.Optional=true;
 
-pard.drift_mirror2c.object=struct('String',{{'no mirror', '2 Channels, mirrored, horizontal', '2 Channels, mirrored, vertical'}},'Style','popupmenu');
+pard.drift_mirror2c.object=struct('String',{{'no mirror', '2 Channels, mirrored, vertical split', '2 Channels, mirrored, horizontal split'}},'Style','popupmenu');
 pard.drift_mirror2c.position=[7,1];
 pard.drift_mirror2c.Optional=true;
-pard.drift_mirror2c.object.TooltipString=sprintf('If checked, drift at end of data set is set to zero. \n Useful for sequential acquisition, use this for first data set.');
+pard.drift_mirror2c.object.TooltipString=sprintf('Vertical split: next to each other, horizontal split: below each other.');
 pard.drift_mirror2c.Width=2;
 pard.drift_mirror2c.Optional=true;
 
