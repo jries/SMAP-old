@@ -29,7 +29,7 @@ classdef calibrater3D_so<interfaces.DialogProcessor
              locfiles=obj.locData.files.file;
 
              for k=1:length(locfiles) 
-                if isfield(locfiles(k).info,'imagefile')
+                if isfield(locfiles(k).info,'imagefile')&&~isempty(locfiles(k).info.imagefile)
                     filename=locfiles(k).info.imagefile;
                 else
                     filename=locfiles(k).info.basefile;

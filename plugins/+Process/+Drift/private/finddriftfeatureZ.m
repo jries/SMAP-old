@@ -86,7 +86,7 @@ if length(dz)>9
 
     sdzm=robustMean(sdz);
 
-    indgz=sdz<5*sdzm;
+    indgz=sdz<10*sdzm;
 
 else
     sdz=std(ddzplot,0,2); %std for each time point, used for interpolation
