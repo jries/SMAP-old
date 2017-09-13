@@ -18,7 +18,7 @@ imagesc(ax,allframes(:,:,thisframe))
 fs=get(0,'defaultUicontrolFontSize')*1.5;
 rangenum=1:numberOfFrames;
 
-slider=uicontrol('style','slider','Units','normalized','Position',[0.02,0.02,0.5,.05],'Callback',@slidercallback,'SliderStep',[1 10]/numberOfFrames,'Max',numberOfFrames,'Min',1);
+slider=uicontrol('style','slider','Units','normalized','Position',[0.02,0.02,0.5,.05],'Callback',@slidercallback,'SliderStep',[1 10]/numberOfFrames,'Max',numberOfFrames,'Min',1,'Value',1);
 number=uicontrol('style','edit','Units','normalized','String',1,'Position',[0.52,0.02,0.13,.05],'Callback',@numbercallback,'FontSize',fs);
 mode=uicontrol('style','popupmenu','Units','normalized','String',{'current','all in range','mean','MIP'},'Position',[0.7,0.8,0.28,0.05],'FontSize',fs);
 rtext=uicontrol('style','text','Units','normalized','String','range:','Position',[0.7,0.7,0.28,0.05],'FontSize',fs);
