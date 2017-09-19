@@ -102,16 +102,17 @@ if length(dx)>9
     sdy(sdy<sdym)=sdym;
     sdxm=robustMean(sdx);
     sdym=robustMean(sdy);
-    indgx=sdx<5*sdxm;
-    indgy=sdy<5*sdym;
+%     indgx=sdx<5*sdxm;
+%     indgy=sdy<5*sdym;
 end
 if length(dx)<=9||sum(indgx)<9||sum(indgy)<9
     sdx=std(ddxplot,0,2); %std for each time point, used for interpolation
     sdy=std(ddyplot,1,2);
-    indgx=true(size(dx));
-    indgy=true(size(dy));
+%     indgx=true(size(dx));
+%     indgy=true(size(dy));
 end
-
+ indgx=true(size(dx));
+    indgy=true(size(dy));
 
 
 
@@ -136,10 +137,21 @@ wy=1./sdy.^2;
 %give higher weight to first data point:
 % wx(1)=wx(1)*2;
 % wy(1)=wy(1)*2;
-
-[dxt,px] = csaps(double(cfit1(indgx)),double(dx(indgx)),[],double(ctrue),wx(indgx)) ;
-[dyt,py] = csaps(double(cfit1(indgy)),double(dy(indgy)),[],double(ctrue),wy(indgy)) ;
-
+ h=cfit1(2)-cfit1(1);
+ if ~isempty(par.smoothpar)
+    pset=1/(1+h^3/60*par.smoothpar);
+ else
+     pset=[];
+ end
+switch par.smoothmode.Value
+    case 1 % smoothing spline
+        [dxt,px] = csaps(double(cfit1(indgx)),double(dx(indgx)),double(pset),double(ctrue),wx(indgx)) ;
+        [dyt,py] = csaps(double(cfit1(indgy)),double(dy(indgy)),double(pset),double(ctrue),wy(indgy)) ;
+    
+    case 2
+        dxt = interp1(double(cfit1(indgx)),double(dx(indgx)),double(ctrue)) ;
+        dyt = interp1(double(cfit1(indgy)),double(dy(indgy)),double(ctrue)) ;
+end
 framesall=(1:par.maxframeall)-firstframe+1;
 binend=floor(1*binframes/2);
 % dxtt=zeros((par.maxframeall),1);dytt=dxtt;

@@ -291,7 +291,7 @@ pard.slicewidth.position=[5,4];
 pard.slicewidth.Optional=true;
 pard.slicewidth.Width=0.90;
 
-pard.smoothmode.object=struct('String',{{'smoothing cubic spline','none'}},'Style','popupmenu');
+pard.smoothmode.object=struct('String',{{'smoothing cubic spline','linear'}},'Style','popupmenu');
 pard.smoothmode.position=[6,2];
 pard.smoothmode.Optional=true;
 pard.smoothmode.Width=2.;
@@ -299,6 +299,7 @@ pard.smoothpar.object=struct('String','','Style','edit');
 pard.smoothpar.position=[6,4];
 pard.smoothpar.Optional=true;
 pard.smoothpar.Width=.5;
+pard.smoothpar.object.TooltipString=sprintf('Parameter for cubic splien interpolation. \n leave empty for automatic determination. \n 0.01 for little smoothing, 10 for strong smoothing.');
 
 
 pard.drift_reference.object=struct('String','reference is last frame','Style','checkbox');

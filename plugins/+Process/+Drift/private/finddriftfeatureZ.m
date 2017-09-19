@@ -78,7 +78,7 @@ end
 %interpolate displacemnt for all frames
 cfit1=(0:length(dz)-1)*binframes+binframes/2+firstframe; %positions of time points
 ctrue=(1:par.maxframeall)'; %positions of frames
-if length(dz)>9
+if 0%length(dz)>9
     [~,sdz,inlier,outlier]=robustMean(ddzplot,2,15);%std for each time point, used for interpolation
 %     [~,sdy]=robustMean(ddyplot,2,15);
     sdzm=robustMean(sdz)/2;
@@ -87,14 +87,16 @@ if length(dz)>9
     sdzm=robustMean(sdz);
 
     indgz=sdz<10*sdzm;
-
+%     if length(indgz)<9
+%         indgz=true(size(dz));
+%     end
 else
     sdz=std(ddzplot,0,2); %std for each time point, used for interpolation
 
-    indgz=true(size(dz));
+%     indgz=true(size(dz));
 end
 
-
+   indgz=true(size(dz));
 
 
 % sdx(sdx>5*sdxm)=inf;
@@ -112,14 +114,25 @@ wz=1./sdz.^2;
 % wy(end)=wy(end)/4;
 
  h=cfit1(2)-cfit1(1);
-%  pset=1/(1+h^3/6);
- pset=1/(1+h^3/24);
+ if ~isempty(par.smoothpar)
+    pset=1/(1+h^3/60*par.smoothpar);
+ else
+     pset=[];
+ end
+%  pset=1/(1+h^3/24);
 %give higher weight to first data point:
 % wx(1)=wx(1)*2;
 % wy(1)=wy(1)*2;
-pset=[];
+% pset=[];
 
-[dzt,pz] = csaps(double(cfit1(indgz)),double(dz(indgz)),pset,double(ctrue),wz(indgz)) ;
+switch par.smoothmode.Value
+    case 1 % smoothing spline
+        [dzt,pz] = csaps(double(cfit1(indgz)),double(dz(indgz)),double(pset),double(ctrue),wz(indgz)) ;    
+    case 2
+        dzt = interp1(double(cfit1(indgz)),double(dz(indgz)),double(ctrue)) ;
+end
+
+% [dzt,pz] = csaps(double(cfit1(indgz)),double(dz(indgz)),pset,double(ctrue),wz(indgz)) ;
 
 framesall=(1:par.maxframeall)-firstframe+1;
 binend=floor(1*binframes/2);
