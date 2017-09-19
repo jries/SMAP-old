@@ -267,7 +267,7 @@ end
 if isfield(locData.loc,'phot')
     phot=locData.loc.phot;
 else
-    phot=zd+1;
+    phot=zd+1000; %default: 1000 photons
 end
 psfnm=150;psfznm=500;
 
