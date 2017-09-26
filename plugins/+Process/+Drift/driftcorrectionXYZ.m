@@ -49,8 +49,18 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                     lochere.loc=copyfields(lochere.loc,locsnew,fieldc);
                     
 %                     lochere.loc=copyfields(lochere.loc,locsnew,{'xnm','ynm'});
-                    lochere.files.file(1).driftinfo=driftinfo;
-                    obj.locData.files.file(k).driftinfo=driftinfo;
+                    if isfield(lochere.files.file(1),'driftinfo')
+                        driftinfoh=copyfields(lochere.files.file(1).driftinfo,driftinfo);
+                    else
+                        driftinfoh=driftinfo;
+                    end
+                    lochere.files.file(1).driftinfo=driftinfoh;
+                    if isfield(obj.locData.files.file(k).driftinfo,'driftinfo')
+                        driftinfoh=copyfields(obj.locData.files.file(k).driftinfo,driftinfo);
+                    else
+                        driftinfoh=driftinfo;
+                    end
+                    obj.locData.files.file(k).driftinfo=driftinfoh;
                     fn=lochere.files.file(1).name;
                     if strfind(fn,'_sml')
                         fnn=strrep(fn,'_sml','_driftc_sml');
@@ -85,8 +95,12 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                     locsnew.channel=locsall.filenumber;
                     obj.locData.loc=copyfields(obj.locData.loc,locsnew,{'channel'});
                 end
-
-               obj.locData.files(obj.locData.loc.filenumber(1)).file.driftinfo=driftinfo;
+                if isfield( obj.locData.files(obj.locData.loc.filenumber(1)).file,'driftinfo')
+                        driftinfoh=copyfields( obj.locData.files(obj.locData.loc.filenumber(1)).file.driftinfo,driftinfo);
+                else
+                        driftinfoh=driftinfo;
+                end
+               obj.locData.files(obj.locData.loc.filenumber(1)).file.driftinfo=driftinfoh;
                 fn=obj.locData.files(obj.locData.loc.filenumber(1)).file.name;
                             
                 if contains(fn,'_sml')
