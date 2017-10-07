@@ -4,6 +4,8 @@
  * \date January 10, 2010
  * \brief This provides the matrix inversion helper functions.
  */
+//"Fast, single-molecule localization that achieves theoretically minimum uncertainty." 
+//C. Simth, N. Joseph, B. Rieger & K. Lidke. Nat. Methods, 7, 373, 2010
 
 #ifndef MATINVLIB_H
 #define MATINVLIB_H

@@ -7,49 +7,29 @@
 
 
  //**************************************************************************************************************************************************
+// This function for calculation of the common term for Cspline is adpopted from
+//"Analyzing Single Molecule Localization Microscopy Data Using Cubic Splines", Hazen Babcok, Xiaowei Zhuang,Scientific Report, 1, 552 , 2017.
  void kernel_computeDelta3D(float x_delta, float y_delta, float z_delta, float *delta_f, float *delta_dxf, float *delta_dyf, float *delta_dzf) {
     
 	int i,j,k;
 	float cx,cy,cz;
 
-	/*if (x_delta<0){
-		x_delta = 0;
-	}
-	if (x_delta>1){
-		x_delta =1;
-	}
-	if (y_delta<0){
-		y_delta = 0;
-	}
-	if (y_delta>1){
-		y_delta =1;
-	}
-	if (z_delta<0){
-		z_delta = 0;
-	}
-	if (z_delta>1){
-		z_delta =1;
-	}*/
 	cz = 1.0;
 	for(i=0;i<4;i++){
 		cy = 1.0;
 		for(j=0;j<4;j++){
 			cx = 1.0;
 			for(k=0;k<4;k++){
-				//delta_f[i*16+j*4+k] = cx * cy * cz;
 				delta_f[i*16+j*4+k] = cz * cy * cx;
 				if(k<3){
-					//delta_dxf[i*16+j*4+k+1] = ((float)k+1) * cx * cy * cz;
 					delta_dxf[i*16+j*4+k+1] = ((float)k+1) * cz * cy * cx;
 				}
 				
 				if(j<3){
-					//delta_dyf[i*16+(j+1)*4+k] = ((float)j+1) * cx * cy * cz;
 					delta_dyf[i*16+(j+1)*4+k] = ((float)j+1) * cz * cy * cx;
 				}
 				
 				if(i<3){
-					//delta_dzf[(i+1)*16+j*4+k] = ((float)i+1) * cx * cy * cz;
 					delta_dzf[(i+1)*16+j*4+k] = ((float)i+1) * cz * cy * cx;
 				}
 				
@@ -59,51 +39,6 @@
 		}
 		cz= cz * z_delta;
 	}
-}
-
-//****************************************************************************************************************************
-//extern texture<float, 1, cudaReadModeElementType> tex_test;
- float kernal_fAt3D(int zc, int yc, int xc, int xsize, int ysize, int zsize, float *delta_f, const float *coeff) {
-    
-	int i;
-	float pd = 0;//,temp;
-	//temp = tex1Dfetch(texture_test, 1);
-	/*if (xc<0){
-		xc = 0;
-	}
-	if (xc>=xsize){
-		xc =xsize-1;
-	}
-	if (yc<0){
-		yc = 0;
-	}
-	if (yc>=ysize){
-		yc =ysize-1;
-	}
-	if (zc<0){
-		zc = 0;
-	}
-	if (zc>=zsize){
-		zc =zsize-1;
-	}*/
-	xc = max(xc,0);
-	xc = min(xc,xsize-1);
-
-	yc = max(yc,0);
-	yc = min(yc,ysize-1);
-
-	zc = max(zc,0);
-	zc = min(zc,zsize-1);
-	
-	for (i=0;i<64;i++){
-		
-		pd+=delta_f[i]*coeff[i*(xsize*ysize*zsize)+zc*(xsize*ysize)+yc*xsize+xc];
-				//temp = tex1Dfetch(tex_test, i*(xsize*ysize*zsize)+zc*(xsize*ysize)+yc*xsize+xc);
-				//pd+=delta_f[i]*temp;
-	}
-	
-	return pd;
-	
 }
 
 //***********************************************************************************************************
@@ -188,8 +123,6 @@
 		dudt[0]+=delta_dxf[i]*coeff[i*(xsize*ysize*zsize)+zc*(xsize*ysize)+yc*xsize+xc];
 		dudt[1]+=delta_dyf[i]*coeff[i*(xsize*ysize*zsize)+zc*(xsize*ysize)+yc*xsize+xc];
 		dudt[4]+=delta_dzf[i]*coeff[i*(xsize*ysize*zsize)+zc*(xsize*ysize)+yc*xsize+xc];
-				//temp = tex1Dfetch(tex_test, i*(xsize*ysize*zsize)+zc*(xsize*ysize)+yc*xsize+xc);
-				//pd+=delta_f[i]*temp;
 	}
 	dudt[0]*=-1*theta[2];
 	dudt[1]*=-1*theta[2];
@@ -197,6 +130,4 @@
 	dudt[2]=temp;
 	dudt[3]=1;
 	*model = theta[3]+theta[2]*temp;
-	
-	//return pd;
 }

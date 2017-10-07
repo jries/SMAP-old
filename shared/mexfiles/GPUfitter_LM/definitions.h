@@ -1,7 +1,7 @@
 /*!
  * \file definitions.h
- * \author Keith Lidke
- * \date January 10, 2010
+//author Yiming Li
+//date 20170301
  * \brief The constants used throughout the project. 
  */
 //#ifndef DEFINITIONS_H
@@ -19,12 +19,14 @@
 #define NV_PZ 5			//!< not used (x,y,bg,I,z)
 #define NV_PS2 6		//!< number of fitting parameters for MLEFit_sigmaxy (x,y,bg,I,Sx,Sy)
 #define NV_PSP 5
-#define _DEBUG 1
+//#define _DEBUG 1
 
-#define RUNNING 0
-#define CONVERGED 1
-#define CHOLERRER 2
 #define TOLERANCE 1e-6f
+#define INIT_ERR 1e13
+#define INIT_LAMBDA 0.1f
+#define SCALE_UP 10
+#define SCALE_DOWN 0.1f
+#define ACCEPTANCE 1.5f
 
 #define BLOCK_MAX_SIZE 512
 

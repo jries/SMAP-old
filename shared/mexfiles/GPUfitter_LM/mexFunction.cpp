@@ -1,28 +1,63 @@
+//Copyright (c) 2017 Ries Lab, European Molecular Biology Laboratory, Heidelberg.
 //author: Yiming Li
 //email: yiming.li@embl.de
 //date: 2017.07.24
 
-//Using Lidke's template
+//Using Keith Lidke's template
+//"Fast, single-molecule localization that achieves theoretically minimum uncertainty." 
+//C. Simth, N. Joseph, B. Rieger & K. Lidke. Nat. Methods, 7, 373, 2010
 
-/*!
+/*! 
 * \file mexFunction.cpp
-* \author Keith Lidke
-* \date January 10, 2010
 * \brief This is a pure C file that contains only the mexFunction call and the wrappers 
 * necessary to make Cuda calls.  
-* [Parameters CRLBs LL]=CgaussMLEv2(data,PSFSigma,iterations, [fit type], [Ax], [Ay], [Bx], [By], [gamma], [d], [PSFSigma_x], [PSFSigma_y])
-*/
+* [Parameters CRLBs LL]=CPUmleFit(varargin)
+*  \varargin:
+*  \imstack, startpsf/coeff, iterations, fitmode, isemccd, hidereport
+*  \1. imagestack (single)
+*  \2. fitmode
+*  \1 fix PSF
+*  \2 free PSF
+*  \3 Gauss fit z
+*  \4 fit PSFx, PSFy elliptical
+*  \5 cspline
+*  \optional:
+*  \3. iterations (default=50)
+*  \4. paramters for fitters:
+*  \1. fix PSF: PSFxy sigma
+*  \2. free PSF: start PSFxy
+*  \3. Gauss fit z: parameters: PSFx, Ax, Ay, Bx, By, gamma, d, PSFy
+*  \(single)
+*  \4. fit PSFx, PSFy elliptical: start PSFx, PSFy
+*  \5. cspline: cspline coefficients (single)
+*  \6. cspline for 2D PSF: as 5, but two fits to break asymmetry. cspline coefficients (single)
+*  \5. varmap: Variance map for sCMOS. If6 size(varmap) ~= size(imagestack):
+*  \no sCMOS correction is used. Default= emCCD
+*  \6. silent (suppress output if 1)
 
-/*! \mainpage GPUgaussMLE
-*
-* \section intro_sec Introduction
-*
-* This is the introduction.
-*
-* \section license_sec License
-*
-* \subsection step1 Step 1: Opening the box
-*
+*  \Output:
+*  \P
+*  \1. X, Y, Photons, Background, Iterations
+*  \2. X, Y, Photons, Background, PSFxy, Iterations
+*  \3. X, Y, Photons, Background, Z, Iterations
+*  \4. X, Y, Photons, Background, PSFx, PSFy, Iterations
+*  \5. X, Y, Photons, Background, Z, Iterations
+*  \6. X, Y, Photons, Background, Z, Iterations
+*  \CRLB: cramer-rao lower bounds, as in P
+*  \LogL: log-likelihood.
+
+//Terms of Use 
+//
+//This file is part of GPUmleFit_LM. 
+//
+//GPUmleFit_LM Fitter is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. 
+//
+//GPUmleFit_LM Fitter is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
+//
+//You should have received a copy of the GNU General Public License along with GPUmleFit_LM Fitter. If not, see <http://www.gnu.org/licenses/>. 
+//
+//Additional permission under GNU GPL version 3 section 7 
+
 * \section publication_sec Publications
 * etc...
 */

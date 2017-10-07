@@ -1,12 +1,10 @@
 /*!
- * \file GPUgaussLib.h
- * \author Keith Lidke
- * \date January 10, 2010
- * \brief Prototypes for all the Cuda helper functions.
+ * \file CPUgaussLib.h
+//author Yiming Li
+//date 20170301
  */
 
-// This code provides a set of functions that can be called from inside
-// NVIDIA CUDA Kernels.
+
 #ifndef CPUGAUSSLIB_H
 #define CPUGAUSSLIB_H
 

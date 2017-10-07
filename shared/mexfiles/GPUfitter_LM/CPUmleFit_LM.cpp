@@ -1,3 +1,13 @@
+//Copyright (c) 2017 Ries Lab, European Molecular Biology Laboratory, Heidelberg.
+//author: Yiming Li
+//email: yiming.li@embl.de
+//date: 2017.07.24
+
+/*!
+ * \file CPUmleFit_LM.cpp
+ * \brief This contains the definitions for all the fitting mode.  
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,16 +19,8 @@
 #include "CPUgaussLib.h"
 #include "CPUmleFit_LM.h"
 
-//#ifndef max
-////! not defined in the C standard used by visual studio
-//#define max(a,b) (((a) > (b)) ? (a) : (b))
-//#endif
-//#ifndef min
-////! not defined in the C standard used by visual studio
-//#define min(a,b) (((a) < (b)) ? (a) : (b))
-//#endif
-//#include "GPUsplineMLE.h"
-
+//*******************************************************************************************
+//theta is: {x,y,N,bg}
  void kernel_MLEFit_LM_EMCCD(const int subregion, const float *d_data,const float PSFSigma, const int sz, const int iterations, 
 	float *d_Parameters, float *d_CRLBs, float *d_LogLikelihood,const int Nfits){
 
@@ -34,21 +36,19 @@
 		float Div;
 
 		float newTheta[NV],oldTheta[NV];
-		float newLambda = 1.0, oldLambda = 1.0;
-		float newSign[NV] = {0}, oldSign[NV] = {0};
-		float newUpdate[NV] = {0},oldUpdate[NV] = {0};
-		float newClamp[NV]={1.0,1.0,100,20}, oldClamp[NV]={1.0,1.0,100,20};
+		float newLambda = INIT_LAMBDA, oldLambda = INIT_LAMBDA, mu;
+	    float newUpdate[NV] = {1e13, 1e13, 1e13, 1e13},oldUpdate[NV] = {1e13, 1e13, 1e13, 1e13};
+		float maxJump[NV]={1.0,1.0,100,20};
 		float newDudt[NV] ={0};
 
-		float newErr = 1e13, oldErr = 1e13;
+		float newErr = 1e12, oldErr = 1e13;
 
 		float jacobian[NV]={0};
 		float hessian[NV*NV]={0};
 		float t1,t2;
 
 		float Nmax;
-		//float temp;
-		int info;
+		int errFlag=0;
 		float L[NV*NV] = {0}, U[NV*NV] = {0};
 
 
@@ -67,11 +67,9 @@
 		newTheta[2]=max(0.0, (Nmax-newTheta[3])*2*PI*PSFSigma*PSFSigma);
 		newTheta[3] = max(newTheta[3],0.01);
 
-		newClamp[2]=max(newTheta[2],newClamp[2]);
-		oldClamp[2]=newClamp[2];
+		maxJump[2]=max(newTheta[2],maxJump[2]);
 
-		newClamp[3]=max(newTheta[3],newClamp[3]);
-		oldClamp[3]=newClamp[3];
+		maxJump[3]=max(newTheta[3],maxJump[3]);
 
 		for (ii=0;ii<NV;ii++)oldTheta[ii]=newTheta[ii];
 
@@ -110,67 +108,48 @@
 				break;
 			}
 			else{
-				if(newErr>1.5*oldErr){
+				if(newErr>ACCEPTANCE*oldErr){
 					//copy Fitdata
 
 					for (i=0;i<NV;i++){
-						newSign[i]=oldSign[i];
-						newClamp[i]=oldClamp[i];
 						newTheta[i]=oldTheta[i];
+						newUpdate[i]=oldUpdate[i];
 					}
 					newLambda = oldLambda;
 					newErr = oldErr;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 
-					newLambda = 10*newLambda;
 				}
-				else if(newErr<oldErr){
-					if (newLambda>1){
-						newLambda = newLambda*0.8;
-					}
-					else if(newLambda<1){
-						newLambda = 1;
-					}
+				else if(newErr<oldErr&&errFlag==0){
+					newLambda = SCALE_DOWN*newLambda;
+				    mu = 1+newLambda;
 				}
 
 
 				for (i=0;i<NV;i++){
-					hessian[i*NV+i]=hessian[i*NV+i]*newLambda;
+					hessian[i*NV+i]=hessian[i*NV+i]*mu;
 				}
 				memset(L,0,NV*sizeof(float));
 				memset(U,0,NV*sizeof(float));
-				info = kernel_cholesky(hessian,NV,L,U);
-				if (info ==0){
-					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);
-					//copyFitData
+				errFlag = kernel_cholesky(hessian,NV,L,U);
+				if (errFlag ==0){
 					for (i=0;i<NV;i++){
-						oldSign[i]=newSign[i];
-						oldClamp[i]=newClamp[i];
-
 						oldTheta[i]=newTheta[i];
+						oldUpdate[i] = newUpdate[i];
 					}
 					oldLambda = newLambda;
 					oldErr=newErr;
 
-
+					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);	
+					
 					//updateFitParameters
 					for (ll=0;ll<NV;ll++){
-						if (newSign[ll]!=0){
-							if (newSign[ll]==1&&newUpdate[ll]<0){
-								newClamp[ll]=newClamp[ll]*0.5;
-							}
-							else if (newSign[ll]==-1&&newUpdate[ll]>0){
-								newClamp[ll] = newClamp[ll]*0.5;
-							}
+						if (newUpdate[ll]/oldUpdate[ll]< -0.5f){
+							maxJump[ll] = maxJump[ll]*0.5;
 						}
-
-						if (newUpdate[ll]>0){
-							newSign[ll]=1;
-						}
-						else{
-							newSign[ll]=-1;
-						}
-
-						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+fabs(newUpdate[ll]/newClamp[ll]));
+					    newUpdate[ll] = newUpdate[ll]/(1+fabs(newUpdate[ll]/maxJump[ll]));
+						newTheta[ll] = newTheta[ll]-newUpdate[ll];
 					}
 
 					newTheta[0] = max(newTheta[0],(float(sz)-1)/2-sz/4.0);
@@ -212,7 +191,8 @@
 				}
 				else
 				{
-					newLambda = 10*newLambda;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 				}
 			}
 		}
@@ -258,29 +238,25 @@
 		int bx = blockIdx.x;
 		int BlockSize = blockDim.x;*/
 		int ii, jj, kk, ll, l, m, i;
-		//int xstart, ystart, zstart, xi, yi;
 
 
 		float model, data;
 		float Div;
-//		float PSFy, PSFx;
 
 		float newTheta[NV],oldTheta[NV];
-		float newLambda = 1.0, oldLambda = 1.0;
-		float newSign[NV] = {0}, oldSign[NV] = {0};
-		float newUpdate[NV] = {0};
-		float newClamp[NV]={1.0,1.0,100,20,0.5}, oldClamp[NV]={1.0,1.0,100,20,0.5};
+		float newLambda = INIT_LAMBDA, oldLambda = INIT_LAMBDA, mu;
+		float newUpdate[NV] = {1e13, 1e13, 1e13, 1e13, 1e13},oldUpdate[NV] = {1e13, 1e13, 1e13, 1e13, 1e13};
+		float maxJump[NV]={1.0,1.0,100,20,0.5};
 		float newDudt[NV] ={0};
 
-		float newErr = 1e13, oldErr = 1e13;
+		float newErr = 1e12, oldErr = 1e13;
 
 		float jacobian[NV]={0};
 		float hessian[NV*NV]={0};
 		float t1,t2;
 
 		float Nmax;
-		//float temp;
-		int info;
+		int errFlag=0;
 		float L[NV*NV] = {0}, U[NV*NV] = {0};
 
 
@@ -300,11 +276,9 @@
 		newTheta[3] = max(newTheta[3],0.01);
 		newTheta[4]=PSFSigma;
 
-		newClamp[2]=max(newTheta[2],newClamp[2]);
-		oldClamp[2]=newClamp[2];
+		maxJump[2]=max(newTheta[2],maxJump[2]);
 
-		newClamp[3]=max(newTheta[3],newClamp[3]);
-		oldClamp[3]=newClamp[3];
+		maxJump[3]=max(newTheta[3],maxJump[3]);;
 
 
 		for (ii=0;ii<NV;ii++)oldTheta[ii]=newTheta[ii];
@@ -344,67 +318,47 @@
 				break;
 			}
 			else{
-				if(newErr>1.5*oldErr){
+				if(newErr>ACCEPTANCE*oldErr){
 					//copy Fitdata
 
 					for (i=0;i<NV;i++){
-						newSign[i]=oldSign[i];
-						newClamp[i]=oldClamp[i];
 						newTheta[i]=oldTheta[i];
+						newUpdate[i]=oldUpdate[i];
 					}
 					newLambda = oldLambda;
 					newErr = oldErr;
-
-					newLambda = 10*newLambda;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 				}
-				else if(newErr<oldErr){
-					if (newLambda>1){
-						newLambda = newLambda*0.8;
-					}
-					else if(newLambda<1){
-						newLambda = 1;
-					}
+				else if(newErr<oldErr&&errFlag==0){
+					newLambda = SCALE_DOWN*newLambda;
+				    mu = 1+newLambda;
 				}
 
 
 				for (i=0;i<NV;i++){
-					hessian[i*NV+i]=hessian[i*NV+i]*newLambda;
+					hessian[i*NV+i]=hessian[i*NV+i]*mu;
 				}
 				memset(L,0,NV*sizeof(float));
 				memset(U,0,NV*sizeof(float));
-				info = kernel_cholesky(hessian,NV,L,U);
-				if (info ==0){
-					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);
-					//copyFitData
+				errFlag = kernel_cholesky(hessian,NV,L,U);
+				if (errFlag ==0){
 					for (i=0;i<NV;i++){
-						oldSign[i]=newSign[i];
-						oldClamp[i]=newClamp[i];
-
 						oldTheta[i]=newTheta[i];
+						oldUpdate[i] = newUpdate[i];
 					}
 					oldLambda = newLambda;
 					oldErr=newErr;
 
-
+					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);	
+					
 					//updateFitParameters
 					for (ll=0;ll<NV;ll++){
-						if (newSign[ll]!=0){
-							if (newSign[ll]==1&&newUpdate[ll]<0){
-								newClamp[ll]=newClamp[ll]*0.5;
-							}
-							else if (newSign[ll]==-1&&newUpdate[ll]>0){
-								newClamp[ll] = newClamp[ll]*0.5;
-							}
+						if (newUpdate[ll]/oldUpdate[ll]< -0.5f){
+							maxJump[ll] = maxJump[ll]*0.5;
 						}
-
-						if (newUpdate[ll]>0){
-							newSign[ll]=1;
-						}
-						else{
-							newSign[ll]=-1;
-						}
-
-						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+fabs(newUpdate[ll]/newClamp[ll]));
+					    newUpdate[ll] = newUpdate[ll]/(1+fabs(newUpdate[ll]/maxJump[ll]));
+						newTheta[ll] = newTheta[ll]-newUpdate[ll];
 					}
 
 					newTheta[0] = max(newTheta[0],(float(sz)-1)/2-sz/4.0);
@@ -447,7 +401,8 @@
 				}
 				else
 				{
-					newLambda = 10*newLambda;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 				}
 			}
 		}
@@ -494,7 +449,6 @@
 		//int bx = blockIdx.x;
 		//int BlockSize = blockDim.x;
 		int ii, jj, kk, ll, l, m, i;
-		//int xstart, ystart, zstart, xi, yi;
 
 
 		float model, data;
@@ -502,13 +456,12 @@
 		float PSFy, PSFx;
 
 		float newTheta[NV],oldTheta[NV];
-		float newLambda = 1.0, oldLambda = 1.0;
-		float newSign[NV] = {0}, oldSign[NV] = {0};
-		float newUpdate[NV] = {0},oldUpdate[NV] = {0};
-		float newClamp[NV]={1.0,1.0,100,20,2}, oldClamp[NV]={1.0,1.0,100,20,2};
+		float newLambda = INIT_LAMBDA, oldLambda = INIT_LAMBDA, mu;
+		float newUpdate[NV] = {1e13, 1e13, 1e13, 1e13, 1e13},oldUpdate[NV] = {1e13, 1e13, 1e13, 1e13, 1e13};
+		float maxJump[NV]={1.0,1.0,100,20,2};
 		float newDudt[NV] ={0};
 
-		float newErr = 1e13, oldErr = 1e13;
+		float newErr = 1e12, oldErr = 1e13;
 
 		float jacobian[NV]={0};
 		float hessian[NV*NV]={0};
@@ -516,7 +469,7 @@
 
 		float Nmax;
 //		float temp;
-		int info;
+		int errFlag=0;
 		float L[NV*NV] = {0}, U[NV*NV] = {0};
 
 
@@ -536,11 +489,9 @@
 		newTheta[3] = max(newTheta[3],0.01);
 		newTheta[4]=0;
 
-		newClamp[2]=max(newTheta[2],newClamp[2]);
-		oldClamp[2]=newClamp[2];
+		maxJump[2]=max(newTheta[2],maxJump[2]);
 
-		newClamp[3]=max(newTheta[3],newClamp[3]);
-		oldClamp[3]=newClamp[3];
+		maxJump[3]=max(newTheta[3],maxJump[3]);
 
 		for (ii=0;ii<NV;ii++)oldTheta[ii]=newTheta[ii];
 
@@ -579,67 +530,47 @@
 				break;
 			}
 			else{
-				if(newErr>1.5*oldErr){
+				if(newErr>ACCEPTANCE*oldErr){
 					//copy Fitdata
 
 					for (i=0;i<NV;i++){
-						newSign[i]=oldSign[i];
-						newClamp[i]=oldClamp[i];
 						newTheta[i]=oldTheta[i];
+						newUpdate[i]=oldUpdate[i];
 					}
 					newLambda = oldLambda;
 					newErr = oldErr;
-
-					newLambda = 10*newLambda;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 				}
-				else if(newErr<oldErr){
-					if (newLambda>1){
-						newLambda = newLambda*0.8;
-					}
-					else if(newLambda<1){
-						newLambda = 1;
-					}
+				else if(newErr<oldErr&&errFlag==0){
+					newLambda = SCALE_DOWN*newLambda;
+				    mu = 1+newLambda;
 				}
 
 
 				for (i=0;i<NV;i++){
-					hessian[i*NV+i]=hessian[i*NV+i]*newLambda;
+					hessian[i*NV+i]=hessian[i*NV+i]*mu;
 				}
 				memset(L,0,NV*sizeof(float));
 				memset(U,0,NV*sizeof(float));
-				info = kernel_cholesky(hessian,NV,L,U);
-				if (info ==0){
-					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);
-					//copyFitData
+				errFlag = kernel_cholesky(hessian,NV,L,U);
+				if (errFlag ==0){
 					for (i=0;i<NV;i++){
-						oldSign[i]=newSign[i];
-						oldClamp[i]=newClamp[i];
-
 						oldTheta[i]=newTheta[i];
+						oldUpdate[i] = newUpdate[i];
 					}
 					oldLambda = newLambda;
 					oldErr=newErr;
 
-
+					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);	
+					
 					//updateFitParameters
 					for (ll=0;ll<NV;ll++){
-						if (newSign[ll]!=0){
-							if (newSign[ll]==1&&newUpdate[ll]<0){
-								newClamp[ll]=newClamp[ll]*0.5;
-							}
-							else if (newSign[ll]==-1&&newUpdate[ll]>0){
-								newClamp[ll] = newClamp[ll]*0.5;
-							}
+						if (newUpdate[ll]/oldUpdate[ll]< -0.5f){
+							maxJump[ll] = maxJump[ll]*0.5;
 						}
-
-						if (newUpdate[ll]>0){
-							newSign[ll]=1;
-						}
-						else{
-							newSign[ll]=-1;
-						}
-
-						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+fabs(newUpdate[ll]/newClamp[ll]));
+					    newUpdate[ll] = newUpdate[ll]/(1+fabs(newUpdate[ll]/maxJump[ll]));
+						newTheta[ll] = newTheta[ll]-newUpdate[ll];
 					}
 
 					newTheta[0] = max(newTheta[0],(float(sz)-1)/2-sz/4.0);
@@ -682,7 +613,8 @@
 				}
 				else
 				{
-					newLambda = 10*newLambda;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 				}
 			}
 		}
@@ -727,21 +659,18 @@
 		//int bx = blockIdx.x;
 		//int BlockSize = blockDim.x;
 		int ii, jj, kk, ll, l, m, i;
-		//int xstart, ystart, zstart, xi, yi;
 
 
 		float model, data;
 		float Div;
-		//float PSFy, PSFx;
 
 		float newTheta[NV],oldTheta[NV];
-		float newLambda = 1.0, oldLambda = 1.0;
-		float newSign[NV] = {0}, oldSign[NV] = {0};
-		float newUpdate[NV] = {0},oldUpdate[NV] = {0};
-		float newClamp[NV]={1.0,1.0,100,20,0.5,0.5}, oldClamp[NV]={1.0,1.0,100,20,0.5,0.5};
+		float newLambda = INIT_LAMBDA, oldLambda = INIT_LAMBDA, mu;
+		float newUpdate[NV] = {1e13, 1e13, 1e13, 1e13, 1e13, 1e13},oldUpdate[NV] = {1e13, 1e13, 1e13, 1e13, 1e13, 1e13};
+		float maxJump[NV]={1.0,1.0,100,20,0.5,0.5};
 		float newDudt[NV] ={0};
 
-		float newErr = 1e13, oldErr = 1e13;
+		float newErr = 1e12, oldErr = 1e13;
 
 		float jacobian[NV]={0};
 		float hessian[NV*NV]={0};
@@ -749,7 +678,7 @@
 
 		float Nmax;
 		//float temp;
-		int info;
+		int errFlag=0;
 		float L[NV*NV] = {0}, U[NV*NV] = {0};
 
 
@@ -770,11 +699,9 @@
 		newTheta[4]=PSFSigma;
 		newTheta[5]=PSFSigma;
 
-		newClamp[2]=max(newTheta[2],newClamp[2]);
-		oldClamp[2]=newClamp[2];
+		maxJump[2]=max(newTheta[2],maxJump[2]);
 
-		newClamp[3]=max(newTheta[3],newClamp[3]);
-		oldClamp[3]=newClamp[3];
+		maxJump[3]=max(newTheta[3],maxJump[3]);
 
 		for (ii=0;ii<NV;ii++)oldTheta[ii]=newTheta[ii];
 
@@ -813,67 +740,47 @@
 				break;
 			}
 			else{
-				if(newErr>1.5*oldErr){
+				if(newErr>ACCEPTANCE*oldErr){
 					//copy Fitdata
 
 					for (i=0;i<NV;i++){
-						newSign[i]=oldSign[i];
-						newClamp[i]=oldClamp[i];
 						newTheta[i]=oldTheta[i];
+						newUpdate[i]=oldUpdate[i];
 					}
 					newLambda = oldLambda;
 					newErr = oldErr;
-
-					newLambda = 10*newLambda;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 				}
-				else if(newErr<oldErr){
-					if (newLambda>1){
-						newLambda = newLambda*0.8;
-					}
-					else if(newLambda<1){
-						newLambda = 1;
-					}
+				else if(newErr<oldErr&&errFlag==0){
+					newLambda = SCALE_DOWN*newLambda;
+				    mu = 1+newLambda;
 				}
 
 
 				for (i=0;i<NV;i++){
-					hessian[i*NV+i]=hessian[i*NV+i]*newLambda;
+					hessian[i*NV+i]=hessian[i*NV+i]*mu;
 				}
 				memset(L,0,NV*sizeof(float));
 				memset(U,0,NV*sizeof(float));
-				info = kernel_cholesky(hessian,NV,L,U);
-				if (info ==0){
-					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);
-					//copyFitData
+				errFlag = kernel_cholesky(hessian,NV,L,U);
+				if (errFlag ==0){
 					for (i=0;i<NV;i++){
-						oldSign[i]=newSign[i];
-						oldClamp[i]=newClamp[i];
-
 						oldTheta[i]=newTheta[i];
+						oldUpdate[i] = newUpdate[i];
 					}
 					oldLambda = newLambda;
 					oldErr=newErr;
 
-
+					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);	
+					
 					//updateFitParameters
 					for (ll=0;ll<NV;ll++){
-						if (newSign[ll]!=0){
-							if (newSign[ll]==1&&newUpdate[ll]<0){
-								newClamp[ll]=newClamp[ll]*0.5;
-							}
-							else if (newSign[ll]==-1&&newUpdate[ll]>0){
-								newClamp[ll] = newClamp[ll]*0.5;
-							}
+						if (newUpdate[ll]/oldUpdate[ll]< -0.5f){
+							maxJump[ll] = maxJump[ll]*0.5;
 						}
-
-						if (newUpdate[ll]>0){
-							newSign[ll]=1;
-						}
-						else{
-							newSign[ll]=-1;
-						}
-
-						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+fabs(newUpdate[ll]/newClamp[ll]));
+					    newUpdate[ll] = newUpdate[ll]/(1+fabs(newUpdate[ll]/maxJump[ll]));
+						newTheta[ll] = newTheta[ll]-newUpdate[ll];
 					}
 
 					newTheta[0] = max(newTheta[0],(float(sz)-1)/2-sz/4.0);
@@ -915,7 +822,8 @@
 				}
 				else
 				{
-					newLambda = 10*newLambda;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 				}
 			}
 		}
@@ -972,10 +880,9 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
     float Div;
     //float dudt[NV_PS];
     float newTheta[NV],oldTheta[NV];
-	float newLambda = 1.0, oldLambda = 1.0;
-	float newSign[NV] = {0}, oldSign[NV] = {0};
-	float newUpdate[NV] = {0};
-	float newClamp[NV]={1.0,1.0,100,20,2}, oldClamp[NV]={1.0,1.0,100,20,2};
+	float newLambda = INIT_LAMBDA, oldLambda = INIT_LAMBDA, mu;
+	float newUpdate[NV] = {1e13, 1e13, 1e13, 1e13, 1e13},oldUpdate[NV] = {1e13, 1e13, 1e13, 1e13, 1e13};
+	float maxJump[NV]={1.0,1.0,100,20,2};
 	float newDudt[NV] ={0};
 
 	float newErr = 1e12, oldErr = 1e13;
@@ -987,9 +894,8 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 
 	float Nmax;
 	float xc,yc,zc;
-	float temp;
 	float delta_f[64]={0}, delta_dxf[64]={0}, delta_dyf[64]={0}, delta_dzf[64]={0};
-	int info;
+	int errFlag=0;
 	float L[NV*NV] = {0}, U[NV*NV] = {0};
 
     
@@ -1007,18 +913,19 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
     //initial values
     kernel_CenterofMass2D(sz, s_data, &newTheta[0], &newTheta[1]);
     kernel_GaussFMaxMin2D(sz, 1.5, s_data, &Nmax, &newTheta[3]);
-    newTheta[2]=max(0.0, (Nmax-newTheta[3])*2*PI*1.5*1.5);
+ //   newTheta[2]=max(0.0, (Nmax-newTheta[3])*2*PI*1.5*1.5);
+	//newTheta[3] = max(newTheta[3],0.01);
+	//central pixel of spline model
 	newTheta[3] = max(newTheta[3],0.01);
+	newTheta[2]= (Nmax-newTheta[3])/d_coeff[(int)(spline_zsize/2)*(spline_xsize*spline_ysize)+(int)(spline_ysize/2)*spline_xsize+(int)(spline_xsize/2)]*4;
+
     newTheta[4]=initZ;
 
-	newClamp[2]=max(newTheta[2],newClamp[2]);
-	oldClamp[2]=newClamp[2];
+	maxJump[2]=max(newTheta[2],maxJump[2]);
 
-	newClamp[3]=max(newTheta[3],newClamp[3]);
-	oldClamp[3]=newClamp[3];
+	maxJump[3]=max(newTheta[3],maxJump[3]);
 
-	newClamp[4]= max(spline_zsize/3.0f,newClamp[4]);
-	oldClamp[4]=newClamp[4];
+	maxJump[4]= max(spline_zsize/3.0f,maxJump[4]);
 
 
 	for (ii=0;ii<NV;ii++)oldTheta[ii]=newTheta[ii];
@@ -1027,7 +934,6 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 	xc = -1.0*((newTheta[0]-float(sz)/2)+0.5);
 	yc = -1.0*((newTheta[1]-float(sz)/2)+0.5);
 
-	//off = (float(spline_xsize)+1.0-2*float(sz))/2;
 	off = floor((float(spline_xsize)+1.0-float(sz))/2);
 
 	xstart = floor(xc);
@@ -1044,8 +950,6 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 	memset(jacobian,0,NV*sizeof(float));
 	memset(hessian,0,NV*NV*sizeof(float));
 	kernel_computeDelta3D(xc, yc, zc, delta_f, delta_dxf, delta_dyf, delta_dzf);
-
-	//for (ii =0;ii<64;i++)hess[ii]=delta_dxf[ii];
 
 	for (ii=0;ii<sz;ii++) for(jj=0;jj<sz;jj++) {
 		kernel_DerivativeSpline(ii+xstart+off,jj+ystart+off,zstart,spline_xsize,spline_ysize,spline_zsize,delta_f,delta_dxf,delta_dyf,delta_dzf,s_coeff,newTheta,newDudt,&model);
@@ -1068,101 +972,72 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 		for (l=0;l<NV;l++) for(m=l;m<NV;m++) {
 			hessian[l*NV+m] +=t2*newDudt[l]*newDudt[m];
 			hessian[m*NV+l] = hessian[l*NV+m];
-			//hess[l*NV+m]=hessian[l*NV+m]; 
-			//hess[m*NV+l]=hessian[m*NV+l];
 		}
 	}
 
 	//copyFitData
-	int newStatus = 0;
 	for (kk=0;kk<iterations;kk++) {//main iterative loop
 
 			if(fabs((newErr-oldErr)/newErr)<TOLERANCE){
 				//newStatus = CONVERGED;
-				newStatus =1;
 				break;
 			}
 			else{
-				if(newErr>1.5*oldErr){
+				if(newErr>ACCEPTANCE*oldErr){
 					//copy Fitdata
 					
 					for (i=0;i<NV;i++){
-						newSign[i]=oldSign[i];
-						newClamp[i]=oldClamp[i];
 						newTheta[i]=oldTheta[i];
+						newUpdate[i]=oldUpdate[i];
 					}
 					newLambda = oldLambda;
 					newErr = oldErr;
-
-					newLambda = 10*newLambda;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 				}
-				else if(newErr<oldErr){
-					newStatus =2;
-					if (newLambda>1){
-						newLambda = newLambda*0.8;
-					}
-					else if(newLambda<1){
-						newLambda = 1;
-					}
+				else if(newErr<oldErr&&errFlag==0){
+					newLambda = SCALE_DOWN*newLambda;
+				    mu = 1+newLambda;
 				}
 				
 
 				for (i=0;i<NV;i++){
-					hessian[i*NV+i]=hessian[i*NV+i]*newLambda;
+					hessian[i*NV+i]=hessian[i*NV+i]*mu;
 				}
 				memset(L,0,NV*sizeof(float));
 				memset(U,0,NV*sizeof(float));
-				info = kernel_cholesky(hessian,NV,L,U);
-				if (info ==0){
-					newStatus = 3;
-					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);
-                 //copyFitData
+				errFlag = kernel_cholesky(hessian,NV,L,U);
+				if (errFlag ==0){
 					for (i=0;i<NV;i++){
-						oldSign[i]=newSign[i];
-						oldClamp[i]=newClamp[i];
-
 						oldTheta[i]=newTheta[i];
+						oldUpdate[i] = newUpdate[i];
 					}
 					oldLambda = newLambda;
 					oldErr=newErr;
-					
 
+					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);	
+					
 					//updateFitParameters
 					for (ll=0;ll<NV;ll++){
-						if (newSign[ll]!=0){
-							if (newSign[ll]==1&&newUpdate[ll]<0){
-								newClamp[ll]=newClamp[ll]*0.5;
-							}
-							else if (newSign[ll]==-1&&newUpdate[ll]>0){
-								newClamp[ll] = newClamp[ll]*0.5;
-							}
+						if (newUpdate[ll]/oldUpdate[ll]< -0.5f){
+							maxJump[ll] = maxJump[ll]*0.5f;
 						}
-
-						if (newUpdate[ll]>0){
-							newSign[ll]=1;
-						}
-						else{
-							newSign[ll]=-1;
-						}
-
-						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+fabs(newUpdate[ll]/newClamp[ll]));
-						newStatus = 4;
+					    newUpdate[ll] = newUpdate[ll]/(1+fabs(newUpdate[ll]/maxJump[ll]));
+						newTheta[ll] = newTheta[ll]-newUpdate[ll];
 					}
 
-					newTheta[0] = max(newTheta[0],(float(sz)-1)/2-sz/4.0);
-					newTheta[0] = min(newTheta[0],(float(sz)-1)/2+sz/4.0);
-					newTheta[1] = max(newTheta[1],(float(sz)-1)/2-sz/4.0);
-					newTheta[1] = min(newTheta[1],(float(sz)-1)/2+sz/4.0);
-					newTheta[2] = max(newTheta[2],1.0);
-					newTheta[3] = max(newTheta[3],0.01);
-					newTheta[4] = max(newTheta[4],0.0);
+					newTheta[0] = max(newTheta[0],(float(sz)-1)/2.0f-sz/4.0f);
+					newTheta[0] = min(newTheta[0],(float(sz)-1)/2.0f+sz/4.0f);
+					newTheta[1] = max(newTheta[1],(float(sz)-1)/2.0f-sz/4.0f);
+					newTheta[1] = min(newTheta[1],(float(sz)-1)/2.0f+sz/4.0f);
+					newTheta[2] = max(newTheta[2],1.0f);
+					newTheta[3] = max(newTheta[3],0.01f);
+					newTheta[4] = max(newTheta[4],0.0f);
 					newTheta[4] = min(newTheta[4],float(spline_zsize));
 
 					//updateFitValues3D
-					xc = -1.0*((newTheta[0]-float(sz)/2)+0.5);
-					yc = -1.0*((newTheta[1]-float(sz)/2)+0.5);
-
-					//off = (float(spline_xsize)+1.0-2*float(sz))/2;
+					xc = -1.0*((newTheta[0]-float(sz)/2)+0.5f);
+					yc = -1.0*((newTheta[1]-float(sz)/2)+0.5f);
 
 					xstart = floor(xc);
 					xc = xc-xstart;
@@ -1201,17 +1076,13 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 							hessian[l*NV+m] +=t2*newDudt[l]*newDudt[m];
 							hessian[m*NV+l] = hessian[l*NV+m];
 						}
-						newStatus = 5;
 					}
 				}
 				else
 				{
-					newLambda = 10*newLambda;
-					//newStatus = 6;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 				}
-
-					//copyFitdata	
-
 			}
 
 
@@ -1287,21 +1158,19 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 		float Div;
 
 		float newTheta[NV],oldTheta[NV];
-		float newLambda = 1.0, oldLambda = 1.0;
-		float newSign[NV] = {0}, oldSign[NV] = {0};
-		float newUpdate[NV] = {0},oldUpdate[NV] = {0};
-		float newClamp[NV]={1.0,1.0,100,20}, oldClamp[NV]={1.0,1.0,100,20};
+		float newLambda = INIT_LAMBDA, oldLambda = INIT_LAMBDA, mu;
+	    float newUpdate[NV] = {1e13, 1e13, 1e13, 1e13},oldUpdate[NV] = {1e13, 1e13, 1e13, 1e13};
+		float maxJump[NV]={1.0,1.0,100,20};
 		float newDudt[NV] ={0};
 
-		float newErr = 1e13, oldErr = 1e13;
+		float newErr = 1e12, oldErr = 1e13;
 
 		float jacobian[NV]={0};
 		float hessian[NV*NV]={0};
 		float t1,t2;
 
 		float Nmax;
-		//float temp;
-		int info;
+		int errFlag=0;
 		float L[NV*NV] = {0}, U[NV*NV] = {0};
 
 
@@ -1321,11 +1190,9 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 		newTheta[2]=max(0.0, (Nmax-newTheta[3])*2*PI*PSFSigma*PSFSigma);
 		newTheta[3] = max(newTheta[3],0.01);
 
-		newClamp[2]=max(newTheta[2],newClamp[2]);
-		oldClamp[2]=newClamp[2];
+		maxJump[2]=max(newTheta[2],maxJump[2]);
 
-		newClamp[3]=max(newTheta[3],newClamp[3]);
-		oldClamp[3]=newClamp[3];
+		maxJump[3]=max(newTheta[3],maxJump[3]);
 
 		for (ii=0;ii<NV;ii++)oldTheta[ii]=newTheta[ii];
 
@@ -1365,26 +1232,22 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 				break;
 			}
 			else{
-				if(newErr>1.5*oldErr){
+				if(newErr>ACCEPTANCE*oldErr){
 					//copy Fitdata
 
 					for (i=0;i<NV;i++){
-						newSign[i]=oldSign[i];
-						newClamp[i]=oldClamp[i];
 						newTheta[i]=oldTheta[i];
+						newUpdate[i]=oldUpdate[i];
 					}
 					newLambda = oldLambda;
 					newErr = oldErr;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 
-					newLambda = 10*newLambda;
 				}
-				else if(newErr<oldErr){
-					if (newLambda>1){
-						newLambda = newLambda*0.8;
-					}
-					else if(newLambda<1){
-						newLambda = 1;
-					}
+				else if(newErr<oldErr&&errFlag==0){
+					newLambda = SCALE_DOWN*newLambda;
+				    mu = 1+newLambda;
 				}
 
 
@@ -1393,39 +1256,24 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 				}
 				memset(L,0,NV*sizeof(float));
 				memset(U,0,NV*sizeof(float));
-				info = kernel_cholesky(hessian,NV,L,U);
-				if (info ==0){
-					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);
-					//copyFitData
+				errFlag = kernel_cholesky(hessian,NV,L,U);
+				if (errFlag ==0){
 					for (i=0;i<NV;i++){
-						oldSign[i]=newSign[i];
-						oldClamp[i]=newClamp[i];
-
 						oldTheta[i]=newTheta[i];
+						oldUpdate[i] = newUpdate[i];
 					}
 					oldLambda = newLambda;
 					oldErr=newErr;
 
-
+					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);	
+					
 					//updateFitParameters
 					for (ll=0;ll<NV;ll++){
-						if (newSign[ll]!=0){
-							if (newSign[ll]==1&&newUpdate[ll]<0){
-								newClamp[ll]=newClamp[ll]*0.5;
-							}
-							else if (newSign[ll]==-1&&newUpdate[ll]>0){
-								newClamp[ll] = newClamp[ll]*0.5;
-							}
+						if (newUpdate[ll]/oldUpdate[ll]< -0.5f){
+							maxJump[ll] = maxJump[ll]*0.5;
 						}
-
-						if (newUpdate[ll]>0){
-							newSign[ll]=1;
-						}
-						else{
-							newSign[ll]=-1;
-						}
-
-						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+fabs(newUpdate[ll]/newClamp[ll]));
+					    newUpdate[ll] = newUpdate[ll]/(1+fabs(newUpdate[ll]/maxJump[ll]));
+						newTheta[ll] = newTheta[ll]-newUpdate[ll];
 					}
 
 					newTheta[0] = max(newTheta[0],(float(sz)-1)/2-sz/4.0);
@@ -1468,7 +1316,8 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 				}
 				else
 				{
-					newLambda = 10*newLambda;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 				}
 			}
 		}
@@ -1515,29 +1364,25 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 		int bx = blockIdx.x;
 		int BlockSize = blockDim.x;*/
 		int ii, jj, kk, ll, l, m, i;
-		//int xstart, ystart, zstart, xi, yi;
 
 
 		float model, data;
 		float Div;
-		//float PSFy, PSFx;
 
 		float newTheta[NV],oldTheta[NV];
-		float newLambda = 1.0, oldLambda = 1.0;
-		float newSign[NV] = {0}, oldSign[NV] = {0};
-		float newUpdate[NV] = {0},oldUpdate[NV] = {0};
-		float newClamp[NV]={1.0,1.0,100,20,0.5}, oldClamp[NV]={1.0,1.0,100,20,0.5};
+		float newLambda = INIT_LAMBDA, oldLambda = INIT_LAMBDA, mu;
+		float newUpdate[NV] = {1e13, 1e13, 1e13, 1e13, 1e13},oldUpdate[NV] = {1e13, 1e13, 1e13, 1e13, 1e13};
+		float maxJump[NV]={1.0,1.0,100,20,0.5};
 		float newDudt[NV] ={0};
 
-		float newErr = 1e13, oldErr = 1e13;
+		float newErr = 1e12, oldErr = 1e13;
 
 		float jacobian[NV]={0};
 		float hessian[NV*NV]={0};
 		float t1,t2;
 
 		float Nmax;
-		//float temp;
-		int info;
+		int errFlag=0;
 		float L[NV*NV] = {0}, U[NV*NV] = {0};
 
 
@@ -1558,11 +1403,9 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 		newTheta[3] = max(newTheta[3],0.01);
 		newTheta[4]=PSFSigma;
 
-		newClamp[2]=max(newTheta[2],newClamp[2]);
-		oldClamp[2]=newClamp[2];
+		maxJump[2]=max(newTheta[2],maxJump[2]);
 
-		newClamp[3]=max(newTheta[3],newClamp[3]);
-		oldClamp[3]=newClamp[3];
+		maxJump[3]=max(newTheta[3],maxJump[3]);
 
 
 		for (ii=0;ii<NV;ii++)oldTheta[ii]=newTheta[ii];
@@ -1603,67 +1446,48 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 				break;
 			}
 			else{
-				if(newErr>1.5*oldErr){
+				if(newErr>ACCEPTANCE*oldErr){
 					//copy Fitdata
 
 					for (i=0;i<NV;i++){
-						newSign[i]=oldSign[i];
-						newClamp[i]=oldClamp[i];
 						newTheta[i]=oldTheta[i];
+						newUpdate[i]=oldUpdate[i];
 					}
 					newLambda = oldLambda;
 					newErr = oldErr;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 
-					newLambda = 10*newLambda;
 				}
-				else if(newErr<oldErr){
-					if (newLambda>1){
-						newLambda = newLambda*0.8;
-					}
-					else if(newLambda<1){
-						newLambda = 1;
-					}
+				else if(newErr<oldErr&&errFlag==0){
+					newLambda = SCALE_DOWN*newLambda;
+				    mu = 1+newLambda;
 				}
 
 
 				for (i=0;i<NV;i++){
-					hessian[i*NV+i]=hessian[i*NV+i]*newLambda;
+					hessian[i*NV+i]=hessian[i*NV+i]*mu;
 				}
 				memset(L,0,NV*sizeof(float));
 				memset(U,0,NV*sizeof(float));
-				info = kernel_cholesky(hessian,NV,L,U);
-				if (info ==0){
-					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);
-					//copyFitData
+				errFlag = kernel_cholesky(hessian,NV,L,U);
+				if (errFlag ==0){
 					for (i=0;i<NV;i++){
-						oldSign[i]=newSign[i];
-						oldClamp[i]=newClamp[i];
-
 						oldTheta[i]=newTheta[i];
+						oldUpdate[i] = newUpdate[i];
 					}
 					oldLambda = newLambda;
 					oldErr=newErr;
 
-
+					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);	
+					
 					//updateFitParameters
 					for (ll=0;ll<NV;ll++){
-						if (newSign[ll]!=0){
-							if (newSign[ll]==1&&newUpdate[ll]<0){
-								newClamp[ll]=newClamp[ll]*0.5;
-							}
-							else if (newSign[ll]==-1&&newUpdate[ll]>0){
-								newClamp[ll] = newClamp[ll]*0.5;
-							}
+						if (newUpdate[ll]/oldUpdate[ll]< -0.5f){
+							maxJump[ll] = maxJump[ll]*0.5;
 						}
-
-						if (newUpdate[ll]>0){
-							newSign[ll]=1;
-						}
-						else{
-							newSign[ll]=-1;
-						}
-
-						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+fabs(newUpdate[ll]/newClamp[ll]));
+					    newUpdate[ll] = newUpdate[ll]/(1+fabs(newUpdate[ll]/maxJump[ll]));
+						newTheta[ll] = newTheta[ll]-newUpdate[ll];
 					}
 
 					newTheta[0] = max(newTheta[0],(float(sz)-1)/2-sz/4.0);
@@ -1707,7 +1531,8 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 				}
 				else
 				{
-					newLambda = 10*newLambda;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 				}
 			}
 		}
@@ -1754,7 +1579,6 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 		//int bx = blockIdx.x;
 		//int BlockSize = blockDim.x;
 		int ii, jj, kk, ll, l, m, i;
-		//int xstart, ystart, zstart, xi, yi;
 
 
 		float model, data;
@@ -1762,21 +1586,19 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 		float PSFy, PSFx;
 
 		float newTheta[NV],oldTheta[NV];
-		float newLambda = 1.0, oldLambda = 1.0;
-		float newSign[NV] = {0}, oldSign[NV] = {0};
-		float newUpdate[NV] = {0},oldUpdate[NV] = {0};
-		float newClamp[NV]={1.0,1.0,100,20,2}, oldClamp[NV]={1.0,1.0,100,20,2};
+		float newLambda = INIT_LAMBDA, oldLambda = INIT_LAMBDA, mu;
+		float newUpdate[NV] = {1e13, 1e13, 1e13, 1e13, 1e13},oldUpdate[NV] = {1e13, 1e13, 1e13, 1e13, 1e13};
+		float maxJump[NV]={1.0,1.0,100,20,2};
 		float newDudt[NV] ={0};
 
-		float newErr = 1e13, oldErr = 1e13;
+		float newErr = 1e12, oldErr = 1e13;
 
 		float jacobian[NV]={0};
 		float hessian[NV*NV]={0};
 		float t1,t2;
 
 		float Nmax;
-		//float temp;
-		int info;
+		int errFlag=0;
 		float L[NV*NV] = {0}, U[NV*NV] = {0};
 
 
@@ -1796,11 +1618,9 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 		newTheta[3] = max(newTheta[3],0.01);
 		newTheta[4]=0;
 
-		newClamp[2]=max(newTheta[2],newClamp[2]);
-		oldClamp[2]=newClamp[2];
+		maxJump[2]=max(newTheta[2],maxJump[2]);
 
-		newClamp[3]=max(newTheta[3],newClamp[3]);
-		oldClamp[3]=newClamp[3];
+		maxJump[3]=max(newTheta[3],maxJump[3]);
 
 		for (ii=0;ii<NV;ii++)oldTheta[ii]=newTheta[ii];
 
@@ -1840,67 +1660,47 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 				break;
 			}
 			else{
-				if(newErr>1.5*oldErr){
+				if(newErr>ACCEPTANCE*oldErr){
 					//copy Fitdata
 
 					for (i=0;i<NV;i++){
-						newSign[i]=oldSign[i];
-						newClamp[i]=oldClamp[i];
 						newTheta[i]=oldTheta[i];
+						newUpdate[i]=oldUpdate[i];
 					}
 					newLambda = oldLambda;
 					newErr = oldErr;
-
-					newLambda = 10*newLambda;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 				}
-				else if(newErr<oldErr){
-					if (newLambda>1){
-						newLambda = newLambda*0.8;
-					}
-					else if(newLambda<1){
-						newLambda = 1;
-					}
+				else if(newErr<oldErr&&errFlag==0){
+					newLambda = SCALE_DOWN*newLambda;
+				    mu = 1+newLambda;
 				}
 
 
 				for (i=0;i<NV;i++){
-					hessian[i*NV+i]=hessian[i*NV+i]*newLambda;
+					hessian[i*NV+i]=hessian[i*NV+i]*mu;
 				}
 				memset(L,0,NV*sizeof(float));
 				memset(U,0,NV*sizeof(float));
-				info = kernel_cholesky(hessian,NV,L,U);
-				if (info ==0){
-					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);
-					//copyFitData
+				errFlag = kernel_cholesky(hessian,NV,L,U);
+				if (errFlag ==0){
 					for (i=0;i<NV;i++){
-						oldSign[i]=newSign[i];
-						oldClamp[i]=newClamp[i];
-
 						oldTheta[i]=newTheta[i];
+						oldUpdate[i] = newUpdate[i];
 					}
 					oldLambda = newLambda;
 					oldErr=newErr;
 
-
-					//updatePeakParameters
+					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);	
+					
+					//updateFitParameters
 					for (ll=0;ll<NV;ll++){
-						if (newSign[ll]!=0){
-							if (newSign[ll]==1&&newUpdate[ll]<0){
-								newClamp[ll]=newClamp[ll]*0.5;
-							}
-							else if (newSign[ll]==-1&&newUpdate[ll]>0){
-								newClamp[ll] = newClamp[ll]*0.5;
-							}
+						if (newUpdate[ll]/oldUpdate[ll]< -0.5f){
+							maxJump[ll] = maxJump[ll]*0.5;
 						}
-
-						if (newUpdate[ll]>0){
-							newSign[ll]=1;
-						}
-						else{
-							newSign[ll]=-1;
-						}
-
-						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+fabs(newUpdate[ll]/newClamp[ll]));
+					    newUpdate[ll] = newUpdate[ll]/(1+fabs(newUpdate[ll]/maxJump[ll]));
+						newTheta[ll] = newTheta[ll]-newUpdate[ll];
 					}
 
 					newTheta[0] = max(newTheta[0],(float(sz)-1)/2-sz/4.0);
@@ -1944,7 +1744,8 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 				}
 				else
 				{
-					newLambda = 10*newLambda;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 				}
 			}
 		}
@@ -1991,21 +1792,18 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 		//int bx = blockIdx.x;
 		//int BlockSize = blockDim.x;
 		int ii, jj, kk, ll, l, m, i;
-		//int xstart, ystart, zstart, xi, yi;
 
 
 		float model, data;
 		float Div;
-		//float PSFy, PSFx;
 
 		float newTheta[NV],oldTheta[NV];
-		float newLambda = 1.0, oldLambda = 1.0;
-		float newSign[NV] = {0}, oldSign[NV] = {0};
-		float newUpdate[NV] = {0},oldUpdate[NV] = {0};
-		float newClamp[NV]={1.0,1.0,100,20,0.5,0.5}, oldClamp[NV]={1.0,1.0,100,20,0.5,0.5};
+		float newLambda = INIT_LAMBDA, oldLambda = INIT_LAMBDA, mu;
+		float newUpdate[NV] = {1e13, 1e13, 1e13, 1e13, 1e13, 1e13},oldUpdate[NV] = {1e13, 1e13, 1e13, 1e13, 1e13, 1e13};
+		float maxJump[NV]={1.0,1.0,100,20,0.5,0.5};
 		float newDudt[NV] ={0};
 
-		float newErr = 1e13, oldErr = 1e13;
+		float newErr = 1e12, oldErr = 1e13;
 
 		float jacobian[NV]={0};
 		float hessian[NV*NV]={0};
@@ -2013,7 +1811,7 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 
 		float Nmax;
 		float temp;
-		int info;
+		int errFlag=0;
 		float L[NV*NV] = {0}, U[NV*NV] = {0};
 
 
@@ -2032,15 +1830,12 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 		kernel_GaussFMaxMin2D(sz, PSFSigma, s_data, &Nmax, &newTheta[3]);
 		newTheta[2]=max(0.0, (Nmax-newTheta[3])*2*PI*PSFSigma*PSFSigma);
 		newTheta[3] = max(newTheta[3],0.01);
-
-		newClamp[2]=max(newTheta[2],newClamp[2]);
-		oldClamp[2]=newClamp[2];
-
-		newClamp[3]=max(newTheta[3],newClamp[3]);
-		oldClamp[3]=newClamp[3];
-
 		newTheta[4]=PSFSigma;
 		newTheta[5]=PSFSigma;
+
+		maxJump[2]=max(newTheta[2],maxJump[2]);
+
+		maxJump[3]=max(newTheta[3],maxJump[3]);
 
 		for (ii=0;ii<NV;ii++)oldTheta[ii]=newTheta[ii];
 
@@ -2080,67 +1875,47 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 				break;
 			}
 			else{
-				if(newErr>1.5*oldErr){
+				if(newErr>ACCEPTANCE*oldErr){
 					//copy Fitdata
 
 					for (i=0;i<NV;i++){
-						newSign[i]=oldSign[i];
-						newClamp[i]=oldClamp[i];
 						newTheta[i]=oldTheta[i];
+						newUpdate[i]=oldUpdate[i];
 					}
 					newLambda = oldLambda;
 					newErr = oldErr;
-
-					newLambda = 10*newLambda;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 				}
-				else if(newErr<oldErr){
-					if (newLambda>1){
-						newLambda = newLambda*0.8;
-					}
-					else if(newLambda<1){
-						newLambda = 1;
-					}
+				else if(newErr<oldErr&&errFlag==0){
+					newLambda = SCALE_DOWN*newLambda;
+				    mu = 1+newLambda;
 				}
 
 
 				for (i=0;i<NV;i++){
-					hessian[i*NV+i]=hessian[i*NV+i]*newLambda;
+					hessian[i*NV+i]=hessian[i*NV+i]*mu;
 				}
 				memset(L,0,NV*sizeof(float));
 				memset(U,0,NV*sizeof(float));
-				info = kernel_cholesky(hessian,NV,L,U);
-				if (info ==0){
-					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);
-					//copyFitData
+				errFlag = kernel_cholesky(hessian,NV,L,U);
+				if (errFlag ==0){
 					for (i=0;i<NV;i++){
-						oldSign[i]=newSign[i];
-						oldClamp[i]=newClamp[i];
-
 						oldTheta[i]=newTheta[i];
+						oldUpdate[i] = newUpdate[i];
 					}
 					oldLambda = newLambda;
 					oldErr=newErr;
 
-
+					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);	
+					
 					//updateFitParameters
 					for (ll=0;ll<NV;ll++){
-						if (newSign[ll]!=0){
-							if (newSign[ll]==1&&newUpdate[ll]<0){
-								newClamp[ll]=newClamp[ll]*0.5;
-							}
-							else if (newSign[ll]==-1&&newUpdate[ll]>0){
-								newClamp[ll] = newClamp[ll]*0.5;
-							}
+						if (newUpdate[ll]/oldUpdate[ll]< -0.5f){
+							maxJump[ll] = maxJump[ll]*0.5;
 						}
-
-						if (newUpdate[ll]>0){
-							newSign[ll]=1;
-						}
-						else{
-							newSign[ll]=-1;
-						}
-
-						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+fabs(newUpdate[ll]/newClamp[ll]));
+					    newUpdate[ll] = newUpdate[ll]/(1+fabs(newUpdate[ll]/maxJump[ll]));
+						newTheta[ll] = newTheta[ll]-newUpdate[ll];
 					}
 
 					newTheta[0] = max(newTheta[0],(float(sz)-1)/2-sz/4.0);
@@ -2183,7 +1958,8 @@ void kernel_splineMLEFit_z_EMCCD(const int subregion,const float *d_data,const f
 				}
 				else
 				{
-					newLambda = 10*newLambda;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 				}
 			}
 		}
@@ -2239,10 +2015,9 @@ void kernel_splineMLEFit_z_sCMOS(const int subregion,const float *d_data,const f
     float Div;
     //float dudt[NV_PS];
     float newTheta[NV],oldTheta[NV];
-	float newLambda = 1.0, oldLambda = 1.0;
-	float newSign[NV] = {0}, oldSign[NV] = {0};
-	float newUpdate[NV] = {0},oldUpdate[NV] = {0};
-	float newClamp[NV]={1.0,1.0,100,20,2}, oldClamp[NV]={1.0,1.0,100,20,2};
+	float newLambda = INIT_LAMBDA, oldLambda = INIT_LAMBDA, mu;
+	float newUpdate[NV] = {1e13, 1e13, 1e13, 1e13, 1e13},oldUpdate[NV] = {1e13, 1e13, 1e13, 1e13, 1e13};
+	float maxJump[NV]={1.0,1.0,100,20,2};
 	float newDudt[NV] ={0};
 
 	float newErr = 1e12, oldErr = 1e13;
@@ -2254,9 +2029,8 @@ void kernel_splineMLEFit_z_sCMOS(const int subregion,const float *d_data,const f
 
 	float Nmax;
 	float xc,yc,zc;
-	//float temp;
 	float delta_f[64]={0}, delta_dxf[64]={0}, delta_dyf[64]={0}, delta_dzf[64]={0};
-	int info;
+	int errFlag=0;
 	float L[NV*NV] = {0}, U[NV*NV] = {0};
 
     
@@ -2275,18 +2049,20 @@ void kernel_splineMLEFit_z_sCMOS(const int subregion,const float *d_data,const f
     //initial values
     kernel_CenterofMass2D(sz, s_data, &newTheta[0], &newTheta[1]);
     kernel_GaussFMaxMin2D(sz, 1.5, s_data, &Nmax, &newTheta[3]);
-    newTheta[2]=max(0.0, (Nmax-newTheta[3])*2*PI*1.5*1.5);
+    /*newTheta[2]=max(0.0, (Nmax-newTheta[3])*2*PI*1.5*1.5);
+	newTheta[3] = max(newTheta[3],0.01);*/
+
+	//central pixel of spline model
 	newTheta[3] = max(newTheta[3],0.01);
+	newTheta[2]= (Nmax-newTheta[3])/d_coeff[(int)(spline_zsize/2)*(spline_xsize*spline_ysize)+(int)(spline_ysize/2)*spline_xsize+(int)(spline_xsize/2)]*4;
+
     newTheta[4]=initZ;
 
-	newClamp[2]=max(newTheta[2],newClamp[2]);
-	oldClamp[2]=newClamp[2];
+	maxJump[2]=max(newTheta[2],maxJump[2]);
 
-	newClamp[3]=max(newTheta[3],newClamp[3]);
-	oldClamp[3]=newClamp[3];
+	maxJump[3]=max(newTheta[3],maxJump[3]);
 
-	newClamp[4]= max(spline_zsize/3.0f,newClamp[4]);
-	oldClamp[4]=newClamp[4];
+	maxJump[4]= max(spline_zsize/3.0f,maxJump[4]);
 
 
 	for (ii=0;ii<NV;ii++)oldTheta[ii]=newTheta[ii];
@@ -2295,7 +2071,6 @@ void kernel_splineMLEFit_z_sCMOS(const int subregion,const float *d_data,const f
 	xc = -1.0*((newTheta[0]-float(sz)/2)+0.5);
 	yc = -1.0*((newTheta[1]-float(sz)/2)+0.5);
 
-	//off = (float(spline_xsize)+1.0-2*float(sz))/2;
 	off = floor((float(spline_xsize)+1.0-float(sz))/2);
 
 	xstart = floor(xc);
@@ -2312,8 +2087,6 @@ void kernel_splineMLEFit_z_sCMOS(const int subregion,const float *d_data,const f
 	memset(jacobian,0,NV*sizeof(float));
 	memset(hessian,0,NV*NV*sizeof(float));
 	kernel_computeDelta3D(xc, yc, zc, delta_f, delta_dxf, delta_dyf, delta_dzf);
-
-	//for (ii =0;ii<64;i++)hess[ii]=delta_dxf[ii];
 
 	for (ii=0;ii<sz;ii++) for(jj=0;jj<sz;jj++) {
 		kernel_DerivativeSpline(ii+xstart+off,jj+ystart+off,zstart,spline_xsize,spline_ysize,spline_zsize,delta_f,delta_dxf,delta_dyf,delta_dzf,s_coeff,newTheta,newDudt,&model);
@@ -2342,79 +2115,53 @@ void kernel_splineMLEFit_z_sCMOS(const int subregion,const float *d_data,const f
 		}
 	}
 
-	int newStatus = 0;
 	for (kk=0;kk<iterations;kk++) {//main iterative loop
 
 			if(fabs((newErr-oldErr)/newErr)<TOLERANCE){
 				//newStatus = CONVERGED;
-				newStatus =1;
 				break;
 			}
 			else{
-				if(newErr>1.5*oldErr){
+				if(newErr>ACCEPTANCE*oldErr){
 					//copy Fitdata
-					
 					for (i=0;i<NV;i++){
-						newSign[i]=oldSign[i];
-						newClamp[i]=oldClamp[i];
 						newTheta[i]=oldTheta[i];
+						newUpdate[i]=oldUpdate[i];
 					}
 					newLambda = oldLambda;
 					newErr = oldErr;
-
-					newLambda = 10*newLambda;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 				}
-				else if(newErr<oldErr){
-					newStatus =2;
-					if (newLambda>1){
-						newLambda = newLambda*0.8;
-					}
-					else if(newLambda<1){
-						newLambda = 1;
-					}
+				else if(newErr<oldErr&&errFlag==0){
+					newLambda = SCALE_DOWN*newLambda;
+				    mu = 1+newLambda;
 				}
 				
 
 				for (i=0;i<NV;i++){
-					hessian[i*NV+i]=hessian[i*NV+i]*newLambda;
+					hessian[i*NV+i]=hessian[i*NV+i]*mu;
 				}
 				memset(L,0,NV*sizeof(float));
 				memset(U,0,NV*sizeof(float));
-				info = kernel_cholesky(hessian,NV,L,U);
-				if (info ==0){
-					newStatus = 3;
-					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);
-                 //copyFitData
+				errFlag = kernel_cholesky(hessian,NV,L,U);
+				if (errFlag ==0){
 					for (i=0;i<NV;i++){
-						oldSign[i]=newSign[i];
-						oldClamp[i]=newClamp[i];
-
 						oldTheta[i]=newTheta[i];
+						oldUpdate[i] = newUpdate[i];
 					}
 					oldLambda = newLambda;
 					oldErr=newErr;
-					
 
+					kernel_luEvaluate(L,U,jacobian,NV,newUpdate);	
+					
 					//updateFitParameters
 					for (ll=0;ll<NV;ll++){
-						if (newSign[ll]!=0){
-							if (newSign[ll]==1&&newUpdate[ll]<0){
-								newClamp[ll]=newClamp[ll]*0.5;
-							}
-							else if (newSign[ll]==-1&&newUpdate[ll]>0){
-								newClamp[ll] = newClamp[ll]*0.5;
-							}
+						if (newUpdate[ll]/oldUpdate[ll]< -0.5f){
+							maxJump[ll] = maxJump[ll]*0.5;
 						}
-
-						if (newUpdate[ll]>0){
-							newSign[ll]=1;
-						}
-						else{
-							newSign[ll]=-1;
-						}
-
-						newTheta[ll] = newTheta[ll]-newUpdate[ll]/(1+fabs(newUpdate[ll]/newClamp[ll]));
-						newStatus = 4;
+					    newUpdate[ll] = newUpdate[ll]/(1+fabs(newUpdate[ll]/maxJump[ll]));
+						newTheta[ll] = newTheta[ll]-newUpdate[ll];
 					}
 
 					newTheta[0] = max(newTheta[0],(float(sz)-1)/2-sz/4.0);
@@ -2430,15 +2177,12 @@ void kernel_splineMLEFit_z_sCMOS(const int subregion,const float *d_data,const f
 					xc = -1.0*((newTheta[0]-float(sz)/2)+0.5);
 					yc = -1.0*((newTheta[1]-float(sz)/2)+0.5);
 
-					//off = (float(spline_xsize)+1.0-2*float(sz))/2;
-
 					xstart = floor(xc);
 					xc = xc-xstart;
 
 					ystart = floor(yc);
 					yc = yc-ystart;
 
-					//zstart = floor(newTheta[4]);
 					zstart = floor(newTheta[4]);
 					zc = newTheta[4] -zstart;
 
@@ -2470,16 +2214,13 @@ void kernel_splineMLEFit_z_sCMOS(const int subregion,const float *d_data,const f
 							hessian[l*NV+m] +=t2*newDudt[l]*newDudt[m];
 							hessian[m*NV+l] = hessian[l*NV+m];
 						}
-						newStatus = 5;
 					}
 				}
 				else
 				{
-					newLambda = 10*newLambda;
-					//newStatus = 6;
+					mu = max( (1 + newLambda*SCALE_UP)/(1 + newLambda),1.3f);         
+					newLambda = SCALE_UP*newLambda;
 				}
-
-					//copyFitdata	
 
 			}
 

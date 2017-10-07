@@ -1,10 +1,12 @@
-/*!
- * \file GPUgaussLib.cuh
- * \author Keith Lidke
- * \date January 10, 2010
- * \brief This contains the definitions for all the cuda device functions.  It is only 
- * included in the GPUgaussMLEv2.cu file to prevent multiple definitions of functions.
- */
+//Copyright (c) 2017 Ries Lab, European Molecular Biology Laboratory, Heidelberg.
+//author: Yiming Li
+//email: yiming.li@embl.de
+//date: 2017.07.24
+
+// Derivative for Gaussian were adopt from Keith Lidke
+//"Fast, single-molecule localization that achieves theoretically minimum uncertainty." 
+//C. Simth, N. Joseph, B. Rieger & K. Lidke. Nat. Methods, 7, 373, 2010
+
 #include "CPUgaussLib.h"
 #include "definitions.h"
 #include <math.h>
@@ -266,23 +268,23 @@ void kernel_GaussFMaxMin2D(const int sz, const float sigma, const float * data, 
 	 * \param MinBG minimum background value
 	 */
     int ii, jj, kk, ll;
-    float filteredpixel=0, sum=0;
+    //float filteredpixel=0, sum=0;
     *MaxN=0.0f;
     *MinBG=10e10f; //big
     
     float norm=1.0f/2.0f/sigma/sigma;
     //loop over all pixels
     for (kk=0;kk<sz;kk++) for (ll=0;ll<sz;ll++){
-        filteredpixel=0.0f;
-        sum=0.0f;
-        for (ii=0;ii<sz;ii++) for(jj=0;jj<sz;jj++){
-            filteredpixel+=exp(-pow((float)(ii-kk), 2)*norm)*exp(-pow((float)(ll-jj), 2)*norm)*data[ii*sz+jj];
-            sum+=exp(-pow((float)(ii-kk), 2)*norm)*exp(-pow((float)(ll-jj), 2)*norm);
-        }
-        filteredpixel/=sum;
+        //filteredpixel=0.0f;
+        //sum=0.0f;
+        //for (ii=0;ii<sz;ii++) for(jj=0;jj<sz;jj++){
+        //    filteredpixel+=exp(-pow((float)(ii-kk), 2)*norm)*exp(-pow((float)(ll-jj), 2)*norm)*data[ii*sz+jj];
+        //    sum+=exp(-pow((float)(ii-kk), 2)*norm)*exp(-pow((float)(ll-jj), 2)*norm);
+        //}
+        //filteredpixel/=sum;
         
-        *MaxN=max(*MaxN, filteredpixel);
-        *MinBG=min(*MinBG, filteredpixel);
+        *MaxN=max(*MaxN, data[kk*sz+ll]);
+        *MinBG=min(*MinBG, data[kk*sz+ll]);
     }
 }
 
