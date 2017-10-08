@@ -399,8 +399,8 @@ numim=length(stackinfo.x);
 varstack=zeros(roisize,roisize,numim,'single');
 dn=floor(roisize/2);
 for k=1:numim
-    stackinfo.x(k)
-    stackinfo.y(k)
+%     stackinfo.x(k)
+%     stackinfo.y(k)
     varstack(:,:,k)=varmap(stackinfo.x(k)-dn:stackinfo.x(k)+dn,stackinfo.y(k)-dn:stackinfo.y(k)+dn);
 end
 end
