@@ -62,7 +62,7 @@ classdef imageloaderMM<interfaces.imageloaderSMAP
             allmd(end+1,:)={'ROI direct',num2str(troi{:}')};
             catch err
             end
-            framesd=max([img.lastAcquiredFrame,summarymetadata.get('Slices'),summarymetadata.get('Frames')]);
+            framesd=max([img.lastAcquiredFrame,summarymetadata.get('Slices'),summarymetadata.get('Frames'),summarymetadata.get('Positions')]);
             allmd(end+1,:)={'frames direct',num2str(framesd)};
             
             allmd=vertcat(allmd,alls);
@@ -140,6 +140,9 @@ function image=readstack(obj,imagenumber)
 img=obj.reader.getImage(0,0,imagenumber-1,0);
 if isempty(img)
     img=obj.reader.getImage(0,imagenumber-1,0,0);
+end
+if isempty(img)
+    img=obj.reader.getImage(0,0,0,imagenumber-1);
 end
 if isempty(img)
     image=[];

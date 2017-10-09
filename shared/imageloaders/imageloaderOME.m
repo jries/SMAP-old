@@ -92,7 +92,7 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
 end
 
 function f=getnumberofframes(allmd)
-numf=contains(allmd(:,1),{'sizeZ','sizeC','sizeT','imageCount'});
+numf=contains(allmd(:,1),{'sizeZ','sizeC','sizeT','imageCount','Positions'});
 f=nanmax(str2double(allmd(numf,2)));
 % obj.metadata.allmetadata(end+1,:)={'frames direct',num2str(f)};
 end

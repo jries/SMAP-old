@@ -278,9 +278,10 @@ p=obj.getAllParameters;
 fitpar.iterations=p.iterations;
 fitpar.fitmode=p.fitmode.Value;
 fitpar.roisperfit=p.roisperfit;
-fitpar.issCMOS=p.isscmos;
+fitpar.issCMOS=false;
 
 if fitpar.fitmode==3||fitpar.fitmode==5
+    fitpar.issCMOS=p.isscmos;
     fitpar.PSF2D=p.fit2D;
     if p.fit2D
         fitpar.fitmode=6;
