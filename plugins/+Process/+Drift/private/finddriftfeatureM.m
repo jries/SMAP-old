@@ -160,7 +160,7 @@ function [Fmovier,posh]=makemovie %calculate fourier transforms of images
 end
 
 function [Mall,Aall]= finddisplacements2 % find displacements
-global SMAP_stopnow;
+% global SMAP_stopnow;
     %     dM=0.006;
 s=size(Fmovier);
 dnumframesh =s(3);
