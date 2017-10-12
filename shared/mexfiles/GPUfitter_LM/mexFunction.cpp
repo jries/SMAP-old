@@ -132,7 +132,7 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 		if (Ndim==2)Nfitraw=1;else Nfitraw=datasize[2];
 
 		if (datasize[0] > IMSZBIG)
-			mexErrMsgIdAndTxt("CPUmleFit_LM:SubregionSize","X,Y dimension of data must be smaller than 21.\n");
+			mexErrMsgIdAndTxt("CPUmleFit_LM:SubregionSize","X,Y dimension of data must be smaller than 51.\n");
 		if (datasize[1]!=datasize[0])
 			mexErrMsgIdAndTxt("CPUmleFit_LM:SubregionShape","Fit Box must be square");
 		sz=datasize[0];

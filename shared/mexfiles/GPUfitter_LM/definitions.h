@@ -10,7 +10,7 @@
 #define BSZ 64			//!< max number of threads per block 
 #define MEM 3872        //3872		11616//!< shared 
 #define IMSZ 11			//!< not used
-#define IMSZBIG 21		//!< maximum fitting window size
+#define IMSZBIG 51		//!< maximum fitting window size
 #define NK 128			//!< number of blocks to run in each kernel
 #define PI 3.141592f	//!< ensure a consistent value for pi
 //#define pi 3.141592f
