@@ -55,7 +55,7 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                         driftinfoh=driftinfo;
                     end
                     lochere.files.file(1).driftinfo=driftinfoh;
-                    if isfield(obj.locData.files.file(k).driftinfo,'driftinfo')
+                    if isfield(obj.locData.files.file(k),'driftinfo')
                         driftinfoh=copyfields(obj.locData.files.file(k).driftinfo,driftinfo);
                     else
                         driftinfoh=driftinfo;
