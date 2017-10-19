@@ -230,4 +230,5 @@ initaxis(p.resultstabgroup,'scatter')
 transform.tinfo.targetpos=p.targetpos.selection;
 transform.tinfo.separator=separator;
 transform.tinfo.mirror=mirrorinfo;
+transform.tinfo.cam_pixelsize_nm=p.currentfileinfo.cam_pixelsize_um*1000;
 

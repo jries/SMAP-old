@@ -44,6 +44,7 @@ classdef PeakFinder<interfaces.WorkflowModule
             maxind= (maxima(:,3)>cutoff);
             maxout.y=maxima(maxind,1);
             maxout.x=maxima(maxind,2);
+            maxout.intensity=maxima(maxind,3);
             dato=data;         
             dato.data=(maxout); 
             else
