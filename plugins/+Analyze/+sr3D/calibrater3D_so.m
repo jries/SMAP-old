@@ -44,11 +44,18 @@ classdef calibrater3D_so<interfaces.DialogProcessor
                 file{k}.posy=yb(infile)/pixelsize(end)/1000-roi(2);
                 il.close;
                 posall{k}=horzcat(file{k}.posx,file{k}.posy);
+                posallnm{k}=horzcat(xb,yb);
+                pixelsizes{k}=pixelsize;
+                rois{k}=roi;
              end
              
              smappos.positions=posall;
+             smappos.positionsnm=posallnm;
              smappos.imageROI=roi;
-             cg=calibrate3D_GUI(smappos);
+             smappos.files=obj.locData.files.file;
+             smappos.pixelsize=pixelsizes;
+             smappos.roi=rois;
+             cg=calibrate3D_GUI_g(smappos);
              cg.guihandles.dz.String=num2str(p.dz);
              cg.guihandles.filelist.String=getFieldAsVector(file,'name');
              [p, f]=fileparts(file{1}.name);
