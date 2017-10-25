@@ -1,4 +1,8 @@
 classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
+    properties
+        poly
+        hpoly
+    end
     methods
         function obj=BALM_fibril_growth(varargin)        
                 obj@interfaces.SEEvaluationProcessor(varargin{:});
@@ -90,15 +94,53 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
             xlabel(h,'xnm')
             ylabel(h,'frame')
             
+            uicontrol(h.Parent,'Position',[10,10,40,20],'String','Add Line','Callback',{@obj.addline,h});
+            
+            if length(obj.poly)<obj.site.ID || isempty(obj.poly{obj.site.ID})
+%                 obj.hpoly=impoly(h,'Closed',false,'PositionConstraintFcn',@obj.polyconstrain);
+            else
+                obj.hpoly=impoly(h,obj.poly{obj.site.ID},'Closed',false,'PositionConstraintFcn',@obj.polyconstrain);
             
             
+                 setConstrainedPosition(obj.hpoly,obj.hpoly.getPosition);
+                hi=addNewPositionCallback(obj.hpoly,@obj.polycallback);
+    %             obj.hpoly.wait;
+                obj.poly{obj.site.ID}=obj.hpoly.getPosition;
+                out.poly=obj.hpoly.getPosition;
+                obj.polycallback(obj.hpoly.getPosition);
+            end
+           
 
-
-
+        end
+        
+        function addline(obj,a,b,h)
+            if length(obj.poly)<obj.site.ID || isempty(obj.poly{obj.site.ID})
+                obj.hpoly=impoly(h,'Closed',false,'PositionConstraintFcn',@obj.polyconstrain);
+            else %add vortex to end
+                pos=obj.hpoly.getPosition;
+                pos(end+1,:)=pos(end,:);
+                obj.hpoly.setPosition(vertcat(pos(1,:),pos));
+                 
+            end
+             setConstrainedPosition(obj.hpoly,obj.hpoly.getPosition);
+            hi=addNewPositionCallback(obj.hpoly,@obj.polycallback);
+            obj.polycallback(obj.hpoly.getPosition);
+        end
+        
+        function outp=polyconstrain(obj,inp)
+            
+            outp=vertcat(inp(1,:),max(inp(2:end,:),inp(1:end-1,:)));
+            
+        end
+        function polycallback(obj,inp)
+%             setConstrainedPosition(obj.hpoly,inp);
+            obj.poly{obj.site.ID}=inp;
+            obj.site.evaluation.(obj.name).poly=inp;
         end
         function pard=guidef(obj)
             pard=guidef;
         end
+        
     end
 end
 
