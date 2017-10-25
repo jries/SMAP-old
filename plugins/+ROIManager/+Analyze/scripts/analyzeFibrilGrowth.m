@@ -19,7 +19,7 @@ for k=1:length(sites)
     timeall(end+1:end+l)=polyh(1:end-1,2)*frametime;
 end
 
-maxwaitelongation=0.1; %in um
+maxwaitelongation=0.03; %in um
 stop=lenall<maxwaitelongation;
 
 
@@ -40,7 +40,7 @@ title('elongationstep')
 xlabel('elongationstep um')
 
 subplot(2,2,4);
-histogram(vall(~stop),0:1e-3:max(vall(~stop)));
+histogram(vall(~stop),0:1e-3:min(max(vall(~stop)),.01));
 title('elongation speed')
 xlabel('elongation speed um/s')
 
