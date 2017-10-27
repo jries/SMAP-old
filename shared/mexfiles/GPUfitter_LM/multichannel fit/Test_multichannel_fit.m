@@ -212,7 +212,7 @@ sharedA = int32(sharedA);
 coeff = single(coeff);
 dT = single(dT);
 tic
-[P1,CRLB1, LL1] =  GPUmleFit_LM_MultiChannel(d_data,sharedA,50,coeff,dT);
+[P1,CRLB1, LL1] =  CPUmleFit_LM_MultiChannel(d_data,sharedA,50,coeff,dT);
 
 tspline=toc;
 disp(['cspline: ' num2str(Nfits/tspline) ' fits/s']);
