@@ -207,7 +207,7 @@ void kernel_splineMLEFit_z_EMCCD_multi(const int subregion, const float *d_data,
 
 	for (kk=0;kk<iterations;kk++) {//main iterative loop
 
-		if(abs((newErr-oldErr)/newErr)<TOLERANCE){
+		if(fabs((newErr-oldErr)/newErr)<TOLERANCE){
 			//newStatus = CONVERGED;
 			break;
 		}
