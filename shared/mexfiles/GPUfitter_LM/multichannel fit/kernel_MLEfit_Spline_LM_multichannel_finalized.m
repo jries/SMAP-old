@@ -613,8 +613,11 @@ for tx = 1:Nfits
     end
     
     Minv = inv(M);
-    
-    iteration = kk;
+    if ~isempty(kk)
+        iteration = kk;
+    else
+        iteration = 0;
+    end
     for kk = 1:NV
         P(Nfits*(kk-1)+tx) = newThetaAll(kk);
         P(Nfits*(NV+kk)+tx) = maxJump(kk);

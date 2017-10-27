@@ -88,6 +88,7 @@ off2 = ((spline_xsize2+1)-Npixels)/2;
 
 
 for kk = 1:Nfits
+    kk
     xcenter1 = coordsxy1(kk,1);
     ycenter1 = coordsxy1(kk,2);
     
@@ -190,7 +191,7 @@ noChannels = 2;
 iterations=50;
 dT = zeros(5,noChannels,Nfits);
 dxy=coordsxy1-coordsxy2;
-temp = reshape(dxy',[2 1,1000]);
+temp = reshape(dxy',[2 1,Nfits]);
 dT(1:2,2,:)=temp*-1;
 shared = [1;1;1;0;0];
 sharedA = repmat(shared,[1 Nfits]);
@@ -201,14 +202,20 @@ coeff(:,:,:,:,1)=coeff1;
 coeff(:,:,:,:,2)=coeff2;
 
 
-[P,CRLB, LL,update, error] =  kernel_MLEfit_Spline_LM_multichannel_finalized(d_data(:,:,1:10,:),coeff, shared,dT,1);
+% [P,CRLB, LL,update, error] =  kernel_MLEfit_Spline_LM_multichannel_finalized(d_data(:,:,1:10,:),coeff, shared,dT,1);
 % 
-% [P,update, error, model_save] =  kernel_MLEfit_Spline_LM_multichannel(output1,output2,coords1chip, coords2chip, tform, coeff1,coeff2,Npixels,iterations);
+% 
+% [P1,CRLB1, LL1] =  GPUmleFit_LM_MultiChannel(single(d_data(:,:,:,:)),int32(sharedA),50,single(coeff),single(dT));
 
-[P1,CRLB1, LL1,test] =  GPUmleFit_LM_MultiChannel(single(d_data(:,:,:,:)),int32(sharedA),50,single(coeff),single(dT));
+d_data = single(d_data);
+sharedA = int32(sharedA);
+coeff = single(coeff);
+dT = single(dT);
+tic
+[P1,CRLB1, LL1] =  GPUmleFit_LM_MultiChannel(d_data,sharedA,50,coeff,dT);
 
-
-
+tspline=toc;
+disp(['cspline: ' num2str(Nfits/tspline) ' fits/s']);
 
 
 
