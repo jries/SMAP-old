@@ -9,6 +9,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
         spatial3Dcal=false;
         spatialXrange=[-inf inf];
         spatialYrange=[-inf inf];
+        infofields={'x','y'};
     end
     methods
 
@@ -105,6 +106,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
                  imgstack=dstruc.img;
                  
                  stackinf=dstruc.info;
+%                  fninfo=fieldnames(fitterstackinfo{1});
                  s=size(imgstack);
                  if length(s)==2
                      s(3)=1;
@@ -255,11 +257,11 @@ global fitterstackinfo fitterimagestack fitterbgstack
                 for X=numx:-1:1
                     for Y=numy:-1:1
                         fitterimagestack{X,Y}=zeros(roisize,roisize,obj.numberInBlock,'single');
-                        fitterstackinfo{X,Y}.x=zeros(obj.numberInBlock,1,'single');
-                        fitterstackinfo{X,Y}.y=zeros(obj.numberInBlock,1,'single');
                         fitterstackinfo{X,Y}.frame=zeros(obj.numberInBlock,1,'double');
-%                         fitterstackinfo{X,Y}.X=X;
-%                         fitterstackinfo{X,Y}.Y=Y;
+                        for k=1:length(obj.infofields)
+                            fitterstackinfo{X,Y}.(obj.infofields{k})=zeros(obj.numberInBlock,1,'single');
+                        end
+         
                     end
                 end
                        
