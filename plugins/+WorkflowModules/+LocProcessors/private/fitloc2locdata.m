@@ -1,5 +1,6 @@
 function locdat=fitloc2locdata(obj,locs,indin)
 fieldsremove={'xerrpix','yerrpix','PSFxpix','PSFypix','xpix','ypix'};
+fieldsremove={};
 keeptype={'frame','filenumber'};
 fn=fieldnames(locs);
 keepfields=setdiff(fn,fieldsremove);

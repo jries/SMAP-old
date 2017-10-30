@@ -82,7 +82,7 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
                 varstack=0;
             end
             out=fitwrapper_global(imstack,obj.fitpar,stackinfo,varstack);
-            locs=fit2locs(out,stackinfo,obj.fitpar,imstack);
+            locs=fit2locs_global(out,stackinfo,obj.fitpar,imstack);
         end
 
         function initGui(obj)
@@ -112,12 +112,14 @@ end
 % function loc_fileinfo_callback(obj)
 % 
 % end
-function locs=fit2locs(results,stackinfo,fitpar,image)
+function locs=fit2locs_global(results,stackinfo,fitpar,image)
 if isempty(results)
     locs=[];
     return
 end
 numl=size(results.P,1);
+numpar=5;
+numchannels=2;
 
 v1=ones(numl,1,'single');
 s=size(image);          
@@ -137,65 +139,101 @@ LogL=results.LogL;
            CRLB((CRLB)<0)= 0; %XXXXXXXXX
           % LogL((LogL)<0)= 0; %XXXXXXXXX
            
-           
+o=ones( numpar,1);fac=num2cell(o);z=zeros( numpar,1);off=num2cell(z);
+faccrlb=fac;
 % locs.xpix=P(:,2)-dn+posx;
 if (fitpar.fitmode==5||fitpar.fitmode==6) && fitpar.mirrorstack
-    locs.xpix=dn-P(:,2)+posx;
+    fac{2}=-1;
+    off{2}=dn+posx;
+%     locs.xpix=dn-P(:,2)+posx;
 else
-    locs.xpix=P(:,2)-dn+posx;
+    fac{2}=1;
+    off{2}=-dn+posx;
+%     locs.xpix=P(:,2)-dn+posx;
 end
-locs.ypix=P(:,1)-dn+posy;
+% locs.ypix=P(:,1)-dn+posy;
+off{1}=-dn+posy;
 
 
-locs.phot=P(:,4)*EMexcess;
-locs.bg=P(:,5)*EMexcess;
+% locs.phot=P(:,4)*EMexcess;
+% locs.bg=P(:,5)*EMexcess;
+fac{4}=EMexcess;
+fac{5}=EMexcess;
+faccrlb{4}=EMexcess;
+faccrlb{5}=EMexcess;
 locs.frame=frame;
 
-locs.xerrpix=sqrt(CRLB(:,2));
-locs.yerrpix=sqrt(CRLB(:,1));
-locs.photerr=sqrt(CRLB(:,4))*EMexcess;
-locs.bgerr=sqrt(CRLB(:,5))*EMexcess;
+% locs.xerrpix=sqrt(CRLB(:,2));
+% locs.yerrpix=sqrt(CRLB(:,1));
+% locs.photerr=sqrt(CRLB(:,4))*EMexcess;
+% locs.bgerr=sqrt(CRLB(:,5))*EMexcess;
 locs.logLikelihood=LogL;
 
 locs.peakfindx=posx;
 locs.peakfindy=posy;
 
-switch fitpar.fitmode
-    case 1 %sx not fitted
-        sx=fitpar.PSFx0*v1;
-        locs.PSFxpix=0*locs.xpix+sx;
-        locs.PSFypix=locs.PSFxpix;
-    case 2 % sx free
-        locs.PSFxpix=P(:,5);
-        locs.PSFxerr=sqrt(CRLB(:,5));
-%                     sx=locs.PSFx;
-        locs.PSFypix=locs.PSFxpix;
-    case 3
-        locs.znm=(P(:,5)*1000+fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
-        locs.zerr=sqrt(CRLB(:,5))*1000*fitpar.refractive_index_mismatch;
-        [locs.PSFxpix,locs.PSFypix]=zpar2sigma(locs.znm/1000,fitpar.zparhere);
-
-
-    case 4  %sx,sy
-
-        locs.PSFxpix=P(:,5);
-        locs.PSFxerr=sqrt(CRLB(:,5));
-        locs.PSFypix=P(:,6);
-        locs.PSFyerr=sqrt(CRLB(:,6));  
-    case {5,6}
-        
-        %         locs.znm=(P(:,5)*1000+fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
-        locs.znm=((P(:,3)-fitpar.z0)*fitpar.dz)*fitpar.refractive_index_mismatch;
-        notconverged=P(:,3)<2|P(:,3)>size(fitpar.splinefit{1}.cspline.coeff,3)-2;
-        locs.znm(notconverged)=NaN;
-        
-        locs.zerr=sqrt(CRLB(:,3))*fitpar.dz*fitpar.refractive_index_mismatch;
+% switch fitpar.fitmode
+%     case 1 %sx not fitted
+%         sx=fitpar.PSFx0*v1;
+%         locs.PSFxpix=0*locs.xpix+sx;
+%         locs.PSFypix=locs.PSFxpix;
+%     case 2 % sx free
+%         locs.PSFxpix=P(:,5);
+%         locs.PSFxerr=sqrt(CRLB(:,5));
+% %                     sx=locs.PSFx;
+%         locs.PSFypix=locs.PSFxpix;
+%     case 3
+%         locs.znm=(P(:,5)*1000+fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
+%         locs.zerr=sqrt(CRLB(:,5))*1000*fitpar.refractive_index_mismatch;
 %         [locs.PSFxpix,locs.PSFypix]=zpar2sigma(locs.znm/1000,fitpar.zparhere);
-        
+% 
+% 
+%     case 4  %sx,sy
+% 
+%         locs.PSFxpix=P(:,5);
+%         locs.PSFxerr=sqrt(CRLB(:,5));
+%         locs.PSFypix=P(:,6);
+%         locs.PSFyerr=sqrt(CRLB(:,6));  
+%     case {5,6}
+%         
+%         %         locs.znm=(P(:,5)*1000+fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
+%         locs.znm=((P(:,3)-fitpar.z0)*fitpar.dz)*fitpar.refractive_index_mismatch;
+%         notconverged=P(:,3)<2|P(:,3)>size(fitpar.splinefit{1}.cspline.coeff,3)-2;
+%         locs.znm(notconverged)=NaN;
+%         
+%         locs.zerr=sqrt(CRLB(:,3))*fitpar.dz*fitpar.refractive_index_mismatch;
+% %         [locs.PSFxpix,locs.PSFypix]=zpar2sigma(locs.znm/1000,fitpar.zparhere);
+%         
          sx=1*v1;
         locs.PSFxpix=sx;
         locs.PSFypix=sx;
+% end
+fac{3}=fitpar.dz*fitpar.refractive_index_mismatch;
+off{3}=-fitpar.z0*fitpar.dz*fitpar.refractive_index_mismatch;
+faccrlb{3}=fitpar.dz*fitpar.refractive_index_mismatch;
+
+names={'ypix','xpix','znm','phot','bg'};
+linked=fitpar.link;
+ind=1;
+for k=1:length(names)
+    if linked(k)
+        locs.(names{k})=P(:,ind).*fac{k}+off{k};
+        locs.([names{k} 'err'])=sqrt(CRLB(:,ind)).*faccrlb{k};
+        ind=ind+1;
+    else
+        for c=1:numchannels
+            if c==1
+                ch='';
+            else
+                ch=num2str(c);
+            end
+            locs.([names{k} ch])=P(:,ind).*fac{k}+off{k};
+            locs.([names{k} ch 'err'])=sqrt(CRLB(:,ind)).*faccrlb{k};
+            ind=ind+1;
+        end
+    end
 end
+
 locs.locpthompson=sqrt((locs.PSFxpix.*locs.PSFypix+1/12*v1)./( locs.phot/EMexcess)+8*pi*(locs.PSFxpix.*locs.PSFypix).^2.* locs.bg./( locs.phot/EMexcess).^2);
 end
 
@@ -384,7 +422,7 @@ if fitpar.fitmode==3||fitpar.fitmode==5
                 if iscell(cs.cspline.coeff)
                     coeff(:,:,:,:,1)=cs.cspline.coeff{1};
                     coeff(:,:,:,:,2)=cs.cspline.coeff{2};
-                    cs.cspline.coeff=coeff;
+                    cs.cspline.coeff=single(coeff);
                 end
                 splinefit{X,Y}=cs;
                 
