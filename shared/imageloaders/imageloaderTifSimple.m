@@ -21,7 +21,12 @@ classdef imageloaderTifSimple<interfaces.imageloaderSMAP
             
         end
         function image=getimage(obj,frame)
+            try
             image=imread(obj.file,'Index',frame);
+            catch
+                image=[];
+            end
+           
         end
         
         function close(obj)
