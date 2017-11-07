@@ -60,8 +60,13 @@ pard.t7.position=[1,3];
 pard.sigmafind.object=struct('String','100','Style','edit');
 pard.sigmafind.position=[1,4];
 
+pard.t10.object=struct('String','layer','Style','text');
+pard.t10.position=[6,1];
+pard.layer.object=struct('String','1','Style','edit');
+pard.layer.position=[6,2];
+
 pard.preview.object=struct('String','preview','Style','checkbox','Value',1);
-pard.preview.position=[6,1];
+pard.preview.position=[6,4];
 
 pard.t11.object=struct('String','Works best with: PSF filtered, locprec filter larger than usual (~30-60 nm), grouped','Style','text');
 pard.t11.position=[8,1];
@@ -77,6 +82,7 @@ cells=se.cells;
 pr=p.se_cellpixelsize;
 sigma1=p.sigma1/pr;
 sigmafind=p.sigmafind/pr;
+layer=p.layer;
 % sigma1=25;
 
 rimrel=p.rim;
@@ -106,7 +112,7 @@ struce2 = strel('disk',1);
     
 for kc=rangec
     cell=se.cells(kc);
-    locs=locData.getloc({'xnm','ynm'},'layer',1,'position',[cell.pos(1:2) p.se_cellfov/2 ],'filenumber',cell.info.filenumber);
+    locs=locData.getloc({'xnm','ynm'},'layer',layer,'position',[cell.pos(1:2) p.se_cellfov/2 ],'filenumber',cell.info.filenumber);
     rangex=[cell.pos(1)-p.se_cellfov/2 , cell.pos(1)+p.se_cellfov/2 ];
     rangey=[cell.pos(2)-p.se_cellfov/2 , cell.pos(2)+p.se_cellfov/2 ];
     imh=(myhist2(locs.xnm,locs.ynm,pr,pr, rangex,rangey))';
@@ -164,7 +170,7 @@ for kc=rangec
     for ks=1:length(cx)
         %calculate average position
         pos=[cx(ks),cy(ks)];
-        locs=locData.getloc({'xnm','ynm'},'layer',1,'position',[pos(1:2) p.se_siteroi p.se_siteroi],'filenumber',cell.info.filenumber);
+        locs=locData.getloc({'xnm','ynm'},'layer',layer,'position',[pos(1:2) p.se_siteroi p.se_siteroi],'filenumber',cell.info.filenumber);
         posnew=[mean(locs.xnm), mean(locs.ynm)];
         
         stdposx=std(locs.xnm);
