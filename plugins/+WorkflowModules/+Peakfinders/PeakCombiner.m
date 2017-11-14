@@ -31,7 +31,11 @@ classdef PeakCombiner<interfaces.WorkflowModule
 %             roi=zeros(1,4);
             maxima=data.data;%get;
             transform=obj.transform;
-            pixelsize=transform.tinfo.cam_pixelsize_nm;
+            if isfield(transform.tinfo,'cam_pixelsize_nm')
+                pixelsize=transform.tinfo.cam_pixelsize_nm;
+            else
+                pixelsize=p.loc_fileinfo.cam_pixelsize_um*1000;
+            end
             xnm=(maxima.x+roi(1))*pixelsize(1);
             ynm=(maxima.y+roi(2))*pixelsize(end);
             indref=obj.transform.getRef(xnm,ynm);
