@@ -260,22 +260,34 @@ end
 
         
 dT=zeros(npar,2,nfits);
-dT(1,2,:)=stackinfo.dx;
-dT(2,2,:)=stackinfo.dy;
+dT(1,2,:)=stackinfo.dy;
+dT(2,2,:)=stackinfo.dx;
 sharedA = repmat(int32(fitpar.link'),[1 numframes]);
-        
-out.indused=1:numberOfChannels:numframes;     
+ 
+%for testing: change order
+
+
+out.indused=1:numberOfChannels:numframes;   
+
+% [~,ind]=sort(rand(length(out.indused),1));
+
+
 imfit(:,:,:,1)=imstack(:,:,1:numberOfChannels:end);
 imfit(:,:,:,2)=imstack(:,:,2:numberOfChannels:end);
+
+% imfit=imfit(:,:,ind,:);
+% dT=dT(:,:,ind);
+% dT=zeros(npar,2,nfits);
 arguments{1}=imfit;
 arguments{2}=sharedA;
 arguments{3}=fitpar.iterations;
 arguments{4}=single(fitpar.splinefithere.cspline.coeff);
-arguments{5}=dT;
+arguments{5}=single(dT);
 %imstack, sharedflag, iterations, spline coefficients, channelshift,
 %fitmode, varmap
 arguments{6}=fitpar.fitmode;
 [P CRLB LogL]=fitpar.fitfunction(arguments{:});
+% htot=P(:,8)
 % 
 % arguments{5}=varstack;
 % arguments{6}=1;
@@ -310,7 +322,7 @@ arguments{6}=fitpar.fitmode;
 
 out.P=P;
 out.CRLB=CRLB;
-out.LogL=LogL;
+ out.LogL=LogL;
 end
         
 

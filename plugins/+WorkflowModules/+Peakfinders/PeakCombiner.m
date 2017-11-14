@@ -44,12 +44,17 @@ classdef PeakCombiner<interfaces.WorkflowModule
             Nref=maxima.intensity(indref).^2;
             Nt=maxima.intensity(~indref).^2;
             [xt,yt]=transform.transformCoordinatesInv(xnm(~indref),ynm(~indref));
-            [iA,iB,uiA,uiB]=matchlocs(xnmref,ynmref,xt,yt,[0 0],pixelsize(1)*2);
+            [iA,iB,uiA,uiB]=matchlocs(xnmref,ynmref,xt,yt,[0 0],pixelsize(1)*4);
             xallr=vertcat(xnmref(uiA), xt(uiB'),((xnmref(iA).*Nref(iA)+xt(iB).*Nt(iB))./(Nref(iA)+Nt(iB))));
             yallr=vertcat(ynmref(uiA), yt(uiB'),((ynmref(iA).*Nref(iA)+yt(iB).*Nt(iB))./(Nref(iA)+Nt(iB))));
+%             
+%             xallr=vertcat(xnmref(uiA), xnmref(iA));
+%             yallr=vertcat(ynmref(uiA), ynmref(iA));
+            
+            
             xallrpix=round(xallr/pixelsize(1));
             yallrpix=round(yallr/pixelsize(end));
-            
+             
             [xallt,yallt]=transform.transformCoordinatesFwd(xallrpix*pixelsize(1),yallrpix*pixelsize(end));
             
             xalltpix=round(xallt/pixelsize(1));
@@ -58,8 +63,8 @@ classdef PeakCombiner<interfaces.WorkflowModule
             
             indgood=xalltpix>roi(1)&yalltpix>roi(2)&xalltpix<=roi(1)+roi(3)&yalltpix<=roi(2)+roi(4);
             
-            dx=xalltpix(indgood)-xallt(indgood)/pixelsize(1);
-            dy=yalltpix(indgood)-yallt(indgood)/pixelsize(end);
+            dx=xallt(indgood)/pixelsize(1)-xalltpix(indgood);
+            dy=yallt(indgood)/pixelsize(end)-yalltpix(indgood);
             
             xallrpix=xallrpix(indgood)-roi(1);
             yallrpix=yallrpix(indgood)-roi(2);
