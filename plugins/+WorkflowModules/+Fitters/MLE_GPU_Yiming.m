@@ -81,6 +81,10 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             end
             out=fitwrapper(imstack,obj.fitpar,varstack);
             locs=fit2locs(out,stackinfo,obj.fitpar,imstack);
+            
+            if p.asymmetry
+            [locs.asymmetry,locs.asymmdiag,locs.asymangle]=asymmetry(imgstack,true);
+            end
         end
 
         function initGui(obj)
@@ -532,6 +536,11 @@ pard.automirror.object=struct('Style','popupmenu','String',{{'auto','no mirror',
 pard.automirror.position=[2,2];
 pard.automirror.Width=1;
 pard.automirror.Optional=true;
+
+pard.asymmetry.object=struct('Style','checkbox','String','calculate asymmetry','Value',0);
+pard.asymmetry.position=[2,3.5];
+pard.asymmetry.Width=1.5;
+pard.asymmetry.Optional=true;
 
 pard.isscmos.object=struct('Style','checkbox','String','sCMOS');   
 pard.isscmos.position=[5,1];
