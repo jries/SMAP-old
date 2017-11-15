@@ -1,4 +1,4 @@
-classdef LocFilter<interfaces.WorkflowModule;
+classdef LocFilter<interfaces.WorkflowModule
     properties
          pixelsize   
     end
@@ -6,7 +6,7 @@ classdef LocFilter<interfaces.WorkflowModule;
        function obj=LocFilter(varargin)
             obj@interfaces.WorkflowModule(varargin{:})
             obj.inputChannels=1; 
-            obj.inputParameters={'loc_ROIsize'};
+            obj.inputParameters={'loc_ROIsize','loc_iterations'};
 %              obj.setInputChannels(1,'frame');
         end
         function pard=guidef(obj)
@@ -87,6 +87,11 @@ classdef LocFilter<interfaces.WorkflowModule;
                     indin=indin&indinh;
                 end 
                 
+                if p.check_converged && isfield(locs,'iterations')&&~isempty(p.loc_iterations)
+                    indinh=locs.iterations<p.loc_iterations;
+                    indin=indin&indinh;
+                end
+                
                 fn=fieldnames(locs);
                 for k=1:length(fn)
                     locsout.(fn{k})=locs.(fn{k})(indin);
@@ -153,6 +158,12 @@ pard.val_LL.position=[5,2.3];
 pard.val_LL.Width=.7;
 pard.val_LL.TooltipString=sprintf('Cutoff relative to maximum of log-likelihood distribution (typically 1, not much smaller).');
 pard.val_LL.Optional=true;
+
+pard.check_converged.object=struct('Style','checkbox','String','iterations < max_iterations','Value',1);
+pard.check_converged.position=[6,1];
+pard.check_converged.Width=1.3;
+pard.check_converged.TooltipString=sprintf('Filter fits that did not converge.');
+pard.check_converged.Optional=true;
 
 pard.plugininfo.type='WorkflowModule'; 
 pard.plugininfo.description='Filters localizations before saving according to photons, PSF, localization precision, log-likelihood. This can dramatically reduce the file size in case a too low cutoff was chosen during the peak finding.';

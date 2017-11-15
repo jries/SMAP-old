@@ -29,7 +29,7 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             end
             roisize=obj.getPar('loc_ROIsize');
             obj.numberInBlock=round(obj.fitpar.roisperfit*100/roisize^2);
-            
+            p=obj.getAllParameters;
             if obj.fitpar.fitmode==5 ||obj.fitpar.fitmode==6
                 EMfile=obj.getPar('loc_fileinfo').EMon;
                 EMcal=obj.fitpar.EMon;
@@ -48,7 +48,7 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
 %                 else
 %                     obj.fitpar.mirrorstack=false;
 %                 end
-                p=obj.getAllParameters;
+                
                 if p.overwritePixelsize
                     obj.setPar('overwrite_pixelsize',[p.pixelsizex p.pixelsizey])
                     cs=obj.getPar('loc_cameraSettings');
@@ -57,8 +57,9 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
                 else
                     obj.setPar('overwrite_pixelsize',[])
                 end
+                
             end   
-            
+            obj.setPar('loc_iterations',p.iterations);
             disp(reporttext)
         end
         function nofound(obj,varargin)
@@ -203,6 +204,7 @@ switch fitpar.fitmode
         locs.PSFypix=sx;
 end
 locs.locpthompson=sqrt((locs.PSFxpix.*locs.PSFypix+1/12*v1)./( locs.phot/EMexcess)+8*pi*(locs.PSFxpix.*locs.PSFypix).^2.* locs.bg./( locs.phot/EMexcess).^2);
+locs.iterations=results.P(:,end);
 end
 
 function out=fitwrapper(imstack,fitpar,varstack)

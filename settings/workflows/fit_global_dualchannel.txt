@@ -14,9 +14,16 @@ PeakFinder.Vpos=3
 PeakFinder.handle=hfilter
 PeakCombiner.Vpos=6
 PeakCombiner.handle=hfilter
+         
+RoiAdder.Vpos=1;
+RoiAdder.Xpos=4;
+RoiAdder.handle=hfilter;  
+OnlineReconstruction.Vpos=1;
+OnlineReconstruction.Xpos=1;
+OnlineReconstruction.handle=hloc;  
 
-DisplayChooser.Vpos=3
-DisplayChooser.Xpos=3.5
+DisplayChooser.Vpos=7
+DisplayChooser.Xpos=1;
 DisplayChooser.handle=hfilter
 RoiCutterWF.Vpos=1
 RoiCutterWF.Xpos=4

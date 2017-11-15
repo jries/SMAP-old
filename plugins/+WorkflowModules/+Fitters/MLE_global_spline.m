@@ -60,6 +60,7 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
                 else
                     obj.setPar('overwrite_pixelsize',[])
                 end
+                 obj.setPar('loc_iterations',p.iterations);
             end   
             
 %             disp(reporttext)
@@ -233,7 +234,7 @@ for k=1:length(names)
         end
     end
 end
-
+locs.iterations=P(:,end);
 locs.locpthompson=sqrt((locs.PSFxpix.*locs.PSFypix+1/12*v1)./( locs.phot/EMexcess)+8*pi*(locs.PSFxpix.*locs.PSFypix).^2.* locs.bg./( locs.phot/EMexcess).^2);
 end
 
