@@ -627,7 +627,10 @@ pard.cal_3Dfile.Width=2;
 pard.cal_3Dfile.TooltipString=sprintf('3D calibration file for astigmtic 3D. \n Generate from bead stacks with plugin: Analyze/sr3D/CalibrateAstig');
 
 
-pard.isglobal.object=struct('Style','checkbox','String','Global fit');
+p(1).value=0; p(1).on={}; p(1).off={'linkt','link'};
+p(2).value=1; p(2).on={'linkt','link'}; p(2).off={};
+
+pard.isglobal.object=struct('Style','checkbox','String','Global fit','Callback',{{@obj.switchvisible,p}});
 pard.isglobal.position=[3,1];
 pard.isglobal.Width=1;
 pard.isglobal.Optional=true;
@@ -653,7 +656,10 @@ pard.refractive_index_mismatch.TooltipString=sprintf('Correction factor to take 
 pard.refractive_index_mismatch.Optional=true;
 pard.refractive_index_mismatch.Width=0.5;
 
-pard.overwritePixelsize.object=struct('Style','checkbox','String','New pixelsize X,Y (um):');
+
+p(1).value=0; p(1).on={}; p(1).off={'pixelsizex','pixelsizey'};
+p(2).value=1; p(2).on={'pixelsizex','pixelsizey'}; p(2).off={};
+pard.overwritePixelsize.object=struct('Style','checkbox','String','New pixelsize X,Y (um):','Callback',{{@obj.switchvisible,p}});
 pard.overwritePixelsize.position=[4,1];
 pard.overwritePixelsize.Width=1.5;
 pard.overwritePixelsize.Optional=true;
@@ -668,8 +674,9 @@ pard.pixelsizey.position=[4,3];
 pard.pixelsizey.Width=0.5;
 pard.pixelsizey.Optional=true;
 
-
-pard.isscmos.object=struct('Style','checkbox','String','sCMOS');   
+p(1).value=0; p(1).on={}; p(1).off={'selectscmos','scmosfile'};
+p(2).value=1; p(2).on={'selectscmos','scmosfile'}; p(2).off={};
+pard.isscmos.object=struct('Style','checkbox','String','sCMOS','Callback',{{@obj.switchvisible,p}});   
 pard.isscmos.position=[5,1];
 pard.isscmos.Optional=true;
 pard.selectscmos.object=struct('Style','pushbutton','String','Load var map','Callback',{{@loadscmos_callback,obj}});   

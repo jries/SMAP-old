@@ -139,7 +139,22 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
             end
 %             end
         end
-        
+        function switchvisible(obj,control,data,p)
+            val=control.Value;
+            for k=1:length(p)
+                if p(k).value==val
+                    off=p(k).off;
+                    for l=1:length(off)
+                        obj.guihandles.(off{l}).Visible='off';
+                    end
+                    on=p(k).on;
+                    for l=1:length(on)
+                        obj.guihandles.(on{l}).Visible='on';
+                    end                    
+                end
+            end
+            
+        end
         
         function fieldvisibility(obj,varargin)
             %sets the gui state (simple/advanced) and sets visibility of
@@ -243,6 +258,11 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                         end
                         h.(fn{k})=copyfields(h.(fn{k}),hs);
                         
+                    end
+                    if strcmp(fn{k},'isscmos')
+                        if isfield(h,fn{k})&&isprop(h.(fn{k}),'Callback')&&contains(func2str(h.(fn{k}).Callback{1},'switchvisible'))
+                            asdljfa
+                        end
                     end
                 end
                 
