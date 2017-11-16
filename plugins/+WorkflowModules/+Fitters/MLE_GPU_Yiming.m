@@ -89,8 +89,8 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
 
         function initGui(obj)
             initGui@interfaces.WorkflowFitter(obj);
-            obj.guihandles.fitmode.Callback={@fitmode_callback,obj};
-            fitmode_callback(0,0,obj)
+%             obj.guihandles.fitmode.Callback={@fitmode_callback,obj};
+%             fitmode_callback(0,0,obj)
             obj.guihandles.loadcal.Callback={@loadcall_callback,obj};
 %             obj.addSynchronization('loc_fileinfo',[],[],{@loc_fileinfo_callback,obj});
 
@@ -415,16 +415,16 @@ end
 function fitmode_callback(a,b,obj)
 p=obj.getGuiParameters;
 fitmode=p.fitmode.Value;
-fitz={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','pixelsizex','pixelsizey','automirror','fit2D','isscmos','selectscmos','scmosfile'};
-fitxy={'PSFx0','tPSFx0'};
-switch fitmode
-    case {3,5}
-        ton=fitz;
-        toff=fitxy;
-    otherwise
-        toff=fitz;
-        ton=fitxy;
-end
+% fitz={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','pixelsizex','pixelsizey','automirror','fit2D','isscmos','selectscmos','scmosfile'};
+% fitxy={'PSFx0','tPSFx0'};
+% switch fitmode
+%     case {3,5}
+%         ton=fitz;
+%         toff=fitxy;
+%     otherwise
+%         toff=fitz;
+%         ton=fitxy;
+% end
 
 switch fitmode
     case {1,2}
@@ -438,17 +438,24 @@ end
 
 obj.setPar('loc_ROIsize',roisize);
 
-obj.fieldvisibility('on',ton,'off',toff);
+% obj.fieldvisibility('on',ton,'off',toff);
 obj.setGuiParameters(struct('iterations',iterations));
 end
 
 function pard=guidef(obj)
-pard.fitmode.object=struct('Style','popupmenu','String',{{'PSF fix','PSF free','3D z','ellipt: PSFx PSFy','Spline'}},'Value',2);
+p1(1).value=1; p1(1).on={'PSFx0','tPSFx0'}; 
+p1(1).off={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize',...
+    'automirror','fit2D','isscmos','pixelsizex','pixelsizey','selectscmos','scmosfile'};
+p1(2)=p1(1);p1(2).value=2;
+p1(3).value=3;p1(3).off={'PSFx0','tPSFx0'};p1(3).on={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','automirror','fit2D','isscmos'};
+p1(4)=p1(1);p1(4).value=4;
+p1(5)=p1(3);p1(5).value=5;
+p1(6)=p1(5);p1(6).value=6;
+
+pard.fitmode.object=struct('Style','popupmenu','String',{{'PSF fix','PSF free','3D z','ellipt: PSFx PSFy','Spline'}},'Value',2,'Callback',{{@obj.switchvisible,p1,{@fitmode_callback,0,0,obj}}});
 pard.fitmode.position=[1,1];
 pard.fitmode.Width=1.5;
 pard.fitmode.TooltipString=sprintf('Fit mode. Fit with constant PSF, free PSF, 3D with astigmatism, asymmetric PSF (for calibrating astigmatic 3D)');
-
-
 
 pard.text.object=struct('Style','text','String','Iterations:');
 pard.text.position=[1,2.5];
@@ -483,28 +490,42 @@ pard.PSFx0.TooltipString=sprintf('start value for PSF, or size of PSF when PSF f
 pard.PSFx0.Optional=true;
 
 pard.fit2D.object=struct('Style','checkbox','String','2D PSF','Value',0);
-pard.fit2D.position=[2,1];
-pard.fit2D.Width=2;
+pard.fit2D.position=[2,3.5];
+pard.fit2D.Width=.75;
 pard.fit2D.TooltipString=sprintf('Check if PSF model is 2D (no specific PSF engineering), or displays a high degree of similarity above and below the focal plane');
 pard.fit2D.Optional=true;
 
+pard.automirror.object=struct('Style','popupmenu','String',{{'auto','no mirror','mirror'}});
+pard.automirror.position=[2,4.25];
+pard.automirror.Width=.75;
+pard.automirror.Optional=true;
+
 pard.loadcal.object=struct('Style','pushbutton','String','Load 3D cal');
-pard.loadcal.position=[3,1];
+pard.loadcal.position=[2,1];
+pard.loadcal.Width=.5;
 pard.cal_3Dfile.object=struct('Style','edit','String','settings/cal_3DAcal.mat');
-pard.cal_3Dfile.position=[3,2];
-pard.cal_3Dfile.Width=3;
+pard.cal_3Dfile.position=[2,1.5];
+pard.cal_3Dfile.Width=2;
 pard.cal_3Dfile.TooltipString=sprintf('3D calibration file for astigmtic 3D. \n Generate from bead stacks with plugin: Analyze/sr3D/CalibrateAstig');
 
-% pard.useObjPos.object=struct('Style','checkbox','String','Use objective position:','Visible','off');
-% pard.useObjPos.position=[4,1];
-% pard.useObjPos.Width=1.5;
-% pard.useObjPos.Optional=true;
-% 
-% pard.objPos.object=struct('Style','edit','String','0','Visible','off');
-% pard.objPos.position=[4,2.5];
-% pard.objPos.TooltipString=sprintf('Position of the objective above the coverslip (nm, piezo position). \n Only used in combination with CalibrateAstigDeep.');
-% pard.objPos.Optional=true;
-% pard.objPos.Width=0.5;
+
+p(1).value=0; p(1).on={}; p(1).off={'linkt','link'};
+p(2).value=1; p(2).on={'linkt','link'}; p(2).off={};
+
+pard.isglobal.object=struct('Style','checkbox','String','Global fit','Callback',{{@obj.switchvisible,p}});
+pard.isglobal.position=[3,1];
+pard.isglobal.Width=1;
+pard.isglobal.Optional=true;
+
+pard.linkt.object=struct('Style','text','String','link: x y z N bg');
+pard.linkt.position=[3,2];
+pard.linkt.Width=1.5;
+pard.linkt.Optional=true;
+
+pard.link.object=struct('Style','edit','String','1 1 1 0 0');
+pard.link.position=[3,3.5];
+pard.link.Width=1.5;
+pard.link.Optional=true;
 
 pard.trefractive_index_mismatch.object=struct('Style','text','String','RI mismatch factor:');
 pard.trefractive_index_mismatch.position=[4,3.5];
@@ -517,7 +538,10 @@ pard.refractive_index_mismatch.TooltipString=sprintf('Correction factor to take 
 pard.refractive_index_mismatch.Optional=true;
 pard.refractive_index_mismatch.Width=0.5;
 
-pard.overwritePixelsize.object=struct('Style','checkbox','String','New pixelsize X,Y (um):');
+
+p(1).value=0; p(1).on={}; p(1).off={'pixelsizex','pixelsizey'};
+p(2).value=1; p(2).on={'pixelsizex','pixelsizey'}; p(2).off={};
+pard.overwritePixelsize.object=struct('Style','checkbox','String','New pixelsize X,Y (um):','Callback',{{@obj.switchvisible,p}});
 pard.overwritePixelsize.position=[4,1];
 pard.overwritePixelsize.Width=1.5;
 pard.overwritePixelsize.Optional=true;
@@ -532,17 +556,9 @@ pard.pixelsizey.position=[4,3];
 pard.pixelsizey.Width=0.5;
 pard.pixelsizey.Optional=true;
 
-pard.automirror.object=struct('Style','popupmenu','String',{{'auto','no mirror','mirror'}});
-pard.automirror.position=[2,2];
-pard.automirror.Width=1;
-pard.automirror.Optional=true;
-
-pard.asymmetry.object=struct('Style','checkbox','String','calculate asymmetry','Value',0);
-pard.asymmetry.position=[2,3.5];
-pard.asymmetry.Width=1.5;
-pard.asymmetry.Optional=true;
-
-pard.isscmos.object=struct('Style','checkbox','String','sCMOS');   
+p(1).value=0; p(1).on={}; p(1).off={'selectscmos','scmosfile'};
+p(2).value=1; p(2).on={'selectscmos','scmosfile'}; p(2).off={};
+pard.isscmos.object=struct('Style','checkbox','String','sCMOS','Callback',{{@obj.switchvisible,p}});   
 pard.isscmos.position=[5,1];
 pard.isscmos.Optional=true;
 pard.selectscmos.object=struct('Style','pushbutton','String','Load var map','Callback',{{@loadscmos_callback,obj}});   

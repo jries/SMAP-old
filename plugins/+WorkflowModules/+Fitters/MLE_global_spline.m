@@ -88,8 +88,8 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
 
         function initGui(obj)
             initGui@interfaces.WorkflowFitter(obj);
-            obj.guihandles.fitmode.Callback={@fitmode_callback,obj};
-            fitmode_callback(0,0,obj)
+%             obj.guihandles.fitmode.Callback={@fitmode_callback,obj};
+%             fitmode_callback(0,0,obj)
             obj.guihandles.loadcal.Callback={@loadcall_callback,obj};
 %             obj.addSynchronization('loc_fileinfo',[],[],{@loc_fileinfo_callback,obj});
 
@@ -540,21 +540,21 @@ end
 function fitmode_callback(a,b,obj)
 p=obj.getGuiParameters;
 fitmode=p.fitmode.Value;
-fitz={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','pixelsizex','pixelsizey','automirror','fit2D','isscmos','selectscmos','scmosfile'};
-fitxy={'PSFx0','tPSFx0'};
-switch fitmode
-    case {3,5}
-        ton=fitz;
-        toff=fitxy;
-    otherwise
-        toff=fitz;
-        ton=fitxy;
-end
+% fitz={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','pixelsizex','pixelsizey','automirror','fit2D','isscmos','selectscmos','scmosfile'};
+% fitxy={'PSFx0','tPSFx0'};
+% switch fitmode
+%     case {3,5}
+%         ton=fitz;
+%         toff=fitxy;
+%     otherwise
+%         toff=fitz;
+%         ton=fitxy;
+% end
 
 switch fitmode
     case {1,2}
         roisize=7;
-        iterations=50;
+        iterations=30;
       
     otherwise
         roisize=13;
@@ -563,17 +563,24 @@ end
 
 obj.setPar('loc_ROIsize',roisize);
 
-obj.fieldvisibility('on',ton,'off',toff);
+% obj.fieldvisibility('on',ton,'off',toff);
 obj.setGuiParameters(struct('iterations',iterations));
 end
 
 function pard=guidef(obj)
-pard.fitmode.object=struct('Style','popupmenu','String',{{'PSF fix','PSF free','3D z','ellipt: PSFx PSFy','Spline'}},'Value',2);
+p1(1).value=1; p1(1).on={}; 
+p1(1).off={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize',...
+    'automirror','fit2D','isscmos','pixelsizex','pixelsizey','selectscmos','scmosfile'};
+p1(2)=p1(1);p1(2).value=2;
+p1(3).value=3;p1(3).off={};p1(3).on={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','automirror','fit2D','isscmos'};
+p1(4)=p1(1);p1(4).value=4;
+p1(5)=p1(3);p1(5).value=5;
+p1(6)=p1(5);p1(6).value=6;
+
+pard.fitmode.object=struct('Style','popupmenu','String',{{'PSF fix','PSF free','3D z','ellipt: PSFx PSFy','Spline'}},'Value',2,'Callback',{{@obj.switchvisible,p1,{@fitmode_callback,0,0,obj}}});
 pard.fitmode.position=[1,1];
 pard.fitmode.Width=1.5;
 pard.fitmode.TooltipString=sprintf('Fit mode. Fit with constant PSF, free PSF, 3D with astigmatism, asymmetric PSF (for calibrating astigmatic 3D)');
-
-
 
 pard.text.object=struct('Style','text','String','Iterations:');
 pard.text.position=[1,2.5];

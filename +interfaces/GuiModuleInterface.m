@@ -139,19 +139,37 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
             end
 %             end
         end
-        function switchvisible(obj,control,data,p)
+        function switchvisible(obj,control,data,p,callbackfnc)
             val=control.Value;
             for k=1:length(p)
                 if p(k).value==val
                     off=p(k).off;
                     for l=1:length(off)
-                        obj.guihandles.(off{l}).Visible='off';
+                        hh=obj.guihandles.(off{l});
+                        hh.Visible='off';
+                        if isprop(hh,'Callback') && ~isempty(hh.Callback) &&contains(func2str(hh.Callback{1}),'switchvisible')
+                            fnc=hh.Callback;
+                            fnc{1}(hh,0,fnc{2});
+                        end
+%                         obj.guihandles.(off{l}).Visible='off';
                     end
                     on=p(k).on;
                     for l=1:length(on)
-                        obj.guihandles.(on{l}).Visible='on';
+                        hh=obj.guihandles.(on{l});
+                        hh.Visible='on';
+                        if isprop(hh,'Callback') && ~isempty(hh.Callback) &&contains(func2str(hh.Callback{1}),'switchvisible')
+                       
+                        %call switchvisible for all children to nest
+                        %functions
+                            fnc=hh.Callback;
+                            fnc{1}(hh,0,fnc{2});
+                        end
+                        
                     end                    
                 end
+            end
+            if nargin>4 && ~isempty(callbackfnc)
+                callbackfnc{1}(callbackfnc{2:end});
             end
             
         end
@@ -259,11 +277,12 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                         h.(fn{k})=copyfields(h.(fn{k}),hs);
                         
                     end
-                    if strcmp(fn{k},'isscmos')
-                        if isfield(h,fn{k})&&isprop(h.(fn{k}),'Callback')&&contains(func2str(h.(fn{k}).Callback{1},'switchvisible'))
-                            asdljfa
+%                     if strcmp(fn{k},'isscmos')
+                        if isfield(h,fn{k})&&isprop(h.(fn{k}),'Callback') && length(h.(fn{k}).Callback)>1 &&contains(func2str(h.(fn{k}).Callback{1}),'switchvisible')
+                            fnc=h.(fn{k}).Callback;
+                            fnc{1}(h.(fn{k}),0,fnc{2});
                         end
-                    end
+%                     end
                 end
                 
                 psave=obj.propertiesToSave;
