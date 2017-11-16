@@ -41,7 +41,7 @@ classdef TifLoader<interfaces.WorkflowModule
                     end
                 catch
                     disp('reload file in image loader')
-                    
+                    obj.addFile(p.tiffile);
                 end
                 
 %                 obj.imloader=imageloaderAll(p.tiffile,obj.getPar('loc_fileinfo')); 

@@ -568,11 +568,11 @@ obj.setGuiParameters(struct('iterations',iterations));
 end
 
 function pard=guidef(obj)
-p1(1).value=1; p1(1).on={}; 
+p1(1).value=1; p1(1).on={'PSFx0','tPSFx0'}; 
 p1(1).off={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize',...
     'automirror','fit2D','isscmos','pixelsizex','pixelsizey','selectscmos','scmosfile'};
 p1(2)=p1(1);p1(2).value=2;
-p1(3).value=3;p1(3).off={};p1(3).on={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','automirror','fit2D','isscmos'};
+p1(3).value=3;p1(3).off={'PSFx0','tPSFx0'};p1(3).on={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','automirror','fit2D','isscmos'};
 p1(4)=p1(1);p1(4).value=4;
 p1(5)=p1(3);p1(5).value=5;
 p1(6)=p1(5);p1(6).value=6;
