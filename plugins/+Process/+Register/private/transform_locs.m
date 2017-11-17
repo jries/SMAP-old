@@ -6,21 +6,23 @@ if p.uselayers
     [loctarget,yy]=locData.getloc({'xnm','ynm','frame','filenumber','znm','PSFxnm'},'layer',p.targetlayer.Value,'position','roi');
     
 else
-    locref=locData.getloc({'xnm','ynm','frame','filenumber','znm','PSFxnm'});
+    locref=locData.getloc({'xnm','ynm','frame','filenumber','inungrouped','znm','PSFxnm'},'position','roi');
 %     loctarget=locData.getloc('xnm','ynm','frame','filenumber','znm','PSFxnm');
     
     filter=locData.layer(1).filter;
     ind=true(length(locref.xnm),1);
     if isfield(filter,'locprecnm')
-        ind=ind&filter.locprecnm;
+        ind=ind&filter.locprecnm(locref.inungrouped);
     end
     if isfield(filter,'PSFxnm')
-        ind=ind&filter.PSFxnm;
+        ind=ind&filter.PSFxnm(locref.inungrouped);
     end
     if isfield(filter,'frame')
-        ind=ind&filter.frame;
+        ind=ind&filter.frame(locref.inungrouped);
     end
+    if ~p.allfiles
     ind=ind&locref.filenumber==p.dataselect.Value;
+    end
 %     indref=ind;
 %     indtarget=ind;
     fn=fieldnames(locref);

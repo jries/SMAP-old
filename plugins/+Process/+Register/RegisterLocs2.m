@@ -121,6 +121,10 @@ pard.texta.position=[2,2.05];
 pard.dataselect.object=struct('Style','popupmenu','String','File');
 pard.dataselect.position=[2,1];
 pard.dataselect.object.TooltipString='file for target localizations';
+
+pard.allfiles.object=struct('String','use all files','Style','checkbox');
+pard.allfiles.position=[3,1];
+
 % 
 % pard.refselect.object=struct('Style','popupmenu','String','File');
 % pard.refselect.position=[2,1];

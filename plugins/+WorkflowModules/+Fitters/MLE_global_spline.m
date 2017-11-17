@@ -696,6 +696,10 @@ pard.scmosfile.position=[5,3];
 pard.scmosfile.Optional=true;
     pard.scmosfile.Width=2;
     
+pard.asymmetry.object=struct('Style','checkbox','String','get asymmetry');   
+pard.asymmetry.position=[6,1];
+pard.asymmetry.Optional=true;
+    
 pard.plugininfo.type='WorkflowFitter';
 pard.plugininfo.description='Maximum likelyhood estimater, optimized for GPU processing. According to: C. S. Smith, N. Joseph, B. Rieger, and K. A. Lidke, ?Fast, single-molecule localization that achieves theoretically minimum uncertainty.,? Nat Methods, vol. 7, no. 5, pp. 373?375, May 2010.';
 end

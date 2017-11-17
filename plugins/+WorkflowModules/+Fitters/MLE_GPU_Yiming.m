@@ -82,7 +82,7 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             out=fitwrapper(imstack,obj.fitpar,varstack);
             locs=fit2locs(out,stackinfo,obj.fitpar,imstack);
             
-            if p.asymmetry
+            if obj.fitpar.asymmetry
             [locs.asymmetry,locs.asymmdiag,locs.asymangle]=asymmetry(imgstack,true);
             end
         end
@@ -285,7 +285,7 @@ fitpar.iterations=p.iterations;
 fitpar.fitmode=p.fitmode.Value;
 fitpar.roisperfit=p.roisperfit;
 fitpar.issCMOS=false;
-
+fitpar.asymmetry=p.asymmetry;
 if fitpar.fitmode==3||fitpar.fitmode==5
     fitpar.issCMOS=p.isscmos;
     fitpar.PSF2D=p.fit2D;
@@ -570,7 +570,11 @@ pard.scmosfile.TooltipString='Tiff/.mat image containing sCMOS variance map (sam
 pard.scmosfile.position=[5,3];
 pard.scmosfile.Optional=true;
     pard.scmosfile.Width=2;
-    
+   
+pard.asymmetry.object=struct('Style','checkbox','String','get asymmetry');   
+pard.asymmetry.position=[6,1];
+pard.asymmetry.Optional=true;
+
 pard.plugininfo.type='WorkflowFitter';
 pard.plugininfo.description='Maximum likelyhood estimater, optimized for GPU processing. According to: C. S. Smith, N. Joseph, B. Rieger, and K. A. Lidke, ?Fast, single-molecule localization that achieves theoretically minimum uncertainty.,? Nat Methods, vol. 7, no. 5, pp. 373?375, May 2010.';
 end
