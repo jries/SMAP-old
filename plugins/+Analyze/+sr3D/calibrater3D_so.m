@@ -56,8 +56,11 @@ classdef calibrater3D_so<interfaces.DialogProcessor
              smappos.pixelsize=pixelsizes;
              smappos.roi=rois;
              
-%              cg=calibrate3D_GUI(smappos);
-             cg=calibrate3D_GUI_g(smappos);
+             if ~p.global
+                cg=calibrate3D_GUI(smappos);
+             else
+                cg=calibrate3D_GUI_g(smappos);
+             end
              cg.guihandles.dz.String=num2str(p.dz);
              cg.guihandles.filelist.String=getFieldAsVector(file,'name');
              [p, f]=fileparts(file{1}.name);
@@ -88,6 +91,8 @@ pard.dzt.object=struct('String','dz (nm)','Style','text');
 pard.dzt.position=[1,1];
 pard.dz.object=struct('String','10','Style','edit');
 pard.dz.position=[1,2];
+pard.global.object=struct('String','global','Style','checkbox');
+pard.global.position=[1,3];
 
 
 pard.inputParameters={'cam_pixelsize_um'};

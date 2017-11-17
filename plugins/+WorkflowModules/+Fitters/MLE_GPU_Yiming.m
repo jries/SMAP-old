@@ -302,11 +302,11 @@ if fitpar.fitmode==3||fitpar.fitmode==5
     elseif isfield(cal,'SXY')
         s=size(cal.SXY);
         Z=1;
-        if p.useObjPos
-            zr=cal.SXY(1).Zrangeall;
-            zr(1)=[];zr(end)=inf;
-            Z=find(p.objPos<=zr,1,'first');
-        end
+%         if p.useObjPos
+%             zr=cal.SXY(1).Zrangeall;
+%             zr(1)=[];zr(end)=inf;
+%             Z=find(p.objPos<=zr,1,'first');
+%         end
         for X=s(1):-1:1
             for Y=s(2):-1:1
 %                     if isfield(cal.SXY(X,Y,Z),'gauss_zfit')

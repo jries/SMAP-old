@@ -36,7 +36,7 @@ classdef TifLoader<interfaces.WorkflowModule
             else
                 try 
                     img=(obj.imloader.getimage(1));
-                    if isemtpy(img)
+                    if isempty(img)
                         obj.addFile(p.tiffile)
                     end
                 catch
