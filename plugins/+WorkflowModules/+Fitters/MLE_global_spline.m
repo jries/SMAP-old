@@ -17,6 +17,11 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
             obj.infofields={'x','y','ID','dx','dy'};
             obj.fitpar=getfitpar(obj);
             obj.fitpar.fitfunction=@mleFit_LM_global; %later: include single channel, decide here
+            
+             transform=obj.getPar('loc_globaltransform');
+             
+             obj.fitpar.mirrorud=contains(transform.tinfo.mirror.targetmirror,'up');
+             obj.fitpar.mirrorrl=contains(transform.tinfo.mirror.targetmirror,'right');
             % check if x,y, then initialize range etc
 %             obj.fitpar.fitfunction = @obj.nofound;
 %             disp('checking cuda fit')
@@ -274,7 +279,12 @@ out.indused=1:numberOfChannels:numframes;
 
 
 imfit(:,:,:,1)=imstack(:,:,1:numberOfChannels:end);
-imfit(:,:,:,2)=imstack(:,:,2:numberOfChannels:end);
+if fitpar.mirrorud
+    imfit(:,:,:,2)=imstack(end:-1:1,:,2:numberOfChannels:end);
+    dT(1,2,:)=-dT(1,2,:);
+else
+    imfit(:,:,:,2)=imstack(:,:,2:numberOfChannels:end);
+end
 
 % imfit=imfit(:,:,ind,:);
 % dT=dT(:,:,ind);
@@ -282,7 +292,7 @@ imfit(:,:,:,2)=imstack(:,:,2:numberOfChannels:end);
 arguments{1}=imfit;
 arguments{2}=sharedA;
 arguments{3}=fitpar.iterations;
-arguments{4}=single(fitpar.splinefithere.cspline.coeff);
+arguments{4}=single(fitpar.splinefithere.coeff);
 arguments{5}=single(dT);
 %imstack, sharedflag, iterations, spline coefficients, channelshift,
 %fitmode, varmap
@@ -431,11 +441,12 @@ if fitpar.fitmode==3||fitpar.fitmode==5
 %                         zpar{X,Y}=[];
 %                     end
                 %global:combine splines
-                cs=cal.SXY(X,Y,Z).cspline_all;
-                if iscell(cs.cspline.coeff)
-                    coeff(:,:,:,:,1)=cs.cspline.coeff{1};
-                    coeff(:,:,:,:,2)=cs.cspline.coeff{2};
-                    cs.cspline.coeff=single(coeff);
+%                 cs=cal.SXY(X,Y,Z).cspline_all;
+                cs=cal.SXY(X,Y,Z).cspline;
+                if iscell(cs.coeff)
+                    coeff(:,:,:,:,1)=cs.coeff{1};
+                    coeff(:,:,:,:,2)=cs.coeff{2};
+                    cs.coeff=single(coeff);
                 end
                 splinefit{X,Y}=cs;
                 
@@ -443,8 +454,8 @@ if fitpar.fitmode==3||fitpar.fitmode==5
             end
         end
         if ~isempty(splinefit{1})
-            fitpar.dz=splinefit{1}.cspline.dz;
-            fitpar.z0=splinefit{1}.cspline.z0;
+            fitpar.dz=splinefit{1}.dz;
+            fitpar.z0=splinefit{1}.z0;
             fitpar.splinefit=splinefit;
         end
         fitpar.zpar=zpar;

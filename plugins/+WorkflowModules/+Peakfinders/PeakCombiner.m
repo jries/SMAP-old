@@ -19,7 +19,8 @@ classdef PeakCombiner<interfaces.WorkflowModule
         end
         function prerun(obj,p)
             l=load(p.Tfile);
-            obj.transform=l.transformation;      
+            obj.transform=l.transformation;  
+            obj.setPar('loc_globaltransform',l.transformation);
 %             cutoffvalue_callback(0,0,obj)
         end
         function dato=run(obj,data,p)
