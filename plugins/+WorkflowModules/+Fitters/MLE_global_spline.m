@@ -286,6 +286,11 @@ else
     imfit(:,:,:,2)=imstack(:,:,2:numberOfChannels:end);
 end
 
+if fitpar.mirrorstack %em vs non em mirror
+%     dT(2,2,:)=-dT(2,2,:);
+%bit problem with using transform. everything is mirrord.
+end
+
 % imfit=imfit(:,:,ind,:);
 % dT=dT(:,:,ind);
 % dT=zeros(npar,2,nfits);
