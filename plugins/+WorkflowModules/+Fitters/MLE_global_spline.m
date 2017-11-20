@@ -43,19 +43,20 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
                 EMcal=obj.fitpar.EMon;
 %                 EMcal=obj.fitpar.splinefit{1}.isEM;
                 mirrorstack=obj.getSingleGuiParameter('automirror');
-                switch mirrorstack.selection
-                    case 'auto'
-                        obj.fitpar.mirrorstack=~(EMfile==EMcal);
-                    case 'mirror'
-                        obj.fitpar.mirrorstack=true;
-                    otherwise
-                        obj.fitpar.mirrorstack=false;
-                end
+%                 switch mirrorstack.selection
+%                     case 'auto'
+%                         obj.fitpar.mirrorstack=~(EMfile==EMcal);
+%                     case 'mirror'
+%                         obj.fitpar.mirrorstack=true;
+%                     otherwise
+%                         obj.fitpar.mirrorstack=false;
+%                 end
 %                 if obj.getSingleGuiParameter('automirror')
 %                     
 %                 else
 %                     obj.fitpar.mirrorstack=false;
 %                 end
+ obj.fitpar.mirrorstack=false; %later: remove completely
                 p=obj.getAllParameters;
                 if p.overwritePixelsize
                     obj.setPar('overwrite_pixelsize',[p.pixelsizex p.pixelsizey])
@@ -636,10 +637,10 @@ pard.fit2D.Width=.75;
 pard.fit2D.TooltipString=sprintf('Check if PSF model is 2D (no specific PSF engineering), or displays a high degree of similarity above and below the focal plane');
 pard.fit2D.Optional=true;
 
-pard.automirror.object=struct('Style','popupmenu','String',{{'auto','no mirror','mirror'}});
-pard.automirror.position=[2,4.25];
-pard.automirror.Width=.75;
-pard.automirror.Optional=true;
+% pard.automirror.object=struct('Style','popupmenu','String',{{'auto','no mirror','mirror'}});
+% pard.automirror.position=[2,4.25];
+% pard.automirror.Width=.75;
+% pard.automirror.Optional=true;
 
 pard.loadcal.object=struct('Style','pushbutton','String','Load 3D cal');
 pard.loadcal.position=[2,1];

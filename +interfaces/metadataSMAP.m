@@ -5,7 +5,7 @@ classdef metadataSMAP<handle
         Width=512;
         Height=512;
         roi_metadata=[];
-        roi=[]; % add converted ROI
+        roi=[]; 
         
         camerainfo=[];
         allmetadata=[];

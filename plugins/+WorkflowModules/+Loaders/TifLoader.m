@@ -1,5 +1,6 @@
 classdef TifLoader<interfaces.WorkflowModule
-    properties     
+    properties   
+        mirrorem
         loaders
         imloader
         framestop
@@ -30,7 +31,7 @@ classdef TifLoader<interfaces.WorkflowModule
                 obj.status('TifLoader: localization file not found')
                  error('TifLoader: localization file not found')
             end
-%             obj.imloader=imageLoader(p.tiffile);  
+%      
             if isempty(obj.imloader)
                 obj.addFile(p.tiffile)
             else
@@ -43,20 +44,13 @@ classdef TifLoader<interfaces.WorkflowModule
                     disp('reload file in image loader')
                     obj.addFile(p.tiffile);
                 end
-                
-%                 obj.imloader=imageloaderAll(p.tiffile,obj.getPar('loc_fileinfo')); 
+               
             end
-%             try 
-%                 img=obj.imloader.getimage(1);
-%             catch err
-%                 err
-%                  obj.imloader=imageloaderAll(p.tiffile,obj.getPar('loc_fileinfo')); 
-%             end
+
             obj.imloader.onlineAnalysis=p.onlineanalysis;
             obj.imloader.waittime=p.onlineanalysiswaittime;
             obj.imloader.setImageNumber(p.framestart-1);
             obj.numberOfFrames=obj.imloader.metadata.numberOfFrames;
-%             obj.numberOfFrames=obj.imloader.info.numberOfFrames;
 
             if p.onlineanalysis
                 obj.framestop=inf;
@@ -97,6 +91,9 @@ classdef TifLoader<interfaces.WorkflowModule
 %             disp('run loader')
             imloader=obj.imloader;
             image=imloader.readNext ; 
+            if obj.mirrorem
+                image=image(:,end:-1:1);
+            end
 %             imloader.currentImageNumber
             tall=0;
             tfitall=0;
@@ -196,6 +193,13 @@ classdef TifLoader<interfaces.WorkflowModule
 % obj.imloader.metadata
             p=obj.getGuiParameters;
             fileinf=obj.imloader.metadata;
+            if fileinf.EMon && p.mirrorem  %if em gain on and mirrorem on: switch roi
+                fileinf.roi(1)=512-fileinf.roi(1)-fileinf.roi(3);
+                fileinf.EMmirror=true;
+            else 
+                fileinf.EMmirror=false;
+            end
+            obj.mirrorem=fileinf.EMmirror;
             if p.padedges
 %                 locsettings=obj.getPar('loc_cameraSettings');
                 dr=p.padedgesdr;
@@ -216,7 +220,11 @@ classdef TifLoader<interfaces.WorkflowModule
              if p.onlineanalysis
                  obj.guihandles.framestop.String='inf';
              else
-                obj.guihandles.framestop.String=int2str(obj.imloader.metadata.numberOfFrames);
+                numf=obj.imloader.metadata.numberOfFrames;
+                if isnan(numf)
+                    numf=inf;
+                end
+                obj.guihandles.framestop.String=int2str(numf);
              end
 %         end
 % 
@@ -263,6 +271,31 @@ catch err
 end
     
 
+end
+
+function mirrorem_callback(a,b,obj)
+if ~isempty(obj.imloader)
+     fileinf=obj.imloader.metadata;
+            if fileinf.EMon && obj.getSingleGuiParameter('mirrorem')  %if em gain on and mirrorem on: switch roi
+                fileinf.roi(1)=512-fileinf.roi(1)-fileinf.roi(3);
+                fileinf.EMmirror=true;
+            else 
+                fileinf.EMmirror=false;
+            end
+            obj.mirrorem=fileinf.EMmirror;
+            if obj.getSingleGuiParameter('padedges') 
+%                 locsettings=obj.getPar('loc_cameraSettings');
+                dr=obj.getSingleGuiParameter('padedgesdr');
+                %dr=ceil((roisize-1)/2);
+                fileinf.roi(1:2)=fileinf.roi(1:2)-dr;
+                fileinf.roi(3:4)=fileinf.roi(3:4)+2*dr;
+%                 fileinf.Width=fileinf.Width+2*dr;
+%                 fileinf.Height=fileinf.Height+2*dr;
+%                 obj.setPar('loc_cameraSettings',locsettings);
+                obj.edgesize=dr;
+            end
+            obj.setPar('loc_fileinfo',fileinf);
+end
 end
 
 function pard=guidef(obj)
@@ -322,10 +355,17 @@ pard.padedges.Optional=true;
 pard.padedges.TooltipString='Pad edges with minimum values to allow detection of localizations close to edges. Usually not necessary.';
 
 pard.padedgesdr.object=struct('Style','edit','String','9','Callback',@obj.loadedges);
-pard.padedgesdr.position=[4.2,4];
+pard.padedgesdr.position=[4.2,3.9];
 pard.padedgesdr.Width=.3;
 pard.padedgesdr.Optional=true;
 pard.padedgesdr.TooltipString='Pad edges with minimum values to allow detection of localizations close to edges. Usually not necessary.';
+
+pard.mirrorem.object=struct('Style','checkbox','String','EM mirror','Value',1,'Callback',{{@mirrorem_callback,obj}});
+pard.mirrorem.position=[4.2,4.2];
+pard.mirrorem.TooltipString=sprintf('calibrate gain and offset from images');
+pard.mirrorem.Optional=true;
+pard.mirrorem.Width=0.8;
+
 
 % pard.mirrorimage.object=struct('Style','checkbox','String','mirror','Visible','off');
 % pard.mirrorimage.position=[4.2,4.3];

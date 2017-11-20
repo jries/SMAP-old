@@ -120,15 +120,6 @@ classdef CameraConverter<interfaces.WorkflowModule
                datao=data;
                datao.data=imphot;  
         end
-        
-%         function set.loc_cameraSettings(obj,cs)
-%             obj.loc_cameraSettings=cs;
-%             if ~isempty(obj.guihandles)&&obj.guihandles.mirrorem.Value && ~cs.EMmirror&&cs.emgain
-%                 obj.loc_cameraSettings.EMmirror=true;
-%                 obj.loc_cameraSettings.roi(2)=512-obj.loc_cameraSettings.roi(2)-obj.loc_cameraSettings.roi(4);
-%             end
-%             
-%         end
        
     end
 end
@@ -271,12 +262,6 @@ pard.calibrate.position=[1,2.2];
 pard.calibrate.TooltipString=sprintf('calibrate gain and offset from images');
 pard.calibrate.Optional=true;
 pard.calibrate.Width=0.6;
-
-pard.mirrorem.object=struct('Style','checkbox','String','EM mirror','Value',1);
-pard.mirrorem.position=[1,2.8];
-pard.mirrorem.TooltipString=sprintf('calibrate gain and offset from images');
-pard.mirrorem.Optional=true;
-pard.mirrorem.Width=0.9;
 
 
 pard.camparbutton.object=struct('Style','pushbutton','String','set Cam Parameters');
