@@ -48,7 +48,7 @@ classdef CameraConverter<interfaces.WorkflowModule
                 settings=obj.getPar('loc_fileinfo');
                 fn=fieldnames(settings);
                 for k=1:length(fn)
-                    if settings.assigned.(fn{k})
+                    if isfield(settings.assigned,fn{k}) && settings.assigned.(fn{k})
                         obj.loc_cameraSettings.(fn{k})=settings.(fn{k});
                     end
                 end

@@ -4,7 +4,7 @@ classdef metadataSMAP<handle
     properties
         Width=512;
         Height=512;
-        roi_metadata=[];
+%         roi_metadata=[];
         roi=[]; 
         
         camerainfo=[];
