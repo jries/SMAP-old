@@ -88,13 +88,10 @@ classdef TifLoader<interfaces.WorkflowModule
                 obj.addFile(file)
             end
             id=1;
-%             disp('run loader')
+
             imloader=obj.imloader;
             image=imloader.readNext ; 
-            if obj.mirrorem
-                image=image(:,end:-1:1);
-            end
-%             imloader.currentImageNumber
+
             tall=0;
             tfitall=0;
             
@@ -105,9 +102,6 @@ classdef TifLoader<interfaces.WorkflowModule
             while ~isempty(image)&&imloader.currentImageNumber<=obj.framestop&&~SMAP_stopnow
                 
                 datout=interfaces.WorkflowData;
-%                 datout.set(image);
-
-
                 if p.padedges
                     dr=obj.edgesize;
                     imgo=zeros(size(image)+2*dr,'like',image);
@@ -116,9 +110,10 @@ classdef TifLoader<interfaces.WorkflowModule
                     imgo(dr+1:end-dr,dr+1:end-dr)=image;
                     image=imgo;
                 end
-%                 if p.mirrorimage
-%                     image=image(:,end:-1:1);
-%                 end
+
+                if obj.mirrorem
+                    image=image(:,end:-1:1);
+                end
                 datout.data=image;
 
                 datout.frame=imloader.currentImageNumber;
@@ -130,7 +125,7 @@ classdef TifLoader<interfaces.WorkflowModule
                 th=tic;
                 image=imloader.readNext;
       
-                
+
                 
                 %display
                 if mod(datout.frame,10)==0
