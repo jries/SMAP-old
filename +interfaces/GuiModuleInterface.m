@@ -145,24 +145,28 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                 if p(k).value==val
                     off=p(k).off;
                     for l=1:length(off)
+                         if isfield(obj.guihandles,off{l})
                         hh=obj.guihandles.(off{l});
                         hh.Visible='off';
                         if isprop(hh,'Callback') && ~isempty(hh.Callback) &&contains(func2str(hh.Callback{1}),'switchvisible')
                             fnc=hh.Callback;
                             fnc{1}(hh,0,fnc{2});
                         end
+                         end
 %                         obj.guihandles.(off{l}).Visible='off';
                     end
                     on=p(k).on;
                     for l=1:length(on)
-                        hh=obj.guihandles.(on{l});
-                        hh.Visible='on';
-                        if isprop(hh,'Callback') && ~isempty(hh.Callback) &&contains(func2str(hh.Callback{1}),'switchvisible')
-                       
-                        %call switchvisible for all children to nest
-                        %functions
-                            fnc=hh.Callback;
-                            fnc{1}(hh,0,fnc{2});
+                        if isfield(obj.guihandles,on{l})
+                            hh=obj.guihandles.(on{l});
+                            hh.Visible='on';
+                            if isprop(hh,'Callback') && ~isempty(hh.Callback) &&contains(func2str(hh.Callback{1}),'switchvisible')
+
+                            %call switchvisible for all children to nest
+                            %functions
+                                fnc=hh.Callback;
+                                fnc{1}(hh,0,fnc{2});
+                            end
                         end
                         
                     end                    
