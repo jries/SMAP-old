@@ -28,12 +28,23 @@ classdef MathParser<interfaces.DialogProcessor
                     else
                         lbefore='';
                     end
-                    if isempty(lbefore) || (lbefore~='.' && ~isstrprop(lbefore,'alpha'))
-                    evalstr=[evalstr(1:ind(m)-1) 'locs.' evalstr(ind(m):ind(m)+length(fn{k})-1) '(indin)' evalstr(ind(m)+length(fn{k}):end)];
+                    indend=ind(m)+length(fn{k});
+                    if indend<length(evalstr)
+                        lafter=evalstr(indend+1);
+                    else
+                        lafter='';
+                    end
+                    
+                    if strcmp(lbefore,'?') || strcmp(lafter,'?') 
+                        continue
+                    end
+                    if isempty(lbefore) || (lbefore~='.' && ~isstrprop(lbefore,'alpha')) 
+                    evalstr=[evalstr(1:ind(m)-1) 'locs.?' evalstr(ind(m):ind(m)+length(fn{k})-1) '?(indin)' evalstr(ind(m)+length(fn{k}):end)];
                     end
 %                     evalstr = strrep(evalstr,[lbefore fn{k}],[lbefore 'locs.'  fn{k}]);
                 end
             end
+            evalstr(evalstr=='?')=[];
              try
                 newval=eval(evalstr);
                 if isfield(obj.locData.loc,p.resultfield)
