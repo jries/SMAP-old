@@ -78,7 +78,7 @@ end
    
 
 sizeV=ceil([(maxx-minx)/pixxy (maxy-miny)/pixxy (maxz-minz)/pixz]);
-imout=zeros(sizeV(1),sizeV(2),sizeV(3),length(layers),'uint16');
+imout=zeros(sizeV(1),sizeV(2),sizeV(3),length(layers),format);
 
 for k=1:length(layers)
     xh=ceil((locsout{k}.xnm-minx)/pixxy);
@@ -89,8 +89,9 @@ for k=1:length(layers)
     
     linind=sub2ind(sizeV,xh(indg),yh(indg),zh(indg));
     hl=histc(linind,1:max(linind));
+    disp(['maxcunts:' num2str(max(hl))])
     uind=unique(linind);
-    imouth=zeros(sizeV,'uint16');
+    imouth=zeros(sizeV,format);
     imouth(uind)=hl(hl>0);
     imout(:,:,:,k)=imouth;
 end
