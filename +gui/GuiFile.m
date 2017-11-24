@@ -116,7 +116,7 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                 catch
                     obj.status('file type not recognized');
                     warning('file type not recognized');
-                    return
+%                     return
                 end
 %                 [~,~,ext]=fileparts(f{1});
 
