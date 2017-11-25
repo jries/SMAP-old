@@ -244,6 +244,9 @@ fe=bfGetFileExtensions;
 if f
     obj.addFile([path f]);
 end  
+%set output filename
+outfile=[obj.getPar('loc_fileinfo').basefile '_sml.mat'];
+obj.setPar('loc_outputfilename',outfile)
 end
 
 function warnmissingmeta(md)
