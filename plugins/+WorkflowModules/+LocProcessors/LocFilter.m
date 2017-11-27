@@ -92,6 +92,12 @@ classdef LocFilter<interfaces.WorkflowModule
                     indin=indin&indinh;
                 end
                 
+                if p.check_convergedxy && isfield(locs,'peakfindx') 
+%                  maxfitdist=min(3.5,(p.loc_ROIsize-1)/2);
+                    maxfitdist=p.val_convxy;
+                    indin=abs(locs.xpix-locs.peakfindx)<maxfitdist & abs(locs.ypix-locs.peakfindy)<maxfitdist;
+                end
+                
                 fn=fieldnames(locs);
                 for k=1:length(fn)
                     locsout.(fn{k})=locs.(fn{k})(indin);
@@ -159,11 +165,25 @@ pard.val_LL.Width=.7;
 pard.val_LL.TooltipString=sprintf('Cutoff relative to maximum of log-likelihood distribution (typically 1, not much smaller).');
 pard.val_LL.Optional=true;
 
-pard.check_converged.object=struct('Style','checkbox','String','iterations < max_iterations','Value',1);
+pard.check_converged.object=struct('Style','checkbox','String','iter< max_iter','Value',1);
 pard.check_converged.position=[6,1];
 pard.check_converged.Width=1.3;
 pard.check_converged.TooltipString=sprintf('Filter fits that did not converge.');
 pard.check_converged.Optional=true;
+
+pard.check_convergedxy.object=struct('Style','checkbox','String','|xfit-xpeakfind|<','Value',1);
+pard.check_convergedxy.position=[7,1];
+pard.check_convergedxy.Width=1.3;
+pard.check_convergedxy.TooltipString=sprintf('Filter fits that did not converge to any point close to center of ROI (in pixels)');
+pard.check_convergedxy.Optional=true;
+
+pard.val_convxy.object=struct('Style','edit','String','3');
+pard.val_convxy.position=[7,2.3];
+pard.val_convxy.Width=.7;
+pard.val_convxy.TooltipString=sprintf('Filter fits that did not converge to any point close to center of ROI');
+pard.val_convxy.Optional=true;
+
+
 
 pard.plugininfo.type='WorkflowModule'; 
 pard.plugininfo.description='Filters localizations before saving according to photons, PSF, localization precision, log-likelihood. This can dramatically reduce the file size in case a too low cutoff was chosen during the peak finding.';

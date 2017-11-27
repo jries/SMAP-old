@@ -100,8 +100,9 @@ classdef LocSaver<interfaces.WorkflowModule
             end
             locs=data.data;%get;
             if ~isempty(locs)&&~isempty(locs.frame)
-                maxfitdist=min(3.5,(p.loc_ROIsize-1)/2);
-                indin=abs(locs.xpix-locs.peakfindx)<maxfitdist & abs(locs.ypix-locs.peakfindy)<maxfitdist;
+%                 maxfitdist=min(3.5,(p.loc_ROIsize-1)/2);
+%                 indin=abs(locs.xpix-locs.peakfindx)<maxfitdist & abs(locs.ypix-locs.peakfindy)<maxfitdist;
+                indin=true(size(locs.frame));
                 if isfield(locs,'znm')
                     indin=indin&~isnan(locs.znm);
                 end

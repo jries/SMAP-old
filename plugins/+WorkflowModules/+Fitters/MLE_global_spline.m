@@ -39,10 +39,10 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
             obj.numberInBlock=round(obj.fitpar.roisperfit*100/roisize^2);
             
             if obj.fitpar.fitmode==5 ||obj.fitpar.fitmode==6
-                EMfile=obj.getPar('loc_fileinfo').EMon;
-                EMcal=obj.fitpar.EMon;
-%                 EMcal=obj.fitpar.splinefit{1}.isEM;
-                mirrorstack=obj.getSingleGuiParameter('automirror');
+%                 EMfile=obj.getPar('loc_fileinfo').EMon;
+%                 EMcal=obj.fitpar.EMon;
+% %                 EMcal=obj.fitpar.splinefit{1}.isEM;
+%                 mirrorstack=obj.getSingleGuiParameter('automirror');
 %                 switch mirrorstack.selection
 %                     case 'auto'
 %                         obj.fitpar.mirrorstack=~(EMfile==EMcal);
@@ -56,7 +56,7 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
 %                 else
 %                     obj.fitpar.mirrorstack=false;
 %                 end
- obj.fitpar.mirrorstack=false; %later: remove completely
+                obj.fitpar.mirrorstack=false; %later: remove completely
                 p=obj.getAllParameters;
                 if p.overwritePixelsize
                     obj.setPar('overwrite_pixelsize',[p.pixelsizex p.pixelsizey])
@@ -269,6 +269,10 @@ end
 dT=zeros(npar,2,nfits);
 dT(1,2,:)=stackinfo.dy;
 dT(2,2,:)=stackinfo.dx;
+
+% dT(1,2,:)=stackinfo.dx;
+% dT(2,2,:)=-stackinfo.dy;
+
 sharedA = repmat(int32(fitpar.link'),[1 numframes]);
  
 %for testing: change order
@@ -287,15 +291,17 @@ else
     imfit(:,:,:,2)=imstack(:,:,2:numberOfChannels:end);
 end
 
-if fitpar.mirrorstack %em vs non em mirror
-%     dT(2,2,:)=-dT(2,2,:);
-%bit problem with using transform. everything is mirrord.
-end
+% imfit(:,:,:,2)=single(poissrnd(10,size(imfit(:,:,:,1))));
+
+% if fitpar.mirrorstack %em vs non em mirror
+% %     dT(2,2,:)=-dT(2,2,:);
+% %bit problem with using transform. everything is mirrord.
+% end
 
 % imfit=imfit(:,:,ind,:);
 % dT=dT(:,:,ind);
 % dT=zeros(npar,2,nfits);
-arguments{1}=imfit;
+arguments{1}=imfit/EMexcess;
 arguments{2}=sharedA;
 arguments{3}=fitpar.iterations;
 arguments{4}=single(fitpar.splinefithere.coeff);
@@ -304,6 +310,7 @@ arguments{5}=single(dT);
 %fitmode, varmap
 arguments{6}=fitpar.fitmode;
 [P CRLB LogL]=fitpar.fitfunction(arguments{:});
+% [P, CRLB,LogL, res]=CPUmleFit_LM_MultiChannel_R(arguments{:});
 % htot=P(:,8)
 % 
 % arguments{5}=varstack;
