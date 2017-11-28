@@ -245,8 +245,9 @@ if f
     obj.addFile([path f]);
 end  
 %set output filename
-outfile=[obj.getPar('loc_fileinfo').basefile '_sml.mat'];
-obj.setPar('loc_outputfilename',outfile)
+outfile=[obj.getPar('loc_fileinfo').basefile];
+[path, file]=fileparts(outfile);
+obj.setPar('loc_outputfilename',[path filesep file  '_sml.mat'])
 end
 
 function warnmissingmeta(md)

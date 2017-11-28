@@ -16,9 +16,9 @@ classdef calibrater3D_so<interfaces.DialogProcessor
             addpath(fit3ddir);
                        
              %get bead positions
-             minframes=800/p.dz;
+             minframes=800/p.dz*1.5;
             locDatacopy=obj.locData.copy;
-            locDatacopy.regroup(150,minframes/2);
+            locDatacopy.regroup(150,round(minframes/2));
             locg=locDatacopy.getloc({'xnm','ynm','numberInGroup','filenumber'},'layer',1,'Position','roi','removeFilter','filenumber','grouping','grouped');
             beadind=find(locg.numberInGroup>minframes);
             xb=locg.xnm(beadind);
