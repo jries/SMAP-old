@@ -71,6 +71,8 @@ classdef PeakCombiner<interfaces.WorkflowModule
             yallrpix=yallrpix(indgood)-roi(2);
             xalltpix=xalltpix(indgood)-roi(1);
             yalltpix=yalltpix(indgood)-roi(2);
+            
+        
             xout=vertcat(xallrpix',xalltpix');
             yout=vertcat(yallrpix',yalltpix');
             dxout=vertcat(0*dx',dx');

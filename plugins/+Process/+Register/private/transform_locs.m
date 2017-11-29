@@ -51,6 +51,7 @@ chipsizenm=p.currentfileinfo.cam_pixelsize_um*1000.*[p.currentfileinfo.Width p.c
 facsize=ones(2,1);
 % separator=chipsizenm;
 separator=roinm(1:2)+roinm(3:4);
+
 switch p.targetpos.selection
     case 'top'
         dy=-chipsizenm(2)/2;
@@ -66,6 +67,7 @@ switch p.targetpos.selection
         separator(2)=roinm(2)+roinm(4)/2;
         indtarget=indtarget&loctarget.ynm>separator(2);
         indref=indref&locref.ynm<=separator(2);
+        
     case 'left'
         dx=-chipsizenm(1)/2;
         dy=0;
@@ -86,12 +88,15 @@ switch p.targetpos.selection
         dy=0;
 %         indtarget=true(size(loctarget.xnm));
 end
-
+cutout=false;
 if p.useT
     Tinitial=loadtransformation(locData,p.Tfile,p.dataselect.Value);
     
     [loctT.x,loctT.y]=Tinitial.transformCoordinatesInv(loctarget.xnm,loctarget.ynm);
     mirrorinfo=Tinitial.tinfo.mirror;
+    if contains(mirrorinfo.targetmirror,'no')
+    cutout=true;
+    end
     %     pos=Tinitial.pos;
 %     size=Tinitial.size;
 else %all initial estimation:
@@ -114,6 +119,9 @@ else %all initial estimation:
         case 'both'  
             loctT.x=2*midmirror(1)-loctT.x;
             loctT.y=2*midmirror(2)-loctT.y;
+            
+        otherwise
+            cutout=true;
            
     end
 
@@ -126,7 +134,9 @@ loctT=copystructReduce(loctT,indtarget);
 
 % indref=loctarget.xnm<chipsizenm*facsize(1)&loctarget.ynm<chipsizenm*facsize(2);
 % loctT=copystructReduce(loctT,ind);
+if cutout
 loctT.frame(~indtarget)=-1;
+end
 
 pixelsizerec=p.register_parameters.pixelsizenm;
 roi=p.currentfileinfo.roi;
@@ -226,6 +236,9 @@ initaxis(p.resultstabgroup,'scatter')
  rr=rand(1000,1);
  ra=ceil(rr*length(iBa));
   rb=ceil(rr*length(nb));
+  if isempty(nb)
+      rb=[];
+  end
  ax4=initaxis(p.resultstabgroup,'locs');
  plot(loctarget.x(iBa(ra)),loctarget.y(iBa(ra)),'+',loctarget.x(nb(rb)),loctarget.y(nb(rb)),'ro')
  

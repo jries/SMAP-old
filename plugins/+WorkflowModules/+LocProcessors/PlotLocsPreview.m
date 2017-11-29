@@ -31,6 +31,7 @@ classdef PlotLocsPreview<interfaces.WorkflowModule;
                         pos=[locs.xpix(k)-dn locs.ypix(k)-dn locs.xpix(k)+dn locs.ypix(k)+dn ];
                         col=[1 0. 1];
                         plotrect(ax,pos,col);
+%                         plotrect(ax,pos,{'Color',col,'LineWidth',3});
                     end
                 end
             end 

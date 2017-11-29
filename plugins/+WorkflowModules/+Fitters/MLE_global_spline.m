@@ -266,9 +266,9 @@ end
 
 
         
-dT=zeros(npar,2,nfits);
-dT(1,2,:)=stackinfo.dy;
-dT(2,2,:)=stackinfo.dx;
+dT=zeros(npar,2,ceil(nfits/2));
+dT(1,2,:)=stackinfo.dy(2:numberOfChannels:end);
+dT(2,2,:)=stackinfo.dx(2:numberOfChannels:end);
 
 % dT(1,2,:)=stackinfo.dx;
 % dT(2,2,:)=-stackinfo.dy;
