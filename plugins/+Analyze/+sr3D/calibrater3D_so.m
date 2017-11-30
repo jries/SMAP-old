@@ -17,47 +17,60 @@ classdef calibrater3D_so<interfaces.DialogProcessor
                        
              %get bead positions
              minframes=800/p.dz*1.5;
-            locDatacopy=obj.locData.copy;
-            locDatacopy.regroup(150,round(minframes/2));
-            locg=locDatacopy.getloc({'xnm','ynm','numberInGroup','filenumber'},'layer',1,'Position','roi','removeFilter','filenumber','grouping','grouped');
-            beadind=find(locg.numberInGroup>minframes);
-            xb=locg.xnm(beadind);
-            yb=locg.ynm(beadind);
-            filenumber=locg.filenumber(beadind);
-
-            
-             locfiles=obj.locData.files.file;
-             minxy=[inf inf];maxxy=[0 0];
              
-             for k=1:length(locfiles) 
-                if isfield(locfiles(k).info,'imagefile')&&~isempty(locfiles(k).info.imagefile)
-                    filename=locfiles(k).info.imagefile;
-                else
-                    filename=locfiles(k).info.basefile;
-                end
-                il=getimageloader(obj,filename);
-                file{k}.name=il.file;
-                file{k}.metadata=il.metadata;
-                infile=filenumber==k;
-                roi=il.metadata.roi;
-                pixelsize=il.metadata.cam_pixelsize_um;
-                file{k}.posx=xb(infile)/pixelsize(1)/1000-roi(1);
-                file{k}.posy=yb(infile)/pixelsize(end)/1000-roi(2);
-                il.close;
-                posall{k}=horzcat(file{k}.posx,file{k}.posy);
-                minxy=min(minxy,min(posall{k}));
-                maxxy=max(maxxy,max(posall{k}));
-                posallnm{k}=horzcat(xb,yb);
-                pixelsizes{k}=pixelsize;
-                rois{k}=roi;
+             if isempty(obj.locData.loc) %no files loaded
+                 posall={};
+                 posallnm={};
+                 rois={[0 0 512 512]};
+                 roi=rois{1};
+                 pixelsizes={[0.1 0.1]};
+                 files={};
+                 file='';
+             else
+                locDatacopy=obj.locData.copy;
+                locDatacopy.regroup(150,round(minframes/2));
+                locg=locDatacopy.getloc({'xnm','ynm','numberInGroup','filenumber'},'layer',1,'Position','roi','removeFilter','filenumber','grouping','grouped');
+                beadind=find(locg.numberInGroup>minframes);
+                xb=locg.xnm(beadind);
+                yb=locg.ynm(beadind);
+                filenumber=locg.filenumber(beadind);
+                files=[];
+
+                 locfiles=obj.locData.files.file;
+                 minxy=[inf inf];maxxy=[0 0];
+
+                 for k=1:length(locfiles) 
+                    if isfield(locfiles(k).info,'imagefile')&&~isempty(locfiles(k).info.imagefile)
+                        filename=locfiles(k).info.imagefile;
+                    else
+                        filename=locfiles(k).info.basefile;
+                    end
+                    il=getimageloader(obj,filename);
+                    file{k}.name=il.file;
+                    file{k}.metadata=il.metadata;
+                    infile=filenumber==k;
+                    roi=il.metadata.roi;
+                    pixelsize=il.metadata.cam_pixelsize_um;
+                    file{k}.posx=xb(infile)/pixelsize(1)/1000-roi(1);
+                    file{k}.posy=yb(infile)/pixelsize(end)/1000-roi(2);
+                    il.close;
+                    posall{k}=horzcat(file{k}.posx,file{k}.posy);
+                    minxy=min(minxy,min(posall{k}));
+                    maxxy=max(maxxy,max(posall{k}));
+                    posallnm{k}=horzcat(xb,yb);
+                    pixelsizes{k}=pixelsize;
+                    rois{k}=roi;
+                 end
+                 files=obj.locData.files.file;
              end
              
              smappos.positions=posall;
              smappos.positionsnm=posallnm;
              smappos.imageROI=roi;
-             smappos.files=obj.locData.files.file;
+             
              smappos.pixelsize=pixelsizes;
              smappos.roi=rois;
+             smappos.files=files;
              
              
              if p.setrange
