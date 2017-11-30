@@ -85,6 +85,10 @@ classdef calibrater3D_so<interfaces.DialogProcessor
                      smappos.yrange=p.yrange;
                  end                 
              end
+             
+             if p.setframerange
+                 smappos.framerangeuse=p.framerangeuse;
+             end
                  
              if ~p.global
                 cg=calibrate3D_GUI(smappos);
@@ -132,6 +136,14 @@ pard.xrange.object=struct('String','','Style','edit');
 pard.xrange.position=[2,3];
 pard.yrange.object=struct('String','','Style','edit');
 pard.yrange.position=[2,4];
+
+pard.setframerange.object=struct('Style','checkbox','String','set frame range ');
+pard.setframerange.position=[3,1];
+pard.setframerange.Width=1.5;
+
+
+pard.framerangeuse.object=struct('String','','Style','edit');
+pard.framerangeuse.position=[3,3];
 
 pard.inputParameters={'cam_pixelsize_um'};
 pard.plugininfo.type='ProcessorPlugin';
