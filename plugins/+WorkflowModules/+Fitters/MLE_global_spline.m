@@ -527,7 +527,11 @@ if fitpar.fitmode==3||fitpar.fitmode==5
         varmap=[];
     end
     fitpar.varmap=varmap*p.loc_cameraSettings.pix2phot;
-    fitpar.refractive_index_mismatch=p.refractive_index_mismatch;
+    if p.userefractive_index_mismatch
+        fitpar.refractive_index_mismatch=p.refractive_index_mismatch;
+    else
+        fitpar.refractive_index_mismatch=1;
+    end
 
 
 % elseif fitpar.fitmode==5
@@ -676,10 +680,10 @@ pard.link.position=[3,3.5];
 pard.link.Width=1.5;
 pard.link.Optional=true;
 
-pard.trefractive_index_mismatch.object=struct('Style','text','String','RI mismatch factor:');
-pard.trefractive_index_mismatch.position=[4,3.5];
-pard.trefractive_index_mismatch.Width=1.5;
-pard.trefractive_index_mismatch.Optional=true;
+pard.userefractive_index_mismatch.object=struct('Style','checkbox','String','RI mismatch:');
+pard.userefractive_index_mismatch.position=[4,3.5];
+pard.userefractive_index_mismatch.Width=1.5;
+pard.userefractive_index_mismatch.Optional=true;
 
 pard.refractive_index_mismatch.object=struct('Style','edit','String','.8');
 pard.refractive_index_mismatch.position=[4,4.5];
