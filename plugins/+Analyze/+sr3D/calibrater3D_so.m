@@ -27,7 +27,8 @@ classdef calibrater3D_so<interfaces.DialogProcessor
 
             
              locfiles=obj.locData.files.file;
-
+             minxy=[inf inf];maxxy=[0 0];
+             
              for k=1:length(locfiles) 
                 if isfield(locfiles(k).info,'imagefile')&&~isempty(locfiles(k).info.imagefile)
                     filename=locfiles(k).info.imagefile;
@@ -44,6 +45,8 @@ classdef calibrater3D_so<interfaces.DialogProcessor
                 file{k}.posy=yb(infile)/pixelsize(end)/1000-roi(2);
                 il.close;
                 posall{k}=horzcat(file{k}.posx,file{k}.posy);
+                minxy=min(minxy,min(posall{k}));
+                maxxy=max(maxxy,max(posall{k}));
                 posallnm{k}=horzcat(xb,yb);
                 pixelsizes{k}=pixelsize;
                 rois{k}=roi;
@@ -56,6 +59,20 @@ classdef calibrater3D_so<interfaces.DialogProcessor
              smappos.pixelsize=pixelsizes;
              smappos.roi=rois;
              
+             
+             if p.setrange
+                 if isempty(p.xrange)
+                     smappos.xrange=[minxy(1)-1 maxxy(1)+1];
+                 else
+                     smappos.xrange=p.xrange;
+                 end
+                 if isempty(p.yrange)
+                     smappos.yrange=[minxy(2)-1 maxxy(2)+1];
+                 else
+                     smappos.yrange=p.yrange;
+                 end                 
+             end
+                 
              if ~p.global
                 cg=calibrate3D_GUI(smappos);
              else
@@ -94,6 +111,14 @@ pard.dz.position=[1,2];
 pard.global.object=struct('String','global','Style','checkbox');
 pard.global.position=[1,3];
 
+pard.setrange.object=struct('Style','checkbox','String','set range (empty = auto)');
+pard.setrange.position=[2,1];
+pard.setrange.Width=1.5;
+
+pard.xrange.object=struct('String','','Style','edit');
+pard.xrange.position=[2,3];
+pard.yrange.object=struct('String','','Style','edit');
+pard.yrange.position=[2,4];
 
 pard.inputParameters={'cam_pixelsize_um'};
 pard.plugininfo.type='ProcessorPlugin';
