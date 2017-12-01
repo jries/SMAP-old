@@ -266,6 +266,7 @@ obj.setPar('loc_preview',true)
 % obj.globpar.parameters.preview=true;
 % notify(obj.P,'loc_initialize')
 % startmodule.initialize;
+obj.status('preview...');drawnow
 startmodule.run;
 obj.status('preview done');
 end
