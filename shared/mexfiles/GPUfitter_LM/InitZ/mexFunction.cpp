@@ -332,15 +332,15 @@ if  (silent==0)
 		case 5: //fit x,y,bg,I,z
 
 			if (initZ <0)
-			initZ = spline_zsize/2.0f;
+				initZ = spline_zsize/2.0f;
 
 			if (cameratype==0){
 				for (int ii = 0; ii<Nfitraw; ii++)
-					kernel_splineMLEFit_z_EMCCD(ii,data,coeff,spline_xsize,spline_ysize,spline_zsize,(int) sz,iterations,Parameters,CRLBs,LogLikelihood,spline_zsize/2.0f,(const int) Nfitraw);
+					kernel_splineMLEFit_z_EMCCD(ii,data,coeff,spline_xsize,spline_ysize,spline_zsize,(int) sz,iterations,Parameters,CRLBs,LogLikelihood,initZ,(const int) Nfitraw);
 			}
 			else if (cameratype ==1){
 				for (int ii = 0; ii<Nfitraw; ii++)
-					kernel_splineMLEFit_z_sCMOS(ii,data,coeff,spline_xsize,spline_ysize,spline_zsize,(int) sz,iterations,Parameters,CRLBs,LogLikelihood,spline_zsize/2.0f,(const int) Nfitraw,varim);
+					kernel_splineMLEFit_z_sCMOS(ii,data,coeff,spline_xsize,spline_ysize,spline_zsize,(int) sz,iterations,Parameters,CRLBs,LogLikelihood,initZ,(const int) Nfitraw,varim);
 			}
 			break;
 		case 6:
