@@ -226,9 +226,9 @@ classdef WorkflowFitter<interfaces.WorkflowModule
                         else
                             locs=obj.fit(fitterimagestack{X,Y}(:,:,1:obj.stackind(X,Y)),stackinfoout);
                         end
-                        if obj.stackind(X,Y)>0
-                        [locs.asymmetry,locs.asymmdiag,locs.asymangle]=asymmetry(fitterimagestack{X,Y}(:,:,1:obj.stackind(X,Y)),true);
-                        end
+%                         if obj.stackind(X,Y)>0
+%                         [locs.asymmetry,locs.asymmdiag,locs.asymangle]=asymmetry(fitterimagestack{X,Y}(:,:,1:obj.stackind(X,Y)),true);
+%                         end
                         outputlocs(obj,locs,fitterstackinfo{X,Y},obj.newID,false);
                         obj.newID=obj.newID+1;
 %                     else

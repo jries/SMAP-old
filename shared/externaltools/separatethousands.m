@@ -34,6 +34,14 @@ function numstring = separatethousands(number, separator, decimalspaces)
         numstring='';
         return
     end
+    if isinf(number)
+        numstring='inf';
+        return
+    end
+    if isnan(number)
+        numstring='NaN';
+        return
+    end
     % Check if negative
     if number < 0
         modified_number(1) = -number;
