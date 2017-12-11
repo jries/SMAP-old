@@ -19,26 +19,31 @@ end
 
 
 function pard=guidef
-pard.t1.object=struct('String','cutoffmask','Style','text');
-pard.t1.position=[2,1];
-pard.cutoffmask.object=struct('String','5','Style','edit');
-pard.cutoffmask.position=[2,2];
-
 pard.t2.object=struct('String','filtersize (nm)','Style','text');
 pard.t2.position=[1,1];
 pard.sigma1.object=struct('String','200','Style','edit');
 pard.sigma1.position=[1,2];
 
-pard.t3.object=struct('String','rim / radius','Style','text');
-pard.t3.position=[4,1];
-pard.rim.object=struct('String','0.2','Style','edit');
-pard.rim.position=[4,2];
+pard.t1.object=struct('String','cutoffmask','Style','text');
+pard.t1.position=[2,1];
+pard.cutoffmask.object=struct('String','5','Style','edit');
+pard.cutoffmask.position=[2,2];
 
 pard.t9.object=struct('String','iterations rim dilation','Style','text');
 pard.t9.position=[3,1];
 pard.iterations.object=struct('String','3','Style','edit');
 pard.iterations.position=[3,2];
 
+pard.t3.object=struct('String','rim / radius','Style','text');
+pard.t3.position=[4,1];
+pard.rim.object=struct('String','0.2','Style','edit');
+pard.rim.position=[4,2];
+
+
+pard.t7.object=struct('String','filter findmax (nm)','Style','text');
+pard.t7.position=[1,3];
+pard.sigmafind.object=struct('String','100','Style','edit');
+pard.sigmafind.position=[1,4];
 
 pard.t4.object=struct('String','cutoff maxima','Style','text');
 pard.t4.position=[2,3];
@@ -55,10 +60,6 @@ pard.t6.position=[4,3];
 pard.sizerange.object=struct('String','20 200','Style','edit');
 pard.sizerange.position=[4,4];
 
-pard.t7.object=struct('String','filter findmax (nm)','Style','text');
-pard.t7.position=[1,3];
-pard.sigmafind.object=struct('String','100','Style','edit');
-pard.sigmafind.position=[1,4];
 
 pard.t10.object=struct('String','layer','Style','text');
 pard.t10.position=[6,1];
@@ -67,6 +68,7 @@ pard.layer.position=[6,2];
 
 pard.preview.object=struct('String','preview','Style','checkbox','Value',1);
 pard.preview.position=[6,4];
+
 
 pard.t11.object=struct('String','Works best with: PSF filtered, locprec filter larger than usual (~30-60 nm), grouped','Style','text');
 pard.t11.position=[8,1];
@@ -125,11 +127,19 @@ for kc=rangec
     yrel=(locs.ynm-rangey(1))/pr;
 %     indin=withinmask(imbw,yrel,xrel);
     che=imbw;
+    emptycell=false;
     for k=1:p.iterations
         indin=withinmask(che,yrel,xrel);
+        if sum(indin)==0
+            emptycell=true;
+            break
+        end
         ims=(myhist2(locs.xnm(indin),locs.ynm(indin),pr,pr, rangex,rangey))';
         ch=bwconvhull(ims>0);
         che=imerode(ch,struce2);
+    end
+    if emptycell
+        continue
     end
 %     inm=sum(indin(:))/length(indin);
     %rim relative 
