@@ -4,24 +4,15 @@ function [P,CRLB,LogL]=mleFit_LM_global(varargin)
 %fitmode, varmap
 
 % 1. imagestack (single)
-% 2. fitmode
-%   1 fix PSF
-%   2 free PSF
-%   3 Gauss fit z
-%   4 fit PSFx, PSFy elliptical
-%   5 cspline
+% 2. shared parameters
+
 % optional:
 % 3. iterations (default=50)
 % 4. paramters for fitters:
-%   1. fix PSF: PSFxy sigma 
-%   2. free PSF: start PSFxy
-%   3. Gauss fit z: parameters: PSFx, Ax, Ay, Bx, By, gamma, d, PSFy
-%       (single)
-%   4. fit PSFx, PSFy elliptical: start PSFx, PSFy
-%   5. cspline: cspline coefficients (single)
-%   6. cspline for 2D PSF: as 5, but two fits to break asymmetry. cspline coefficients (single)
-% 5. varmap: Variance map for sCMOS. If size(varmap) ~= size(imagestack):
-%       no sCMOS correction is used. Default= emCCD
+
+%   cspline: cspline coefficients (single)
+%   cspline for 2D PSF: as 5, but two fits to break asymmetry. cspline coefficients (single)
+% 5. shifts dT
 % 6. silent (suppress output if 1)
 
 %Output:

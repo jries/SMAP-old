@@ -197,7 +197,7 @@ switch fitpar.fitmode
         
         %         locs.znm=(P(:,5)*1000+fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
         locs.znm=((P(:,5)-fitpar.z0)*fitpar.dz)*fitpar.refractive_index_mismatch;
-        notconverged=P(:,5)<2|P(:,5)>size(fitpar.splinefit{1}.cspline.coeff,3)-2;
+        notconverged=P(:,5)<2|P(:,5)>fitpar.coeffsize(3)-2;
         locs.znm(notconverged)=NaN;
         
         locs.zerr=sqrt(CRLB(:,5))*fitpar.dz*fitpar.refractive_index_mismatch;
@@ -247,7 +247,11 @@ arguments{6}=1;
             else
                 arguments{1}=single(imstack/EMexcess);
             end
-            arguments{4}=single(fitpar.splinefithere.cspline.coeff);
+            coeffh=(fitpar.splinefithere.cspline.coeff);
+            if iscell(coeffh)
+                coeffh=coeffh{1};
+                arguments{4}=single(coeffh);
+            end
     end
    
 %     if fitpar.fitmode==6
@@ -314,7 +318,7 @@ if fitpar.fitmode==3||fitpar.fitmode==5
 %                     else
 %                         zpar{X,Y}=[];
 %                     end
-                splinefit{X,Y}=cal.SXY(X,Y,Z).cspline_all;
+                splinefit{X,Y}=cal.SXY(X,Y,Z);
 
             end
         end
@@ -322,6 +326,11 @@ if fitpar.fitmode==3||fitpar.fitmode==5
             fitpar.dz=splinefit{1}.cspline.dz;
             fitpar.z0=splinefit{1}.cspline.z0;
             fitpar.splinefit=splinefit;
+            coeffh=splinefit{1}.cspline.coeff;
+            if iscell(coeffh)
+                coeffh=coeffh{1};
+            end
+            fitpar.coeffsize=size(coeffh);
         end
         fitpar.zpar=zpar;
 
