@@ -250,8 +250,9 @@ arguments{6}=1;
             coeffh=(fitpar.splinefithere.cspline.coeff);
             if iscell(coeffh)
                 coeffh=coeffh{1};
-                arguments{4}=single(coeffh);
             end
+            arguments{4}=single(coeffh);
+            
     end
    
 %     if fitpar.fitmode==6
