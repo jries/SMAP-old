@@ -15,6 +15,7 @@ rx=1;
 lold=1;
 [xAs,ixAs]=sort(xA);
 [xBs,ixBs]=sort(xB);
+matched=false(size(ixBs));
 % xAs==xA(ixAs)
 
 iA=zeros(lA,1);iB=zeros(lB,1);
@@ -32,9 +33,10 @@ for k=1:lA
         found=0;
         while l<=lB&&xBs(l)+d(1)<xAs(k)+maxd  %all possible hits
             dnew2=(xBs(l)+d(1)-xAs(k))^2+(yA(ixAs(k))-yB(ixBs(l))-d(2))^2;
-            if dnew2<dold2
+            if dnew2<dold2 &&~matched(l)
                 iA(rx)=ixAs(k);
                 iB(rx)=ixBs(l);
+                matched(l)=true; %associate only onces
                 dold2=dnew2;
                 found=1;
             end

@@ -88,8 +88,9 @@ for k=1:length(layers)
     indg=xh>0&xh<=sizeV(1) & yh>0&yh<=sizeV(2) & zh>0&zh<=sizeV(3);
     
     linind=sub2ind(sizeV,xh(indg),yh(indg),zh(indg));
-    hl=histc(linind,1:max(linind));
-    disp(['maxcunts:' num2str(max(hl))])
+    hl=cast(histc(linind,1:max(linind)),format);
+%     hl=cast(histcounts(linind,1:max(linind)),format);
+    disp(['maxcounts:' num2str(max(hl))])
     uind=unique(linind);
     imouth=zeros(sizeV,format);
     imouth(uind)=hl(hl>0);

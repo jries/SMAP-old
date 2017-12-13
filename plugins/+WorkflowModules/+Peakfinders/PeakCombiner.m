@@ -46,8 +46,12 @@ classdef PeakCombiner<interfaces.WorkflowModule
             Nt=maxima.intensity(~indref).^2;
             [xt,yt]=transform.transformCoordinatesInv(xnm(~indref),ynm(~indref));
             [iA,iB,uiA,uiB]=matchlocs(xnmref,ynmref,xt,yt,[0 0],pixelsize(1)*4);
+            try
             xallr=vertcat(xnmref(uiA), xt(uiB'),((xnmref(iA).*Nref(iA)+xt(iB).*Nt(iB))./(Nref(iA)+Nt(iB))));
             yallr=vertcat(ynmref(uiA), yt(uiB'),((ynmref(iA).*Nref(iA)+yt(iB).*Nt(iB))./(Nref(iA)+Nt(iB))));
+            catch err
+                disp('error')
+            end
 %             
 %             xallr=vertcat(xnmref(uiA), xnmref(iA));
 %             yallr=vertcat(ynmref(uiA), ynmref(iA));
