@@ -21,7 +21,7 @@ classdef generalStatistics<interfaces.SEEvaluationProcessor
 %             end
             for k=1:p.numberOfLayers
                 if layerson(k)
-                    locs=obj.getLocs({'locprecnm','PSFxnm','xnm','ynm'},'layer',k,'size',roisizeh);  
+                    locs=obj.getLocs({'locprecnm','PSFxnm','xnm','ynm','phot','bg'},'layer',k,'size',roisizeh);  
                    
                     if isfield(locs,'PSFxnm')
                     psf=mean(locs.PSFxnm);
@@ -41,7 +41,12 @@ classdef generalStatistics<interfaces.SEEvaluationProcessor
                     out.(['layers' num2str(k)]).meany=mean(locs.ynm); 
                     out.(['layers' num2str(k)]).medianx=median(locs.xnm);
                     out.(['layers' num2str(k)]).mediany=median(locs.ynm);
-                     
+                    out.(['layers' num2str(k)]).meanphot=mean(locs.phot);
+                    out.(['layers' num2str(k)]).medianphot=median(locs.phot);
+                    out.(['layers' num2str(k)]).meanbg=mean(locs.bg);
+                    out.(['layers' num2str(k)]).medianbg=median(locs.bg);
+                    out.(['layers' num2str(k)]).maxbg=mode(round(locs.bg));
+                    
                 end
             end
             
