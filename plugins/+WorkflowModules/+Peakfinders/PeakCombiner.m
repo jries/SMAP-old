@@ -19,8 +19,12 @@ classdef PeakCombiner<interfaces.WorkflowModule
         end
         function prerun(obj,p)
             l=load(p.Tfile);
-            obj.transform=l.transformation;  
-            obj.setPar('loc_globaltransform',l.transformation);
+            if isfield(l,'transformation')
+                obj.transform=l.transformation;  
+            else
+                obj.transform=l.SXY(1).cspline.global.transformation;
+            end
+            obj.setPar('loc_globaltransform',obj.transform);
 %             cutoffvalue_callback(0,0,obj)
         end
         function dato=run(obj,data,p)
@@ -36,6 +40,9 @@ classdef PeakCombiner<interfaces.WorkflowModule
                 pixelsize=transform.tinfo.cam_pixelsize_nm;
             else
                 pixelsize=p.loc_fileinfo.cam_pixelsize_um*1000;
+            end
+            if isfield(transform.tinfo,'units')&&strcmp(transform.tinfo.units,'pixels')
+                pixelsize=[1 1];
             end
             xnm=(maxima.x+roi(1))*pixelsize(1);
             ynm=(maxima.y+roi(2))*pixelsize(end);

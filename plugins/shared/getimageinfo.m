@@ -37,7 +37,7 @@ switch ext
             firstfile.name=[basepath filesep firstfile.name];
             allfiles=vertcat(firstfile,allfs);
         else
-            infoim=imfinfo(file);
+            infoim=imfinfo(file,'tif');
             if length(infoim)>1
                 isstack=true;
                 numberOfFrames=length(infoim);
