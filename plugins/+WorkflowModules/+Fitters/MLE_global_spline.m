@@ -439,7 +439,12 @@ if fitpar.fitmode==3||fitpar.fitmode==5
     if isfield(cal,'outforfit')
         fitpar.zpar{1,1}=cal.outforfit;
     elseif isfield(cal,'SXY')
-        s=size(cal.SXY);
+        if p.isglobal 
+            SS=cal.SXY_g;
+        else
+            SS=cal.SXY;
+        end
+        s=size(SS);
         Z=1;
 %         if p.useObjPos
 %             zr=cal.SXY(1).Zrangeall;
@@ -449,13 +454,13 @@ if fitpar.fitmode==3||fitpar.fitmode==5
         for X=s(1):-1:1
             for Y=s(2):-1:1
 %                     if isfield(cal.SXY(X,Y,Z),'gauss_zfit')
-                zpar{X,Y}=cal.SXY(X,Y,Z).gauss_zfit;
+                zpar{X,Y}=SS(X,Y,Z).gauss_zfit;
 %                     else
 %                         zpar{X,Y}=[];
 %                     end
                 %global:combine splines
 %                 cs=cal.SXY(X,Y,Z).cspline_all;
-                cs=cal.SXY(X,Y,Z).cspline;
+                cs=SS(X,Y,Z).cspline;
                 if iscell(cs.coeff)
                     coeff(:,:,:,:,1)=cs.coeff{1};
                     coeff(:,:,:,:,2)=cs.coeff{2};
@@ -473,18 +478,18 @@ if fitpar.fitmode==3||fitpar.fitmode==5
         end
         fitpar.zpar=zpar;
 
-        if numel(cal.SXY)>1
+        if numel(SS)>1
             obj.spatial3Dcal=true;
         else
             obj.spatial3Dcal=false;
         end
-        xr=cal.SXY(1,1).Xrangeall;
+        xr=SS(1,1).Xrangeall;
         xr(1)=-inf;xr(end)=inf;
-        yr=cal.SXY(1,1).Yrangeall;
+        yr=SS(1,1).Yrangeall;
         yr(1)=-inf;yr(end)=inf;
         obj.spatialXrange=xr;
         obj.spatialYrange=yr;
-        fitpar.EMon=cal.SXY(1).EMon;
+        fitpar.EMon=SS(1).EMon;
     elseif isfield(cal,'cspline')
         fitpar.zpar{1}=cal.gauss_zfit;
         fitpar.dz=cal.cspline.dz;

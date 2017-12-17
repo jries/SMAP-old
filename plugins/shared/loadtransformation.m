@@ -8,8 +8,12 @@ if nargin<3
     dataset=length(locData.files.file);
 end
 if exist(file,'file')
-    l=load(file,'transformation');
-    transformation=l.transformation;
+    l=load(file);
+    if isfield(l,'transformation')
+         transformation=l.transformation;
+    else
+        transformation=l.parameters_g.transformation;
+    end
 elseif isfield(locData.files.file(1),'transformation')
      if ~isempty(locData.files.file(dataset).transformation)
             transformation=locData.files.file(dataset).transformation;
