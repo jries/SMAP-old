@@ -74,8 +74,12 @@ classdef OnlineReconstruction<interfaces.WorkflowModule
             locs=data.data;%get;
             
             if ~isempty(locs)&&~isempty(locs.frame)
+                try
                 maxfitdist=min(5,(p.loc_ROIsize-1)/2);
                 indin=abs(locs.xpix-locs.peakfindx)<maxfitdist & abs(locs.ypix-locs.peakfindy)<maxfitdist;
+                catch err
+                    indin=true(size(locs.xpix));
+                end
                 if isfield(locs,'znm')
                     indin=indin&~isnan(locs.znm);
                 end

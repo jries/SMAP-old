@@ -165,6 +165,10 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
             for k=1:length(filelist)
                 obj.locData.clear;
                 filen=filelist{k};
+                status=['fitting ' num2str(k) '/' num2str(length(filelist)) '. ' filen];
+                 obj.guihandles.status.String=status;drawnow;
+                 disp(status);
+
                 if ~isempty(strfind(filen,'.tif'))
                     obj.processtiff(filen);
                 elseif ~isempty(strfind(filen,'.mat')) 
@@ -175,6 +179,9 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
                     end
                 end
             end
+            status='done...';
+            obj.guihandles.status.String=status;drawnow;
+            disp(status);
         end
         
         function processonline(obj,file)

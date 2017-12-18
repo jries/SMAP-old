@@ -20,6 +20,8 @@ else
     
     refimhd=interp3(refimnn,2,'cubic');
     targetimhd=interp3(tarimnn,2,'cubic');
+    refimhd=refimhd/nanmean(refimhd(:));
+    targetimhd=targetimhd/nanmean(targetimhd(:));
 %         refimhd=(refim);
 %     targetimhd=(targetim;);
 %     targetimhd=refimhd;
@@ -34,7 +36,7 @@ else
     Gs = fftshift(real(ifft(ifft2(Gfft),[],3)));
     Gs(Gs<0)=NaN;
     nisn=~isnan(targetimhd);
-    G=Gs/((nanmean(refimhd(:))*nanmean(targetimhd(:))) *sum(nisn(:)))-1;
+    G=Gs/(sum(nisn(:)))-1;
     
 %     px=sum(sum(G,2),3);
 %      maxmethod='interp';

@@ -9,6 +9,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
         spatial3Dcal=false;
         spatialXrange=[-inf inf];
         spatialYrange=[-inf inf];
+        infofields={'x','y'};
     end
     methods
 
@@ -105,6 +106,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
                  imgstack=dstruc.img;
                  
                  stackinf=dstruc.info;
+%                  fninfo=fieldnames(fitterstackinfo{1});
                  s=size(imgstack);
                  if length(s)==2
                      s(3)=1;
@@ -181,7 +183,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
                      else
                          locs=obj.fit(fitterimagestack{X,Y},stackinfoout);
                      end
-                     [locs.asymmetry,locs.asymmdiag,locs.asymangle]=asymmetry(fitterimagestack{X,Y},true);
+%                      [locs.asymmetry,locs.asymmdiag,locs.asymangle]=asymmetry(fitterimagestack{X,Y},true);
                      outputlocs(obj,locs,fitterstackinfo{X,Y},obj.newID,false);
                      obj.newID=obj.newID+1;
 
@@ -205,7 +207,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
                      else
                         locs=obj.fit(imgstack,stackinf);
                      end
-                     [locs.asymmetry,locs.asymmdiag,locs.asymangle]=asymmetry(imgstack,true);
+%                      [locs.asymmetry,locs.asymmdiag,locs.asymangle]=asymmetry(imgstack,true);
                      outputlocs(obj,locs,stackinf,obj.newID,false);
                      obj.newID=obj.newID+1;
                 end
@@ -224,9 +226,9 @@ classdef WorkflowFitter<interfaces.WorkflowModule
                         else
                             locs=obj.fit(fitterimagestack{X,Y}(:,:,1:obj.stackind(X,Y)),stackinfoout);
                         end
-                        if obj.stackind(X,Y)>0
-                        [locs.asymmetry,locs.asymmdiag,locs.asymangle]=asymmetry(fitterimagestack{X,Y}(:,:,1:obj.stackind(X,Y)),true);
-                        end
+%                         if obj.stackind(X,Y)>0
+%                         [locs.asymmetry,locs.asymmdiag,locs.asymangle]=asymmetry(fitterimagestack{X,Y}(:,:,1:obj.stackind(X,Y)),true);
+%                         end
                         outputlocs(obj,locs,fitterstackinfo{X,Y},obj.newID,false);
                         obj.newID=obj.newID+1;
 %                     else
@@ -255,11 +257,11 @@ global fitterstackinfo fitterimagestack fitterbgstack
                 for X=numx:-1:1
                     for Y=numy:-1:1
                         fitterimagestack{X,Y}=zeros(roisize,roisize,obj.numberInBlock,'single');
-                        fitterstackinfo{X,Y}.x=zeros(obj.numberInBlock,1,'single');
-                        fitterstackinfo{X,Y}.y=zeros(obj.numberInBlock,1,'single');
                         fitterstackinfo{X,Y}.frame=zeros(obj.numberInBlock,1,'double');
-%                         fitterstackinfo{X,Y}.X=X;
-%                         fitterstackinfo{X,Y}.Y=Y;
+                        for k=1:length(obj.infofields)
+                            fitterstackinfo{X,Y}.(obj.infofields{k})=zeros(obj.numberInBlock,1,'single');
+                        end
+         
                     end
                 end
                        

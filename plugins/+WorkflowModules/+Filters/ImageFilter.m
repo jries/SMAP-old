@@ -38,12 +38,21 @@ classdef ImageFilter<interfaces.WorkflowModule
                     else
                         obj.filterkernel=obj.filterkernelPSF;
                     end
+                case 3 %DoG
+                    rsize=max(ceil(6*fs-1),3);
+                    hdog=fspecial('gaussian',rsize,fs)-fspecial('gaussian',rsize,max(1,2.5*fs));
+                    obj.filterkernel=hdog;
             end
             obj.preview=obj.getPar('loc_preview');
         end
         function dato=run(obj,data,p)
             dato=data;%.copy;
-            imf=filter2(obj.filterkernel,data.data);
+            if p.filtermode.Value==3&&~isempty(data.data)
+                offset=min(data.data(:,1));
+            else 
+                offset=0;
+            end
+            imf=filter2(obj.filterkernel,data.data-offset);
             if obj.preview&&obj.getPar('loc_previewmode').Value==3&&~isempty(imf)
                f=obj.getPar('loc_outputfig');
                if isempty(f)||~isvalid(f)
@@ -108,7 +117,7 @@ figure(99);imagesc(h);
 end
 
 function pard=guidef(obj)
-pard.filtermode.object=struct('Style','popupmenu','String',{{'Gauss: ','mean PSF'}},'Callback',{{@filtermode_callback,obj}});
+pard.filtermode.object=struct('Style','popupmenu','String',{{'Gauss: ','mean PSF','DoG'}},'Callback',{{@filtermode_callback,obj}});
 pard.filtermode.position=[1,1];
 pard.filtermode.Width=1.;
 pard.filtermode.Optional=true;

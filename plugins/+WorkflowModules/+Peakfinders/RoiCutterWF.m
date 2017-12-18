@@ -74,8 +74,9 @@ classdef RoiCutterWF<interfaces.WorkflowModule
 %                     info(ind).y=maxima.y(k);
 %                     info(ind).frame=data{1}.frame;     
             end 
-            info.x=maxima.x;
-            info.y=maxima.y;
+            info=maxima;
+%             info.x=maxima.x;
+%             info.y=maxima.y;
             frameh=data{1}.frame;
             info.frame=maxima.x*0+frameh;
            

@@ -29,26 +29,26 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             end
             roisize=obj.getPar('loc_ROIsize');
             obj.numberInBlock=round(obj.fitpar.roisperfit*100/roisize^2);
-            
+            p=obj.getAllParameters;
             if obj.fitpar.fitmode==5 ||obj.fitpar.fitmode==6
                 EMfile=obj.getPar('loc_fileinfo').EMon;
                 EMcal=obj.fitpar.EMon;
 %                 EMcal=obj.fitpar.splinefit{1}.isEM;
                 mirrorstack=obj.getSingleGuiParameter('automirror');
-                switch mirrorstack.selection
-                    case 'auto'
-                        obj.fitpar.mirrorstack=~(EMfile==EMcal);
-                    case 'mirror'
-                        obj.fitpar.mirrorstack=true;
-                    otherwise
-                        obj.fitpar.mirrorstack=false;
-                end
+%                 switch mirrorstack.selection
+%                     case 'auto'
+%                         obj.fitpar.mirrorstack=~(EMfile==EMcal);
+%                     case 'mirror'
+%                         obj.fitpar.mirrorstack=true;
+%                     otherwise
+%                         obj.fitpar.mirrorstack=false;
+%                 end
 %                 if obj.getSingleGuiParameter('automirror')
 %                     
 %                 else
 %                     obj.fitpar.mirrorstack=false;
 %                 end
-                p=obj.getAllParameters;
+                obj.fitpar.mirrorstack=false; %later: take out completely. NOw in tiff loader
                 if p.overwritePixelsize
                     obj.setPar('overwrite_pixelsize',[p.pixelsizex p.pixelsizey])
                     cs=obj.getPar('loc_cameraSettings');
@@ -57,8 +57,9 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
                 else
                     obj.setPar('overwrite_pixelsize',[])
                 end
+                
             end   
-            
+            obj.setPar('loc_iterations',p.iterations);
             disp(reporttext)
         end
         function nofound(obj,varargin)
@@ -80,12 +81,16 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             end
             out=fitwrapper(imstack,obj.fitpar,varstack);
             locs=fit2locs(out,stackinfo,obj.fitpar,imstack);
+            
+            if obj.fitpar.asymmetry
+            [locs.asymmetry,locs.asymmdiag,locs.asymangle]=asymmetry(imgstack,true);
+            end
         end
 
         function initGui(obj)
             initGui@interfaces.WorkflowFitter(obj);
-            obj.guihandles.fitmode.Callback={@fitmode_callback,obj};
-            fitmode_callback(0,0,obj)
+%             obj.guihandles.fitmode.Callback={@fitmode_callback,obj};
+%             fitmode_callback(0,0,obj)
             obj.guihandles.loadcal.Callback={@loadcall_callback,obj};
 %             obj.addSynchronization('loc_fileinfo',[],[],{@loc_fileinfo_callback,obj});
 
@@ -192,7 +197,7 @@ switch fitpar.fitmode
         
         %         locs.znm=(P(:,5)*1000+fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
         locs.znm=((P(:,5)-fitpar.z0)*fitpar.dz)*fitpar.refractive_index_mismatch;
-        notconverged=P(:,5)<2|P(:,5)>size(fitpar.splinefit{1}.cspline.coeff,3)-2;
+        notconverged=P(:,5)<2|P(:,5)>fitpar.coeffsize(3)-2;
         locs.znm(notconverged)=NaN;
         
         locs.zerr=sqrt(CRLB(:,5))*fitpar.dz*fitpar.refractive_index_mismatch;
@@ -203,6 +208,7 @@ switch fitpar.fitmode
         locs.PSFypix=sx;
 end
 locs.locpthompson=sqrt((locs.PSFxpix.*locs.PSFypix+1/12*v1)./( locs.phot/EMexcess)+8*pi*(locs.PSFxpix.*locs.PSFypix).^2.* locs.bg./( locs.phot/EMexcess).^2);
+locs.iterations=results.P(:,end);
 end
 
 function out=fitwrapper(imstack,fitpar,varstack)
@@ -241,18 +247,23 @@ arguments{6}=1;
             else
                 arguments{1}=single(imstack/EMexcess);
             end
-            arguments{4}=single(fitpar.splinefithere.cspline.coeff);
+            coeffh=(fitpar.splinefithere.cspline.coeff);
+            if iscell(coeffh)
+                coeffh=coeffh{1};
+            end
+            arguments{4}=single(coeffh);
+            
     end
    
-    if fitpar.fitmode==6
-          
-        [P1 CRLB1 LL1 P2 CRLB2 LL2 ]=fitpar.fitfunction(arguments{:});
-        P = repmat(single(LL1>=LL2),1,6).*P1+repmat(single(LL1<LL2),1,6).*P2;
-        CRLB = repmat(single(LL1>=LL2),1,5).*CRLB1+repmat(single(LL1<LL2),1,5).*CRLB2;
-        LogL = repmat(single(LL1>=LL2),1,1).*LL1+repmat(single(LL1<LL2),1,1).*LL2;
-    else
+%     if fitpar.fitmode==6
+%           
+%         [P1 CRLB1 LL1 P2 CRLB2 LL2 ]=fitpar.fitfunction(arguments{:});
+%         P = repmat(single(LL1>=LL2),1,6).*P1+repmat(single(LL1<LL2),1,6).*P2;
+%         CRLB = repmat(single(LL1>=LL2),1,5).*CRLB1+repmat(single(LL1<LL2),1,5).*CRLB2;
+%         LogL = repmat(single(LL1>=LL2),1,1).*LL1+repmat(single(LL1<LL2),1,1).*LL2;
+%     else
         [P CRLB LogL]=fitpar.fitfunction(arguments{:});
-    end
+%     end
 
 out.P=P;
 out.CRLB=CRLB;
@@ -279,7 +290,7 @@ fitpar.iterations=p.iterations;
 fitpar.fitmode=p.fitmode.Value;
 fitpar.roisperfit=p.roisperfit;
 fitpar.issCMOS=false;
-
+fitpar.asymmetry=p.asymmetry;
 if fitpar.fitmode==3||fitpar.fitmode==5
     fitpar.issCMOS=p.isscmos;
     fitpar.PSF2D=p.fit2D;
@@ -296,11 +307,11 @@ if fitpar.fitmode==3||fitpar.fitmode==5
     elseif isfield(cal,'SXY')
         s=size(cal.SXY);
         Z=1;
-        if p.useObjPos
-            zr=cal.SXY(1).Zrangeall;
-            zr(1)=[];zr(end)=inf;
-            Z=find(p.objPos<=zr,1,'first');
-        end
+%         if p.useObjPos
+%             zr=cal.SXY(1).Zrangeall;
+%             zr(1)=[];zr(end)=inf;
+%             Z=find(p.objPos<=zr,1,'first');
+%         end
         for X=s(1):-1:1
             for Y=s(2):-1:1
 %                     if isfield(cal.SXY(X,Y,Z),'gauss_zfit')
@@ -308,7 +319,7 @@ if fitpar.fitmode==3||fitpar.fitmode==5
 %                     else
 %                         zpar{X,Y}=[];
 %                     end
-                splinefit{X,Y}=cal.SXY(X,Y,Z).cspline_all;
+                splinefit{X,Y}=cal.SXY(X,Y,Z);
 
             end
         end
@@ -316,6 +327,11 @@ if fitpar.fitmode==3||fitpar.fitmode==5
             fitpar.dz=splinefit{1}.cspline.dz;
             fitpar.z0=splinefit{1}.cspline.z0;
             fitpar.splinefit=splinefit;
+            coeffh=splinefit{1}.cspline.coeff;
+            if iscell(coeffh)
+                coeffh=coeffh{1};
+            end
+            fitpar.coeffsize=size(coeffh);
         end
         fitpar.zpar=zpar;
 
@@ -372,7 +388,11 @@ if fitpar.fitmode==3||fitpar.fitmode==5
         varmap=[];
     end
     fitpar.varmap=varmap*p.loc_cameraSettings.pix2phot;
-    fitpar.refractive_index_mismatch=p.refractive_index_mismatch;
+    if p.userefractive_index_mismatch
+        fitpar.refractive_index_mismatch=p.refractive_index_mismatch;
+    else
+        fitpar.refractive_index_mismatch=1;
+    end
 
 
 % elseif fitpar.fitmode==5
@@ -409,16 +429,16 @@ end
 function fitmode_callback(a,b,obj)
 p=obj.getGuiParameters;
 fitmode=p.fitmode.Value;
-fitz={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','pixelsizex','pixelsizey','automirror','fit2D','isscmos','selectscmos','scmosfile'};
-fitxy={'PSFx0','tPSFx0'};
-switch fitmode
-    case {3,5}
-        ton=fitz;
-        toff=fitxy;
-    otherwise
-        toff=fitz;
-        ton=fitxy;
-end
+% fitz={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','pixelsizex','pixelsizey','automirror','fit2D','isscmos','selectscmos','scmosfile'};
+% fitxy={'PSFx0','tPSFx0'};
+% switch fitmode
+%     case {3,5}
+%         ton=fitz;
+%         toff=fitxy;
+%     otherwise
+%         toff=fitz;
+%         ton=fitxy;
+% end
 
 switch fitmode
     case {1,2}
@@ -432,17 +452,24 @@ end
 
 obj.setPar('loc_ROIsize',roisize);
 
-obj.fieldvisibility('on',ton,'off',toff);
+% obj.fieldvisibility('on',ton,'off',toff);
 obj.setGuiParameters(struct('iterations',iterations));
 end
 
 function pard=guidef(obj)
-pard.fitmode.object=struct('Style','popupmenu','String',{{'PSF fix','PSF free','3D z','ellipt: PSFx PSFy','Spline'}},'Value',2);
+p1(1).value=1; p1(1).on={'PSFx0','tPSFx0'}; 
+p1(1).off={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize',...
+    'automirror','fit2D','isscmos','pixelsizex','pixelsizey','selectscmos','scmosfile'};
+p1(2)=p1(1);p1(2).value=2;
+p1(3).value=3;p1(3).off={'PSFx0','tPSFx0'};p1(3).on={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','automirror','fit2D','isscmos'};
+p1(4)=p1(1);p1(4).value=4;
+p1(5)=p1(3);p1(5).value=5;
+p1(6)=p1(5);p1(6).value=6;
+
+pard.fitmode.object=struct('Style','popupmenu','String',{{'PSF fix','PSF free','3D z','ellipt: PSFx PSFy','Spline'}},'Value',2,'Callback',{{@obj.switchvisible,p1,{@fitmode_callback,0,0,obj}}});
 pard.fitmode.position=[1,1];
 pard.fitmode.Width=1.5;
 pard.fitmode.TooltipString=sprintf('Fit mode. Fit with constant PSF, free PSF, 3D with astigmatism, asymmetric PSF (for calibrating astigmatic 3D)');
-
-
 
 pard.text.object=struct('Style','text','String','Iterations:');
 pard.text.position=[1,2.5];
@@ -477,33 +504,47 @@ pard.PSFx0.TooltipString=sprintf('start value for PSF, or size of PSF when PSF f
 pard.PSFx0.Optional=true;
 
 pard.fit2D.object=struct('Style','checkbox','String','2D PSF','Value',0);
-pard.fit2D.position=[2,1];
-pard.fit2D.Width=2;
+pard.fit2D.position=[2,3.5];
+pard.fit2D.Width=.75;
 pard.fit2D.TooltipString=sprintf('Check if PSF model is 2D (no specific PSF engineering), or displays a high degree of similarity above and below the focal plane');
 pard.fit2D.Optional=true;
 
+% pard.automirror.object=struct('Style','popupmenu','String',{{'auto','no mirror','mirror'}});
+% pard.automirror.position=[2,4.25];
+% pard.automirror.Width=.75;
+% pard.automirror.Optional=true;
+
 pard.loadcal.object=struct('Style','pushbutton','String','Load 3D cal');
-pard.loadcal.position=[3,1];
+pard.loadcal.position=[2,1];
+pard.loadcal.Width=.5;
 pard.cal_3Dfile.object=struct('Style','edit','String','settings/cal_3DAcal.mat');
-pard.cal_3Dfile.position=[3,2];
-pard.cal_3Dfile.Width=3;
+pard.cal_3Dfile.position=[2,1.5];
+pard.cal_3Dfile.Width=2;
 pard.cal_3Dfile.TooltipString=sprintf('3D calibration file for astigmtic 3D. \n Generate from bead stacks with plugin: Analyze/sr3D/CalibrateAstig');
 
-% pard.useObjPos.object=struct('Style','checkbox','String','Use objective position:','Visible','off');
-% pard.useObjPos.position=[4,1];
-% pard.useObjPos.Width=1.5;
-% pard.useObjPos.Optional=true;
-% 
-% pard.objPos.object=struct('Style','edit','String','0','Visible','off');
-% pard.objPos.position=[4,2.5];
-% pard.objPos.TooltipString=sprintf('Position of the objective above the coverslip (nm, piezo position). \n Only used in combination with CalibrateAstigDeep.');
-% pard.objPos.Optional=true;
-% pard.objPos.Width=0.5;
 
-pard.trefractive_index_mismatch.object=struct('Style','text','String','RI mismatch factor:');
-pard.trefractive_index_mismatch.position=[4,3.5];
-pard.trefractive_index_mismatch.Width=1.5;
-pard.trefractive_index_mismatch.Optional=true;
+p(1).value=0; p(1).on={}; p(1).off={'linkt','link'};
+p(2).value=1; p(2).on={'linkt','link'}; p(2).off={};
+
+pard.isglobal.object=struct('Style','checkbox','String','Global fit','Callback',{{@obj.switchvisible,p}});
+pard.isglobal.position=[3,1];
+pard.isglobal.Width=1;
+pard.isglobal.Optional=true;
+
+pard.linkt.object=struct('Style','text','String','link: x y z N bg');
+pard.linkt.position=[3,2];
+pard.linkt.Width=1.5;
+pard.linkt.Optional=true;
+
+pard.link.object=struct('Style','edit','String','1 1 1 0 0');
+pard.link.position=[3,3.5];
+pard.link.Width=1.5;
+pard.link.Optional=true;
+
+pard.userefractive_index_mismatch.object=struct('Style','checkbox','String','RI mismatch:');
+pard.userefractive_index_mismatch.position=[4,3.5];
+pard.userefractive_index_mismatch.Width=1.5;
+pard.userefractive_index_mismatch.Optional=true;
 
 pard.refractive_index_mismatch.object=struct('Style','edit','String','.8');
 pard.refractive_index_mismatch.position=[4,4.5];
@@ -511,7 +552,10 @@ pard.refractive_index_mismatch.TooltipString=sprintf('Correction factor to take 
 pard.refractive_index_mismatch.Optional=true;
 pard.refractive_index_mismatch.Width=0.5;
 
-pard.overwritePixelsize.object=struct('Style','checkbox','String','New pixelsize X,Y (um):');
+
+p(1).value=0; p(1).on={}; p(1).off={'pixelsizex','pixelsizey'};
+p(2).value=1; p(2).on={'pixelsizex','pixelsizey'}; p(2).off={};
+pard.overwritePixelsize.object=struct('Style','checkbox','String','New pixelsize X,Y (um):','Callback',{{@obj.switchvisible,p}});
 pard.overwritePixelsize.position=[4,1];
 pard.overwritePixelsize.Width=1.5;
 pard.overwritePixelsize.Optional=true;
@@ -526,12 +570,9 @@ pard.pixelsizey.position=[4,3];
 pard.pixelsizey.Width=0.5;
 pard.pixelsizey.Optional=true;
 
-pard.automirror.object=struct('Style','popupmenu','String',{{'auto','no mirror','mirror'}});
-pard.automirror.position=[2,2];
-pard.automirror.Width=1;
-pard.automirror.Optional=true;
-
-pard.isscmos.object=struct('Style','checkbox','String','sCMOS');   
+p(1).value=0; p(1).on={}; p(1).off={'selectscmos','scmosfile'};
+p(2).value=1; p(2).on={'selectscmos','scmosfile'}; p(2).off={};
+pard.isscmos.object=struct('Style','checkbox','String','sCMOS','Callback',{{@obj.switchvisible,p}});   
 pard.isscmos.position=[5,1];
 pard.isscmos.Optional=true;
 pard.selectscmos.object=struct('Style','pushbutton','String','Load var map','Callback',{{@loadscmos_callback,obj}});   
@@ -543,7 +584,11 @@ pard.scmosfile.TooltipString='Tiff/.mat image containing sCMOS variance map (sam
 pard.scmosfile.position=[5,3];
 pard.scmosfile.Optional=true;
     pard.scmosfile.Width=2;
-    
+   
+pard.asymmetry.object=struct('Style','checkbox','String','get asymmetry');   
+pard.asymmetry.position=[6,1];
+pard.asymmetry.Optional=true;
+
 pard.plugininfo.type='WorkflowFitter';
 pard.plugininfo.description='Maximum likelyhood estimater, optimized for GPU processing. According to: C. S. Smith, N. Joseph, B. Rieger, and K. A. Lidke, ?Fast, single-molecule localization that achieves theoretically minimum uncertainty.,? Nat Methods, vol. 7, no. 5, pp. 373?375, May 2010.';
 end

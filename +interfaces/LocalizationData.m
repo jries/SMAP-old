@@ -281,7 +281,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                             minmax=s(ind,[2,6]);
                             filtermode='minmax';
                         end
-                        if s{ind,8}
+                        if size(s,2)>=8 && s{ind,8}
                             invert=true;
                         end
                     elseif strcmp(fields{f},'channel')

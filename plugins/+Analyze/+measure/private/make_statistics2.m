@@ -239,7 +239,7 @@ sls={txt};
 for k=1:length(datrange)
     sls{end+1}='';
     sls{end+1}=[num2str(datrange(k)) '.' modetxt{datrange(k)} ];
-    if isempty(hz{datrange(k)})
+    if length(hz)<k || isempty(hz{datrange(k)})
         continue
     end
     [~,ind]=max(hz{datrange(k)}.h);

@@ -34,6 +34,22 @@ classdef LocSaver<interfaces.WorkflowModule
             pard.savelocal.position=[2,1];
             pard.savelocal.Width=2;
             pard.savelocal.Optional=true;
+            
+            pard.setoutputfile.object=struct('Style','pushbutton','String','Set:','Callback',{{@setoutputfile_callback,obj}});
+            pard.setoutputfile.object.TooltipString='Set the output file';
+            pard.setoutputfile.position=[3,1];
+            pard.setoutputfile.Width=.5;
+            pard.setoutputfile.Optional=true;
+            
+            pard.outputfile.object=struct('Style','edit','String','');
+            pard.outputfile.object.TooltipString='output file name';
+            pard.outputfile.position=[3,1.5];
+            pard.outputfile.Width=1.5;
+            pard.outputfile.Optional=true;
+            
+            pard.syncParameters={{'loc_outputfilename','outputfile',{'String','Value'}}};
+            
+            
         end
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
@@ -52,6 +68,9 @@ classdef LocSaver<interfaces.WorkflowModule
             obj.locDatatemp.addfile;
             obj.filenumber=1;
              obj.locDatatemp.files.file=locsaveFileinfo(obj);  
+             if contains(p.outputfile,'_sml.mat') %valid output name
+                 obj.locDatatemp.files.file.name=p.outputfile;
+             end
              p=obj.parent.getGuiParameters(true,true);
              p.name=obj.parent.pluginpath;
              
@@ -81,8 +100,9 @@ classdef LocSaver<interfaces.WorkflowModule
             end
             locs=data.data;%get;
             if ~isempty(locs)&&~isempty(locs.frame)
-                maxfitdist=min(3.5,(p.loc_ROIsize-1)/2);
-                indin=abs(locs.xpix-locs.peakfindx)<maxfitdist & abs(locs.ypix-locs.peakfindy)<maxfitdist;
+%                 maxfitdist=min(3.5,(p.loc_ROIsize-1)/2);
+%                 indin=abs(locs.xpix-locs.peakfindx)<maxfitdist & abs(locs.ypix-locs.peakfindy)<maxfitdist;
+                indin=true(size(locs.frame));
                 if isfield(locs,'znm')
                     indin=indin&~isnan(locs.znm);
                 end
@@ -234,5 +254,16 @@ layers.images.finalImages=drawerSMAP(rawimage,p);
 imoutt=displayerSMAP(layers,p);
 imout=imoutt.image;
 % imout=TotalRender(locDatatemp,pall.defaultChannelParameters);
+end
+
+function setoutputfile_callback(a,b,obj)
+fn=obj.getSingleGuiParameter('outputfile');
+if ~contains(fn,'sml.mat')
+        fn='*sml.mat';
+end
+[f,p]=uiputfile(fn);
+obj.setGuiParameters(struct('outputfile',[p f]));
+    
+
 end
 

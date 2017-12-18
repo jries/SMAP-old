@@ -48,7 +48,7 @@ classdef CameraConverter<interfaces.WorkflowModule
                 settings=obj.getPar('loc_fileinfo');
                 fn=fieldnames(settings);
                 for k=1:length(fn)
-                    if settings.assigned.(fn{k})
+                    if isfield(settings.assigned,fn{k}) && settings.assigned.(fn{k})
                         obj.loc_cameraSettings.(fn{k})=settings.(fn{k});
                     end
                 end
@@ -120,7 +120,6 @@ classdef CameraConverter<interfaces.WorkflowModule
                datao=data;
                datao.data=imphot;  
         end
-        
        
     end
 end
@@ -245,7 +244,7 @@ end
 
 function pard=guidef
 
-pard.text.object=struct('Style','text','String','Acquisition:');
+pard.text.object=struct('Style','text','String','Metadata:');
 pard.text.position=[1,1];
 pard.text.Width=.7;
 pard.text.Optional=true;
@@ -253,14 +252,17 @@ pard.text.Optional=true;
 % pard.metadatafile.position=[2,1];
 % pard.metadatafile.Width=4;
 % pard.metadatafile.Optional=true;
-pard.loadmetadata.object=struct('Style','pushbutton','String','Load metadata');
+pard.loadmetadata.object=struct('Style','pushbutton','String','Load');
 pard.loadmetadata.position=[1,1.7];
 pard.loadmetadata.TooltipString=sprintf('Load camera settings metadata from image or _sml.mat file.');
 pard.loadmetadata.Optional=true;
-pard.calibrate.object=struct('Style','pushbutton','String','auto calibration');
-pard.calibrate.position=[1,2.7];
+pard.loadmetadata.Width=0.5;
+pard.calibrate.object=struct('Style','pushbutton','String','autocal');
+pard.calibrate.position=[1,2.2];
 pard.calibrate.TooltipString=sprintf('calibrate gain and offset from images');
 pard.calibrate.Optional=true;
+pard.calibrate.Width=0.6;
+
 
 pard.camparbutton.object=struct('Style','pushbutton','String','set Cam Parameters');
 pard.camparbutton.position=[1,3.7];

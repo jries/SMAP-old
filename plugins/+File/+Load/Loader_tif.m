@@ -41,6 +41,10 @@ pard.stack.position=[1,1];
 pard.stack.Width=2;
 pard.stack.TooltipString='Load image stack (otherwise load single image)';
 
+pard.mirrortif.object=struct('Style','checkbox','String','Mirror (for EM gain)');
+pard.mirrortif.position=[1,3];
+pard.mirrortif.Width=2;
+pard.mirrortif.TooltipString='Mirror image. Might be required if EM gain was used';
 
 pard.plugininfo=info;
 pard.plugininfo.type='LoaderPlugin';
@@ -68,6 +72,14 @@ if isfield(p,'stack')&&p.stack
     images=chooseTifImage(file);
 else
     images=gettif(file);
+end
+
+if p.mirrortif
+    for k=1:length(images)
+        images(k).image=images(k).image(:,end:-1:1);
+        roih=images(k).info.roi;
+        images(k).info.roi(1)=512-roih(1)-roih(3);
+    end
 end
 numimages=length(images);
 tiffold=obj.locData.files.file(f).numberOfTif;

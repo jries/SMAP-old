@@ -4,7 +4,9 @@ classdef metadataSMAP<handle
     properties
         Width=512;
         Height=512;
-        roi=[];
+%         roi_metadata=[];
+        roi=[]; 
+        
         camerainfo=[];
         allmetadata=[];
         exposure=1;
@@ -21,6 +23,7 @@ classdef metadataSMAP<handle
         basefile;
         assigned
         imagefile
+        EMmirror=false;
     end
     
     methods
