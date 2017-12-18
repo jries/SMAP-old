@@ -5,7 +5,8 @@ classdef LocTransformN<handle
         tinfo
         transformZ2Reference
         transformZ2Target
-        
+        unit='nm'; %or pixel
+        cam_pixnm=[100 100];
     end
     
     methods
@@ -18,7 +19,7 @@ classdef LocTransformN<handle
             tinfo{1}.yrange=[-inf inf];
         end
         function setTransform(obj,varargin)
-            properties={'xrange','yrange','type','parameter','mirror'};
+            properties={'xrange','yrange','type','parameter','mirror','unit'};
             for k=1:2:length(varargin)
                 if any(strcmp(properties,varargin{k}))
                     obj.tinfo.(varargin{k})=varargin{k+1};
@@ -26,11 +27,17 @@ classdef LocTransformN<handle
                     disp([varargin{k} ' is not a proper parameter']);
                 end
             end
+            ind=find(strcmp(varargin,'unit'));
+            if ~isempty(ind)
+                obj.unit=varargin{ind+1};
+            end
+       
         end
         function findTransform(obj,channel,coordreference,coordtarget,type,parameter)
             %XXX make sure reference and target are not exchanged 
             %matrix becomes singular for too large coordinates. Use um
             %instead of nm
+            %use units as specified
             
             if nargin<5
                 th=obj.tinfo{channel};
@@ -57,6 +64,11 @@ classdef LocTransformN<handle
                         return
                     end
                 end
+            else
+                obj.tinfo{channel}.type=type;
+                if nargin>5
+                    obj.tinfo{channel}.parameter=parameter;
+                end
             end
             coordreference=double(coordreference/1000);
             coordtarget=double(coordtarget/1000);
@@ -76,22 +88,43 @@ classdef LocTransformN<handle
             end
         end
         
-        function co=transformToReference(obj,channel,ci)
+       function co=convertcoordinates(obj, ci,unitref,unittar)
+       if ~strcmp(unitref,unittar)
+            switch unittar
+                case 'pixels'
+                    cf=1./obj.cam_pixnm;
+                case 'nm'
+                    cf=obj.cam_pixnm;
+            end
+            co(1,:)=ci(1,:)*cf(1);
+            co(2,:)=ci(2,:)*cf(end);
+        end
+        end
+        
+        function co=transformToReference(obj,channel,ci,unit)
+            if nargin>3 %unit specified
+                ci=obj.convertcoordinates(ci,unit,obj.unit);
+            end
             ci=ci/1000;
             co=transformPointsInverse(obj.transform2Reference{channel},ci(:,1:2)); %inverse of inverse is forward          
             if size(ci,2)>2 %z coordinates present               
                  X=transformPointsInverse(obj.transformZ2Reference{channel},horzcat(co,ci(:,3)));
                  co(:,3)=X(:,3);
             end
+             if nargin>3,co=obj.convertcoordinates(co,obj.unit,unit);end
              co=co*1000; %back to nm   
         end
-        function co=transformToTarget(obj,channel,ci)
+        function co=transformToTarget(obj,channel,ci,unit)
+            if nargin>3 %unit specified
+                ci=obj.convertcoordinates(ci,unit,obj.unit);
+            end
             ci=ci/1000;
             co=transformPointsInverse(obj.transform2Target{channel},ci(:,1:2)); %inverse of inverse is forward          
             if size(ci,2)>2 %z coordinates present               
                  X=transformPointsInverse(obj.transformZ2Target{channel},horzcat(co,ci(:,3)));
                  co(:,3)=X(:,3);
             end
+            if nargin>3,co=obj.convertcoordinates(co,obj.unit,unit);end
              co=co*1000; %back to nm   
         end  
 
@@ -103,7 +136,10 @@ classdef LocTransformN<handle
             imout=transformImage(obj.transform2Reference{channel},image,cam_pixnm,roi);
         end  
         
-        function ind=getPart(obj,channel,coordinates)
+        function ind=getPart(obj,channel,coordinates,unit)
+            if nargin>3 %unit specified
+                coordinates=obj.convertcoordinates(coordinates,unit,obj.unit);
+            end
             th=obj.tinfo{channel};
             if ~isfield(th,'xrange')||isempty(th.xrange)||~isfield(th,'yrange')||isempty(th.yrange)
                 disp('no range specified, getPart in LocTransformN returns all coordinates');
