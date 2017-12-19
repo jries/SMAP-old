@@ -53,7 +53,14 @@ for k=1:length(layers)
               txtN=[txtN 'N'  num2str(k) '=' shortnumber(fi.numberOfLocs) ', '];
          end
          if layersnext
-         allnext=horzcat(allnext,fi.image);
+             s=size(fi.image);
+             if s(2)>s(1)*1.3 
+                 vertnext=true;
+                 allnext=vertcat(fi.image,allnext);
+             else
+                 allnext=horzcat(allnext,fi.image);
+                 vertnext=false;
+             end
          end
 
         end
@@ -108,7 +115,11 @@ end
 if layersnext
      imfinal=allnext;
      nlayer=sum(p.sr_layerson)-1;
-     rangexplot(2)=rangexplot(2)+nlayer*(rangexplot(2)-rangexplot(1));
+     if vertnext
+         rangeyplot(2)=rangeyplot(2)+nlayer*(rangeyplot(2)-rangeyplot(1));
+     else
+        rangexplot(2)=rangexplot(2)+nlayer*(rangexplot(2)-rangexplot(1));
+     end
 end
 
     [imfinal,lennm]=addscalebar(imfinal,p.sr_pixrec(1));

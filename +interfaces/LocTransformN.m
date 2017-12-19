@@ -2,11 +2,12 @@ classdef LocTransformN<handle
     properties
         transform2Reference
         transform2Target
-        tinfo
+        tinfo={[]};
         transformZ2Reference
         transformZ2Target
         unit='nm'; %or pixel
         cam_pixnm=[100 100];
+        channels=2;
     end
     
     methods
@@ -18,11 +19,41 @@ classdef LocTransformN<handle
             tinfo{1}.xrange=[-inf inf];
             tinfo{1}.yrange=[-inf inf];
         end
-        function setTransform(obj,varargin)
-            properties={'xrange','yrange','type','parameter','mirror','unit'};
+        function setTransform(obj,channel,varargin)
+            % type: any of matlab transformations
+            % mirror:  dimension along which to mirror: 0, 1, 2 , [1 2]
+            %unit: nm pixel
+            % also possibility to pass on structure
+            if isempty(channel)
+                channel=1:length(obj.tinfo);
+            end
+            obj.channels=max(obj.channels,max(channel));
+            
+            properties={'xrange','yrange','type','parameter','mirror','unit','channels','cam_pixnm'};
+            if isstruct(varargin{1})   
+                p=varargin{1};
+                if max(channel)<length(obj.tinfo)
+                    obj.tinfo{max(channel)}=[];
+                end
+                for c=1:length(channel)
+                    obj.tinfo{channel(c)}=copyfields(obj.tinfo{channel(c)},p,properties);
+                end
+                if isfield(p,'unit')
+                    obj.unit=p.unit;
+                end
+                if isfield(p,'channels')
+                    obj.channels=p.channels;
+                end
+                if isfield(p,'cam_pixnm')
+                    obj.cam_pixnm=p.cam_pixnm;
+                end
+            else
+                  
             for k=1:2:length(varargin)
                 if any(strcmp(properties,varargin{k}))
-                    obj.tinfo.(varargin{k})=varargin{k+1};
+                    for c=1:length(channel)
+                        obj.tinfo{channel(c)}.(varargin{k})=varargin{k+1};
+                    end
                 else 
                     disp([varargin{k} ' is not a proper parameter']);
                 end
@@ -31,7 +62,15 @@ classdef LocTransformN<handle
             if ~isempty(ind)
                 obj.unit=varargin{ind+1};
             end
-       
+            ind=find(strcmp(varargin,'channels'));
+            if ~isempty(ind)
+                obj.channels=varargin{ind+1};
+            end
+            ind=find(strcmp(varargin,'cam_pixnm'));
+            if ~isempty(ind)
+                obj.cam_pixnm=varargin{ind+1};
+            end   
+            end
         end
         function findTransform(obj,channel,coordreference,coordtarget,type,parameter)
             %XXX make sure reference and target are not exchanged 
