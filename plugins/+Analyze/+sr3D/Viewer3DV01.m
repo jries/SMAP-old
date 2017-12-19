@@ -337,6 +337,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 if isempty(obj.axis)||isstruct(obj.axis)||~isvalid(obj.axis)
                     return
                 end
+            renderfield={};
             roih=obj.getPar('sr_roihandle');
             if ~isa(roih,'imline')
                 return
