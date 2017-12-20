@@ -34,6 +34,7 @@ else
 end
 
 maxV=nanmax(V(:));
+minV=nanmin(V(:));
 
  dim=1:2;
  dimmenu=3;
@@ -257,21 +258,32 @@ changeaxis(0,0,0);
         
         %contrast
         if hcontrastcheck.Value
-            imax=str2double(hcontrast.String)*maxV;
+            meanV=(minV+maxV)/2;
+            dV=(maxV-minV)/2;
+            imax=meanV+dV*str2double(hcontrast.String);
+            imin=meanV-dV*str2double(hcontrast.String);
+%             imax=str2double(hcontrast.String)*maxV;
+%             imin=str2double(hcontrast.String)*minV;
         else
             imaxim=nanmax(img(:));
+            iminim=nanmin(img(:));
             if isnan(imaxim)
                 imax=inf;
+                imin=-inf;
             else
-            imax=str2double(hcontrast.String)*imaxim;
+                meanV=(iminim+imaxim)/2;
+                dV=(imaxim-iminim)/2;
+                imax=meanV+dV*str2double(hcontrast.String);
+                imin=meanV-dV*str2double(hcontrast.String);
+%                 imax=str2double(hcontrast.String)*imaxim;
             end
         end
          if imax==0, imax=1;end
         
         img(img>imax)=imax;
-        
-        if length(size(img))==3
-            img=img/imax;
+        img(img<imin)=imin;
+        if length(size(img))==3 %???
+            img=(img-imin)/(imax-imin);
         end
 %         img(1,1)=imax; %replace by scaling
         imagesc(ax,a1,a2,img);
@@ -290,7 +302,7 @@ changeaxis(0,0,0);
             ax.YLim=a2([1 end])+[-1 1]*d2/2;
         end
         colormap(ax,hlut.String{hlut.Value})
-        imin=nanmin(img(:));
+%         imin=nanmin(img(:));
         ax.CLim=[imin imax];
         if ~isempty(p.Title)
             title(ax,p.Title);
