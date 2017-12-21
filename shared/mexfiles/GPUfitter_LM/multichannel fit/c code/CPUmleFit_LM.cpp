@@ -207,7 +207,7 @@ void kernel_splineMLEFit_z_EMCCD_multi(const int subregion, const float *d_data,
 
 	for (kk=0;kk<iterations;kk++) {//main iterative loop
 
-		if(fabs((newErr-oldErr)/newErr)<TOLERANCE){
+		if(abs((newErr-oldErr)/newErr)<TOLERANCE){
 			//newStatus = CONVERGED;
 			break;
 		}
@@ -298,31 +298,18 @@ void kernel_splineMLEFit_z_EMCCD_multi(const int subregion, const float *d_data,
 							switch (i){
 							case 0:
 							case 1:
-								/*newThetaAll[n]=max(newThetaAll[n],(float(sz)-1)/2-sz/4.0);
-								newThetaAll[n] = min(newThetaAll[n],(float(sz)-1)/2+sz/4.0);*/
-
-								newThetaAll[n+j]=max(newThetaAll[n+j],(float(sz)-1)/2-sz/4.0);
-								newThetaAll[n+j] = min(newThetaAll[n+j],(float(sz)-1)/2+sz/4.0);
-
-
+								newThetaAll[n]=max(newThetaAll[n],(float(sz)-1)/2-sz/4.0);
+								newThetaAll[n] = min(newThetaAll[n],(float(sz)-1)/2+sz/4.0);
 								break;
 							case 2:
-								/*newThetaAll[n]=max(newThetaAll[n],0.0);
-								newThetaAll[n]=min(newThetaAll[n],float(spline_zsize));*/
-
-								newThetaAll[n+j]=max(newThetaAll[n+j],0.0);
-								newThetaAll[n+j]=min(newThetaAll[n+j],float(spline_zsize));
-
+								newThetaAll[n]=max(newThetaAll[n],0.0);
+								newThetaAll[n]=min(newThetaAll[n],float(spline_zsize));
 								break;
 							case 3:
-								/*newThetaAll[n]=max(newThetaAll[n],1.0);*/
-
-								newThetaAll[n+j]=max(newThetaAll[n+j],1.0);
+								newThetaAll[n]=max(newThetaAll[n],1.0);
 								break;
 							case 4:
-								/*newThetaAll[n]=max(newThetaAll[n],0.01);*/
-
-								newThetaAll[n+j]=max(newThetaAll[n+j],0.01);
+								newThetaAll[n]=max(newThetaAll[n],0.01);
 								break;
 							}
 							newTheta[i+5*j]=newThetaAll[n+j];

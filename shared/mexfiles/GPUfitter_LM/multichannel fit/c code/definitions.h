@@ -27,7 +27,7 @@
 #define SCALE_UP 10
 #define SCALE_DOWN 0.1f
 #define ACCEPTANCE 1.5f
-#define Max_No_Channel 2
+#define Max_No_Channel 4
 
 #define BLOCK_MAX_SIZE 512
 

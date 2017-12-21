@@ -87,6 +87,7 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
     float * test;
 	int blockx=0;
 	int threadx=0;
+	float initZ=-1;
 	const mwSize *datasize=0;
 	//const int *datasize=0;
 	int iterations=50,i;
@@ -163,6 +164,11 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 
 	dTAll = (float *) mxGetData(prhs[4]);
 
+	if (nrhs>5)
+		{
+			initZ = (float) mxGetScalar(prhs[5]);
+		}
+
 
 	sumShared=0;
 	for (i=0;i<5;i++){
@@ -216,8 +222,12 @@ void mexFunction(int nlhs, mxArray *plhs[],	int	nrhs, const	mxArray	*prhs[]) {
 	//	mexPrintf("threadx: %d,blockx: %d\n", threadx, blockx);
 	//#endif
 	/*mexPrintf("before iterations %f\n",(double)iterations);*/
+
+	if (initZ <0)
+	initZ = spline_zsize/2.0f;
+
 	for (int ii = 0; ii<Nfitraw; ii++)
-		kernel_splineMLEFit_z_EMCCD_multi(ii,data,coeff,dTAll,spline_xsize,spline_ysize,spline_zsize,(int) sz,iterations,noParameters,noChannels,Parameters,CRLBs,LogLikelihood,spline_zsize/2.0f,(const int) Nfitraw,shared);
+		kernel_splineMLEFit_z_EMCCD_multi(ii,data,coeff,dTAll,spline_xsize,spline_ysize,spline_zsize,(int) sz,iterations,noParameters,noChannels,Parameters,CRLBs,LogLikelihood,initZ,(const int) Nfitraw,shared);
 			
     #ifdef _WIN32
 	QueryPerformanceCounter(&stop);    
