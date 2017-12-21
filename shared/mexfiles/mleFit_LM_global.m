@@ -1,7 +1,7 @@
 function [P,CRLB,LogL]=mleFit_LM_global(varargin)
 % varargin:
 %imstack, sharedflag, iterations, spline coefficients, channelshift,
-%fitmode, varmap
+%fitmode, varmap,zstart
 
 % 1. imagestack (single)
 % 2. shared parameters
@@ -14,6 +14,9 @@ function [P,CRLB,LogL]=mleFit_LM_global(varargin)
 %   cspline for 2D PSF: as 5, but two fits to break asymmetry. cspline coefficients (single)
 % 5. shifts dT
 % 6. silent (suppress output if 1)
+% 7. z start parameter (more than one: return solution with maximum
+%       LIkelihood). Units: distance of stack calibration, center based
+
 
 %Output:
 %P
@@ -30,15 +33,8 @@ function [P,CRLB,LogL]=mleFit_LM_global(varargin)
 %results with z-startparameter>0
 
 % [P,CRLB, LL] =CPUmleFit_LM_MultiChannel(fitstack,int32(sharedA),50,coeffh,single(dT),fitmode);
+P=[];CRLB=[];LogL=[]; %
 
-if nargin<7
-    varmap=0; %emccd
-end 
-if nargin<6 || isempty(varargin{6})
-    fitmode=5;
-else
-    fitmode=varargin{6};
-end
 %determine of it runs on GPU, otherwise use CPU as default
 persistent fitter
 allfitters={@GPUmleFit_LM_MultiChannel,@CPUmleFit_LM_MultiChannel};
@@ -57,17 +53,58 @@ if isempty(fitter)
     disp(['using: ' char(allfitters{fitter})]);
 end
 
-if fitmode==6 %2D fit: find proper results
-%     [P1,CRLB1,LogL1,P2,CRLB2,LogL2]=allfitters{fitter}(varargin{:});
-%     ind1=LogL1>=LogL2;
-%     ind2=LogL1<LogL2;
-%     P=zeros(size(P1),'single');CRLB=zeros(size(CRLB1),'single');LogL=zeros(size(LogL1),'single');
-%     P(ind1,:)=P1(ind1,:);P(ind2,:)=P2(ind2,:);
-%     CRLB(ind1,:)=CRLB1(ind1,:);CRLB(ind2,:)=CRLB2(ind2,:);
-%     LogL(ind1,:)=LogL1(ind1,:);LogL(ind2,:)=LogL2(ind2,:);
+if nargin<7||isempty(varargin{7})
+    varmap=0; %emccd
+end 
+if nargin<8||isempty(varargin{7})
+    zstart=0; %emccd
+end 
+if nargin<6 || isempty(varargin{6})
+    fitmode=5;
 else
-    [P,CRLB,LogL]=allfitters{fitter}(varargin{1:5});
+    fitmode=varargin{6};
 end
+
+if nargin>2 && ~isempty(varargin{3})
+    iterations=varargin{3};
+else
+    iterations=30;
+end
+splinecoeff=single(varargin{4});
+coeffsize=size(splinecoeff);
+if fitmode==6
+    fitmode=5;
+    zstart=[-coeffsize(3)/6, coeffsize(3)/6];
+%     narginh=max(narginh,7);
+end
+imstack=single(varargin{1});
+shared=int32(varargin{2});
+channelshift=single(varargin{5});
+
+% if fitmode==6 %2D fit: find proper results
+% %     [P1,CRLB1,LogL1,P2,CRLB2,LogL2]=allfitters{fitter}(varargin{:});
+% %     ind1=LogL1>=LogL2;
+% %     ind2=LogL1<LogL2;
+% %     P=zeros(size(P1),'single');CRLB=zeros(size(CRLB1),'single');LogL=zeros(size(LogL1),'single');
+% %     P(ind1,:)=P1(ind1,:);P(ind2,:)=P2(ind2,:);
+% %     CRLB(ind1,:)=CRLB1(ind1,:);CRLB(ind2,:)=CRLB2(ind2,:);
+% %     LogL(ind1,:)=LogL1(ind1,:);LogL(ind2,:)=LogL2(ind2,:);
+% else
+[P,CRLB,LogL]=allfitters{fitter}(imstack,shared,iterations,splinecoeff,channelshift,zstart(1));
+
+
+if length(zstart)>1
+    for k=2:length(zstart)
+        [Ph,CRLBh,LogLh]=allfitters{fitter}(imstack,shared,iterations,splinecoeff,channelshift,zstart(k));
+%         indbettero=LogLh<LogL;
+        indbetter=LogLh-LogL>1e-4; %copy only everything if LogLh increases by more than rounding error.
+        P(indbetter,:)=Ph(indbetter,:);
+        CRLB(indbetter,:)=CRLBh(indbetter,:);
+        LogL(indbetter)=LogLh(indbetter);
+    end
+end
+%     [P,CRLB,LogL]=allfitters{fitter}(imstack,shared,iterations,splinecoeff,channelshift,zstart);
+% end
 %%
 % 
 % <latex>

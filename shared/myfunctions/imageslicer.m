@@ -48,10 +48,12 @@ ax.XLim=[0 Inf];
 vp1=0.08;
 vp2=0.02;
 
+numf=max(1,size(V,3)-1);
+
 hslider{1}=uicontrol('Parent',phandle,'Style','slider','Units','normalized','Position',[0.05 vp1 0.35 0.05],...
-    'Min',1,'Max',size(V,3),'Value',1,'SliderStep',[1/(size(V,3)-1) 5/(size(V,3)-1)],'Callback',{@slidercallback,1});
+    'Min',1,'Max',size(V,3),'Value',1,'SliderStep',[1/(numf) 5/(numf)],'Callback',{@slidercallback,1});
 hslider{2}=uicontrol('Parent',phandle,'Style','slider','Units','normalized','Position',[0.05 vp2 0.35 0.05],...
-    'Min',1,'Max',size(V,3),'Value',1,'SliderStep',[1/(size(V,3)-1) 5/(size(V,3)-1)],'Callback',{@slidercallback,2});
+    'Min',1,'Max',size(V,3),'Value',1,'SliderStep',[1/(numf) 5/(numf)],'Callback',{@slidercallback,2});
 hframe{1}=uicontrol('Parent',phandle,'Style','edit','Units','normalized','String','1','Position',[0.4 vp1 0.075 0.05],'Callback',{@framecallback,1});
 hframe{2}=uicontrol('Parent',phandle,'Style','edit','Units','normalized','String','1','Position',[0.4 vp2 0.075 0.05],'Callback',{@framecallback,2});
 
@@ -168,7 +170,8 @@ changeaxis(0,0,0);
         dimmenu=setdiff(1:length(s),[dim dimrgb]);
         
 %         strm=str;strm(dimrgb)=[];
-        hslider{1}.SliderStep=[1/(size(V,dimmenu(1))-1) 5/(size(V,dimmenu(1))-1)];
+        numfh=max(1,size(V,dimmenu(1))-1);
+        hslider{1}.SliderStep=[1/(numfh) 5/(numfh)];
         hslider{1}.Max=size(V,dimmenu(1));
          setslice(min(hslider{1}.Max,hslider{1}.Value),1,0);
          
