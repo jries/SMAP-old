@@ -75,6 +75,7 @@ coeffsize=size(splinecoeff);
 if fitmode==6
     fitmode=5;
     zstart=[-coeffsize(3)/6, coeffsize(3)/6];
+    zstart=[-coeffsize(3)/3, coeffsize(3)/3];
 %     narginh=max(narginh,7);
 end
 imstack=single(varargin{1});
