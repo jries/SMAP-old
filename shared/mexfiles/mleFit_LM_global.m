@@ -53,11 +53,16 @@ if isempty(fitter)
     disp(['using: ' char(allfitters{fitter})]);
 end
 
+
+
+splinecoeff=single(varargin{4});
+coeffsize=size(splinecoeff);
+
 if nargin<7||isempty(varargin{7})
     varmap=0; %emccd
 end 
 if nargin<8||isempty(varargin{7})
-    zstart=0; %emccd
+    zstart=coeffsize(3)/2; %emccd
 end 
 if nargin<6 || isempty(varargin{6})
     fitmode=5;
@@ -70,13 +75,11 @@ if nargin>2 && ~isempty(varargin{3})
 else
     iterations=30;
 end
-splinecoeff=single(varargin{4});
-coeffsize=size(splinecoeff);
+
 if fitmode==6
     fitmode=5;
-    zstart=[-coeffsize(3)/6, coeffsize(3)/6];
-    zstart=[-coeffsize(3)/3, coeffsize(3)/3];
-%     narginh=max(narginh,7);
+    zstart=single([-coeffsize(3)/4, coeffsize(3)/4]+coeffsize(3)/2);
+    zstart=single([-coeffsize(3)/3, coeffsize(3)/3]+coeffsize(3)/2);
 end
 imstack=single(varargin{1});
 shared=int32(varargin{2});

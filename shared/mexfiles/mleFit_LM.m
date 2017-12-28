@@ -112,7 +112,7 @@ elseif fitmode==5
 else
     zstart=0;
 end
- zstart=[-70 -30 0 30 70]+75;
+%  zstart=[-70 -30 0 30 70]+75;
 
 [P,CRLB,LogL]=allfitters{fitter}(imagestack,fitmode, iterations,fitpar,varmap,silent,zstart(1));
 
