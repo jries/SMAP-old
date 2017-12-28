@@ -112,6 +112,7 @@ elseif fitmode==5
 else
     zstart=0;
 end
+ zstart=[-70 -30 0 30 70]+75;
 
 [P,CRLB,LogL]=allfitters{fitter}(imagestack,fitmode, iterations,fitpar,varmap,silent,zstart(1));
 
@@ -119,7 +120,7 @@ if length(zstart)>1
     for k=2:length(zstart)
         [Ph,CRLBh,LogLh]=allfitters{fitter}(imagestack,fitmode, iterations,fitpar,varmap,silent,zstart(k));
 %         indbettero=LogLh<LogL;
-        indbetter=LogLh-LogL>1e-4; %copy only everything if LogLh increases by more than rounding error.
+        indbetter=LogLh-LogL>1e-8; %copy only everything if LogLh increases by more than rounding error.
         P(indbetter,:)=Ph(indbetter,:);
         CRLB(indbetter,:)=CRLBh(indbetter,:);
         LogL(indbetter)=LogLh(indbetter);
