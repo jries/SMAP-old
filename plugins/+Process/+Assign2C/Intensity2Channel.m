@@ -12,7 +12,8 @@ classdef Intensity2Channel<interfaces.DialogProcessor
                 p.assignfield1.selection='fit_n2';
                 p.assignfield2.selection='fit_n1';
             end
-            loc=get_intensity2ch(obj.locData.loc,p);
+            ll=obj.locData.getloc({'xnm','inungrouped'},'Position','roi','layer',find(obj.getPar('sr_layerson')));
+            loc=get_intensity2ch(obj.locData.loc,p,ll.inungrouped);
             if p.combineunassigned
                 loc.channel(loc.channel==3)=1;
                 loc.channel(loc.channel==4)=2;
@@ -59,9 +60,9 @@ pard.dataselect.position=[2,1];
 pard.dataselect.object.TooltipString='choose localization file data set';
 
 pard.textb.object=struct('String','slope','Style','text');
-pard.textb.position=[1,3];
-pard.split_slope.object=struct('Style','edit','String','.5 .51');
-pard.split_slope.position=[1,4];
+pard.textb.position=[3,3];
+pard.split_slope.object=struct('Style','edit','String','1');
+pard.split_slope.position=[3,4];
 
 pard.split_slope.object.TooltipString='slope to split. give two numbers for upper and lower slope, data in between is excluded.';
 pard.textb.object.TooltipString=pard.split_slope.object.TooltipString;
@@ -69,15 +70,15 @@ pard.textb.object.TooltipString=pard.split_slope.object.TooltipString;
 
 pard.textc.object=struct('String','edge [1 2]','Style','text');
 pard.textc.position=[2,3];
-pard.split_edge.object=struct('Style','edit','String','0 0');
+pard.split_edge.object=struct('Style','edit','String','.5');
 pard.split_edge.position=[2,4];
 pard.split_edge.object.TooltipString='additional part around slopes to be excluded. One number or two for asymmetric edge.';
 pard.textc.object.TooltipString=pard.split_edge.object.TooltipString;
 
 pard.texto.object=struct('String','offset (int 1)','Style','text');
-pard.texto.position=[3,3];
+pard.texto.position=[1,3];
 pard.split_offset.object=struct('Style','edit','String','0 0');
-pard.split_offset.position=[3,4];
+pard.split_offset.position=[1,4];
 pard.split_offset.object.TooltipString='Offset for split line.';
 pard.texto.object.TooltipString=pard.split_offset.object.TooltipString;
 
