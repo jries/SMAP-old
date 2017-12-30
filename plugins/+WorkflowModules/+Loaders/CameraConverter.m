@@ -35,7 +35,9 @@ classdef CameraConverter<interfaces.WorkflowModule
            obj.guihandles.camparbutton.Callback={@camparbutton_callback,obj};
            obj.guihandles.calibrate.Callback={@calibrate_callback,obj};
             obj.outputParameters={'loc_cameraSettings'};
-           obj.addSynchronization('loc_fileinfo',[],[],@obj.setmetadata)
+%            obj.addSynchronization('loc_fileinfo',[],[],@obj.setmetadata)
+           obj.addSynchronization('loc_fileinfo_set',[],[],@obj.setmetadata)
+           
         end
         function setmetadata(obj,overwrite)
             if nargin<2

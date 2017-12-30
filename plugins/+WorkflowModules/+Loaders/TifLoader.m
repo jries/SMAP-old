@@ -227,6 +227,7 @@ classdef TifLoader<interfaces.WorkflowModule
         function loadtif_ext(obj)
             p=obj.getAllParameters;
             obj.addFile(p.tiffile)
+            obj.setPar('loc_fileinfo_set',obj.getPar('loc_fileinfo'));
         end
         function loadedges(obj,a,b)
             tiffile=obj.getSingleGuiParameter('tiffile');
@@ -248,6 +249,7 @@ end
 outfile=[obj.getPar('loc_fileinfo').basefile];
 [path, file]=fileparts(outfile);
 obj.setPar('loc_outputfilename',[path filesep file  '_sml.mat'])
+obj.setPar('loc_fileinfo_set',obj.getPar('loc_fileinfo'));
 end
 
 function warnmissingmeta(md)
