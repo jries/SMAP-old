@@ -24,7 +24,7 @@ classdef Sxsy2z<interfaces.DialogProcessor
             ld=load(p.calfile);
             
             if ~p.usespline
-                sx2sy2=(locs.PSFxnm/p.cam_pixelsize_nm).^2-(locs.PSFynm/p.cam_pixelsize_nm).^2;
+                sx2sy2=(locs.PSFxnm/p.cam_pixelsize_nm(1)).^2-(locs.PSFynm/p.cam_pixelsize_nm(end)).^2;
                 z=feval(ld.outsx2sy2,sx2sy2);
                 z(locs.PSFynm==0)=-2;
             else %spline method

@@ -81,6 +81,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                  fig.MenuBar='figure';
                  fig.Color=[0.94 0.94 0.94];
              end
+             figure(fig);
              axis(obj.axis,'tight');
              axis(obj.axis,'equal');
              axis(obj.axis,'ij');

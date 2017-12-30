@@ -36,7 +36,7 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
 %                 reporttext='mleFit_LM works';
 %             end
             roisize=obj.getPar('loc_ROIsize');
-            obj.numberInBlock=round(obj.fitpar.roisperfit*100/roisize^2);
+            obj.numberInBlock=round(obj.fitpar.roisperfit*100/roisize^2/12)*12;
             
             if obj.fitpar.fitmode==5 ||obj.fitpar.fitmode==6
 %                 EMfile=obj.getPar('loc_fileinfo').EMon;
