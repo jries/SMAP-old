@@ -231,7 +231,9 @@ arguments{3}=fitpar.iterations;
 
 arguments{5}=varstack;
 arguments{6}=1;
-arguments{7}=fitpar.zstart/fitpar.dz;
+if isfield(fitpar,'zstart')
+    arguments{7}=fitpar.zstart/fitpar.dz;
+end
     switch fitpar.fitmode
         case {1,2,4} %fix
             arguments{4}=fitpar.PSFx0;
