@@ -14,7 +14,8 @@ function [P,CRLB,LogL]=mleFit_LM_global(varargin)
 %   cspline for 2D PSF: as 5, but two fits to break asymmetry. cspline coefficients (single)
 % 5. shifts dT
 % 6. silent (suppress output if 1)
-% 7. z start parameter (more than one: return solution with maximum
+% 7. scmoS varmap
+% 8. z start parameter (more than one: return solution with maximum
 %       LIkelihood). Units: distance of stack calibration, center based
 
 
@@ -61,7 +62,7 @@ coeffsize=size(splinecoeff);
 if nargin<7||isempty(varargin{7})
     varmap=0; %emccd
 end 
-if nargin<8||isempty(varargin{7})
+if nargin>7||isempty(varargin{7})
     zstart=coeffsize(3)/2; %emccd
 else
     zstart=single(coeffsize(3)/2+varargin{7});

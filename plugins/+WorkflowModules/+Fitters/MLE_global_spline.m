@@ -39,23 +39,7 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
             obj.numberInBlock=round(obj.fitpar.roisperfit*100/roisize^2/12)*12;
             
             if obj.fitpar.fitmode==5 ||obj.fitpar.fitmode==6
-%                 EMfile=obj.getPar('loc_fileinfo').EMon;
-%                 EMcal=obj.fitpar.EMon;
-% %                 EMcal=obj.fitpar.splinefit{1}.isEM;
-%                 mirrorstack=obj.getSingleGuiParameter('automirror');
-%                 switch mirrorstack.selection
-%                     case 'auto'
-%                         obj.fitpar.mirrorstack=~(EMfile==EMcal);
-%                     case 'mirror'
-%                         obj.fitpar.mirrorstack=true;
-%                     otherwise
-%                         obj.fitpar.mirrorstack=false;
-%                 end
-%                 if obj.getSingleGuiParameter('automirror')
-%                     
-%                 else
-%                     obj.fitpar.mirrorstack=false;
-%                 end
+%               
                 obj.fitpar.mirrorstack=false; %later: remove completely
                 p=obj.getAllParameters;
                 if p.overwritePixelsize
@@ -98,6 +82,22 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
 %             fitmode_callback(0,0,obj)
             obj.guihandles.loadcal.Callback={@loadcall_callback,obj};
 %             obj.addSynchronization('loc_fileinfo',[],[],{@loc_fileinfo_callback,obj});
+%             executecallbacks(obj,'switchvisible');
+            %make global fit control
+            hold=obj.guihandles.globaltable;
+            gt=uitable(hold.Parent,'Position',hold.Position);
+            
+            gt.RowName={'x','y','z','N','Bg'};
+            gt.ColumnName={'l','x'};
+            
+            hh=obj.guiPar.fontsize;
+            wh=hold.Position(3)-hh-50;
+            gt.ColumnWidth={hh,wh};
+            gt.Data={true,'1';true,'1';true,'1';false,'1';false,'1'};
+            gt.ColumnEditable=true;
+            obj.guihandles.globaltable=gt;
+            hold.Visible='off';
+            hold.delete;
 
         end
             
@@ -309,6 +309,7 @@ arguments{5}=single(dT);
 %imstack, sharedflag, iterations, spline coefficients, channelshift,
 %fitmode, varmap
 arguments{6}=fitpar.fitmode;
+arguments{7}=fitpar.zstart/fitpar.dz;
 [P CRLB LogL]=fitpar.fitfunction(arguments{:});
 % [P, CRLB,LogL, res]=CPUmleFit_LM_MultiChannel_R(arguments{:});
 % htot=P(:,8)
@@ -424,13 +425,17 @@ fitpar.iterations=p.iterations;
 fitpar.fitmode=p.fitmode.Value;
 fitpar.roisperfit=p.roisperfit;
 fitpar.issCMOS=false;
-fitpar.link=p.link;
+for k=1:size(p.globaltable.Data,1)
+    fitpar.factor{k}=str2num(p.globaltable.Data{k,2});
+end
+fitpar.link=[p.globaltable.Data{:,1}];
+fitpar.zstart=p.zstart;
 if fitpar.fitmode==3||fitpar.fitmode==5
     fitpar.issCMOS=p.isscmos;
-    fitpar.PSF2D=p.fit2D;
-    if p.fit2D
-        fitpar.fitmode=6;
-    end
+%     fitpar.PSF2D=p.fit2D;
+%     if p.fit2D
+%         fitpar.fitmode=6;
+%     end
     
     calfile=p.cal_3Dfile;
     cal=load(calfile);
@@ -647,11 +652,22 @@ pard.PSFx0.Width=0.75;
 pard.PSFx0.TooltipString=sprintf('start value for PSF, or size of PSF when PSF fixed (in camera pixels)');
 pard.PSFx0.Optional=true;
 
-pard.fit2D.object=struct('Style','checkbox','String','2D PSF','Value',0);
-pard.fit2D.position=[2,3.5];
-pard.fit2D.Width=.75;
-pard.fit2D.TooltipString=sprintf('Check if PSF model is 2D (no specific PSF engineering), or displays a high degree of similarity above and below the focal plane');
-pard.fit2D.Optional=true;
+% pard.fit2D.object=struct('Style','checkbox','String','2D PSF','Value',0);
+% pard.fit2D.position=[2,3.5];
+% pard.fit2D.Width=.75;
+% pard.fit2D.TooltipString=sprintf('Check if PSF model is 2D (no specific PSF engineering), or displays a high degree of similarity above and below the focal plane');
+% pard.fit2D.Optional=true;
+pard.zstartt.object=struct('Style','text','String','z start (nm)');
+pard.zstartt.position=[2,3.5];
+pard.zstartt.Width=.75;
+pard.zstartt.TooltipString=sprintf('z start parameter. Use vector with several values for 2D PSF');
+pard.zstartt.Optional=true;
+
+pard.zstart.object=struct('Style','edit','String','0');
+pard.zstart.position=[2,4.25];
+pard.zstart.Width=.75;
+pard.zstart.TooltipString=pard.zstartt.TooltipString;
+pard.zstart.Optional=true;
 
 % pard.automirror.object=struct('Style','popupmenu','String',{{'auto','no mirror','mirror'}});
 % pard.automirror.position=[2,4.25];
@@ -660,38 +676,45 @@ pard.fit2D.Optional=true;
 
 pard.loadcal.object=struct('Style','pushbutton','String','Load 3D cal');
 pard.loadcal.position=[2,1];
-pard.loadcal.Width=.5;
+pard.loadcal.Width=.75;
 pard.cal_3Dfile.object=struct('Style','edit','String','settings/cal_3DAcal.mat');
-pard.cal_3Dfile.position=[2,1.5];
-pard.cal_3Dfile.Width=2;
+pard.cal_3Dfile.position=[2,1.75];
+pard.cal_3Dfile.Width=1.75;
 pard.cal_3Dfile.TooltipString=sprintf('3D calibration file for astigmtic 3D. \n Generate from bead stacks with plugin: Analyze/sr3D/CalibrateAstig');
 
 
-p(1).value=0; p(1).on={}; p(1).off={'linkt','link'};
-p(2).value=1; p(2).on={'linkt','link'}; p(2).off={};
+p(1).value=0; p(1).on={}; p(1).off={'globaltable','linkt','link'};
+p(2).value=1; p(2).on={'globaltable','linkt','link'}; p(2).off={};
 
 pard.isglobal.object=struct('Style','checkbox','String','Global fit','Callback',{{@obj.switchvisible,p}});
-pard.isglobal.position=[3,1];
-pard.isglobal.Width=1;
+pard.isglobal.position=[3,3.5];
+pard.isglobal.Width=.75;
 pard.isglobal.Optional=true;
 
-pard.linkt.object=struct('Style','text','String','link: x y z N bg');
-pard.linkt.position=[3,2];
-pard.linkt.Width=1.5;
-pard.linkt.Optional=true;
+pard.globaltable.object=struct('Style','listbox','String','x');
+pard.globaltable.position=[6.5,4.25];
+pard.globaltable.Width=.75;
+pard.globaltable.Optional=true;
+pard.globaltable.Height=4.5;
+% pard.linkt.object=struct('Style','text','String','link: x y z N bg');
+% pard.linkt.position=[3,2];
+% pard.linkt.Width=1.5;
+% pard.linkt.Optional=true;
 
-pard.link.object=struct('Style','edit','String','1 1 1 0 0');
-pard.link.position=[3,3.5];
-pard.link.Width=1.5;
-pard.link.Optional=true;
-
-pard.userefractive_index_mismatch.object=struct('Style','checkbox','String','RI mismatch:');
-pard.userefractive_index_mismatch.position=[4,3.5];
+% pard.link.object=struct('Style','edit','String','1 1 1 0 0');
+% pard.link.position=[3,3.5];
+% pard.link.Width=1.5;
+% pard.link.Optional=true;
+p(1).value=0; p(1).on={}; p(1).off={'refractive_index_mismatch'};
+p(2).value=1; p(2).on={'refractive_index_mismatch'}; p(2).off={};
+pard.userefractive_index_mismatch.object=struct('Style','checkbox','String','RI mismatch:','Callback',{{@obj.switchvisible,p}});
+pard.userefractive_index_mismatch.position=[3,1];
 pard.userefractive_index_mismatch.Width=1.5;
 pard.userefractive_index_mismatch.Optional=true;
 
+
 pard.refractive_index_mismatch.object=struct('Style','edit','String','.8');
-pard.refractive_index_mismatch.position=[4,4.5];
+pard.refractive_index_mismatch.position=[3,2.5];
 pard.refractive_index_mismatch.TooltipString=sprintf('Correction factor to take into account the different refracrive indices of immersion oil and buffer. \n This leads to smaller distances inside the sample compared to bead calibration. \n Bead calibration: in piezo positions (nm). \n This factor transforms z positions to real-space z positions. \n For high-NA oil objectives: typical 0.72 (range 0.7-1).');
 pard.refractive_index_mismatch.Optional=true;
 pard.refractive_index_mismatch.Width=0.5;
@@ -717,20 +740,20 @@ pard.pixelsizey.Optional=true;
 p(1).value=0; p(1).on={}; p(1).off={'selectscmos','scmosfile'};
 p(2).value=1; p(2).on={'selectscmos','scmosfile'}; p(2).off={};
 pard.isscmos.object=struct('Style','checkbox','String','sCMOS','Callback',{{@obj.switchvisible,p}});   
-pard.isscmos.position=[5,1];
+pard.isscmos.position=[6,1];
 pard.isscmos.Optional=true;
 pard.selectscmos.object=struct('Style','pushbutton','String','Load var map','Callback',{{@loadscmos_callback,obj}});   
 pard.selectscmos.TooltipString='Select sCMOS variance map (in ADU^2) of same size ROI on chip as image stack';
-pard.selectscmos.position=[5,2];
+pard.selectscmos.position=[6,1.75];
 pard.selectscmos.Optional=true;
 pard.scmosfile.object=struct('Style','edit','String','');
 pard.scmosfile.TooltipString='Tiff/.mat image containing sCMOS variance map (same ROI on camera as tiff).';
-pard.scmosfile.position=[5,3];
+pard.scmosfile.position=[6,2.75];
 pard.scmosfile.Optional=true;
-    pard.scmosfile.Width=2;
+    pard.scmosfile.Width=1.5;
     
 pard.asymmetry.object=struct('Style','checkbox','String','get asymmetry');   
-pard.asymmetry.position=[6,1];
+pard.asymmetry.position=[5,1];
 pard.asymmetry.Optional=true;
     
 pard.plugininfo.type='WorkflowFitter';

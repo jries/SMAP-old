@@ -231,7 +231,7 @@ arguments{3}=fitpar.iterations;
 
 arguments{5}=varstack;
 arguments{6}=1;
-
+arguments{7}=fitpar.zstart/fitpar.dz;
     switch fitpar.fitmode
         case {1,2,4} %fix
             arguments{4}=fitpar.PSFx0;
@@ -292,12 +292,13 @@ fitpar.roisperfit=p.roisperfit;
 fitpar.issCMOS=false;
 fitpar.asymmetry=p.asymmetry;
 if fitpar.fitmode==3||fitpar.fitmode==5
+    fitpar.zstart=p.zstart;
     fitpar.issCMOS=p.isscmos;
-    fitpar.PSF2D=p.fit2D;
-    if p.fit2D
-        fitpar.fitmode=6;
-    end
-    
+%     fitpar.PSF2D=p.fit2D;
+%     if p.fit2D
+%         fitpar.fitmode=6;
+%     end
+%     
     calfile=p.cal_3Dfile;
     cal=load(calfile);
 
@@ -503,11 +504,23 @@ pard.PSFx0.Width=0.75;
 pard.PSFx0.TooltipString=sprintf('start value for PSF, or size of PSF when PSF fixed (in camera pixels)');
 pard.PSFx0.Optional=true;
 
-pard.fit2D.object=struct('Style','checkbox','String','2D PSF','Value',0);
-pard.fit2D.position=[2,3.5];
-pard.fit2D.Width=.75;
-pard.fit2D.TooltipString=sprintf('Check if PSF model is 2D (no specific PSF engineering), or displays a high degree of similarity above and below the focal plane');
-pard.fit2D.Optional=true;
+% pard.fit2D.object=struct('Style','checkbox','String','2D PSF','Value',0);
+% pard.fit2D.position=[2,3.5];
+% pard.fit2D.Width=.75;
+% pard.fit2D.TooltipString=sprintf('Check if PSF model is 2D (no specific PSF engineering), or displays a high degree of similarity above and below the focal plane');
+% pard.fit2D.Optional=true;
+
+pard.zstartt.object=struct('Style','text','String','z start (nm)');
+pard.zstartt.position=[2,3.5];
+pard.zstartt.Width=.75;
+pard.zstartt.TooltipString=sprintf('z start parameter. Use vector with several values for 2D PSF');
+pard.zstartt.Optional=true;
+
+pard.zstart.object=struct('Style','edit','String','0');
+pard.zstart.position=[2,4.25];
+pard.zstart.Width=.75;
+pard.zstart.TooltipString=pard.zstartt.TooltipString;
+pard.zstart.Optional=true;
 
 % pard.automirror.object=struct('Style','popupmenu','String',{{'auto','no mirror','mirror'}});
 % pard.automirror.position=[2,4.25];
@@ -516,32 +529,34 @@ pard.fit2D.Optional=true;
 
 pard.loadcal.object=struct('Style','pushbutton','String','Load 3D cal');
 pard.loadcal.position=[2,1];
-pard.loadcal.Width=.5;
+pard.loadcal.Width=.75;
 pard.cal_3Dfile.object=struct('Style','edit','String','settings/cal_3DAcal.mat');
-pard.cal_3Dfile.position=[2,1.5];
-pard.cal_3Dfile.Width=2;
+pard.cal_3Dfile.position=[2,1.75];
+pard.cal_3Dfile.Width=1.75;
 pard.cal_3Dfile.TooltipString=sprintf('3D calibration file for astigmtic 3D. \n Generate from bead stacks with plugin: Analyze/sr3D/CalibrateAstig');
 
 
-p(1).value=0; p(1).on={}; p(1).off={'linkt','link'};
-p(2).value=1; p(2).on={'linkt','link'}; p(2).off={};
+% p(1).value=0; p(1).on={}; p(1).off={'linkt','link'};
+% p(2).value=1; p(2).on={'linkt','link'}; p(2).off={};
+% 
+% pard.isglobal.object=struct('Style','checkbox','String','Global fit','Callback',{{@obj.switchvisible,p}});
+% pard.isglobal.position=[3,1];
+% pard.isglobal.Width=1;
+% pard.isglobal.Optional=true;
+% 
+% pard.linkt.object=struct('Style','text','String','link: x y z N bg');
+% pard.linkt.position=[3,2];
+% pard.linkt.Width=1.5;
+% pard.linkt.Optional=true;
+% 
+% pard.link.object=struct('Style','edit','String','1 1 1 0 0');
+% pard.link.position=[3,3.5];
+% pard.link.Width=1.5;
+% pard.link.Optional=true;
 
-pard.isglobal.object=struct('Style','checkbox','String','Global fit','Callback',{{@obj.switchvisible,p}});
-pard.isglobal.position=[3,1];
-pard.isglobal.Width=1;
-pard.isglobal.Optional=true;
-
-pard.linkt.object=struct('Style','text','String','link: x y z N bg');
-pard.linkt.position=[3,2];
-pard.linkt.Width=1.5;
-pard.linkt.Optional=true;
-
-pard.link.object=struct('Style','edit','String','1 1 1 0 0');
-pard.link.position=[3,3.5];
-pard.link.Width=1.5;
-pard.link.Optional=true;
-
-pard.userefractive_index_mismatch.object=struct('Style','checkbox','String','RI mismatch:');
+p(1).value=0; p(1).on={}; p(1).off={'refractive_index_mismatch'};
+p(2).value=1; p(2).on={'refractive_index_mismatch'}; p(2).off={};
+pard.userefractive_index_mismatch.object=struct('Style','checkbox','String','RI mismatch:','Callback',{{@obj.switchvisible,p}});
 pard.userefractive_index_mismatch.position=[4,3.5];
 pard.userefractive_index_mismatch.Width=1.5;
 pard.userefractive_index_mismatch.Optional=true;

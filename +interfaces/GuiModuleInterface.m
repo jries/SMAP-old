@@ -223,7 +223,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                         if isfield(pard.(fn{k}),'Optional')&&pard.(fn{k}).Optional==true
                             if isfield(obj.guihandles.(fn{k}).UserData,'visibleSMAP')       
                                  obj.guihandles.(fn{k}).Visible=obj.guihandles.(fn{k}).UserData.visibleSMAP;
-                            else
+                            elseif oldstate==true %only change if from simple to advanced
                                 obj.guihandles.(fn{k}).Visible='on';
                             end   
                         end
@@ -325,6 +325,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                     end
                 end
             end
+%             obj.executecallback('switchvisible');
 %             obj.initializeGuiParameters;
         end
 
@@ -384,7 +385,7 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
             % resizes all GUI and children GUIs
             % usually called from figure.SizeChangeCallback (or similar)
             
-            if ~isempty(obj.guihandles)
+            if isfield(obj,'guihandles') && ~isempty(obj.guihandles)
             fn=fieldnames(obj.guihandles);
             for k=1:length(fn)
                 try
@@ -711,7 +712,23 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
            else
            obj.setPar(field,p)
            end
-       end
+      end
+%        function executecallback(obj,callback)
+%            if ~isstruct(obj.guihandles)
+%                return
+%            end
+%         fn=fieldnames(obj.guihandles);
+%         for k=1:length(fn)
+%             h=obj.guihandles.(fn{k});
+%             if isfield(h,'Callback') && ~isempty(h.Callback) && iscell(h.Callback)
+%                 cfnc=h.Callback{1};
+%                 if contains(func2str(cfnc),callback)
+%                     cfnc(h,0,h.Callback{2});
+%                 end
+%             end
+%         end
+
+%        end
    end
 end
 
