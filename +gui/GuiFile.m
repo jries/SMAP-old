@@ -189,7 +189,9 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
            
         end
         function group_callback(obj,a,b)
+            obj.status('grouping');drawnow
             obj.locData.regroup;
+            obj.status('grouping done');
 %             group_callback(0, 0,obj);
         end
         function pard=guidef(obj)

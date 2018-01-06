@@ -2,6 +2,7 @@ classdef Grouper< interfaces.LocDataInterface
     properties
         combinemodes
         indsortlist
+        dllistsort
     end
     methods
         function obj=Grouper(varargin)            
@@ -103,7 +104,12 @@ classdef Grouper< interfaces.LocDataInterface
             indold2=indold(indsort2);
             [~,indback2]=sort(indold2);
             obj.locData.setloc('numberInGroup',numbergroup(indback2));
+            
             [~,obj.indsortlist]=sort(listback);
+            
+            obj.dllistsort=[diff(listsort);1];
+            
+  
             end
 %             obj.status('group localizations done')
 
@@ -146,7 +152,7 @@ classdef Grouper< interfaces.LocDataInterface
                 end
             end
             
-            v=single(obj.locData.getloc(field).(field));
+            v=double(obj.locData.getloc(field).(field));
           
             list=obj.locData.getloc('groupindex').groupindex;
             
@@ -184,30 +190,36 @@ classdef Grouper< interfaces.LocDataInterface
             %sum
 %             [listsort,indsort]=sort(list);
             indsort=obj.indsortlist;
-            listsort=list(indsort);
-            vwsort=v2(indsort);
+%             listsort=list(indsort);
+%             vwsort=v2(indsort);
 
             if mode==2
-                dl=[diff(listsort);1];
-                vwout2=vwsort(dl>0);
+%                 listsort=list(indsort);
+                vwsort=v2(indsort);
+                
+%                 dl=[diff(listsort);1];
+                vwout2=vwsort(obj.dllistsort>0);
 %                 listsort(end)
 %                 sum(dl==1)
             else 
                 if mode==0
-                vwout=sumcombine(double(vwsort),double(listsort));
-                gweights=sumcombine(double(weights(indsort)),double(listsort));
+                    vwout=sumcombineind(double(v2),double(list),(indsort));
+%                 vwout=sumcombine(double(vwsort),double(listsort));
+%                 gweights=sumcombine(double(weights(indsort)),double(listsort));
                 switch combinemode
                     case 'sum'
                         vwout2=vwout;  
                     case 'mean'
+                        gweights=sumcombineind(double(weights),double(list),(indsort));
                         vwout2=vwout./gweights;                 
                     case 'square'
+                        gweights=sumcombineind(double(weights),double(list),(indsort));
                         vwout2=sqrt(vwout./gweights); 
                     case 'locp'
                         vwout2=1./sqrt(vwout);
                 end   
                 elseif mode==1
-                    vwout=maxcombine(double(vwsort),double(listsort));
+                    vwout=maxcombine(double(v2),double(list),(indsort));
                     if strcmp(combinemode,'min')
                         vwout2=-vwout;
                     else
