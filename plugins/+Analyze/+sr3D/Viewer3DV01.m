@@ -111,7 +111,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 for k=length(lps):-1:1
                     rfields{k}=lps{k}.renderfield.selection;
                 end
-                rfields=horzcat(unique(rfields),{'xnm','ynm','znm','locprecnm','locprecznm','phot'});
+                rfields=horzcat(unique(rfields),{'xnm','ynm','znm','locprecnm','locprecznm','phot','numberInGroup'});
                 lenL=len*2;
                 obj.posL=[meanpos(1)-lenL, meanpos(2)-lenL;meanpos(1)+lenL, meanpos(2)+lenL];
                 posLnm=obj.posL*1000;
@@ -612,6 +612,8 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 loc.sy=sy;
 %                 loc.y=yrot(sortind)+zmean;
                 loc.znm=loc.znm(sortind);
+                loc.numberInGroup=loc.numberInGroup(sortind);
+                loc.phot=loc.phot(sortind);
                 for kc=1:length(renderfield)
                     if ~isempty(loc.(renderfield{kc}))
                         loc.(renderfield{kc})=loc.(renderfield{kc})(sortind);
