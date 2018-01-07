@@ -1,6 +1,6 @@
-classdef applyexistingdriftcorrection<interfaces.DialogProcessor
+classdef applyPicassoDriftcorrection<interfaces.DialogProcessor
     methods
-        function obj=applyexistingdriftcorrection(varargin)        
+        function obj=applyPicassoDriftcorrection(varargin)        
                 obj@interfaces.DialogProcessor(varargin{:}) ;
                 obj.history=true;
                 obj.showresults=false;
@@ -11,28 +11,25 @@ classdef applyexistingdriftcorrection<interfaces.DialogProcessor
             out=[];
             obj.setPar('undoModule','applydriftcorrection');
             notify(obj.P,'backup4undo');
-            try
-                saveloc=load(p.file);
-                driftinfo=saveloc.saveloc.file(1).driftinfo; 
-            catch err
-                disp('could not read file or no drift info present');
-                return
-            end
+            drift=table2array(readtable(p.file));
+            
+            pixelsize=obj.getPar('cam_pixelsize_um')*1000;
 
-            if p.correctxy&&isfield(driftinfo,'xy')
-                dr.xy=driftinfo.xy;
-                dr.xy.x=driftinfo.xy.dxt;
-                dr.xy.y=driftinfo.xy.dyt;
+            if p.correctxy
+                dr.xy.mirror='none';
+                
+                dr.xy.x=drift(:,1)*pixelsize(1);
+                dr.xy.y=drift(:,2)*pixelsize(2);
             end
-            if p.correctz&&isfield(driftinfo,'z')
-                dr.z=driftinfo.z;
-                dr.z.z=driftinfo.z.zt;
+            if p.correctz&& size(drift,2)>2
+%                 dr.z=driftinfo.z;
+                dr.z.z=drift(:,3);
             end
             locsnew=applydriftcorrection(dr,obj.locData.loc);
             obj.locData.loc.xnm=locsnew.xnm;
             obj.locData.loc.ynm=locsnew.ynm;
 
-            obj.locData.files.file(1).driftinfo=driftinfo;
+            obj.locData.files.file(1).driftinfo=dr;
             fn=obj.locData.files.file(1).name;
             if strfind(fn,'_sml')
                 fnn=strrep(fn,'_sml','_adriftc_sml');
@@ -55,7 +52,7 @@ oldf=obj.getSingleGuiParameter('file');
 if ~exist(oldf,'file')
     oldf=obj.getPar('lastSMLFile');
 end
-[f,path]=uigetfile(oldf);
+[f,path]=uigetfile([fileparts(oldf) filesep '*.txt']);
 if f
     obj.setGuiParameters(struct('file',[path f]));
 end
@@ -84,9 +81,7 @@ pard.save_dc.position=[4,1];
 pard.save_dc.Width=2;
 pard.save_dc.Optional=true;
 
-pard.plugininfo.name='apply drift correction from driftcorrected file';
+pard.plugininfo.name='apply drift correction from Picasso';
 pard.plugininfo.type='ProcessorPlugin';
-pard.plugininfo.description={'Drift correction based on cross-correlation.','Algorithm: the data set is divided into [timepoints] blocks, for which superresolution images are calculated. The displacement between all images is calcualted with a FFT-based cross-correlation algorithm. The position of the maxima of the cross-correlation curve are fitted with sub-pixel accuracy with a free elliptical Gaussian.',...
-    'A robust estimator is used to calculate the drift vs frame from all pairwise displacements.','All localiaztions visible in the superresolution image are used to infer the drift. Use [Render]...[Layer] to control this.',...
-    'If two files are loaded, their drift is calculated together and they are saved as one file with their filenumbers copied to the channel field.',' ','(c) Jonas Ries, EMBL, 2015'};
+
 end
