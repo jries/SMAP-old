@@ -205,7 +205,7 @@ pard.volumeviewer.object=struct('Style','pushbutton','String','Matlab volumeView
 pard.volumeviewer.position=[7,1];
 pard.volumeviewer.Width=1.5;
 
-pard.plugininfo.name='3D volume hist';
+pard.plugininfo.name='3D_volume_hist';
 pard.plugininfo.type='ProcessorPlugin';
 
 pard.plugininfo.description= 'volume3D renders dataset as 3D volumes with 3D elliptical Gaussiancs corresponding to locprecnm and locprecznm.';
