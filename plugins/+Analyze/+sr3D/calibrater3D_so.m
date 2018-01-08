@@ -95,15 +95,15 @@ classdef calibrater3D_so<interfaces.DialogProcessor
              else
                  smappos.settings=[];
              end
-                 
-             switch p.global.selection
-                 case 'global'
-                     cg=calibrate3D_GUI_g(smappos);
-                 case '4pi'
-                     cg=calibrate3D_GUI_g(smappos);
-                 otherwise
-                    cg=calibrate3D_GUI(smappos); 
-             end
+               cg=calibrate3D_GUI_g(smappos);    
+%              switch p.global.selection
+%                  case 'global'
+%                      cg=calibrate3D_GUI_g(smappos);
+%                  case '4pi'
+%                      cg=calibrate3D_GUI_g(smappos);
+%                  otherwise
+%                     cg=calibrate3D_GUI(smappos); 
+%              end
              cg.guihandles.dz.String=num2str(p.dz);
              cg.guihandles.filelist.String=getFieldAsVector(file,'name');
              [p, f]=fileparts(file{1}.name);

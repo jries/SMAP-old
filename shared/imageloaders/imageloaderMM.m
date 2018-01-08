@@ -154,10 +154,6 @@ image=img.pix;
     if isa(image,'int16')
         image2=uint16(image);
         ind=image<0;
-        image(ind)
-        if any(ind(:))
-            
-        end
 %         image2(ind)=image(ind)+2^16;
          image2(ind)=2^16-uint16(-image(ind));
         image=image2;
