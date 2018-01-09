@@ -105,14 +105,17 @@ classdef calibrater3D_so<interfaces.DialogProcessor
 %                     cg=calibrate3D_GUI(smappos); 
 %              end
              cg.guihandles.dz.String=num2str(p.dz);
+             if ~isempty(file)
              cg.guihandles.filelist.String=getFieldAsVector(file,'name');
              [p, f]=fileparts(file{1}.name);
             
              cg.guihandles.outputfile.String=[p  filesep f '_3dcal.mat'];
+             
              if length(xb)>0
                  cg.guihandles.posfromsmap.Value=true;
              end
              cg.guihandles.emgain.Value=file{1}.metadata.EMon;
+             end
              out=[];
         end
         
