@@ -224,6 +224,12 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                                 case 'field'
                                     fields{end+1}=pk.renderfield.selection;
                             end
+                            switch pk.intensitycoding.selection
+                                case 'blinks'
+                                    fields{end+1}='numberInGroup';
+                                case 'photons'
+                                    fields{end+1}='phot';
+                            end
 %                             {'xnm','ynm','znm','locprecnm','PSFxnm','phot',pk.renderfield.selection}
                             locD=obj.locData.getloc(fields,'layer',k,'position',posh);
 %                             maxlfast=2e5;
