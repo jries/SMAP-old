@@ -3,7 +3,7 @@ classdef applyPicassoDriftcorrection<interfaces.DialogProcessor
         function obj=applyPicassoDriftcorrection(varargin)        
                 obj@interfaces.DialogProcessor(varargin{:}) ;
                 obj.history=true;
-                obj.showresults=false;
+                obj.showresults=true;
                 obj.guiselector.show=true;
         end
         
@@ -12,6 +12,13 @@ classdef applyPicassoDriftcorrection<interfaces.DialogProcessor
             obj.setPar('undoModule','applydriftcorrection');
             notify(obj.P,'backup4undo');
             drift=table2array(readtable(p.file));
+            ax=initaxis(p.resultstabgroup,'drift');
+            frame=1:size(drift,1);
+            plot(ax,frame,drift(:,1),frame,drift(:,2));
+            if size(drift,2)>2
+                ax=initaxis(p.resultstabgroup,'drift z');
+                plot(ax,frame,drift(:,3));
+            end
             
             pixelsize=obj.getPar('cam_pixelsize_um')*1000;
 

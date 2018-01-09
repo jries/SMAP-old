@@ -48,7 +48,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
  ind= mxGetPr(prhs[2]);
   numlocs = mxGetM(prhs[0]);
   
-numcombined=list[(mwSize)ind[numlocs-1]-1]-list[0]+1;
+numcombined=list[(mwSize)ind[numlocs-1]-1]-list[(mwSize)ind[0]-1]+1;
 
   plhs[0] = mxCreateNumericMatrix(numcombined,1,mxDOUBLE_CLASS,mxREAL);
   vout = mxGetData(plhs[0]);
