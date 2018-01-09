@@ -101,7 +101,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 return
             end
             posrx=hroi.getPosition;
-            len=sum((posrx(2,:)-posrx(1,:)).^2);
+            len=sqrt(sum((posrx(2,:)-posrx(1,:)).^2));
             meanpos=mean(posrx,1);
            
             dpos=obj.posL-posrx;
