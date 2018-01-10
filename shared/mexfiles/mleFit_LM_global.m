@@ -62,10 +62,10 @@ coeffsize=size(splinecoeff);
 if nargin<7||isempty(varargin{7})
     varmap=0; %emccd
 end 
-if nargin>7||isempty(varargin{7})
+if nargin<8||isempty(varargin{8})
     zstart=coeffsize(3)/2; %emccd
 else
-    zstart=single(coeffsize(3)/2+varargin{7});
+    zstart=single(coeffsize(3)/2+varargin{8});
 end
 
 if nargin<6 || isempty(varargin{6})
