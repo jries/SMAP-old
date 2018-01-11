@@ -63,7 +63,7 @@ if nargin<7||isempty(varargin{7})
     varmap=0; %emccd
 end 
 if nargin<8||isempty(varargin{8})
-    zstart=coeffsize(3)/2; %emccd
+    zstart=single(coeffsize(3)/2); %emccd
 else
     zstart=single(coeffsize(3)/2+varargin{8});
 end
@@ -80,11 +80,11 @@ else
     iterations=30;
 end
 
-if fitmode==6
-    fitmode=5;
-    zstart=single([-coeffsize(3)/4, coeffsize(3)/4]+coeffsize(3)/2);
-%     zstart=single([-coeffsize(3)/3, coeffsize(3)/3]+coeffsize(3)/2);
-end
+% if fitmode==6
+%     fitmode=5;
+%     zstart=single([-coeffsize(3)/4, coeffsize(3)/4]+coeffsize(3)/2);
+% %     zstart=single([-coeffsize(3)/3, coeffsize(3)/3]+coeffsize(3)/2);
+% end
 imstack=single(varargin{1});
 shared=int32(varargin{2});
 channelshift=single(varargin{5});
