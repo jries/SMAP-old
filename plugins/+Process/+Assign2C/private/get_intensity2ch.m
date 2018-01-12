@@ -51,9 +51,9 @@ int2=loc.(p.assignfield2.selection);
 % int1=loc.intA1;
 % int2=loc.intB1;
 
+int1(int1<0)=0;int2(int2<0)=0;
 int1=log(int1);
 int2=log(int2);
-int1(int1<0)=0;int2(int2<0)=0;
 
 m1=myquantilefast(int1(int1>0),[0.01,0.999],1e5);m2=myquantilefast(int2(int2>0),[0.01,0.999],1e5);
 map=max(m1(2), m2(2))+1;mip=min(m1(1),m2(1));
