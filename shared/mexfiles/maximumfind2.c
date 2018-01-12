@@ -45,14 +45,14 @@ for(i1=1;i1<sy-1;i1+=1) //carful if sx and sy are exchanged
         
         if ((stop==0)&(maxind<maxmax))*/
         
-        if (*(img+i1*sx+j1)) > *(img+(i1-1)*sx+j1-1)) &&
-                *(img+i1*sx+j1)) > *(img+(i1-1)*sx+j1) &&
-                *(img+i1*sx+j1)) > *(img+(i1-1)*sx+j1+1) &&
-                *(img+i1*sx+j1)) > *(img+(i1)*sx+j1-1) &&
-                *(img+i1*sx+j1)) > *(img+(i1)*sx+j1+1) &&
-                *(img+i1*sx+j1)) > *(img+(i1+1)*sx+j1-1) &&
-                *(img+i1*sx+j1)) > *(img+(i1+1)*sx+j1) &&
-                *(img+i1*sx+j1)) > *(img+(i1+1)*sx+j1+1)               
+        if ((*(img+i1*sx+j1) > *(img+(i1-1)*sx+j1-1)) &&
+                (*(img+i1*sx+j1) > *(img+(i1-1)*sx+j1)) &&
+                (*(img+i1*sx+j1) > *(img+(i1-1)*sx+j1+1)) &&
+                (*(img+i1*sx+j1) > *(img+(i1)*sx+j1-1)) &&
+                (*(img+i1*sx+j1) > *(img+(i1)*sx+j1+1)) &&
+                (*(img+i1*sx+j1) > *(img+(i1+1)*sx+j1-1)) &&
+                (*(img+i1*sx+j1) > *(img+(i1+1)*sx+j1)) &&
+                (*(img+i1*sx+j1) > *(img+(i1+1)*sx+j1+1)))               
         {
             
             *(maxima+maxind)=i1+1;

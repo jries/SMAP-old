@@ -6,11 +6,11 @@ function maximaout=maximumfindcall(imin)
 
 simg=size(imin);
 maxmax=numel(imin)/9;
-% asdf
-       
-    
-        
-maxima= maximumfind(single(imin),uint32(maxmax));
+
+% maxima= maximumfind(single(imin),uint32(maxmax));
+maxima= maximumfind2(single(imin),uint32(maxmax));
+
+sum(maxima(:)-maxima2(:))
 % size(maxima)
 % sum(maxima)
 f=find(maxima(:,1)==0,1,'first');
