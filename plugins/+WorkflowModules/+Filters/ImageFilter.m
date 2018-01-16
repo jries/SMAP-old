@@ -95,7 +95,7 @@ if f
     
     l=load([p f]);
     if isfield(l,'SXY')
-    PSF=l.SXY(1).splinefit.PSF;
+    PSF=l.SXY(1).PSF{1};
     elseif isfield(l,'cspline_all')
         PSF=l.cspline_all.PSF;
     end    
