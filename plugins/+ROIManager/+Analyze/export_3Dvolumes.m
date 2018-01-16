@@ -17,56 +17,53 @@ classdef export_3Dvolumes<interfaces.DialogProcessor&interfaces.SEProcessor
             end
             mainfile=obj.getPar('mainfile');
             path=fileparts(mainfile);
-            prefix='img_.tif';
-            [f,path]=uiputfile([path filesep prefix]);
+            prefix='img_.em';
+            [fileout,path]=uiputfile([path filesep prefix]);
             
-            if ~f
+            if ~fileout
                 return
             end
-            [~,f]=fileparts(f);
-     
-            for k=selectedsites
-                site=sites(k);
-                imold=site.image.image;
-                site.image=[];
-                site.image=obj.SE.plotsite(site,-1);
-                site.image.image=imold;
-                options.color=true;
-                options.comp='lzw';
-                filen=[f strrep(site.name,'.','_')];
-                fhere= [filen '.tif'];
-                imout=uint8(site.image.image*255);
-                
-                saveastiff(imout,[path fhere],options);
-                if length(site.image.layers)>1
-                    for ll=1:length(site.image.layers)
-                        
-                        iml=site.image.layers(ll).images.renderimages.image;
-                        filell= [filen '_' int2str(ll) '.tif'];
-                        imoutll=uint8(iml*255);
-                        saveastiff(imoutll,[path filell],options);
-                    end
-                end
-                site.image.layers=[];site.image.composite=[];
+            [~,f]=fileparts(fileout);
+             layers=find(obj.getPar('sr_layerson'));
+             pixelsize=p.pixrec;
+             if length(pixelsize)<2
+                pixelsize(2)=pixelsize(1);
+            end
+            if length(pixelsize)<3
+                pixelsize(3)=pixelsize(1);
+            end
+            sizerec=p.sizerec;
+            if length(sizerec)<2
+                sizerec(2)=sizerec(1);
+            end
+            if length(sizerec)<3
+                sizerec(3)=sizerec(1);
             end
             
-            if p.export_cells
-                cells=obj.SE.cells;
-                for k=1:length(cells)
-                    cell=cells(k);
-                    imold=cell.image.image;
-                    cell.image=[];
-                    cell.image=obj.SE.plotsite(cell,-1);
-                    cell.image.image=imold;
-                    options.color=true;
-                    options.comp='lzw';
-                    filen=[f 'cell_C' num2str(cell.ID)  '_F' num2str(cell.info.filenumber)];
-                    fhere= [filen '.tif'];
-                    imout=uint8(cell.image.image*255);
-
-                    saveastiff(imout,[path fhere],options);
+             xrange=[-1 1]/2*sizerec(1)*pixelsize(1);
+             yrange=[-1 1]/2*sizerec(2)*pixelsize(2);
+             zrange=[-1 1]/2*sizerec(3)*pixelsize(3);
+             
+             positions=zeros(length(selectedsites),4);
+            for k=selectedsites
+                site=sites(k);
+                
+                [locs,indloc]=obj.locData.getloc({'xnm','ynm','znm','numberInGroup'},'position',sites(k),'layer',layers);
+                zpos=median(locs.znm);
+                xh=locs.xnm-sites(k).pos(1);yh=locs.ynm-sites(k).pos(2);zh=locs.znm-zpos;
+                if p.blinkcoded
+                    [imouth,dxo,dyo,dzo]=myhist3(xh,yh,zh,pixelsize,xrange,yrange,zrange,locs.numberInGroup);
+                else
+                 imouth=renderhist3D(xh,yh,zh,xrange,yrange,zrange,pixelsize);
                 end
+                filen=[f strrep(site.name,'.','_')];
+                fhere= [filen '.em'];
+               tom_emwrite([path filesep fhere],imouth); 
+               positions(k,1:2)=sites(k).pos(1:2);
+               positions(k,3)=zpos;
+               positions(k,4)=sites(k).ID;
             end
+            csvwrite([path filesep 'positions.txt'],positions);
             
             out=0;
         end
@@ -76,7 +73,28 @@ classdef export_3Dvolumes<interfaces.DialogProcessor&interfaces.SEProcessor
     end
 end
 
-
+function imouth=renderhist3D(x,y,z,xrange,yrange,zrange,pixelsize)
+format='uint8';
+if length(pixelsize)<2
+    pixelsize(2)=pixelsize(1);
+end
+if length(pixelsize)<3
+    pixelsize(3)=pixelsize(1);
+end
+ xh=ceil((x-xrange(1))/pixelsize(1));
+ yh=ceil((y-yrange(1))/pixelsize(2));
+ zh=ceil((z-zrange(1))/pixelsize(3));
+ sizeV=ceil([(xrange(2)-xrange(1))/pixelsize(1) (yrange(2)-yrange(1))/pixelsize(2) (zrange(2)-zrange(1))/pixelsize(3)]);   
+indg=xh>0&xh<=sizeV(1) & yh>0&yh<=sizeV(2) & zh>0&zh<=sizeV(3);
+    
+    linind=sub2ind(sizeV,xh(indg),yh(indg),zh(indg));
+    hl=cast(histc(linind,1:max(linind)),format);
+%     hl=cast(histcounts(linind,1:max(linind)),format);
+%     disp(['maxcounts:' num2str(max(hl))])
+    uind=unique(linind);
+    imouth=zeros(sizeV,format);
+    imouth(uind)=hl(hl>0);
+end
 
 
 function pard=guidef
@@ -100,6 +118,10 @@ pard.sizerect.Width=1;
 pard.sizerec.object=struct('String','50','Style','edit');
 pard.sizerec.position=[3,2];
 pard.sizerec.Width=1;
+
+pard.blinkcoded.object=struct('String','blink coded for grouped','Style','checkbox');
+pard.blinkcoded.position=[4,1];
+pard.blinkcoded.Width=2;
 
 pard.plugininfo.type='ROI_Analyze';
 
