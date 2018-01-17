@@ -57,8 +57,16 @@ classdef export_3Dvolumes<interfaces.DialogProcessor&interfaces.SEProcessor
                  imouth=renderhist3D(xh,yh,zh,xrange,yrange,zrange,pixelsize);
                 end
                 filen=[f strrep(site.name,'.','_')];
-                fhere= [filen '.em'];
-               tom_emwrite([path filesep fhere],imouth); 
+                switch p.format.selection
+                case '.em'
+                    
+                    fhere= [filen '.em'];
+                    tom_emwrite([path filesep fhere],imouth); 
+                otherwise
+                    disp('format not implemented');
+                end
+                        
+               
                positions(k,1:2)=sites(k).pos(1:2);
                positions(k,3)=zpos;
                positions(k,4)=sites(k).ID;
@@ -102,6 +110,11 @@ function pard=guidef
 pard.export_selected.object=struct('String','export only selected sites','Style','checkbox');
 pard.export_selected.position=[1,1];
 pard.export_selected.Width=2;
+
+pard.format.object=struct('String',{{'.em','.tif'}},'Style','popupmenu');
+pard.format.position=[1,1];
+pard.format.Width=2;
+
 
 pard.pixrect.object=struct('String','pixelsize (nm) [x y z]','Style','text');
 pard.pixrect.position=[2,1];
