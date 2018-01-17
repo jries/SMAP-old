@@ -245,6 +245,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
             wf.makeGui;
             wf.load(p.mainbatchfile,[],true,true);
             wf.module(wf.startmodule).addFile(tiffile);
+            wf.module(wf.startmodule).setoutputfilename;
             disp(mytextsplit(wf.description));
             wf.run;
             delete(wf)

@@ -235,6 +235,11 @@ classdef TifLoader<interfaces.WorkflowModule
                 obj.addFile(tiffile);
             end
         end
+        function setoutputfilename(obj)
+            outfile=[obj.getPar('loc_fileinfo').basefile];
+            [path, file]=fileparts(outfile);
+            obj.setPar('loc_outputfilename',[path filesep file  '_sml.mat'])
+        end
     end
 end
 
