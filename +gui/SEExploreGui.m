@@ -100,35 +100,40 @@ classdef SEExploreGui<interfaces.SEProcessor
                 onlysites=false;
             end
             indselected=obj.getSingleGuiParameter('sitelist').Value;
+            se_keeptempimages=obj.getPar('se_keeptempimages');
             if ~onlysites
-        files=obj.SE.files;
-        for k=1:length(files)
-            obj.guihandles.filelist.Value=k;
-            obj.status(['redrawall: file ' num2str(k) ' of ' num2str(length(files))]);
-%             notify(obj.SE.locData,'status',recgui.statusEvent(['redrawall: file ' num2str(k) ' of ' num2str(length(files))]))
-            drawnow
-            filenumber=files(k).ID;
-            files(k).image=[];
-            obj.SE.plotfile(filenumber,obj.guihandles.fileax);
-            if SMAP_stopnow
-                break
+                files=obj.SE.files;
+                for k=1:length(files)
+                    obj.guihandles.filelist.Value=k;
+                    obj.status(['redrawall: file ' num2str(k) ' of ' num2str(length(files))]);
+        %             notify(obj.SE.locData,'status',recgui.statusEvent(['redrawall: file ' num2str(k) ' of ' num2str(length(files))]))
+                    drawnow
+                    filenumber=files(k).ID;
+                    if ~se_keeptempimages
+                        files(k).image=[];
+                    end
+                    obj.SE.plotfile(filenumber,obj.guihandles.fileax);
+                    if SMAP_stopnow
+                        break
+                    end
+
+                end
+
+
+                cells=obj.SE.cells;
+                for k=1:length(cells)
+                    obj.guihandles.cellist.Value=k;   
+                    obj.status(['redrawall: cell ' num2str(k) ' of ' num2str(length(cells))])
+                    drawnow
+                    if ~se_keeptempimages
+                        cells(k).image=[];
+                    end
+                    obj.SE.plotcell(cells(k),obj.guihandles.cellax,obj.guihandles.fileax);
+
+
+                end
+                obj.SE.currentcell=cells(k);
             end
-
-        end
-            
-        
-        cells=obj.SE.cells;
-        for k=1:length(cells)
-            obj.guihandles.cellist.Value=k;   
-            obj.status(['redrawall: cell ' num2str(k) ' of ' num2str(length(cells))])
-            drawnow
-            cells(k).image=[];
-            obj.SE.plotcell(cells(k),obj.guihandles.cellax,obj.guihandles.fileax);
-            
-
-        end
-        obj.SE.currentcell=cells(k);
-        end
         sites=obj.SE.sites;
         
         if length(indselected)>1 %only redraw selected
@@ -203,6 +208,9 @@ end
 
 function toggleuse_callback(data,action,obj)
  selected=obj.guihandles.sitelist.Value;
+ if ~isfield(obj.SE.sites(selected(1)).annotation,'use')
+     obj.SE.sites(selected(1)).annotation.use=true;
+ end
  newstate=~obj.SE.sites(selected(1)).annotation.use;
 if length(selected)<=1
 

@@ -217,6 +217,13 @@ results.sumrdensity1=sumrdensity1;
 results.sumrdensity2=sumrdensity2;
 results.sumrdensityn=results.rdensityn{1};
 
+
+% add intensityTiff eval
+
+if isfield(sites(1).evaluation,'intensityTiff')
+    results.intensityTiff=getFieldAsVector(sites,'evaluation','intensityTiff');
+end
+
 end
 
 
