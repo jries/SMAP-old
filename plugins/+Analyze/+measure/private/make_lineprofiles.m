@@ -1,5 +1,7 @@
 function results=make_lineprofiles(locD,p)
 
+global jervistemp;
+jervistemp=[];
 ax1=initaxis(p.resultstabgroup,'scatter');
 hold off
 [ax2,tab2]=initaxis(p.resultstabgroup,'xprofile');
@@ -84,6 +86,8 @@ for layer=1:length(p.sr_layerson)
     
     n=my-linew-binwidth:binwidth:my+linew+binwidth;
     profy=hist(y,n);profy([1 end])=[];n([1 end])=[];
+    jervistemp.ny=n;
+    jervistemp.profy=profy;
     axes(ax2)
     plot(n,profy);
     hold on
@@ -97,7 +101,10 @@ for layer=1:length(p.sr_layerson)
     
 
     n=mx-linel-binwidth:binwidth:mx+linel+binwidth;
+    jervistemp.binwidth=binwidth;
     profx=hist(x,n);profx([1 end])=[];n([1 end])=[];
+    jervistemp.profx=profx;
+    jervistemp.nx=n;
     axes(ax3)
     plot(n,profx);
     hold on
@@ -145,6 +152,7 @@ if ~isempty(locs.znm)
 
 end
 tab2.Parent.SelectedTab=tab2;
+assignin('base','jervistemp',jervistemp);
 results=[t1 t2 t3];
 
 function [fwhm,fwhmind]=getFWHM(profile,x)
