@@ -6,6 +6,7 @@ if nargin<2
     resetview=true;
 end
 % disp('init gui after load')
+obj.status('grouping');drawnow;
 obj.locData.regroup;
 % obj.locData.filter;
 % fmax=max(obj.locData.loc.frame);
@@ -44,6 +45,7 @@ obj.setPar('locFields',locfields,'String');
 % end
 
 obj.setPar('filelist_short',fls,'String');
+obj.status('filter');drawnow;
 obj.locData.filter;
 obj.setPar('currentfileinfo',obj.locData.files.file(1).info)
 
@@ -58,4 +60,6 @@ if ~isempty(strfind(obj.getPar('mainfile'),'_sml'))
    tg=obj.getPar('mainGui').guihandles.maintab;
    tg.SelectedTab=tg.Children(3);
 end
+
+obj.status('loading done');drawnow;
 end

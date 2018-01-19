@@ -1,7 +1,9 @@
 function loadfile(obj,p,file,mode)
 % fobj=obj.locData.files;
 % obj.locData.files.filenumberEnd=obj.locData.files.filenumberEnd+1; %write back to .files
-filedat=load(file);
+% filedat=load(file);
+filedat=loadmatparts(file);
+
 filedat.filename=file;
 
 filenumber=obj.locData.files.filenumberEnd;
