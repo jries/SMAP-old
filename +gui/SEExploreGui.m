@@ -193,6 +193,14 @@ classdef SEExploreGui<interfaces.SEProcessor
             obj.guihandles.sitelist.Value=vnew;
             plotsite(obj,obj.SE.currentsite)
         end
+        function nextcell(obj,direction)
+            v=obj.guihandles.celllist.Value+direction;
+            s=obj.guihandles.celllist.String;
+            vnew=max(1,min(v,length(s)));
+            obj.SE.currentcell=obj.SE.cells(vnew);
+            obj.guihandles.celllist.Value=vnew;
+            plotcell(obj,obj.SE.currentcell)
+        end
     end
 end
 
@@ -315,8 +323,8 @@ end
 cells=obj.SE.cells;
 
 if ~isempty(cells)&&~isempty(cells(1).ID)
-    for k=1:length(cells)
-        s{k}=['C' num2str(cells(k).ID,'%02.0f') 'F' num2str(cells(k).info.filenumber,'%02.0f')];
+    for k=length(cells):-1:1
+        s{k}=['C' dec2base(cells(k).ID,10) 'F' dec2base(cells(k).info.filenumber,10)];
     end
     obj.guihandles.celllist.String=s;
     if isempty(obj.SE.currentcell)
@@ -341,7 +349,7 @@ if ~isvalid(obj.handle)
 end
 sites=obj.SE.sites;
 if ~isempty(sites)&&~isempty(sites(1).ID)
-for k=1:length(sites)
+for k=length(sites):-1:1
     usesite='';
     if isfield(sites(k).annotation,'use')
         if sites(k).annotation.use
@@ -352,10 +360,18 @@ for k=1:length(sites)
     end
         
     
-    list=[num2str(sites(k).annotation.list1.value) num2str(sites(k).annotation.list2.value)...
-        num2str(sites(k).annotation.list3.value) num2str(sites(k).annotation.list4.value)];
-    sitename=[num2str(sites(k).indList,'%2.0f') '.S' num2str(sites(k).ID,'%02.0f') 'C' num2str(sites(k).info.cell,'%02.0f')...
-        'F' num2str(sites(k).info.filenumber,'%02.0f') 'L' list usesite];
+%     list=[num2str(sites(k).annotation.list1.value) num2str(sites(k).annotation.list2.value)...
+%         num2str(sites(k).annotation.list3.value) num2str(sites(k).annotation.list4.value)];
+    list=[char(sites(k).annotation.list1.value+48) char(sites(k).annotation.list2.value+48)...
+        char(sites(k).annotation.list3.value+48) char(sites(k).annotation.list4.value+48)];
+
+%     sitename=[int2str(sites(k).indList,'%2.0f') '.S' int2str(sites(k).ID,'%02.0f') 'C' int2str(sites(k).info.cell,'%02.0f')...
+%         'F' int2str(sites(k).info.filenumber,'%02.0f') 'L' list usesite];
+    
+    
+    sitename=[dec2base(sites(k).indList,10) '.S' dec2base(sites(k).ID,10) 'C' dec2base(sites(k).info.cell,10)...
+        'F' dec2base(sites(k).info.filenumber,10) 'L' list usesite];
+    
     sites(k).name=sitename;
     s{k}=sitename;
 end
@@ -546,10 +562,12 @@ for k=1:length(ind)
     obj.SE.removeSite(siteID(k));
 end
 redraw_sitelist(obj);
-sv=obj.guihandles.sitelist.Value-1;
+sv=obj.guihandles.sitelist.Value;
 sv=min(max(1,sv),length(obj.guihandles.sitelist.String));
 % if obj.guihandles.sitelist.Value>length(obj.guihandles.sitelist.String)
 obj.guihandles.sitelist.Value=sv;
+obj.SE.currentsite=obj.SE.sites(sv);
+ plotsite(obj,obj.SE.currentsite)
 % end
 end
 
@@ -559,7 +577,14 @@ cellID=obj.SE.cells(ind).ID;
 obj.SE.removeCell(cellID);
 redraw_celllist(obj);
 redraw_sitelist(obj);
-obj.SE.currentcell=obj.SE.cells(1);
+sv=obj.guihandles.celllist.Value;
+sv=min(max(1,sv),length(obj.guihandles.celllist.String));
+obj.guihandles.celllist.Value=sv;
+obj.SE.currentcell=obj.SE.cells(sv);
+ plotcell(obj,obj.SE.currentcell);
+ 
+ obj.SE.currentsite=obj.SE.sites(obj.guihandles.sitelist.Value);
+ plotsite(obj,obj.SE.currentsite)
 % obj.guihandles.sitelist.Value=1;
 % obj.guihandles.celllist.Value=1;
 end
@@ -672,9 +697,25 @@ end
 function keypress(a,event,obj,flag)
 switch event.Key
     case 'rightarrow'
-        obj.nextsite(1);
+        if contains(event.Modifier,'shift')
+            obj.nextcell(1);
+        else
+            obj.nextsite(1);
+        end
     case 'leftarrow'
-        obj.nextsite(-1);
+        
+        if contains(event.Modifier,'shift')
+            obj.nextcell(-1);
+        else
+            obj.nextsite(-1);
+        end
+    case 'delete'
+        if contains(event.Modifier,'shift')
+            removecell_callback(0,0,obj);
+        else
+            removesite_callback(0,0,obj);
+        end        
 end
 
 end
+
