@@ -22,6 +22,9 @@ tnum=p.render_colormode.Value;
  end
  
  if strcmp(form,'tif')&&isfield(fileh.(form)(tnum).info,'pixsize') 
+    pixsize=fileh.(form)(tnum).info.pixsize;
+    roi=fileh.(form)(tnum).info.roi;
+ elseif strcmp(form,'tif')&&isfield(fileh.(form)(tnum).info,'cam_pixelsize_um') 
     pixsize=fileh.(form)(tnum).info.cam_pixelsize_um;
     roi=fileh.(form)(tnum).info.roi;
  else
