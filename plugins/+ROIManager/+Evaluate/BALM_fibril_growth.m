@@ -17,6 +17,10 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
             alpha=-atan2(dpol(1),dpol(2));
 
             len=sqrt(sum(dpol.^2))*1000/2;
+            if len==0
+                out=[];
+                return
+            end
             midp=mean(pol,1)*1000;
             [xr,yr]=rotcoord(locs.xnm-midp(1),locs.ynm-midp(2),alpha);
 
