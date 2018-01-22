@@ -135,7 +135,7 @@ if p.dualchannel
         xf2=locs2.xnmr-imfit.x0;yf2=locs2.ynmr-imfit.y0;
         profiles=rthetaprofiles(p,xf2,yf2,hr,ht);
         imfit.profiles2=profiles;
-        
+
         s1=locs1.locprecnm/2;
         imc1=makeimage(p,xf1,yf1,s1);
         s2=locs2.locprecnm/2;
@@ -197,6 +197,7 @@ xf=xm-imfit.x0;yf=ym-imfit.y0;
 hr.NextPlot='add';
 ht.NextPlot='add';
 profilesim=rthetaprofiles(p,xf,yf,hr,ht);
+imfit.asymmetry=getasymmetry(p,xf,yf);
 imfit.profiles1=profilesim;%=copyfields(imfit,profilesim); 
 out.imfit=imfit;out.circfit=circfit;
 legend(hr,'circfit','imfit')
@@ -212,6 +213,7 @@ locs=obj.getLocs({'xnm','ynm','xnmr','ynmr','locprecnm'},'layer',p.layer.Value,'
 
 xm=locs.xnm-obj.site.pos(1);
 ym=locs.ynm-obj.site.pos(2);
+
 xc=xm-imfit.x0;
 yc=ym-imfit.y0;
 s=locs.locprecnm/2;
@@ -225,6 +227,18 @@ pixels=p.se_sitepixelsize;
  range=[-roisize roisize];
  posf.x=xm;posf.y=ym;posf.s=s;
 im=double(gaussrender(posf,range, range, pixels, pixels));
+end
+
+function out=getasymmetry(p,x,y)
+I(1,1)=sum(x.^2);
+I(2,2)=sum(y.^2);
+I(1,2)=-sum(x.*y);
+I(2,1)=I(1,2);
+I=I/length(x);
+
+e=(eig(I));
+
+out=sort(sqrt(e));
 end
 
 function out=imgfit(p,xm,ym,locs,circfit,hf,hf2)
@@ -309,6 +323,13 @@ imstart=imstart/max(imstart(:));
        out.sigma1=sigma;
    end
 %    out.image=img.^2;
+  %segmentation:
+  h=fspecial('gaussian',7,3);
+  imh=filter2(h,img);
+  imbw=imh>max(h(:))*1.5;
+  imbws=bwareafilt(imbw,1);
+  out.areastat=regionprops(imbws,'MajorAxisLength','MinorAxisLength','ConvexArea','Area','Eccentricity');
+  out.areastat.fractionCircle=out.areastat.Area/(pi*(out.areastat.MajorAxisLength/2)^2);
   
 
 end
@@ -390,6 +411,10 @@ range2=[-roisize 3*roisize];
    out.dr_ro2=out.dr2/(out.r2);
    out.sigma1=sigma1;
    out.sigma2=sigma2;
+   
+   %segment:
+   
+   
 %    out.image=img.^2;
 %   out
 %  fitpim(1:2)
@@ -421,6 +446,14 @@ rdensity=histr./norm;
  tac=myxcorr(histtheta,histtheta);
  tac=tac+myxcorr(histtheta2,histtheta2);
  plot(thetan+pi,tac,'Parent',ht)
+ 
+ %look at variance along theta
+ dtheta=2*pi/8; %coarse
+ thetanh=-pi+dtheta/2:dtheta:pi;
+ histtheta=hist(theta,thetanh);
+ out.theta_varnorm=var(histtheta)/mean(histtheta);
+ out.xcorramp=tac(1)/(mean(histtheta)+mean(histtheta2))^2;
+%  figure(88);plot(thetanh,histtheta); title([out.theta_varnorm out.xcorramp]);
  
  out.thetaAC=tac;
  out.thetan=thetan+pi;
