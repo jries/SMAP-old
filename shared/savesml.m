@@ -37,11 +37,7 @@ if p.savefile
     saveloc.loc.filenumber=ones(size(locData.loc.filenumber));
 end
 
-if locData.getGlobalSetting('saveas73')
-    version='-v7.3';
-else
-    version='-v7';
-end
+
 rg=p.mainGui; 
 parameters=rg.saveParameters;
 fileformat.name='sml';
@@ -55,7 +51,14 @@ if isfield(locData.files.file(1),'transformation')
     end
     
 end
-v=saverightversion(file,out,version);
-disp(['saved as version ' v])
+
+if locData.getGlobalSetting('saveas73')
+    save(file,'saveloc','fileformat','parameters','-v7.3');
+else
+    savematparts(file,out,{'saveloc','loc'});
+%     version='-v7';
+end
+% v=saverightversion(file,out,version);
+% disp(['saved as version ' v])
 % save(file,'saveloc','fileformat','parameters','-v7.3');
 end
