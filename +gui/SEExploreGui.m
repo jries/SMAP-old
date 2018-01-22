@@ -583,8 +583,8 @@ obj.guihandles.celllist.Value=sv;
 obj.SE.currentcell=obj.SE.cells(sv);
  plotcell(obj,obj.SE.currentcell);
  
- obj.SE.currentsite=obj.SE.sites(obj.guihandles.sitelist.Value);
- plotsite(obj,obj.SE.currentsite)
+%  obj.SE.currentsite=obj.SE.sites(obj.guihandles.sitelist.Value);
+%  plotsite(obj,obj.SE.currentsite)
 % obj.guihandles.sitelist.Value=1;
 % obj.guihandles.celllist.Value=1;
 end
