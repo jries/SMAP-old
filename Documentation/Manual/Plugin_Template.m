@@ -1,4 +1,4 @@
-classdef SimulateSites2<interfaces.DialogProcessor
+classdef Plugin_Template<interfaces.DialogProcessor
     % PLUGIN_TEMPLATE Summary of this plugin goes here
     % put a description of your plugin here.
         %replace Plugin_Template by filename   
@@ -6,7 +6,7 @@ classdef SimulateSites2<interfaces.DialogProcessor
         %define class properties if needed
     end
     methods
-        function obj=SimulateSites2(varargin)   %replace by filename        
+        function obj=Plugin_Template(varargin)   %replace by filename        
             obj@interfaces.DialogProcessor(varargin{:}) 
             obj.showresults=true; %set true, if results are shown by default
             obj.history=false; %if set true, every time the plugin is called, its parameters are added to the history. Makes sense only if plugin changes the data
