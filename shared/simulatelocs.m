@@ -73,7 +73,7 @@ function [locs,possites]=getlabels(p)
 % fields p. :
 % coordinatefile, se_sitefov, numberofsites(x,y), labeling_efficiency, randomxy,
 % randomxyd
-[~,~,ext]=fileparts(p.coordinatefile);
+[~,~,ext]=fileparts(p.coordinatefile);% Get extension of the specified file
 image=[];
 locsall=[];
 switch ext
@@ -115,7 +115,7 @@ switch ext
     otherwise
         display('file not identified selected')
         return
-end
+end % after this block, you will get either image or locsall, depending on the type of your input
 if ~isfield(locsall,'z')
     locsall.z=0*locsall.x;
 end
