@@ -1,5 +1,5 @@
-function [locsout,possites]=simulatelocs(p)
-           [poslabels,possites]=getlabels(p);
+function [locsout,possites]=simulatelocs(p, colour)
+           [poslabels,possites]=getlabels(p, colour);
 %            p.maxframe=100000;
            posreappear=reappear(poslabels,p.blinks,p.maxframes);
            
@@ -68,11 +68,20 @@ locso.frame=[locs.frame; frame];
 
 end
 
-function [locs,possites]=getlabels(p)
+function [locs,possites]=getlabels(p, colour)
 %gets position of labels either from image or from coordinates
 % fields p. :
 % coordinatefile, se_sitefov, numberofsites(x,y), labeling_efficiency, randomxy,
 % randomxyd
+paths =  strsplit(p.coordinatefile, '|');
+switch colour
+    case 1
+        p.coordinatefile = paths{1};
+    case 2
+        p.coordinatefile = paths{2};
+    otherwise
+end
+        
 [~,~,ext]=fileparts(p.coordinatefile);% Get extension of the specified file
 image=[];
 locsall=[];
@@ -112,6 +121,11 @@ switch ext
         else
             locsall=copyfields([],l,{'x','y','z'});
         end
+% add a new way to get localizations
+    case {'.loc'}
+        image=imread(p.coordinatefile);
+        img=sum(image,3)/size(image,3); %binarize
+        image=double(img)/255;
     otherwise
         display('file not identified selected')
         return
@@ -140,7 +154,7 @@ for k=numberofsites:-1:1
     if ~isempty(image)
         locsh=locsfromimage(image,p);
     else
-        locsh=labelremove(locsall,p.labeling_efficiency);
+        locsh=labelremove(locsall,p.labeling_efficiency); % give all the coordinates of I dots and the lableling efficiency (P(ref)), and then randomly generating I even probabilities (P(gi)), keep P(gi) if the P(gi) <= P(ref)
     end
 
     numlocs=length(locsh.x);
