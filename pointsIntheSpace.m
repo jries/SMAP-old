@@ -1,9 +1,9 @@
 function [x, y, z] = pointsIntheSpace(depth, dia, thickness, numMol)
-    [X, Y, Z] = parabolaCy(depth, dia*2); % make an outer parabola cylinder
-    outVol = volume(alphaShape(X,Y,Z)); % calculate the volume of the outer cylinder
+    [X, Y, Z] = parabolaCy(depth, dia); % make an outer parabola cylinder
+    [~, outVol] = convhull(X,Y,Z); % calculate the volume of the outer cylinder
     [Xin, Yin, Zin] = parabolaCy(depth-thickness, dia-thickness/2); % make an inner parabola cylinder
-    inVol = volume(alphaShape(Xin, Yin, Zin)); % calculate the volume of the inner cylinder
-    factor = (outVol-inVol)/(dia*2)^2*depth; % the ratio between the random space and space of interest (space between the two cylinders)
+    [~, inVol] = convhull(Xin, Yin, Zin); % calculate the volume of the inner cylinder
+    factor = ((dia*2)^2*depth)/(outVol-inVol); % the ratio between the random space and space of interest (space between the two cylinders)
     inputNum = upper(numMol*factor); % calculate how many points need to be sampled
     % numMol = 200
     % Generate random points
