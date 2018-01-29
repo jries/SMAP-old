@@ -1,19 +1,4 @@
-function [X, Y, Z] = cylinder(depth, dia, thickness)
-    depth = 200;
-    dia = 50;
-    thickness = 20;
-    inDepth = depth-thickness;
-    inDia = dia-thickness;
-    Y = 0:1:depth;
-    a = findA(depth, dia);
-    X = ((Y-depth)/a).^(1/2); 
-end
-
-function a = findA(depth, dia)
-    Y = 0:1:depth;
-    a = -depth/(dia/2).^2;
-end
-
+spaceDefiner
 
 % create the surface of a cylinder
 Y = 0:1:200;
