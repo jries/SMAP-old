@@ -41,17 +41,20 @@ function [x, y, z] = pointsIntheSpace(depth, dia, thickness, numMol)
 end
 
 function [X, Y, Z] = parabolaCy(depth, dia)
+%% Using a Parabola to create a cylinder
     a = aFinder(depth, dia);
-    Y = 0:1:depth;
-    X = ((Y-depth)/a).^(1/2);
-    [X,Y,Z] = cylinder(X,20);
+    pY = 0:1:depth;
+    pX = ((pY-depth)/a).^(1/2);
+    [X,Y,Z] = cylinder(pX, 40); % create a unit cylinder (the range of z is from 0 to 1)
+    % get one column vectors of X, Y, and Z
     X = reshape(X,[numel(X),1]);
     Y = reshape(Y,[numel(Y),1]);
     Z = reshape(Z,[numel(Z),1]);
-    Z = Z*depth;
+    Z = Z*depth; % assign depth to the cylinder
 end
 
 function a = aFinder(depth, dia)
+%% This is for the determination of coefficient "a" for a Parabola, using depth (y-intercept) and diameter (x-intercept) as inputs
     Y = 0:1:depth;
     a = -depth/(dia).^2;
 end
