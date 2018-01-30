@@ -1,15 +1,15 @@
-function [x, y, z] = pointsIntheSpace(depth, dia, thickness, numMol)
-    [X, Y, Z] = parabolaCy(depth, dia); % make an outer parabola cylinder
+function l = pointsIntheSpace(pp)
+    [X, Y, Z] = parabolaCy(pp.depth, pp.dia); % make an outer parabola cylinder
     [~, outVol] = convhull(X,Y,Z); % calculate the volume of the outer cylinder
-    [Xin, Yin, Zin] = parabolaCy(depth-thickness, dia-thickness/2); % make an inner parabola cylinder
+    [Xin, Yin, Zin] = parabolaCy(pp.depth-pp.thickness, pp.dia-pp.thickness/2); % make an inner parabola cylinder
     [~, inVol] = convhull(Xin, Yin, Zin); % calculate the volume of the inner cylinder
-    factor = ((dia*2)^2*depth)/(outVol-inVol); % the ratio between the random space and space of interest (space between the two cylinders)
-    inputNum = upper(numMol*factor); % calculate how many points need to be sampled
+    factor = ((pp.dia*2)^2*pp.depth)/(outVol-inVol); % the ratio between the random space and space of interest (space between the two cylinders)
+    inputNum = upper(pp.numMol*factor); % calculate how many points need to be sampled
     % numMol = 200
     % Generate random points
     n = ceil(inputNum*1.2); % the total number of random points the 1.2 times of inputNum. The number of points should be higher than numMol.
-    xy = rand(2, n).*dia*2-dia; % generate random points at xy
-    z = rand(1, n).*depth; % generate random points at z
+    xy = rand(2, n).*pp.dia*2-pp.dia; % generate random points at xy
+    z = rand(1, n).*pp.depth; % generate random points at z
     
     % Outer cylinder
     % Only retain the points within the cylinder
@@ -31,9 +31,21 @@ function [x, y, z] = pointsIntheSpace(depth, dia, thickness, numMol)
     z = z(:, ~IsInside);
     x = xy(1,:);
     y = xy(2,:);
-    x = x(:,1:numMol)';
-    y = y(:,1:numMol)';
-    z = z(:,1:numMol)';
+    x = x(:,1:pp.numMol)' + pp.comp;
+    y = y(:,1:pp.numMol)' + pp.comp;
+    z = z(:,1:pp.numMol)';
+    
+    switch pp.view
+        case 'bottom'
+            l.x = x
+            l.y = y
+        case 'side'
+            l.x = x
+            l.y = z
+        otherwise
+    
+    end
+    
     figure(33)
     scatter3(x, y, z)
     figure(34)
