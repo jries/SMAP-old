@@ -1,16 +1,27 @@
 function l = pointsIntheSpace(pp)
-    [X, Y, Z] = parabolaCy(pp.shape, pp.depth, pp.dia); % make an outer parabola cylinder
+    [X, Y, Z] = mkCy(pp.shape, pp.depth, pp.dia); % make an outer parabola cylinder
     figure(30)
     scatter3(X,Y,Z)
     rotate3d on
     [~, outVol] = convhull(X,Y,Z); % calculate the volume of the outer cylinder
-    [Xin, Yin, Zin] = parabolaCy(pp.shape, pp.depth-pp.thickness, pp.dia-pp.thickness/2); % make an inner parabola cylinder
+    
+    % Determine the thickness of the top
+    switch pp.shape
+        case 'columnNT'
+            zThickness = 0;
+        otherwise
+            zThickness = pp.thickness;
+    end
+    [Xin, Yin, Zin] = mkCy(pp.shape, pp.depth-zThickness, pp.dia-pp.thickness/2); % make an inner parabola cylinder
+    figure(31)
+    scatter3(Xin,Yin,Zin)
+    rotate3d on
     [~, inVol] = convhull(Xin, Yin, Zin); % calculate the volume of the inner cylinder
     factor = ((pp.dia*2)^2*pp.depth)/(outVol-inVol); % the ratio between the random space and space of interest (space between the two cylinders)
     inputNum = upper(pp.numMol*factor); % calculate how many points need to be sampled
     % numMol = 200
     % Generate random points
-    n = ceil(inputNum*1.2); % the total number of random points the 1.2 times of inputNum. The number of points should be higher than numMol.
+    n = ceil(inputNum*1.1); % the total number of random points the 1.2 times of inputNum. The number of points should be higher than numMol.
     xy = rand(2, n).*pp.dia*2-pp.dia; % generate random points at xy
     z = rand(1, n).*pp.depth; % generate random points at z
     
@@ -55,13 +66,14 @@ function l = pointsIntheSpace(pp)
     % visualization of the structures
     figure(33)
     scatter3(x, y, z)
+    rotate3d on
     figure(34)
     scatter(x, y)
     figure(35)
     scatter(x, z)
 end
 
-function [X, Y, Z] = parabolaCy(shape, depth, dia)
+function [X, Y, Z] = mkCy(shape, depth, dia)
 switch shape
     case 'parabola'
     %% Using a Parabola to create a cylinder

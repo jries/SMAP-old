@@ -18,15 +18,9 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
         end
         function out=run(obj,p)  
             [locst,possites]=simulatelocs(p, 1);
-            % introduce locst2 #DEV
-            [locst2,~]=simulatelocs(p, 2);
-            % add new lines here for management of channels #DEV
-            [locst(:).channel] = repelem(1,length(locst.xnm))';
-            [locst2(:).channel] = repelem(2,length(locst2.xnm))';
             
            if ~p.savez
                locst=rmfield(locst,{'znm','znm_gt'});
-               locst2=rmfield(locst2,{'znm','znm_gt'});
            end
            
 
@@ -39,7 +33,6 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
            obj.locData.addfile(['simulated_' num2str(obj.locData.files.filenumberEnd) '_' filename]);
            obj.locData.files.file(end).info.simulationParameters=obj.getGuiParameters;
            obj.locData.addLocData(locst);
-           obj.locData.addLocData(locst2);
            obj.locData.sort('filenumber','frame');
            try
            initGuiAfterLoad(obj);

@@ -119,7 +119,7 @@ switch ext
         if isfield(l,'image')
             image=l.image;
         else
-            locsall=copyfields([],l,{'x','y','z'});
+            locsall=copyfields([],l,{'x','y','z','channel'}); % channel is added
         end
 % add a new way to get localizations
     case {'.loc'}
@@ -161,6 +161,7 @@ for k=numberofsites:-1:1
     locsh.x=reshape(locsh.x,numlocs,1);
     locsh.y=reshape(locsh.y,numlocs,1);
     locsh.z=reshape(locsh.z,numlocs,1);
+    locsh.channel=reshape(locsh.channel,numlocs,1); %added
     if p.randomrot
         angle=2*pi*rand(1);
         [locsh.x,locsh.y]=rotcoord(locsh.x,locsh.y,angle);
@@ -188,6 +189,7 @@ for k=numberofsites:-1:1
     locs(k).x=locsh.x+xh*distsites;
     locs(k).y=locsh.y+yh*distsites;
     locs(k).z=locsh.z;
+    locs(k).channel=locsh.channel;% added
     locs(k).angle=angle*ones(size(locsh.x));
     locs(k).dx_gt=dx*ones(size(locsh.x));
     locs(k).dy_gt=dy*ones(size(locsh.x));
@@ -297,7 +299,7 @@ function locs=locsfromposi(locsi,p)
     locs.dznm_gt=single(locsi.dz_gt(indin));
     locs.angle=single(locsi.angle(indin));
     locs.frame=single(locsi.frame(indin));
-      
+    locs.channel=single(locsi.channel(indin));  %added
 end
 
 
