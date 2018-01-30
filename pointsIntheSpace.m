@@ -102,7 +102,16 @@ switch shape
         X = [Xbottom' Xtop']';
         Y = [Ybottom' Ytop']';
         Z = [Zbottom' Ztop']';
-        
+    case 'columnNT'
+    %% create a cylinder with no top
+        pY = 0:1:depth;
+        pX = repelem(dia, numel(pY));
+        [X,Y,Z] = cylinder(pX, 40);
+        X = reshape(X,[numel(X),1]);
+        Y = reshape(Y,[numel(Y),1]);
+        Z = reshape(Z,[numel(Z),1]);
+        Z = Z*depth; % assign depth to the cylinder
+
     otherwise
 end
 

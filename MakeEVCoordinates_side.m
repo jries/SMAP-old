@@ -5,7 +5,7 @@ function l=MakeEVCoordinates_bottom
     pp.dia = 30; % the outer radius.
     pp.thickness = 15; % distance between inner and outer cylinder.
     pp.numMol = 150; % the number of molecular in the region of interest
-    pp.view = 'bottom';
+    pp.view = 'side';
     
     pp.shape = 'columnNT';
 
