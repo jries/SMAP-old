@@ -7,6 +7,8 @@ function l=MakeEVCoordinates_bottom2
     pp.numMol = 300; % the number of molecular in the region of interest
     pp.view = 'bottom';
     
+    pp.shape = 'columnRT';
+        
     pp.comp = 50;
 
     l = pointsIntheSpace(pp)
