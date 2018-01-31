@@ -1,18 +1,17 @@
 function l = pointsIntheSpace(pp)
-    [X, Y, Z] = mkCy(pp.shape, pp.depth, pp.dia); % make an outer parabola cylinder
+    [X, Y, Z] = mkCy(pp.shapeOut, pp.depth, pp.dia); % make an outer parabola cylinder
     figure(30)
     scatter3(X,Y,Z)
     rotate3d on
     [~, outVol] = convhull(X,Y,Z); % calculate the volume of the outer cylinder
     
     % Determine the thickness of the top
-    switch pp.shape
-        case 'columnNT'
-            zThickness = 0;
-        otherwise
-            zThickness = pp.thickness;
+    if regexp(pp.shapeIn, 'NT$')>1
+        zThickness = 0;
+    else
+        zThickness = pp.thickness;
     end
-    [Xin, Yin, Zin] = mkCy(pp.shape, pp.depth-zThickness, pp.dia-pp.thickness/2); % make an inner parabola cylinder
+    [Xin, Yin, Zin] = mkCy(pp.shapeIn, pp.depth-zThickness, pp.dia-pp.thickness); % make an inner parabola cylinder
     figure(31)
     scatter3(Xin,Yin,Zin)
     rotate3d on

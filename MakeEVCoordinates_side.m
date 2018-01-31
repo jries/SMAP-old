@@ -3,11 +3,12 @@ function l=MakeEVCoordinates_side
     pp1 = [];
     pp1.depth = 40; % the inward depth of the endocytic site.
     pp1.dia = 30; % the outer radius.
-    pp1.thickness = 15; % distance between inner and outer cylinder.
+    pp1.thickness = 10; % distance between inner and outer cylinder.
     pp1.numMol = 150; % the number of molecular in the region of interest
     pp1.view = 'side';
     
-    pp1.shape = 'columnNT';
+    pp1.shapeIn = 'columnNT';
+    pp1.shapeOut = 'columnNT';
 
     pp1.comp = 50;
     
@@ -22,7 +23,8 @@ function l=MakeEVCoordinates_side
     pp2.numMol = 300; % the number of molecular in the region of interest
     pp2.view = 'side';
     
-    pp2.shape = 'columnRT';
+    pp2.shapeIn = 'columnRT';
+    pp2.shapeOut = 'parabola';
         
     pp2.comp = 50;
 
