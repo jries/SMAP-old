@@ -44,32 +44,34 @@ classdef export_3Dvolumes<interfaces.DialogProcessor&interfaces.SEProcessor
              yrange=[-1 1]/2*sizerec(2)*pixelsize(2);
              zrange=[-1 1]/2*sizerec(3)*pixelsize(3);
              
-             positions=zeros(length(selectedsites),4);
+             positions=zeros(length(selectedsites),5);
             for k=selectedsites
                 site=sites(k);
-                
-                [locs,indloc]=obj.locData.getloc({'xnm','ynm','znm','numberInGroup'},'position',sites(k),'layer',layers);
-                zpos=median(locs.znm);
-                xh=locs.xnm-sites(k).pos(1);yh=locs.ynm-sites(k).pos(2);zh=locs.znm-zpos;
-                if p.blinkcoded
-                    [imouth,dxo,dyo,dzo]=myhist3(xh,yh,zh,pixelsize,xrange,yrange,zrange,locs.numberInGroup);
-                else
-                 imouth=renderhist3D(xh,yh,zh,xrange,yrange,zrange,pixelsize);
-                end
-                filen=[f strrep(site.name,'.','_')];
-                switch p.format.selection
-                case '.em'
-                    
-                    fhere= [filen '.em'];
-                    tom_emwrite([path filesep fhere],imouth); 
-                otherwise
-                    disp('format not implemented');
+                for l=1:length(layers)
+                    [locs,indloc]=obj.locData.getloc({'xnm','ynm','znm','numberInGroup'},'position',sites(k),'layer',layers(l));
+                    zpos=median(locs.znm);
+                    xh=locs.xnm-sites(k).pos(1);yh=locs.ynm-sites(k).pos(2);zh=locs.znm-zpos;
+                    if p.blinkcoded
+                        [imouth,dxo,dyo,dzo]=myhist3(xh,yh,zh,pixelsize,xrange,yrange,zrange,locs.numberInGroup);
+                    else
+                     imouth=renderhist3D(xh,yh,zh,xrange,yrange,zrange,pixelsize);
+                    end
+                    filen=[f strrep(site.name,'.','_') '_' int2str(l)];
+                    switch p.format.selection
+                    case '.em'
+
+                        fhere= [filen '.em'];
+                        tom_emwrite([path filesep fhere],imouth); 
+                    otherwise
+                        disp('format not implemented');
+                    end
                 end
                         
                
                positions(k,1:2)=sites(k).pos(1:2);
                positions(k,3)=zpos;
                positions(k,4)=sites(k).ID;
+               positions(k,5)=k;
             end
             csvwrite([path filesep 'positions.txt'],positions);
             
@@ -112,28 +114,28 @@ pard.export_selected.position=[1,1];
 pard.export_selected.Width=2;
 
 pard.format.object=struct('String',{{'.em','.tif'}},'Style','popupmenu');
-pard.format.position=[1,1];
+pard.format.position=[2,1];
 pard.format.Width=2;
 
 
 pard.pixrect.object=struct('String','pixelsize (nm) [x y z]','Style','text');
-pard.pixrect.position=[2,1];
+pard.pixrect.position=[3,1];
 pard.pixrect.Width=1;
 
 pard.pixrec.object=struct('String','7','Style','edit');
-pard.pixrec.position=[2,2];
+pard.pixrec.position=[3,2];
 pard.pixrec.Width=1;
 
 pard.sizerect.object=struct('String','size (pixels) [x y z]','Style','text');
-pard.sizerect.position=[3,1];
+pard.sizerect.position=[4,1];
 pard.sizerect.Width=1;
 
 pard.sizerec.object=struct('String','50','Style','edit');
-pard.sizerec.position=[3,2];
+pard.sizerec.position=[4,2];
 pard.sizerec.Width=1;
 
 pard.blinkcoded.object=struct('String','blink coded for grouped','Style','checkbox');
-pard.blinkcoded.position=[4,1];
+pard.blinkcoded.position=[5,1];
 pard.blinkcoded.Width=2;
 
 pard.plugininfo.type='ROI_Analyze';

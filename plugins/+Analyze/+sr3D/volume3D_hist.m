@@ -4,6 +4,7 @@ classdef volume3D_hist<interfaces.DialogProcessor
     properties
         imagestack
         imageinfo
+        fileinfo
     end
     methods
         function obj=volume3D_hist(varargin)        
@@ -54,6 +55,8 @@ elseif isvalid(hroi)
     phere.sr_size=[pos(3) pos(4)]*1000/2;
 end
 
+
+
 if p.pixzauto
     pixz=p.pixzrecset;
 else
@@ -96,6 +99,17 @@ for k=1:length(layers)
     imouth(uind)=hl(hl>0);
     imout(:,:,:,k)=imouth;
 end
+
+%save txtfile with info:
+obj.fileinfo.position=pos;
+obj.fileinfo.type=class(hroi);
+obj.fileinfo.lienwidth=p.linewidth_roi;
+obj.fileinfo.minz=minz;
+obj.fileinfo.maxz=maxz;
+obj.fileinfo.sr_pos=phere.sr_pos;
+obj.fileinfo.sr_size=phere.sr_size;
+obj.fileinfo.pixxy=pixxy;
+obj.fileinfo.pixz=pixz;
 % imageslicer(imout);
 obj.imagestack=imout;
 end
@@ -114,6 +128,10 @@ if f
 %     imout=uint8(imout3/max(imout3(:))*(2^8-1));
     saveastiff(imout(:,:,:,k),fileouth,options)
     end
+    
+    fileoutt=strrep(f,'.tif','.txt');
+    writestruct([p fileoutt],obj.fileinfo);
+    
 end
 end
 
