@@ -19,7 +19,7 @@ else
     indg=true(size(locData.loc.xnm));
 end
 
-if p.savefile
+if isfield(p,'savefile') && p.savefile
     filenumber=p.dataselect.Value;
     indg=indg&locData.loc.filenumber==filenumber;
 end
