@@ -12,7 +12,7 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
             end
 %             try
             framerange=p.framerange(1):p.framerange(end);
-            if p.framerangeget2
+            if p.frameranget2
                 framerange2=p.framerange2(1):p.framerange2(end);
             else 
                 framerange2=framerange;
@@ -29,23 +29,32 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
                 testfile=[path filesep allfiles(1).name];
             end
             
-            il=imageLoader(testfile);
-            im=il.getImage(framerange(1));
+%             il=imageLoader(testfile);
+             il=imageloaderAll(testfile,[],obj.P);
+            im=il.getimage(framerange(1));
             
             for k=framerange
-                im=max(im,il.getImage(k));
+                im=max(im,il.getimage(k));
             end
-            im2=il.getImage(framerange2(1));
+            im2=il.getimage(framerange2(1));
             for k=framerange2
-                im=max(im2,il.getImage(k));
+                im2=max(im2,il.getimage(k));
             end
+            
+            emon=il.metadata.EMon;
+            il.close;
+            if emon
+                im=im(:,end:-1:1);
+                im2=im2(:,end:-1:1);
+            end
+            
 %             catch err
 %                 err
 %                 disp(['no image found for ' file])
 %             end
             
 %             filetest=[il.info.path filesep il.info.files{framerange(1)}];
-            filetest=il.info.filename;
+            filetest=il.file;
             tiff=gettif(filetest);
             tiff.image=im;
             tiff.info.cam_pixelsize_um=obj.locData.files.file(end).info.cam_pixelsize_um;
@@ -88,7 +97,7 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
             tiffbgT2.image=mipbgT2;
             tiffbgT2.info.name='MIP-BG-T2';
             
-            if p.framerangeget2
+            if p.frameranget2
                 obj.locData.files.file(end).tif=[tiffbgT,tiff,tiffbg,tiffbgT2,tiff2,tiffbg2];
                 obj.locData.files.file(end).numberOfTif=6;      
             else
