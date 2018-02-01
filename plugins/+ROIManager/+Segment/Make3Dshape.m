@@ -18,6 +18,7 @@ classdef Make3Dshape<interfaces.DialogProcessor
             %synchronizations and callbacks.
         end
         function out=run(obj,p)
+            l = pointsInDefSpace(p);
             %Here you implement the functionality
             %p contains:
             %global parameters defined in pard.inputParameters
@@ -79,33 +80,81 @@ classdef Make3Dshape<interfaces.DialogProcessor
             pard.guiobject.TooltipString=sprintf('you can define a tooltip string. \n This tip is displayed when you hover the mouse on the control');
             
             pard.guiobject2.object=struct('String','string','Style','pushbutton','Callback',{{@callbackfunction,obj,'additonal parameter'}});
-            pard.guiobject2.position=[2,1];
+            pard.guiobject2.position=[1,2];
             pard.guiobject2.Width=1;
             
-            pard.cap.object=struct('String','With cap','Style','checkbox','Value', 0);
-            pard.cap.position=[3,1];
-            pard.cap.Width=2;
+            pard.t_inner.object=struct('String','Inner cylinder','Style','text');
+            pard.t_inner.position=[2,2];
+            pard.t_inner.Width=1.5;
             
-            pard.bottom.object=struct('String','With bottom','Style','checkbox','Value', 0);
-            pard.bottom.position=[4,1];
-            pard.bottom.Width=2;
+            pard.t_outer.object=struct('String','Outer cylinder','Style','text');
+            pard.t_outer.position=[2,3];
+            pard.t_outer.Width=1.5;
             
-            pard.t_capDepth.object=struct('String','Cap depth (nm)','Style','text');
-            pard.t_capDepth.position=[3,1.5];
-            pard.t_capDepth.Width=2;
+            pard.t_cap.object=struct('String','Cap depth','Style','text');
+            pard.t_cap.position=[3,1];
+            pard.t_cap.Width=1.5;
             
-            pard.capDepth.object=struct('String','30','Style','edit');
-            pard.capDepth.position=[3,2];
-            pard.capDepth.Width=2;
+            pard.t_bottom.object=struct('String','Bottom depth','Style','text');
+            pard.t_bottom.position=[4,1];
+            pard.t_bottom.Width=1.5;
             
-            pard.t_bottomDepth.object=struct('String','Bottom depth (nm)','Style','text');
-            pard.t_bottomDepth.position=[4,1.5];
-            pard.t_bottomDepth.Width=2;
+            pard.t_diameter.object=struct('String','Diameter','Style','text');
+            pard.t_diameter.position=[5,1];
+            pard.t_diameter.Width=1.5;
+            
+            pard.t_root.object=struct('String','Root','Style','text');
+            pard.t_root.position=[6,1];
+            pard.t_root.Width=1.5;
+            
+            pard.inCap.object=struct('String',20,'Style','edit');
+            pard.inCap.position=[3,2];
+            pard.inCap.Width=.5;
+            
+            pard.outCap.object=struct('String',150,'Style','edit');
+            pard.outCap.position=[3,3];
+            pard.outCap.Width=.5;
+            
+            pard.inBottom.object=struct('String',80,'Style','edit');
+            pard.inBottom.position=[4,2];
+            pard.inBottom.Width=.5;
                      
-            pard.bottomDepth.object=struct('String','70','Style','edit');
-            pard.bottomDepth.position=[4,2];
-            pard.bottomDepth.Width=2;
+            pard.outBottom.object=struct('String',0,'Style','edit');
+            pard.outBottom.position=[4,3];
+            pard.outBottom.Width=.5;
             
+            pard.inDia.object=struct('String',50,'Style','edit');
+            pard.inDia.position=[5,2];
+            pard.inDia.Width=.5;
+                     
+            pard.outDia.object=struct('String',120,'Style','edit');
+            pard.outDia.position=[5,3];
+            pard.outDia.Width=.5;
+            
+            pard.root.object=struct('String',0,'Style','edit');
+            pard.root.position=[6,2.5];
+            pard.root.Width=.5;
+            
+            pard.preview.object=struct('String','Preview','Style','pushbutton','Callback',{{@callbackfunction,obj}});
+            pard.preview.position=[7,2.5];
+            pard.preview.Width=0.5;
+            
+            pard.t_numMol.object=struct('String','#Molecular','Style','text');
+            pard.t_numMol.position=[9,1];
+            pard.t_numMol.Width=0.5;
+            
+            pard.numMol.object=struct('String',150,'Style','edit');
+            pard.numMol.position=[9,2];
+            pard.numMol.Width=0.5;
+            pard.numMol.TooltipString=sprintf('The mean of molecular number in the defined space.');
+            
+            pard.t_viewType.object=struct('String','View type','Style','text');
+            pard.t_viewType.position=[9,1];
+            pard.t_viewType.Width=0.5;
+            
+            pard.viewType.object=struct('String','bottom','Style','edit');
+            pard.viewType.position=[9,2];
+            pard.viewType.Width=0.5;
             
             %provide a description and name in the field: plugininfo.
             pard.plugininfo.name='Make3Dshape';
@@ -130,8 +179,61 @@ classdef Make3Dshape<interfaces.DialogProcessor
     end
 end
 
+function  unitSur = mkSurCom(capDepth, bottomDepth, root, diameter)
+    %% make a surface component for making a cylinder
+    if capDepth > 0
+        % Create a parabola cap
+        a = aFinder(capDepth, diameter);
+        pY = 0:1:capDepth;
+        pX1 = ((pY-capDepth)/a).^(1/2);
+        rmBottom = 1;
+    else
+        pX1=[];
+        rmBottom = 0;
+    end
+    
+    if bottomDepth > 0
+        % add a bottom column
+        pY = 0:1:bottomDepth;
+        pX2 = repelem(diameter/2, numel(pY));
+    else
+        pX2=[];
+        rmBottom = 0;
+    end
+    
+    pX = [pX2(1:(numel(pX2)-rmBottom)) pX1];
+    
+    % set the root
+    unitSur = [];
+    unitSur.main = pX;
+    unitSur.root = root;
+    unitSur.mainDepth = capDepth + bottomDepth;
+end
 
-function callbackfunction(uiobject,data,obj,extradata)
+function a = aFinder(depth, dia)
+%% This is for the determination of coefficient "a" for a Parabola, using depth (y-intercept) and diameter (x-intercept) as inputs
+    Y = 0:1:depth;
+    a = -depth/(dia/2).^2;
+end
+
+function  fig = visualSurCom(unitSur)
+    reflection = [-unitSur.main; 0:unitSur.mainDepth];
+    surfaceCurve = [reflection(:,end:-1:1), [unitSur.main; 0:unitSur.mainDepth]];
+    plot(surfaceCurve(1,:), surfaceCurve(2,:))
+end
+
+function  [X, Y, Z] = mkCy(unitSur)
+    [X,Y,Z] = cylinder(unitSur.main, 40); % create a unit cylinder (the range of z is from 0 to 1)
+    X = reshape(X,[numel(X),1]);
+    Y = reshape(Y,[numel(Y),1]);
+    Z = reshape(Z,[numel(Z),1]);
+    
+    Z = Z * unitSur.mainDepth;
+    Z = Z + unitSur.root;
+end
+
+function callbackfunction(uiobject,data,obj)
+obj
 disp('callback')
 end
 
