@@ -11,10 +11,12 @@ if ~isfield(ld,'lds') && ~isfield(ld,'S') %not part file
     sout=ld;
     return
 end
+[path,file]=fileparts(f);
 
 lh=subsref(ld.lds,ld.S);
 for k=1:length(ld.partnames)
-    lk=load(ld.partnames{k});
+    [~,fileh,ext]=fileparts(ld.partnames{k});
+    lk=load([path filesep fileh ext]);
     lh=copyfields(lh,lk.ltemp);
 end
 sout=ld.lds;
