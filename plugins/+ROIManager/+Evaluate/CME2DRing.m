@@ -330,7 +330,7 @@ imstart=imstart/max(imstart(:));
   imbws=bwareafilt(imbw,1);
   out.areastat=regionprops(imbws,'MajorAxisLength','MinorAxisLength','ConvexArea','Area','Eccentricity');
   out.areastat.fractionCircle=out.areastat.Area/(pi*(out.areastat.MajorAxisLength/2)^2);
-  
+  out.areastat.fractionCircleconv=out.areastat.ConvexArea/(pi*(out.areastat.MajorAxisLength/2)^2);
 
 end
 function out=imgfit2(p,xm1,ym1,xm2,ym2,locs1,locs2,circfit,hf,hf2)
