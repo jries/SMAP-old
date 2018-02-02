@@ -32,7 +32,7 @@ saveloc=locData.savelocs([],indg); % BETA , maybe problematic with more than 1 f
 % if ~isempty(locData.SE)
 %     saveloc.siteexplorer=locData.SE.save;
 % end
-if p.savefile
+if isfield(p,'savefile') && p.savefile
     saveloc.file=saveloc.file(filenumber);
     saveloc.history=saveloc.history(filenumber);
     saveloc.loc.filenumber=ones(size(locData.loc.filenumber));
