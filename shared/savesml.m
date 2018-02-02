@@ -53,13 +53,14 @@ if isfield(locData.files.file(1),'transformation')
     
 end
 
-if locData.getGlobalSetting('saveas73')
-    save(file,'saveloc','fileformat','parameters','-v7.3');
+if locData.getGlobalSetting('saveas73') %now I use this to save with the old saver: large files are saved as v7.3, not as small parts.
+    v=saverightversion(file,out,'-v7');
+    disp(['saved as version ' v])
+%     save(file,'saveloc','fileformat','parameters','-v7.3');
 else
     savematparts(file,out,{'saveloc','loc'});
-%     version='-v7';
+
 end
-% v=saverightversion(file,out,version);
-% disp(['saved as version ' v])
+
 % save(file,'saveloc','fileformat','parameters','-v7.3');
 end
