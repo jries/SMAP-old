@@ -142,17 +142,17 @@ classdef intensityTiff<interfaces.SEEvaluationProcessor
                 dv=(fitp3(8:9)-pos(1:2));
                 mv=max(abs(dv));
                 if mv<=sx
-                 plot(fitp3(8),fitp3(9),'k+','Parent',ax)
+                 plot(fitp3(8),fitp3(9),'kx','Parent',ax)
                  plot(fitp3(8),fitp3(9),'ko','Parent',ax)
                 else
                     dv=dv/mv*(sx+0.7*pixcam(1));
-                    plot(psh(1)+dv(1),psh(2)+dv(2),'k+','Parent',ax)
+                    plot(psh(1)+dv(1),psh(2)+dv(2),'kx','Parent',ax)
                     plot(psh(1)+dv(1),psh(2)+dv(2),'ko','Parent',ax)
                     ax.XLim=[rangex(1)-pixcam(1) rangex(end)+pixcam(1)];
                     ax.YLim=[rangey(1)-pixcam(2) rangey(end)+pixcam(2)];
                 end
                 
-                ttxt=['A1=' num2str(fitp3(1),'%5.0f') ', A2=' num2str(fitp3(2),'%5.0f') ', A3=' num2str(fitp3(7),'%5.0f') ', d=' num2str(d,'%5.0f') ', chi2=' num2str(chi2red,'%5.2f')];
+                ttxt=['*: A1=' num2str(fitp3(1),'%5.0f') ', +: A2=' num2str(fitp3(2),'%5.0f') ', x: A3=' num2str(fitp3(7),'%5.0f') ', d=' num2str(d,'%5.0f') ', chi2=' num2str(chi2red,'%5.2f')];
                 title(ttxt,'Parent',ax)
                 axis(ax,'equal')
                 ax.NextPlot='replace';
@@ -172,11 +172,19 @@ classdef intensityTiff<interfaces.SEEvaluationProcessor
                 
                 imagesc(rangex,rangey,startim,'Parent',ax4)   
                 axis(ax4,'equal')
-                out.Amplitude1=fitp(1);
-                out.Amplitude2=fitp(2);
-%                 out.xcent=fitp2(7);
-%                 out.ycent=fitp2(8);
-%                 
+                
+                
+                out.G3Amplitude1=fitp3(1);
+                out.G3Amplitude2=fitp3(2);
+                out.G3Amplitude3=fitp3(7);
+                
+                out.G3freeAmplitude1=fitp3free(1);
+                out.G3freeAmplitude2=fitp3free(2);
+                out.G3freeAmplitude3=fitp3free(7);
+                
+                out.G3freexcent=fitp3free(11);
+                out.G3freeycent=fitp3free(12);
+                
 %                 out.Amplitudefreexy1=fitp2(1);
 %                 out.Amplitudefreexy2=fitp2(2);
         end
@@ -199,7 +207,7 @@ pard.t2.object=struct('Style','text','String','minimal distance 2nd Gauss (nm)')
 pard.t2.position=[2,1];
 pard.t2.Width=3;
 
-pard.mind.object=struct('Style','edit','String','100');
+pard.mind.object=struct('Style','edit','String','350');
 pard.mind.position=[2,4];
 
 pard.t3.object=struct('Style','text','String','sigma first Gauss (nm)');
@@ -277,7 +285,7 @@ meanposx=mean(rangex); meanposy=mean(rangey);
 % change n to determine how far 2nd and 3rd Gaussians can move outside, n
 % is maximum distance from center in [ROI size]s
 n=.5;
-lb=double([0 0 meanposx-n*dx meanposy-n*dx 150 0 0 meanposx-n*dx meanposy-n*dx  150]);ub=double([inf inf meanposx+n*dx meanposy+n*dx  750 inf inf meanposx+n*dx meanposy+n*dx 750]);
+lb=double([0 0 meanposx-n*dx meanposy-n*dx 150 0 0 meanposx-n*dx meanposy-n*dx  150]);ub=double([inf inf meanposx+n*dx meanposy+n*dx  250 inf inf meanposx+n*dx meanposy+n*dx 250]);
 startp(startp>ub)=ub(startp>ub);
 startp(startp<lb)=lb(startp<lb);
 fit=lsqnonlin(@triplegaussforfiterr,double(startp),lb,ub,[],double(img),X,Y,fixp);
@@ -351,7 +359,7 @@ meanposx=mean(rangex); meanposy=mean(rangey);
 % change n to determine how far 2nd and 3rd Gaussians can move outside, n
 % is maximum distance from center in [ROI size]s
 n=.5;
-lb=double([0 0 meanposx-n*dx meanposy-n*dx 150 0 0 meanposx-n*dx meanposy-n*dx  150 meanposx-d meanposy-d]);ub=double([inf inf meanposx+n*dx meanposy+n*dx  750 inf inf meanposx+n*dx meanposy+n*dx 750 meanposx+d meanposy+d]);
+lb=double([0 0 meanposx-n*dx meanposy-n*dx 150 0 0 meanposx-n*dx meanposy-n*dx  150 meanposx-d meanposy-d]);ub=double([inf inf meanposx+n*dx meanposy+n*dx  250 inf inf meanposx+n*dx meanposy+n*dx 250 meanposx+d meanposy+d]);
 fit=lsqnonlin(@triplegaussforfiterrfree,double(startp),lb,ub,[],double(img),X,Y,fixp);
 [fit(3),fit(4)]=restrictcoordiantes(fit(3),fit(4),fit(11),fit(12),fixp(2));
 [fit(8),fit(9)]=restrictcoordiantes(fit(8),fit(9),fit(11),fit(12),fixp(2));
