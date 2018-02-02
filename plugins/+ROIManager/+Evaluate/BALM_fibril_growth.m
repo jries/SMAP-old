@@ -101,8 +101,13 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
             uicontrol(h.Parent,'Position',[10,10,40,20],'String','Add Line','Callback',{@obj.addline,h});
             
             if length(obj.poly)<obj.site.ID || isempty(obj.poly{obj.site.ID})
-%                 obj.hpoly=impoly(h,'Closed',false,'PositionConstraintFcn',@obj.polyconstrain);
-            else
+                valh=obj.site.evaluation.(obj.modulename);
+                if isfield(valh,'poly')
+                   %obj.hpoly=impoly(h,valh.poly,'Closed',false,'PositionConstraintFcn',@obj.polyconstrain);
+                   obj.poly{obj.site.ID}=valh.poly;
+                end
+            end
+            if length(obj.poly)>=obj.site.ID &&~isempty(obj.poly{obj.site.ID})
                 obj.hpoly=impoly(h,obj.poly{obj.site.ID},'Closed',false,'PositionConstraintFcn',@obj.polyconstrain);
             
             

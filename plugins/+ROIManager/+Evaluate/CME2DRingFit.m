@@ -91,7 +91,7 @@ end
 end
 
 function out=runintern(obj,p)
-roisize=obj.getPar('se_siteroi')%obj.site.sePar.Settings.siteroi/2;
+roisize=obj.getPar('se_siteroi');%obj.site.sePar.Settings.siteroi/2;
 locs=obj.getLocs({'xnm','ynm'},'layer',p.layer.Value,'size',roisize*2);
 
 xm=locs.xnm-obj.site.pos(1);
