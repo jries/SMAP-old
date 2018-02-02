@@ -43,9 +43,11 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
             
             emon=il.metadata.EMon;
             il.close;
+            roi=il.metadata.roi;
             if emon
                 im=im(:,end:-1:1);
                 im2=im2(:,end:-1:1);
+                roi(1)=512-roi(1)-roi(3);
             end
             
 %             catch err
@@ -54,11 +56,13 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
 %             end
             
 %             filetest=[il.info.path filesep il.info.files{framerange(1)}];
-            filetest=il.file;
-            tiff=gettif(filetest);
+%             filetest=il.file;
+%             tiff=gettif(filetest);
+            tiff=gettifmetadata(il);
             tiff.image=im;
             tiff.info.cam_pixelsize_um=obj.locData.files.file(end).info.cam_pixelsize_um;
             tiff.info.name='MIP';
+            tiff.info.roi=roi;
             
             bg=mywaveletfilter(double(im),3,true);
             mipbg=double(im)-bg;
@@ -260,3 +264,18 @@ end
 %    
 %    
 % end
+
+function tiff=gettifmetadata(il)
+% tiff.image=imread(file); 
+% sim=size(imout.image);
+metadata=il.metadata;
+tiff.info.Width=metadata.Width;
+tiff.info.Height=metadata.Height;
+tiff.info.roi=metadata.roi;
+if all((tiff.info.roi(:))==([0 ;0 ;512; 512]))
+    imout.info.roi(3:4)=[metadata.Width metadata.Height];
+end
+tiff.info.name=il.file;
+end
+
+
