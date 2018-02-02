@@ -123,14 +123,14 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
         end
         
         function addline(obj,a,b,h)
-            if length(obj.poly)<obj.site.ID || isempty(obj.poly{obj.site.ID})
+           % if length(obj.poly)<obj.site.ID || isempty(obj.poly{obj.site.ID}) 
                 obj.hpoly=impoly(h,'Closed',false,'PositionConstraintFcn',@obj.polyconstrain);
-            else %add vortex to end
-                pos=obj.hpoly.getPosition;
-                pos(end+1,:)=pos(end,:);
-                obj.hpoly.setPosition(vertcat(pos(1,:),pos));
+           % else %add vortex to end
+           %     pos=obj.hpoly.getPosition;
+           %     pos(end+1,:)=pos(end,:);
+           %     obj.hpoly.setPosition(vertcat(pos(1,:),pos));
                  
-            end
+          %  end
              setConstrainedPosition(obj.hpoly,obj.hpoly.getPosition);
             hi=addNewPositionCallback(obj.hpoly,@obj.polycallback);
             obj.polycallback(obj.hpoly.getPosition);
