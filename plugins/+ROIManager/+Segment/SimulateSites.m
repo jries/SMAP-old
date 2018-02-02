@@ -100,7 +100,7 @@ end
 
 
 function load_callback(a,b,obj)
-f=obj.getSingleGuiParameter('coordinatefile');
+f=obj.getSingleGuiParameter('coordinatefile'); 
 [f,p]=uigetfile({'*.*';'*.tif';'*.png';'*.csv';'*.txt';'*.mat'},'Choose coordinate file',f);
 if ~f
     return

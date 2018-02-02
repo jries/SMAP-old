@@ -16,6 +16,18 @@ classdef Make3Dshape<interfaces.DialogProcessor
             %can add additional GUI components, e.g. some that are not
             %defined by simple uicontrols (e.g. uitable), set additional
             %synchronizations and callbacks.
+            obj.guihandles.previewimage=axes(obj.handle,'Units','pixels');
+            obj.guihandles.previewimage.Position=obj.guihandles.previewdummy.Position;
+            obj.guihandles.previewimage.Position(4)=5*obj.guihandles.previewimage.Position(4);
+            obj.guihandles.previewimage.Position(3)=0.6*obj.guihandles.previewimage.Position(3);
+            hold on
+            visualSurCom(mkSurCom(obj.getSingleGuiParameter('inCap'), obj.getSingleGuiParameter('inBottom'), obj.getSingleGuiParameter('root'), obj.getSingleGuiParameter('inDia')))
+            hold on
+            visualSurCom(mkSurCom(obj.getSingleGuiParameter('outCap'), obj.getSingleGuiParameter('outBottom'), obj.getSingleGuiParameter('root'), obj.getSingleGuiParameter('outDia')))
+            axis(obj.guihandles.previewimage,'on')
+            %axis(obj.guihandles.previewimage,'equal')
+            axis(obj.guihandles.previewimage,[-obj.getSingleGuiParameter('outDia')/2 obj.getSingleGuiParameter('outDia')/2 0 (obj.getSingleGuiParameter('outCap')+obj.getSingleGuiParameter('outBottom')+obj.getSingleGuiParameter('root'))])
+          
         end
         function out=run(obj,p)
             l = pointsInDefSpace(p);
@@ -74,87 +86,110 @@ classdef Make3Dshape<interfaces.DialogProcessor
             %non-integer values
             %optional fields: Width, Height. In relative units.
             
-            pard.guiobject.object=struct('String','string','Style','checkbox','Value',0);
-            pard.guiobject.position=[1,1];
-            pard.guiobject.Width=2;
-            pard.guiobject.TooltipString=sprintf('you can define a tooltip string. \n This tip is displayed when you hover the mouse on the control');
-            
-            pard.guiobject2.object=struct('String','string','Style','pushbutton','Callback',{{@callbackfunction,obj,'additonal parameter'}});
-            pard.guiobject2.position=[1,2];
-            pard.guiobject2.Width=1;
-            
             pard.t_inner.object=struct('String','Inner cylinder','Style','text');
-            pard.t_inner.position=[2,2];
-            pard.t_inner.Width=1.5;
+            pard.t_inner.position=[1,2];
+            pard.t_inner.Width=1;
             
             pard.t_outer.object=struct('String','Outer cylinder','Style','text');
-            pard.t_outer.position=[2,3];
-            pard.t_outer.Width=1.5;
+            pard.t_outer.position=[1,3];
+            pard.t_outer.Width=1;
             
             pard.t_cap.object=struct('String','Cap depth','Style','text');
-            pard.t_cap.position=[3,1];
+            pard.t_cap.position=[2,1];
             pard.t_cap.Width=1.5;
             
             pard.t_bottom.object=struct('String','Bottom depth','Style','text');
-            pard.t_bottom.position=[4,1];
+            pard.t_bottom.position=[3,1];
             pard.t_bottom.Width=1.5;
             
             pard.t_diameter.object=struct('String','Diameter','Style','text');
-            pard.t_diameter.position=[5,1];
+            pard.t_diameter.position=[4,1];
             pard.t_diameter.Width=1.5;
             
             pard.t_root.object=struct('String','Root','Style','text');
-            pard.t_root.position=[6,1];
+            pard.t_root.position=[5,1];
             pard.t_root.Width=1.5;
             
             pard.inCap.object=struct('String',20,'Style','edit');
-            pard.inCap.position=[3,2];
+            pard.inCap.position=[2,2];
             pard.inCap.Width=.5;
             
             pard.outCap.object=struct('String',150,'Style','edit');
-            pard.outCap.position=[3,3];
+            pard.outCap.position=[2,3];
             pard.outCap.Width=.5;
             
             pard.inBottom.object=struct('String',80,'Style','edit');
-            pard.inBottom.position=[4,2];
+            pard.inBottom.position=[3,2];
             pard.inBottom.Width=.5;
                      
             pard.outBottom.object=struct('String',0,'Style','edit');
-            pard.outBottom.position=[4,3];
+            pard.outBottom.position=[3,3];
             pard.outBottom.Width=.5;
             
             pard.inDia.object=struct('String',50,'Style','edit');
-            pard.inDia.position=[5,2];
+            pard.inDia.position=[4,2];
             pard.inDia.Width=.5;
                      
             pard.outDia.object=struct('String',120,'Style','edit');
-            pard.outDia.position=[5,3];
+            pard.outDia.position=[4,3];
             pard.outDia.Width=.5;
             
             pard.root.object=struct('String',0,'Style','edit');
-            pard.root.position=[6,2.5];
+            pard.root.position=[5,2.5];
             pard.root.Width=.5;
             
             pard.preview.object=struct('String','Preview','Style','pushbutton','Callback',{{@callbackfunction,obj}});
-            pard.preview.position=[7,2.5];
+            pard.preview.position=[6,2.5];
             pard.preview.Width=0.5;
             
             pard.t_numMol.object=struct('String','#Molecular','Style','text');
-            pard.t_numMol.position=[9,1];
+            pard.t_numMol.position=[7,1];
             pard.t_numMol.Width=0.5;
             
             pard.numMol.object=struct('String',150,'Style','edit');
-            pard.numMol.position=[9,2];
+            pard.numMol.position=[7,2];
             pard.numMol.Width=0.5;
             pard.numMol.TooltipString=sprintf('The mean of molecular number in the defined space.');
             
             pard.t_viewType.object=struct('String','View type','Style','text');
-            pard.t_viewType.position=[9,1];
+            pard.t_viewType.position=[7,1];
             pard.t_viewType.Width=0.5;
             
-            pard.viewType.object=struct('String','bottom','Style','edit');
-            pard.viewType.position=[9,2];
+            pard.viewType.object=struct('String',{{'side','top'}},'Style','popupmenu');
+            pard.viewType.position=[7,2];
             pard.viewType.Width=0.5;
+            
+            pard.t_size.object=struct('String','Size of the image','Style','text');
+            pard.t_size.position=[7,3];
+            pard.t_size.Width=1;
+            
+            pard.size.object=struct('String', 120, 'Style','edit');
+            pard.size.position=[7,4];
+            pard.size.Width=0.5;
+            
+            pard.t_imgPath.object=struct('String','as','Style','text');
+            pard.t_imgPath.position=[9,1];
+            pard.t_imgPath.Width=1;
+            
+            pard.t_folderPath.object=struct('String','Save to','Style','text');
+            pard.t_folderPath.position=[8,1];
+            pard.t_folderPath.Width=1;
+            
+            pard.folderPath.object=struct('String','/','Style','edit');
+            pard.folderPath.position=[8,2:3];
+            pard.folderPath.Width=1;
+            
+            pard.folder_button.object=struct('String','Choose folder','Style','pushbutton','Callback',{{@saveTo_callback,obj}});
+            pard.folder_button.position=[8,3];
+            pard.folder_button.Width=1;        
+            
+            pard.imgPath.object=struct('String', 'my_image.png', 'Style','edit');
+            pard.imgPath.position=[9,2:3];
+            pard.imgPath.Width=2;     
+            
+            pard.previewdummy.object=struct('String', ' ', 'Style','text');
+            pard.previewdummy.position=[5,3.7];
+            pard.previewdummy.Width=2;   
             
             %provide a description and name in the field: plugininfo.
             pard.plugininfo.name='Make3Dshape';
@@ -172,7 +207,7 @@ classdef Make3Dshape<interfaces.DialogProcessor
             %called after the global parameter has been changed. this
             %function is only called, if the parameter is changed by a
             %different class.
-            pard.syncParameters={{'globalParameterName','guiobject2',{'String','Value'},{@aftersync_callback,obj}}};
+            pard.syncParameters={{'globalParameterName','inCap',{'String','Value'},{@aftersync_callback,obj}}};
             
 
         end
@@ -233,8 +268,23 @@ function  [X, Y, Z] = mkCy(unitSur)
 end
 
 function callbackfunction(uiobject,data,obj)
-obj
+    obj.guihandles.previewimage
+    cla reset
+    hold on
+    visualSurCom(mkSurCom(obj.getSingleGuiParameter('inCap'), obj.getSingleGuiParameter('inBottom'), obj.getSingleGuiParameter('root'), obj.getSingleGuiParameter('inDia')))
+    hold on
+    visualSurCom(mkSurCom(obj.getSingleGuiParameter('outCap'), obj.getSingleGuiParameter('outBottom'), obj.getSingleGuiParameter('root'), obj.getSingleGuiParameter('outDia')))
 disp('callback')
+end
+
+function saveTo_callback(a,b,obj)
+f=obj.getSingleGuiParameter('folderPath');
+f=uigetdir(f,'Choose folder for saving the result');
+if ~f
+    return
+end
+obj.setGuiParameters(struct('folderPath',f));
+setvisibility(obj)
 end
 
 function aftersync_callback(obj)

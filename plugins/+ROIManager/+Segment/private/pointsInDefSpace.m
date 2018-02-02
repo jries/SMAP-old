@@ -3,51 +3,113 @@ function l = pointsInDefSpace(p)
     inUnitSur = mkSurCom(p.inCap, p.inBottom, p.root, p.inDia);
     [Xout, Yout, Zout] = mkCy(outUnitSur);
     [Xin, Yin, Zin] = mkCy(inUnitSur);
-    totalDepth = outUnitSur.root+outUnitSur.mainDepth;
     
+    totalDepth = p.root+outUnitSur.mainDepth;
+    
+    [T,R,ZRin] = meshgrid(linspace(0,2*pi,41),linspace(0,p.inBottom/2,16),totalDepth);
+    XRin = R.*cos(T);
+    YRin = R.*sin(T);
     figure(30)
-    scatter3(Xout,Yout,Zout)
-    rotate3d on
+    scatter3(XRin(:),YRin(:),ZRin(:))
+    Xin=[XRin;Xin];
+    Yin=[YRin;Yin];
+    Zin=[ZRin;Zin];
     
-    [~, inVol] = convhull(Xin, Yin, Zin); % calculate the volume of the inner cylinder
-    [~, outVol] = convhull(Xout, Yout, Zout); % calculate the volume of the outer cylinder
-    factor = ((p.outDia)^2*totalDepth)/(outVol-inVol); % the ratio between the random space and space of interest (space between the two cylinders)
-    inputNum = upper(p.numMol*factor); % calculate how many points need to be sampled
-    n = ceil(inputNum*1.1); % the total number of random points the 1.2 times of inputNum. The number of points should be higher than numMol.   % numMol = 200
-    
-    % Generate random points
-    xy = rand(2, n).*(p.outDia/2)*2-p.outDia/2; % generate random points at xy
-    z = rand(1, n).*totalDepth; % generate random points at z
-    
-    % Filter the points
-    [xy, z] = pointsIn3DS(Xout, Yout, Zout, xy, z, 'inside');
-    [xy, z] = pointsIn3DS(Xin, Yin, Zin, xy, z, 'outside');
-    
-    x = xy(1,:);
-    y = xy(2,:);
+    [T,R,ZRout] = meshgrid(linspace(0,2*pi,41),linspace(0,p.outBottom/2,16),totalDepth);
+    XRout = R.*cos(T);
+    YRout = R.*sin(T);
+    figure(30)
+    scatter3(XRout(:),YRout(:),ZRout(:))
+    Xout=[XRout;Xout];
+    Yout=[YRout;Yout];
+    Zout=[ZRout;Zout];
 
-    l = [];
-        %% make the projection by discard infomation of a specified axis
-    switch p.viewType
-        case 'bottom'
-            % discard z axis
-            l.x = x(1,1:p.numMol)'
-            l.y = y(1,1:p.numMol)'
-        case 'side'
-            % discard y axis, and relabeled oringinal z axis as new y axis
-            l.x = x(1,1:p.numMol)'
-            l.y = z(1,1:p.numMol)'
-        otherwise
+    outSur = scatteredInterpolant(Xout(:), Yout(:), Zout(:));
+    outSur.ExtrapolationMethod = 'none';
+    outSur.Method = 'natural';
+    
+    inSur = scatteredInterpolant(Xin(:), Yin(:), Zin(:));
+    inSur.Method = 'natural';
+    
+    
+    pointMode = 'full';
+    switch pointMode
+        case 'random'
+        % Generate random points #DEV
+        [inK, inVol] = convhull(Xin, Yin, Zin); % calculate the volume of the inner cylinder
+        [outK, outVol] = convhull(Xout, Yout, Zout); % calculate the volume of the outer cylinder
+        factor = ((p.outDia)^2*totalDepth)/(outVol-inVol); % the ratio between the random space and space of interest (space between the two cylinders)
+        inputNum = upper(p.numMol*factor); % calculate how many points need to be sampled
+        n = ceil(inputNum*1.1); % the total number of random points the 1.2 times of inputNum. The number of points should be higher than numMol.   % numMol = 200
+
+        xy = rand(2, n).*(p.outDia/2)*2-p.outDia/2; % generate random points at xy
+        z = rand(1, n).*totalDepth; % generate random points at z
+    
+        case 'full'
+        % Generate full points
+        sizeRange = p.size/2;
+        [x y z] = meshgrid((-sizeRange):sizeRange, (-sizeRange):sizeRange, 0:totalDepth);
+        xy = [x(:), y(:)]';
+        z = z(:)';
     end
     
-    % visualization of the structures
-    figure(33)
-    scatter3(x, y, z)
-    rotate3d on
-    figure(34)
-    scatter(x, y)
-    figure(35)
-    scatter(x, z)
+    % Filter the points
+    refZin = inSur(xy(1,:),xy(2,:));
+    refZout = outSur(xy(1,:),xy(2,:));
+    
+    idx = z<refZout&z>refZin&z>=p.root;
+    l = [];
+    tempL = [x(:), y(:), z'];
+    tempL = tempL(idx,:);
+    
+    tempL(:,1) = tempL(:,1) + sizeRange;
+    tempL(:,2) = tempL(:,2) + sizeRange;
+    tempL = tempL+1;
+      
+    outputType = 'image';
+    switch outputType
+        case 'coordinates'
+            %% make the projection by discard infomation of a specified axis
+            l = [];
+            switch p.viewType.selection
+                case 'top'
+                    % discard z axis
+                    l.x = x(1,1:p.numMol)';
+                    l.y = y(1,1:p.numMol)';
+                case 'side'
+                    % discard y axis, and relabeled oringinal z axis as new y axis
+                    l.x = x(1,1:p.numMol)';
+                    l.y = z(1,1:p.numMol)';
+                otherwise
+            end
+
+            % visualization of the structures
+            figure(33)
+            scatter3(x, y, z)
+            rotate3d on
+            figure(34)
+            scatter(x, y)
+            figure(35)
+            scatter(x, z)
+        case 'image'
+            %%
+            switch p.viewType.selection
+                case 'top'
+                    % discard z axis
+                    proImg = accumarray(int8(tempL(:,1:2)), tempL(:,3),[],@(x) length(x));
+                    figure(39)
+                    scatter3(tempL(:,1), tempL(:,2), tempL(:,3))
+                    rotate3d on
+                    figure(31)
+                    image(proImg, 'CDataMapping', 'scaled')
+                    imwrite(uint8(round(mat2gray(proImg)*255)), [p.folderPath '\' p.imgPath])
+                case 'side'
+                    % discard y axis, and relabeled oringinal z axis as new y axis
+
+                otherwise
+            end
+    end
+
 end
 
 function [xy, z] = pointsIn3DS(X, Y, Z, xy, z, filter)
@@ -110,10 +172,7 @@ end
 
 function  [X, Y, Z] = mkCy(unitSur)
     [X,Y,Z] = cylinder(unitSur.main, 40); % create a unit cylinder (the range of z is from 0 to 1)
-    X = reshape(X,[numel(X),1]);
-    Y = reshape(Y,[numel(Y),1]);
-    Z = reshape(Z,[numel(Z),1]);
-    
+       
     Z = Z * unitSur.mainDepth;
     Z = Z + unitSur.root;
 end
