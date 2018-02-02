@@ -2,7 +2,7 @@
 
 fieldstosave={'phot','frame','PSFxnm','locprecnm','xnm','ynm','bg','channel','filenumber','dummy'};
 
-startdirectory='c:/Users/*_sml.mat';
+startdirectory='C:\Users\ries\Documents\Mund_RingPaper_Data\Radial\GFP\*_sml.mat';
 h=selectManyFiles(startdirectory);
 waitfor(h.handle)
 
@@ -18,6 +18,10 @@ for k=1:length(filelist)
     end
     lout.saveloc.loc=rmfield(l.saveloc.loc,fieldsremove);
     newname=strrep(filelist{k},'_sml.mat','_s_sml.mat');
-    v=saverightversion(file,lout,'-v7');
+    if exist(newname,'file')
+        newname=strrep(filelist{k},'.mat','_s_sml.mat');
+    end
+        
+    v=saverightversion(newname,lout,'-v7');
     disp(v)
 end
