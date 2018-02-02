@@ -6,7 +6,8 @@ range=1:300;
 sites=se.sites(range);
 
 
-GFP1=getFieldAsVector(sites,'evaluation.intensityTiff.Amplitude1');
+GFP1=getFieldAsVector(sites,'evaluation.intensityTiff.G3Amplitude1');
+% GFP1=getFieldAsVector(sites,'evaluation.intensityTiff.Amplitude1');
 asymmetry1=getFieldAsVectorInd(sites,'evaluation.CME2DRing.imfit.asymmetry',1);
 asymmetry2=getFieldAsVectorInd(sites,'evaluation.CME2DRing.imfit.asymmetry',2);
 area=getFieldAsVector(sites,'evaluation.CME2DRing.imfit.areastat.Area');
@@ -16,28 +17,43 @@ theta_varnorm=getFieldAsVector(sites,'evaluation.CME2DRing.imfit.profiles1.theta
 xcorramp=getFieldAsVector(sites,'evaluation.CME2DRing.imfit.profiles1.xcorramp');
 r1=getFieldAsVector(sites,'evaluation.CME2DRing.imfit.r1');
 dr_ro1=getFieldAsVector(sites,'evaluation.CME2DRing.imfit.dr_ro1');
-images=getFieldAsVector(sites,'image','image');
+images=getFieldAsVector(sites,'evaluation.CME2DRing.imfit.image');
 
-
+simages=size(images{1});
+if length(simages)<3
+    simages(3)=1;
+end
 
 figure(9312);
 clf;
 
 mode='median';
-numberofbins=10;
+numberofbins=6;
+numberofbins=numberofbins+1;
 GFPmaxcutoff=0.5; % factor*max(GFP) to exlude brightest GFP values, which are usually sparse and artifical (overlap)
 binwidth=[];
 ringfraction=[];
 binmidpoints=[];
-ringthreshold=1.5;
+ringthreshold=1;
 gfprange=linspace(1,GFPmaxcutoff*max(GFP1),numberofbins);
+
+allimages=zeros(simages(1),simages(2),simages(3),numberofbins-1);
 for i=1:(numberofbins - 1)
-    binwidth(i)=sum(GFP1>gfprange(i) & GFP1<=gfprange(i+1));
-    ringfraction(i)=sum(dr_ro1(GFP1>gfprange(i) & GFP1<=gfprange(i+1))<ringthreshold)/binwidth(i);
+    inrange=GFP1>gfprange(i) & GFP1<=gfprange(i+1);
+    binwidth(i)=sum(inrange);
+    ringfraction(i)=sum(dr_ro1(inrange)<ringthreshold)/binwidth(i);
     binmidpoints(i)=mean(gfprange(i:i+1));   
+    finrange=find(inrange);
+    mimages=zeros(simages);
+    for c=finrange
+        imh=images{c};
+        mimages=images{c}+mimages;
+    end
+    mimages=mimages/binwidth(i);
+    allimages(:,:,:,i)=mimages;
 end
 
-    
+    imageslicer(allimages)
 
 figure(9312);
 subplot(3,3,1)
