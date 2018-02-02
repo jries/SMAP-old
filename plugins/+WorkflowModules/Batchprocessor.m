@@ -209,7 +209,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
                     obj.filesprocessed{end+1}=thisfile;
                     obj.dirsprocessed{end+1}=fileparts(thisfile);
                 else
-                    obj.guihandles.status.String=['no file foiund. waiting '];drawnow; 
+                    obj.guihandles.status.String=['no file found. waiting '];drawnow; 
                     pause(1)
                 end
                
