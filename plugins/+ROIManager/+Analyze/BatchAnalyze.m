@@ -26,7 +26,7 @@ classdef BatchAnalyze<interfaces.DialogProcessor&interfaces.SEProcessor
             for files=1:length(f)
                 gf=g.children.guiFile;
                 
-                gf.loadbutton_callback(0,0,0,pfad,f{files});           
+                gf.loadbutton_callback(0,0,0,pfad,f{files});
                 if p.redrawall
 
                     g.locData.SE.processors.preview.redrawall(true); %%% remove (true) to also redraw files and cells. feb 3 2018 /mm
