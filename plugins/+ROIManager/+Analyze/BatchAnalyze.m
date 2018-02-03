@@ -29,7 +29,7 @@ classdef BatchAnalyze<interfaces.DialogProcessor&interfaces.SEProcessor
                 gf.loadbutton_callback(0,0,0,pfad,f{files});           
                 if p.redrawall
 
-                    g.locData.SE.processors.preview.redrawall;
+                    g.locData.SE.processors.preview.redrawall(true); %%% remove (true) to also redraw files and cells. feb 3 2018 /mm
 
                 end
                 analzyers=fieldnames(g.children.guiSites.children.Analyze.children);
