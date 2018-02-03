@@ -328,9 +328,19 @@ imstart=imstart/max(imstart(:));
   imh=filter2(h,img);
   imbw=imh>max(h(:))*1.5;
   imbws=bwareafilt(imbw,1);
+  try
   out.areastat=regionprops(imbws,'MajorAxisLength','MinorAxisLength','ConvexArea','Area','Eccentricity');
   out.areastat.fractionCircle=out.areastat.Area/(pi*(out.areastat.MajorAxisLength/2)^2);
   out.areastat.fractionCircleconv=out.areastat.ConvexArea/(pi*(out.areastat.MajorAxisLength/2)^2);
+  catch err
+      out.areastat(1).MajorAxisLength=0;
+      out.areastat(1).MinorAxisLength=0;
+      out.areastat(1).ConvexArea=0;
+      out.areastat(1).Area=0;
+      out.areastat(1).Eccentricity=0;
+      out.areastat(1).fractionCircle=0;
+      out.areastat(1).fractionCircleconv=0;
+  end
 
 end
 function out=imgfit2(p,xm1,ym1,xm2,ym2,locs1,locs2,circfit,hf,hf2)

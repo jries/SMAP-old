@@ -8,6 +8,7 @@ waitfor(h.handle)
 
 filelist=h.filelist;
 for k=1:length(filelist)
+    disp(['load file: ' filelist{k}]);
     l=load(filelist{k});
     lout=l;
     fn=fieldnames(l.saveloc.loc);
@@ -21,7 +22,7 @@ for k=1:length(filelist)
     if exist(newname,'file')
         newname=strrep(filelist{k},'.mat','_s_sml.mat');
     end
-        
+     disp(['save file: ' newname]);    
     v=saverightversion(newname,lout,'-v7');
     disp(v)
 end
