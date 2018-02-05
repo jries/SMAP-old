@@ -1,29 +1,12 @@
 function l = pointsInDefSpace(p)
     outUnitSur = mkSurCom(p.outCap, p.outBottom, p.root, p.outDia);
     inUnitSur = mkSurCom(p.inCap, p.inBottom, p.root, p.inDia);
+    
     [Xout, Yout, Zout] = mkCy(outUnitSur);
     [Xin, Yin, Zin] = mkCy(inUnitSur);
-    
+
     totalDepth = p.root+outUnitSur.mainDepth;
     
-    [T,R,ZRin] = meshgrid(linspace(0,2*pi,41),linspace(0,p.inBottom/2,16),totalDepth);
-    XRin = R.*cos(T);
-    YRin = R.*sin(T);
-    figure(30)
-    scatter3(XRin(:),YRin(:),ZRin(:))
-    Xin=[XRin;Xin];
-    Yin=[YRin;Yin];
-    Zin=[ZRin;Zin];
-    
-    [T,R,ZRout] = meshgrid(linspace(0,2*pi,41),linspace(0,p.outBottom/2,16),totalDepth);
-    XRout = R.*cos(T);
-    YRout = R.*sin(T);
-    figure(30)
-    scatter3(XRout(:),YRout(:),ZRout(:))
-    Xout=[XRout;Xout];
-    Yout=[YRout;Yout];
-    Zout=[ZRout;Zout];
-
     outSur = scatteredInterpolant(Xout(:), Yout(:), Zout(:));
     outSur.ExtrapolationMethod = 'none';
     outSur.Method = 'natural';
@@ -53,14 +36,23 @@ function l = pointsInDefSpace(p)
         z = z(:)';
     end
     
-    % Filter the points
-    refZin = inSur(xy(1,:),xy(2,:));
-    refZout = outSur(xy(1,:),xy(2,:));
     
-    idx = z<refZout&z>refZin&z>=p.root;
+    % Filter the points
+    
+    inOut = pointsInCy(Xout, Yout, Zout, xy(1,:), xy(2,:), z);
+    outIn = pointsInCy(Xin, Yin, Zin, xy(1,:), xy(2,:), z);
+    
+    figure(30)
+    rotate3d on
+    scatter3(xy(1,inOut),xy(2,inOut),z(:,inOut))
+    
+    figure(31)
+    rotate3d on
+    scatter3(xy(1,inOut&~outIn),xy(2,inOut&~outIn),z(:,inOut&~outIn))
+    
     l = [];
     tempL = [x(:), y(:), z'];
-    tempL = tempL(idx,:);
+    tempL = tempL(inOut&~outIn,:);
     
     tempL(:,1) = tempL(:,1) + sizeRange;
     tempL(:,2) = tempL(:,2) + sizeRange;
@@ -95,8 +87,11 @@ function l = pointsInDefSpace(p)
             %%
             switch p.viewType.selection
                 case 'top'
-                    % discard z axis
-                    proImg = accumarray(int8(tempL(:,1:2)), tempL(:,3),[],@(x) length(x));
+                    % accumulate all the even points in the space to z=1
+                    proImg = accumarray(int16(tempL(:,1:2)), tempL(:,3),[],@(x) length(x));
+                    proImg = [proImg zeros(min(size(proImg)),p.size-min(size(proImg)))];
+                    proImg = [proImg; zeros(p.size-min(size(proImg)),p.size)];
+                    
                     figure(39)
                     scatter3(tempL(:,1), tempL(:,2), tempL(:,3))
                     rotate3d on
@@ -104,10 +99,29 @@ function l = pointsInDefSpace(p)
                     image(proImg, 'CDataMapping', 'scaled')
                     imwrite(uint8(round(mat2gray(proImg)*255)), [p.folderPath '\' p.imgPath])
                 case 'side'
-                    % discard y axis, and relabeled oringinal z axis as new y axis
+                    % accumulate all the even points in the space to z=1
+                    proImg = accumarray(int16(tempL(:,2:3)), tempL(:,1),[],@(x) length(x));
+                    Size = size(proImg);
+                    proImg = [proImg; zeros(p.size-Size(1),Size(2))];
+                    Size = size(proImg);
+                    proImg = [proImg zeros(p.size, p.size-Size(2))];
+                    
+                    figure(39)
+                    scatter3(tempL(:,1), tempL(:,2), tempL(:,3))
+                    rotate3d on
+                    figure(31)
+                    image(proImg', 'CDataMapping', 'scaled')
+                    imwrite(uint8(round(mat2gray(proImg')*255)), [p.folderPath '\' p.imgPath])
+                    
+                    % applyFilter(proImg, 200, 20)
+                    
+
 
                 otherwise
             end
+            Result = applyFilter(proImg, 1000, 100);
+            figure(31)
+            scatter(Result(1,:)',Result(2,:)')
     end
 
 end
@@ -175,4 +189,37 @@ function  [X, Y, Z] = mkCy(unitSur)
        
     Z = Z * unitSur.mainDepth;
     Z = Z + unitSur.root;
+end
+
+function  keept = pointsInCy(X, Y, Z, x, y, z)
+    IdxXR = X >= 0;
+    IdxXL = X < 0;
+    xRefR = griddata(Y(IdxXR),Z(IdxXR),X(IdxXR), y, z);
+    xRefL = griddata(Y(IdxXL),Z(IdxXL),X(IdxXL), y, z);
+    keept = x < xRefR & x > xRefL ;
+
+end
+
+function  filtered = applyFilter(Filter, Mean, Std)
+    finalNumMol = round(random('norm', Mean, Std));
+   
+    norFilter = Filter/max(Filter(:));
+    
+    ExpP = numel(Filter);
+    ActP = sum(norFilter(:));
+    numInput = (finalNumMol*ExpP)/ActP;
+    numInput = ceil(numInput * 1.1);
+    
+    setRange = length(Filter);
+    x = rand(1,numInput)*setRange;
+    y = rand(1,numInput)*setRange;
+    p = rand(1,numInput);
+    
+    idx = sub2ind(size(norFilter), ceil(x), ceil(y));
+    
+    filteredIdx = p <= norFilter(idx);
+    
+    xy = [x; y];
+    filtered = xy(:,filteredIdx);
+    filtered = filtered(:,1:finalNumMol);
 end

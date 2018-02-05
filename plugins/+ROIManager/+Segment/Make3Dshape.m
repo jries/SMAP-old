@@ -269,11 +269,15 @@ end
 
 function callbackfunction(uiobject,data,obj)
     obj.guihandles.previewimage
-    cla reset
+    cla
+    
     hold on
     visualSurCom(mkSurCom(obj.getSingleGuiParameter('inCap'), obj.getSingleGuiParameter('inBottom'), obj.getSingleGuiParameter('root'), obj.getSingleGuiParameter('inDia')))
     hold on
     visualSurCom(mkSurCom(obj.getSingleGuiParameter('outCap'), obj.getSingleGuiParameter('outBottom'), obj.getSingleGuiParameter('root'), obj.getSingleGuiParameter('outDia')))
+    axis(obj.guihandles.previewimage,'on')
+    %axis(obj.guihandles.previewimage,'equal')
+    axis(obj.guihandles.previewimage,[-obj.getSingleGuiParameter('outDia')/2 obj.getSingleGuiParameter('outDia')/2 0 (obj.getSingleGuiParameter('outCap')+obj.getSingleGuiParameter('outBottom')+obj.getSingleGuiParameter('root'))])
 disp('callback')
 end
 
@@ -288,5 +292,6 @@ setvisibility(obj)
 end
 
 function aftersync_callback(obj)
+
 disp('aftersync')
 end
