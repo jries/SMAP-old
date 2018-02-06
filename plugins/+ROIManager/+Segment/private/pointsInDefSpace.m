@@ -197,7 +197,6 @@ function  keept = pointsInCy(X, Y, Z, x, y, z)
     xRefR = griddata(Y(IdxXR),Z(IdxXR),X(IdxXR), y, z);
     xRefL = griddata(Y(IdxXL),Z(IdxXL),X(IdxXL), y, z);
     keept = x < xRefR & x > xRefL ;
-
 end
 
 function  filtered = applyFilter(Filter, Mean, Std)
