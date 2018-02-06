@@ -1,7 +1,9 @@
-function loco=get_intensity2ch(loc,p)
+function loco=get_intensity2ch(loc,p,ind)
 
 %parameters
-
+if nargin<3
+    ind=true(length(loc.(p.assignfield1.selection)),1);
+end
 if isnumeric(p.split_slope)
     slope=p.split_slope;
 else
@@ -49,12 +51,18 @@ int2=loc.(p.assignfield2.selection);
 % int1=loc.intA1;
 % int2=loc.intB1;
 
-m1=myquantilefast(int1(:),[0.01,0.98],1e5);m2=myquantilefast(int2(:),[0.01,0.98],1e5);
-map=max(m1(2), m2(2));mip=min(m1(1),m2(1));
+int1(int1<0)=0;int2(int2<0)=0;
+int1=log(int1);
+int2=log(int2);
+
+m1=myquantilefast(int1(int1>0),[0.01,0.999],1e5);m2=myquantilefast(int2(int2>0),[0.01,0.999],1e5);
+map=max(m1(2), m2(2))+1;mip=min(m1(1),m2(1));
 % mip=-300;
 ps=ceil((map-mip)/250);
+ps=((map-mip)/250);
 % indgood=int1~=0&int2~=0;
-indgood=true(size(int1));
+% indgood=true(size(int1));
+indgood=ind;
 img=myhist2(int1(indgood),int2(indgood),ps,ps,[mip map],[mip map]);
 % img=myhist2(int1,int2,ps,ps,[mip map],[mip map]);
 
@@ -71,7 +79,7 @@ imagesc([mip map],[mip map],limg)
 hold on
 plotboundary
 hold off
-
+drawnow
 i1co=slope(2)*int2+edge1+offset(1);
 c1=int1>=i1co&int1>=int1min;
 loco.channel(c1)=1;
@@ -85,15 +93,15 @@ loco.channel(int2==-100)=3;
 loco.channel(int1==-100)=4;
 
 ax3=initaxis(p.resultstabgroup,'log split');
-imgc2=myhist2(int1(c2),int2(c2),ps,ps,[mip map],[mip map]);
+imgc2=myhist2(int1(c2&ind),int2(c2&ind),ps,ps,[mip map],[mip map]);
 sout=size(imgc2);
 outrgb=zeros(sout(1),sout(2),3);
 outrgb(:,:,1)=imgc2;
-imgc1=myhist2(int1(c1),int2(c1),ps,ps,[mip map],[mip map]);
+imgc1=myhist2(int1(c1&ind),int2(c1&ind),ps,ps,[mip map],[mip map]);
 outrgb(:,:,2)=imgc1;
 
 c3=~(c1|c2);
-imgc3=myhist2(int1(c3),int2(c3),ps,ps,[mip map],[mip map]);
+imgc3=myhist2(int1(c3&ind),int2(c3&ind),ps,ps,[mip map],[mip map]);
 outrgb(:,:,3)=imgc3;
 outrgb=log(outrgb)+1;
 outrgb(isinf(outrgb))=0;
@@ -101,6 +109,7 @@ imagesc([mip map],[mip map],outrgb/myquantilefast(outrgb(:),.9995,1e5))
 hold on
 plotboundary
 hold off
+drawnow
 
 function plotboundary
 plot([mip map],slope(1)*[mip map]+offset(1),'w')

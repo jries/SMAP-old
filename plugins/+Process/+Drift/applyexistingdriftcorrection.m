@@ -1,7 +1,7 @@
 classdef applyexistingdriftcorrection<interfaces.DialogProcessor
     methods
         function obj=applyexistingdriftcorrection(varargin)        
-                obj@interfaces.DialogProcessor(varargin{:}) ;;
+                obj@interfaces.DialogProcessor(varargin{:}) ;
                 obj.history=true;
                 obj.showresults=false;
                 obj.guiselector.show=true;

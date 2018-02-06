@@ -153,7 +153,9 @@ image=img.pix;
     image=reshape(image,obj.metadata.Width,obj.metadata.Height)';
     if isa(image,'int16')
         image2=uint16(image);
-        image2(image<0)=image(image<0)+2^16;
+        ind=image<0;
+%         image2(ind)=image(ind)+2^16;
+         image2(ind)=2^16-uint16(-image(ind));
         image=image2;
     end
 % else

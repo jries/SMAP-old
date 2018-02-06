@@ -32,7 +32,7 @@ classdef LocTransformN<handle
             properties={'xrange','yrange','type','parameter','mirror','unit','channels','cam_pixnm'};
             if isstruct(varargin{1})   
                 p=varargin{1};
-                if max(channel)<length(obj.tinfo)
+                if max(channel)>length(obj.tinfo)
                     obj.tinfo{max(channel)}=[];
                 end
                 for c=1:length(channel)

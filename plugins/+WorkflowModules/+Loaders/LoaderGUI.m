@@ -41,6 +41,9 @@ classdef LoaderGUI<interfaces.WorkflowModule
         function  addFile(obj,file)
              obj.currentloader.addFile(file);
         end
+        function setoutputfilename(obj)
+            obj.currentloader.setoutputfilename;
+        end
         
         function loadloaders(obj)
             t1=obj.plugininfo.description;

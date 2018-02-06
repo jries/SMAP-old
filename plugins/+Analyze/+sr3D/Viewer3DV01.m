@@ -81,6 +81,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                  fig.MenuBar='figure';
                  fig.Color=[0.94 0.94 0.94];
              end
+             figure(fig);
              axis(obj.axis,'tight');
              axis(obj.axis,'equal');
              axis(obj.axis,'ij');
@@ -100,7 +101,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 return
             end
             posrx=hroi.getPosition;
-            len=sum((posrx(2,:)-posrx(1,:)).^2);
+            len=sqrt(sum((posrx(2,:)-posrx(1,:)).^2));
             meanpos=mean(posrx,1);
            
             dpos=obj.posL-posrx;
@@ -110,7 +111,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 for k=length(lps):-1:1
                     rfields{k}=lps{k}.renderfield.selection;
                 end
-                rfields=horzcat(unique(rfields),{'xnm','ynm','znm','locprecnm','locprecznm','phot'});
+                rfields=horzcat(unique(rfields),{'xnm','ynm','znm','locprecnm','locprecznm','phot','numberInGroup'});
                 lenL=len*2;
                 obj.posL=[meanpos(1)-lenL, meanpos(2)-lenL;meanpos(1)+lenL, meanpos(2)+lenL];
                 posLnm=obj.posL*1000;
@@ -337,6 +338,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 if isempty(obj.axis)||isstruct(obj.axis)||~isvalid(obj.axis)
                     return
                 end
+            renderfield={};
             roih=obj.getPar('sr_roihandle');
             if ~isa(roih,'imline')
                 return
@@ -610,6 +612,8 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 loc.sy=sy;
 %                 loc.y=yrot(sortind)+zmean;
                 loc.znm=loc.znm(sortind);
+                loc.numberInGroup=loc.numberInGroup(sortind);
+                loc.phot=loc.phot(sortind);
                 for kc=1:length(renderfield)
                     if ~isempty(loc.(renderfield{kc}))
                         loc.(renderfield{kc})=loc.(renderfield{kc})(sortind);

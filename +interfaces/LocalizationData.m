@@ -274,6 +274,10 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                     fn={};
                 end
                 for f=1:length(fields)
+                    if ~isfield(obj.loc,fields{f})
+                        disp(['cannot filter ' fields{f} '. Field in locData.loc is missing.'])
+                        continue
+                    end
                     invert=false;
                     ind=find(strcmp(fn,fields{f}));
                     if (~isempty(ind) && (s{ind,7})) ||(~filterall&&isfield(obj.loc,fields{f})&&nargin>3) %if field specified: filter for sure

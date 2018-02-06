@@ -1,7 +1,9 @@
 function loadfile(obj,p,file,mode)
 % fobj=obj.locData.files;
 % obj.locData.files.filenumberEnd=obj.locData.files.filenumberEnd+1; %write back to .files
-filedat=load(file);
+% filedat=load(file);
+filedat=loadmatparts(file);
+
 filedat.filename=file;
 
 filenumber=obj.locData.files.filenumberEnd;
@@ -21,7 +23,9 @@ switch mode
         return;
 end
 indout=templocData.loc.locprecnm>250|imag(templocData.loc.locprecnm)~=0|isnan(templocData.loc.locprecnm);
+if any(indout)
 templocData.removelocs(indout);
+end
 
 %correct filenumber: .loc, files.filenumber, add files.
 fn=fieldnames(templocData.loc);

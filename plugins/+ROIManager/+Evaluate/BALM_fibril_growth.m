@@ -17,6 +17,10 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
             alpha=-atan2(dpol(1),dpol(2));
 
             len=sqrt(sum(dpol.^2))*1000/2;
+            if len==0
+                out=[];
+                return
+            end
             midp=mean(pol,1)*1000;
             [xr,yr]=rotcoord(locs.xnm-midp(1),locs.ynm-midp(2),alpha);
 
@@ -97,8 +101,13 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
             uicontrol(h.Parent,'Position',[10,10,40,20],'String','Add Line','Callback',{@obj.addline,h});
             
             if length(obj.poly)<obj.site.ID || isempty(obj.poly{obj.site.ID})
-%                 obj.hpoly=impoly(h,'Closed',false,'PositionConstraintFcn',@obj.polyconstrain);
-            else
+                valh=obj.site.evaluation.(obj.modulename);
+                if isfield(valh,'poly')
+                   %obj.hpoly=impoly(h,valh.poly,'Closed',false,'PositionConstraintFcn',@obj.polyconstrain);
+                   obj.poly{obj.site.ID}=valh.poly;
+                end
+            end
+            if length(obj.poly)>=obj.site.ID &&~isempty(obj.poly{obj.site.ID})
                 obj.hpoly=impoly(h,obj.poly{obj.site.ID},'Closed',false,'PositionConstraintFcn',@obj.polyconstrain);
             
             
@@ -114,14 +123,14 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
         end
         
         function addline(obj,a,b,h)
-            if length(obj.poly)<obj.site.ID || isempty(obj.poly{obj.site.ID})
+           % if length(obj.poly)<obj.site.ID || isempty(obj.poly{obj.site.ID}) 
                 obj.hpoly=impoly(h,'Closed',false,'PositionConstraintFcn',@obj.polyconstrain);
-            else %add vortex to end
-                pos=obj.hpoly.getPosition;
-                pos(end+1,:)=pos(end,:);
-                obj.hpoly.setPosition(vertcat(pos(1,:),pos));
+           % else %add vortex to end
+           %     pos=obj.hpoly.getPosition;
+           %     pos(end+1,:)=pos(end,:);
+           %     obj.hpoly.setPosition(vertcat(pos(1,:),pos));
                  
-            end
+          %  end
              setConstrainedPosition(obj.hpoly,obj.hpoly.getPosition);
             hi=addNewPositionCallback(obj.hpoly,@obj.polycallback);
             obj.polycallback(obj.hpoly.getPosition);

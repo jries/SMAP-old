@@ -142,7 +142,7 @@ classdef GuiHistSlider< interfaces.LayerInterface
                 obj.guihandles.smax.Min=q(1);
                 obj.guihandles.smax.Max=q(2);
                 obj.histogram=restorestruc.histogram;        
-            elseif isfield(obj.locData.loc,fieldh)
+            elseif isfield(obj.locData.loc,fieldh) && isfield(obj.locData.loc,'filenumber')
                     v=double(obj.locData.loc.(fieldh)(obj.locData.loc.filenumber==filenumber));
                     v=real(v);
                     v(isinf(v))=[];

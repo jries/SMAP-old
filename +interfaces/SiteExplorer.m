@@ -357,14 +357,19 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
              if obj.getPar('se_drawboxes')&&~isempty(obj.sites)&&~isempty(obj.sites(1).info)
                  allsites=[obj.sites(:).info];
                  ind=[allsites.cell]==cell.ID;
-                 use=getFieldAsVector(obj.sites,'annotation','use');
-%                  use(isnan(use))=false;
-                if iscell(use)
-                    use=ind;
-                end
                  
-                 plotmanyboxes(hax,obj.sites,ind&use,obj.getPar('se_sitefov'),[1 0 1]);
-                 plotmanyboxes(hax,obj.sites,ind & ~use,obj.getPar('se_sitefov'),[1 0 0]);
+                 if sum(ind)>0
+                    
+                 use=getFieldAsVector(obj.sites(ind),'annotation','use');
+%                  use(isnan(use))=false;
+                    if iscell(use)
+                         plotmanyboxes(hax,obj.sites(ind),[],obj.getPar('se_sitefov'),[1 0 1]);
+                    else
+                         plotmanyboxes(hax,obj.sites(ind), ~use,obj.getPar('se_sitefov'),[1 0 0]);
+                          plotmanyboxes(hax,obj.sites(ind),use,obj.getPar('se_sitefov'),[1 0 1]);
+                    end
+         
+                 end
              end
             
             delete(obj.temp.cellinfile);
@@ -621,7 +626,7 @@ if nargin<5
 color=[1 0 1];
 end
 for k=1:length(list)
-    if ind(k)
+    if isempty(ind) || ind(k)
         plotbox(hg,list(k).pos,roi,color);
     end
 end

@@ -209,7 +209,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
                     obj.filesprocessed{end+1}=thisfile;
                     obj.dirsprocessed{end+1}=fileparts(thisfile);
                 else
-                    obj.guihandles.status.String=['no file foiund. waiting '];drawnow; 
+                    obj.guihandles.status.String=['no file found. waiting '];drawnow; 
                     pause(1)
                 end
                
@@ -245,6 +245,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
             wf.makeGui;
             wf.load(p.mainbatchfile,[],true,true);
             wf.module(wf.startmodule).addFile(tiffile);
+            wf.module(wf.startmodule).setoutputfilename;
             disp(mytextsplit(wf.description));
             wf.run;
             delete(wf)

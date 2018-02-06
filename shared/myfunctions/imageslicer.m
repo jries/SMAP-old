@@ -34,6 +34,7 @@ else
 end
 
 maxV=nanmax(V(:));
+minV=nanmin(V(:));
 
  dim=1:2;
  dimmenu=3;
@@ -47,10 +48,12 @@ ax.XLim=[0 Inf];
 vp1=0.08;
 vp2=0.02;
 
+numf=max(1,size(V,3)-1);
+
 hslider{1}=uicontrol('Parent',phandle,'Style','slider','Units','normalized','Position',[0.05 vp1 0.35 0.05],...
-    'Min',1,'Max',size(V,3),'Value',1,'SliderStep',[1/(size(V,3)-1) 5/(size(V,3)-1)],'Callback',{@slidercallback,1});
+    'Min',1,'Max',size(V,3),'Value',1,'SliderStep',[1/(numf) 5/(numf)],'Callback',{@slidercallback,1});
 hslider{2}=uicontrol('Parent',phandle,'Style','slider','Units','normalized','Position',[0.05 vp2 0.35 0.05],...
-    'Min',1,'Max',size(V,3),'Value',1,'SliderStep',[1/(size(V,3)-1) 5/(size(V,3)-1)],'Callback',{@slidercallback,2});
+    'Min',1,'Max',size(V,3),'Value',1,'SliderStep',[1/(numf) 5/(numf)],'Callback',{@slidercallback,2});
 hframe{1}=uicontrol('Parent',phandle,'Style','edit','Units','normalized','String','1','Position',[0.4 vp1 0.075 0.05],'Callback',{@framecallback,1});
 hframe{2}=uicontrol('Parent',phandle,'Style','edit','Units','normalized','String','1','Position',[0.4 vp2 0.075 0.05],'Callback',{@framecallback,2});
 
@@ -167,7 +170,8 @@ changeaxis(0,0,0);
         dimmenu=setdiff(1:length(s),[dim dimrgb]);
         
 %         strm=str;strm(dimrgb)=[];
-        hslider{1}.SliderStep=[1/(size(V,dimmenu(1))-1) 5/(size(V,dimmenu(1))-1)];
+        numfh=max(1,size(V,dimmenu(1))-1);
+        hslider{1}.SliderStep=[1/(numfh) 5/(numfh)];
         hslider{1}.Max=size(V,dimmenu(1));
          setslice(min(hslider{1}.Max,hslider{1}.Value),1,0);
          
@@ -257,21 +261,32 @@ changeaxis(0,0,0);
         
         %contrast
         if hcontrastcheck.Value
-            imax=str2double(hcontrast.String)*maxV;
+            meanV=(minV+maxV)/2;
+            dV=(maxV-minV)/2;
+            imax=meanV+dV*str2double(hcontrast.String);
+            imin=meanV-dV*str2double(hcontrast.String);
+%             imax=str2double(hcontrast.String)*maxV;
+%             imin=str2double(hcontrast.String)*minV;
         else
             imaxim=nanmax(img(:));
+            iminim=nanmin(img(:));
             if isnan(imaxim)
                 imax=inf;
+                imin=-inf;
             else
-            imax=str2double(hcontrast.String)*imaxim;
+                meanV=(iminim+imaxim)/2;
+                dV=(imaxim-iminim)/2;
+                imax=meanV+dV*str2double(hcontrast.String);
+                imin=meanV-dV*str2double(hcontrast.String);
+%                 imax=str2double(hcontrast.String)*imaxim;
             end
         end
          if imax==0, imax=1;end
         
         img(img>imax)=imax;
-        
-        if length(size(img))==3
-            img=img/imax;
+        img(img<imin)=imin;
+        if length(size(img))==3 %???
+            img=(img-imin)/(imax-imin);
         end
 %         img(1,1)=imax; %replace by scaling
         imagesc(ax,a1,a2,img);
@@ -290,7 +305,7 @@ changeaxis(0,0,0);
             ax.YLim=a2([1 end])+[-1 1]*d2/2;
         end
         colormap(ax,hlut.String{hlut.Value})
-        imin=nanmin(img(:));
+%         imin=nanmin(img(:));
         ax.CLim=[imin imax];
         if ~isempty(p.Title)
             title(ax,p.Title);

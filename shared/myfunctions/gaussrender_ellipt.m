@@ -22,11 +22,15 @@ end
 Gc=G;
 
 
-if isfield(pos,'N')
+if isfield(pos,'N')&&~isempty(pos.N)
+
     N=pos.N;
 else
     N=ones(length(pos.x),1,'like',pos.x);
-end;
+%      if isempty(pos.N)
+%         disp('no N passed on')
+%     end
+end
 
 
 % roiks=2.5; %roiks*sigma: size of Roi used in units of sigma

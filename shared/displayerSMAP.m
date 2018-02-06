@@ -41,8 +41,10 @@ for k=1:length(layers)
                 tiffthere=1;
          else
              if exist('imall','var')
-                 if ~all(size(imall)==size(fi.image))&&~layersnext
-                     fi.image=imresize(fi.image,size(imall));
+                 if ~all(size(imall)==size(fi.image))%s&&~layersnext
+                    simh=size(imall); 
+                    fi.image=imresize(fi.image,simh(1:2));
+                    fi.mask=imresize(fi.mask,simh(1:2));
                  end
                  imall=imall+fi.image;
                  mask=mask+fi.mask;

@@ -113,8 +113,12 @@ elseif isfield(p,'intensitycoding')
         case 'blinks'
             pos.N=locsh.numberInGroup;
     end
-end
 
+if isfield(pos,'N') && isempty(pos.N)
+    pos.N=ones(size(pos.x),'like',pos.x);
+    disp('N for intensity weighing not passed on')
+end
+end
 lutall=mymakelut(p.lut.selection);
 switch p.render_colormode.selection
     case 'normal'

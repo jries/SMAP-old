@@ -171,6 +171,12 @@ end
 
 if istable(tab)
     tab=table2struct(tab,'ToScalar',true);
+    fns=fieldnames(tab);
+    for k=1:length(fns)
+    if iscell(tab.(fns{k}))
+        tab=rmfield(tab,fns{k});
+    end
+    end
 end
 
 if ~isfield(p,'importdef') %if called from loader
