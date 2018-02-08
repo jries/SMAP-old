@@ -27,7 +27,7 @@ classdef SEExploreGui<interfaces.SEProcessor
              h.sitelist=uicontrol(obj.handle,'Position',[400-10,160,190+30,380],'Style','listbox',...
                  'String','empty ','Units','normalized','FontSize',fontsize-2,'max',100,'Callback',{@sitelist_callback,obj});
              h.celllist=uicontrol(obj.handle,'Position',[600+20,360,190-20,180],'Style','listbox',...
-                 'String',' empty','Units','normalized','FontSize',fontsize-2,...
+                 'String',' empty','Units','normalized','FontSize',fontsize-2,'max',100,...
                  'Callback',{@celllist_callback,obj});
              h.redrawsite=uicontrol(obj.handle,'Position',[30,925,100,40],'Style','pushbutton','String','redraw','Units','normalized','FontSize',fontsize,'Callback',{@redrawsite_callback,obj});
              h.addsite=uicontrol(obj.handle,'Position',[290,925,60,40],'Style','pushbutton','String','Add','Units','normalized','FontSize',fontsize,'Callback',{@addsite,obj});
@@ -387,6 +387,9 @@ end
 
 function celllist_callback(data,action,obj)
 ind=data.Value;
+if numel(ind)>1
+    return
+end
 obj.SE.currentcell=obj.SE.cells(ind);
 plotcell(obj,obj.SE.currentcell);
 end
@@ -571,14 +574,21 @@ obj.SE.currentsite=obj.SE.sites(sv);
 % end
 end
 
-function removecell_callback(a,b,obj);
+function removecell_callback(a,b,obj)
 ind=obj.guihandles.celllist.Value;
-cellID=obj.SE.cells(ind).ID;
-obj.SE.removeCell(cellID);
+
+for k=length(ind):-1:1
+    cellID(k)=obj.SE.cells(ind(k)).ID;
+end
+for k=1:length(ind)
+    obj.SE.removeCell(cellID(k));
+end
+% cellID=obj.SE.cells(ind).ID;
+% obj.SE.removeCell(cellID);
 redraw_celllist(obj);
 redraw_sitelist(obj);
 sv=obj.guihandles.celllist.Value;
-sv=min(max(1,sv),length(obj.guihandles.celllist.String));
+sv=min(max(1,sv(1)),length(obj.guihandles.celllist.String));
 obj.guihandles.celllist.Value=sv;
 obj.SE.currentcell=obj.SE.cells(sv);
  plotcell(obj,obj.SE.currentcell);
