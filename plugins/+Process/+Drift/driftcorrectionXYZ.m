@@ -19,13 +19,24 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                 %locData.copy, remove other filenames from .loc, .grouploc,
                 %. files.file(k)
                 %save copy
-                obj.setPar('undoModule','driftfeature');
+            obj.setPar('undoModule','driftfeature');
             notify(obj.P,'backup4undo');
-            groupcheck=obj.locData.isgrouped(1);
+%             groupcheck=obj.locData.isgrouped(1);
             numberOfFiles=obj.locData.files.filenumberEnd;
             layers=find(obj.getPar('sr_layerson'));
-            if p.drift_individual&&numberOfFiles>1
-                for k=1:numberOfFiles
+            
+            
+            %determine which files to correct
+            if contains(p.drift_whatfiles.selection,'all')
+                files=1:numberOfFiles;
+                region='all';
+            else %use file from layer 1
+                files=p.layer1_.ch_filelist.Value;
+                region='roi';
+            end
+            
+%             if p.drift_individual&&numberOfFiles>1
+                for k=files
                     lochere=obj.locData.copy;
                     lochere.files.fileNumberEnd=1;
                     lochere.files.file=lochere.files.file(k);
@@ -36,10 +47,10 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                     
 %                     locs=lochere.getloc({'frame','xnm','ynm','znm'},'position','all','grouping',groupcheck);
 %                      locs=lochere.getloc({'frame','xnm','ynm','znm'},'position','all','grouping',groupcheck,'layer',1,'removeFilter',{'filenumber'});
-                     locs=lochere.getloc({'frame','xnm','ynm','znm'},'position','all','layer',layers,'removeFilter',{'filenumber'});
-                    p.maxframeall=max(locs.frame);
+                    locs=lochere.getloc({'frame','xnm','ynm','znm'},'position',region,'layer',layers,'removeFilter',{'filenumber'});
+                    p.maxframeall=max(lochere.loc.frame);
                     p.framestart=min(locs.frame);
-                    p.framestop=p.maxframeall;
+                    p.framestop=max(locs.frame);
                     p.roi=obj.locData.files.file(k).info.roi;
                     [drift,driftinfo,fieldc]=getxyzdrift(locs,p);
                     
@@ -82,57 +93,58 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                         fnn=strrep(fn,'fitpos','driftc_sml');
                     end
                     if p.save_dc
+                        obj.addhistory;
                         lochere.savelocs(fnn); 
                     end
                     obj.locData.loc.xnm(~badind)=lochere.loc.xnm;
                     obj.locData.loc.ynm(~badind)=lochere.loc.ynm;
                 end
                 obj.locData.regroup;
-            else
-                locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','roi','layer',1);
-%                  locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','fov','grouping',groupcheck);
-                if length(locs.xnm)<100
-                    locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','all','grouping',groupcheck);
-                end
-
-            
-                p.maxframeall=max(obj.locData.loc.frame);
-%                 p.framestart=p.layer1_.frame_min;
-                p.framestart=(min(locs.frame));
-                p.framestop=max(locs.frame);
-                p.roi=obj.locData.files.file(1).info.roi;  
-                [drift,driftinfo,fieldc]=getxyzdrift(locs,p);
-                locsall=copyfields([],obj.locData.loc,{fieldc{:},'frame','filenumber'});
-                locsnew=applydriftcorrection(drift,locsall);
-                
-                
-                
-                obj.locData.loc=copyfields(obj.locData.loc,locsnew,fieldc);
-                if length(unique(locsall.filenumber))>1
-                    locsnew.channel=locsall.filenumber;
-                    obj.locData.loc=copyfields(obj.locData.loc,locsnew,{'channel'});
-                end
-                if isfield( obj.locData.files(obj.locData.loc.filenumber(1)).file,'driftinfo')
-                        driftinfoh=copyfields( obj.locData.files(obj.locData.loc.filenumber(1)).file.driftinfo,driftinfo);
-                else
-                        driftinfoh=driftinfo;
-                end
-               obj.locData.files(obj.locData.loc.filenumber(1)).file.driftinfo=driftinfoh;
-                fn=obj.locData.files(obj.locData.loc.filenumber(1)).file.name;
-                            
-                if contains(fn,'_sml')
-                    fnn=strrep(fn,'_sml','_driftc_sml');
-                else
-                    fnn=strrep(fn,'fitpos','driftc_sml');
-                end
-%                 fnn=strrep(fn,'_sml','_driftc_sml');
-                if p.save_dc
-                    obj.addhistory;
-                    obj.locData.savelocs(fnn); 
-                end
-                obj.locData.regroup;
-                
-            end
+%             else
+%                 locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','roi','layer',1);
+% %                  locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','fov','grouping',groupcheck);
+%                 if length(locs.xnm)<100
+%                     locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','all','grouping',groupcheck);
+%                 end
+% 
+%             
+%                 p.maxframeall=max(obj.locData.loc.frame);
+% %                 p.framestart=p.layer1_.frame_min;
+%                 p.framestart=(min(locs.frame));
+%                 p.framestop=max(locs.frame);
+%                 p.roi=obj.locData.files.file(1).info.roi;  
+%                 [drift,driftinfo,fieldc]=getxyzdrift(locs,p);
+%                 locsall=copyfields([],obj.locData.loc,{fieldc{:},'frame','filenumber'});
+%                 locsnew=applydriftcorrection(drift,locsall);
+%                 
+%                 
+%                 
+%                 obj.locData.loc=copyfields(obj.locData.loc,locsnew,fieldc);
+%                 if length(unique(locsall.filenumber))>1
+%                     locsnew.channel=locsall.filenumber;
+%                     obj.locData.loc=copyfields(obj.locData.loc,locsnew,{'channel'});
+%                 end
+%                 if isfield( obj.locData.files(obj.locData.loc.filenumber(1)).file,'driftinfo')
+%                         driftinfoh=copyfields( obj.locData.files(obj.locData.loc.filenumber(1)).file.driftinfo,driftinfo);
+%                 else
+%                         driftinfoh=driftinfo;
+%                 end
+%                obj.locData.files(obj.locData.loc.filenumber(1)).file.driftinfo=driftinfoh;
+%                 fn=obj.locData.files(obj.locData.loc.filenumber(1)).file.name;
+%                             
+%                 if contains(fn,'_sml')
+%                     fnn=strrep(fn,'_sml','_driftc_sml');
+%                 else
+%                     fnn=strrep(fn,'fitpos','driftc_sml');
+%                 end
+% %                 fnn=strrep(fn,'_sml','_driftc_sml');
+%                 if p.save_dc
+%                     obj.addhistory;
+%                     obj.locData.savelocs(fnn); 
+%                 end
+%                 obj.locData.regroup;
+%                 
+%             end
         end
         function pard=guidef(obj)
             pard=guidef;
@@ -348,10 +360,14 @@ pard.drift_mirror2c.Width=2;
 pard.drift_mirror2c.Optional=true;
 
 
-pard.drift_individual.object=struct('String','correct every file individually','Style','checkbox','Value',1);
-pard.drift_individual.position=[8,1];
-pard.drift_individual.Width=2;
-pard.drift_individual.Optional=true;
+% pard.drift_individual.object=struct('String','correct every file individually','Style','checkbox','Value',1);
+% pard.drift_individual.position=[8,1];
+% pard.drift_individual.Width=2;
+% pard.drift_individual.Optional=true;
+pard.drift_whatfiles.object=struct('String',{{'all files','currrent file layer1'}},'Style','popupmenu','Value',1);
+pard.drift_whatfiles.position=[8,1];
+pard.drift_whatfiles.Width=1.5;
+pard.drift_whatfiles.Optional=true;
 
 pard.drift_ask.object=struct('String','?','Style','checkbox','Value',0);
 pard.drift_ask.position=[8,2.6];
