@@ -45,6 +45,18 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
 %                     locsall=copyfields([],lochere.loc,{'xnm','ynm','frame','filenumber'});
                     locsall=copyfields([],lochere.loc,{fieldc{:},'frame','filenumber'});
                     
+                    if p.drift_ask %check if to apply drift correction
+%                         answ=questdlg('apply drift correction?'); %htis is modal: no way to see output.
+                          answ=nonmodaldialog('apply drift correction?','YES, apply', 'NO');
+                          
+
+%                         t=uicontrol('Parent',h,'
+%                         h=inputdlg('apply drift correction?');
+                        if ~contains(answ,'YES') %not use this
+                            continue
+                        end
+                           
+                    end
                     locsnew=applydriftcorrection(drift,locsall);
                     lochere.loc=copyfields(lochere.loc,locsnew,fieldc);
                     
@@ -90,6 +102,9 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                 [drift,driftinfo,fieldc]=getxyzdrift(locs,p);
                 locsall=copyfields([],obj.locData.loc,{fieldc{:},'frame','filenumber'});
                 locsnew=applydriftcorrection(drift,locsall);
+                
+                
+                
                 obj.locData.loc=copyfields(obj.locData.loc,locsnew,fieldc);
                 if length(unique(locsall.filenumber))>1
                     locsnew.channel=locsall.filenumber;
@@ -335,6 +350,11 @@ pard.drift_individual.object=struct('String','correct every file individually','
 pard.drift_individual.position=[8,1];
 pard.drift_individual.Width=2;
 pard.drift_individual.Optional=true;
+
+pard.drift_ask.object=struct('String','?','Style','checkbox','Value',0);
+pard.drift_ask.position=[8,2.6];
+pard.drift_ask.Width=.4;
+pard.drift_ask.Optional=true;
 
 pard.save_dc.object=struct('String','Save driftcorrected SML','Style','checkbox','Value',1);
 pard.save_dc.position=[8,3];
