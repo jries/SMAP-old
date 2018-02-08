@@ -23,6 +23,7 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
             notify(obj.P,'backup4undo');
             groupcheck=obj.locData.isgrouped(1);
             numberOfFiles=obj.locData.files.filenumberEnd;
+            layers=find(obj.getPar('sr_layerson'));
             if p.drift_individual&&numberOfFiles>1
                 for k=1:numberOfFiles
                     lochere=obj.locData.copy;
@@ -34,9 +35,10 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                     lochere.loc.filenumber=lochere.loc.filenumber*0+1;
                     
 %                     locs=lochere.getloc({'frame','xnm','ynm','znm'},'position','all','grouping',groupcheck);
-                     locs=lochere.getloc({'frame','xnm','ynm','znm'},'position','all','grouping',groupcheck,'layer',1,'removeFilter',{'filenumber'});
-                    p.maxframeall=max(lochere.loc.frame);
-                    p.framestart=min(lochere.loc.frame);
+%                      locs=lochere.getloc({'frame','xnm','ynm','znm'},'position','all','grouping',groupcheck,'layer',1,'removeFilter',{'filenumber'});
+                     locs=lochere.getloc({'frame','xnm','ynm','znm'},'position','all','layer',layers,'removeFilter',{'filenumber'});
+                    p.maxframeall=max(locs.frame);
+                    p.framestart=min(locs.frame);
                     p.framestop=p.maxframeall;
                     p.roi=obj.locData.files.file(k).info.roi;
                     [drift,driftinfo,fieldc]=getxyzdrift(locs,p);
