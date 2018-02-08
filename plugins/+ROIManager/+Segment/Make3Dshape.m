@@ -20,10 +20,10 @@ classdef Make3Dshape<interfaces.DialogProcessor
             obj.guihandles.previewimage.Position=obj.guihandles.previewdummy.Position;
             obj.guihandles.previewimage.Position(4)=5*obj.guihandles.previewimage.Position(4);
             obj.guihandles.previewimage.Position(3)=0.6*obj.guihandles.previewimage.Position(3);
-            hold on
-            visualSurCom(mkSurCom(obj.getSingleGuiParameter('inCap'), obj.getSingleGuiParameter('inBottom'), obj.getSingleGuiParameter('root'), obj.getSingleGuiParameter('inDia')))
-            hold on
-            visualSurCom(mkSurCom(obj.getSingleGuiParameter('outCap'), obj.getSingleGuiParameter('outBottom'), obj.getSingleGuiParameter('root'), obj.getSingleGuiParameter('outDia')))
+            visualSurCom(mkSurCom(obj.getSingleGuiParameter('inCap'), obj.getSingleGuiParameter('inBottom'), obj.getSingleGuiParameter('root'), obj.getSingleGuiParameter('inDia')),obj.guihandles.previewimage)
+            hold(obj.guihandles.previewimage, 'on')
+            visualSurCom(mkSurCom(obj.getSingleGuiParameter('outCap'), obj.getSingleGuiParameter('outBottom'), obj.getSingleGuiParameter('root'), obj.getSingleGuiParameter('outDia')),obj.guihandles.previewimage)
+            hold(obj.guihandles.previewimage, 'off')
             axis(obj.guihandles.previewimage,'on')
             %axis(obj.guihandles.previewimage,'equal')
             axis(obj.guihandles.previewimage,[-obj.getSingleGuiParameter('outDia')/2 obj.getSingleGuiParameter('outDia')/2 0 (obj.getSingleGuiParameter('outCap')+obj.getSingleGuiParameter('outBottom')+obj.getSingleGuiParameter('root'))])
@@ -251,10 +251,10 @@ function a = aFinder(depth, dia)
     a = -depth/(dia/2).^2;
 end
 
-function  fig = visualSurCom(unitSur)
+function  fig = visualSurCom(unitSur,h)
     reflection = [-unitSur.main; 0:unitSur.mainDepth];
     surfaceCurve = [reflection(:,end:-1:1), [unitSur.main; 0:unitSur.mainDepth]];
-    plot(surfaceCurve(1,:), surfaceCurve(2,:))
+    plot(h,surfaceCurve(1,:), surfaceCurve(2,:))
 end
 
 function  [X, Y, Z] = mkCy(unitSur)
@@ -268,13 +268,10 @@ function  [X, Y, Z] = mkCy(unitSur)
 end
 
 function callbackfunction(uiobject,data,obj)
-    obj.guihandles.previewimage
-    cla
-    
-    hold on
-    visualSurCom(mkSurCom(obj.getSingleGuiParameter('inCap'), obj.getSingleGuiParameter('inBottom'), obj.getSingleGuiParameter('root'), obj.getSingleGuiParameter('inDia')))
-    hold on
-    visualSurCom(mkSurCom(obj.getSingleGuiParameter('outCap'), obj.getSingleGuiParameter('outBottom'), obj.getSingleGuiParameter('root'), obj.getSingleGuiParameter('outDia')))
+    visualSurCom(mkSurCom(obj.getSingleGuiParameter('inCap'), obj.getSingleGuiParameter('inBottom'), obj.getSingleGuiParameter('root'), obj.getSingleGuiParameter('inDia')),obj.guihandles.previewimage)
+    hold(obj.guihandles.previewimage, 'on')
+    visualSurCom(mkSurCom(obj.getSingleGuiParameter('outCap'), obj.getSingleGuiParameter('outBottom'), obj.getSingleGuiParameter('root'), obj.getSingleGuiParameter('outDia')),obj.guihandles.previewimage)
+    hold(obj.guihandles.previewimage, 'off')
     axis(obj.guihandles.previewimage,'on')
     %axis(obj.guihandles.previewimage,'equal')
     axis(obj.guihandles.previewimage,[-obj.getSingleGuiParameter('outDia')/2 obj.getSingleGuiParameter('outDia')/2 0 (obj.getSingleGuiParameter('outCap')+obj.getSingleGuiParameter('outBottom')+obj.getSingleGuiParameter('root'))])
