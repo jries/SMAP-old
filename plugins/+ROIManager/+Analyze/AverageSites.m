@@ -18,8 +18,8 @@ classdef AverageSites<interfaces.DialogProcessor&interfaces.SEProcessor
             locnew=obj.locData.loc;
             sites=obj.locData.SE.sites;
             used=false(size(locnew.xnm));
-            x0=median(locnew.xnm);
-            y0=median(locnew.ynm);
+            x0=nanmedian(locnew.xnm);
+            y0=nanmedian(locnew.ynm);
             for k=1:length(sites)
                 if p.sortselection.Value==1 ||  sites(k).annotation.use
                     [locs,indloc]=obj.locData.getloc({'xnm','ynm'},'position',sites(k),'grouping','ungrouped');
@@ -33,6 +33,9 @@ classdef AverageSites<interfaces.DialogProcessor&interfaces.SEProcessor
                     used=used|indloc;
                 end
             end
+            
+            used=used& ~( isnan(locnew.xnm)|isnan(locnew.ynm));
+            
             fn=fieldnames(locnew);
               for k=1:length(fn)
                    locnew.(fn{k})=locnew.(fn{k})(used);
@@ -72,16 +75,23 @@ classdef AverageSites<interfaces.DialogProcessor&interfaces.SEProcessor
              [phi1,r1]=cart2pol(loc1.xnm,loc1.ynm);
              [phi2,r2]=cart2pol(loc2.xnm,loc2.ynm);
             ax=obj.initaxis('radial distribution');
-            dr=2;
-            rr=dr/2:dr:max(max(r1),max(r2));
-            h1=histcounts(r1,[0 rr]) ;
-             h2=histcounts(r2,[0 rr]) ;
-            plot(rr,h1,rr,h2)
+            dr=5;
+%             rr=dr/2:dr:max(max(r1),max(r2));
+            %proper concentration: dA=pi*(ro^2-ri^2)
+            rr=0:dr:max(max(r1),max(r2))+dr;
+            
+            dA=pi*(rr(2:end)+rr(1:end-1)).*(rr(2:end)-rr(1:end-1));
+            h1=histcounts(r1,[rr]) ;
+             h2=histcounts(r2,[rr]) ;
+              rrp=rr(1:end-1)+dr/2;
+            plot(rrp,h1,rrp,h2)
             xlabel('r')
             ylabel('counts')
             
             ax=obj.initaxis('radial concentration');
-            plot(rr,h1./rr/2/pi,rr,h2./rr/2/pi)
+%             plot(rr,h1./rr/2/pi,rr,h2./rr/2/pi)
+           
+             plot(rrp,h1./dA,rrp,h2./dA)
             xlabel('r')
             ylabel('concentration')
         end
