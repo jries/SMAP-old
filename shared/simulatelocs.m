@@ -1,5 +1,5 @@
-function [locsout,possites]=simulatelocs(p)
-           [poslabels,possites]=getlabels(p);
+function [locsout,possites]=simulatelocs(p, colour)
+           [poslabels,possites]=getlabels(p, colour);
 %            p.maxframe=100000;
            posreappear=reappear(poslabels,p.blinks,p.maxframes);
            
@@ -68,12 +68,21 @@ locso.frame=[locs.frame; frame];
 
 end
 
-function [locs,possites]=getlabels(p)
+function [locs,possites]=getlabels(p, colour)
 %gets position of labels either from image or from coordinates
 % fields p. :
 % coordinatefile, se_sitefov, numberofsites(x,y), labeling_efficiency, randomxy,
 % randomxyd
-[~,~,ext]=fileparts(p.coordinatefile);
+paths =  strsplit(p.coordinatefile, '|');
+switch colour
+    case 1
+        p.coordinatefile = paths{1};
+    case 2
+        p.coordinatefile = paths{2};
+    otherwise
+end
+        
+[~,~,ext]=fileparts(p.coordinatefile);% Get extension of the specified file
 image=[];
 locsall=[];
 switch ext
@@ -110,12 +119,17 @@ switch ext
         if isfield(l,'image')
             image=l.image;
         else
-            locsall=copyfields([],l,{'x','y','z'});
+            locsall=copyfields([],l,{'x','y','z','channel'}); % channel is added
         end
+% add a new way to get localizations
+    case {'.loc'}
+        image=imread(p.coordinatefile);
+        img=sum(image,3)/size(image,3); %binarize
+        image=double(img)/255;
     otherwise
         display('file not identified selected')
         return
-end
+end % after this block, you will get either image or locsall, depending on the type of your input
 if ~isfield(locsall,'z')
     locsall.z=0*locsall.x;
 end
@@ -140,13 +154,14 @@ for k=numberofsites:-1:1
     if ~isempty(image)
         locsh=locsfromimage(image,p);
     else
-        locsh=labelremove(locsall,p.labeling_efficiency);
+        locsh=labelremove(locsall,p.labeling_efficiency); % give all the coordinates of I dots and the lableling efficiency (P(ref)), and then randomly generating I even probabilities (P(gi)), keep P(gi) if the P(gi) <= P(ref)
     end
 
     numlocs=length(locsh.x);
     locsh.x=reshape(locsh.x,numlocs,1);
     locsh.y=reshape(locsh.y,numlocs,1);
     locsh.z=reshape(locsh.z,numlocs,1);
+    locsh.channel=reshape(locsh.channel,numlocs,1); %added
     if p.randomrot
         angle=2*pi*rand(1);
         [locsh.x,locsh.y]=rotcoord(locsh.x,locsh.y,angle);
@@ -174,6 +189,7 @@ for k=numberofsites:-1:1
     locs(k).x=locsh.x+xh*distsites;
     locs(k).y=locsh.y+yh*distsites;
     locs(k).z=locsh.z;
+    locs(k).channel=locsh.channel;% added
     locs(k).angle=angle*ones(size(locsh.x));
     locs(k).dx_gt=dx*ones(size(locsh.x));
     locs(k).dy_gt=dy*ones(size(locsh.x));
@@ -283,7 +299,7 @@ function locs=locsfromposi(locsi,p)
     locs.dznm_gt=single(locsi.dz_gt(indin));
     locs.angle=single(locsi.angle(indin));
     locs.frame=single(locsi.frame(indin));
-      
+    locs.channel=single(locsi.channel(indin));  %added
 end
 
 

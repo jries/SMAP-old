@@ -73,9 +73,9 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
 %             imbw=imdilate(imbw,ones(3));
 %             bwac=activecontour(himf,true(size(himf)));
 %             subplot(2,2,3);imagesc(imbw)
-            xr=round((xnmline+len)/pixrec)+1;
-            yr=round((ynmline+lw)/pixrec)+1;
-            indlin=sub2ind(size(imbw),xr,yr);
+            xr2=round((xnmline+len)/pixrec)+1;
+            yr2=round((ynmline+lw)/pixrec)+1;
+            indlin=sub2ind(size(imbw),xr2,yr2);
             indgood=imbw(indlin);
             out.mask=imbw;
             
@@ -83,18 +83,20 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
 %             h2=fspecial('gaussian',12,1.5);
             
  
-            xr=-len:p.dx:len;
+            xn=-len:p.dx:len;
             fr=1:p.df:max(frame(indgood));
-            him=histcounts2(frame(indgood),xnmline(indgood),fr,xr);
+            him=histcounts2(frame(indgood),xnmline(indgood),fr,xn);
 %             hxf=filter2(h2,him);
 %             mf=max(h2(:));
 %             hxfb=hxf>mf*1.1;
             
             out.kimograph=him;
+            out.fr=fr;
+            out.xn=xn;
             co=quantile(him(:),0.999);
             him(him>co)=co;
             h=obj.setoutput('kimograph');
-            imagesc(h,xr,fr,(him))
+            imagesc(h,xn,fr,(him))
             xlabel(h,'xnm')
             ylabel(h,'frame')
             
@@ -149,8 +151,8 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
         function pard=guidef(obj)
             pard=guidef;
         end
-        
     end
+
 end
 
 function pard=guidef
