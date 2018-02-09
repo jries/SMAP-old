@@ -365,7 +365,7 @@ if fitpar.fitmode==3||fitpar.fitmode==5
 
     end
     %load sCMOS
-    if p.isscmos
+    if p.isscmos  %this needs to be extended. Include offset correction as well!
         [~,~,ext]=fileparts(p.scmosfile);
         switch ext
             case '.tif'
@@ -385,7 +385,8 @@ if fitpar.fitmode==3||fitpar.fitmode==5
         end
         if ~isempty(varmaph)
             roi=p.loc_cameraSettings.roi;
-            varmap=varmaph(max(1,roi(1)):roi(3),max(1,roi(2)):roi(4));
+            varmap=varmaph(max(1,roi(1)):roi(3),max(1,roi(2)):roi(4)); %or +1? roi: width height or coordinates? This is wrong
+            varmap=varmaph(roi(1)+1:roi(1)+roi(3),roi(2)+1:roi(2)+roi(4)); 
         end
     else 
         varmap=[];
