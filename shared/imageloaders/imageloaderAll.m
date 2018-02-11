@@ -1,13 +1,14 @@
 function io=imageloaderAll(varargin)
 % imageloaderAll selects the right image loader based on the presence of
 % metadata.
+%file, metadata, P
 file=varargin{1};
    [path,~,ext]=fileparts(file);
 %    info=imfinfo(file);Tiff
    switch ext
        case '.tif'
            if exist([path filesep 'metadata.txt'],'file')
-%                imloader=@imageloaderMM;
+%                imloader=@imageloaderMM;s
                if countfiles(file)>1 && ~(any(strfind(file,'MMStack'))||any(strfind(file,'.ome.')))
                    imloader=@imageloaderMMsingle;
                else
