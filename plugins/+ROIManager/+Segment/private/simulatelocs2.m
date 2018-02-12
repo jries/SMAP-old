@@ -152,7 +152,7 @@ for k=numberofsites:-1:1
     xh=mod(k-1,numberofrows)+1;
     yh=ceil(k/numberofrows);
     if ~isempty(image)
-        locsh=locsfromimage(image,p);
+        locsh=locsfromimage(image,p,colour);
     else
         locsh=labelremove(locsall,p.labeling_efficiency); % give all the coordinates of I dots and the lableling efficiency (P(ref)), and then randomly generating I even probabilities (P(gi)), keep P(gi) if the P(gi) <= P(ref)
     end
@@ -204,35 +204,35 @@ end
 end
 
 
-function locs=locsfromimage(image,p)
+function locs=locsfromimage(image,p, colour)
     % adapted from applyFilter
     
     finalNumMol = round(random('norm', p.Mean, p.Std));
    
-    norFilter = image/max(image(:));
+    norFilter = image/max(image(:)); % = normalized filter. the maximun of a pixel value is set 1
     
-    ExpP = numel(image);
-    ActP = sum(norFilter(:));
+    ExpP = numel(image); % number of image pixels
+    ActP = sum(norFilter(:)); % sum of all pixel values in the normalized filter
     numInput = (finalNumMol*ExpP)/ActP;
     numInput = ceil(numInput * 1.2);
     
     setRange = length(image);
     x = rand(1,numInput)*setRange;
     y = rand(1,numInput)*setRange;
-    p = rand(1,numInput);
+    pr = rand(1,numInput);
     
     idx = sub2ind(size(norFilter), ceil(x), ceil(y));
     
-    filteredIdx = p <= norFilter(idx);
+    filteredIdx = pr <= norFilter(idx);
     
     xy = [x; y];
     Filtered = xy(:,filteredIdx);
     Filtered = Filtered(:,1:finalNumMol);
     locs = [];
-    locs.x = Filtered(1,:)';
-    locs.y = Filtered(2,:)';
+    locs.x = Filtered(1,:)'-setRange/2;
+    locs.y = Filtered(2,:)'-setRange/2;
     locs.z = repelem(0,length(Filtered));
-    locs.channel = repelem(1,length(Filtered));
+    locs.channel = repelem(colour,length(Filtered));
 end
 
 function locs=labelremove(locin,p)

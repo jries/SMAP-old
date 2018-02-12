@@ -18,6 +18,8 @@ classdef SimulateSitesYL<interfaces.DialogProcessor&interfaces.SEProcessor
         end
         function out=run(obj,p)  
             [locst,possites]=simulatelocs2(p, 1);
+            [locst2,~]=simulatelocs2(p, 2);
+            locst = mergeStruct(locst, locst2);
             
            if ~p.savez
                locst=rmfield(locst,{'znm','znm_gt'});
@@ -263,4 +265,12 @@ pard.plugininfo.description=sprintf(['SimulateSites is a localization based simu
     'returns coordiantes or an image which defines a 2D structure. It \n'...
     'returns simulated localizations to SMAP using a realistic model for the \n'...
     'photophysics of the dye. Simulated structures are added to the RoiManager']);
+end
+
+function mergedStruct = mergeStruct(A, B)
+mergedStruct=A;
+f = fieldnames(A);
+    for i = 1:length(f)
+        mergedStruct.(f{i}) = [A.(f{i});B.(f{i})];
+    end
 end

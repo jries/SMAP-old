@@ -8,11 +8,23 @@ classdef circleFitter<interfaces.SEEvaluationProcessor
         end
         function out=run(obj, inp)
             % Import the kimograph
-            site = obj.site.image.image
-            getloc({'xnm','frame','ynm'},'position','roi','layer',1);
-            scatter(site.xnm, site.ynm);
+%             site = obj(1).locData
+            layers=find(inp.sr_layerson);
+            locs=obj.getLocs({'locprecnm','PSFxnm','xnm','ynm','frame'},'layer',1,'size',inp.se_siteroi);  
+            figure(30)
+            scatter(locs.xnm, locs.ynm);
             test(test>=1)=1;
-
+            
+            
+            [x, y] = meshgrid(400:800, 400:800);
+            scatter3(x(:), y(:), repelem(0, 40401)')
+            
+            [xq, yq] = meshgrid(locs.xnm, locs.ynm);
+            
+            zq = griddata(x(:), y(:), repelem(0, 401*401)', xq ,yq);
+            
+            contour(xq ,yq, zq)
+            
             slideStep = inp.slideStep;
             gridRange = inp.gridRange;
             adjM = inp.adjM;
