@@ -48,5 +48,6 @@ matr = [cos(psi) -sin(psi) 0; sin(psi) cos(psi) 0;0 0 1];
 matr = matr*[1 0 0 ; 0 cos(the) -sin(the); 0 sin(the) cos(the)];
 
 matr = matr*[cos(phi) -sin(phi) 0; sin(phi) cos(phi) 0;0 0 1];
+matr=inv(matr);
 r = matr*r';
 r=r';
