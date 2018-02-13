@@ -17,6 +17,7 @@ classdef SimulateSitesYL<interfaces.DialogProcessor&interfaces.SEProcessor
             setvisibility(obj);
         end
         function out=run(obj,p)  
+        
             [locst,possites]=simulatelocs2(p, 1);
             [locst2,~]=simulatelocs2(p, 2);
             locst = mergeStruct(locst, locst2);
@@ -98,8 +99,6 @@ classdef SimulateSitesYL<interfaces.DialogProcessor&interfaces.SEProcessor
         end
     end
 end
-
-
 
 function load_callback(a,b,obj)
 f=obj.getSingleGuiParameter('coordinatefile'); 

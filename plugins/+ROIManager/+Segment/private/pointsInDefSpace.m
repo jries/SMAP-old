@@ -1,6 +1,14 @@
 function l = pointsInDefSpace(p)
-    outUnitSur = mkSurCom(p.outCap, p.outBottom, p.root, p.outDia);
-    inUnitSur = mkSurCom(p.inCap, p.inBottom, p.root, p.inDia);
+    x=[100 80 60 10 5 0]';
+    y=[0 23 20 15 25 40]';
+    inUnitSur = mkSurCom2(x, y, 1);
+    x=[110 90 60 10 5 0]';
+    y=[0 33 30 25 35 50]';
+    outUnitSur = mkSurCom2(x, y, 1);
+    p.Zrange = [1 20];
+
+    %outUnitSur = mkSurCom(p.outCap, p.outBottom, p.root, p.outDia);
+    %inUnitSur = mkSurCom(p.inCap, p.inBottom, p.root, p.inDia);
     
     [Xout, Yout, Zout] = mkCy(outUnitSur);
     [Xin, Yin, Zin] = mkCy(inUnitSur);
@@ -105,7 +113,7 @@ function l = pointsInDefSpace(p)
                     proImg = [proImg; zeros(p.size-Size(1),Size(2))];
                     Size = size(proImg);
                     proImg = [proImg zeros(p.size, p.size-Size(2))];
-                    
+                    proImg(:,[1:(p.Zrange(1)-1) (p.Zrange(2)-1):Size(1)]) = 0;
                     figure(39)
                     scatter3(tempL(:,1), tempL(:,2), tempL(:,3))
                     rotate3d on
@@ -139,6 +147,79 @@ function [xy, z] = pointsIn3DS(X, Y, Z, xy, z, filter)
     % Filter the points (in the outer cylinder)
     xy = xy(:, idx);
     z = z(:, idx);
+end
+
+function unitSur = mkSurCom2(x,y,scale)
+
+    yq1 = y(2);
+    xq1 = slopePoint(1, x(3), y(3), yq1, 'y');
+
+    yq2 = y(4);
+    xq2 = slopePoint(1, x(3), y(3), yq2, 'y');
+
+    yq3 = y(4);
+    xq3 = slopePoint(-1, x(5), y(5), yq3, 'y');
+
+    xq4 = x(6);
+    yq4 = slopePoint(-1, x(5), y(5), xq4, 'x');
+
+    xO = [x(2) x(1) x(1) xq1 xq2 xq3 xq4 x(6) x(5)];
+    yO = [-y(2) -y(2) y(2) yq1 yq2 yq3 yq4 y(6) y(6)];
+
+    outline = spcrv([xO; yO],4);
+    
+    outline = outline(:,outline(2,:) >= 0);
+    
+    figure(155)
+    hold on
+    plot(xO', yO')
+    adx = outline(1,:)-min(outline(1,:));
+    factorEx = max(adx)/x(1);
+    tempX0 = adx == 0;
+    XtoTrim = cummin(adx) == 0 & ~tempX0;
+    
+    adx = adx(~XtoTrim);
+    outline = outline(:,~XtoTrim);
+    
+    xOut = adx/factorEx;
+    yOut = outline(2,:);
+    
+    xOut = xOut(xOut<=x(1));
+    yOut = yOut(xOut<=x(1));
+    
+    trimmedY = yOut >= 0;
+    yOut = yOut(trimmedY);
+    xOut = xOut(trimmedY);
+    
+    %upperYBD = (yq4+y(6))/2;
+    %lowerYBD = 0;
+    
+    %inY = yOut>=lowerYBD&yOut<=upperYBD;
+    
+    %yOut = yOut(inY);
+    %xOut = xOut(inY);
+    
+    yOut = interp1(xOut*scale, yOut*scale, 0:1:(x(1)*scale));
+    
+    % set the root
+    unitSur = [];
+    unitSur.main = yOut;
+    unitSur.root = 0;
+    unitSur.mainDepth = x(1)*scale;
+end
+
+function theAns = slopePoint(m, px, py, q, qt)
+    switch qt
+        case 'x'
+            theAns = m*(q-px)+py;
+        case 'y'
+            theAns = (q+m*px-py)/m;
+    end
+end
+
+function [x, y] = lineIntersect(m1, px1, py1, m2, px2, py2)
+   x = (-m1*px1+py1+m2*px2-py2)/(m2-m1);
+   y = m1*(x-px1)+py1;
 end
 
 function  unitSur = mkSurCom(capDepth, bottomDepth, root, diameter)
@@ -185,17 +266,17 @@ function  fig = visualSurCom(unitSur)
 end
 
 function  [X, Y, Z] = mkCy(unitSur)
-    [X,Y,Z] = cylinder(unitSur.main, 40); % create a unit cylinder (the range of z is from 0 to 1)
+    [X,Y,Z] = cylinder(unitSur.main, 1000); % create a unit cylinder (the range of z is from 0 to 1)
        
     Z = Z * unitSur.mainDepth;
     Z = Z + unitSur.root;
 end
 
 function  keept = pointsInCy(X, Y, Z, x, y, z)
-    IdxXR = X >= 0;
-    IdxXL = X < 0;
-    xRefR = griddata(Y(IdxXR),Z(IdxXR),X(IdxXR), y, z);
-    xRefL = griddata(Y(IdxXL),Z(IdxXL),X(IdxXL), y, z);
+    IdxXR = X > 0;
+    IdxXL = X <= 0;
+    xRefR = griddata(Y(IdxXR),Z(IdxXR),X(IdxXR), y, z,'cubic');
+    xRefL = griddata(Y(IdxXL),Z(IdxXL),X(IdxXL), y, z,'cubic');
     keept = x < xRefR & x > xRefL ;
 end
 
