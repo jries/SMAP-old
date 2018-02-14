@@ -1,11 +1,21 @@
 function l = pointsInDefSpace(p)
-    x=[100 80 60 10 5 0]';
-    y=[0 23 20 15 25 40]';
-    inUnitSur = mkSurCom2(x, y, 1);
-    x=[110 90 60 10 5 0]';
-    y=[0 33 30 25 35 50]';
+
+
+    x=[40 25 25 25 10 0]';
+    y=[0 25 25 25 30 70]';
+    m=[0 25 25 25 30 70]';
+    inUnitSur = mkSurCom2(x, y, m, 1);
+
+
+    %x=[100 80 60 10 5 0]';
+    %y=[0 23 20 15 25 40]';
+    %inUnitSur = mkSurCom2(x, y, 1);
+    
+    thickness = 10;
+    x=[x(1)+thickness x(2)+thickness x(3) x(4) x(5) x(6)]';
+    y=[y(1) y(2)+thickness y(3)+thickness y(4)+thickness y(5)+thickness y(6)+thickness]';
     outUnitSur = mkSurCom2(x, y, 1);
-    p.Zrange = [1 20];
+    p.Zrange = [1 60];
 
     %outUnitSur = mkSurCom(p.outCap, p.outBottom, p.root, p.outDia);
     %inUnitSur = mkSurCom(p.inCap, p.inBottom, p.root, p.inDia);
@@ -149,22 +159,39 @@ function [xy, z] = pointsIn3DS(X, Y, Z, xy, z, filter)
     z = z(:, idx);
 end
 
-function unitSur = mkSurCom2(x,y,scale)
+function unitSur = mkSurCom2(x,y,m,scale)
+    x=[40 25 25 25 10 0]';
+    y=[0 25 25 25 30 70]';
+    m=[999 -1 0 0 -1 999]';
 
+    xq0 = x(1);
+    yq0 = slopePoint(m(2), x(2), y(2), xq0, 'x');
+    
     yq1 = y(2);
-    xq1 = slopePoint(1, x(3), y(3), yq1, 'y');
+    xq1 = slopePoint(m(3), x(3), y(3), yq1, 'y');
 
     yq2 = y(4);
-    xq2 = slopePoint(1, x(3), y(3), yq2, 'y');
+    xq2 = slopePoint(m(3), x(3), y(3), yq2, 'y');
 
     yq3 = y(4);
-    xq3 = slopePoint(-1, x(5), y(5), yq3, 'y');
+    xq3 = slopePoint(m(5), x(5), y(5), yq3, 'y');
 
     xq4 = x(6);
-    yq4 = slopePoint(-1, x(5), y(5), xq4, 'x');
+    yq4 = slopePoint(m(5), x(5), y(5), xq4, 'x');
 
-    xO = [x(2) x(1) x(1) xq1 xq2 xq3 xq4 x(6) x(5)];
-    yO = [-y(2) -y(2) y(2) yq1 yq2 yq3 yq4 y(6) y(6)];
+    xq5 = x(6);
+    yq5 = yq4*2;
+    
+    xq6 = xq3;
+    yq6 = yq5;
+    
+    xO = [xq2 xq1 xq0 xq1 xq2 xq3 xq4 xq5 xq6];
+    yO = [-yq2 -yq1 yq0 yq1 yq2 yq3 yq4 yq5 yq6];
+    O = unique([xO; yO]','stable','rows')';
+    
+    
+    xO = O(1,:);
+    yO = O(2,:);
 
     outline = spcrv([xO; yO],4);
     
@@ -198,9 +225,9 @@ function unitSur = mkSurCom2(x,y,scale)
     
     %yOut = yOut(inY);
     %xOut = xOut(inY);
-    
-    yOut = interp1(xOut*scale, yOut*scale, 0:1:(x(1)*scale));
-    
+    Out = unique([xOut; yOut]','stable','rows')'
+    yOut = interp1(Out(1,:)*scale, Out(2,:)*scale, 0:1:(x(1)*scale));
+    plot(0:1:(x(1)*scale), yOut)
     % set the root
     unitSur = [];
     unitSur.main = yOut;
@@ -211,9 +238,13 @@ end
 function theAns = slopePoint(m, px, py, q, qt)
     switch qt
         case 'x'
-            theAns = m*(q-px)+py;
+                theAns = m*(q-px)+py;
         case 'y'
+        if m == 999
+            theAns = px;
+        else
             theAns = (q+m*px-py)/m;
+        end
     end
 end
 
@@ -273,11 +304,18 @@ function  [X, Y, Z] = mkCy(unitSur)
 end
 
 function  keept = pointsInCy(X, Y, Z, x, y, z)
-    IdxXR = X > 0;
-    IdxXL = X <= 0;
-    xRefR = griddata(Y(IdxXR),Z(IdxXR),X(IdxXR), y, z,'cubic');
-    xRefL = griddata(Y(IdxXL),Z(IdxXL),X(IdxXL), y, z,'cubic');
-    keept = x < xRefR & x > xRefL ;
+    IdxXR = X >= 0;
+    IdxXL = X < 0;
+    xRefR = griddata(Y(IdxXR),Z(IdxXR),X(IdxXR), y, z);
+    xRefL = griddata(Y(IdxXL),Z(IdxXL),X(IdxXL), y, z);
+    IdxYR = Y >= 0;
+    IdxYL = Y < 0;
+    yRefR = griddata(X(IdxYR),Z(IdxYR),Y(IdxYR), x, z);
+    yRefL = griddata(X(IdxYL),Z(IdxYL),Y(IdxYL), x, z);
+    keeptByx = x < xRefR & x > xRefL ;
+    keeptByy = y < yRefR & y > yRefL ;
+    keeptByx(x<=30&x>=-30)=keeptByy(x<=30&x>=-30);
+    keept = keeptByx;
 end
 
 function  filtered = applyFilter(Filter, Mean, Std)
