@@ -273,6 +273,8 @@ end
 %         CRLB = repmat(single(LL1>=LL2),1,5).*CRLB1+repmat(single(LL1<LL2),1,5).*CRLB2;
 %         LogL = repmat(single(LL1>=LL2),1,1).*LL1+repmat(single(LL1<LL2),1,1).*LL2;
 %     else
+
+
         [P CRLB LogL]=fitpar.fitfunction(arguments{:});
 %     end
 
@@ -449,7 +451,8 @@ dn=floor(roisize/2);
 for k=1:numim
 %     stackinfo.x(k)
 %     stackinfo.y(k)
-    varstack(:,:,k)=varmap(stackinfo.x(k)-dn:stackinfo.x(k)+dn,stackinfo.y(k)-dn:stackinfo.y(k)+dn);
+  varstack(:,:,k)=varmap(stackinfo.y(k)-dn:stackinfo.y(k)+dn,stackinfo.x(k)-dn:stackinfo.x(k)+dn);
+    
 end
 end
 
