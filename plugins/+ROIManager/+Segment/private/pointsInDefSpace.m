@@ -1,21 +1,37 @@
 function l = pointsInDefSpace(p)
+    t = 4;
+    if t==1
+        x=[40 25 25 25 10 0]';
+        y=[0 23 25 25 30 40]';
+        m=[999 -1 0 0 -1 999]';
+        
+    elseif t==2
+        x=[50 40 30 20 2.5 0]';
+        y=[0 23 23 23 25 40]';
+        m=[999 0 1 0 -1 999]';
+        
+    elseif t==3
+        x=[100 80 60 10 5 0]';
+        y=[0 23 23 23 25 40]';
+        m=[999 0 1 0 -1 999]';
+        
+    elseif t==4
+        x=[100 80 60 10 5 0]';
+        y=[0 23 20 15 25 40]';
+        m=[999 0 1 0 -1 999]';
+    end
+    
 
-
-    x=[40 25 25 25 10 0]';
-    y=[0 25 25 25 30 70]';
-    m=[0 25 25 25 30 70]';
     inUnitSur = mkSurCom2(x, y, m, 1);
 
-
-    %x=[100 80 60 10 5 0]';
-    %y=[0 23 20 15 25 40]';
     %inUnitSur = mkSurCom2(x, y, 1);
     
+    off=m(3);
     thickness = 10;
-    x=[x(1)+thickness x(2)+thickness x(3) x(4) x(5) x(6)]';
+    x=[x(1)+thickness x(2)+thickness*off x(3) x(4) x(5) x(6)]';
     y=[y(1) y(2)+thickness y(3)+thickness y(4)+thickness y(5)+thickness y(6)+thickness]';
-    outUnitSur = mkSurCom2(x, y, 1);
-    p.Zrange = [1 60];
+    outUnitSur = mkSurCom2(x, y, m, 1);
+    p.Zrange = [1 200];
 
     %outUnitSur = mkSurCom(p.outCap, p.outBottom, p.root, p.outDia);
     %inUnitSur = mkSurCom(p.inCap, p.inBottom, p.root, p.inDia);
@@ -160,18 +176,21 @@ function [xy, z] = pointsIn3DS(X, Y, Z, xy, z, filter)
 end
 
 function unitSur = mkSurCom2(x,y,m,scale)
-    x=[40 25 25 25 10 0]';
-    y=[0 25 25 25 30 70]';
-    m=[999 -1 0 0 -1 999]';
-
     xq0 = x(1);
     yq0 = slopePoint(m(2), x(2), y(2), xq0, 'x');
     
-    yq1 = y(2);
-    xq1 = slopePoint(m(3), x(3), y(3), yq1, 'y');
+    if m(3)==0
+        yq1 = y(3);
+        i = 2;
+    else
+        yq1 = y(2);
+        i = 3;
+    end
+    
+    xq1 = slopePoint(m(i), x(i), y(i), yq1, 'y');
 
     yq2 = y(4);
-    xq2 = slopePoint(m(3), x(3), y(3), yq2, 'y');
+    xq2 = slopePoint(m(i), x(i), y(i), yq2, 'y');
 
     yq3 = y(4);
     xq3 = slopePoint(m(5), x(5), y(5), yq3, 'y');
@@ -185,8 +204,8 @@ function unitSur = mkSurCom2(x,y,m,scale)
     xq6 = xq3;
     yq6 = yq5;
     
-    xO = [xq2 xq1 xq0 xq1 xq2 xq3 xq4 xq5 xq6];
-    yO = [-yq2 -yq1 yq0 yq1 yq2 yq3 yq4 yq5 yq6];
+    xO = [xq2 xq0 xq0 xq1 xq2 xq3 xq4 xq5 xq6];
+    yO = [-yq2 -yq0 yq0 yq1 yq2 yq3 yq4 yq5 yq6];
     O = unique([xO; yO]','stable','rows')';
     
     
@@ -225,7 +244,7 @@ function unitSur = mkSurCom2(x,y,m,scale)
     
     %yOut = yOut(inY);
     %xOut = xOut(inY);
-    Out = unique([xOut; yOut]','stable','rows')'
+    Out = unique([xOut; yOut]','stable','rows')';
     yOut = interp1(Out(1,:)*scale, Out(2,:)*scale, 0:1:(x(1)*scale));
     plot(0:1:(x(1)*scale), yOut)
     % set the root
@@ -314,7 +333,8 @@ function  keept = pointsInCy(X, Y, Z, x, y, z)
     yRefL = griddata(X(IdxYL),Z(IdxYL),Y(IdxYL), x, z);
     keeptByx = x < xRefR & x > xRefL ;
     keeptByy = y < yRefR & y > yRefL ;
-    keeptByx(x<=30&x>=-30)=keeptByy(x<=30&x>=-30);
+    keeptByy(y<5&y>-5)=keeptByx(y<5&y>-5);
+    keeptByx(x<30&x>-30)=keeptByy(x<30&x>-30);
     keept = keeptByx;
 end
 

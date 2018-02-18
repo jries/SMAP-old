@@ -215,6 +215,8 @@ classdef Make3Dshape<interfaces.DialogProcessor
     end
 end
 
+
+
 function  unitSur = mkSurCom(capDepth, bottomDepth, root, diameter)
     %% make a surface component for making a cylinder
     if capDepth > 0
