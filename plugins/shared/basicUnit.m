@@ -25,6 +25,7 @@ classdef basicUnit < handle
             basicComponent3D = table(x(:),y(:),z(:)*obj.totalDepth);
             basicComponent3D.Properties.VariableNames = {'x' 'y' 'z'};
             obj.basicComponent3D = basicComponent3D;
+            
         end
         
         function plot(obj, mode)
@@ -44,9 +45,14 @@ classdef basicUnit < handle
         end
         
         function fullPx = fullPixel(obj)
-            [x,y,z] = meshgrid((-obj.radius):obj.radius, (-obj.radius):obj.radius, 0:obj.totalDepth);
+            [x,y,z] = meshgrid(round((-obj.radius):obj.radius), round((-obj.radius):obj.radius), round(0:obj.totalDepth));
             fullPx = table(x(:),y(:),z(:));
             fullPx.Properties.VariableNames = {'x' 'y' 'z'};
+        end
+        
+        function ESC = convert2EScoordinates(obj, zmt)
+            ESC = obj.basicComponent3D;
+            ESC.z = ESC.z+zmt;
         end
     end
     methods(Static)
@@ -81,7 +87,7 @@ function  basicComponent = mkBasicCom(capDepth, capShape, bottomDepth, bottomSha
         y=yO+b*sin(t);
         y(y == max(y)) = round(max(y));
         x(y == max(y)) = 0;
-        idxKept = x<=xO&y>=yO;
+        idxKept = x<=xO&y>yO;
         cx = x(idxKept);
         cy = y(idxKept);
     end
