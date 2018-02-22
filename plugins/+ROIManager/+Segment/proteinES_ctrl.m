@@ -8,7 +8,7 @@ classdef proteinES_ctrl<interfaces.DialogProcessor
     methods
         function obj=proteinES_ctrl(varargin)   %replace by filename        
             obj@interfaces.DialogProcessor(varargin{:}) 
-            obj.showresults=true; %set true, if results are shown by default
+            obj.showresults=false; %set true, if results are shown by default
             obj.history=false; %if set true, every time the plugin is called, its parameters are added to the history. Makes sense only if plugin changes the data
         end       
         function initGui(obj)
@@ -29,28 +29,9 @@ classdef proteinES_ctrl<interfaces.DialogProcessor
             %value returns a double, not a text. popupmenu etc return three
             %fields: String (all entries), Value (selected item), selection
             %(string of selected item).
-            
-            %out=[] possible, but out needs to be defined. Out is stored
-            %and accessible later or by other plugins
-            
-            %Only if you modify the localization date it makes sense to
-            %enable Undo. This can be done with the follwoing lines:
-            obj.setPar('undoModule','PluginName');
-            notify(obj.P,'backup4undo');
-
-            %Get access to the localization data via obj.locData.getlocs (see description there):
-            %example:
-            locs=obj.locData.getloc({'xnm','frame','ynm'},'position','roi','layer',1);
-            %locs.xnm, locs.frame, locs.ynm contain data from all
-            %localizations in roi, or if no roi is defined in field of
-            %view. But only those, displayed (and filtered) in layer 1.
-            
-            %create some output:
-            axis1=obj.initaxis('axisname');
-            plot(locs.xnm,locs.ynm,'.','Parent',axis1);
-            
+                       
             %set a global parameter
-            obj.setPar('locFields',fieldnames(obj.locData.loc));
+            obj.setPar('proteinES', pes);
             %this example updates all lists in other plugins which are
             %linked to the fields of localization data.
             

@@ -73,66 +73,75 @@ function [locs,possites]=getlabels(p, colour)
 % fields p. :
 % coordinatefile, se_sitefov, numberofsites(x,y), labeling_efficiency, randomxy,
 % randomxyd
-paths =  strsplit(p.coordinatefile, '|');
-switch colour
-    case 1
-        p.coordinatefile = paths{1};
-    case 2
-        p.coordinatefile = paths{2};
-    otherwise
+
+if p.usePes
+    image = p.obj.P.par.proteinES.content.getTimeImg(p.time, 'side', p.tif_imagesize);
+    p.Mean = p.obj.P.par.proteinES.content.timePar.nm(p.obj.P.par.proteinES.content.timePar.time==p.time);
+    p.Std = 0.01;
+    
+else
+    paths =  strsplit(p.coordinatefile, '|');
+    switch colour
+        case 1
+            p.coordinatefile = paths{1};
+        case 2
+            p.coordinatefile = paths{2};
+        otherwise
+    end
+
+    [~,~,ext]=fileparts(p.coordinatefile);% Get extension of the specified file
+    image=[];
+    locsall=[];
+    switch ext
+        case {'.txt','.csv'}
+            plocs=readtable(p.coordinatefile);
+            plocsa=table2array(plocs);
+            locsall.x=plocsa(:,1);
+            locsall.y=plocsa(:,2);
+            if size(plocsa,2)>2
+                locsall.z=plocsa(:,3);
+            end
+            locsall=copyfields(locsall,plocs,{'x','y','z'});
+        case {'.tif','.png'}
+    %         locs=getlabelstiff(obj,p);
+            image=imread(p.coordinatefile);
+            p.Mean = 150;
+            p.Std = 20;
+
+        case '.mat'
+            l=load(p.coordinatefile);
+
+            if isfield(l,'image')
+                image=l.image;
+            else
+                locsall=copyfields([],l,{'x','y','z'});
+            end
+        case '.m'
+            cf=pwd;
+            [ph,fh]=fileparts(p.coordinatefile);
+            cd(ph)
+            l=eval(fh);
+            cd(cf);
+    %         l=eval(p.coordinatefile);
+            if isfield(l,'image')
+                image=l.image;
+            else
+                locsall=copyfields([],l,{'x','y','z','channel'}); % channel is added
+            end
+    % add a new way to get localizations
+        case {'.loc'}
+            image=imread(p.coordinatefile);
+            img=sum(image,3)/size(image,3); %binarize
+            image=double(img)/255;
+        otherwise
+            display('file not identified selected')
+            return
+    end % after this block, you will get either image or locsall, depending on the type of your input
+    %if ~isfield(locsall,'z')
+    %    locsall.z=0*locsall.x;
+    %end    
 end
-        
-[~,~,ext]=fileparts(p.coordinatefile);% Get extension of the specified file
-image=[];
-locsall=[];
-switch ext
-    case {'.txt','.csv'}
-        plocs=readtable(p.coordinatefile);
-        plocsa=table2array(plocs);
-        locsall.x=plocsa(:,1);
-        locsall.y=plocsa(:,2);
-        if size(plocsa,2)>2
-            locsall.z=plocsa(:,3);
-        end
-        locsall=copyfields(locsall,plocs,{'x','y','z'});
-    case {'.tif','.png'}
-%         locs=getlabelstiff(obj,p);
-        image=imread(p.coordinatefile);
-        p.Mean = 150;
-        p.Std = 20;
-        
-    case '.mat'
-        l=load(p.coordinatefile);
-        
-        if isfield(l,'image')
-            image=l.image;
-        else
-            locsall=copyfields([],l,{'x','y','z'});
-        end
-    case '.m'
-        cf=pwd;
-        [ph,fh]=fileparts(p.coordinatefile);
-        cd(ph)
-        l=eval(fh);
-        cd(cf);
-%         l=eval(p.coordinatefile);
-        if isfield(l,'image')
-            image=l.image;
-        else
-            locsall=copyfields([],l,{'x','y','z','channel'}); % channel is added
-        end
-% add a new way to get localizations
-    case {'.loc'}
-        image=imread(p.coordinatefile);
-        img=sum(image,3)/size(image,3); %binarize
-        image=double(img)/255;
-    otherwise
-        display('file not identified selected')
-        return
-end % after this block, you will get either image or locsall, depending on the type of your input
-%if ~isfield(locsall,'z')
-%    locsall.z=0*locsall.x;
-%end
+
 
 if isempty(p.se_sitefov)
     p.se_sitefov=500;

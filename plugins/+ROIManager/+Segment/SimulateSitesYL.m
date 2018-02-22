@@ -19,8 +19,8 @@ classdef SimulateSitesYL<interfaces.DialogProcessor&interfaces.SEProcessor
         function out=run(obj,p)  
         
             [locst,possites]=simulatelocs2(p, 1);
-            [locst2,~]=simulatelocs2(p, 2);
-            locst = mergeStruct(locst, locst2);
+            %[locst2,~]=simulatelocs2(p, 2);
+            %locst = mergeStruct(locst, locst2);
             
            if ~p.savez
                locst=rmfield(locst,{'znm','znm_gt'});
@@ -148,8 +148,32 @@ obj.guihandles.tif_density.Visible=tif;
 obj.guihandles.tif_numbermode.Visible=tif;
 obj.guihandles.tif_imagesizet.Visible=tif;
 obj.guihandles.tif_imagesize.Visible=tif;
+obj.guihandles.load_button.Visible='on';
+obj.guihandles.coordinatefile.Visible='on';
 end
 
+function pesInput_callback(a,b,obj)
+if obj.getSingleGuiParameter('usePes');
+    txt = 'off';
+    tif = 'off';
+    pes = 'on';
+    obj.guihandles.labeling_efficiency.Visible=txt;
+    obj.guihandles.t_labelingefficiency.Visible=txt;
+    obj.guihandles.tif_density.Visible=tif;
+    obj.guihandles.tif_numbermode.Visible=tif;
+    obj.guihandles.tif_imagesizet.Visible=pes;
+    obj.guihandles.tif_imagesize.Visible=pes;
+    obj.guihandles.load_button.Visible='off';
+    obj.guihandles.coordinatefile.Visible='off';
+    obj.guihandles.time.Visible=pes;
+    obj.guihandles.t_time.Visible=pes;
+else
+    pes = 'off';
+    setvisibility(obj)
+    obj.guihandles.time.Visible=pes;
+    obj.guihandles.t_time.Visible=pes;
+end
+end
 
 function pard=guidef(obj)
 
@@ -162,6 +186,10 @@ pard.coordinatefile.TooltipString=sprintf('.txt or .csv file with coordinates, .
 pard.load_button.object=struct('String','Load','Style','pushbutton','Callback',{{@load_callback,obj}});
 pard.load_button.position=[1,4];
 pard.load_button.TooltipString=pard.coordinatefile.TooltipString;
+
+pard.usePes.object=struct('String','Use pes','Style','checkbox','Value',0,'Callback',{{@pesInput_callback,obj}});
+pard.usePes.position=[2,4];
+pard.usePes.TooltipString=pard.coordinatefile.TooltipString;
 
 pard.tif_numbermode.object=struct('String',{{'Density (labels/um^2)','Number of labels'}},'Style','popupmenu');
 pard.tif_numbermode.Width=1.5;
@@ -186,6 +214,14 @@ pard.t_labelingefficiency.Width=1.5;
 pard.labeling_efficiency.object=struct('String','.5','Style','edit');
 pard.labeling_efficiency.Width=.5;
 pard.labeling_efficiency.position=[3,2.5];
+
+pard.t_time.object=struct('String','Time point','Style','text');
+pard.t_time.position=[3,1];
+pard.t_time.Width=1.5;
+
+pard.time.object=struct('String','1','Style','edit');
+pard.time.Width=.5;
+pard.time.position=[3,2.5];
 
 pard.t2.object=struct('String','mean re-activations','Style','text');
 pard.t2.position=[4,1];

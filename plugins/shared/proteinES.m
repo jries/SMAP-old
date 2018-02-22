@@ -51,9 +51,9 @@ classdef proteinES < handle
                     proImg = accumarray(idx, idxZ,[],@(x) length(x));
                     proImg = [proImg zeros(min(size(proImg)),imageSize-min(size(proImg)))];
                     img = [proImg; zeros(imageSize-min(size(proImg)),imageSize)];
-
-                    figure(31)
-                    image(img, 'CDataMapping', 'scaled')
+                    img = uint8(round(mat2gray(img)*255));
+                    figure(999)
+                    image(img, 'CDataMapping', 'scaled');
                     % imwrite(uint8(round(mat2gray(proImg)*255)), [p.folderPath '\' p.imgPath])
                 case 'side'
                     % accumulate all the even points in the space to z=1
@@ -64,8 +64,9 @@ classdef proteinES < handle
                     proImg = [proImg; zeros(imageSize-Size(1),Size(2))];
                     Size = size(proImg);
                     img = [proImg zeros(imageSize, imageSize-Size(2))];
-                    figure(31)
-                    image(img', 'CDataMapping', 'scaled')
+                    img = uint8(round(mat2gray(img)*255));
+                    figure(999)
+                    image(img', 'CDataMapping', 'scaled');
                     % imwrite(uint8(round(mat2gray(proImg')*255)), [p.folderPath '\' p.imgPath])
             end
         end
