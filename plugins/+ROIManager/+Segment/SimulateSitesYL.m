@@ -17,10 +17,11 @@ classdef SimulateSitesYL<interfaces.DialogProcessor&interfaces.SEProcessor
             setvisibility(obj);
         end
         function out=run(obj,p)  
-        
-            [locst,possites]=simulatelocs2(p, 1);
-            %[locst2,~]=simulatelocs2(p, 2);
-            %locst = mergeStruct(locst, locst2);
+            [locst,possites]=simulatelocs2(p, p.channel(1));
+            if (p.pro2nd.selection)~= "No pes"
+                [locst2,~]=simulatelocs2(p, p.channel(2));
+                locst = mergeStruct(locst, locst2);
+            end
             
            if ~p.savez
                locst=rmfield(locst,{'znm','znm_gt'});
@@ -150,10 +151,11 @@ obj.guihandles.tif_imagesizet.Visible=tif;
 obj.guihandles.tif_imagesize.Visible=tif;
 obj.guihandles.load_button.Visible='on';
 obj.guihandles.coordinatefile.Visible='on';
+obj.guihandles.pro2nd.Visible = 'off';
 end
 
 function pesInput_callback(a,b,obj)
-if obj.getSingleGuiParameter('usePes');
+if obj.getSingleGuiParameter('usePes')
     txt = 'off';
     tif = 'off';
     pes = 'on';
@@ -167,17 +169,54 @@ if obj.getSingleGuiParameter('usePes');
     obj.guihandles.coordinatefile.Visible='off';
     obj.guihandles.time.Visible=pes;
     obj.guihandles.t_time.Visible=pes;
+    obj.guihandles.selectPro.Visible=pes;
+    obj.guihandles.pro2nd.Visible='off';
+    if isfield(obj.P.par, 'proteinES')
+        obj.guihandles.selectPro.String = fieldnames(obj.getPar('proteinES'));
+    end
 else
     pes = 'off';
     setvisibility(obj)
     obj.guihandles.time.Visible=pes;
     obj.guihandles.t_time.Visible=pes;
+    obj.guihandles.selectPro.Visible=pes;
+    obj.guihandles.pro2nd.Visible=pes;
+    obj.guihandles.setPro2nd.Value = 0;
+end
+end
+
+function pro2_callback(a,b,obj)
+if obj.getSingleGuiParameter('setPro2nd')
+    lenOptions=numel(obj.guihandles.selectPro.String(1:end ~= obj.guihandles.selectPro.Value));
+    if lenOptions < 1
+        obj.guihandles.pro2nd.String = {'No pes'};
+    else
+        obj.guihandles.pro2nd.String = obj.guihandles.selectPro.String(1:end ~= obj.guihandles.selectPro.Value);
+    end
+    obj.guihandles.pro2nd.Visible = 'on';
+else
+    obj.guihandles.pro2nd.Visible = 'off';
 end
 end
 
 function pard=guidef(obj)
 
-% 
+pard.t_selectPro.object=struct('String', 'Protein','Style','text');
+pard.t_selectPro.position=[1,1];
+pard.t_selectPro.Width=0.5;
+
+pard.setPro2nd.object=struct('String', '2nd', 'Style', 'checkbox', 'Value', 0, 'Callback', {{@pro2_callback,obj}});
+pard.setPro2nd.position=[1,2];
+pard.setPro2nd.Width=0.5;
+
+pard.selectPro.object=struct('String',{{'No pes'}},'Style','popup');
+pard.selectPro.position=[1,1.5];
+pard.selectPro.Width=0.5;
+
+pard.pro2nd.object=struct('String',{{'No pes'}},'Style','popup');
+pard.pro2nd.position=[1,2.5];
+pard.pro2nd.Width=0.5;
+
 pard.coordinatefile.object=struct('String','plugins/+ROIManager/+Segment/hidden/MakeNPCCoordinates.m','Style','edit');
 pard.coordinatefile.position=[1,1];
 pard.coordinatefile.Width=3;
@@ -256,6 +295,21 @@ pard.background.object=struct('String','20','Style','edit');
 pard.background.Width=.5;
 pard.background.position=[5,4.5];
 
+pard.t_channel.object=struct('String', 'Channel','Style','text');
+pard.t_channel.position=[6,1];
+pard.t_channel.Width=1.5;
+
+pard.channel.object=struct('String', '1','Style','edit');
+pard.channel.position=[6,2.5];
+pard.channel.Width=0.5;
+
+pard.t_viewType.object=struct('String', 'View','Style','text');
+pard.t_viewType.position=[6,3];
+pard.t_viewType.Width=1.5;
+
+pard.viewType.object=struct('String', {{'side', 'top'}},'Style','popup','Value', 1);
+pard.viewType.position=[6,4.5];
+pard.viewType.Width=0.5;
 
 pard.t6.object=struct('String','Number of sites','Style','text');
 pard.t6.position=[8,1];

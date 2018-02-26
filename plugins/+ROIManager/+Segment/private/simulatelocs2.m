@@ -1,13 +1,13 @@
 function [locsout,possites]=simulatelocs2(p, colour)
            [poslabels,possites]=getlabels(p, colour);
 %            p.maxframe=100000;
-           posreappear=reappear(poslabels,p.blinks,p.maxframes);
+           posreappear=reappear(poslabels,p.blinks(colour),p.maxframes(colour));
            
 %            p.lifetime=2;
-           photonsperframe=p.photons/p.lifetime;
-           posphot=getphotons(posreappear,photonsperframe,p.lifetime);
+           photonsperframe=p.photons(colour)/p.lifetime(colour);
+           posphot=getphotons(posreappear,photonsperframe,p.lifetime(colour));
            
-           locs=locsfrompos(posphot,p);
+           locs=locsfrompos(posphot,p, colour);
            locsout=singlelocs(locs);
 end
 
@@ -75,10 +75,17 @@ function [locs,possites]=getlabels(p, colour)
 % randomxyd
 
 if p.usePes
-    image = p.obj.P.par.proteinES.content.getTimeImg(p.time, 'side', p.tif_imagesize);
-    p.Mean = p.obj.P.par.proteinES.content.timePar.nm(p.obj.P.par.proteinES.content.timePar.time==p.time);
-    p.Std = 0.01;
-    
+    switch colour
+        case 1  
+            image = p.obj.getPar('proteinES').(p.selectPro.selection).getTimeImg(p.time, p.viewType.selection, p.tif_imagesize);
+            p.Mean = p.obj.getPar('proteinES').(p.selectPro.selection).timePar.nm(p.obj.getPar('proteinES').(p.selectPro.selection).timePar.time==p.time);
+            p.Std = 0;
+        case 2
+            image = p.obj.getPar('proteinES').(p.pro2nd.selection).getTimeImg(p.time, p.viewType.selection, p.tif_imagesize);
+            p.Mean = p.obj.getPar('proteinES').(p.pro2nd.selection).timePar.nm(p.obj.getPar('proteinES').(p.pro2nd.selection).timePar.time==p.time);
+            p.Std = 0;
+        otherwise
+    end
 else
     paths =  strsplit(p.coordinatefile, '|');
     switch colour
@@ -223,7 +230,7 @@ function locs=locsfromimage(image,p, colour)
     ExpP = numel(image); % number of image pixels
     ActP = sum(norFilter(:)); % sum of all pixel values in the normalized filter
     numInput = (finalNumMol*ExpP)/ActP;
-    numInput = ceil(numInput * 1.2);
+    numInput = ceil(numInput * 2);
     
     setRange = length(image);
     x = rand(1,numInput)*setRange;
@@ -278,13 +285,13 @@ locso.frame=double(ceil(rand(length(indout),1)*maxframe));
 end
 
 
-function locs=locsfrompos(locsi,p)
+function locs=locsfrompos(locsi,p, colour)
 for k=length(locsi):-1:1
-    locs(k)=locsfromposi(locsi(k),p);
+    locs(k)=locsfromposi(locsi(k),p, colour);
 end
 end
 
-function locs=locsfromposi(locsi,p)
+function locs=locsfromposi(locsi,p, colour)
     numlocs=length(locsi.x);
 %     phot=exprnd(p.photons,numlocs,1);
     phot=locsi.phot;
@@ -296,9 +303,9 @@ function locs=locsfromposi(locsi,p)
     indin=phot>=10;
     numlocs=sum(indin);
     %MOrtensen
-    locprecnm=sqrt(sa^2./phot.*(16/9+8*pi*sa^2*p.background^2./phot/a^2));
+    locprecnm=sqrt(sa^2./phot.*(16/9+8*pi*sa^2*p.background(colour)^2./phot/a^2));
     locs.phot=single(phot(indin));
-    locs.bg=single(locprecnm(indin)*0+p.background);
+    locs.bg=single(locprecnm(indin)*0+p.background(colour));
     locs.locprecnm=single(locprecnm(indin));
 %     locs.frame=double(ceil(rand(numlocs,1)*p.maxframe));
     locs.xnm=single(locsi.x(indin)+randn(numlocs,1).*locprecnm(indin));

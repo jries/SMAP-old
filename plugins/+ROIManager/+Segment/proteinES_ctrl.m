@@ -31,7 +31,10 @@ classdef proteinES_ctrl<interfaces.DialogProcessor
             %(string of selected item).
                        
             %set a global parameter
-            obj.setPar('proteinES', pes);
+            if ~isfield(obj.P.par, 'proteinES')
+                obj.setPar('proteinES', [])
+            end
+             obj.P.par.proteinES.content.(pes.proteinName)=pes;
             %this example updates all lists in other plugins which are
             %linked to the fields of localization data.
             
@@ -161,7 +164,7 @@ classdef proteinES_ctrl<interfaces.DialogProcessor
             %called after the global parameter has been changed. this
             %function is only called, if the parameter is changed by a
             %different class.
-            pard.syncParameters={{'globalParameterName','radius',{'String','Value'},{@aftersync_callback,obj}}};
+            pard.syncParameters={{'globalParameterName','t_radius',{'String','Value'},{@aftersync_callback,obj}}};
             
 
         end
