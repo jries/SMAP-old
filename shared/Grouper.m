@@ -64,7 +64,7 @@ classdef Grouper< interfaces.LocDataInterface
             maxactive=10000;
             list=connectsingle2c(double(x(indsort)),double(y(indsort)),double(frame(indsort)),double(dx),int32(dt),int32(maxactive));
             clear frame
-%             listm=connectsingle2mat(double(x(indsort)),double(y(indsort)),double(frame(indsort)),double(dx),int32(dt),int32(maxactive));
+%              listm=connectsingle2mat(double(x(indsort)),double(y(indsort)),double(frame(indsort)),double(dx),int32(dt),int32(maxactive));
             if list(end)==0
                 list(end)=max(list)+1; %FIX connectsingle doesnt assign last loc. Fix later!
             end  
