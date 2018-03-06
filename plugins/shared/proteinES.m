@@ -1,17 +1,12 @@
 classdef proteinES < handle
-%     bu = basicUnit(25,'ellipse', 110, 'bar', 25);
-%     pes = proteinES('121212', 'sla1', bu, 'ellipse','bar', 9, -135);
-%     timePar = readtable('C:\Users\ries\Dropbox\EMBL\Jonas lab\data\timePar_earlyCoat - Sheet1.txt');
-%     pes.addTimePoint(timePar)
-%     pes.addTimePoint(table([1],[1],[5],[5],[105],[0],[200],{'bar'},'VariableNames',{'time', 'dz', 'th', 'de', 'zm', 'shi', 'nm', 'sha'}));
-%     pes.addTimePoint(table([0],[1],[25],[5],[2.5],[-25],[200],{'bar'},'VariableNames',{'time', 'dz', 'th', 'de', 'zm', 'shi', 'nm', 'sha'}));
-%     pes.addTimePoint(table([2],[1],[5],[5],[105],[0],[200],{'bar'},'VariableNames',{'time', 'dz', 'th', 'de', 'zm', 'shi', 'nm', 'sha'}));
-%     pes.addTimePoint(table([3],[1],[5],[5],[105],[0],[200],{'bar'},'VariableNames',{'time', 'dz', 'th', 'de', 'zm', 'shi', 'nm', 'sha'}));
-%     pes.addTimePoint(table([4],[1],[5],[5],[105],[0],[200],{'bar'},'VariableNames',{'time', 'dz', 'th', 'de', 'zm', 'shi', 'nm', 'sha'}));
-%     pes.timeData.t1 = getTime(pes, 1)
-%     pes.timeData.t0 = getTime(pes, 0)
+    % You can create an object to represent a protien at endocytic sites.
+    % You can easily create objects of this class using the segment plug-in
+    % proteinES_ctrl.
+    % Time-related parameters can be defined in timePar.
+    % You can specify the endocytic membrane by modifying the property
+    % endocyticPM, which is a basicUnit object.
+
     properties
-        %define class properties if needed
         proteinID
         proteinName
         endocyticPM
@@ -23,14 +18,13 @@ classdef proteinES < handle
         zmt0
     end
     methods
-        function obj=proteinES(proteinID, proteinName, endocyticPM, capShape, bottomShape, velocityEPM, zmt0)   %replace by filename
+        function obj=proteinES(proteinID, proteinName, endocyticPM, capShape, bottomShape, velocityEPM, zmt0)
             obj.proteinID = proteinID;
             obj.proteinName = proteinName;
             obj.endocyticPM = endocyticPM;
             obj.capShape = capShape;
             obj.bottomShape = bottomShape;
             timePar = proteinES.emptyTimePar();
-            % obj.timePar = table([1],[1],[10],[20],[5],[5],[200],{'bar'},'VariableNames',{'time', 'dz', 'th', 'de', 'zm', 'shi', 'nm', 'sha'});
             obj.timePar = timePar;
             obj.timeData = [];
             obj.velocityEPM = velocityEPM;
@@ -39,7 +33,7 @@ classdef proteinES < handle
         function addTimePoint(obj, aTable)
             obj.timePar = [obj.timePar;aTable];
         end
-        function img = getTimeImg(obj, t, viewType, imageSize)
+        function [img, nm] = getTimeImg(obj, t, viewType, imageSize)
             if ~isfield(obj.timeData, proteinES.time2label(t))
                 obj.timeData.(proteinES.time2label(t)) = obj.getTime(t);
             end    
@@ -69,15 +63,26 @@ classdef proteinES < handle
                     image(img', 'CDataMapping', 'scaled');
                     % imwrite(uint8(round(mat2gray(proImg')*255)), [p.folderPath '\' p.imgPath])
             end
+            if ~ismember(t, obj.timePar.time)
+                thisTP = obj.interpTimePar(t);
+                nm = thisTP.nm;
+            else
+                thisTP = obj.timePar(obj.timePar.time==t,:);
+                nm = thisTP.nm;
+            end
         end
         function time = getTime(obj, t)
-            % timeTime = getTime(pes,1);           
-            if t<=3
+            if t<=3 % determining the last time point that a pre-invagination model should be used.
                 if t >= 0
                     thisTP = obj.timePar(obj.timePar.time==999,:);
                 else
-                    thisTP = obj.timePar(obj.timePar.time==t,:);
+                    if ismember(t, obj.timePar.time)
+                        thisTP = obj.timePar(obj.timePar.time==t,:);
+                    else
+                        thisTP = obj.interpTimePar(t);
+                    end
                 end
+                % basicUnit(capDepth, capShape, bottomDepth, bottomShape, radius)
                 pseudoInner = basicUnit(0, obj.endocyticPM.capShape, obj.endocyticPM.bottomDepth, obj.endocyticPM.bottomShape, obj.endocyticPM.radius+thisTP.shi);
                 pseudoOuter = basicUnit(0, obj.endocyticPM.capShape, obj.endocyticPM.bottomDepth, obj.endocyticPM.bottomShape, obj.endocyticPM.radius+thisTP.shi+thisTP.th);
                 prePx = fullPixel(pseudoOuter);
@@ -94,7 +99,11 @@ classdef proteinES < handle
             prePx = prePx(prePx.z>=0,:);
             
             if t>0
-                thisTP = obj.timePar(obj.timePar.time==t,:);
+                if ismember(t, obj.timePar.time)
+                    thisTP = obj.timePar(obj.timePar.time==t,:);
+                else
+                    thisTP = obj.interpTimePar(t);
+                end
                 inner = basicUnit(obj.endocyticPM.capDepth+thisTP.shi, obj.endocyticPM.capShape, obj.endocyticPM.bottomDepth, obj.endocyticPM.bottomShape, obj.endocyticPM.radius+thisTP.shi);
                 if strcmp(obj.endocyticPM.capShape, obj.capShape) && strcmp(obj.endocyticPM.bottomShape, obj.bottomShape) % Check the shapes of inner and outer columns are the same or not
                     outer = basicUnit(obj.endocyticPM.capDepth+thisTP.shi+thisTP.th, obj.endocyticPM.capShape, obj.endocyticPM.bottomDepth, obj.endocyticPM.bottomShape, obj.endocyticPM.radius+thisTP.shi+thisTP.th);
@@ -139,7 +148,15 @@ classdef proteinES < handle
                     theAns = outer.basicComponent.x(idx);
             end
         end
-        
+        function tp = interpTimePar(obj, t)
+            tp = proteinES.emptyTimePar();
+            for i=2:6
+                thisVal = interp1(obj.timePar.time, obj.timePar{:,i}, t);
+                tp{1,i}=thisVal;
+            end
+            tp{1,1}=t;
+            tp.sha={'bar'};
+        end
     end
     methods(Static)
         function label = time2label(t)
@@ -150,6 +167,7 @@ classdef proteinES < handle
         function timePar = emptyTimePar()
             timePar = table([],[],[],[],[],[],[],'VariableNames',{'time', 'th', 'de', 'zm', 'shi', 'nm', 'sha'});
         end
+
     end
 end
 

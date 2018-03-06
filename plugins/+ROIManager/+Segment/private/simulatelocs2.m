@@ -77,12 +77,14 @@ function [locs,possites]=getlabels(p, colour)
 if p.usePes
     switch colour
         case 1  
-            image = p.obj.getPar('proteinES').(p.selectPro.selection).getTimeImg(p.time, p.viewType.selection, p.tif_imagesize);
-            p.Mean = p.obj.getPar('proteinES').(p.selectPro.selection).timePar.nm(p.obj.getPar('proteinES').(p.selectPro.selection).timePar.time==p.time);
+            [image, nm] = p.obj.getPar('proteinES').(p.selectPro.selection).getTimeImg(p.time, p.viewType.selection, p.tif_imagesize);
+            image = imrotate(image, 180);
+            p.Mean = nm;
             p.Std = 0;
         case 2
-            image = p.obj.getPar('proteinES').(p.pro2nd.selection).getTimeImg(p.time, p.viewType.selection, p.tif_imagesize);
-            p.Mean = p.obj.getPar('proteinES').(p.pro2nd.selection).timePar.nm(p.obj.getPar('proteinES').(p.pro2nd.selection).timePar.time==p.time);
+            [image, nm] = p.obj.getPar('proteinES').(p.pro2nd.selection).getTimeImg(p.time, p.viewType.selection, p.tif_imagesize);
+            image = imrotate(image, 180);
+            p.Mean = nm;
             p.Std = 0;
         otherwise
     end

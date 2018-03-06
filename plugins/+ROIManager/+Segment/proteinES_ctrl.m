@@ -1,4 +1,4 @@
-classdef proteinES_ctrl<interfaces.DialogProcessor
+classdef proteinES_ctrl<interfaces.DialogProcessor&interfaces.SEProcessor
     % PLUGIN_TEMPLATE Summary of this plugin goes here
     % put a description of your plugin here.
         %replace Plugin_Template by filename   
@@ -44,7 +44,7 @@ classdef proteinES_ctrl<interfaces.DialogProcessor
 
         end
         function pard=guidef(obj)
-           %pard structure can be =[]; All fields are optional.
+            %pard structure can be =[]; All fields are optional.
             
             %define your GUI: for every GUI control define a structure as
             %follows, replace 'guiobject' by a name by which you want to
@@ -142,11 +142,26 @@ classdef proteinES_ctrl<interfaces.DialogProcessor
             pard.timeParPath.position=[8,2:3.5];
             pard.timeParPath.Width=1;
             
-            pard.file_button.object=struct('String','Choose file','Style','pushbutton','Callback',{{@saveTo_callback,obj}});
+            pard.file_button.object=struct('String','Choose file','Style','pushbutton','Callback',{{@load_callback,obj}});
             pard.file_button.position=[8,3];
             pard.file_button.Width=1;   
             
+            pard.saveAs.object=struct('String','Save created object(s) as...','Style','text');
+            pard.saveAs.position = [9,1];
+            pard.saveAs.Width = 1.5;
+            
+            pard.save_button.object=struct('String','Save','Style','pushbutton' ,'Callback',{{@exportProteinES_callback,obj}});
+            pard.save_button.position = [9,2.5];
+            pard.save_button.Width = 0.5;
             %pard.guiobject.TooltipString=sprintf('you can define a tooltip string. \n This tip is displayed when you hover the mouse on the control');
+            
+            pard.t_load.object=struct('String','Load created object(s) as...','Style','text');
+            pard.t_load.position = [10,1];
+            pard.t_load.Width = 1.5;
+            
+            pard.load_button.object=struct('String','Load','Style','pushbutton' ,'Callback',{{@importProteinES_callback,obj}});
+            pard.load_button.position = [10,2.5];
+            pard.load_button.Width = 0.5;
             
             %provide a description and name in the field: plugininfo.
             pard.plugininfo.name='proteinES_ctrl';
@@ -171,6 +186,29 @@ classdef proteinES_ctrl<interfaces.DialogProcessor
     end
 end
 
+function exportProteinES_callback(a, b, obj)
+    proteinESObj = obj.getPar('proteinES');
+    if class(proteinESObj)== "struct"
+        [f,p]=uiputfile({'*.mat'},'Name the proteinES file','/');
+        if ~f
+            return
+        end
+        save([p f], 'proteinESObj');
+    else
+        warning('There is no generated proteinES object.')
+    end
+end
+
+function importProteinES_callback(a, b, obj)
+    
+    [f,p]=uigetfile({'*.mat'},'Choose a proteinES file','/');
+    if ~f
+        return
+    end
+    load([p f], 'proteinESObj');
+    obj.setPar('proteinES', proteinESObj);
+
+end
 
 function callbackfunction(uiobject,data,obj,extradata)
 disp('callback')
@@ -180,7 +218,7 @@ function aftersync_callback(obj)
 disp('aftersync')
 end
 
-function saveTo_callback(a,b,obj)
+function load_callback(a,b,obj)
 f=obj.getSingleGuiParameter('timeParPath');
 [f,p]=uigetfile({'*.txt'},'Choose timePar file',f);
 if ~f

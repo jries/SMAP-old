@@ -57,7 +57,7 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
             % target
             SizeD = size(D);
 
-            diff = cell(slideStep-1,1);
+            diffOne = cell(slideStep-1,1);
             diffAll = zeros(SizeD(1), SizeD(2)-slideStep);
             for i = 1:(slideStep-1)
                 diffAll = diffAll + (D(:,1+i:end-slideStep+i) - D(:,1:(end-slideStep)) < 0);
@@ -162,6 +162,17 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
             hold(h,'off')
 
             out.boundary = [CxFParent CyFParentA];
+            stepWidth = diff(CyFParentA);
+            stepWidthNon0 = stepWidth(find(stepWidth));
+            stallTime = diff(find(stepWidth));
+            
+            h2=obj.setoutput('statistics');
+            ax1 = subplot(1,2,1,h2);
+            histogram(ax1, stepWidthNon0, 'BinWidth', 1);
+            title(ax1,'Rate');
+            ax2 = subplot(1,2,2);
+            histogram(ax2, stallTime, 'BinWidth', 1);
+            title(ax2,'Stall time');
         end
      
         function pard=guidef(obj)

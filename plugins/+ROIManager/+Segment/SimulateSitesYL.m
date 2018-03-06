@@ -16,89 +16,103 @@ classdef SimulateSitesYL<interfaces.DialogProcessor&interfaces.SEProcessor
         function initGui(obj)
             setvisibility(obj);
         end
-        function out=run(obj,p)  
-            [locst,possites]=simulatelocs2(p, p.channel(1));
-            if (p.pro2nd.selection)~= "No pes"
-                [locst2,~]=simulatelocs2(p, p.channel(2));
-                locst = mergeStruct(locst, locst2);
-            end
-            
-           if ~p.savez
-               locst=rmfield(locst,{'znm','znm_gt'});
-           end
-           
-
-               labels=num2str(p.labeling_efficiency*100,'%2.0f');
-                phots=num2str(p.photons,'%3.0f');
-                blinks=num2str(p.blinks,'%3.0f');
-                filename=['L' labels 'P' phots 'B' blinks];
-           
-           
-           obj.locData.addfile(['simulated_' num2str(obj.locData.files.filenumberEnd) '_' filename]);
-           obj.locData.files.file(end).info.simulationParameters=obj.getGuiParameters;
-           obj.locData.addLocData(locst);
-           obj.locData.sort('filenumber','frame');
-           try
-           initGuiAfterLoad(obj);
-           catch err
-               err
-           end
-           se=obj.locData.SE;
-           cell=interfaces.SEsites;
-           cell.pos=[mean(locst.xnm) mean(locst.ynm)];
-           cell.ID=0;
-           cell.info.filenumber=obj.locData.files.filenumberEnd;
-           se.addCell(cell);
-           for k=1:length(possites)
-               thissite=interfaces.SEsites;
-               thissite.pos=[possites(k).x possites(k).y];
-               thissite.info.cell=cell.ID;
-               thissite.info.filenumber=cell.info.filenumber;
-                % thissite.cellnumber=sitepar.currentcell.number;
-        %         thissite.number=sitepar.sitelist.cellnumber+1;
-                se.addSite(thissite);
-           end 
-           
-%            obj.setPar('SimulateSitesParameters',p);
-
-            try
-           se.currentsite=se.sites(1);
-           se.currentcell=se.cells(1);
-           se.currentfile=se.files(1);
-           se.processors.preview.updateFilelist;
-           se.processors.preview.updateCelllist;
-           se.processors.preview.updateSitelist; 
-            se.processors.preview.nextsite(1)
-%            se.processors.plotsite(se.sites(1));
-            catch err
-                err
-            end
-           
-            if p.savenow.Value==2
-                obj.locData.loc.xnm=obj.locData.loc.xnm_gt;
-                obj.locData.loc.ynm=obj.locData.loc.ynm_gt;
-                obj.locData.loc.znm=obj.locData.loc.znm_gt;
-                obj.locData.loc=rmfield(obj.locData.loc,{'xnm_gt','ynm_gt','znm_gt'});
-            end
-            if p.savenow.Value>1
-                lastsml=obj.getPar('lastSMLFile');
-                if ~isempty(lastsml)
-                    path=fileparts(lastsml);
-                else
-                    path='';
+        function out=run(obj,p)
+            ptime = p.time;
+            if length(ptime)==1
+                runSingleSim(obj,p);
+            else
+                allTime = ptime(1):ptime(2):ptime(3);
+                for i=1:length(allTime)
+                    p.time=allTime(i);
+                    runSingleSim(obj,p);
                 end
-               [file,path]= uiputfile([path filesep obj.locData.files.file(1).name]);
-               if file
-                    obj.locData.savelocs([path file])
-                    obj.setPar('lastSMLFile',[path file]);
-               end
             end
-          out=[];
+            out = [];
         end
         function pard=guidef(obj)
             pard=guidef(obj);
         end
     end
+end
+
+function out=runSingleSim(obj,p)  
+[locst,possites]=simulatelocs2(p, p.channel(1));
+if (p.pro2nd.selection)~= "No pes"
+    [locst2,~]=simulatelocs2(p, p.channel(2));
+    locst = mergeStruct(locst, locst2);
+end
+
+if ~p.savez
+   locst=rmfield(locst,{'znm','znm_gt'});
+end
+
+    info = [num2str(p.channel(1)) p.selectPro.selection num2str(p.channel(2)) p.pro2nd.selection 'T' num2str(p.time)];
+    labels=num2str(p.labeling_efficiency*100,'%2.0f');
+    phots=num2str(p.photons,'%3.0f');
+    blinks=num2str(p.blinks,'%3.0f');
+    filename=['L' labels 'P' phots 'B' blinks 'Info' info];
+
+
+obj.locData.addfile(['simulated_' num2str(obj.locData.files.filenumberEnd) '_' filename]);
+obj.locData.files.file(end).info.simulationParameters=obj.getGuiParameters;
+obj.locData.addLocData(locst);
+obj.locData.sort('filenumber','frame');
+try
+initGuiAfterLoad(obj);
+catch err
+   err
+end
+se=obj.locData.SE;
+cell=interfaces.SEsites;
+cell.pos=[mean(locst.xnm) mean(locst.ynm)];
+cell.ID=0;
+cell.info.filenumber=obj.locData.files.filenumberEnd;
+se.addCell(cell);
+for k=1:length(possites)
+   thissite=interfaces.SEsites;
+   thissite.pos=[possites(k).x possites(k).y];
+   thissite.info.cell=cell.ID;
+   thissite.info.filenumber=cell.info.filenumber;
+    % thissite.cellnumber=sitepar.currentcell.number;
+%         thissite.number=sitepar.sitelist.cellnumber+1;
+    se.addSite(thissite);
+end 
+
+%            obj.setPar('SimulateSitesParameters',p);
+
+try
+se.currentsite=se.sites(1);
+se.currentcell=se.cells(1);
+se.currentfile=se.files(1);
+se.processors.preview.updateFilelist;
+se.processors.preview.updateCelllist;
+se.processors.preview.updateSitelist; 
+se.processors.preview.nextsite(1)
+%            se.processors.plotsite(se.sites(1));
+catch err
+    err
+end
+
+if p.savenow.Value==2
+    obj.locData.loc.xnm=obj.locData.loc.xnm_gt;
+    obj.locData.loc.ynm=obj.locData.loc.ynm_gt;
+    obj.locData.loc.znm=obj.locData.loc.znm_gt;
+    obj.locData.loc=rmfield(obj.locData.loc,{'xnm_gt','ynm_gt','znm_gt'});
+end
+if p.savenow.Value>1
+    lastsml=obj.getPar('lastSMLFile');
+    if ~isempty(lastsml)
+        path=fileparts(lastsml);
+    else
+        path='';
+    end
+   [file,path]= uiputfile([path filesep obj.locData.files.file(1).name]);
+   if file
+        obj.locData.savelocs([path file])
+        obj.setPar('lastSMLFile',[path file]);
+   end
+end
+out=[];
 end
 
 function load_callback(a,b,obj)
