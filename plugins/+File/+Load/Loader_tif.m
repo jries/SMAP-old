@@ -69,7 +69,7 @@ else
 end
 
 if isfield(p,'stack')&&p.stack
-    images=chooseTifImage(file);
+    images=chooseTifImage(file,obj.P);
 else
     images=gettif(file);
 end
