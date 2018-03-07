@@ -12,7 +12,7 @@ classdef Intensity2Channel<interfaces.DialogProcessor
                 p.assignfield1.selection='fit_n2';
                 p.assignfield2.selection='fit_n1';
             end
-            ll=obj.locData.getloc({'xnm','inungrouped'},'Position','roi','layer',find(obj.getPar('sr_layerson')));
+            ll=obj.locData.getloc({'xnm','inungrouped'},'Position','roi','layer',find(obj.getPar('sr_layerson')),'removeFilter','channel');
             loc=get_intensity2ch(obj.locData.loc,p,ll.inungrouped);
             if p.combineunassigned
                 loc.channel(loc.channel==3)=1;
