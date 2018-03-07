@@ -47,23 +47,24 @@ classdef export_3Dvolumes<interfaces.DialogProcessor&interfaces.SEProcessor
              positions=zeros(length(selectedsites),5);
             for k=selectedsites
                 site=sites(k);
-                
-                [locs,indloc]=obj.locData.getloc({'xnm','ynm','znm','numberInGroup'},'position',sites(k),'layer',layers);
-                zpos=median(locs.znm);
-                xh=locs.xnm-sites(k).pos(1);yh=locs.ynm-sites(k).pos(2);zh=locs.znm-zpos;
-                if p.blinkcoded
-                    [imouth,dxo,dyo,dzo]=myhist3(xh,yh,zh,pixelsize,xrange,yrange,zrange,locs.numberInGroup);
-                else
-                 imouth=renderhist3D(xh,yh,zh,xrange,yrange,zrange,pixelsize);
-                end
-                filen=[f strrep(site.name,'.','_')];
-                switch p.format.selection
-                case '.em'
-                    
-                    fhere= [filen '.em'];
-                    tom_emwrite([path filesep fhere],imouth); 
-                otherwise
-                    disp('format not implemented');
+                for l=1:length(layers)
+                    [locs,indloc]=obj.locData.getloc({'xnm','ynm','znm','numberInGroup'},'position',sites(k),'layer',layers(l));
+                    zpos=median(locs.znm);
+                    xh=locs.xnm-sites(k).pos(1);yh=locs.ynm-sites(k).pos(2);zh=locs.znm-zpos;
+                    if p.blinkcoded
+                        [imouth,dxo,dyo,dzo]=myhist3(xh,yh,zh,pixelsize,xrange,yrange,zrange,locs.numberInGroup);
+                    else
+                     imouth=renderhist3D(xh,yh,zh,xrange,yrange,zrange,pixelsize);
+                    end
+                    filen=[f strrep(site.name,'.','_') '_' int2str(l)];
+                    switch p.format.selection
+                    case '.em'
+
+                        fhere= [filen '.em'];
+                        tom_emwrite([path filesep fhere],imouth); 
+                    otherwise
+                        disp('format not implemented');
+                    end
                 end
                         
                

@@ -17,7 +17,8 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
             setvisibility(obj);
         end
         function out=run(obj,p)  
-            [locst,possites]=simulatelocs(p);
+            [locst,possites]=simulatelocs(p, 1);
+            
            if ~p.savez
                locst=rmfield(locst,{'znm','znm_gt'});
            end
@@ -99,7 +100,7 @@ end
 
 
 function load_callback(a,b,obj)
-f=obj.getSingleGuiParameter('coordinatefile');
+f=obj.getSingleGuiParameter('coordinatefile'); 
 [f,p]=uigetfile({'*.*';'*.tif';'*.png';'*.csv';'*.txt';'*.mat'},'Choose coordinate file',f);
 if ~f
     return

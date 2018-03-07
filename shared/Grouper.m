@@ -60,10 +60,11 @@ classdef Grouper< interfaces.LocDataInterface
             end
             sm=size(sortmatrix);
             [~,indsort]=sortrows(sortmatrix,1:sm(2));
-            
+            clear sortmatrix
             maxactive=10000;
             list=connectsingle2c(double(x(indsort)),double(y(indsort)),double(frame(indsort)),double(dx),int32(dt),int32(maxactive));
-%             listm=connectsingle2mat(double(x(indsort)),double(y(indsort)),double(frame(indsort)),double(dx),int32(dt),int32(maxactive));
+            clear frame
+%              listm=connectsingle2mat(double(x(indsort)),double(y(indsort)),double(frame(indsort)),double(dx),int32(dt),int32(maxactive));
             if list(end)==0
                 list(end)=max(list)+1; %FIX connectsingle doesnt assign last loc. Fix later!
             end  
@@ -73,18 +74,22 @@ classdef Grouper< interfaces.LocDataInterface
             
             numbers=1:sm(1);
             indold=numbers(indsort);
+            clear numbers
             [~,indback]=sort(indold);
             listback=list(indback);
+            clear indback;
           
             obj.locData.setloc('groupindex',listback)
             
              %number of locs
             [listsort,indsort2]=sort(list);
+            clear list
 %             numbergroup=zeros(size(listsort));
 %             whos listsort
             if ~isempty(listsort)
             numbergroup=countlocs(double(listsort));
-            
+            obj.dllistsort=[diff(listsort);1];
+            clear listsort
            
 %             groupc=listsort(1);
 %             ng=0;
@@ -102,12 +107,14 @@ classdef Grouper< interfaces.LocDataInterface
             
             
             indold2=indold(indsort2);
+            clear indsort2 indold
             [~,indback2]=sort(indold2);
+            clear indold2
             obj.locData.setloc('numberInGroup',numbergroup(indback2));
             
             [~,obj.indsortlist]=sort(listback);
             
-            obj.dllistsort=[diff(listsort);1];
+            
             
   
             end

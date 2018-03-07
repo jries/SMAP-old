@@ -12,6 +12,11 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
             end
 %             try
             framerange=p.framerange(1):p.framerange(end);
+            if p.frameranget2
+                framerange2=p.framerange2(1):p.framerange2(end);
+            else 
+                framerange2=framerange;
+            end
             
             loadfile(obj,p,file,mode);
             %search for Tiff
@@ -24,36 +29,63 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
                 testfile=[path filesep allfiles(1).name];
             end
             
-            il=imageLoader(testfile);
-            im=il.getImage(framerange(1));
+%             il=imageLoader(testfile);
+             il=imageloaderAll(testfile,[],obj.P);
+            im=il.getimage(framerange(1));
+            
             for k=framerange
-                im=max(im,il.getImage(k));
+                im=max(im,il.getimage(k));
             end
+            im2=il.getimage(framerange2(1));
+            for k=framerange2
+                im2=max(im2,il.getimage(k));
+            end
+            
+            emon=il.metadata.EMon;
+            il.close;
+            roi=il.metadata.roi;
+            if emon
+                im=im(:,end:-1:1);
+                im2=im2(:,end:-1:1);
+                roi(1)=512-roi(1)-roi(3);
+            end
+            
 %             catch err
 %                 err
 %                 disp(['no image found for ' file])
 %             end
             
 %             filetest=[il.info.path filesep il.info.files{framerange(1)}];
-            filetest=il.info.filename;
-            tiff=gettif(filetest);
+%             filetest=il.file;
+%             tiff=gettif(filetest);
+            tiff=gettifmetadata(il);
             tiff.image=im;
             tiff.info.cam_pixelsize_um=obj.locData.files.file(end).info.cam_pixelsize_um;
             tiff.info.name='MIP';
+            tiff.info.roi=roi;
             
             bg=mywaveletfilter(double(im),3,true);
             mipbg=double(im)-bg;
+            
+            bg2=mywaveletfilter(double(im2),3,true);
+            mipbg2=double(im2)-bg2;
+            
             load(p.Tfile)
             if ~exist('transformation','var')
                 disp('selected transformation file does not have a valid transformation, image not transformed');
                 mipbgT=mipbg;
+                mipbgT2=mipbg2;
             else
                 p.cam_pixelsize_nm=tiff.info.cam_pixelsize_um*1000;
                 p.roitiff=tiff.info.roi;
                 p.datapart.selection='all (T->R)';
                 mipbgT=apply_transform_image(mipbg,transformation,p);
+                mipbgT2=apply_transform_image(mipbg2,transformation,p);
             end
             
+            tiff2=tiff;
+            tiff2.image=im2;
+            tiff2.info.name='MIP2';
             
             tiffbg=tiff;
             tiffbg.image=mipbg;
@@ -61,9 +93,21 @@ classdef Loader_sml_Tiff<interfaces.DialogProcessor;
             tiffbgT=tiff;
             tiffbgT.image=mipbgT;
             tiffbgT.info.name='MIP-BG-T';
-           
-            obj.locData.files.file(end).tif=[tiffbgT,tiff,tiffbg];
-            obj.locData.files.file(end).numberOfTif=3;          
+            
+            tiffbg2=tiff;
+            tiffbg2.image=mipbg2;
+            tiffbg2.info.name='MIP-BG2';
+            tiffbgT2=tiff;
+            tiffbgT2.image=mipbgT2;
+            tiffbgT2.info.name='MIP-BG-T2';
+            
+            if p.frameranget2
+                obj.locData.files.file(end).tif=[tiffbgT,tiff,tiffbg,tiffbgT2,tiff2,tiffbg2];
+                obj.locData.files.file(end).numberOfTif=6;      
+            else
+                obj.locData.files.file(end).tif=[tiffbgT,tiff,tiffbg];
+                obj.locData.files.file(end).numberOfTif=3;          
+            end
             
         end
         function run(obj,p)
@@ -105,6 +149,16 @@ pard.framerange.object=struct('Style','edit','String','39 44');
 pard.framerange.position=[1,2.25];
  pard.framerange.Width=.75;
 pard.framerange.TooltipString='frame range';
+
+pard.frameranget2.object=struct('Style','checkbox','String','frame range 2:','Value',0);
+pard.frameranget2.position=[1,3];
+ pard.frameranget2.Width=1.25;
+pard.frameranget2.TooltipString='frame range';
+
+pard.framerange2.object=struct('Style','edit','String','1 3');
+pard.framerange2.position=[1,4.25];
+ pard.framerange2.Width=.75;
+pard.framerange2.TooltipString='frame range';
 
 pard.searchstringt.object=struct('Style','text','String','search string');
 pard.searchstringt.position=[2,1];
@@ -210,3 +264,18 @@ end
 %    
 %    
 % end
+
+function tiff=gettifmetadata(il)
+% tiff.image=imread(file); 
+% sim=size(imout.image);
+metadata=il.metadata;
+tiff.info.Width=metadata.Width;
+tiff.info.Height=metadata.Height;
+tiff.info.roi=metadata.roi;
+if all((tiff.info.roi(:))==([0 ;0 ;512; 512]))
+    imout.info.roi(3:4)=[metadata.Width metadata.Height];
+end
+tiff.info.name=il.file;
+end
+
+

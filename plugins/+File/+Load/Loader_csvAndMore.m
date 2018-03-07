@@ -307,15 +307,20 @@ end
 
 
 
+if isfield(pfile,'cam_pixelsize_um')
+    pixnm=pfile.cam_pixelsize_um;
+else
+    pixnm=100;
+end
 
 obj.locData.addLocData(locData);
 
 filestruc=locData.files.file;
 filestruc.name=file;
-mx=ceil(max(locData.loc.xnm)/100);
-my=ceil(max(locData.loc.ynm)/100);
+mx=ceil(max(locData.loc.xnm)/pixnm);
+my=ceil(max(locData.loc.ynm)/pixnm);
 
-filestruc.info=struct('Width',mx,'Height',my,'roi',[0 0 mx my],'cam_pixelsize_um',100/1000);
+filestruc.info=struct('Width',mx,'Height',my,'roi',[0 0 mx my],'cam_pixelsize_um',pixnm/1000);
 if obj.locData.files.filenumberEnd==0
     obj.locData.files.file=filestruc;
     

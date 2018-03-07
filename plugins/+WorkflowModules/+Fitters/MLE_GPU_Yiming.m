@@ -76,6 +76,15 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             end
             if obj.fitpar.issCMOS
                 varstack=getvarmap(obj.fitpar.varmap,stackinfo,size(imstack,1));
+                imstackraw=imstack; %XXXXXXXXXXXXXXXXXXXX
+                if ~isempty(obj.fitpar.offsetmap)
+                    offsetstack=getvarmap(obj.fitpar.offsetmap,stackinfo,size(imstack,1));
+                    imstack=imstack-offsetstack;
+                end
+                if ~isempty(obj.fitpar.gainmap)
+                    gainstack=getvarmap(obj.fitpar.gainmap,stackinfo,size(imstack,1));
+                    imstack=imstack.*gainstack;
+                end               
             else
                 varstack=0;
             end
@@ -264,6 +273,8 @@ end
 %         CRLB = repmat(single(LL1>=LL2),1,5).*CRLB1+repmat(single(LL1<LL2),1,5).*CRLB2;
 %         LogL = repmat(single(LL1>=LL2),1,1).*LL1+repmat(single(LL1<LL2),1,1).*LL2;
 %     else
+
+
         [P CRLB LogL]=fitpar.fitfunction(arguments{:});
 %     end
 
@@ -291,16 +302,12 @@ p=obj.getAllParameters;
 fitpar.iterations=p.iterations;
 fitpar.fitmode=p.fitmode.Value;
 fitpar.roisperfit=p.roisperfit;
-fitpar.issCMOS=false;
+fitpar.issCMOS=p.isscmos;
 fitpar.asymmetry=p.asymmetry;
+
 if fitpar.fitmode==3||fitpar.fitmode==5
     fitpar.zstart=p.zstart;
-    fitpar.issCMOS=p.isscmos;
-%     fitpar.PSF2D=p.fit2D;
-%     if p.fit2D
-%         fitpar.fitmode=6;
-%     end
-%     
+  
     calfile=p.cal_3Dfile;
     cal=load(calfile);
 
@@ -310,20 +317,11 @@ if fitpar.fitmode==3||fitpar.fitmode==5
     elseif isfield(cal,'SXY')
         s=size(cal.SXY);
         Z=1;
-%         if p.useObjPos
-%             zr=cal.SXY(1).Zrangeall;
-%             zr(1)=[];zr(end)=inf;
-%             Z=find(p.objPos<=zr,1,'first');
-%         end
+
         for X=s(1):-1:1
             for Y=s(2):-1:1
-%                     if isfield(cal.SXY(X,Y,Z),'gauss_zfit')
                 zpar{X,Y}=cal.SXY(X,Y,Z).gauss_zfit;
-%                     else
-%                         zpar{X,Y}=[];
-%                     end
                 splinefit{X,Y}=cal.SXY(X,Y,Z);
-
             end
         end
         if ~isempty(splinefit{1})
@@ -364,56 +362,84 @@ if fitpar.fitmode==3||fitpar.fitmode==5
         disp('no calibration found')
 
     end
-    %load sCMOS
-    if p.isscmos
-        [~,~,ext]=fileparts(p.scmosfile);
-        switch ext
-            case '.tif'
-                varmaph=imread(p.scmosfile);
-            case '.mat'
-                varmaph=load(p.scmosfile);
-                if isstruct(varmaph)
-                    fn=fieldnames(varmaph);
-                    varmaph=varmaph.(fn{1});
-                end
-            otherwise
-                disp('could not load variance map. No sCMOS noise model used.')
-                p.isscmos=false;
-                fitpar.issCMOS=false;
-                varstack=0;
-                varmaph=[];
-        end
-        if ~isempty(varmaph)
-            roi=p.loc_cameraSettings.roi;
-            varmap=varmaph(max(1,roi(1)):roi(3),max(1,roi(2)):roi(4));
-        end
-    else 
-        varmap=[];
-    end
-    fitpar.varmap=varmap*p.loc_cameraSettings.pix2phot;
+    
     if p.userefractive_index_mismatch
         fitpar.refractive_index_mismatch=p.refractive_index_mismatch;
     else
         fitpar.refractive_index_mismatch=1;
     end
-
-
-% elseif fitpar.fitmode==5
-%     calfile=p.cal_3Dfile;
-%     cal=load(calfile);
-%     fitpar.splinecoefficients=single(cal.cspline.coeff);
-%     fitpar.z0=cal.z0;
-%     fitpar.dz=cal.dz; 
-%     fitpar.refractive_index_mismatch=p.refractive_index_mismatch;
-%     fitpar.objPos=p.objPos;
-    
-else
+    else
     fitpar.PSFx0=p.PSFx0;
 end
+
+%load sCMOS
+if p.isscmos  %this needs to be extended. Include offset correction as well!
+    [~,~,ext]=fileparts(p.scmosfile);
+    switch ext
+        case '.tif'
+            varmaph=imread(p.scmosfile);
+            offsetmap=[];
+        case '.mat'
+            l=load(p.scmosfile);
+%             if isstruct(l)
+
+                %fn=fieldnames(varmaph);
+                %varmaph=varmaph.(fn{1});
+                if isfield(l,'metadata')
+                    metadata=l.metadata;
+                else
+                    metadata=p.loc_cameraSettings;
+                end
+                if isfield(l,'mean')
+                offsetmaph=(single(l.mean)-metadata.offset)*metadata.pix2phot;
+                else
+                    offsetmaph=[];
+                end
+                if isfield(l,'gainmap')
+                    gainmap=(single(l.gainmap))/metadata.pix2phot;
+                else
+                    gainmap=[];
+                end
+                varmaph=single(l.variance)*metadata.pix2phot^2;
+%             end
+        otherwise
+            disp('could not load variance map. No sCMOS noise model used.')
+            p.isscmos=false;
+            fitpar.issCMOS=false;
+            varmaph=[];
+            offsetmaph=[];
+    end
+    if ~isempty(varmaph)
+        roi=p.loc_cameraSettings.roi;
+%         varmap=varmaph(max(1,roi(1)):roi(3),max(1,roi(2)):roi(4)); %or +1? roi: width height or coordinates? This is wrong
+        varmap=varmaph(roi(1)+1:roi(1)+roi(3),roi(2)+1:roi(2)+roi(4)); 
+    end
+    if ~isempty(offsetmaph)
+        roi=p.loc_cameraSettings.roi;
+%         varmap=varmaph(max(1,roi(1)):roi(3),max(1,roi(2)):roi(4)); %or +1? roi: width height or coordinates? This is wrong
+        offsetmap=offsetmaph(roi(1)+1:roi(1)+roi(3),roi(2)+1:roi(2)+roi(4)); 
+    end
+    if ~isempty(gainmap)
+        roi=p.loc_cameraSettings.roi;
+%         varmap=varmaph(max(1,roi(1)):roi(3),max(1,roi(2)):roi(4)); %or +1? roi: width height or coordinates? This is wrong
+        gainmap=gainmap(roi(1)+1:roi(1)+roi(3),roi(2)+1:roi(2)+roi(4)); 
+    end
+else 
+    varmap=[];
+    offsetmap=[];
+    gainmap=[];
+end
+% fitpar.varmap=varmap*p.loc_cameraSettings.pix2phot;
+fitpar.varmap=varmap;
+fitpar.offsetmap=offsetmap; % added by Robin
+fitpar.gainmap=gainmap; % added by Robin
+
+
+
 if p.loc_cameraSettings.EMon
     fitpar.EMexcessNoise=2;
 else
-fitpar.EMexcessNoise=1;
+    fitpar.EMexcessNoise=1;
 end
 
 end
@@ -425,7 +451,8 @@ dn=floor(roisize/2);
 for k=1:numim
 %     stackinfo.x(k)
 %     stackinfo.y(k)
-    varstack(:,:,k)=varmap(stackinfo.x(k)-dn:stackinfo.x(k)+dn,stackinfo.y(k)-dn:stackinfo.y(k)+dn);
+  varstack(:,:,k)=varmap(stackinfo.y(k)-dn:stackinfo.y(k)+dn,stackinfo.x(k)-dn:stackinfo.x(k)+dn);
+    
 end
 end
 
@@ -462,9 +489,9 @@ end
 function pard=guidef(obj)
 p1(1).value=1; p1(1).on={'PSFx0','tPSFx0'}; 
 p1(1).off={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize',...
-    'automirror','fit2D','isscmos','pixelsizex','pixelsizey','selectscmos','scmosfile'};
+    'automirror','fit2D','pixelsizex','pixelsizey'};%,'isscmos','selectscmos','scmosfile'};
 p1(2)=p1(1);p1(2).value=2;
-p1(3).value=3;p1(3).off={'PSFx0','tPSFx0'};p1(3).on={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','automirror','fit2D','isscmos'};
+p1(3).value=3;p1(3).off={'PSFx0','tPSFx0'};p1(3).on={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','automirror','fit2D'};%,'isscmos'};
 p1(4)=p1(1);p1(4).value=4;
 p1(5)=p1(3);p1(5).value=5;
 p1(6)=p1(5);p1(6).value=6;

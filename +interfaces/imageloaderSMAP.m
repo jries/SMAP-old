@@ -63,7 +63,7 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
             if nargin<3
                 format='cell';
             end
-            if isempty(numbers)
+            if nargin<2|| isempty(numbers)
                 numbers=1:obj.metadata.numberOfFrames;
             end
             switch format

@@ -73,9 +73,9 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
 %             imbw=imdilate(imbw,ones(3));
 %             bwac=activecontour(himf,true(size(himf)));
 %             subplot(2,2,3);imagesc(imbw)
-            xr=round((xnmline+len)/pixrec)+1;
-            yr=round((ynmline+lw)/pixrec)+1;
-            indlin=sub2ind(size(imbw),xr,yr);
+            xr2=round((xnmline+len)/pixrec)+1;
+            yr2=round((ynmline+lw)/pixrec)+1;
+            indlin=sub2ind(size(imbw),xr2,yr2);
             indgood=imbw(indlin);
             out.mask=imbw;
             
@@ -83,26 +83,33 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
 %             h2=fspecial('gaussian',12,1.5);
             
  
-            xr=-len:p.dx:len;
+            xn=-len:p.dx:len;
             fr=1:p.df:max(frame(indgood));
-            him=histcounts2(frame(indgood),xnmline(indgood),fr,xr);
+            him=histcounts2(frame(indgood),xnmline(indgood),fr,xn);
 %             hxf=filter2(h2,him);
 %             mf=max(h2(:));
 %             hxfb=hxf>mf*1.1;
             
             out.kimograph=him;
+            out.fr=fr;
+            out.xn=xn;
             co=quantile(him(:),0.999);
             him(him>co)=co;
             h=obj.setoutput('kimograph');
-            imagesc(h,xr,fr,(him))
+            imagesc(h,xn,fr,(him))
             xlabel(h,'xnm')
             ylabel(h,'frame')
             
             uicontrol(h.Parent,'Position',[10,10,40,20],'String','Add Line','Callback',{@obj.addline,h});
             
             if length(obj.poly)<obj.site.ID || isempty(obj.poly{obj.site.ID})
-%                 obj.hpoly=impoly(h,'Closed',false,'PositionConstraintFcn',@obj.polyconstrain);
-            else
+                valh=obj.site.evaluation.(obj.modulename);
+                if isfield(valh,'poly')
+                   %obj.hpoly=impoly(h,valh.poly,'Closed',false,'PositionConstraintFcn',@obj.polyconstrain);
+                   obj.poly{obj.site.ID}=valh.poly;
+                end
+            end
+            if length(obj.poly)>=obj.site.ID &&~isempty(obj.poly{obj.site.ID})
                 obj.hpoly=impoly(h,obj.poly{obj.site.ID},'Closed',false,'PositionConstraintFcn',@obj.polyconstrain);
             
             
@@ -118,14 +125,14 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
         end
         
         function addline(obj,a,b,h)
-            if length(obj.poly)<obj.site.ID || isempty(obj.poly{obj.site.ID})
+           % if length(obj.poly)<obj.site.ID || isempty(obj.poly{obj.site.ID}) 
                 obj.hpoly=impoly(h,'Closed',false,'PositionConstraintFcn',@obj.polyconstrain);
-            else %add vortex to end
-                pos=obj.hpoly.getPosition;
-                pos(end+1,:)=pos(end,:);
-                obj.hpoly.setPosition(vertcat(pos(1,:),pos));
+           % else %add vortex to end
+           %     pos=obj.hpoly.getPosition;
+           %     pos(end+1,:)=pos(end,:);
+           %     obj.hpoly.setPosition(vertcat(pos(1,:),pos));
                  
-            end
+          %  end
              setConstrainedPosition(obj.hpoly,obj.hpoly.getPosition);
             hi=addNewPositionCallback(obj.hpoly,@obj.polycallback);
             obj.polycallback(obj.hpoly.getPosition);
@@ -144,8 +151,8 @@ classdef BALM_fibril_growth<interfaces.SEEvaluationProcessor
         function pard=guidef(obj)
             pard=guidef;
         end
-        
     end
+
 end
 
 function pard=guidef

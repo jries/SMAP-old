@@ -80,13 +80,13 @@ if p.dualchannel
             p.gaussfac_imfit(2)=p.gaussfac_imfit(1);
         end
         out.channel=[1 2];
-        xm1=locs1.xnm-obj.site.pos(1);
+        xm1=locs1.xnm-obj.site.pos(1); %coordinates relative to site position
         ym1=locs1.ynm-obj.site.pos(2); 
         xm2=locs2.xnm-obj.site.pos(1);
         ym2=locs2.ynm-obj.site.pos(2);
         ho=obj.setoutput('image');
 %         disp('circfit')
-        circfit=ringfit2(p,xm1,ym1,xm2,ym2,ho);
+        circfit=ringfit2(p,xm1,ym1,xm2,ym2,ho); % fit two circles with same center position
         
         %Ng and Nu
         circfactor=1.5;
@@ -94,7 +94,7 @@ if p.dualchannel
         locsu1=obj.getLocs({'xnmr','ynmr'},'layer',1,'size',roisize,'grouping','ungrouped');
         locsg2=obj.getLocs({'xnmr','ynmr'},'layer',2,'size',roisize,'grouping','grouped');
         locsu2=obj.getLocs({'xnmr','ynmr'},'layer',2,'size',roisize,'grouping','ungrouped');
-        circfit.Ncirc1=sum((locs1.xnmr-circfit.x0).^2+(locs1.ynmr-circfit.y0).^2<circfit.r1.^2*circfactor^2);
+        circfit.Ncirc1=sum((locs1.xnmr-circfit.x0).^2+(locs1.ynmr-circfit.y0).^2<circfit.r1.^2*circfactor^2); %number of lucs in circle
         circfit.Ncircg1=sum((locsg1.xnmr-circfit.x0).^2+(locsg1.ynmr-circfit.y0).^2<circfit.r1.^2*circfactor^2);
         circfit.Ncircu1=sum((locsu1.xnmr-circfit.x0).^2+(locsu1.ynmr-circfit.y0).^2<circfit.r1.^2*circfactor^2);
         circfit.Ncirc2=sum((locs2.xnmr-circfit.x0).^2+(locs2.ynmr-circfit.y0).^2<circfit.r2.^2*circfactor^2);
@@ -118,7 +118,7 @@ if p.dualchannel
         hf=obj.setoutput('fitim');
         hf2=obj.setoutput('fitim2');
 %         disp('imagefit')
-        imfit=imgfit2(p,xm1,ym1,xm2,ym2,locs1,locs2,circfit,hf,hf2);
+        imfit=imgfit2(p,xm1,ym1,xm2,ym2,locs1,locs2,circfit,hf,hf2); %same center position
         
         
         imfit.Ncirc1=sum((locs1.xnmr-imfit.x0).^2+(locs1.ynmr-imfit.y0).^2<imfit.r1.^2*circfactor^2);
@@ -186,7 +186,12 @@ circfit.profiles1=profiles;
  hf=obj.setoutput('fitim');
 hf2=obj.setoutput('fitim2');
 
-
+% circfit.r1=15;circfit.x0=0;circfit.y0=0; %Feb 6 2018
+% disp('CAREFUL: FIT IS INITIALIZED AT THE CENTER WITH r1=15nm - TAKE OUT AGAIN in CME2DRing line 189');
+% disp('CAREFUL: FIT IS INITIALIZED AT THE CENTER WITH r1=15nm - TAKE OUT AGAIN in CME2DRing line 189');
+% disp('CAREFUL: FIT IS INITIALIZED AT THE CENTER WITH r1=15nm - TAKE OUT AGAIN in CME2DRing line 189');
+% disp('CAREFUL: FIT IS INITIALIZED AT THE CENTER WITH r1=15nm - TAKE OUT AGAIN in CME2DRing line 189');
+% disp('CAREFUL: FIT IS INITIALIZED AT THE CENTER WITH r1=15nm - TAKE OUT AGAIN in CME2DRing line 189');
 imfit=imgfit(p,xm,ym,locs,circfit,hf,hf2);
 imfit.Ncirc1=sum((locs.xnmr-imfit.x0).^2+(locs.ynmr-imfit.y0).^2<imfit.r1.^2*circfactor^2);
 imfit.Ncircg1=sum((locsg.xnmr-imfit.x0).^2+(locsg.ynmr-imfit.y0).^2<imfit.r1.^2*circfactor^2);
@@ -328,9 +333,19 @@ imstart=imstart/max(imstart(:));
   imh=filter2(h,img);
   imbw=imh>max(h(:))*1.5;
   imbws=bwareafilt(imbw,1);
+  try
   out.areastat=regionprops(imbws,'MajorAxisLength','MinorAxisLength','ConvexArea','Area','Eccentricity');
   out.areastat.fractionCircle=out.areastat.Area/(pi*(out.areastat.MajorAxisLength/2)^2);
-  
+  out.areastat.fractionCircleconv=out.areastat.ConvexArea/(pi*(out.areastat.MajorAxisLength/2)^2);
+  catch err
+      out.areastat(1).MajorAxisLength=0;
+      out.areastat(1).MinorAxisLength=0;
+      out.areastat(1).ConvexArea=0;
+      out.areastat(1).Area=0;
+      out.areastat(1).Eccentricity=0;
+      out.areastat(1).fractionCircle=0;
+      out.areastat(1).fractionCircleconv=0;
+  end
 
 end
 function out=imgfit2(p,xm1,ym1,xm2,ym2,locs1,locs2,circfit,hf,hf2)
@@ -345,7 +360,7 @@ roisize=p.se_siteroi/2;
 %  qim=myquantile(img(:),.95);
 %  img(img>qim)=qim;
 startdr=30;
-maxradius=75;
+maxradius=75;%for startp parameter only
  [X,Y]=meshgrid(-roisize+pixels/2:pixels:roisize);
   startpc=circfit;
  if startpc.r1>maxradius||startpc.r2>maxradius

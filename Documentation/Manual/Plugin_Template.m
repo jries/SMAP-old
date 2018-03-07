@@ -78,7 +78,7 @@ classdef Plugin_Template<interfaces.DialogProcessor
             pard.guiobject.Width=2;
             pard.guiobject.TooltipString=sprintf('you can define a tooltip string. \n This tip is displayed when you hover the mouse on the control');
             
-            pard.guiobject2.object=struct('String','string','Style','pushbutton','Callback',{{@callbackfunction,obj,'additonal parameter'}});
+            pard.guiobject2.object=struct('String','string','Style','pushbutton','Callback',{{@callbackfunction,obj,p}});
             pard.guiobject2.position=[2,1];
             pard.guiobject2.Width=1;
             

@@ -1,5 +1,4 @@
 function  savesml(locData,file,p,excludesavefields)
-
 if p.saveroi
     [~,indgroi]=locData.getloc('xnm','position','roi');  
     indgl=false(size(indgroi));
@@ -19,19 +18,21 @@ else
     indg=true(size(locData.loc.xnm));
 end
 
-if p.savefile
+if isfield(p,'savefile') && p.savefile
     filenumber=p.dataselect.Value;
     indg=indg&locData.loc.filenumber==filenumber;
 end
 if all(indg)%save all
     indg=[];
 end
+if nargin>3
 locData.loc=rmfield(locData.loc,excludesavefields);
+end
 saveloc=locData.savelocs([],indg); % BETA , maybe problematic with more than 1 file: this will save only displayed loicalizations
 % if ~isempty(locData.SE)
 %     saveloc.siteexplorer=locData.SE.save;
 % end
-if p.savefile
+if isfield(p,'savefile') && p.savefile
     saveloc.file=saveloc.file(filenumber);
     saveloc.history=saveloc.history(filenumber);
     saveloc.loc.filenumber=ones(size(locData.loc.filenumber));
@@ -52,13 +53,14 @@ if isfield(locData.files.file(1),'transformation')
     
 end
 
-if locData.getGlobalSetting('saveas73')
-    save(file,'saveloc','fileformat','parameters','-v7.3');
+if locData.getGlobalSetting('saveas73') %now I use this to save with the old saver: large files are saved as v7.3, not as small parts.
+    v=saverightversion(file,out,'-v7');
+    disp(['saved as version ' v])
+%     save(file,'saveloc','fileformat','parameters','-v7.3');
 else
     savematparts(file,out,{'saveloc','loc'});
-%     version='-v7';
+
 end
-% v=saverightversion(file,out,version);
-% disp(['saved as version ' v])
+
 % save(file,'saveloc','fileformat','parameters','-v7.3');
 end
