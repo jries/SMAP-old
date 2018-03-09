@@ -869,6 +869,16 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             obj.setGuiParameters(struct('theta',0));
             obj.redraw;
         end
+        
+        function savesideview_callback(obj,a,b)
+            f=obj.getPar('lastSMLFile');
+            fn=strrep(f,'sml.mat','3dxz.tif');
+            [file,path]=uiputfile(fn);
+            if file
+                imwrite(obj.currentimage.image,[path file],'tif')
+            end
+            
+        end
                    
     end
 end
@@ -1030,6 +1040,12 @@ pard.stereomagnification.position=[8,2.6];
 pard.stereomagnification.Width=.4;
 pard.stereomagnification.TooltipString='Used only for side-by-side reconstructions of left and right image. You can adjust the magnification with this paramter';
 pard.tx4.TooltipString=pard.stereomagnification.TooltipString;
+
+
+pard.savesideview.object=struct('String','save tif','Style','pushbutton','Callback',@obj.savesideview_callback);
+pard.savesideview.position=[8,4];
+pard.savesideview.Width=1;
+
 
 pard.plugininfo.name='Viewer 3D';
 pard.plugininfo.type='ProcessorPlugin';

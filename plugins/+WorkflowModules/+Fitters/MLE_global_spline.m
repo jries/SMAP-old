@@ -414,6 +414,10 @@ end
         
 function loadcall_callback(a,b,obj)
 p=obj.getAllParameters;
+ph=fileparts(p.cal_3Dfile);
+if ~exist(ph,'file')
+    p.cal_3Dfile= [fileparts(obj.getPar('loc_outputfilename')) filesep '*.mat'];
+end
 [f,p]=uigetfile(p.cal_3Dfile);
 if f
     l=load([p f]);
@@ -421,7 +425,10 @@ if f
         msgbox('no 3D data recognized. Select other file.');
     end
     obj.setGuiParameters(struct('cal_3Dfile',[p f]));
-    
+    if isfield(l,'transformation')
+        obj.setPar('transformationfile',[p f]);
+    end
+       
 end
 end
 
