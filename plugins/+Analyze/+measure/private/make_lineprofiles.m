@@ -129,6 +129,8 @@ for layer=1:length(p.sr_layerson)
     plot(n,fitprof,'k--')
     t3(end+1:end+length(fittxt))=fittxt;
     
+    jervistemp.profz=profz;jervistemp.nz=n;
+    
     
     axes(ax5)
     plot(x,z,'.')
