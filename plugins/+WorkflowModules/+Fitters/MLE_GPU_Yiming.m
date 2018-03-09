@@ -76,10 +76,15 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             end
             if obj.fitpar.issCMOS
                 varstack=getvarmap(obj.fitpar.varmap,stackinfo,size(imstack,1));
+                imstackraw=imstack; %XXXXXXXXXXXXXXXXXXXX
                 if ~isempty(obj.fitpar.offsetmap)
                     offsetstack=getvarmap(obj.fitpar.offsetmap,stackinfo,size(imstack,1));
                     imstack=imstack-offsetstack;
                 end
+                if ~isempty(obj.fitpar.gainmap)
+                    gainstack=getvarmap(obj.fitpar.gainmap,stackinfo,size(imstack,1));
+                    imstack=imstack.*gainstack;
+                end               
             else
                 varstack=0;
             end
@@ -268,6 +273,8 @@ end
 %         CRLB = repmat(single(LL1>=LL2),1,5).*CRLB1+repmat(single(LL1<LL2),1,5).*CRLB2;
 %         LogL = repmat(single(LL1>=LL2),1,1).*LL1+repmat(single(LL1<LL2),1,1).*LL2;
 %     else
+
+
         [P CRLB LogL]=fitpar.fitfunction(arguments{:});
 %     end
 
@@ -378,8 +385,21 @@ if p.isscmos  %this needs to be extended. Include offset correction as well!
 
                 %fn=fieldnames(varmaph);
                 %varmaph=varmaph.(fn{1});
-                metadata=l.metadata;
+                if isfield(l,'metadata')
+                    metadata=l.metadata;
+                else
+                    metadata=p.loc_cameraSettings;
+                end
+                if isfield(l,'mean')
                 offsetmaph=(single(l.mean)-metadata.offset)*metadata.pix2phot;
+                else
+                    offsetmaph=[];
+                end
+                if isfield(l,'gainmap')
+                    gainmap=(single(l.gainmap))/metadata.pix2phot;
+                else
+                    gainmap=[];
+                end
                 varmaph=single(l.variance)*metadata.pix2phot^2;
 %             end
         otherwise
@@ -399,12 +419,20 @@ if p.isscmos  %this needs to be extended. Include offset correction as well!
 %         varmap=varmaph(max(1,roi(1)):roi(3),max(1,roi(2)):roi(4)); %or +1? roi: width height or coordinates? This is wrong
         offsetmap=offsetmaph(roi(1)+1:roi(1)+roi(3),roi(2)+1:roi(2)+roi(4)); 
     end
+    if ~isempty(gainmap)
+        roi=p.loc_cameraSettings.roi;
+%         varmap=varmaph(max(1,roi(1)):roi(3),max(1,roi(2)):roi(4)); %or +1? roi: width height or coordinates? This is wrong
+        gainmap=gainmap(roi(1)+1:roi(1)+roi(3),roi(2)+1:roi(2)+roi(4)); 
+    end
 else 
     varmap=[];
+    offsetmap=[];
+    gainmap=[];
 end
 % fitpar.varmap=varmap*p.loc_cameraSettings.pix2phot;
 fitpar.varmap=varmap;
-fitpar.offsetmap=offsetmap;
+fitpar.offsetmap=offsetmap; % added by Robin
+fitpar.gainmap=gainmap; % added by Robin
 
 
 
@@ -423,7 +451,8 @@ dn=floor(roisize/2);
 for k=1:numim
 %     stackinfo.x(k)
 %     stackinfo.y(k)
-    varstack(:,:,k)=varmap(stackinfo.x(k)-dn:stackinfo.x(k)+dn,stackinfo.y(k)-dn:stackinfo.y(k)+dn);
+  varstack(:,:,k)=varmap(stackinfo.y(k)-dn:stackinfo.y(k)+dn,stackinfo.x(k)-dn:stackinfo.x(k)+dn);
+    
 end
 end
 

@@ -7,7 +7,8 @@ void sumcombine(double *vout,double *vin,double *list,mwSize numlocs, mwSize num
     double v, thisparticle,oldparticle,v0=0;
     mwSize part=0,k,indh;
     
-    oldparticle=list[0];
+    //oldparticle=list[0];
+    oldparticle=list[(mwSize) ind[0]-1];
     for(k=0;k<numlocs;k++)
         {
         indh=(mwSize) ind[k];

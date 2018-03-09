@@ -295,7 +295,7 @@ end
 
 function [x,h]=makeHist(v,q)
 d=(q(2)-q(1))/50;
-if d<2&&d>0.1
+if d<2&&d>0.2
     d=1;
 end
 if d==0

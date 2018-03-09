@@ -44,6 +44,15 @@ classdef CameraConverter<interfaces.WorkflowModule
                 overwrite=false;
             end
             md=obj.loc_cameraSettings;
+            
+            %update adu2phot
+            if md.EMon
+                emfactor=md.emgain;
+            else
+                emfactor=1;
+            end
+            md.pix2phot=md.conversion/emfactor;
+            obj.adu2phot=md.pix2phot;
             obj.loc_cameraSettings=interfaces.metadataSMAP;
             obj.loc_cameraSettings=copyfields(obj.loc_cameraSettings,md);
             if ~overwrite

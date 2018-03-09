@@ -1,17 +1,19 @@
 % use rotation and shift from TOM to average localization data.
 % for now: in ROImanager. Later maybe coordinate based
+mainpath='/Users/ries/Library/Mobile Documents/com~apple~CloudDocs/mEMBL/data/Vilma/';
+posfile='positions.txt';
+em_motl_file='averaging/JR-Nup133_8fold_motl_11.em';
+parIDfile='averaging/ParID.mat';
 
-posfile='/Users/jonas/Documents/Data/Vilma/positions.txt';
-em_motl_file='/Users/jonas/Documents/Data/Vilma/averaging/JR-Nup133_8fold_motl_11.em';
-parIDfile='/Users/jonas/Documents/Data/Vilma/averaging/ParID.mat';
-
-positions=csvread(posfile);
-em=emread(em_motl_file);
-l=load(parIDfile);
+positions=csvread([mainpath posfile]);
+em=emread([mainpath em_motl_file]);
+l=load([mainpath parIDfile]);
 parID=l.ParID;
 iparticle=4;
-idX=11;idY=12;idZ=13;
-% idX=14;idY=15;idZ=16;
+% idX=11;idY=12;idZ=13;
+idX=14;idY=15;idZ=16;
+
+
 iPhi=17;iPsi=18;iTheta=19;
 
 pixrec=7; %(nm)
@@ -29,10 +31,14 @@ p.addfile=false;
 thetan=-pi:pi/64:pi;
 actheta1=zeros(size(thetan));
 actheta2=zeros(size(thetan));
+actheta21=zeros(size(thetan));
+actheta12=zeros(size(thetan));
 
-zn=-100:2:100;
+zn=-100:1:100;
 acz1=zeros(size(zn));
 acz2=zeros(size(zn));
+acz12=zeros(size(zn));
+acz21=zeros(size(zn));
 
 hold off
 for k=1:length(parID)
@@ -93,37 +99,50 @@ end
 
 %analysis
 theta=cart2pol(r1(:,1),r1(:,2));
-histtheta=hist(theta,thetan);
-histtheta2=hist(theta+pi,thetan+pi);
-tac=myxcorr(histtheta,histtheta);
-tac=tac+myxcorr(histtheta2,histtheta2);
+histtheta11=hist(theta,thetan);
+histtheta12=hist(theta+pi,thetan+pi);
+tac=myxcorr(histtheta11,histtheta11);
+tac1=tac+myxcorr(histtheta12,histtheta12);
 
 actheta1=actheta1+tac;
 
 
-histz=hist(r1(:,3),zn);
-acz1=acz1+myxcorr(histz,histz);
+
+histz1=hist(r1(:,3),zn);
+acz1=acz1+myxcorr(histz1,histz1);
 
 theta=cart2pol(r2(:,1),r2(:,2));
-histtheta=hist(theta,thetan);
-histtheta2=hist(theta+pi,thetan+pi);
-tac=myxcorr(histtheta,histtheta);
-tac=tac+myxcorr(histtheta2,histtheta2);
+histtheta21=hist(theta,thetan);
+histtheta22=hist(theta+pi,thetan+pi);
+tac=myxcorr(histtheta21,histtheta21);
+tac=tac+myxcorr(histtheta22,histtheta22);
 actheta2=actheta2+tac;
 
-histz=hist(r2(:,3),zn);
-acz2=acz2+myxcorr(histz,histz);
+
+actheta12=actheta12+myxcorr(histtheta11,histtheta21)+myxcorr(histtheta12,histtheta22);
+actheta21=actheta21+myxcorr(histtheta21,histtheta11)+myxcorr(histtheta22,histtheta12);
+
+
+histz2=hist(r2(:,3),zn);
+acz2=acz2+myxcorr(histz2,histz2);
+
+acz12=acz12+myxcorr(histz1,histz2);
+acz21=acz21+myxcorr(histz2,histz1);
+
 end
 hold off
 
 normz=length(zn):-1:1;
 normt=length(thetan):-1:1;
+
 figure(109);
 subplot(2,1,1);
-plot(zn,acz1/acz1(2)./normz,zn,acz2/acz2(2)./normz);
+plot(zn,acz1/acz1(2)./normz,zn,acz2/acz2(2)./normz,zn,acz12/acz12(2)./normz,zn,acz21/acz21(2)./normz);
+legend('1','2','12','21')
 subplot(2,1,2);
-plot(thetan,actheta1/actheta1(2)./normt,thetan,actheta2/actheta2(2)./normt);
-
+thetaplot=thetan/2/pi*8;
+plot(thetaplot,actheta1/actheta1(2)./normt,thetaplot,actheta2/actheta2(2)./normt,thetaplot,actheta12/actheta12(2)./normt,thetaplot,actheta21/actheta21(2)./normt);
+legend('1','2','12','21')
 % from averageSites:
     if p.addfile
 p.addfile=true;
@@ -154,7 +173,7 @@ function r=applyT(ri,dc, angles)
 % ri(:,1)=ri(:,1)+dc(1);
 % ri(:,2)=ri(:,2)+dc(2);
 % ri(:,3)=ri(:,3)+dc(3);
-r = tom_pointrotate(ri,angles(1),angles(2),angles(3));
+r = tom_pointrotate_inv(ri,angles(1),angles(2),angles(3));
 r(:,1)=r(:,1)+dc(1);
 r(:,2)=r(:,2)+dc(2);
 r(:,3)=r(:,3)+dc(3);

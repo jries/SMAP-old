@@ -27,7 +27,8 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
 %             disp('checking cuda fit')
 %             reporttext='GPU fit function did not run. Possibly the wrong CUDA version is installed.';
 %             img=zeros(11,'single');img(5,5)=1;
-            
+
+
 %             try
 % %                 fitp=callYimingFitter(img,single(1),single(10),single(2),single(0),0);
 %                 fitp=mleFit_LM(img,1);
@@ -270,6 +271,11 @@ dT=zeros(npar,2,ceil(nfits/2));
 dT(1,2,:)=stackinfo.dy(2:numberOfChannels:end);
 dT(2,2,:)=stackinfo.dx(2:numberOfChannels:end);
 
+% %XXXXXXXXXXX
+% dT(1,2,:)=-stackinfo.dx(2:numberOfChannels:end);
+% dT(2,2,:)=-stackinfo.dy(2:numberOfChannels:end);
+
+
 % dT(1,2,:)=stackinfo.dx;
 % dT(2,2,:)=-stackinfo.dy;
 
@@ -305,7 +311,7 @@ arguments{1}=imfit/EMexcess;
 arguments{2}=sharedA;
 arguments{3}=fitpar.iterations;
 arguments{4}=single(fitpar.splinefithere.coeff);
-arguments{5}=single(dT);
+arguments{5}=single(dT); %XXXXXXXXXX
 %imstack, sharedflag, iterations, spline coefficients, channelshift,
 %fitmode, varmap
 arguments{6}=fitpar.fitmode;
@@ -408,6 +414,10 @@ end
         
 function loadcall_callback(a,b,obj)
 p=obj.getAllParameters;
+ph=fileparts(p.cal_3Dfile);
+if ~exist(ph,'file')
+    p.cal_3Dfile= [fileparts(obj.getPar('loc_outputfilename')) filesep '*.mat'];
+end
 [f,p]=uigetfile(p.cal_3Dfile);
 if f
     l=load([p f]);
@@ -415,7 +425,10 @@ if f
         msgbox('no 3D data recognized. Select other file.');
     end
     obj.setGuiParameters(struct('cal_3Dfile',[p f]));
-    
+    if isfield(l,'transformation')
+        obj.setPar('transformationfile',[p f]);
+    end
+       
 end
 end
 
