@@ -87,6 +87,11 @@ if isfield(locs,'znmerr')
     locdat.locprecznm=locs.znmerr(indin);
 end
 
+if isfield(locs,'logLikelihood')
+    roisize=obj.getPar('loc_ROIsize');
+    locdat.LLrel=locs.locLikelihood(indin)*2/roisize^2;
+end
+
 locdat.filenumber=uint8(0*locdat.xnm+obj.filenumber);
 locdat.channel=0*locdat.xnm;
 end
