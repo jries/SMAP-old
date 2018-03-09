@@ -89,7 +89,7 @@ end
 
 if isfield(locs,'logLikelihood')
     roisize=obj.getPar('loc_ROIsize');
-    locdat.LLrel=locs.locLikelihood(indin)*2/roisize^2;
+    locdat.LLrel=real(locs.logLikelihood(indin)*2/roisize^2);
 end
 
 locdat.filenumber=uint8(0*locdat.xnm+obj.filenumber);

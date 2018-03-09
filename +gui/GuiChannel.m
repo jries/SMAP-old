@@ -520,7 +520,7 @@ if ~isempty(v)
 obj.locData.loc.colorfield=single(obj.locData.loc.(field));
 obj.locData.grouploc.colorfield=single(obj.locData.grouploc.(field));
 q=myquantilefast(v,[0.01,0.99]);
-dx=10^floor(log10(q(2)/100));
+dx=10^floor(log10(abs(q(2))/100));
 minv=round(q(1)/dx)*dx;
 maxv=round(q(2)/dx)*dx;            
 obj.colorrange.mincall(p.Value)=minv;
