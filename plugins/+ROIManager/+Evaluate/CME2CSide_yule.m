@@ -7,8 +7,12 @@ classdef CME2CSide_yule<interfaces.SEEvaluationProcessor
                 obj@interfaces.SEEvaluationProcessor(varargin{:});
         end
         function out=run(obj, inp)
-            locs=obj.getLocs({'locprecnm','PSFxnm','xnm','ynm','frame','channel'});  
-            oriCor = [locs.xnm locs.ynm];
+            roisize=obj.getPar('se_siteroi');
+            locsL1=obj.getLocs({'locprecnm','PSFxnm','xnm','ynm','frame','channel', 'gaussfac'},'layer',1);
+            locsL2=obj.getLocs({'locprecnm','PSFxnm','xnm','ynm','frame','channel', 'gaussfac'},'layer',2);
+            oriCor = [locsL1.xnm locsL1.ynm; locsL2.xnm locsL2.ynm];
+                       
+            
             
             % Do PCA together
             [U,SigmaV,lambda] = pca(oriCor);
@@ -25,6 +29,18 @@ classdef CME2CSide_yule<interfaces.SEEvaluationProcessor
             sVrot = Vrot-minVrot; % shift all points to make the points attach to the x and y axies
             
              % Get the kernel matrix
+            img = makeimage(inp, sVrot(:,1), sVrot(:,2), 15, 5, 500);
+            
+            pixels=inp.se_sitepixelsize;
+            maxone1=1/(2*pi*15*5)*pixels^2;
+
+            cutoff=1;
+            if length(cutoff)==1
+                cutoff(2)=cutoff(1);
+            end
+            inp.dilation = 2;
+            mask1=makemask(inp,img,maxone1*cutoff(1));            
+            
             
             [inLoc1, kf1] = kernelFeatures(sVrot, locs.channel==1);
             [inLoc2, kf2] = kernelFeatures(sVrot, locs.channel==2);
@@ -117,6 +133,8 @@ function pard=guidef
 pard.t_gridRange.object=struct('Style','text','String','Bin size of the grids');
 pard.t_gridRange.position=[1,1];
 pard.t_gridRange.Width=2;
+
+pard.inputParameters={'numberOfLayers','sr_layerson','se_cellfov','se_sitefov','se_siteroi','layer1_','layer2_','se_sitepixelsize'};
 end
 
 function filtered = corFiltedByMask(mask, cor)
@@ -171,4 +189,49 @@ function [filteredCor, kf] = kernelFeatures(parentalLocs, sub)
     kf.numPeak = numPeak;
     kf.peakLoc = peakLoc;
     kf.peakDist = pd;
+end
+
+function [mask,im1,cutoff]=makemask(p,im1,maxone)
+% 
+% im1=makeimage(p,xm1,ym1,s(1),s(2));
+
+p.take2factor=1.5;
+cutoff= maxone;% *p.cutofffactor;
+im1bw=im1>cutoff;
+
+% if two largest segments are similar in size
+im1bwa1=bwareafilt(im1bw,1);
+im1bwa2=bwareafilt(im1bw,2);
+if sum(im1bwa2(:))>p.take2factor*sum(im1bwa1(:))
+    im1bwa=im1bwa2;
+else
+    im1bwa=im1bwa1;
+end
+
+sel=strel('disk',p.dilation);
+
+im1bwa=imdilate(im1bwa,sel);
+mask=imfill(im1bwa,'holes');
+end
+
+function im=makeimage(p,xm,ym,sx,sy,roisize)
+if nargin<6
+    roisize=p.se_siteroi/2;
+end
+if nargin<5||isempty(sy)
+    sy=sx;
+end
+if length(sx)==1||length(sy)==1
+    sx=sx+0*xm; sy=sy+0*xm;
+end
+
+pixels=p.se_sitepixelsize;
+ range=[-roisize(1) roisize(1)];
+ posf.x=xm;posf.y=ym;posf.sx=sx;posf.sy=sy;
+im=double(gaussrender_ellipt(posf,range, range, pixels, pixels));
+end
+function ind=inmask(p,locs,mask)
+roisize=ones(2,1)*p.se_siteroi/2;
+pixels=p.se_sitepixelsize;
+ind=withinmask(mask',(locs.xnmrot+roisize(1))/pixels,(locs.ynmrot+roisize(2))/pixels);
 end

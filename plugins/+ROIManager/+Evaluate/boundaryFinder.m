@@ -36,7 +36,7 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
 
             test(sub2ind(size(test), testNZx([rmean>=EDcutoff]), testNZy([rmean>=EDcutoff]))) = 0;
 
-            % Get cordinates of the kemograph
+            % Get cordinates of the kimograph
             Size = size(test);
             [CorX CorY] = meshgrid(1:Size(1), 1:Size(2));
             Order = sub2ind(Size, CorX(:), CorY(:));
@@ -151,28 +151,96 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
             fig = KimoPar.kimograph;
             co=quantile(fig(:),0.999);
             fig(fig>co)=co;
+            out.boundary = [CxFParent CyFParentA];
+
+            % Remove redundant points (in stalled region)
+            stepWidth = diff(out.boundary(:,2));
+            indStepWidthNon0 = find(stepWidth);
+            indPoint2Keep = [indStepWidthNon0; indStepWidthNon0+1];
+            indPoint2Keep = unique(indPoint2Keep);
+            out.boundary = out.boundary([1; indPoint2Keep; end],:);
+            
+            % Merge steps by move
+            while 1
+                [newboundary, idx] =  mergeStallsByMove(out.boundary);
+                idxRef = idx;
+                if isequal(idxRef, idx)
+                    break
+                end
+                out.boundary =  newboundary;
+            end
+            
+            % Merge steps by move
+            while 1
+                [newboundary, idx] =  mergeByMove(out.boundary);
+                idxRef = idx;
+                if isequal(idxRef, idx)
+                    break
+                end
+                out.boundary =  newboundary;
+            end
+            
+            % Merge steps by time
+            out.boundary =  mergeByTime(out.boundary);
+            
+            % Merge steps by move
+            out.boundary = mergeStallsByMove(out.boundary);
+            
+            % Merge steps by move again
+            while 1
+                [newboundary, idx] =  mergeByMove(out.boundary);
+                idxRef = idx;
+                if isequal(idxRef, idx)
+                    break
+                end
+                out.boundary =  newboundary;
+            end
+            
+            % Merge steps by time
+            out.boundary =  mergeByTime(out.boundary);
+            
+            % Remove redundant points (in stalled region)
+            stepWidth = diff(out.boundary(:,2));
+            indStepWidthNon0 = find(stepWidth);
+            indPoint2Keep = [indStepWidthNon0; indStepWidthNon0+1];
+            indPoint2Keep = unique(indPoint2Keep);
+            out.boundary = out.boundary([1; indPoint2Keep; end],:);
+            
+            out.stallTime = calStallTime(out.boundary);
+            out.stepWidth = calStepWidth(out.boundary);
+            out.growthTime = calGrowthTime(out.boundary);
+            out.avgRate = calAvgRate(out.boundary);
+            
+            
             h=obj.setoutput('kimograph');
             imagesc(h,(fig))
+            hold(h,'on')
+            plot(h,CyFParentA,CxFParent, 'LineWidth', 1, 'Color', 'g')
+            plot(h,out.boundary(:,2),out.boundary(:,1), 'LineWidth', 1.5, 'Color', 'w')
+            hold(h,'off')            
+            
+
             %xlabel(h,'xnm')
             %ylabel(h,'frame')
             %xticklabels(h, KimoPar.xn)
             %yticklabels(h, KimoPar.fr)
-            hold(h,'on')
-            plot(h,CyFParentA,CxFParent, 'LineWidth', 1, 'Color', 'w')
-            hold(h,'off')
 
-            out.boundary = [CxFParent CyFParentA];
-            stepWidth = diff(CyFParentA);
-            stepWidthNon0 = stepWidth(find(stepWidth));
-            stallTime = diff(find(stepWidth));
+
             
-            h2=obj.setoutput('statistics');
-            ax1 = subplot(1,2,1,h2);
-            histogram(ax1, stepWidthNon0, 'BinWidth', 1);
-            title(ax1,'Rate');
-            ax2 = subplot(1,2,2);
-            histogram(ax2, stallTime, 'BinWidth', 1);
-            title(ax2,'Stall time');
+            if 0
+                out.avgRate = (CyFParentA(end)-CyFParentA(1))/(CxFParent(end)-CxFParent(1));
+                out.stepWidth = stepWidthNon0;
+                out.stallTime = stallTime;
+
+                h2=obj.setoutput('statistics');
+                axes(h2);
+                ax1 = subplot(1,2,1);
+                histogram(ax1, stepWidthNon0, 'BinWidth', 1);
+                title(ax1,'Rate');
+                ax2 = subplot(1,2,2);
+                histogram(ax2, stallTime, 'BinWidth', 1);
+                title(ax2,'Stall time');
+            end
         end
      
         function pard=guidef(obj)
@@ -223,4 +291,85 @@ function M = calMeasurement(x,y,qx,qy,Size)
     leftD = sum(leftIdx)/leftA;
     rightD = sum(rightIdx)/rightA;
     M = 0-((leftD-1)^2 + (rightD-0)^2)^(1/2);
+end
+
+function [newBoundary, idx] = mergeStallsByMove(boundary)
+    % Merge steps by move
+    move = diff(boundary(:,2));
+    stalled = move==0;
+    stalled = [boundary(find(stalled), 1) boundary(find(stalled)+1, 1)];
+    indConStalled = find(diff(stalled,1,2)>1);
+    conStalled = stalled(indConStalled,:);
+    conStallTime = diff(conStalled,1,2);
+
+    smallMove = move == 1;
+    smallMove = [boundary(find(smallMove), 1) boundary(find(smallMove)+1, 1)];
+
+    afterStall = ismember(smallMove(:,1),conStalled(:,2));
+    beforeStall = ismember(smallMove(:,2), conStalled(:,1));
+    abStallSM = smallMove(afterStall+beforeStall==2,:);
+    lPosition2change = [];
+    for i = 1:size(abStallSM,1)
+    upstreamStall = conStalled(:,2) == abStallSM(i,1);
+    downstreamStall = conStalled(:,1) == abStallSM(i,2);
+        if conStallTime(upstreamStall) >= conStallTime(downstreamStall);
+            lPosition2change = ismember(boundary(:,1), conStalled(downstreamStall,:)');
+            lPositionValue = ismember(boundary(:,1), conStalled(upstreamStall,:)');
+            boundary(lPosition2change,2) = boundary(lPositionValue,2);
+        else
+            lPosition2change = ismember(boundary(:,1), conStalled(upstreamStall,:)');
+            lPositionValue = ismember(boundary(:,1), conStalled(downstreamStall,:)');
+            boundary(lPosition2change,2) = boundary(lPositionValue,2);
+        end
+    end
+    newBoundary = boundary;
+    idx=lPosition2change;
+end
+function [newBoundary, idx] = mergeByMove(boundary)
+    move = diff(boundary(:,2));
+    point2drag = move == 1;
+    indPoint2drag = find(point2drag)+1;
+    boundary(indPoint2drag,2) = boundary(indPoint2drag-1,2);
+    newBoundary = boundary;
+    idx = indPoint2drag;
+end
+function newBoundary = mergeByTime(boundary)
+    point2keepCp = [];
+    while 1
+        stallTime = diff(boundary(:,1));
+        point2keep = stallTime > 5;
+        if isequal(point2keep, point2keepCp)
+            break
+        end
+        point2keepCp = point2keep;
+        indPoint2keep=unique([find(point2keep); find(point2keep)+1]);
+        point2keep(indPoint2keep)=1;
+        boundary = boundary(point2keep,:);
+        newBoundary = boundary;
+    end
+end
+
+function salltime = calStallTime(boundary)
+    move = diff(boundary(:,2));
+    stalled = move==0;
+    stalled = [boundary(find(stalled), 1) boundary(find(stalled)+1, 1)];
+    salltime = diff(stalled,1,2);    
+end
+
+function growthTime = calGrowthTime(boundary)
+    move = diff(boundary(:,2));
+    growth = move>0;
+    growth = [boundary(find(growth), 1) boundary(find(growth)+1, 1)];
+    growthTime = diff(growth,1,2);    
+end
+
+function stepWidth = calStepWidth(boundary)
+    move = diff(boundary(:,2));
+    stepWidth = move(move>0);
+end
+
+function avgRate = calAvgRate(boundary)
+    startNEnd = boundary([1 end], :);
+    diffTimeNPosition = diff(startNEnd, 1, 1);
+    avgRate = diffTimeNPosition(2)/diffTimeNPosition(1);
 end
