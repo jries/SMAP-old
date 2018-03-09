@@ -164,10 +164,10 @@ classdef GuiChannel< interfaces.LayerInterface
         function setcolorfield_callback(obj)
             if isempty(obj.locData.loc), return; end
             numlocs=length(obj.locData.loc.frame);
-            obj.locData.loc.colorfield=(1:numlocs)'/numlocs*2-0.5;
+            obj.locData.loc.colorfield=single((1:numlocs)'/numlocs*2-0.5);
             if ~isempty(obj.locData.grouploc)
                 numlocs=length(obj.locData.grouploc.frame);
-                obj.locData.grouploc.colorfield=(1:numlocs)'/numlocs;
+                obj.locData.grouploc.colorfield=single((1:numlocs)'/numlocs);
             end
         end
          
@@ -476,8 +476,8 @@ switch p.render_colormode.selection
         obj.setcolorfield_callback
     case 'z'
         if isfield(obj.locData.loc,'znm')
-        obj.locData.loc.colorfield=obj.locData.loc.znm;
-        obj.locData.grouploc.colorfield=obj.locData.grouploc.znm;
+        obj.locData.loc.colorfield=single(obj.locData.loc.znm);
+        obj.locData.grouploc.colorfield=single(obj.locData.grouploc.znm);
         cmin=-300;
         cmax=300;
         else 
@@ -517,8 +517,8 @@ p=obj.getSingleGuiParameter('renderfield');
 field=p.selection;
 v=obj.locData.getloc(field,'layer',obj.layer).(field);
 if ~isempty(v)
-obj.locData.loc.colorfield=obj.locData.loc.(field);
-obj.locData.grouploc.colorfield=obj.locData.grouploc.(field);
+obj.locData.loc.colorfield=single(obj.locData.loc.(field));
+obj.locData.grouploc.colorfield=single(obj.locData.grouploc.(field));
 q=myquantilefast(v,[0.01,0.99]);
 dx=10^floor(log10(q(2)/100));
 minv=round(q(1)/dx)*dx;

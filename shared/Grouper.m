@@ -110,7 +110,7 @@ classdef Grouper< interfaces.LocDataInterface
             clear indsort2 indold
             [~,indback2]=sort(indold2);
             clear indold2
-            obj.locData.setloc('numberInGroup',numbergroup(indback2));
+            obj.locData.setloc('numberInGroup',single(numbergroup(indback2)));
             
             [~,obj.indsortlist]=sort(listback);
             
@@ -159,6 +159,7 @@ classdef Grouper< interfaces.LocDataInterface
                 end
             end
             
+            vtype=obj.locData.getloc(field).(field)(1);
             v=double(obj.locData.getloc(field).(field));
           
             list=obj.locData.getloc('groupindex').groupindex;
@@ -235,7 +236,7 @@ classdef Grouper< interfaces.LocDataInterface
                 end
             end
            
-            obj.locData.grouploc.(field)=cast(vwout2,'like',v);   
+            obj.locData.grouploc.(field)=cast(vwout2,'like',vtype);   
             
             end
 %             obj.status('group: combine fields done')
