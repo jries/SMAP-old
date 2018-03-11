@@ -11,9 +11,15 @@ classdef calibrater3D_so<interfaces.DialogProcessor
         function out=run(obj,p)
             
             fit3ddir=strrep(pwd,'SMAP','fit3D');
+            if exist(fit3ddir,'file')
             addpath(fit3ddir);
+            else
             fit3ddir=strrep(pwd,'SMAP','fit3Dcspline');
+            if exist(fit3ddir,'file')
             addpath(fit3ddir);
+            end
+            end
+           
                        
              %get bead positions
              minframes=800/p.dz*1.5;
