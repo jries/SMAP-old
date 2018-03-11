@@ -51,33 +51,36 @@ classdef calibrater3D_so<interfaces.DialogProcessor
                     else
                         filename=locfiles(k).info.basefile;
                     end
-                    il=getimageloader(obj,filename);
-                    file{k}.name=il.file;
-                    file{k}.metadata=il.metadata;
-                    infile=filenumber==k;
-                    roi=il.metadata.roi;
-                    pixelsize=il.metadata.cam_pixelsize_um;
-                    file{k}.posx=xb(infile)/pixelsize(1)/1000-roi(1);
-                    file{k}.posy=yb(infile)/pixelsize(end)/1000-roi(2);
-                    il.close;
-                    posall{k}=horzcat(file{k}.posx,file{k}.posy);
-                    minxy=min(minxy,min(posall{k}));
-                    maxxy=max(maxxy,max(posall{k}));
-                    posallnm{k}=horzcat(xb,yb);
-                    pixelsizes{k}=pixelsize;
-                    rois{k}=roi;
+                    filename=strrep(strrep(filename,'\',filesep),'/',filesep);
+                    file{k}.name=filename;
+                    file{k}.metadata=locfiles(k).info;
+%                     il=getimageloader(obj,filename);
+%                     file{k}.name=il.file;
+%                     file{k}.metadata=il.metadata;
+%                     infile=filenumber==k;
+%                     roi=il.metadata.roi;
+%                     pixelsize=il.metadata.cam_pixelsize_um;
+%                     file{k}.posx=xb(infile)/pixelsize(1)/1000-roi(1);
+%                     file{k}.posy=yb(infile)/pixelsize(end)/1000-roi(2);
+%                     il.close;
+%                     posall{k}=horzcat(file{k}.posx,file{k}.posy);
+%                     minxy=min(minxy,min(posall{k}));
+%                     maxxy=max(maxxy,max(posall{k}));
+%                     posallnm{k}=horzcat(xb,yb);
+%                     pixelsizes{k}=pixelsize;
+%                     rois{k}=roi;
                  end
                  files=obj.locData.files.file;
              end
              
-             smappos.positions=posall;
-             smappos.positionsnm=posallnm;
-             smappos.imageROI=roi;
-             
-             smappos.pixelsize=pixelsizes;
-             smappos.roi=rois;
+%              smappos.positions=posall;
+%              smappos.positionsnm=posallnm;
+%              smappos.imageROI=roi;
+%              
+%              smappos.pixelsize=pixelsizes;
+%              smappos.roi=rois;
              smappos.files=files;
-             smappos.P=obj.P;
+%              smappos.P=obj.P;
              
              
              if p.setrange
@@ -101,6 +104,7 @@ classdef calibrater3D_so<interfaces.DialogProcessor
              else
                  smappos.settings=[];
              end
+             smappos.fit3ddir=fit3ddir;
                cg=calibrate3D_GUI_g(smappos);    
 %              switch p.global.selection
 %                  case 'global'
