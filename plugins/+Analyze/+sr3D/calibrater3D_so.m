@@ -80,7 +80,7 @@ classdef calibrater3D_so<interfaces.DialogProcessor
 %              smappos.pixelsize=pixelsizes;
 %              smappos.roi=rois;
              smappos.files=files;
-%              smappos.P=obj.P;
+             smappos.P=obj.P;
              
              
              if p.setrange
