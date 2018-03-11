@@ -91,6 +91,10 @@ classdef SEExploreGui<interfaces.SEProcessor
             obj.infostruct=getinfostruct(infofile);
             catch
             end
+            %clear images (might have changed)
+            delete(obj.guihandles.fileax.Children)
+            delete(obj.guihandles.cellax.Children)
+            delete(obj.guihandles.siteax.Children)
             redraw_sitelist(obj)
             redraw_celllist(obj)
         end
