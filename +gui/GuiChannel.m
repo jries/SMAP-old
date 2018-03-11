@@ -111,6 +111,9 @@ classdef GuiChannel< interfaces.LayerInterface
 %             cross-layer synch
              callobj=obj;
             obj.addSynchronization('filelist_short',obj.guihandles.ch_filelist,'String',{@callobj.filelist_callback,1})
+            obj.addSynchronization('filenumber',obj.guihandles.ch_filelist,'Value',{@callobj.filelist_callback,1})
+           
+           
            
             obj.addSynchronization([obj.layerprefix 'selectedField'],[],[],{@callobj.selectedField_callback})
             obj.addSynchronization('locFields',[],[],{@callobj.setcolorfield_callback})
