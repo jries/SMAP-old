@@ -136,8 +136,8 @@ if doPlot
     title('Mean Variance Plot');
     s=sprintf('offset: %0.4g ADU\nslope: %0.2g',offset,slope);
     ax = axis;
-    axis([0 ax(2) 0 ax(4)])
-    text(ax(2)/10,ax(4)*0.8,s,'FontSize',11)
+%     axis([0 ax(2) 0 ax(4)])
+    text(ax(2)+(ax(2)-ax(1))/5,ax(4)-(ax(4)-ax(3))/4,s,'FontSize',11)
     hold off
     drawnow;
     fprintf('offset: %0.4g ADU, slope: %0.2g\n',offset,slope);  % show what the fit results into
