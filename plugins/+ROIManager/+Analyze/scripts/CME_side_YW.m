@@ -1,21 +1,29 @@
 global se
 sites=se.sites;
-x1q13all = [];
+numSites = length(sites);
+siteIdx = 1:30:numSites;
+[siteIdx,~] = meshgrid(siteIdx, 1:30);
+siteIdx = siteIdx(:)';
+x1q13all = zeros(1, numSites);
 x2q13all = [];
 z1q13all = [];
 z2q13all = [];
 zmeddall = [];
-for k=1:length(sites)
+dPeakAll = zeros(1, numSites);
+for k=1:numSites
     try
-        x1q13=sites(k).evaluation.CME2CSide_yule2.x1q13;
+        x1q13all(k)=sites(k).evaluation.CME2CSide_yule2.x1q13;
         x2q13=sites(k).evaluation.CME2CSide_yule2.x2q13;
         z1q13=sites(k).evaluation.CME2CSide_yule2.z1q13;
         z2q13=sites(k).evaluation.CME2CSide_yule2.z2q13;
         zmedd=sites(k).evaluation.CME2CSide_yule2.zmd;
+        dPeak = max(sites(k).evaluation.CME2CSide_yule2.dPeak);
+        if length(dPeak)==1
+            dPeakAll(k) = dPeak;
+        end
     catch err
         continue
     end
-    x1q13all = [x1q13all; x1q13];
     x2q13all = [x2q13all; x2q13];
     z1q13all = [z1q13all; z1q13];
     z2q13all = [z2q13all; z2q13];
@@ -24,14 +32,25 @@ end
 
 figure(500)
 subplot(2,3,1);
-histogram(stepWidthAll, 'Binwidth', 1);
-title('Rate')
-xlabel('nm/frame')
+scatter(siteIdx, dPeakAll);
+title('Distance (density peaks)')
+
+subplot(2,3,3);
+scatter(siteIdx, x2q13all);
+title('Interquartile range (x)')
+
+subplot(2,3,4);
+scatter(siteIdx, z2q13all);
+title('Interquartile range (z)')
+
 subplot(2,3,2);
-histogram(stallTimeAll, 'Binwidth', 1);
-title('Stall time')
-xlabel('Time')
+scatter(siteIdx, -zmeddall);
+title('Distance (median)')
+
+featureMatrix = [x1q13all' x2q13all z2q13all -zmeddall];
+
+tSNE = tsne(featureMatrix);
+figure(501);
+gscatter(tSNE(:,1),tSNE(:,2),siteIdx, '','',10);
 
 
-figure(5000)
-plot(1:2160', zmeddall)

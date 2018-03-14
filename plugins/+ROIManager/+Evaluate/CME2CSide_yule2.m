@@ -99,6 +99,26 @@ out.zmed1=median(ym1);out.zmed2=median(ym2);
 out.zmedd=out.zmed1-out.zmed2;
 out.xmed1=median(xm1);out.xmed2=median(xm2);
 
+kxm1 = fitdist(xm1, 'Kernel');
+kxm1 = fitdist(xm1, 'Kernel', 'Width', kxm1.BandWidth * 0.7);
+pdfKxm1 = pdf(kxm1, floor(min(xm1)):ceil(max(xm1)));
+%figure(5556)
+%plot(pdfKxm1)
+
+kxm2 = fitdist(xm2, 'Kernel');
+kxm2 = fitdist(xm2, 'Kernel', 'Width', kxm2.BandWidth * 0.7);
+pdfKxm2 = pdf(kxm2, floor(min(xm2)):ceil(max(xm2)));
+lmKxm2 = islocalmax(pdfKxm2);
+dia = diff(find(lmKxm2));
+out.dPeak = dia;
+%figure(5555)
+%plot(pdfKxm2)
+
+kym1 = fitdist(ym1, 'Kernel');
+pdfKym1 = pdf(kym1, floor(min(ym1)):ceil(max(ym1)));
+
+
+
 out.zm1=mean(ym1);out.zm2=mean(ym2);
 out.zmd=out.zmed1-out.zmed2;
 out.xm1=mean(xm1);out.xm2=mean(xm2);

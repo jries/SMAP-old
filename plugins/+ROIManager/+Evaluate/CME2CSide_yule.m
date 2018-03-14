@@ -42,8 +42,8 @@ classdef CME2CSide_yule<interfaces.SEEvaluationProcessor
             mask1=makemask(inp,img,maxone1*cutoff(1));            
             
             
-            [inLoc1, kf1] = kernelFeatures(sVrot, locs.channel==1);
-            [inLoc2, kf2] = kernelFeatures(sVrot, locs.channel==2);
+            %[inLoc1, kf1] = kernelFeatures(sVrot, locs.channel==1);
+            %[inLoc2, kf2] = kernelFeatures(sVrot, locs.channel==2);
             
 
             
