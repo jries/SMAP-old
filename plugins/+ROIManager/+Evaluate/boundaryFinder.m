@@ -1,4 +1,6 @@
 classdef boundaryFinder<interfaces.SEEvaluationProcessor
+    % This plug-in depends on the BALM_fibril_growth.
+
     properties
         boundary
     end
@@ -7,37 +9,40 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
                 obj@interfaces.SEEvaluationProcessor(varargin{:});
         end
         function out=run(obj, inp)
+            %% Data import
             % Import the kimograph
-            test = obj.site.evaluation.BALM_fibril_growth.kimograph;
-            test(test>=1)=1;
+            kimo = obj.site.evaluation.BALM_fibril_growth.kimograph;
+            kimo(kimo>=1)=1;
 
             slideStep = inp.slideStep;
             gridRange = inp.gridRange;
             adjM = inp.adjM;
 
-            % expand test
-            oriSize = size(test);
+            % extend the kimo on x to compensate the sliding window
+            oriSize = size(kimo);
             expand = zeros(oriSize(1),gridRange*slideStep);
-            test = [test, expand];
+            kimo = [kimo, expand];
 
             % Binarize the kimograph
-            [testRefx, testRefy] = find(test);
-            [testNZx, testNZy] = find(test);
-
+            [kimoRefx, kimoRefy] = find(kimo);
+            [kimoNZx, kimoNZy] = find(kimo);
+            
+            %% Remove noise based on euclidean distances between data points
             % use euclidean distances to filter out noises
-            K = round(length(testRefx)*5/100);
+            K = round(length(kimoRefx)*5/100);
 
-            ED = pdist2([testNZx testNZy],[testNZx testNZy],'euclidean');
+            ED = pdist2([kimoNZx kimoNZy],[kimoNZx kimoNZy],'euclidean');
             sortedED = sort(ED,2);
             sortedED = sortedED(:,1:K);
             rmean = mean(sortedED,2);
 
             EDcutoff = quantile(rmean, 0.95);
 
-            test(sub2ind(size(test), testNZx([rmean>=EDcutoff]), testNZy([rmean>=EDcutoff]))) = 0;
-
+            kimo(sub2ind(size(kimo), kimoNZx([rmean>=EDcutoff]), kimoNZy([rmean>=EDcutoff]))) = 0;
+            
+            %% Get a rough boundary based on density
             % Get cordinates of the kimograph
-            Size = size(test);
+            Size = size(kimo);
             [CorX CorY] = meshgrid(1:Size(1), 1:Size(2));
             Order = sub2ind(Size, CorX(:), CorY(:));
 
@@ -46,7 +51,7 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
             adjCorY = ceil(CorY(:)./gridRange);
 
             % Get density
-            D = accumarray([adjCorX adjCorY], test(Order), [], @sum);
+            D = accumarray([adjCorX adjCorY], kimo(Order), [], @sum);
 
             % Filter out grids that might be background
             cutoff = 3; %#Par
@@ -99,16 +104,16 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
 
 
             %figure(50)
-            %scatter(testNZx, testNZy)
+            %scatter(kimoNZx, kimoNZy)
             %hold on
             %plot(CxFParent, CyFParent)
-
-
-            Mref = calMeasurement(CxFParent,CyFParent,testNZx,testNZy,Size);
+            
+            %% refinement of the boundary
+            Mref = calMeasurement(CxFParent,CyFParent,kimoNZx,kimoNZy,Size);
             MrefO = Mref;
             CyFParentA = CyFParent;
             for i=size(CxFParent):-1:1
-               thisFrameY = testNZy(testNZx == CxFParent(i));
+               thisFrameY = kimoNZy(kimoNZx == CxFParent(i));
                thisFrameY = thisFrameY(thisFrameY>CyFParent(i));
                ii = 1;
                futherStep = 0;
@@ -121,7 +126,7 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
                    CyFParentA = cummax(CyFParentA);
 
                    % fit to new boundary
-                   Mnew = calMeasurement(CxFParent,CyFParentA,testNZx,testNZy,Size);
+                   Mnew = calMeasurement(CxFParent,CyFParentA,kimoNZx,kimoNZy,Size);
                    if Mnew >= MrefO*adjM && Mnew >= Mref %#Par
                        MrefO = Mnew;
                        futherStep = 0;
@@ -140,7 +145,7 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
                end
                 if isinteger(i/10)
                     figure(51)
-                    scatter(testNZx, testNZy)
+                    scatter(kimoNZx, kimoNZy)
                     hold on
                     plot(CxFParent, CyFParentA)
                     hold off
@@ -160,44 +165,36 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
             indPoint2Keep = unique(indPoint2Keep);
             out.boundary = out.boundary([1; indPoint2Keep; end],:);
             
-            % Merge steps by move
-            while 1
-                [newboundary, idx] =  mergeStallsByMove(out.boundary);
-                idxRef = idx;
-                if isequal(idxRef, idx)
-                    break
+            
+            %% Merge small steps
+            steps = [1 2 3 1 2 3];
+            for i=1:length(steps)
+                switch steps(i)
+                    case 1
+                    % Merge steps by move
+                        while 1
+                            [newboundary, idx] =  mergeStallsByMove(out.boundary);
+                            idxRef = idx;
+                            if isequal(idxRef, idx)
+                                break
+                            end
+                            out.boundary =  newboundary;
+                        end
+                    case 2
+                    % Merge steps by move
+                        while 1
+                            [newboundary, idx] =  mergeByMove(out.boundary);
+                            idxRef = idx;
+                            if isequal(idxRef, idx)
+                                break
+                            end
+                            out.boundary =  newboundary;
+                        end
+                    case 3
+                    % Merge steps by time
+                    out.boundary =  mergeByTime(out.boundary);
                 end
-                out.boundary =  newboundary;
             end
-            
-            % Merge steps by move
-            while 1
-                [newboundary, idx] =  mergeByMove(out.boundary);
-                idxRef = idx;
-                if isequal(idxRef, idx)
-                    break
-                end
-                out.boundary =  newboundary;
-            end
-            
-            % Merge steps by time
-            out.boundary =  mergeByTime(out.boundary);
-            
-            % Merge steps by move
-            out.boundary = mergeStallsByMove(out.boundary);
-            
-            % Merge steps by move again
-            while 1
-                [newboundary, idx] =  mergeByMove(out.boundary);
-                idxRef = idx;
-                if isequal(idxRef, idx)
-                    break
-                end
-                out.boundary =  newboundary;
-            end
-            
-            % Merge steps by time
-            out.boundary =  mergeByTime(out.boundary);
             
             % Remove redundant points (in stalled region)
             stepWidth = diff(out.boundary(:,2));
@@ -337,7 +334,7 @@ function newBoundary = mergeByTime(boundary)
     point2keepCp = [];
     while 1
         stallTime = diff(boundary(:,1));
-        point2keep = stallTime > 5;
+        point2keep = stallTime > 7;
         if isequal(point2keep, point2keepCp)
             break
         end
@@ -372,4 +369,19 @@ function avgRate = calAvgRate(boundary)
     startNEnd = boundary([1 end], :);
     diffTimeNPosition = diff(startNEnd, 1, 1);
     avgRate = diffTimeNPosition(2)/diffTimeNPosition(1);
+end
+
+function [z, bw] = getKernelMatrix(matrixSize, sVrot, varargin) 
+    [meshx, meshy] = meshgrid(0:matrixSize(1), 0:matrixSize(2)); % make full grid
+    q = [meshx(:), meshy(:)]; % convert the grid to positions
+    if length(varargin)==0
+        [sVrotx,xy,bw]=ksdensity(sVrot, q); % get kernel density estimation
+    else
+        [sVrotx,xy,bw]=ksdensity(sVrot, q, varargin{1,1}, varargin{1,2}); % get kernel density estimation    
+    end
+    
+    % converted into an image
+    idx = sub2ind(matrixSize(end:-1:1)+1, xy(:,2)+1, xy(:,1)+1); 
+    z = zeros(matrixSize(end:-1:1)+1);
+    z(idx) = sVrotx;
 end

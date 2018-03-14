@@ -19,6 +19,7 @@ for k=1:length(sites)
         stallTime=sites(k).evaluation.boundaryFinder.stallTime*dt;
         growthTime=sites(k).evaluation.boundaryFinder.growthTime*dt;
         avgRate=sites(k).evaluation.boundaryFinder.avgRate*dxn/dt;
+        
     catch err
         continue
     end
@@ -27,6 +28,7 @@ for k=1:length(sites)
     growthTimeAll = [growthTimeAll; growthTime(2:(end-1))];
     avgRateAll = [avgRateAll; avgRate];
     idxAll = [idxAll, k];
+    
     end
 end
 growthRateAll = stepWidthAll./growthTimeAll;
@@ -56,3 +58,11 @@ subplot(2,3,5);
 histogram(avgRateAll, 'Binwidth', dxn/dt/20);
 title('Average rate')
 xlabel('nm/min')
+
+subplot(2,3,6);
+scatter(growthTimeAll, stepWidthAll, 'jitter','on', 'jitterAmount', 1);
+title('Growth time vs step width')
+xlabel('Growth time (min)')
+ylabel('step width (nm)')
+
+corr(growthTimeAll, stepWidthAll)
