@@ -111,6 +111,9 @@ classdef GuiChannel< interfaces.LayerInterface
 %             cross-layer synch
              callobj=obj;
             obj.addSynchronization('filelist_short',obj.guihandles.ch_filelist,'String',{@callobj.filelist_callback,1})
+            obj.addSynchronization('filenumber',[],[],{@callobj.filenumber_callback})
+           
+           
            
             obj.addSynchronization([obj.layerprefix 'selectedField'],[],[],{@callobj.selectedField_callback})
             obj.addSynchronization('locFields',[],[],{@callobj.setcolorfield_callback})
@@ -142,7 +145,13 @@ classdef GuiChannel< interfaces.LayerInterface
             p.frame_max=obj.getPar('frame_max');
             obj.setGuiParameters(p);
         end
-
+        function filenumber_callback(obj,a,b,c)
+            fn=obj.getPar('filenumber');
+            obj.guihandles.ch_filelist.Value=fn;
+            obj.filelist_callback;
+            notify(obj.P,'sr_render');
+        end
+           
         function filelist_callback(obj,x,y,z)
                 znm=obj.locData.getloc('znm');
                 if isfield(znm,'znm')&&any(znm.znm~=0) % loical: dont update hist slider

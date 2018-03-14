@@ -62,12 +62,11 @@ classdef SEEvaluationProcessor<interfaces.GuiModuleInterface & interfaces.LocDat
         
         function out=evaluate(obj,site)
             p=obj.getAllParameters;
-%             if ~isempty(obj.site.ID)
-%                 
-%             end
             obj.site=site;
             out=obj.run(p);  
-            site.evaluation.(obj.name)=out;         
+            site.evaluation.(obj.name)=out;    
+            gp=rmfield(obj.getGuiParameters,{'classname','pluginpath'});
+            site.evaluation.(obj.name).GuiParameters=gp; 
         end
         
         function [locsout,indroi]=getLocs(obj,varargin) 

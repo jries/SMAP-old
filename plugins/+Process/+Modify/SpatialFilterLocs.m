@@ -39,6 +39,10 @@ classdef SpatialFilterLocs<interfaces.DialogProcessor
                     locfilter=@min;
                 case 'max'
                     locfilter=@max;
+                case 'std'
+                    locfilter=@std;
+                case '5-95% percentile'
+                    locfilter=@perc9_95;
             end
             lx=length(sortind);
             
@@ -96,8 +100,9 @@ classdef SpatialFilterLocs<interfaces.DialogProcessor
 end
 
 function pard=guidef(obj)
-% pard.t1.object=struct('String','result field','Style','text');
-% pard.t1.position=[2,1];
+pard.t1.object=struct('String','Only localizations displayed in layer 1 are used','Style','text');
+pard.t1.position=[1,1];
+pard.t1.Width=4;
 
 pard.resultfield.object=struct('String','','Style','edit');
 pard.resultfield.position=[3,1];
@@ -112,7 +117,7 @@ pard.locfield.object=struct('String','','Style','popupmenu','Callback',{{@obj.lo
 pard.locfield.position=[3,2];
 pard.locfield.Width=1;
 
-pard.filter.object=struct('String',{{'median','mean','max','min'}},'Style','popupmenu');
+pard.filter.object=struct('String',{{'median','mean','max','min','std','5-95% percentile'}},'Style','popupmenu','Callback',{{@obj.locfield_callback}});
 pard.filter.position=[3,3];
 pard.filter.Width=1;
 
@@ -133,16 +138,22 @@ pard.spatialscale.Width=1;
 
 
 pard.dataselect.object=struct('Style','popupmenu','String','File');
-pard.dataselect.position=[1,1];
+pard.dataselect.position=[2,1];
 pard.dataselect.object.TooltipString='choose localization file data set';
 
 
 pard.dataselectall.object=struct('Style','checkbox','String','all','Value',1);
-pard.dataselectall.position=[1,2];
+pard.dataselectall.position=[2,2];
 pard.dataselectall.object.TooltipString='apply on all';
 
 
 pard.syncParameters={{'filelist_short','dataselect',{'String'}},{'locFields','locfield',{'String'}}};
 
 pard.plugininfo.type='ProcessorPlugin';
+end
+
+
+function out=perc9_95(in)
+q=myquantilefast(in,[0.05 0.95]);
+out=q(2)-q(1);
 end

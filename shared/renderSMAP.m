@@ -188,12 +188,18 @@ switch lower(p.rendermode.selection)
             p.cam_pixelsize_um=.140;
         end
         p.sr_pixrec=p.cam_pixelsize_um(1)*1000;
-        if isfield(locsh,'PSFxnm')&&~isempty(locsh.PSFxnm) &&all(locsh.PSFxnm(indin)>0) &&any(locsh.PSFxnm(indin)<500)
+        if isfield(locsh,'PSFxnm')&&~isempty(locsh.PSFxnm) &&all(locsh.PSFxnm(indin)>0) &&any(locsh.PSFxnm(indin)<1500)
             pos.s=locsh.PSFxnm(indin);
         else
             pos.s=pos.x*0+p.cam_pixelsize_um(1)*1000;
         end
- 
+        %sx, sy different (e.g 3d sideview)
+        if isfield(locsh,'sx')&&isfield(locsh,'sy')&&~isempty(locsh.sx)&&~isempty(locsh.sy)
+            pos.sx=pos.s;
+            ratio=nanmean(locsh.sy)/nanmean(locsh.sx);
+            pos.sy=pos.s*ratio;
+            pos=rmfield(pos,'s');
+        end
         dl=1;
         imageo.istiff=1;
 %         rangex(1:2)=rangex(1:2)-p.sr_pixrec/2;

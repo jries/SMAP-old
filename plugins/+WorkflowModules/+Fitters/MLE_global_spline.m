@@ -91,7 +91,7 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
             gt.RowName={'x','y','z','N','Bg'};
             gt.ColumnName={'l','x'};
             
-            hh=obj.guiPar.fontsize;
+            hh=obj.guiPar.fontsize+5;
             wh=hold.Position(3)-hh-50;
             gt.ColumnWidth={hh,wh};
             gt.Data={true,'1';true,'1';true,'1';false,'1';false,'1'};
