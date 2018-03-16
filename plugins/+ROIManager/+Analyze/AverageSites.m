@@ -39,7 +39,7 @@ classdef AverageSites<interfaces.DialogProcessor&interfaces.SEProcessor
                 end
                 if toc(ticc)>1
                     ticc=tic;
-                    obj.status(['average site: ' num2str(k) ' of ' num2str(length(sites))]);
+                    obj.status(['average site: ' num2str(k) ' of ' num2str(length(sites))]); drawnow
                 end
             end
             
