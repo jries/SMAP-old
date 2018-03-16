@@ -221,7 +221,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                         else
                             disp('size of filters does not match. Call interfaces.LocData.filter before. Tried to fix it')
                             obj.filter(fields{k},layer)
-                            indin=obj.inFilter(obj,layer,grouping);
+                            indin=inFilter(obj,layer,grouping);
                             filters
                             break       
                         end
@@ -551,7 +551,11 @@ classdef LocalizationData<interfaces.GuiParameterInterface
 %             obj.setPar('status','grouping')
             grouper=Grouper;
             grouper.attachLocData(obj);
-            grouper.connect(dx,dt,'frame','xnm','ynm','filenumber','channel')
+            groupfields={'frame','xnm','ynm','filenumber','channel'};
+            if isfield(obj.loc,'class')
+                groupfields{end+1}='class';
+            end
+            grouper.connect(dx,dt,groupfields{:})
             grouper.combine;  
             obj.filter;
 %             locfields=fieldnames(obj.loc);

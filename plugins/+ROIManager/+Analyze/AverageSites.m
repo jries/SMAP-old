@@ -20,6 +20,10 @@ classdef AverageSites<interfaces.DialogProcessor&interfaces.SEProcessor
             used=false(size(locnew.xnm));
             x0=nanmedian(locnew.xnm);
             y0=nanmedian(locnew.ynm);
+            if ~isfield(locnew,'class')
+                locnew.class=0*locnew.xnm;
+            end
+            ticc=tic;
             for k=1:length(sites)
                 if p.sortselection.Value==1 ||  sites(k).annotation.use
                     [locs,indloc]=obj.locData.getloc({'xnm','ynm'},'position',sites(k),'grouping','ungrouped');
@@ -30,7 +34,12 @@ classdef AverageSites<interfaces.DialogProcessor&interfaces.SEProcessor
     %                 figure(88)
     %                 plot(locnew.xnm(indloc),locnew.ynm(indloc),'+')
                     locnew.filenumber(indloc)=newfile;
+                    locnew.class(indloc)=sites(k).ID;
                     used=used|indloc;
+                end
+                if toc(ticc)>1
+                    ticc=tic;
+                    obj.status(['average site: ' num2str(k) ' of ' num2str(length(sites))]);
                 end
             end
             
@@ -40,6 +49,7 @@ classdef AverageSites<interfaces.DialogProcessor&interfaces.SEProcessor
               for k=1:length(fn)
                    locnew.(fn{k})=locnew.(fn{k})(used);
               end
+             
              locc=obj.locData.copy;
              locc.loc=locnew;
              locc.regroup;
@@ -48,6 +58,7 @@ classdef AverageSites<interfaces.DialogProcessor&interfaces.SEProcessor
             if p.addfile
                 locnew.xnm=locnew.xnm+x0;
                 locnew.ynm=locnew.ynm+y0;
+            
                 for k=1:length(fn)
                     obj.locData.addloc(fn{k},locnew.(fn{k}))
                 end
