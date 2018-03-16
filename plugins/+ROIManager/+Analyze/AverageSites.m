@@ -43,7 +43,7 @@ classdef AverageSites<interfaces.DialogProcessor&interfaces.SEProcessor
                 end
             end
             
-            used=used& ~( isnan(locnew.xnm)|isnan(locnew.ynm));
+            used=used& ~( isnan(locnew.xnm) | isnan(locnew.ynm) | isnan(locnew.class));
             
             fn=fieldnames(locnew);
               for k=1:length(fn)
