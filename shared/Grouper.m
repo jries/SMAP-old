@@ -35,6 +35,8 @@ classdef Grouper< interfaces.LocDataInterface
             obj.combinemodes.filenumber='first';
             obj.combinemodes.neighbours='sum';
             obj.combinemodes.clusterdensity='mean';
+             obj.combinemodes.cellnumbers='max';
+              obj.combinemodes.sitenumbers='max';
         end
         function connect(obj,dx,dt,framef,xf,yf,varargin)
             fn=fieldnames(obj.locData.loc);

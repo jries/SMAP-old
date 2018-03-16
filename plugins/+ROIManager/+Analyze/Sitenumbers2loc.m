@@ -14,9 +14,13 @@ classdef Sitenumbers2loc<interfaces.DialogProcessor&interfaces.SEProcessor
             sitenumbers=0*ld.xnm;
             cellnumbers=0*ld.xnm;
             for k=1:length(sites)
-                [~,ind]=obj.locData.getloc('xnm','Position',sites(k));
-                sitenumbers(ind)=sites(k).ID;
-                cellnumbers(ind)=sites(k).info.cell;
+                [l,ind]=obj.locData.getloc('filenumber','Position',sites(k));
+%                 find=find(ind);
+%                 indfile=l.filenumber==sites(k).info.filenumber;
+%                 indh=find(indfile);
+                indh=ind & (obj.locData.loc.filenumber==sites(k).info.filenumber);
+                sitenumbers(indh)=sites(k).ID;
+                cellnumbers(indh)=sites(k).info.cell;
             end
             obj.locData.addloc('sitenumbers',sitenumbers);
             obj.locData.addloc('cellnumbers',cellnumbers);
