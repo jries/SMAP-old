@@ -80,6 +80,8 @@ roisizeh=p.se_siteroi/2;
 locs1=obj.getLocs({'xnm','ynm','locprecnm','xnmrot','ynmrot'},'layer',1,'size',roisizeh);
 locs2=obj.getLocs({'xnm','ynm','locprecnm','xnmrot','ynmrot'},'layer',2,'size',roisizeh);
 
+out.locs1 = locs1;
+out.locs2 = locs2;
 % locs1.xnmrot = PCArot1(:,1); locs1.ynmrot = PCArot1(:,2);
 % locs2.xnmrot = PCArot2(:,1); locs2.ynmrot = PCArot2(:,2);
 
