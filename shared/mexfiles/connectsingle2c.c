@@ -47,13 +47,13 @@ void  cs(double *list, double *x, double *y, double *frames,double dX,long dT,mw
     numdark=0;
     
     testentry=thisentry;
-    while ((numdark<=dT) && (testentry <=lenx-1))//search for dT frames in the future
+    while ( (numdark<=dT) && (testentry <=lenx-1) && (frames[testentry]>=frh) )//search for dT frames in the future
     {
         particlefound=0;
         
         
         // find index of next frame
-        while((frames[testentry]<=frh) && (testentry<=lenx-1)) 
+        while((frames[testentry]==frh) && (testentry<=lenx-1)) 
         {
             testentry+=1;
         } 

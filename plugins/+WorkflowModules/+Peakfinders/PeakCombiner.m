@@ -103,6 +103,10 @@ classdef PeakCombiner<interfaces.WorkflowModule
         end
         function loadbutton(obj,a,b)
             fn=obj.guihandles.Tfile.String;
+            path=fileparts(fn);
+            if ~exist(path,'file')
+                fn=[fileparts(obj.getPar('loc_outputfilename')) filesep '*.mat'];
+            end
             [f,path]=uigetfile(fn,'Select transformation file _T.mat');
             if f
                 Tload=load([path f],'transformation');

@@ -260,25 +260,31 @@ changeaxis(0,0,0);
 %         end
         
         %contrast
-        if hcontrastcheck.Value
-            meanV=(minV+maxV)/2;
-            dV=(maxV-minV)/2;
-            imax=meanV+dV*str2double(hcontrast.String);
-            imin=meanV-dV*str2double(hcontrast.String);
-%             imax=str2double(hcontrast.String)*maxV;
-%             imin=str2double(hcontrast.String)*minV;
+        contrast=str2num(hcontrast.String);
+        if length(contrast)==2
+            imin=contrast(1);
+            imax=contrast(2);
         else
-            imaxim=nanmax(img(:));
-            iminim=nanmin(img(:));
-            if isnan(imaxim)
-                imax=inf;
-                imin=-inf;
+            if hcontrastcheck.Value
+                meanV=(minV+maxV)/2;
+                dV=(maxV-minV)/2;
+                imax=meanV+dV*contrast(1);
+                imin=meanV-dV*contrast(1);
+    %             imax=str2double(hcontrast.String)*maxV;
+    %             imin=str2double(hcontrast.String)*minV;
             else
-                meanV=(iminim+imaxim)/2;
-                dV=(imaxim-iminim)/2;
-                imax=meanV+dV*str2double(hcontrast.String);
-                imin=meanV-dV*str2double(hcontrast.String);
-%                 imax=str2double(hcontrast.String)*imaxim;
+                imaxim=nanmax(img(:));
+                iminim=nanmin(img(:));
+                if isnan(imaxim)
+                    imax=inf;
+                    imin=-inf;
+                else
+                    meanV=(iminim+imaxim)/2;
+                    dV=(imaxim-iminim)/2;
+                    imax=meanV+dV*contrast(1);
+                    imin=meanV-dV*contrast(1);
+    %                 imax=str2double(hcontrast.String)*imaxim;
+                end
             end
         end
          if imax==0, imax=1;end
@@ -309,6 +315,9 @@ changeaxis(0,0,0);
         ax.CLim=[imin imax];
         if ~isempty(p.Title)
             title(ax,p.Title);
+        end
+        if ~p.rgb
+            colorbar(ax)
         end
         
     end

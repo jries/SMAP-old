@@ -16,80 +16,18 @@ classdef SimulateSitesYL<interfaces.DialogProcessor&interfaces.SEProcessor
         function initGui(obj)
             setvisibility(obj);
         end
-        function out=run(obj,p)  
-            [locst,possites]=simulatelocs2(p, 1);
-            
-           if ~p.savez
-               locst=rmfield(locst,{'znm','znm_gt'});
-           end
-           
-
-               labels=num2str(p.labeling_efficiency*100,'%2.0f');
-                phots=num2str(p.photons,'%3.0f');
-                blinks=num2str(p.blinks,'%3.0f');
-                filename=['L' labels 'P' phots 'B' blinks];
-           
-           
-           obj.locData.addfile(['simulated_' num2str(obj.locData.files.filenumberEnd) '_' filename]);
-           obj.locData.files.file(end).info.simulationParameters=obj.getGuiParameters;
-           obj.locData.addLocData(locst);
-           obj.locData.sort('filenumber','frame');
-           try
-           initGuiAfterLoad(obj);
-           catch err
-               err
-           end
-           se=obj.locData.SE;
-           cell=interfaces.SEsites;
-           cell.pos=[mean(locst.xnm) mean(locst.ynm)];
-           cell.ID=0;
-           cell.info.filenumber=obj.locData.files.filenumberEnd;
-           se.addCell(cell);
-           for k=1:length(possites)
-               thissite=interfaces.SEsites;
-               thissite.pos=[possites(k).x possites(k).y];
-               thissite.info.cell=cell.ID;
-               thissite.info.filenumber=cell.info.filenumber;
-                % thissite.cellnumber=sitepar.currentcell.number;
-        %         thissite.number=sitepar.sitelist.cellnumber+1;
-                se.addSite(thissite);
-           end 
-           
-%            obj.setPar('SimulateSitesParameters',p);
-
-            try
-           se.currentsite=se.sites(1);
-           se.currentcell=se.cells(1);
-           se.currentfile=se.files(1);
-           se.processors.preview.updateFilelist;
-           se.processors.preview.updateCelllist;
-           se.processors.preview.updateSitelist; 
-            se.processors.preview.nextsite(1)
-%            se.processors.plotsite(se.sites(1));
-            catch err
-                err
-            end
-           
-            if p.savenow.Value==2
-                obj.locData.loc.xnm=obj.locData.loc.xnm_gt;
-                obj.locData.loc.ynm=obj.locData.loc.ynm_gt;
-                obj.locData.loc.znm=obj.locData.loc.znm_gt;
-                obj.locData.loc=rmfield(obj.locData.loc,{'xnm_gt','ynm_gt','znm_gt'});
-            end
-            if p.savenow.Value>1
-                lastsml=obj.getPar('lastSMLFile');
-                if ~isempty(lastsml)
-                    path=fileparts(lastsml);
-                else
-                    path='';
+        function out=run(obj,p)
+            ptime = p.time;
+            if length(ptime)==1
+                runSingleSim(obj,p);
+            else
+                allTime = ptime(1):ptime(2):ptime(3);
+                for i=1:length(allTime)
+                    p.time=allTime(i);
+                    runSingleSim(obj,p);
                 end
-               [file,path]= uiputfile([path filesep obj.locData.files.file(1).name]);
-               if file
-                    obj.locData.savelocs([path file])
-                    obj.setPar('lastSMLFile',[path file]);
-               end
             end
-          out=[];
+            out = [];
         end
         function pard=guidef(obj)
             pard=guidef(obj);
@@ -97,7 +35,85 @@ classdef SimulateSitesYL<interfaces.DialogProcessor&interfaces.SEProcessor
     end
 end
 
+function out=runSingleSim(obj,p)  
+[locst,possites]=simulatelocs2(p, p.channel(1));
+if (p.pro2nd.selection)~= "No pes"
+    [locst2,~]=simulatelocs2(p, p.channel(2));
+    locst = mergeStruct(locst, locst2);
+end
 
+if ~p.savez
+   locst=rmfield(locst,{'znm','znm_gt'});
+end
+
+    info = [num2str(p.channel(1)) p.selectPro.selection num2str(p.channel(2)) p.pro2nd.selection 'T' num2str(p.time)];
+    labels=num2str(p.labeling_efficiency*100,'%2.0f');
+    phots=num2str(p.photons,'%3.0f');
+    blinks=num2str(p.blinks,'%3.0f');
+    filename=['L' labels 'P' phots 'B' blinks 'Info' info];
+
+
+obj.locData.addfile(['simulated_' num2str(obj.locData.files.filenumberEnd) '_' filename]);
+obj.locData.files.file(end).info.simulationParameters=obj.getGuiParameters;
+obj.locData.addLocData(locst);
+obj.locData.sort('filenumber','frame');
+try
+initGuiAfterLoad(obj);
+catch err
+   err
+end
+se=obj.locData.SE;
+cell=interfaces.SEsites;
+cell.pos=[mean(locst.xnm) mean(locst.ynm)];
+cell.ID=0;
+cell.info.filenumber=obj.locData.files.filenumberEnd;
+se.addCell(cell);
+for k=1:length(possites)
+   thissite=interfaces.SEsites;
+   thissite.pos=[possites(k).x possites(k).y];
+   thissite.info.cell=cell.ID;
+   thissite.info.filenumber=cell.info.filenumber;
+    % thissite.cellnumber=sitepar.currentcell.number;
+%         thissite.number=sitepar.sitelist.cellnumber+1;
+    se.addSite(thissite);
+end 
+
+%            obj.setPar('SimulateSitesParameters',p);
+
+try
+se.currentsite=se.sites(1);
+se.currentcell=se.cells(1);
+se.currentfile=se.files(1);
+se.processors.preview.updateFilelist;
+se.processors.preview.updateCelllist;
+se.processors.preview.updateSitelist; 
+se.processors.preview.nextsite(1)
+%            se.processors.plotsite(se.sites(1));
+catch err
+    err
+end
+
+if p.savenow.Value==2
+    obj.locData.loc.xnm=obj.locData.loc.xnm_gt;
+    obj.locData.loc.ynm=obj.locData.loc.ynm_gt;
+    obj.locData.loc.znm=obj.locData.loc.znm_gt;
+    obj.locData.loc=rmfield(obj.locData.loc,{'xnm_gt','ynm_gt','znm_gt'});
+end
+if p.savenow.Value>1
+    lastsml=obj.getPar('lastSMLFile');
+    if ~isempty(lastsml)
+        path=fileparts(lastsml);
+    else
+        path='';
+    end
+   [file,path]= uiputfile([path filesep obj.locData.files.file(1).name]);
+   if file
+        obj.locData.savelocs([path file])
+        obj.setPar('lastSMLFile',[path file]);
+   end
+end
+out=[];
+end
 
 function load_callback(a,b,obj)
 f=obj.getSingleGuiParameter('coordinatefile'); 
@@ -147,12 +163,74 @@ obj.guihandles.tif_density.Visible=tif;
 obj.guihandles.tif_numbermode.Visible=tif;
 obj.guihandles.tif_imagesizet.Visible=tif;
 obj.guihandles.tif_imagesize.Visible=tif;
+obj.guihandles.load_button.Visible='on';
+obj.guihandles.coordinatefile.Visible='on';
+obj.guihandles.pro2nd.Visible = 'off';
 end
 
+function pesInput_callback(a,b,obj)
+if obj.getSingleGuiParameter('usePes')
+    txt = 'off';
+    tif = 'off';
+    pes = 'on';
+    obj.guihandles.labeling_efficiency.Visible=txt;
+    obj.guihandles.t_labelingefficiency.Visible=txt;
+    obj.guihandles.tif_density.Visible=tif;
+    obj.guihandles.tif_numbermode.Visible=tif;
+    obj.guihandles.tif_imagesizet.Visible=pes;
+    obj.guihandles.tif_imagesize.Visible=pes;
+    obj.guihandles.load_button.Visible='off';
+    obj.guihandles.coordinatefile.Visible='off';
+    obj.guihandles.time.Visible=pes;
+    obj.guihandles.t_time.Visible=pes;
+    obj.guihandles.selectPro.Visible=pes;
+    obj.guihandles.pro2nd.Visible='off';
+    if isfield(obj.P.par, 'proteinES')
+        obj.guihandles.selectPro.String = fieldnames(obj.getPar('proteinES'));
+    end
+else
+    pes = 'off';
+    setvisibility(obj)
+    obj.guihandles.time.Visible=pes;
+    obj.guihandles.t_time.Visible=pes;
+    obj.guihandles.selectPro.Visible=pes;
+    obj.guihandles.pro2nd.Visible=pes;
+    obj.guihandles.setPro2nd.Value = 0;
+end
+end
+
+function pro2_callback(a,b,obj)
+if obj.getSingleGuiParameter('setPro2nd')
+    lenOptions=numel(obj.guihandles.selectPro.String(1:end ~= obj.guihandles.selectPro.Value));
+    if lenOptions < 1
+        obj.guihandles.pro2nd.String = {'No pes'};
+    else
+        obj.guihandles.pro2nd.String = obj.guihandles.selectPro.String(1:end ~= obj.guihandles.selectPro.Value);
+    end
+    obj.guihandles.pro2nd.Visible = 'on';
+else
+    obj.guihandles.pro2nd.Visible = 'off';
+end
+end
 
 function pard=guidef(obj)
 
-% 
+pard.t_selectPro.object=struct('String', 'Protein','Style','text');
+pard.t_selectPro.position=[1,1];
+pard.t_selectPro.Width=0.5;
+
+pard.setPro2nd.object=struct('String', '2nd', 'Style', 'checkbox', 'Value', 0, 'Callback', {{@pro2_callback,obj}});
+pard.setPro2nd.position=[1,2];
+pard.setPro2nd.Width=0.5;
+
+pard.selectPro.object=struct('String',{{'No pes'}},'Style','popup');
+pard.selectPro.position=[1,1.5];
+pard.selectPro.Width=0.5;
+
+pard.pro2nd.object=struct('String',{{'No pes'}},'Style','popup');
+pard.pro2nd.position=[1,2.5];
+pard.pro2nd.Width=0.5;
+
 pard.coordinatefile.object=struct('String','plugins/+ROIManager/+Segment/hidden/MakeNPCCoordinates.m','Style','edit');
 pard.coordinatefile.position=[1,1];
 pard.coordinatefile.Width=3;
@@ -161,6 +239,10 @@ pard.coordinatefile.TooltipString=sprintf('.txt or .csv file with coordinates, .
 pard.load_button.object=struct('String','Load','Style','pushbutton','Callback',{{@load_callback,obj}});
 pard.load_button.position=[1,4];
 pard.load_button.TooltipString=pard.coordinatefile.TooltipString;
+
+pard.usePes.object=struct('String','Use pes','Style','checkbox','Value',0,'Callback',{{@pesInput_callback,obj}});
+pard.usePes.position=[2,4];
+pard.usePes.TooltipString=pard.coordinatefile.TooltipString;
 
 pard.tif_numbermode.object=struct('String',{{'Density (labels/um^2)','Number of labels'}},'Style','popupmenu');
 pard.tif_numbermode.Width=1.5;
@@ -185,6 +267,14 @@ pard.t_labelingefficiency.Width=1.5;
 pard.labeling_efficiency.object=struct('String','.5','Style','edit');
 pard.labeling_efficiency.Width=.5;
 pard.labeling_efficiency.position=[3,2.5];
+
+pard.t_time.object=struct('String','Time point','Style','text');
+pard.t_time.position=[3,1];
+pard.t_time.Width=1.5;
+
+pard.time.object=struct('String','1','Style','edit');
+pard.time.Width=.5;
+pard.time.position=[3,2.5];
 
 pard.t2.object=struct('String','mean re-activations','Style','text');
 pard.t2.position=[4,1];
@@ -219,6 +309,21 @@ pard.background.object=struct('String','20','Style','edit');
 pard.background.Width=.5;
 pard.background.position=[5,4.5];
 
+pard.t_channel.object=struct('String', 'Channel','Style','text');
+pard.t_channel.position=[6,1];
+pard.t_channel.Width=1.5;
+
+pard.channel.object=struct('String', '1','Style','edit');
+pard.channel.position=[6,2.5];
+pard.channel.Width=0.5;
+
+pard.t_viewType.object=struct('String', 'View','Style','text');
+pard.t_viewType.position=[6,3];
+pard.t_viewType.Width=1.5;
+
+pard.viewType.object=struct('String', {{'side', 'top'}},'Style','popup','Value', 1);
+pard.viewType.position=[6,4.5];
+pard.viewType.Width=0.5;
 
 pard.t6.object=struct('String','Number of sites','Style','text');
 pard.t6.position=[8,1];
@@ -263,4 +368,12 @@ pard.plugininfo.description=sprintf(['SimulateSites is a localization based simu
     'returns coordiantes or an image which defines a 2D structure. It \n'...
     'returns simulated localizations to SMAP using a realistic model for the \n'...
     'photophysics of the dye. Simulated structures are added to the RoiManager']);
+end
+
+function mergedStruct = mergeStruct(A, B)
+mergedStruct=A;
+f = fieldnames(A);
+    for i = 1:length(f)
+        mergedStruct.(f{i}) = [A.(f{i});B.(f{i})];
+    end
 end

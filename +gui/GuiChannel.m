@@ -111,6 +111,9 @@ classdef GuiChannel< interfaces.LayerInterface
 %             cross-layer synch
              callobj=obj;
             obj.addSynchronization('filelist_short',obj.guihandles.ch_filelist,'String',{@callobj.filelist_callback,1})
+            obj.addSynchronization('filenumber',[],[],{@callobj.filenumber_callback})
+           
+           
            
             obj.addSynchronization([obj.layerprefix 'selectedField'],[],[],{@callobj.selectedField_callback})
             obj.addSynchronization('locFields',[],[],{@callobj.setcolorfield_callback})
@@ -142,7 +145,13 @@ classdef GuiChannel< interfaces.LayerInterface
             p.frame_max=obj.getPar('frame_max');
             obj.setGuiParameters(p);
         end
-
+        function filenumber_callback(obj,a,b,c)
+            fn=obj.getPar('filenumber');
+            obj.guihandles.ch_filelist.Value=fn;
+            obj.filelist_callback;
+            notify(obj.P,'sr_render');
+        end
+           
         function filelist_callback(obj,x,y,z)
                 znm=obj.locData.getloc('znm');
                 if isfield(znm,'znm')&&any(znm.znm~=0) % loical: dont update hist slider
@@ -164,10 +173,10 @@ classdef GuiChannel< interfaces.LayerInterface
         function setcolorfield_callback(obj)
             if isempty(obj.locData.loc), return; end
             numlocs=length(obj.locData.loc.frame);
-            obj.locData.loc.colorfield=(1:numlocs)'/numlocs*2-0.5;
+            obj.locData.loc.colorfield=single((1:numlocs)'/numlocs*2-0.5);
             if ~isempty(obj.locData.grouploc)
                 numlocs=length(obj.locData.grouploc.frame);
-                obj.locData.grouploc.colorfield=(1:numlocs)'/numlocs;
+                obj.locData.grouploc.colorfield=single((1:numlocs)'/numlocs);
             end
         end
          
@@ -476,8 +485,8 @@ switch p.render_colormode.selection
         obj.setcolorfield_callback
     case 'z'
         if isfield(obj.locData.loc,'znm')
-        obj.locData.loc.colorfield=obj.locData.loc.znm;
-        obj.locData.grouploc.colorfield=obj.locData.grouploc.znm;
+        obj.locData.loc.colorfield=single(obj.locData.loc.znm);
+        obj.locData.grouploc.colorfield=single(obj.locData.grouploc.znm);
         cmin=-300;
         cmax=300;
         else 
@@ -517,10 +526,10 @@ p=obj.getSingleGuiParameter('renderfield');
 field=p.selection;
 v=obj.locData.getloc(field,'layer',obj.layer).(field);
 if ~isempty(v)
-obj.locData.loc.colorfield=obj.locData.loc.(field);
-obj.locData.grouploc.colorfield=obj.locData.grouploc.(field);
+obj.locData.loc.colorfield=single(obj.locData.loc.(field));
+obj.locData.grouploc.colorfield=single(obj.locData.grouploc.(field));
 q=myquantilefast(v,[0.01,0.99]);
-dx=10^floor(log10(q(2)/100));
+dx=10^floor(log10(abs(q(2))/100));
 minv=round(q(1)/dx)*dx;
 maxv=round(q(2)/dx)*dx;            
 obj.colorrange.mincall(p.Value)=minv;

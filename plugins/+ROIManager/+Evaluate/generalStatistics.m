@@ -45,8 +45,11 @@ classdef generalStatistics<interfaces.SEEvaluationProcessor
                     out.(['layers' num2str(k)]).medianphot=median(locs.phot);
                     out.(['layers' num2str(k)]).meanbg=mean(locs.bg);
                     out.(['layers' num2str(k)]).medianbg=median(locs.bg);
+                    if ~isempty(locs.bg)
                     out.(['layers' num2str(k)]).maxbg=mode(round(locs.bg));
-                    
+                    else
+                    out.(['layers' num2str(k)]).maxbg=NaN;
+                    end
                 end
             end
             

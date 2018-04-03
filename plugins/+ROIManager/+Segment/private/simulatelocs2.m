@@ -1,13 +1,13 @@
 function [locsout,possites]=simulatelocs2(p, colour)
            [poslabels,possites]=getlabels(p, colour);
 %            p.maxframe=100000;
-           posreappear=reappear(poslabels,p.blinks,p.maxframes);
+           posreappear=reappear(poslabels,p.blinks(colour),p.maxframes(colour));
            
 %            p.lifetime=2;
-           photonsperframe=p.photons/p.lifetime;
-           posphot=getphotons(posreappear,photonsperframe,p.lifetime);
+           photonsperframe=p.photons(colour)/p.lifetime(colour);
+           posphot=getphotons(posreappear,photonsperframe,p.lifetime(colour));
            
-           locs=locsfrompos(posphot,p);
+           locs=locsfrompos(posphot,p, colour);
            locsout=singlelocs(locs);
 end
 
@@ -73,66 +73,84 @@ function [locs,possites]=getlabels(p, colour)
 % fields p. :
 % coordinatefile, se_sitefov, numberofsites(x,y), labeling_efficiency, randomxy,
 % randomxyd
-paths =  strsplit(p.coordinatefile, '|');
-switch colour
-    case 1
-        p.coordinatefile = paths{1};
-    case 2
-        p.coordinatefile = paths{2};
-    otherwise
+
+if p.usePes
+    switch colour
+        case 1  
+            [image, nm] = p.obj.getPar('proteinES').(p.selectPro.selection).getTimeImg(p.time, p.viewType.selection, p.tif_imagesize);
+            image = imrotate(image, 180);
+            p.Mean = nm;
+            p.Std = 0;
+        case 2
+            [image, nm] = p.obj.getPar('proteinES').(p.pro2nd.selection).getTimeImg(p.time, p.viewType.selection, p.tif_imagesize);
+            image = imrotate(image, 180);
+            p.Mean = nm;
+            p.Std = 0;
+        otherwise
+    end
+else
+    paths =  strsplit(p.coordinatefile, '|');
+    switch colour
+        case 1
+            p.coordinatefile = paths{1};
+        case 2
+            p.coordinatefile = paths{2};
+        otherwise
+    end
+
+    [~,~,ext]=fileparts(p.coordinatefile);% Get extension of the specified file
+    image=[];
+    locsall=[];
+    switch ext
+        case {'.txt','.csv'}
+            plocs=readtable(p.coordinatefile);
+            plocsa=table2array(plocs);
+            locsall.x=plocsa(:,1);
+            locsall.y=plocsa(:,2);
+            if size(plocsa,2)>2
+                locsall.z=plocsa(:,3);
+            end
+            locsall=copyfields(locsall,plocs,{'x','y','z'});
+        case {'.tif','.png'}
+    %         locs=getlabelstiff(obj,p);
+            image=imread(p.coordinatefile);
+            p.Mean = 150;
+            p.Std = 20;
+
+        case '.mat'
+            l=load(p.coordinatefile);
+
+            if isfield(l,'image')
+                image=l.image;
+            else
+                locsall=copyfields([],l,{'x','y','z'});
+            end
+        case '.m'
+            cf=pwd;
+            [ph,fh]=fileparts(p.coordinatefile);
+            cd(ph)
+            l=eval(fh);
+            cd(cf);
+    %         l=eval(p.coordinatefile);
+            if isfield(l,'image')
+                image=l.image;
+            else
+                locsall=copyfields([],l,{'x','y','z','channel'}); % channel is added
+            end
+    % add a new way to get localizations
+        case {'.loc'}
+            image=imread(p.coordinatefile);
+            img=sum(image,3)/size(image,3); %binarize
+            image=double(img)/255;
+        otherwise
+            display('file not identified selected')
+            return
+    end % after this block, you will get either image or locsall, depending on the type of your input
+    %if ~isfield(locsall,'z')
+    %    locsall.z=0*locsall.x;
+    %end    
 end
-        
-[~,~,ext]=fileparts(p.coordinatefile);% Get extension of the specified file
-image=[];
-locsall=[];
-switch ext
-    case {'.txt','.csv'}
-        plocs=readtable(p.coordinatefile);
-        plocsa=table2array(plocs);
-        locsall.x=plocsa(:,1);
-        locsall.y=plocsa(:,2);
-        if size(plocsa,2)>2
-            locsall.z=plocsa(:,3);
-        end
-        locsall=copyfields(locsall,plocs,{'x','y','z'});
-    case {'.tif','.png'}
-%         locs=getlabelstiff(obj,p);
-        image=imread(p.coordinatefile);
-        p.Mean = 150;
-        p.Std = 20;
-        
-    case '.mat'
-        l=load(p.coordinatefile);
-        
-        if isfield(l,'image')
-            image=l.image;
-        else
-            locsall=copyfields([],l,{'x','y','z'});
-        end
-    case '.m'
-        cf=pwd;
-        [ph,fh]=fileparts(p.coordinatefile);
-        cd(ph)
-        l=eval(fh);
-        cd(cf);
-%         l=eval(p.coordinatefile);
-        if isfield(l,'image')
-            image=l.image;
-        else
-            locsall=copyfields([],l,{'x','y','z','channel'}); % channel is added
-        end
-% add a new way to get localizations
-    case {'.loc'}
-        image=imread(p.coordinatefile);
-        img=sum(image,3)/size(image,3); %binarize
-        image=double(img)/255;
-    otherwise
-        display('file not identified selected')
-        return
-end % after this block, you will get either image or locsall, depending on the type of your input
-%if ~isfield(locsall,'z')
-%    locsall.z=0*locsall.x;
-%end
+
 
 if isempty(p.se_sitefov)
     p.se_sitefov=500;
@@ -152,7 +170,7 @@ for k=numberofsites:-1:1
     xh=mod(k-1,numberofrows)+1;
     yh=ceil(k/numberofrows);
     if ~isempty(image)
-        locsh=locsfromimage(image,p);
+        locsh=locsfromimage(image,p,colour);
     else
         locsh=labelremove(locsall,p.labeling_efficiency); % give all the coordinates of I dots and the lableling efficiency (P(ref)), and then randomly generating I even probabilities (P(gi)), keep P(gi) if the P(gi) <= P(ref)
     end
@@ -204,35 +222,35 @@ end
 end
 
 
-function locs=locsfromimage(image,p)
+function locs=locsfromimage(image,p, colour)
     % adapted from applyFilter
     
     finalNumMol = round(random('norm', p.Mean, p.Std));
    
-    norFilter = image/max(image(:));
+    norFilter = image/max(image(:)); % = normalized filter. the maximun of a pixel value is set 1
     
-    ExpP = numel(image);
-    ActP = sum(norFilter(:));
+    ExpP = numel(image); % number of image pixels
+    ActP = sum(norFilter(:)); % sum of all pixel values in the normalized filter
     numInput = (finalNumMol*ExpP)/ActP;
-    numInput = ceil(numInput * 1.2);
+    numInput = ceil(numInput * 2);
     
     setRange = length(image);
     x = rand(1,numInput)*setRange;
     y = rand(1,numInput)*setRange;
-    p = rand(1,numInput);
+    pr = rand(1,numInput);
     
     idx = sub2ind(size(norFilter), ceil(x), ceil(y));
     
-    filteredIdx = p <= norFilter(idx);
+    filteredIdx = pr <= norFilter(idx);
     
     xy = [x; y];
     Filtered = xy(:,filteredIdx);
     Filtered = Filtered(:,1:finalNumMol);
     locs = [];
-    locs.x = Filtered(1,:)';
-    locs.y = Filtered(2,:)';
+    locs.x = Filtered(1,:)'-setRange/2;
+    locs.y = Filtered(2,:)'-setRange/2;
     locs.z = repelem(0,length(Filtered));
-    locs.channel = repelem(1,length(Filtered));
+    locs.channel = repelem(colour,length(Filtered));
 end
 
 function locs=labelremove(locin,p)
@@ -269,13 +287,13 @@ locso.frame=double(ceil(rand(length(indout),1)*maxframe));
 end
 
 
-function locs=locsfrompos(locsi,p)
+function locs=locsfrompos(locsi,p, colour)
 for k=length(locsi):-1:1
-    locs(k)=locsfromposi(locsi(k),p);
+    locs(k)=locsfromposi(locsi(k),p, colour);
 end
 end
 
-function locs=locsfromposi(locsi,p)
+function locs=locsfromposi(locsi,p, colour)
     numlocs=length(locsi.x);
 %     phot=exprnd(p.photons,numlocs,1);
     phot=locsi.phot;
@@ -287,9 +305,9 @@ function locs=locsfromposi(locsi,p)
     indin=phot>=10;
     numlocs=sum(indin);
     %MOrtensen
-    locprecnm=sqrt(sa^2./phot.*(16/9+8*pi*sa^2*p.background^2./phot/a^2));
+    locprecnm=sqrt(sa^2./phot.*(16/9+8*pi*sa^2*p.background(colour)^2./phot/a^2));
     locs.phot=single(phot(indin));
-    locs.bg=single(locprecnm(indin)*0+p.background);
+    locs.bg=single(locprecnm(indin)*0+p.background(colour));
     locs.locprecnm=single(locprecnm(indin));
 %     locs.frame=double(ceil(rand(numlocs,1)*p.maxframe));
     locs.xnm=single(locsi.x(indin)+randn(numlocs,1).*locprecnm(indin));
