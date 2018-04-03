@@ -117,7 +117,7 @@ sigmax=par.c_stdymax;
 % maxbg=150;
 
 ig=[cluster(:).meansigmapsf]>minsigma & [cluster(:).meansigmapsf]<maxsigma;
-ig=ig&sqrt([cluster(:).stdx].*[cluster(:).stdy])>sigmin & sqrt(
+ig=ig&sqrt([cluster(:).stdx].*[cluster(:).stdy])>sigmin & sqrt([cluster(:).stdx].*[cluster(:).stdy])<sigmax;
 
 initaxis(par.resultstabgroup,'histogram');
 maxhist=myquantile(dlocs,0.998);
