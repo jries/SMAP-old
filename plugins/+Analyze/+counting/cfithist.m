@@ -10,13 +10,46 @@ classdef cfithist<interfaces.DialogProcessor
         end
         
         function out=run(obj,p)
-            histogram=obj.getResults('counting_histogram');
-%             histogram=obj.locData.guiData.counting.histogram;
-            pout=cluster_mmaple_fithist(p,histogram);
-           
-%             locs=obj.locData.getloc({'frame','xnm','ynm','phot','bg','PSFxnm','locprecnm'},'layer',1,'position','roi');
+            
+            if p.bootstrap
+                numberOfSubsets = length(obj.getResults('counting_histogram'));
+            else
+                numberOfSubsets = 1;
+            end
+            
+            mature = [];
+            blink = [];
+            for i = 1:numberOfSubsets
+                if p.bootstrap
+                    allHistogram=obj.getResults('counting_histogram');
+                    histogram=allHistogram{i};
+                else
+                    histogram=obj.getResults('counting_histogram');
+                end
+%               histogram=obj.locData.guiData.counting.histogram;
+                pout_ref=cluster_mmaple_fithist(p,histogram);
+                
+                while 1
+                    pout=cluster_mmaple_fithist(pout_ref,histogram);
 
-%             pout.par=cluster_counting(locs,p);
+                    if round(pout.pmature_v,3) == round(pout_ref.pmature_v,3) & round(pout.pblink_v,3) == round(pout_ref.pblink_v,3)
+                        break
+                    else
+                        pout_ref=pout;
+                    end
+                end
+                blink(i) = pout_ref.pblink_v;
+                mature(i) = pout_ref.pmature_v;
+                
+%               locs=obj.locData.getloc({'frame','xnm','ynm','phot','bg','PSFxnm','locprecnm'},'layer',1,'position','roi');
+
+%               pout.par=cluster_counting(locs,p);
+            end
+            
+            if p.bootstrap
+                pout.blinkStd = std(blink); pout.matureStd = std(mature);
+                pout.blinkMean = mean(blink); pout.matureMean = mean(mature);
+            end
             obj.setGuiParameters(pout);
             out.histogram=histogram;
             out.fit=pout;
@@ -101,6 +134,43 @@ pard.t2.Width=0.25;
 pard.fitselection.object=struct('String',{{'cumulative distribution','histogram','weighted histogram'}},'Style','popupmenu');
 pard.fitselection.position=[4,3.25];
 pard.fitselection.Width=1.75;
+
+pard.bootstrap.object=struct('String','Bootstrap','Style','checkbox', 'Value', 0);
+pard.bootstrap.position=[8,1];
+pard.bootstrap.Width=1;
+
+pard.t_bsMean.object=struct('String','Mean','Style','text');
+pard.t_bsMean.position=[9,1.5];
+pard.t_bsMean.Width=0.5;
+
+pard.t_bsStd.object=struct('String','Std','Style','text');
+pard.t_bsStd.position=[9,2];
+pard.t_bsStd.Width=0.5;
+
+pard.t_bsMature.object=struct('String','Mature','Style','text');
+pard.t_bsMature.position=[10,1];
+pard.t_bsMature.Width=0.5;
+
+pard.t_bsBlink.object=struct('String','Blink','Style','text');
+pard.t_bsBlink.position=[11,1];
+pard.t_bsBlink.Width=0.5;
+
+pard.matureMean.object=struct('String','-','Style','edit');
+pard.matureMean.position=[10,1.5];
+pard.matureMean.Width=0.5;
+
+pard.blinkMean.object=struct('String','-','Style','edit');
+pard.blinkMean.position=[11,1.5];
+pard.blinkMean.Width=0.5;
+
+pard.matureStd.object=struct('String','-','Style','edit');
+pard.matureStd.position=[10,2];
+pard.matureStd.Width=0.5;
+
+pard.blinkStd.object=struct('String','-','Style','edit');
+pard.blinkStd.position=[11,2];
+pard.blinkStd.Width=0.5;
+
 
 pard.plugininfo.name='fit brightness histogram';
 pard.plugininfo.type='ProcessorPlugin';
