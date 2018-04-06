@@ -136,39 +136,39 @@ pard.fitselection.position=[4,3.25];
 pard.fitselection.Width=1.75;
 
 pard.bootstrap.object=struct('String','Bootstrap','Style','checkbox', 'Value', 0);
-pard.bootstrap.position=[8,1];
+pard.bootstrap.position=[5,3];
 pard.bootstrap.Width=1;
 
 pard.t_bsMean.object=struct('String','Mean','Style','text');
-pard.t_bsMean.position=[9,1.5];
+pard.t_bsMean.position=[6,4];
 pard.t_bsMean.Width=0.5;
 
 pard.t_bsStd.object=struct('String','Std','Style','text');
-pard.t_bsStd.position=[9,2];
+pard.t_bsStd.position=[6,4.5];
 pard.t_bsStd.Width=0.5;
 
 pard.t_bsMature.object=struct('String','Mature','Style','text');
-pard.t_bsMature.position=[10,1];
+pard.t_bsMature.position=[7,3.5];
 pard.t_bsMature.Width=0.5;
 
 pard.t_bsBlink.object=struct('String','Blink','Style','text');
-pard.t_bsBlink.position=[11,1];
+pard.t_bsBlink.position=[8,3.5];
 pard.t_bsBlink.Width=0.5;
 
 pard.matureMean.object=struct('String','-','Style','edit');
-pard.matureMean.position=[10,1.5];
+pard.matureMean.position=[7,4];
 pard.matureMean.Width=0.5;
 
 pard.blinkMean.object=struct('String','-','Style','edit');
-pard.blinkMean.position=[11,1.5];
+pard.blinkMean.position=[8,4];
 pard.blinkMean.Width=0.5;
 
 pard.matureStd.object=struct('String','-','Style','edit');
-pard.matureStd.position=[10,2];
+pard.matureStd.position=[7,4.5];
 pard.matureStd.Width=0.5;
 
 pard.blinkStd.object=struct('String','-','Style','edit');
-pard.blinkStd.position=[11,2];
+pard.blinkStd.position=[8,4.5];
 pard.blinkStd.Width=0.5;
 
 
