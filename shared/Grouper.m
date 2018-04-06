@@ -35,6 +35,8 @@ classdef Grouper< interfaces.LocDataInterface
             obj.combinemodes.filenumber='first';
             obj.combinemodes.neighbours='sum';
             obj.combinemodes.clusterdensity='mean';
+             obj.combinemodes.cellnumbers='max';
+              obj.combinemodes.sitenumbers='max';
         end
         function connect(obj,dx,dt,framef,xf,yf,varargin)
             fn=fieldnames(obj.locData.loc);
@@ -54,22 +56,54 @@ classdef Grouper< interfaces.LocDataInterface
             y=double(obj.locData.getloc(yf).(yf));
             frame=double(obj.locData.getloc(framef).(framef));
             
-            sortmatrix=([frame,x,y]);  %modify:unconnected
+            numfields=length(varargin);
+            
+%             sortmatrix=([frame,x,y]);  %modify:unconnected
+%        sorting of y not necessary, as all y are compared.
+            sortmatrix=zeros(length(frame),numfields+2);
+            sortmatrix(:,end-1)=frame;
+            sortmatrix(:,end)=x;
+%             sortmatrix(:,end)=y;
             for k=1:length(varargin)
-                sortmatrix=[double(obj.locData.getloc(varargin{k}).(varargin{k})),sortmatrix];
+                sortmatrix(:,k)=double(obj.locData.getloc(varargin{k}).(varargin{k}));
+%                 sortmatrix=[double(obj.locData.getloc(varargin{k}).(varargin{k})),sortmatrix];
             end
             sm=size(sortmatrix);
-            [~,indsort]=sortrows(sortmatrix,1:sm(2));
-            clear sortmatrix
+            [sortmatrixsort,indsort]=sortrows(sortmatrix,1:sm(2));
+            
+            newgroup=false(length(frame)-1,1);
+            for k=1:length(varargin)
+                newgroup=newgroup | diff(sortmatrixsort(:,k));
+            end
+            
+            
+            %later: remove multiple consequtive 1. For sites of length 1.
+            %Always remove the first ones.
+            fng=find(newgroup);
+            if ~isempty(fng)
+                if fng(1)==1
+                fng(1)=[];
+                end
+                newgroup(fng-1)=0;
+                sortmatrixsort(newgroup,end-1)=0;
+            end
+            
+%             frame(indsort(newgroup))=0;
+            
+            
+            clear sortmatrix 
             maxactive=10000;
-            list=connectsingle2c(double(x(indsort)),double(y(indsort)),double(frame(indsort)),double(dx),int32(dt),int32(maxactive));
+            list=connectsingle2c(sortmatrixsort(:,end),double(y(indsort)),sortmatrixsort(:,end-1),double(dx),int32(dt),int32(maxactive));
+%             listo=connectsingle2c(double(x(indsort)),double(y(indsort)),double(frame(indsort)),double(dx),int32(dt),int32(maxactive));
+            
+            clear  sortmatrixsort
             clear frame
-%             listm=connectsingle2mat(double(x(indsort)),double(y(indsort)),double(frame(indsort)),double(dx),int32(dt),int32(maxactive));
+%              listm=connectsingle2mat(double(x(indsort)),double(y(indsort)),double(frame(indsort)),double(dx),int32(dt),int32(maxactive));
             if list(end)==0
                 list(end)=max(list)+1; %FIX connectsingle doesnt assign last loc. Fix later!
             end  
             if list(1)==0
-                list(end)=max(list)+1; %FIX connectsingle doesnt assign last loc. Fix later!
+                list(1)=1; %FIX connectsingle doesnt assign last loc. Fix later!
             end   
             
             numbers=1:sm(1);
@@ -110,7 +144,7 @@ classdef Grouper< interfaces.LocDataInterface
             clear indsort2 indold
             [~,indback2]=sort(indold2);
             clear indold2
-            obj.locData.setloc('numberInGroup',numbergroup(indback2));
+            obj.locData.setloc('numberInGroup',single(numbergroup(indback2)));
             
             [~,obj.indsortlist]=sort(listback);
             
@@ -122,7 +156,7 @@ classdef Grouper< interfaces.LocDataInterface
 
             
         end
-        function combine(obj,field,combinemode,weights) %no field etc: group everythign for which we have combinemodes
+        function combine(obj,field,combinemode,weights,gweights) %no field etc: group everythign for which we have combinemodes
             
 %             obj.status('group: combine fields')
             if nargin==1 %do all
@@ -138,13 +172,17 @@ classdef Grouper< interfaces.LocDataInterface
                 else
                     weights(isinf(weights))=1;
                 end
+                
+                list=obj.locData.getloc('groupindex').groupindex;
+                gweights=sumcombineind(double(weights),double(list),double(obj.indsortlist));
+                
                 for k=1:length(fn2)
                     if isfield(obj.combinemodes,fn2{k})
                         combinemode=obj.combinemodes.(fn2{k});
                     else
                         combinemode='mean';
                     end
-                    obj.combine(fn2{k},combinemode,weights);
+                    obj.combine(fn2{k},combinemode,weights,gweights);
                 end
                 
             else
@@ -159,13 +197,17 @@ classdef Grouper< interfaces.LocDataInterface
                 end
             end
             
+            vtype=obj.locData.getloc(field).(field)(1);
             v=double(obj.locData.getloc(field).(field));
           
             list=obj.locData.getloc('groupindex').groupindex;
             
             if nargin <4
                 weights=ones(size(v),'like',v);              
-            end          
+            end   
+            if nargin <5
+                      gweights=sumcombineind(double(weights),double(list),double(obj.indsortlist));
+            end
             mode=0;
             switch combinemode
                 case 'sum'
@@ -174,7 +216,8 @@ classdef Grouper< interfaces.LocDataInterface
                     v2=v.*weights;                 
                 case 'square'
                     v2=v.^2.*weights.^2;
-                    weights=weights.^2;
+                    gweights=sumcombineind(double(weights.^2),double(list),double(obj.indsortlist));
+%                     weights=weights.^2;
                 case 'min'
                     v2=-v;
                     mode=1;
@@ -217,10 +260,10 @@ classdef Grouper< interfaces.LocDataInterface
                     case 'sum'
                         vwout2=vwout;  
                     case 'mean'
-                        gweights=sumcombineind(double(weights),double(list),(indsort));
+%                         gweights=sumcombineind(double(weights),double(list),(indsort));
                         vwout2=vwout./gweights;                 
                     case 'square'
-                        gweights=sumcombineind(double(weights),double(list),(indsort));
+%                         gweights=sumcombineind(double(weights),double(list),(indsort));
                         vwout2=sqrt(vwout./gweights); 
                     case 'locp'
                         vwout2=1./sqrt(vwout);
@@ -235,7 +278,7 @@ classdef Grouper< interfaces.LocDataInterface
                 end
             end
            
-            obj.locData.grouploc.(field)=cast(vwout2,'like',v);   
+            obj.locData.grouploc.(field)=cast(vwout2,'like',vtype);   
             
             end
 %             obj.status('group: combine fields done')

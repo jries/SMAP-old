@@ -119,14 +119,14 @@ sigmax=par.c_stdymax;
 ig=[cluster(:).meansigmapsf]>minsigma & [cluster(:).meansigmapsf]<maxsigma;
 ig=ig&sqrt([cluster(:).stdx].*[cluster(:).stdy])>sigmin & sqrt([cluster(:).stdx].*[cluster(:).stdy])<sigmax;
 
-
 dlocs=[cluster(ig).(gfield)]';
 
 initaxis(par.resultstabgroup,'histogram');
 maxhist=myquantile(dlocs,0.998);
 % figure(43)
 [y,x]=hist(dlocs,0:maxhist);
-xlim([1,100])
+xlim([1,100]);
+
 plot(x,y)
 title(length(dlocs));
 % sum(y)

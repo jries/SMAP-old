@@ -26,7 +26,7 @@ classdef applyPicassoDriftcorrection<interfaces.DialogProcessor
                 dr.xy.mirror='none';
                 
                 dr.xy.x=drift(:,1)*pixelsize(1);
-                dr.xy.y=drift(:,2)*pixelsize(2);
+                dr.xy.y=drift(:,2)*pixelsize(end);
             end
             if p.correctz&& size(drift,2)>2
 %                 dr.z=driftinfo.z;
@@ -59,7 +59,12 @@ oldf=obj.getSingleGuiParameter('file');
 if ~exist(oldf,'file')
     oldf=obj.getPar('lastSMLFile');
 end
-[f,path]=uigetfile([fileparts(oldf) filesep '*.txt']);
+if isempty(oldf)
+    directory='';
+else
+    directory=fileparts(oldf);
+end
+[f,path]=uigetfile([directory filesep '*.txt']);
 if f
     obj.setGuiParameters(struct('file',[path f]));
 end

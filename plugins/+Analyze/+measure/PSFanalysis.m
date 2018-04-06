@@ -17,7 +17,7 @@ classdef PSFanalysis<interfaces.DialogProcessor
                obj.figure=figure('Position',[1 1 800 800],'Units','Pixels');
             end
             p.figure=obj.figure;
-            analyze_PSF(obj.locData,p) 
+            analyze_PSF(obj.locData,p,obj) 
             out=[];
         end
         function pard=guidef(obj)
@@ -28,7 +28,7 @@ end
 
 
 
-function analyze_PSF(locData,p) %analyze PSF 
+function analyze_PSF(locData,p,obj) %analyze PSF 
 
 % allzstart=1;
 DZ=p.dz/1000;
@@ -43,7 +43,7 @@ if isempty(allf)||~exist([fd allf(1).name],'file')
 end
 l=length(allf);
 
-imageloader=imageloaderAll([fd fi]);
+imageloader=imageloaderAll([fd fi],[],obj.P);
 img=imageloader.getmanyimages(1:imageloader.metadata.numberOfFrames,'mat');
 numberofframes=imageloader.metadata.numberOfFrames;
 % imageloader.close;

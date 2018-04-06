@@ -1,5 +1,6 @@
-function out=chooseTifImage(filename)
-il=imageloaderOME(filename);
+function out=chooseTifImage(filename,P)
+%il=imageloaderOME(filename,[],P);
+il=imageloaderAll(filename,[],P);
 % il=imageloaderTifSimple(filename);
 numberOfFrames=il.metadata.numberOfFrames;
 allframes=il.getmanyimages(1:numberOfFrames,'mat');

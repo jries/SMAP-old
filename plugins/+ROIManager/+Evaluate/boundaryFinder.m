@@ -1,4 +1,6 @@
 classdef boundaryFinder<interfaces.SEEvaluationProcessor
+    % This plug-in depends on the BALM_fibril_growth.
+
     properties
         boundary
     end
@@ -7,108 +9,76 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
                 obj@interfaces.SEEvaluationProcessor(varargin{:});
         end
         function out=run(obj, inp)
+            %% Data import
             % Import the kimograph
-            test = obj.site.evaluation.BALM_fibril_growth.kimograph;
-            test(test>=1)=1;
+            kimo = obj.site.evaluation.BALM_fibril_growth.kimograph;
+            kimo(kimo>=1)=1;
 
             slideStep = inp.slideStep;
             gridRange = inp.gridRange;
             adjM = inp.adjM;
 
-            % expand test
-            oriSize = size(test);
+            % extend the kimo on x to compensate the sliding window
+            oriSize = size(kimo);
             expand = zeros(oriSize(1),gridRange*slideStep);
-            test = [test, expand];
+            kimo = [kimo, expand];
 
             % Binarize the kimograph
-            [testRefx, testRefy] = find(test);
-            [testNZx, testNZy] = find(test);
-
+            % X means time, Y means space
+            [kimoRefx, kimoRefy] = find(kimo);
+            [kimoNZx, kimoNZy] = find(kimo);
+            
+            %% Remove noise based on euclidean distances between data points
             % use euclidean distances to filter out noises
-            K = round(length(testRefx)*5/100);
+            K = round(length(kimoRefx)*5/100);
 
-            ED = pdist2([testNZx testNZy],[testNZx testNZy],'euclidean');
+            ED = pdist2([kimoNZx kimoNZy],[kimoNZx kimoNZy],'euclidean');
             sortedED = sort(ED,2);
             sortedED = sortedED(:,1:K);
             rmean = mean(sortedED,2);
 
             EDcutoff = quantile(rmean, 0.95);
 
-            test(sub2ind(size(test), testNZx([rmean>=EDcutoff]), testNZy([rmean>=EDcutoff]))) = 0;
+            kimo(sub2ind(size(kimo), kimoNZx([rmean>=EDcutoff]), kimoNZy([rmean>=EDcutoff]))) = 0;
+            
+            %% Get a rough boundary based on density
+            % Get cordinates of the kimograph
+            Size = size(kimo);
+            [kimoFZx, kimoFZy]=find(kimo);
 
-            % Get cordinates of the kemograph
-            Size = size(test);
-            [CorX CorY] = meshgrid(1:Size(1), 1:Size(2));
-            Order = sub2ind(Size, CorX(:), CorY(:));
-
-            % Make grids (see gridRange)
-            adjCorX = ceil(CorX(:)./gridRange);
-            adjCorY = ceil(CorY(:)./gridRange);
-
-            % Get density
-            D = accumarray([adjCorX adjCorY], test(Order), [], @sum);
-
-            % Filter out grids that might be background
-            cutoff = 3; %#Par
-            D(D<=cutoff)=0;
-
-            % Do sliding subtraction (see slideStep)
-            % to see the next slideStep-1 right neighbor is higher or not than the
-            % target
-            SizeD = size(D);
-
-            diff = cell(slideStep-1,1);
-            diffAll = zeros(SizeD(1), SizeD(2)-slideStep);
-            for i = 1:(slideStep-1)
-                diffAll = diffAll + (D(:,1+i:end-slideStep+i) - D(:,1:(end-slideStep)) < 0);
-            end
-
-            % Get grids with 4 zero grids on its right-hand side
-            diffAllLog = diffAll == slideStep-1; 
-            [bX,bY] = find(diffAllLog, 1, 'last');
-
-            % Get boundary (itself is 1, and its cumsum is also 1)
-            boundary = diffAllLog & cumsum(diffAllLog,2,'reverse') == 1;
-
-            %figure(50)
-            %mesh(boundary)
-            %rotate3d on
-
-            % Find the corrdinates of boundary
-            [Cx, Cy]= find(boundary,sum(boundary(:)),'last');
-
-            % Make sure every frame (x-axies) have a point
-            bounSize = size(boundary);
-            CxFinal = (1:bounSize(1))';
-            CyFinal = zeros(bounSize(1),1);
-            CyFinal(Cx) = Cy;
-
-            % Find the cummax (next points should always >= the previous points)
-            CyFinal = cummax(CyFinal);
-            CxGridParent = CxFinal*gridRange;
-            CyGridParent = CyFinal*gridRange;
-
-            meaningfulX = (CxGridParent+1)<=Size(1);
-            CxGridParent = CxGridParent(meaningfulX);
-            CyGridParent = CyGridParent(meaningfulX);
-
-            CxFParent = (0:Size(1)-1)';
-            CyFParent = zeros(Size(1),1);
-            CyFParent(CxGridParent+1) = CyGridParent;
-            CyFParent = cummax(CyFParent);
-
-
-            %figure(50)
-            %scatter(testNZx, testNZy)
+            KDM = getKernelMatrix(Size,[kimoFZx, kimoFZy]);
+            
+            [~,h] = contour(KDM, 50);
+            
+            tl = h.LevelList(15);
+            %figure(999)
+            %cla
+            %imagesc(kimo)
+            
+            %figure(1000)
+            %cla
+            %contour(KDM, 200);
             %hold on
-            %plot(CxFParent, CyFParent)
-
-
-            Mref = calMeasurement(CxFParent,CyFParent,testNZx,testNZy,Size);
+            [theLevel,~] = contour(KDM, [tl tl],'LineWidth',2);
+            rBoundary = round(theLevel)';
+            %scatter(kimoRefx, kimoRefy)
+            %hold off
+            boundary = zeros(Size(1),1);
+            CxFParent = 1:Size(1);
+            for i=CxFParent
+                idx = rBoundary(:,1)==i;
+                if sum(idx)>0
+                    boundary(i) = max(rBoundary(idx,2));
+                end
+            end
+            CyFParent = cummax(boundary);
+            CxFParent = CxFParent';
+            %% refinement of the boundary
+            Mref = calMeasurement(CxFParent,CyFParent,kimoNZx,kimoNZy,Size);
             MrefO = Mref;
             CyFParentA = CyFParent;
             for i=size(CxFParent):-1:1
-               thisFrameY = testNZy(testNZx == CxFParent(i));
+               thisFrameY = kimoNZy(kimoNZx == CxFParent(i));
                thisFrameY = thisFrameY(thisFrameY>CyFParent(i));
                ii = 1;
                futherStep = 0;
@@ -121,7 +91,7 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
                    CyFParentA = cummax(CyFParentA);
 
                    % fit to new boundary
-                   Mnew = calMeasurement(CxFParent,CyFParentA,testNZx,testNZy,Size);
+                   Mnew = calMeasurement(CxFParent,CyFParentA,kimoNZx,kimoNZy,Size);
                    if Mnew >= MrefO*adjM && Mnew >= Mref %#Par
                        MrefO = Mnew;
                        futherStep = 0;
@@ -140,7 +110,7 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
                end
                 if isinteger(i/10)
                     figure(51)
-                    scatter(testNZx, testNZy)
+                    scatter(kimoNZx, kimoNZy)
                     hold on
                     plot(CxFParent, CyFParentA)
                     hold off
@@ -151,17 +121,89 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
             fig = KimoPar.kimograph;
             co=quantile(fig(:),0.999);
             fig(fig>co)=co;
+            out.boundary = [CxFParent CyFParentA];
+
+            
+            %% Merge small steps
+            steps = inp.mergeSteps;
+            for i=1:length(steps)
+                switch steps(i)
+                    case 1
+                    % Merge steps by move
+                        idxRef = [];
+                        while 1
+                            [newboundary, idx] =  mergeStallsByMove(out.boundary, inp.minWidth);
+                            if isequal(idxRef, idx)
+                                break
+                            end
+                            idxRef = idx;
+                            out.boundary =  newboundary;
+                            out.boundary = rmRedundant(out.boundary);
+                        end
+                    case 2
+                    % Merge steps by move
+                    	idxRef = [];
+                        while 1
+                            [newboundary, idx] =  mergeByMove(out.boundary, inp.minWidth);
+                            if isequal(idxRef, idx)
+                                break
+                            end
+                            idxRef = idx;
+                            out.boundary =  newboundary;
+                            out.boundary = rmRedundant(out.boundary);
+                        end
+                    case 3
+                    % Merge steps by time
+                    out.boundary = mergeByTime(out.boundary, inp.minT);
+                    out.boundary = rmRedundant(out.boundary);
+                    case 0
+                        % Remove redundant points (in stalled region)
+                    out.boundary = rmRedundant(out.boundary);
+                end
+            end
+            
+            % Remove redundant points (in stalled region)
+            stepWidth = diff(out.boundary(:,2));
+            indStepWidthNon0 = find(stepWidth);
+            indPoint2Keep = [indStepWidthNon0; indStepWidthNon0+1];
+            indPoint2Keep = unique(indPoint2Keep);
+            out.boundary = out.boundary([1; indPoint2Keep; end],:);
+            
+            out.stallTime = calStallTime(out.boundary);
+            out.stepWidth = calStepWidth(out.boundary);
+            out.growthTime = calGrowthTime(out.boundary);
+            out.avgRate = calAvgRate(out.boundary);
+            
+            
             h=obj.setoutput('kimograph');
             imagesc(h,(fig))
+            hold(h,'on')
+            plot(h,CyFParentA,CxFParent, 'LineWidth', 1, 'Color', 'g')
+            plot(h,out.boundary(:,2),out.boundary(:,1), 'LineWidth', 1.5, 'Color', 'w')
+            hold(h,'off')            
+            
+
             %xlabel(h,'xnm')
             %ylabel(h,'frame')
             %xticklabels(h, KimoPar.xn)
             %yticklabels(h, KimoPar.fr)
-            hold(h,'on')
-            plot(h,CyFParentA,CxFParent, 'LineWidth', 1, 'Color', 'w')
-            hold(h,'off')
 
-            out.boundary = [CxFParent CyFParentA];
+
+            
+            if 0
+                out.avgRate = (CyFParentA(end)-CyFParentA(1))/(CxFParent(end)-CxFParent(1));
+                out.stepWidth = stepWidthNon0;
+                out.stallTime = stallTime;
+
+                h2=obj.setoutput('statistics');
+                axes(h2);
+                ax1 = subplot(1,2,1);
+                histogram(ax1, stepWidthNon0, 'BinWidth', 1);
+                title(ax1,'Rate');
+                ax2 = subplot(1,2,2);
+                histogram(ax2, stallTime, 'BinWidth', 1);
+                title(ax2,'Stall time');
+            end
         end
      
         function pard=guidef(obj)
@@ -198,6 +240,30 @@ pard.adjM.object=struct('Style','edit','String',1.0003);
 pard.adjM.position=[3,3];
 pard.adjM.TooltipString = 'If you set it as 1.0003, it means during the optimization, if the measurment of current step (Mcur) is 0.0003-time worse than the measurment of the previous step (Mpre), Mcur will still be considered as a good result. The measurment, which defines the boundary is good or not, can be definde by users.';
 
+pard.t_mergeSteps.object = struct('Style','text','String','Order of merging steps');
+pard.t_mergeSteps.position=[4,1];
+pard.t_mergeSteps.Width = 2;
+
+pard.mergeSteps.object = struct('Style','edit','String','0 3 1 2 3 1 2 0');
+pard.mergeSteps.position=[4,3];
+pard.mergeSteps.TooltipString = '0 = clean up; 1 = by space(ambiguous); 2 = by space(small), 3 = by time';
+
+pard.t_minT.object = struct('Style','text','String','Minimum time');
+pard.t_minT.position=[5,1];
+pard.t_minT.Width = 2;
+
+pard.minT.object = struct('Style','edit','String',5);
+pard.minT.position=[5,3];
+pard.minT.TooltipString = 'minimum time of a step (arbitrary unit)';
+
+pard.t_minWidth.object = struct('Style','text','String','Minimum width');
+pard.t_minWidth.position=[6,1];
+pard.t_minWidth.Width = 2;
+
+pard.minWidth.object = struct('Style','edit','String',2);
+pard.minWidth.position=[6,3];
+pard.minWidth.TooltipString = 'minimum width of a step (arbitrary unit)';
+
 % pard.dxt.Width=3;
 pard.inputParameters={'numberOfLayers','sr_layerson','se_cellfov','se_sitefov','se_siteroi'};
 pard.plugininfo.type='ROI_Evaluate';
@@ -213,3 +279,108 @@ function M = calMeasurement(x,y,qx,qy,Size)
     rightD = sum(rightIdx)/rightA;
     M = 0-((leftD-1)^2 + (rightD-0)^2)^(1/2);
 end
+
+function [newBoundary, idx] = mergeStallsByMove(boundary, minWidth)
+    % Merge steps by move
+    move = diff(boundary(:,2));
+    stalled = move==0;
+    stalled = [boundary(find(stalled), 1) boundary(find(stalled)+1, 1)];
+    indConStalled = find(diff(stalled,1,2)>1);
+    conStalled = stalled(indConStalled,:);
+    conStallTime = diff(conStalled,1,2);
+
+    smallMove = move <= minWidth;
+    smallMove = [boundary(find(smallMove), 1) boundary(find(smallMove)+1, 1)];
+
+    afterStall = ismember(smallMove(:,1),conStalled(:,2));
+    beforeStall = ismember(smallMove(:,2), conStalled(:,1));
+    abStallSM = smallMove(afterStall+beforeStall==2,:);
+    lPosition2change = [];
+    for i = 1:size(abStallSM,1)
+    upstreamStall = conStalled(:,2) == abStallSM(i,1);
+    downstreamStall = conStalled(:,1) == abStallSM(i,2);
+        if conStallTime(upstreamStall) >= conStallTime(downstreamStall);
+            lPosition2change = ismember(boundary(:,1), conStalled(downstreamStall,:)');
+            lPositionValue = ismember(boundary(:,1), conStalled(upstreamStall,:)');
+            boundary(lPosition2change,2) = boundary(lPositionValue,2);
+        else
+            lPosition2change = ismember(boundary(:,1), conStalled(upstreamStall,:)');
+            lPositionValue = ismember(boundary(:,1), conStalled(downstreamStall,:)');
+            boundary(lPosition2change,2) = boundary(lPositionValue,2);
+        end
+    end
+    newBoundary = boundary;
+    idx=lPosition2change;
+end
+function [newBoundary, idx] = mergeByMove(boundary, minWidth)
+    move = diff(boundary(:,2));
+    point2drag = move <= minWidth;
+    indPoint2drag = find(point2drag)+1;
+    boundary(indPoint2drag,2) = boundary(indPoint2drag-1,2);
+    newBoundary = boundary;
+    idx = indPoint2drag;
+end
+function newBoundary = mergeByTime(boundary, minT)
+    point2keepCp = [];
+    while 1
+        stallTime = diff(boundary(:,1));
+        point2keep = stallTime >= minT;
+        if isequal(point2keep, point2keepCp)
+            break
+        end
+        point2keepCp = point2keep;
+        indPoint2keep=unique([find(boundary(:,1)==1); find(point2keep); find(point2keep)+1]);
+        point2keep(indPoint2keep)=1;
+        boundary = boundary(point2keep,:);
+        newBoundary = boundary;
+    end
+end
+
+function salltime = calStallTime(boundary)
+    move = diff(boundary(:,2));
+    stalled = move==0;
+    stalled = [boundary(find(stalled), 1) boundary(find(stalled)+1, 1)];
+    salltime = diff(stalled,1,2);    
+end
+
+function growthTime = calGrowthTime(boundary)
+    move = diff(boundary(:,2));
+    growth = move>0;
+    growth = [boundary(find(growth), 1) boundary(find(growth)+1, 1)];
+    growthTime = diff(growth,1,2);    
+end
+
+function stepWidth = calStepWidth(boundary)
+    move = diff(boundary(:,2));
+    stepWidth = move(move>0);
+end
+
+function avgRate = calAvgRate(boundary)
+    startNEnd = boundary([1 end], :);
+    diffTimeNPosition = diff(startNEnd, 1, 1);
+    avgRate = diffTimeNPosition(2)/diffTimeNPosition(1);
+end
+
+function [z, bw] = getKernelMatrix(matrixSize, sVrot, varargin) 
+    [meshx, meshy] = meshgrid(0:matrixSize(1), 0:matrixSize(2)); % make full grid
+    q = [meshx(:), meshy(:)]; % convert the grid to positions
+    if length(varargin)==0
+        [sVrotx,xy,bw]=ksdensity(sVrot, q); % get kernel density estimation
+    else
+        [sVrotx,xy,bw]=ksdensity(sVrot, q, varargin{1,1}, varargin{1,2}); % get kernel density estimation    
+    end
+    
+    % converted into an image
+    idx = sub2ind(matrixSize(end:-1:1)+1, xy(:,2)+1, xy(:,1)+1); 
+    z = zeros(matrixSize(end:-1:1)+1);
+    z(idx) = sVrotx;
+end
+
+function newBoundary = rmRedundant(boundary)
+    % Remove redundant points (in stalled region)
+    stepWidth = diff(boundary(:,2));
+    indStepWidthNon0 = find(stepWidth);
+    indPoint2Keep = [indStepWidthNon0; indStepWidthNon0+1];
+    indPoint2Keep = unique(indPoint2Keep);
+    newBoundary = boundary([1; indPoint2Keep; end],:);
+end 

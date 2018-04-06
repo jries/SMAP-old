@@ -20,6 +20,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             obj.inputParameters{end+1}='numberOfLayers';
             obj.inputParameters=unique(obj.inputParameters);
              obj.showresults=false;
+             obj.guiselector.show=true;
         end
 %         function makeGui(obj)
 %             makeGui@interfaces.DialogProcessor(obj);
@@ -409,7 +410,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 case 2 %transparent
                     transparency.parameter=p.transparencypar(1)/ph.sr_pixrec(1)^2*10;
                 case 3 %balls
-                    transparency.parameter=[p.transparencypar(1)/ph.sr_pixrec(1)^2*10 p.transparencypar(2)];
+                    transparency.parameter=[p.transparencypar(1)/ph.sr_pixrec(1)^2*10 p.transparencypar(end)];
                     
             end
             
@@ -608,8 +609,13 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 else
                     sy=sx;
                 end
+                
+                th=p.theta+thetaoffset;
+                sxr=sx*sin(th);
+                syr=sy*cos(th);
+                
                 loc.sx=sx;
-                loc.sy=sy;
+                loc.sy=sqrt(sxr.^2+syr.^2);
 %                 loc.y=yrot(sortind)+zmean;
                 loc.znm=loc.znm(sortind);
                 loc.numberInGroup=loc.numberInGroup(sortind);
@@ -869,6 +875,16 @@ classdef Viewer3DV01<interfaces.DialogProcessor
             obj.setGuiParameters(struct('theta',0));
             obj.redraw;
         end
+        
+        function savesideview_callback(obj,a,b)
+            f=obj.getPar('lastSMLFile');
+            fn=strrep(f,'sml.mat','3dxz.tif');
+            [file,path]=uiputfile(fn);
+            if file
+                imwrite(obj.currentimage.image,[path file],'tif')
+            end
+            
+        end
                    
     end
 end
@@ -906,6 +922,7 @@ function pard=guidef(obj)
 pard.text2.object=struct('String','zmin/zmax','Style','text');
 pard.text2.position=[2,1];
 pard.text2.Width=0.6;
+pard.text2.Optional=false;
 % pard.text3.object=struct('String','zmax','Style','text');
 % pard.text3.position=[2,2];
 % pard.text3.Width=0.3;
@@ -913,123 +930,163 @@ pard.text2.Width=0.6;
 pard.setpixelsize.object=struct('String','set pixelsize (x z): ','Style','checkbox','Value',1);
 pard.setpixelsize.position=[4,1];
 pard.setpixelsize.Width=1.5;
+pard.setpixelsize.Optional=true;
+
 pard.transparencymode.object=struct('String',{{'projection', 'transparency','balls'}} ,'Style','popupmenu');
 pard.transparencymode.position=[6,1];
 pard.transparencymode.Width=1.5;
 pard.transparencymode.TooltipString=sprintf('maximum intensity, \n partial transparency (parameter is related to transparency), \n render as ball (parameter is ball diamter in reconstructed pixels');
+pard.transparencymode.Optional=true;
 
 pard.thetat.object=struct('String','Polar angle theta ','Style','pushbutton','Callback',@obj.resetazimuth);
 pard.thetat.position=[3,1];
 pard.thetat.Width=1.1;
 pard.thetat.TooltipString='Push to set polar angle to zero';
+pard.thetat.Optional=false;
 
 pard.zmin.object=struct('Style','edit','String','-400'); 
 pard.zmin.position=[2,1.6];
 pard.zmin.Width=0.5;
+pard.zmin.Optional=false;
+
 pard.zmax.object=struct('Style','edit','String','400'); 
 pard.zmax.position=[2,2.1];
 pard.zmax.Width=0.5;
+pard.zmax.Optional=false;
+
 pard.theta.object=struct('Style','edit','String','0'); 
 pard.theta.position=[3,2.1];
 pard.theta.Width=0.5;
+pard.theta.Optional=false;
+
 pard.transparencypar.object=struct('Style','edit','String','1'); 
 pard.transparencypar.position=[6,2.5];
 pard.transparencypar.Width=0.5;
-
 pard.transparencypar.TooltipString=pard.transparencymode.TooltipString;
+pard.transparencypar.Optional=true;
 
 pard.pixrecset.object=struct('Style','edit','String','5 5'); 
 pard.pixrecset.position=[4,2.1];
 pard.pixrecset.Width=0.5;
+pard.pixrecset.Optional=true;
 
 pard.showcontrols.object=struct('String','Show Controls','Style','pushbutton','Callback',@obj.showpanel_callback);
 pard.showcontrols.position=[1,1];
 pard.showcontrols.Width=1.6;
 pard.showcontrols.TooltipString='opens control panel to move, rotate, zoom';
+pard.showcontrols.Optional=false;
 
 pard.rotateb.object=struct('String','Animate','Style','togglebutton','Callback',@obj.rotate_callback);
 pard.rotateb.position=[1,3];
 pard.rotateb.TooltipString='Start continuous animation';
+pard.rotateb.Optional=false;
 
 pard.animatemode.object=struct('String',{{'Rotate','Translate'}},'Style','popupmenu');
 pard.animatemode.position=[1,4];
 pard.animatemode.TooltipString='Select rotation or translation';
+pard.animatemode.Optional=false;
 
 pard.raxis.object=struct('String',{{'horizontal','vertical'}},'Style','popupmenu');%,'Callback',@obj.axischange_callback);
 pard.raxis.position=[2,4];
 pard.raxis.TooltipString='axis for continuous rotation / direction of translation';
+pard.raxis.Optional=false;
 
 pard.danglet.object=struct('String','step','Style','text');
 pard.danglet.position=[3,3];
 pard.danglet.Width=0.5;
 pard.danglet.TooltipString='step in angle between frames of continuous rotation';
+pard.danglet.Optional=true;
 
 pard.dangle.object=struct('String','3','Style','edit');
 pard.dangle.position=[3,3.5];
 pard.dangle.Width=0.5;
 pard.dangle.TooltipString=pard.danglet.TooltipString;
+pard.dangle.Optional=true;
 
 pard.zpost.object=struct('String','position','Style','text');
 pard.zpost.position=[3,4];
 pard.zpost.Width=0.5;
 pard.zpost.TooltipString='slice thickness (nm) for z-movie';
+pard.zpost.Optional=true;
 
 pard.zpos.object=struct('String','0','Style','edit');
 pard.zpos.position=[3,4.5];
 pard.zpos.Width=0.5;
 pard.zpos.TooltipString=pard.danglet.TooltipString;
+pard.zpos.Optional=true;
 
 pard.zdistt.object=struct('String','dz','Style','text');
 pard.zdistt.position=[5,4];
 pard.zdistt.Width=0.5;
 pard.zdistt.TooltipString='slice thickness (nm) for z-movie';
+pard.zdistt.Optional=true;
 
 pard.zdist.object=struct('String','10','Style','edit');
 pard.zdist.position=[5,4.5];
 pard.zdist.Width=0.5;
 pard.zdist.TooltipString=pard.danglet.TooltipString;
+pard.zdist.Optional=true;
 
 pard.savemovie.object=struct('String','save movie','Style','pushbutton','Callback',@obj.savemovie_callback);
 pard.savemovie.position=[2,3];
 pard.savemovie.TooltipString='Save rotating movie. Uses min - max angle';
+pard.savemovie.Optional=false;
 
 pard.tx.object=struct('String','min max','Style','text');
 pard.tx.position=[4,3];
 pard.tx.TooltipString='start and stop angle/position. Uses step from above';
+pard.tx.Optional=true;
+
 pard.anglerange.object=struct('String','0 360','Style','edit');
 pard.anglerange.position=[4,4];
 pard.anglerange.TooltipString=pard.tx.TooltipString;
+pard.anglerange.Optional=true;
 
 pard.stereo.object=struct('Style','popupmenu','String',{{'no stereo','perspective','anaglyphs (color)','free-view','cross-eyed','goggles'}}); 
 pard.stereo.position=[7,1];
 pard.stereo.Width=1;
 pard.stereo.TooltipString='mode for stereo reconstruction. anaglyphs need cyan/red glasses.';
+pard.stereo.Optional=true;
+
 pard.tx2.object=struct('String','pixel (mm)','Style','text');
 pard.tx2.position=[7,2];
 pard.tx2.Width=.6;
+pard.tx2.Optional=true;
+
 pard.monitorpmm.object=struct('Style','edit','String','0.12'); 
 pard.monitorpmm.position=[7,2.6];
 pard.monitorpmm.Width=.4;
 pard.monitorpmm.TooltipString='Size of a monitor pixel in nm. Used to calculate eye distance. Adjust freely to optimize 3D reconstruction. iPhone: 0.12; iMac: 0.3.';
+pard.monitorpmm.Optional=true;
 pard.tx2.TooltipString=pard.monitorpmm.TooltipString;
 
 pard.tx3.object=struct('String','d plane','Style','text');
 pard.tx3.position=[8,1];
 pard.tx3.Width=.6;
+pard.tx3.Optional=true;
 pard.dplanemm.object=struct('Style','edit','String','1000');  
 pard.dplanemm.position=[8,1.6];
 pard.dplanemm.Width=.4;
 pard.dplanemm.TooltipString='Distance to plane of reconstruction. Smaller values result in stronger 3D effect';
+pard.dplanemm.Optional=true;
 pard.tx3.TooltipString=pard.dplanemm.TooltipString;
 
 pard.tx4.object=struct('String','Mag','Style','text');
 pard.tx4.position=[8,2];
 pard.tx4.Width=.6;
+pard.tx4.Optional=true;
 pard.stereomagnification.object=struct('Style','edit','String','2');  
 pard.stereomagnification.position=[8,2.6];
 pard.stereomagnification.Width=.4;
 pard.stereomagnification.TooltipString='Used only for side-by-side reconstructions of left and right image. You can adjust the magnification with this paramter';
+pard.stereomagnification.Optional=true;
 pard.tx4.TooltipString=pard.stereomagnification.TooltipString;
+
+
+pard.savesideview.object=struct('String','save tif','Style','pushbutton','Callback',@obj.savesideview_callback);
+pard.savesideview.position=[8,4];
+pard.savesideview.Width=1;
+pard.savesideview.Optional=false;
 
 pard.plugininfo.name='Viewer 3D';
 pard.plugininfo.type='ProcessorPlugin';

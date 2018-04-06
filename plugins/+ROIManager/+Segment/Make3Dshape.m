@@ -31,6 +31,7 @@ classdef Make3Dshape<interfaces.DialogProcessor
         end
         function out=run(obj,p)
             l = pointsInDefSpace(p);
+
             %Here you implement the functionality
             %p contains:
             %global parameters defined in pard.inputParameters
@@ -213,6 +214,8 @@ classdef Make3Dshape<interfaces.DialogProcessor
         end
     end
 end
+
+
 
 function  unitSur = mkSurCom(capDepth, bottomDepth, root, diameter)
     %% make a surface component for making a cylinder

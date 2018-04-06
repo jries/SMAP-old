@@ -48,7 +48,11 @@ classdef SEExploreGui<interfaces.SEProcessor
              
              h.anglebutton=uicontrol(obj.handle,'Position',[150,925,60,40],'Style','pushbutton','String','Angle','Units','normalized','FontSize',fontsize,'Callback',{@anglebutton_callback,obj});
              h.angle=uicontrol(obj.handle,'Position',[210,925,60,40],'Style','edit','String','0','Units','normalized','FontSize',fontsize,'Callback',{@angle_callback,obj});
-              
+             
+             
+             h.revealsmap=uicontrol(obj.handle,'Position',[30,600,30,30],'Style','pushbutton','String','<-','Units','normalized','FontSize',fontsize,'Callback',{@revealsmap_callback,obj});
+             h.revealsmap.TooltipString='reaveal current site in SMAP';
+            
              obj.guihandles=h;
              obj.updateFilelist;
              obj.hlines.rotationpos=[];
@@ -87,6 +91,10 @@ classdef SEExploreGui<interfaces.SEProcessor
             obj.infostruct=getinfostruct(infofile);
             catch
             end
+            %clear images (might have changed)
+            delete(obj.guihandles.fileax.Children)
+            delete(obj.guihandles.cellax.Children)
+            delete(obj.guihandles.siteax.Children)
             redraw_sitelist(obj)
             redraw_celllist(obj)
         end
@@ -729,3 +737,10 @@ end
 
 end
 
+function revealsmap_callback(a,b,obj)
+pos=obj.SE.currentsite.pos;
+obj.setPar('sr_pos',pos);
+notify(obj.P,'sr_render')
+obj.setPar('filenumber',obj.SE.currentsite.info.filenumber)
+
+end

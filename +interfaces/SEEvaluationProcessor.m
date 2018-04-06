@@ -62,12 +62,11 @@ classdef SEEvaluationProcessor<interfaces.GuiModuleInterface & interfaces.LocDat
         
         function out=evaluate(obj,site)
             p=obj.getAllParameters;
-%             if ~isempty(obj.site.ID)
-%                 
-%             end
             obj.site=site;
             out=obj.run(p);  
-            site.evaluation.(obj.name)=out;         
+            site.evaluation.(obj.name)=out;    
+            gp=rmfield(obj.getGuiParameters,{'classname','pluginpath'});
+            site.evaluation.(obj.name).GuiParameters=gp; 
         end
         
         function [locsout,indroi]=getLocs(obj,varargin) 
@@ -84,7 +83,7 @@ classdef SEEvaluationProcessor<interfaces.GuiModuleInterface & interfaces.LocDat
             end
             p=roiparser(varargin); 
                 sx=obj.site.image.rangex;
-                fovsize=(sx(2)-sx(1))*1000/2*[1,1];             
+                fovsize=(sx(2)-sx(1))*1000*[1,1];             
             if isempty(p.position) %no position specified, that is the usual case
 
                 pos=obj.site.pos;

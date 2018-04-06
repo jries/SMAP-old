@@ -212,11 +212,11 @@ pixels=p.se_sitepixelsize;
 locs1=obj.getLocs({'xnm','ynm','locprecnm','xnmrot','ynmrot'},'layer',1,'size',roisizeh,'grouping','ungrouped');
 locs2=obj.getLocs({'xnm','ynm','locprecnm','xnmrot','ynmrot'},'layer',2,'size',roisizeh,'grouping','ungrouped');
 
-xm1=locs1.xnmrot;ym1=locs1.ynmrot;
-xm2=locs2.xnmrot;ym2=locs2.ynmrot;
+xm1=locs1.xnmrot;ym1=locs1.ynmrot; % Get coordinates in ROI
+xm2=locs2.xnmrot;ym2=locs2.ynmrot; % The same
 
-img1=makeimage(p,xm1,ym1,p.sigma1(1),p.sigma1(2));
-img2=makeimage(p,xm2,ym2,p.sigma2(1),p.sigma2(2));
+img1=makeimage(p,xm1,ym1,p.sigma1(1),p.sigma1(2)); % convert coordinates into pixel matrix
+img2=makeimage(p,xm2,ym2,p.sigma2(1),p.sigma2(2)); % The same
 maxone1=1/(2*pi*p.sigma1(1)*p.sigma1(2))*pixels^2;
 maxone2=1/(2*pi*p.sigma2(1)*p.sigma2(2))*pixels^2;
 
