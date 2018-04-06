@@ -82,8 +82,39 @@ locs2=obj.getLocs({'xnm','ynm','locprecnm','xnmrot','ynmrot'},'layer',2,'size',r
 
 out.locs1 = locs1;
 out.locs2 = locs2;
+
+
+% use contour to segment
+if 0
+    pos1 = [];
+    pos1.x = locs1.xnmrot;
+    pos1.y = locs1.ynmrot;
+    pos1.sx = zeros(size(pos1.x),'like',pos1.x);
+    pos1.sy = zeros(size(pos1.x),'like',pos1.y);
+    pos1.sx = pos1.sx + 12; 
+    pos1.sy = pos1.sy + 12; 
+    pos1.c = 0;
+
+
+    premask1 = gaussrender_ellipt(pos1, [-roisizeh roisizeh],  [-roisizeh roisizeh], 1, 1,0, [0 0],25);
+    [~,h1] = contour(premask1,100);
+    h1Contour75 = h1.LevelList(15);
+    [h1C75,~] = contour(premask1,[h1Contour75 h1Contour75]);
+    h1C75x = floor(h1C75(1,2:(end-1)));
+    h1C75y = floor(h1C75(2,2:(end-1)));
+    theMask = zeros(300);
+    theMask(sub2ind([300 300], h1C75y+1, h1C75x+1)) = 1;
+    theMask = imfill(theMask,'holes');
+    figure; imagesc(theMask)
+    %figure; contour(premask1,100);
+    hold on
+    scatter(pos1.x+150, pos1.y+150)
+end
+
 % locs1.xnmrot = PCArot1(:,1); locs1.ynmrot = PCArot1(:,2);
 % locs2.xnmrot = PCArot2(:,1); locs2.ynmrot = PCArot2(:,2);
+
+
 
 inmask1=inmask(p,locs1,mask);
 inmask2=inmask(p,locs2,mask);
@@ -94,9 +125,32 @@ xm2=locs2.xnmrot(inmask2);
 ym2=locs2.ynmrot(inmask2);
 %determine parameters
 
+%% do PCA on the coordinates
+if 0
+    % Do PCA together
+    oriCor = [xm1 ym1;xm2 ym2];
+    [U,SigmaV,lambda] = pca(oriCor);
+    krot=2; % Get axies
+    [Urot,T] = rotatefactors(U(:,1:krot)); % get the rotation factor
+
+    % Rotate the data
+    Vrot=oriCor*Urot;  
+    minVrot = min(Vrot); % Get minmun of the dataset
+    sVrot = Vrot-minVrot; % shift all points to make the points attach to the x and y axies
+end
+%% end
+
 out.N1=sum(inmask1);
 out.N2=sum(inmask2);
 
+
+%% align sites (currently it is quite rough)
+idxPro1 = length(xm1);
+allLocs = [xm1 ym1; xm2 ym2];
+ori = [median(allLocs(:,1),1) prctile(allLocs(:,2),95,1)];
+newOri = allLocs-ori;
+out.z1 = newOri(1:idxPro1,2); out.z2 = newOri((idxPro1+1):end,2);
+out.x1 = newOri(1:idxPro1,1); out.x2 = newOri((idxPro1+1):end,1);
 out.zmed1=median(ym1);out.zmed2=median(ym2);
 out.zmedd=out.zmed1-out.zmed2;
 out.xmed1=median(xm1);out.xmed2=median(xm2);
@@ -243,6 +297,7 @@ pixels=p.se_sitepixelsize;
 locs1=obj.getLocs({'xnm','ynm','locprecnm','xnmrot','ynmrot'},'layer',1,'size',roisizeh,'grouping','ungrouped');
 locs2=obj.getLocs({'xnm','ynm','locprecnm','xnmrot','ynmrot'},'layer',2,'size',roisizeh,'grouping','ungrouped');
 
+% Yu-le added this part
 if 0
     numLocs1 = length(locs1.xnmrot);
     numLocs2 = length(locs2.xnmrot);
@@ -318,15 +373,15 @@ cutoff= maxone;% *p.cutofffactor;
 im1bw=im1>cutoff;
 
 % if two largest segments are similar in size
-im1bwa1=bwareafilt(im1bw,1);
-im1bwa2=bwareafilt(im1bw,2);
+im1bwa1=bwareafilt(im1bw,1); % connected objects 1
+im1bwa2=bwareafilt(im1bw,2); % connected objects 1+2
 if sum(im1bwa2(:))>p.take2factor*sum(im1bwa1(:))
     im1bwa=im1bwa2;
 else
     im1bwa=im1bwa1;
 end
 
-sel=strel('disk',p.dilation);
+sel=strel('disk',p.dilation); % create a basic structure
 
 im1bwa=imdilate(im1bwa,sel);
 mask=imfill(im1bwa,'holes');

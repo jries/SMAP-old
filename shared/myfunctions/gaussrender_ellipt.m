@@ -77,6 +77,14 @@ if ~isempty(xpix)&&~isempty(ypix)&&~isempty(xspix)&&~isempty(yspix)&&~isempty(po
     single(roiks),single(N),int32(uselut),single(pos.c),single(lut), single(rangec));
 srim=permute(srim,[2 1 3]);
 
+% xpix: x coordinates
+% ypix: y coordinates
+% xspix: x bandwidth
+% yspix: y bandwidth
+% srec: image size
+% G.template: the gaussian distribution
+% 
+
 else
     srim=zeros(srec,'single');
     nlocs=0;
