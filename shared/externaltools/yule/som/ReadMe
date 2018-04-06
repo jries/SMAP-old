@@ -1,0 +1,27 @@
+This directory contains Matlab code implementing a multi-dimensional
+version of Kohonen's Self-Organizing Map.  Like the traditional version,
+this version can work with a two-dimensional grid, but it also supports
+mapping to vectors of arbitrary dimensions.  
+
+To get started, download and unzip the file som.zip from this directory into
+your Matlab working directory, launch Matlab, and type
+
+  >> addpath src
+  >> addpath demo
+  >> somdemo(@nicering, 200);
+
+This will run a two-dimensional demo using a ring shape as the input data
+set.  Instead of nicering, you can also use the other nice* shape functions. 
+You can run a three-dimensional example, with the interior of a cube
+as the data set, by typing
+ 
+  >> somdemo(@nicecube, 300);
+
+or however iterations you want to try.  The src directory contains code that
+you can use in actual applications.  Most users will probably just want
+to use SOM.M, the two-dimensional grid version.  SOMLEARN.M supports learning
+in higher dimensions.
+
+
+Have fun, and contact levys@wlu.edu with any questions.
+
