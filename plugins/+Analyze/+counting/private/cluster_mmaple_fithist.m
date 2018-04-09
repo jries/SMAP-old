@@ -135,6 +135,7 @@ parout.pmature_v=fitp(2);
 parout.pblink_v=fitp(3);
 % parout.monomer_v=0.2;
 parout.ncluster_v=fitp(4);
+parout.meanlocs = num2str(meanlocs,'%3.1f'); % added by Yu-le 
 % recgui.initaxis(par.resultstabgroup,'cumulative','keep');
 
 if par.N0_fit

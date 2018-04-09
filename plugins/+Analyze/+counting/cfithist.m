@@ -16,9 +16,26 @@ classdef cfithist<interfaces.DialogProcessor
             else
                 numberOfSubsets = 1;
             end
+            meanlocs = [];
+            ticked = [];
+            collection = [];
+            if p.N0_fit
+                ticked = [ticked "N0_v"];
+            end
+            if p.pblink_fit
+                ticked = [ticked "pblink_v"];
+            end
+            if p.pmature_fit
+                ticked = [ticked "pmature_v"];
+            end
+            if p.monomer_fit
+                ticked = [ticked "monomer_v"];
+            end
+            if p.ncluster_fit
+                ticked = [ticked "ncluster_v"];
+            end
+            nTicked = length(ticked);
             
-            mature = [];
-            blink = [];
             for i = 1:numberOfSubsets
                 if p.bootstrap
                     allHistogram=obj.getResults('counting_histogram');
@@ -31,24 +48,31 @@ classdef cfithist<interfaces.DialogProcessor
                 
                 while 1
                     pout=cluster_mmaple_fithist(pout_ref,histogram);
-
-                    if round(pout.pmature_v,3) == round(pout_ref.pmature_v,3) & round(pout.pblink_v,3) == round(pout_ref.pblink_v,3)
+                    stopSignal = round(pout.N0_v ,3) == round(pout_ref.N0_v,3) & round(pout.pmature_v,3) == round(pout_ref.pmature_v,3) & round(pout.pmature_v,3) == round(pout_ref.pmature_v,3) & round(pout.pblink_v,3) == round(pout_ref.pblink_v,3);
+                    if stopSignal
                         break
                     else
                         pout_ref=pout;
                     end
                 end
-                blink(i) = pout_ref.pblink_v;
-                mature(i) = pout_ref.pmature_v;
-                
+                meanlocs(i) = str2double(pout.meanlocs);
+                for ii = 1:nTicked
+                    tickedFlag = ticked(ii);
+                    collection(i,ii) = pout_ref.(tickedFlag);
+                end
 %               locs=obj.locData.getloc({'frame','xnm','ynm','phot','bg','PSFxnm','locprecnm'},'layer',1,'position','roi');
 
 %               pout.par=cluster_counting(locs,p);
             end
             
+            
             if p.bootstrap
-                pout.blinkStd = std(blink); pout.matureStd = std(mature);
-                pout.blinkMean = mean(blink); pout.matureMean = mean(mature);
+                outCollection = [mean(meanlocs) mean(collection);std(meanlocs) std(collection)];
+                sOutCollection = size(outCollection);
+                outCollection = mat2cell(outCollection, repelem(1, sOutCollection(1)), repelem(1, sOutCollection(2)));
+                outCollection = [{'Mean';'Std'}, outCollection];
+                obj.guihandles.bsResult = figure;
+                t = uitable(obj.guihandles.bsResult, 'data', outCollection, 'columnName', ["Type", "MeanLocs", ticked]);
             end
             obj.setGuiParameters(pout);
             out.histogram=histogram;
@@ -138,39 +162,6 @@ pard.fitselection.Width=1.75;
 pard.bootstrap.object=struct('String','Bootstrap','Style','checkbox', 'Value', 0);
 pard.bootstrap.position=[5,3];
 pard.bootstrap.Width=1;
-
-pard.t_bsMean.object=struct('String','Mean','Style','text');
-pard.t_bsMean.position=[6,4];
-pard.t_bsMean.Width=0.5;
-
-pard.t_bsStd.object=struct('String','Std','Style','text');
-pard.t_bsStd.position=[6,4.5];
-pard.t_bsStd.Width=0.5;
-
-pard.t_bsMature.object=struct('String','Mature','Style','text');
-pard.t_bsMature.position=[7,3.5];
-pard.t_bsMature.Width=0.5;
-
-pard.t_bsBlink.object=struct('String','Blink','Style','text');
-pard.t_bsBlink.position=[8,3.5];
-pard.t_bsBlink.Width=0.5;
-
-pard.matureMean.object=struct('String','-','Style','edit');
-pard.matureMean.position=[7,4];
-pard.matureMean.Width=0.5;
-
-pard.blinkMean.object=struct('String','-','Style','edit');
-pard.blinkMean.position=[8,4];
-pard.blinkMean.Width=0.5;
-
-pard.matureStd.object=struct('String','-','Style','edit');
-pard.matureStd.position=[7,4.5];
-pard.matureStd.Width=0.5;
-
-pard.blinkStd.object=struct('String','-','Style','edit');
-pard.blinkStd.position=[8,4.5];
-pard.blinkStd.Width=0.5;
-
 
 pard.plugininfo.name='fit brightness histogram';
 pard.plugininfo.type='ProcessorPlugin';
