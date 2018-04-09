@@ -7,8 +7,8 @@ void maxcombine(double *vout,double *vin,double *list,mwSize numlocs, mwSize num
     double v, thisparticle,oldparticle,v0=0;
     mwSize part=0,k,indh;
     
-    oldparticle=list[0];
-    v0=vin[1];
+    oldparticle=list[(mwSize) ind[0]-1];
+    v0=vin[(mwSize) ind[0]-1];
     for(k=0;k<numlocs;k++)
         {
         indh=(mwSize) ind[k];

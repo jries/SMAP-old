@@ -410,7 +410,7 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 case 2 %transparent
                     transparency.parameter=p.transparencypar(1)/ph.sr_pixrec(1)^2*10;
                 case 3 %balls
-                    transparency.parameter=[p.transparencypar(1)/ph.sr_pixrec(1)^2*10 p.transparencypar(2)];
+                    transparency.parameter=[p.transparencypar(1)/ph.sr_pixrec(1)^2*10 p.transparencypar(end)];
                     
             end
             
@@ -609,8 +609,13 @@ classdef Viewer3DV01<interfaces.DialogProcessor
                 else
                     sy=sx;
                 end
+                
+                th=p.theta+thetaoffset;
+                sxr=sx*sin(th);
+                syr=sy*cos(th);
+                
                 loc.sx=sx;
-                loc.sy=sy;
+                loc.sy=sqrt(sxr.^2+syr.^2);
 %                 loc.y=yrot(sortind)+zmean;
                 loc.znm=loc.znm(sortind);
                 loc.numberInGroup=loc.numberInGroup(sortind);
