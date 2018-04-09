@@ -104,7 +104,7 @@ if 0
         [~,Jea(i)]=get3Dcorrshift(EGA, singleOne, 'max');
     end
 end
-CMErec = CMErecWf(se);
+CMErec = CMErecWf(se, true);
 figure; CMErec.getScatterPlot('rank', 'disHat');
 CMErec.generateKdeImage([500 500], 1:15, 'disHat', 'top15', 'Bandwidth', [10 10]);
 CMErec.generateKdeImage([500 500], CMErec.dataSource.numberOfSites:-1:(CMErec.dataSource.numberOfSites-15), 'disHat', 'bottom15', 'Bandwidth', [10 10]);
