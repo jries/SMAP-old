@@ -370,6 +370,18 @@ classdef CMErecWf < handle
             xlabel(xlabelName)
         end
         
+        function h = plotFeatureMatrix(obj, method, featureMatrixName, featureName, featureSub)
+            switch method
+                case 'tSNE'
+                    h = tsne(obj.featureMatrix.(featureMatrixName));
+                    figure; gscatter(h(:,1),h(:,2),siteIdx, '','',10);
+
+                case 'PCA'
+                    pca
+                    
+            end
+        end
+        
         function dataOutput = getData(obj, dataName, dataType)
             dataOutput = obj.(dataType).(dataName);
         end
