@@ -48,9 +48,9 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
 
             KDM = getKernelMatrix(Size,[kimoFZx, kimoFZy]);
             
-            [~,h] = contour(KDM, 50);
+            [~,ct] = contour(KDM, 50);
             
-            tl = h.LevelList(15);
+            tl = ct.LevelList(15);
             %figure(999)
             %cla
             %imagesc(kimo)

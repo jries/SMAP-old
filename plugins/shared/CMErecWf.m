@@ -1,5 +1,6 @@
 classdef CMErecWf < handle
     properties
+        sourceType
         workFlow
         featureSet % might be called "originalFeatures" in the futuer
         featureMatrix
@@ -8,9 +9,23 @@ classdef CMErecWf < handle
         temporalInfo % might be called "derivedFeatures" in the futuer
     end
     methods
-        function obj = CMErecWf(se)
-            %% extract basic statistics
+        function obj = CMErecWf(se, isSimulation)
             obj.dataSource = se;
+            if isSimulation
+                obj.sourceType = 'simulation';
+
+                numberOfSitesPerCell = obj.dataSource.numberOfSites/obj.dataSource.numberOfCells;
+                siteIdx = 1:numberOfSitesPerCell:obj.dataSource.numberOfSites;
+                [siteIdx,~] = meshgrid(siteIdx, 1:numberOfSitesPerCell);
+                xData = siteIdx(:)';
+                
+                obj.setFeature('assignedTime', xData, 'Assigned time', 'Time (s)')
+            else
+                obj.sourceType = 'experiment';
+            end
+                        
+            %% extract basic statistics
+            
             sites=se().sites;
             numSites = se.numberOfSites;
             numSitesEachTP = se.numberOfSites/se.numberOfCells;
@@ -52,7 +67,8 @@ classdef CMErecWf < handle
                 
                 % singleOneZ = [sites(k).evaluation.CME2CSide_yule2.locs1.ynmrot;sites(k).evaluation.CME2CSide_yule2.locs2.ynmrot];
                 singleOneZ = [sites(k).evaluation.CME2CSide_yule2.z1;sites(k).evaluation.CME2CSide_yule2.z2];
-                disHat(k) = prctile(singleOneZ, 100) - prctile(singleOneZ, 20);
+
+                disHat(k) = prctile(singleOneZ, 99) - prctile(singleOneZ, 20);
             end
             %% set basic features
             obj.featureSet = [];
@@ -305,7 +321,6 @@ classdef CMErecWf < handle
                     wPar.s = find(sSite);
                     rawWanderlust = wanderlust(featureMatrix, wPar);
                     temporalInfo = mean(rawWanderlust.traj);
-                    
             end
             if ~isempty(obj.temporalInfo)
                 i = length(fieldnames(obj.temporalInfo))+1;
@@ -355,13 +370,6 @@ classdef CMErecWf < handle
                 yData = yData(obj.(dataTypeY).(yName).rank);
                 xlabelName = 'Rank';
                 xData = siteIdx;
-            elseif isequal(xName,'assignedTime')
-                yData = obj.(dataTypeY).(yName).data;
-                xlabelName = 'Time (s)';
-                numberOfSitesPerCell = obj.dataSource.numberOfSites/obj.dataSource.numberOfCells;
-                siteIdx = 1:numberOfSitesPerCell:obj.dataSource.numberOfSites;
-                [siteIdx,~] = meshgrid(siteIdx, 1:numberOfSitesPerCell);
-                xData = siteIdx(:)';
             end
             fullTitle = [xTitle obj.(dataTypeY).(yName).label];
             scatter(xData, yData);
@@ -369,16 +377,22 @@ classdef CMErecWf < handle
             ylabel(obj.(dataTypeY).(yName).unit)
             xlabel(xlabelName)
         end
-        
-        function h = plotFeatureMatrix(obj, method, featureMatrixName, featureName, featureSub)
+
+        function h = plotFeatureMatrix(obj, method, featureMatrixName, featureName, useRank)
+            if useRank
+               CS = obj.featureSet.(featureName).rank;
+            else
+               CS = obj.featureSet.(featureName);
+            end
+            
             switch method
                 case 'tSNE'
                     h = tsne(obj.featureMatrix.(featureMatrixName));
-                    figure; gscatter(h(:,1),h(:,2),siteIdx, '','',10);
+                    figure; gscatter(h(:,1),h(:,2),CS, '','',10);
 
                 case 'PCA'
-                    pca
-                    
+                    [~,h,~] = pca(featureMatrixJCom);
+                    figure; gscatter(h(:,1),h(:,2),CS, '','',10, 'off');
             end
         end
         
