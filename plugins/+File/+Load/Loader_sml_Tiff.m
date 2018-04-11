@@ -145,7 +145,7 @@ pard.frameranget.position=[1,1];
  pard.frameranget.Width=1.25;
 pard.frameranget.TooltipString='frame range';
 
-pard.framerange.object=struct('Style','edit','String','39 44');
+pard.framerange.object=struct('Style','edit','String','38 44');
 pard.framerange.position=[1,2.25];
  pard.framerange.Width=.75;
 pard.framerange.TooltipString='frame range';
