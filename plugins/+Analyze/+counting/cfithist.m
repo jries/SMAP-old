@@ -45,14 +45,15 @@ classdef cfithist<interfaces.DialogProcessor
                 end
 %               histogram=obj.locData.guiData.counting.histogram;
                 pout_ref=cluster_mmaple_fithist(p,histogram);
-                
+                rep = 0;
                 while 1
                     pout=cluster_mmaple_fithist(pout_ref,histogram);
-                    stopSignal = round(pout.N0_v ,3) == round(pout_ref.N0_v,3) & round(pout.pmature_v,3) == round(pout_ref.pmature_v,3) & round(pout.pmature_v,3) == round(pout_ref.pmature_v,3) & round(pout.pblink_v,3) == round(pout_ref.pblink_v,3);
-                    if stopSignal
+                    stopSignal = round(pout.N0_v ,3) == round(pout_ref.N0_v,3) & round(pout.pmature_v,3) == round(pout_ref.pmature_v,3) & round(pout.pblink_v,3) == round(pout_ref.pblink_v,3);
+                    if stopSignal||(rep>10)
                         break
                     else
                         pout_ref=pout;
+                        rep=rep+1;
                     end
                 end
                 meanlocs(i) = str2double(pout.meanlocs);
