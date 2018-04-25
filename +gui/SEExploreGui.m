@@ -66,10 +66,21 @@ classdef SEExploreGui<interfaces.SEProcessor
              
              obj.handle.WindowKeyPressFcn={@keypress,obj,0};
              obj.addSynchronization('filelist_long',[],[],@obj.updateFilelist);
-     
+            obj.addSynchronization('currentsite',[],[],@obj.updatesite);
         end
  
-
+        function updatesite(obj,varargin)
+            if nargin>1
+                currentsiteid=varargin{1};
+            else
+            %if passed on: use Id from here, else get currentsite
+                currentsiteid=obj.getPar('currentsite');
+            end
+            ind=obj.SE.indexFromID(obj.SE.sites,currentsiteid);
+            obj.SE.currentsite=obj.SE.sites(ind);
+            obj.guihandles.sitelist.Value=ind;
+            plotsite(obj,obj.SE.currentsite);
+        end
         function updateSitelist(obj)
             redraw_sitelist(obj);
         end
