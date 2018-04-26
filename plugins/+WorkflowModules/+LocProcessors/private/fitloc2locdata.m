@@ -88,7 +88,11 @@ if isfield(locs,'znmerr')
 end
 
 if isfield(locs,'logLikelihood')
+    try
     roisize=obj.getPar('loc_ROIsize');
+    catch
+        roisize=10;
+    end
     locdat.LLrel=real(locs.logLikelihood(indin)*2/roisize^2);
 end
 
