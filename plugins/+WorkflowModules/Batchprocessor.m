@@ -54,6 +54,7 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
                 if ~f
                 return
                 end
+                f={f};
             end
             str=p.filelist.String;
             for k=1:length(f)
