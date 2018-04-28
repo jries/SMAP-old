@@ -73,7 +73,9 @@ classdef Grouper< interfaces.LocDataInterface
             
             newgroup=false(length(frame)-1,1);
             for k=1:length(varargin)
+                if ~any(isnan(diff(sortmatrixsort(:,k))))
                 newgroup=newgroup | diff(sortmatrixsort(:,k));
+                end
             end
             
             
