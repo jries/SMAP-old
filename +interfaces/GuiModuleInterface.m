@@ -279,7 +279,10 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                             
                         end
                         h.(fn{k})=copyfields(h.(fn{k}),hs);
-                        
+%                     elseif strcmp(fn{k},'globaltable')
+                    elseif isfield(h,fn{k}) && isa(h.(fn{k}),'matlab.ui.control.Table') %Table    
+                        hs=obj.value2handle(phere.(fn{k}),h.(fn{k})); 
+                        h.(fn{k})=copyfields(h.(fn{k}),hs);
                     end
 %                     if strcmp(fn{k},'isscmos')
                         if isfield(h,fn{k})&&isprop(h.(fn{k}),'Callback') && length(h.(fn{k}).Callback)>1 &&contains(func2str(h.(fn{k}).Callback{1}),'switchvisible')

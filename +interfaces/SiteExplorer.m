@@ -17,6 +17,7 @@ classdef SiteExplorer<interfaces.GuiModuleInterface & interfaces.LocDataInterfac
         currentcell
         currentfile       
         temp
+        analysis
 
     end
     methods
