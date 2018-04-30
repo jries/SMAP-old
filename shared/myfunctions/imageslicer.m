@@ -8,7 +8,14 @@ function imageslicer(varargin)
 %Title
 
 %todo: rgb, more dimension, choose dim1,dim2
+if isa(varargin{1},'matlab.graphics.axis.Axes')||isa(varargin{1},'matlab.ui.Figure')
+    p=parseinput(varargin(2:end));
+    if isempty(p.Parent)
+        p.Parent=varargin{1};
+    end
+else
 p=parseinput(varargin);
+end
 % extend to rgb
 if ~isempty(p.x)
     V=p.z;
