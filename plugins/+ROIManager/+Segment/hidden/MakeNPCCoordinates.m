@@ -8,3 +8,4 @@ for k=1:lpc
     thetaa=[thetaa theta+k*dth];
 end
 [l.x,l.y]=pol2cart(thetaa,radius);
+l.channel=ones(size(l.x));
