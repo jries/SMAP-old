@@ -1,4 +1,6 @@
 classdef LocTransformN<handle
+    %coordinates: right now it is totally confuse (coordinate vs particle)
+    %coordinates(particle, xyz)
     properties
         transform2Reference
         transform2Target
@@ -135,8 +137,10 @@ classdef LocTransformN<handle
                 case 'nm'
                     cf=obj.cam_pixnm;
             end
-            co(1,:)=ci(1,:)*cf(1);
-            co(2,:)=ci(2,:)*cf(end);
+%             co(1,:)=ci(1,:)*cf(1);
+%             co(2,:)=ci(2,:)*cf(end);
+            co(:,1)=ci(:,1)*cf(1);
+            co(:,2)=ci(:,2)*cf(end);
         end
         end
         
@@ -166,6 +170,16 @@ classdef LocTransformN<handle
             if nargin>3,co=obj.convertcoordinates(co,obj.unit,unit);end
              co=co*1000; %back to nm   
         end  
+        function co=transformToTargetAll(obj,varargin)
+            ci=varargin{1};
+            numch=length(obj.transform2Target);
+      
+            si=size(ci);si(3)=numch;
+            co=zeros(si);
+            for ch=1:numch
+                co(:,:,ch)=obj.transformToTarget(ch,varargin{:});
+            end
+        end
 
         function imout=transformImageToTarget(obj,channel,image,cam_pixnm,roi)
             imout=transformImage(obj.transform2Target{channel},image,cam_pixnm,roi);
