@@ -51,6 +51,7 @@ classdef imageloaderTifSimple<interfaces.imageloaderSMAP
             imtest=imread(obj.file,'Index',1);
             allmd(end+1,:)={'Width info',size(imtest,1)};
             allmd(end+1,:)={'Height info',size(imtest,2)};
+            allmd(end+1,:)={'FileName',obj.file};
             obj.allmetadatatags=allmd;
                 
         

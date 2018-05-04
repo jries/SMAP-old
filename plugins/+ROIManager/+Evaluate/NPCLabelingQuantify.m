@@ -11,17 +11,17 @@ classdef NPCLabelingQuantify<interfaces.SEEvaluationProcessor
 %             obj.guihandles.saveimagesb.Callback={@saveimagesb_callback,obj};
         end
         function out=run(obj,p)
-            try
+%             try
             out=runintern(obj,p);
-            catch err
-                err
-                    out.numcornersfiltered=0;
-                out.numcorners=0;
-                out.numfoundint=0;
-                out.numfoundrat=0;
-                out.numbercornerassined=0;
-                out.rotation=0;
-            end
+%             catch err
+%                 err
+%                     out.numcornersfiltered=0;
+%                 out.numcorners=0;
+%                 out.numfoundint=0;
+%                 out.numfoundrat=0;
+%                 out.numbercornerassined=0;
+%                 out.rotation=0;
+%             end
          
         end
         
@@ -79,90 +79,30 @@ R=p.R;
 dR=p.dR;
 
 locs=obj.getLocs({'xnm','ynm','xnm_gt','ynm_gt','locprecnm'},'layer',1,'size',p.se_siteroi(1)/2);
-
-
-% xm=locs.xnm-obj.site.pos(1);
-% ym=locs.ynm-obj.site.pos(2);
 [x0,y0]=fitposring(locs.xnm,locs.ynm,R);
 xm=locs.xnm-x0;
 ym=locs.ynm-y0;
 
-
 step=2*pi/8;
-
 [tha,rhoa]=cart2pol(xm,ym);
 
-
 minlp=step*R*.4;
-% minlp=inf;
 inr=rhoa>R-dR&rhoa<R+dR;
 
 inr=inr&locs.locprecnm<minlp;
 th=tha(inr);rho=rhoa(inr);
-
-
-
-% find rotation
-locptheta=locs.locprecnm(inr)./rho;
-
 out.coordinates=struct('rho',rhoa,'theta',tha,'drho',locs.locprecnm, 'dtheta',locs.locprecnm./rhoa,'x',locs.xnm,'y',locs.ynm);
-% dth=mod(th,step);
-mdt=cyclicaverage(th,step,1./locptheta.^2);
-if mdt>pi/16
-    mdt=mdt-step;
+
+
+if obj.display
+   ax1= obj.setoutput('assigned');
+else
+    ax1=[];
 end
-dthplot=mod(th-mdt+step/2,step)-step/2;
+   
+[numbercornerassigned,mdt]=assigntocorners(out.coordinates,inr,8,ax1);
+[numfound, numfound2]=countspacing(out.coordinates,inr,8);
 
-%locptheta: increase for inefficient rotation etc:
-spreadcorners=pi/32; %somehting like that
-additionalerror=pi/64;
-locpthetacorr=locptheta+spreadcorners+additionalerror;
-%somewhere: additional weighting with localiaztion precision: really bad
-%ones: should not contribute
-throt=th-mdt; %rotate with respect to template.
-% cyclicaverage(throt,step,1./locptheta.^2)/pi*180 %funny: thats not zero.
-% Evaluate to check goodness of rotation?
-cornerpos=0:step:2*pi-step;
-probc=zeros(8,length(throt));
-% cornerfills=zeros(8,1);
-for k=1:length(throt)
-    for c=1:8 %8 corners
-        dc=mod(throt(k)-cornerpos(c)+pi,2*pi)-pi;
-        probc(c,k)=exp(-dc^2/2/locpthetacorr(k)^2);
-    end
-%     probch=probc(:,k);
-%     probch(probch<0.3)=0;
-%     if sum(probch)<0.1
-%         continue
-%     end
-%     probch=probch/sum(probch);
-    
-%     cornerfills=cornerfills+probch;
-end
-% probc
-probc2=probc;
-probc2(probc2<0.3)=0;
-numberincorners=sum(probc2,2);
-numbercornerassined=sum(numberincorners>0.75);
-
-
-%number of locs from spacing
-
-[ths,inds]=sort(th);
-ths(end+1)=ths(1)+2*pi;
-dth=diff(ths);
-lp=locptheta(inds);
-lp(end+1)=lp(1);
-dstep=sqrt(lp(1:end-1).^2+lp(2:end).^2); %uncertaintty
-mindistance=1;%-0.1*length(th)/8;
-
-fullspace=ceil(dth-mindistance); fullspace( fullspace<0)=0;
-numfound=8-sum(fullspace);
-
-% try again with non-integer values
-fs2=dth; fs2=fs2(fs2>mindistance);
-fs2=fs2-.25;
-numfound2=8-sum(fs2);
 
 %when considering maximum gap, also look at next corners
 %correlation: when uncertain and moves in one direction, distance to othr
@@ -177,7 +117,7 @@ numfound2=8-sum(fs2);
 
 out.numfoundint=numfound;
 out.numfoundrat=numfound2;
-out.numbercornerassined=numbercornerassined;
+out.numbercornerassigned=numbercornerassigned;
 out.rotation=(mdt);
 
 if ~isempty(locs.xnm_gt)
@@ -233,3 +173,76 @@ end
 % end
 end
 
+function [numbercornerassigned,mdt]=assigntocorners(locs,inr,corners,ax)
+%assign to corneres
+% find rotation
+step=2*pi/corners;
+% locptheta=locs.drho(inr)./locs.rho(inr);
+
+mdt=cyclicaverage(locs.theta(inr),step,1./locs.dtheta(inr).^2);
+if mdt>pi/16
+    mdt=mdt-step;
+end
+dthplot=mod(locs.theta(inr)-mdt+step/2,step)-step/2;
+
+%locptheta: increase for inefficient rotation etc:
+spreadcorners=pi/32; %somehting like that
+additionalerror=pi/64;
+locpthetacorr=locs.dtheta(inr)+spreadcorners+additionalerror;
+%somewhere: additional weighting with localiaztion precision: really bad
+%ones: should not contribute
+throt=locs.theta(inr)-mdt; %rotate with respect to template.
+% cyclicaverage(throt,step,1./locptheta.^2)/pi*180 %funny: thats not zero.
+% Evaluate to check goodness of rotation?
+cornerpos=0:step:2*pi-step;
+probc=zeros(8,length(throt));
+% cornerfills=zeros(8,1);
+for k=1:length(throt)
+    for c=1:8 %8 corners
+        dc=mod(throt(k)-cornerpos(c)+pi,2*pi)-pi;
+        probc(c,k)=exp(-dc^2/2/locpthetacorr(k)^2);
+    end
+%     probch=probc(:,k);
+%     probch(probch<0.3)=0;
+%     if sum(probch)<0.1
+%         continue
+%     end
+%     probch=probch/sum(probch);
+    
+%     cornerfills=cornerfills+probch;
+end
+% probc
+probc2=probc;
+probc2(probc2<0.3)=0;
+numberincorners=sum(probc2,2);
+numbercornerassigned=sum(numberincorners>0.75);
+
+if nargin>3 &&~isempty(ax)
+bar(ax,numberincorners);
+xlabel(ax,'number of locs per corner assigned');
+tstr={['corners: ' int2str(numlocsf)  ', assigned: ' ,int2str(numbercornerassined)], ['from gaps: ' int2str(numfound) ', fractional: ' num2str(numfound2,3) ]};
+title(ax,tstr)
+end
+end
+
+function [numfound, numfound2]=countspacing(locs,inr,corners,ax)
+th=locs.theta(inr);
+locptheta=locs.dtheta(inr);
+%number of locs from spacing
+
+[ths,inds]=sort(th);
+ths(end+1)=ths(1)+2*pi;
+dth=diff(ths);
+lp=locptheta(inds);
+lp(end+1)=lp(1);
+dstep=sqrt(lp(1:end-1).^2+lp(2:end).^2); %uncertaintty
+mindistance=1;%-0.1*length(th)/8;
+
+fullspace=ceil(dth-mindistance); fullspace( fullspace<0)=0;
+numfound=8-sum(fullspace);
+
+% try again with non-integer values
+fs2=dth; fs2=fs2(fs2>mindistance);
+fs2=fs2-.25;
+numfound2=8-sum(fs2);
+end
