@@ -16,14 +16,16 @@ midp=max(dat);
 dh=-1.5:0.2:1.5;
 for k=length(dh):-1:1
     indh=dat2>midp-period/2+dh(k) & dat2<midp+period/2+dh(k);
-    ssd(k)=std(dat2(indh),w2(indh)); 
+%     ssd(k)=std(dat2(indh),w2(indh));  %rms with center?
+    ssd(k)=sqrt(mean((dat2(indh)-(midp+dh(k))).^2));
 end
 % indh=dat2>midp-period/2 & dat2<midp+period/2;
 % indh2=dat2>midp & dat2<midp+period;
 % indh3=dat2<midp & dat2>midp-period;
 % [~, startcase]=max([std(dat2(indh),w2(indh)) std(dat2(indh2),w2(indh2)) std(dat2(indh3),w2(indh3))]);
 % startoffs=[-1 0 +1]*period/2;
-[~, startcase]=max(ssd);
+% [~, startcase]=max(ssd);
+[~, startcase]=min(ssd,[],'omitnan');
 midp=midp+dh(startcase);
 
 for k=1:50

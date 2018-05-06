@@ -272,18 +272,22 @@ end
 end
 
 function locs=locsfromposi(locsi,p)
-    numlocs=length(locsi.x);
+%     numlocs=length(locsi.x);
 %     phot=exprnd(p.photons,numlocs,1);
     phot=locsi.phot;
     
     a=100;
     PSF=100;
-    sa=PSF+a/12;
+%     sa=PSF+a/12;
     phot(phot<10)=10;
     indin=phot>=10;
     numlocs=sum(indin);
     %MOrtensen
-    locprecnm=sqrt(sa^2./phot.*(16/9+8*pi*sa^2*p.background^2./phot/a^2));
+%     p.background: photons, b^2=p.background: variance in Mortenson
+    locpthompson=sqrt((PSF^2+a^2/12)./(phot)+8*pi*(PSF^2).^2.* p.background./(phot).^2/a^2);
+    locprecnm=sqrt((PSF^2+a^2/12)./phot.*(16/9+8*pi*(PSF^2+a^2/12)*p.background./phot/a^2));
+    
+    
     locs.phot=single(phot(indin));
     locs.bg=single(locprecnm(indin)*0+p.background);
     locs.locprecnm=single(locprecnm(indin));
