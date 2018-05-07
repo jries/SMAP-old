@@ -97,7 +97,7 @@ hi=hist(numfoundint,nb);
     title(['gap integer: ' num2str(100*pf,'%2.1f') '\pm' num2str(100*berr_numfoundint,'%2.1f')])
     axis tight
     results.gapinteger=pf;   
-    results.gapinteger_se=berr_numfoundint;
+    results.gapinteger(2)=berr_numfoundint;
 subplot(1,2,2,ax2);
     p.ploton=false;
     bs_numfoundrat=bootstrp(20,@fitNPClabeling,numfoundrat,p);
@@ -275,11 +275,11 @@ if p.copy2page
     axt.Parent=f;
     subplot(3,3,8,axt) 
     end
-    if exist('ax8','var')
-        axt=ax8.copy;
+    if exist('ax6b','var')
+        axt=ax6b.copy;
     axt.Parent=f;
     subplot(3,3,9,axt) 
-     ax8l=legend(axt,t8,'Location','northoutside');
+%      ax7l=legend(axt,t7,'Location','northoutside');
 %     legend(axt,'integer','prob','assigned','Location','northwestoutside');
     end
 end
