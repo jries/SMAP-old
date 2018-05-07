@@ -56,6 +56,7 @@ numfoundrat=numfoundrat(use);
 numbercornerassinged=numbercornerassinged(use);
 psf=psf(use);
 
+filefile=se.sites(find(use,1,'first')).info.filenumber
 
 ax0=obj.initaxis('Summary');
 axpsf=obj.initaxis('PSF');
@@ -97,7 +98,7 @@ hi=hist(numfoundint,nb);
     title(['gap integer: ' num2str(100*pf,'%2.1f') '\pm' num2str(100*berr_numfoundint,'%2.1f')])
     axis tight
     results.gapinteger=pf;   
-    results.gapinteger(2)=berr_numfoundint;
+    results(2).gapinteger=berr_numfoundint;
 subplot(1,2,2,ax2);
     p.ploton=false;
     bs_numfoundrat=bootstrp(20,@fitNPClabeling,numfoundrat,p);
@@ -111,8 +112,8 @@ subplot(1,2,2,ax2);
     pf=fitNPClabeling(hr,p);
     title(['gap fractional: ' num2str(100*pf,'%2.1f')  '\pm' num2str(100*berr_numfoundrat,'%2.1f')])
     axis tight
-    results.gapfractional=[pf ]; 
-    results.gapfractional_se=berr_numfoundrat;
+    results(1).gapfractional=pf ; 
+    results(2).gapfractional=berr_numfoundrat;
     
  ax3=obj.initaxis('assigned + all');
 %  ax3b=axes(ax3.Parent);
@@ -140,8 +141,8 @@ ax4=axes(ax3.Parent);
     pf=fitNPClabeling(ha,p);
     title(['assigned direct: ' num2str(100*pf,'%2.1f') '\pm' num2str(100*berr_assigned,'%2.1f')])
    axis tight
-   results.assigned=pf; 
-   results.assigned_se=berr_assigned;
+   results(1).assigned=pf; 
+   results(2).assigned=berr_assigned;
    
 subplot(1,2,2,ax4);
     hall=hi+hr+ha;
@@ -150,7 +151,7 @@ subplot(1,2,2,ax4);
     pf=fitNPClabeling(hall,p);
     title(['all: ' num2str(100*pf,'%2.1f')])
     axis tight 
-    results.all=pf; 
+    results(1).all=pf; 
     
 
     
@@ -171,8 +172,8 @@ ax6=obj.initaxis('ground truth');
     bar(nb,hnc)
     hold on
     pf=fitNPClabeling(hnc,p);
-    results.groundtruth=pf;
-    results.groundtruth_se=berr_gtf;
+    results(1).groundtruth=pf;
+    results(2).groundtruth=berr_gtf;
     title(['true: ' num2str(100*pf,'%2.1f') '\pm' num2str(100*berr_gtf,'%2.1f')])
     axis tight
 
@@ -187,8 +188,8 @@ ax6=obj.initaxis('ground truth');
     bar(nb,hnc)
     hold on
     pf=fitNPClabeling(hnc,p);
-    results.groundtruthall=pf; 
-    results.groundtruthall_se=berr_gtfa;
+    results(1).groundtruthall=pf; 
+    results(2).groundtruthall=berr_gtfa;
     title(['true: ' num2str(100*pf,'%2.1f') '\pm' num2str(100*berr_gtfa,'%2.1f')])
     axis tight
     
@@ -235,12 +236,22 @@ numbercornerassineddm=mean(numbercornerassigneddirect-numcorners);
 %    ax8l=legend(ax8,t8);
 end
 
+sp=obj.locData.files.file(filefile).info.simulationParameters;
+results(3).gapinteger=sp.labeling_efficiency;
+results(3).gapfractional=sp.blinks;
+results(3).assigned=sp.photons;
+results(3).all=sp.lifetime;
+results(3).groundtruth=sp.background;
 
-dat=struct2table(results);
+results(3).groundtruthall=0;
+results(2).all=-1;
+% dat=struct2table(results);
 axp=ax0.Parent;
 delete(ax0);
 ht=uitable('Parent',axp);
 struct2uitable(ht, results,'flip')
+% A=cell2mat(ht.Data);
+copytoexcel(results,'flip');
 
 out=[];
 
