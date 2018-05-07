@@ -74,7 +74,7 @@ end
 function saved=trysave(file,ls)
 saved=false;
 try
-    save(file,'-struct','ls','-v7');
+    save(file,'-struct','ls','-v7');    
     [msg,msgid]=lastwarn;
     if strcmp(msgid,'MATLAB:save:sizeTooBigForMATFile')
         saved=false;
