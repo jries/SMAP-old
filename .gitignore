@@ -4,3 +4,4 @@ settings/temp
 *.m~
 plugins/plugin.m
 *.asv
+autosave_*
