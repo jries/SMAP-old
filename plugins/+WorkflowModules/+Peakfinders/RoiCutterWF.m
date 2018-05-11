@@ -34,49 +34,36 @@ classdef RoiCutterWF<interfaces.WorkflowModule
             if isempty(maxima.x)
                 return;
             end
-%             data{1}.frame
-            
             
             kernelSize=obj.loc_ROIsize;
             dn=ceil((kernelSize-1)/2);
             sim=size(image);
             
             if p.loc_filterforfit>0
-            %test: filter image befor fitting for z from 2D
-            %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-            h=fspecial('gaussian',3,p.loc_filterforfit);
-           
-            image=filter2(h,image);
+                %test: filter image befor fitting for z from 2D
+                %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+                h=fspecial('gaussian',3,p.loc_filterforfit);
+
+                image=filter2(h,image);
             %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             end
             
             cutoutimages=zeros(kernelSize,kernelSize,length(maxima.x),'single');
-          
-            
-%             info.x=zeros(length(maxima.x),1,'single');
-%             info.y=zeros(length(maxima.x),1,'single');
-%             info.frame=zeros(length(maxima.x),1,'single');
             ind=0;
             goodind=~(maxima.y<=dn|maxima.y>sim(1)-dn|maxima.x<=dn|maxima.x>sim(2)-dn);
-%             info(sum(goodind))=struct('x',[],'y',[],'frame',[]);
-%             info(length(maxima.x))=struct('x',[],'y',[],'frame',[]);
+
             for k=1:length(maxima.x)
                  ind=ind+1;
                 if goodind(k)
-%                 if maxima.y(k)>dn&&maxima.y(k)<=sim(1)-dn&&maxima.x(k)>dn&&maxima.x(k)<=sim(2)-dn;
-                   
-%                     ind=k; %return empty frame if outside
                     cutoutimages(:,:,ind)=image(maxima.y(k)-dn:maxima.y(k)+dn,maxima.x(k)-dn:maxima.x(k)+dn); %coordinates exchanged.
                 else
-                    cutoutimages(:,:,ind)=zeros(kernelSize,kernelSize,1,'single');
-                end
-%                     info(ind).x=maxima.x(k);
-%                     info(ind).y=maxima.y(k);
-%                     info(ind).frame=data{1}.frame;     
+                    maxima.y(k)=max(dn+1,min(maxima.y(k),sim(1)-dn));
+                    maxima.x(k)=max(dn+1,min(maxima.x(k),sim(2)-dn));
+                    cutoutimages(:,:,ind)=image(maxima.y(k)-dn:maxima.y(k)+dn,maxima.x(k)-dn:maxima.x(k)+dn); %coordinates exchanged.
+%                     cutoutimages(:,:,ind)=zeros(kernelSize,kernelSize,1,'single');
+                end  
             end 
             info=maxima;
-%             info.x=maxima.x;
-%             info.y=maxima.y;
             frameh=data{1}.frame;
             info.frame=maxima.x*0+frameh;
            
