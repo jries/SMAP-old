@@ -234,7 +234,7 @@ numbercornerassineddm=mean(numbercornerassigneddirect-numcorners);
 % % title(ax8,t8)
 % %   ax8l=legend(ax8,'integer','prob','assigned');
 %    ax8l=legend(ax8,t8);
-end
+
 
 sp=obj.locData.files.file(filefile).info.simulationParameters;
 results(3).gapinteger=sp.labeling_efficiency;
@@ -244,6 +244,7 @@ results(3).all=sp.lifetime;
 results(3).groundtruth=sp.background;
 
 results(3).groundtruthall=0;
+end
 results(2).all=-1;
 % dat=struct2table(results);
 axp=ax0.Parent;
