@@ -1,4 +1,7 @@
 classdef CompareToGroundTruthChallenge<interfaces.DialogProcessor
+    properties
+        induse
+    end
     methods
         function obj=CompareToGroundTruthChallenge(varargin)        
                 obj@interfaces.DialogProcessor(varargin{:});
@@ -34,7 +37,7 @@ classdef CompareToGroundTruthChallenge<interfaces.DialogProcessor
             lochere.loc.znm=lochere.loc.znm+p.offsetxyz(3);
             end
              lochere.loc.phot=lochere.loc.phot*p.photonfactor;
-            [descfile]=saveLocalizationsCSV(lochere,filenew,p.onlyfiltered,p.numberOfLayers,p.sr_layerson);
+            [descfile]=saveLocalizationsCSV(lochere,filenew,p.onlyfiltered,p.numberOfLayers,p.sr_layerson,obj.induse);
             
             %modify challenge data
             challengepath=['External' filesep 'SMLMChallenge' filesep];

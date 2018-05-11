@@ -82,7 +82,9 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                     v=obj.grouped2ungrouped(indused,value);
                 end
                 obj.loc.(name)=real(v);
-                obj.regroup;                
+                obj.regroup;    
+                locfields=fieldnames(obj.loc);
+                obj.setPar('locFields',locfields,'String');
             end
         end
         function addloc(obj,name,value)

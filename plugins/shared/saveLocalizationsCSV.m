@@ -1,4 +1,4 @@
-function  [file,dato]=saveLocalizationsCSV(locData,file,saveroi,numberOfLayers,sr_layerson)
+function  [file,dato]=saveLocalizationsCSV(locData,file,saveroi,numberOfLayers,sr_layerson,indg)
 if nargin<3
     saveroi=false;
 end
@@ -38,7 +38,7 @@ if saveroi
     
 else
     grouped=false;
-    indg=[];
+%     indg=[];
 end
 loc=locData.savelocs([],indg,[],grouped).loc; 
 numlocs=length(loc.frame);

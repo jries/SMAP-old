@@ -4,6 +4,9 @@ classdef density_calculator<interfaces.DialogProcessor
     
     % density_calculator looks at the neighborhood and counts number of
     % neighbours. locData.clusterdensity=neighbours
+    properties
+        useind
+    end
     methods
         function obj=density_calculator(varargin)    
             obj@interfaces.DialogProcessor(varargin{:}) ;
@@ -58,7 +61,11 @@ classdef density_calculator<interfaces.DialogProcessor
                 end
             else
                 locall=obj.locData.getloc({'xnm','ynm','filenumber','channel','frame','znm','ingrouped','inungrouped'},'grouping','ungrouped');
+                if ~isempty(obj.useind)
+                    locref=copystructReduce(locall,obj.useind);
+                else
                 locref=locall;
+                end
 %                 locall=obj.locData.loc;
 %                 locref=obj.locData.loc;
             end
