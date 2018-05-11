@@ -49,9 +49,24 @@ classdef imageloaderTifSimple<interfaces.imageloaderSMAP
         function allmd=getmetadatatags(obj)
             allmd={'Format','SimpleTif'};
             imtest=imread(obj.file,'Index',1);
-            allmd(end+1,:)={'Width info',size(imtest,1)};
-            allmd(end+1,:)={'Height info',size(imtest,2)};
+            allmd(end+1,:)={'Width info',size(imtest,2)};
+            allmd(end+1,:)={'Height info',size(imtest,1)};
             allmd(end+1,:)={'FileName',obj.file};
+            
+            ttt=Tiff(obj.file);
+            desc=ttt.getTag('ImageDescription');
+            ttt.close;
+            ind=strfind(desc,'images=');
+            numf=1;
+            if ~isempty(ind)
+                numf=sscanf(desc(ind:end),'images=%f');
+            else
+                ind=strfind(desc,'slices=');
+                if ~isempty(ind)
+                    numf=sscanf(desc(ind:end),'slices=%f');
+                end
+            end
+            allmd(end+1,:)={'Frames',numf};
             obj.allmetadatatags=allmd;
                 
         
