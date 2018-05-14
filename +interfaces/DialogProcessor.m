@@ -50,6 +50,7 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
             else
                 vis='off';
             end
+            if isvalid(obj.handle)
                 hpos=obj.handle.Position;
                 vrim=obj.guiPar.Vrim;
                 obj.guihandles.showresults=uicontrol(obj.handle,'Position',[obj.guiPar.FieldWidth*2, hpos(4)-vrim+20,120,20],...
@@ -59,6 +60,7 @@ classdef DialogProcessor<interfaces.GuiModuleInterface & interfaces.LocDataInter
                     'Style','pushbutton','String','Run','FontSize',obj.guiPar.fontsize*1.5,'Callback',{@processgo_callback,obj},'Visible',vis);
                 obj.guihandles.info=uicontrol(obj.handle,'Position',[obj.guiPar.FieldWidth*2, hpos(4)-vrim+50,100,25],...
                     'Style','pushbutton','String','Info','FontSize',obj.guiPar.fontsize,'Callback',{@info_callback,obj},'Visible',vis);
+            end
             
         end
         function setvisibility(obj,name)

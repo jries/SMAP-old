@@ -5,13 +5,14 @@ classdef calibrater3D_so<interfaces.DialogProcessor
     methods
         function obj=calibrater3D_so(varargin)   
             obj@interfaces.DialogProcessor(varargin{:}) ;
-            obj.run;
+            
             
 %              obj.showresults=true;
 %              obj.guiPar.FieldHeight=obj.guiPar.FieldHeight-1;obj.guiPar.Vrim=obj.guiPar.Vrim-20;
         end
         
         function initGui(obj)
+            obj.run;
             close(obj.handle)
         end
         function out=run(obj,p)

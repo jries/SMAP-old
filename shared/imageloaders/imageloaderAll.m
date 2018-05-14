@@ -35,7 +35,9 @@ file=varargin{1};
    end    
    try
         io=imloader(varargin{:});
-   catch
+   catch err
+       err
+       disp('simple tiff loader loader')
        imloader=@imageloaderTifSimple;
        io=imloader(varargin{:});
    end
