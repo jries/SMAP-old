@@ -83,9 +83,10 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                 end
                 obj.loc.(name)=real(v);
                 obj.regroup;    
-                locfields=fieldnames(obj.loc);
-                obj.setPar('locFields',locfields,'String');
             end
+            
+            locfields=fieldnames(obj.loc);
+            obj.setPar('locFields',locfields,'String');
         end
         function addloc(obj,name,value)
             %addloc(field, value) Appends localizations to exisiting field, sets localizations

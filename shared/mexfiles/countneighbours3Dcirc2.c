@@ -36,6 +36,10 @@ for(this=0;this<lenx;this++)
         indx2++;
     }
     testind2=indx2;
+//     while((x2[testind2]>x[this]-dx)&&(testind2>0))
+//     {
+//         testind2--;
+//     }
     while((x2[testind2]<x[this]+dx)&&(testind2<lenx2-1))
     {
         ry2=(y2[testind2]-y[this])*(y2[testind2]-y[this]);
@@ -44,7 +48,7 @@ for(this=0;this<lenx;this++)
             rz2=(z2[testind2]-z[this])*(z2[testind2]-z[this]);
             if (rz2<dz2)
                 {
-                rx2=(x2[testind2]-x[this])*(x[testind2]-x[this]); 
+                rx2=(x2[testind2]-x[this])*(x2[testind2]-x[this]); 
                 if ((rx2+ry2)/dx2+rz2/dz2<1)
                 nb[this]++;
                 }

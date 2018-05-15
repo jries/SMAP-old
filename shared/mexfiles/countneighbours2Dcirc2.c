@@ -35,6 +35,11 @@ for(this=0;this<lenx;this++)
         indx2++;
     }
     testind2=indx2;
+    
+//     while((x2[testind2]>x[this]-dx)&&(testind2>0))
+//     {
+//         testind2--;
+//     }
     while((x2[testind2]<x[this]+dx)&&(testind2<lenx2-1))
     {
         

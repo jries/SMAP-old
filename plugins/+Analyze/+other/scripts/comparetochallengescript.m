@@ -1,46 +1,45 @@
 % challengescript
 % parameters
+%% MT1.N1.LD optimized
 dx=0; %corrections from bead fit.
 dy=0;
 dz=0;
 photonfactor=1;
+
 %density
-densitysize_xy=40;
-densitysize_z=80;
+densitysize_xy=25;
+densitysize_z=45;
 densitycutoff=3;
-zmin=-600;zmax=600;
-bgmin=15; bgmax=50; %background filter
+zmin=-700;zmax=700;
+bgmin=85; bgmax=105; %background filter
+locprec_cutoff=20;
+locprecz_cutoff=50;
+phot_cutoff=200;
+LLrel_cutoff=-2.5;
+group_dT=0;
+border=10; %distance from min/max: if fit did converge to border
+
+
+
+compare=false; %open compare java
+%%
 
 ld=g.locData;
-
+maxiter=max(ld.loc.iterations);
 % group_dX=[15 30 50] 
-locprec_cutoff=[20 40 30]; %for N1, N2, N3
+
 
 PSF_cutoff_min=75; %only for Gaussian, so not relevant?
 PSF_cutoff_max=200;
-LLrel_cutoff=-2;
+
 
 filenumber =1;
 
 [~,filename]=fileparts(ld.files.file(filenumber).name);
-if contains(filename,'.HD')
-    density=1;
-else
-    density=0;
-end
-ind=strfind(filename,'.N');
-if ~isempty(ind)
-    brightness=str2num(filename(ind+2:ind+2));
-else
-    brightness=0;
-end
+
 
 group_dX=2*median(ld.loc.locprecnm);
-if density==0
-    group_dT=1;
-else
-    group_dT=0;
-end
+
 % determine HD, LD, bright, dark
 %regroup with smaller dx, dt (depending on brightness, density)
 ld.regroup(group_dX,group_dT)
@@ -49,9 +48,11 @@ ld.regroup(group_dX,group_dT)
 indgood=true(size(ld.loc.xnm));
 %  combined PSF grouping filter. PSF not relevant?
 indgroupfilter=((...
-    ld.loc.locprecnm<locprec_cutoff(brightness) ...
+    ld.loc.locprecnm<locprec_cutoff...
+    & ld.loc.locprecznm<locprecz_cutoff...
     & ld.loc.PSFxnm>PSF_cutoff_min & ld.loc.PSFxnm<PSF_cutoff_max ...
     & ld.loc.bg>bgmin & ld.loc.bg<bgmax  ...
+    & ld.loc.phot>phot_cutoff ...
     )| ld.loc.numberInGroup>1);
 
 disp(['groupfilter: ' num2str(1-sum(indgroupfilter)/length(indgroupfilter))])
@@ -62,6 +63,25 @@ indgood=indgood & indgroupfilter;
 if isfield(ld.loc,'LLrel') %do this filtr before regrouping?
     indgood=indgood & ld.loc.LLrel>LLrel_cutoff;
 end
+
+%iterations
+indgood=indgood&ld.loc.iterations<maxiter;
+
+%stripe artifacts: can be reduced if integer numbers are removed
+indint=round(ld.loc.xnm)-ld.loc.xnm == 0 | ...
+    round(ld.loc.ynm)-ld.loc.ynm == 0 | ...
+    round(ld.loc.znm)-ld.loc.znm == 0;
+indgood=indgood & ~indint;
+
+%border filtering
+indborder=ld.loc.xnm>min(ld.loc.xnm)+border & ...
+    ld.loc.xnm<max(ld.loc.xnm)-border & ...
+    ld.loc.ynm>min(ld.loc.ynm)+border & ...
+    ld.loc.ynm<max(ld.loc.ynm)-border & ...
+    ld.loc.znm>min(ld.loc.znm)+border & ...
+    ld.loc.znm<max(ld.loc.znm)-border;
+indgood=indgood&indborder;
+
 
 % only current filenumber:
 indgood =indgood &ld.loc.filenumber==filenumber;
@@ -138,6 +158,7 @@ for k=1:gi(end)
     end
 end
 
+if compare
 fchallege=figure(234);
 cs=plugin('Analyze','other','CompareToGroundTruthChallenge',fchallege,g.P);
 cs.attachLocData(ldc);
@@ -148,6 +169,8 @@ p.offsetxyz=[dx dy dz];
 p.photonfactor=photonfactor;
 cs.setGuiParameters(p);
 cs.processgo;
+end
 disp('done')
+
 % write  dx, dy, dz from bead fit into challenge compare plugin
 
