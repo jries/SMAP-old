@@ -66,12 +66,23 @@ classdef PeakCombiner<interfaces.WorkflowModule
             
             xallrpix=round(xallr/pixelsize(1));
             yallrpix=round(yallr/pixelsize(end));
+            
+            %for challenge: allow for localizations close to rim. Correct
+            %both reference and target if too far outside
+            %now implemented only for right-left
+            if contains(p.Tfile,'Challenge')
+                dn=(p.loc_ROIsize-1)/2;
+                xallrpix=min(max(xallrpix,dn+1),roi(3)/2-dn);
+                yallrpix=min(max(yallrpix,dn+1),roi(4)-dn);
+            end
+
              
             [xallt,yallt]=transform.transformCoordinatesFwd(xallrpix*pixelsize(1),yallrpix*pixelsize(end));
             
             xalltpix=round(xallt/pixelsize(1));
             yalltpix=round(yallt/pixelsize(end)); 
             
+
             
             indgood=xalltpix>roi(1)&yalltpix>roi(2)&xalltpix<=roi(1)+roi(3)&yalltpix<=roi(2)+roi(4);
             
