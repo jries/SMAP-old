@@ -531,12 +531,12 @@ v=obj.locData.getloc(field,'layer',obj.layer).(field);
 if ~isempty(v) && obj.getSingleGuiParameter('colorauto')
 obj.locData.loc.colorfield=single(obj.locData.loc.(field));
 obj.locData.grouploc.colorfield=single(obj.locData.grouploc.(field));
-q=myquantilefast(v,[0.01,0.99]);
+q=myquantilefast(v,[0.02,0.98]);
 dx=10^floor(log10(abs(q(2))/100));
 minv=round(q(1)/dx)*dx;
 maxv=round(q(2)/dx)*dx;            
-obj.colorrange.mincall(p.Value)=minv;
-obj.colorrange.maxcall(p.Value)=maxv;
+obj.colorrange.mincall(p.Value)=minv-dx;
+obj.colorrange.maxcall(p.Value)=maxv+dx;
 obj.guihandles.colorfield_min.String=num2str(minv);
 obj.guihandles.colorfield_max.String=num2str(maxv);
 % render_colormode_callback(object,0,obj)      
