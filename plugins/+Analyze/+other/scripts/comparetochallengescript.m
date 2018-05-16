@@ -22,6 +22,52 @@ border=10; %distance from min/max: if fit did converge to border
 
 
 compare=false; %open compare java
+%% fit time
+fn=g.locData.files.file.name;
+l=load(fn);
+fitt=l.saveloc.fitparameters.processfittime;
+disp(['fit time without loading: ' num2str(fitt,3) ' s']);
+%% create best J vs RMS plot
+GTfile='/Volumes/t2ries/projects/SMLMChallenge2018/T1_MT0.N1.LD/activations.csv';
+% GTfile='/Volumes/t2ries/projects/SMLMChallenge2018/T2_MT0.N1.LD/activations.csv';
+
+dat = csvread(GTfile,1,0);
+excessnoise=2;
+phot=dat(:,6)*.9/excessnoise;
+bg=90; 
+
+PSF0=100; a=100; 
+
+%PSF(z)
+lambda=600;
+w0=2*PSF0;
+z=dat(:,5);
+zR=pi*w0^2/lambda;
+wz=w0*sqrt(1+(z/zR).^2);
+PSF=wz/2;
+
+locprecnm=sqrt((PSF.^2+a^2/12)./phot.*(16/9+8*pi*(PSF.^2+a^2/12)*bg./phot/a^2));
+lps=sort(locprecnm);
+norm=(1:length(lps))';
+lpsj=sqrt(cumsum(lps.^2)./norm);
+figure(88);
+subplot(1,2,2)
+hold off
+plot(norm/max(norm),lpsj,'.')
+hold on
+plot([0 1],[1 1]*lpsj(1))
+ax=gca;
+ax.YLim(1)=0;
+ax.YLim(2)=quantile(lpsj,0.99);
+xlabel('Recall')
+ylabel('RMS (nm)')
+title('best possible RMS vs recall')
+
+subplot(1,2,1);
+histogram(locprecnm)
+xlabel('localization precision nm')
+xlim([0 quantile(locprecnm,0.98)])
+title('localization precision Mortenson')
 %%
 
 ld=g.locData;
