@@ -3,39 +3,73 @@
 %% DHNPC 10nm
 
 % 44.453 45.166 9.744
+if 1
+    dx=44.453; %corrections from bead fit.
+    dy=45.166;
+    dz=9.744;
+    photonfactor=0.662;
+    
+    %% filter used
+    
+    groupfilter = 0;
+    LLfilter = 1;
+    iterationfilter = 1;
+    filterint=1;
+    boarderfilter = 1;
+    clusterfilter = 1;
+    zfilter = 0;
+    %% MT1.N1.LD optimized DHNPC10nm
+    
+    %density
+    densitysize_xy=50;
+    densitysize_z=100;
+    densitycutoff=6;
+    zmin=-800;zmax=800;
+    bgmin=75; bgmax=125; %background filter
+    locprec_cutoff=50;
+    locprecz_cutoff=80;
+    phot_cutoff=900;
+    LLrel_cutoff=-3.5;
+    group_dT=0;
+    border=5; %distance from min/max: if fit did converge to border
+end
 
-dx=44.453; %corrections from bead fit.
-dy=45.166;
-dz=9.744;
-photonfactor=0.662;
+%% MT3.N1.LD optimized DHNPC10nm
 
-%% filter used
+% 44.453 45.166 9.744
+if 0
+    dx=44.453; %corrections from bead fit.
+    dy=45.166;
+    dz=9.744;
+    photonfactor=0.662;
+    
+    %% filter used
+    
+    groupfilter = 0;
+    LLfilter = 1;
+    iterationfilter = 1;
+    filterint=1;
+    boarderfilter = 1;
+    clusterfilter = 1;
+    zfilter = 0;
+    %% MT3.N1.LD optimized DHNPC10nm
+    
+    %density
+    densitysize_xy=50;
+    densitysize_z=100;
+    densitycutoff=6;
+    zmin=-800;zmax=800;
+    bgmin=75; bgmax=125; %background filter
+    locprec_cutoff=50;
+    locprecz_cutoff=80;
+    phot_cutoff=900;
+    LLrel_cutoff=-2.5;
+    group_dT=0;
+    border=5; %distance from min/max: if fit did converge to border
+end
 
-groupfilter = 1;
-LLfilter = 1;
-iterationfilter = 1;
-filterint=1;
-boarderfilter = 1;
-clusterfilter = 1;
-zfilter = 1;
-%% MT1.N1.LD optimized
 
-%density
-densitysize_xy=50;
-densitysize_z=100;
-densitycutoff=5;
-zmin=-800;zmax=800;
-bgmin=75; bgmax=125; %background filter
-locprec_cutoff=50;
-locprecz_cutoff=80;
-phot_cutoff=900;
-LLrel_cutoff=-2.5;
-group_dT=0;
-border=5; %distance from min/max: if fit did converge to border
-
-
-
-
+%%
 compare=true; %open compare java
 % %% fit time
 % fn=g.locData.files.file.name;
