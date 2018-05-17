@@ -1,10 +1,15 @@
 % challengescript
 % parameters
+%% DHNPC 10nm
+
+% 44.453 45.166 9.744
+
+dx=44.453; %corrections from bead fit.
+dy=45.166;
+dz=9.744;
+photonfactor=0.662;
+
 %% MT1.N1.LD optimized
-dx=0; %corrections from bead fit.
-dy=0;
-dz=0;
-photonfactor=1;
 
 %density
 densitysize_xy=25;
@@ -12,62 +17,21 @@ densitysize_z=45;
 densitycutoff=3;
 zmin=-700;zmax=700;
 bgmin=85; bgmax=105; %background filter
-locprec_cutoff=20;
+locprec_cutoff=30;
 locprecz_cutoff=50;
-phot_cutoff=200;
-LLrel_cutoff=-2.5;
+phot_cutoff=1200;
+LLrel_cutoff=-1.5;
 group_dT=0;
 border=10; %distance from min/max: if fit did converge to border
 
 
 
-compare=false; %open compare java
-%% fit time
-fn=g.locData.files.file.name;
-l=load(fn);
-fitt=l.saveloc.fitparameters.processfittime;
-disp(['fit time without loading: ' num2str(fitt,3) ' s']);
-%% create best J vs RMS plot
-GTfile='/Volumes/t2ries/projects/SMLMChallenge2018/T1_MT0.N1.LD/activations.csv';
-% GTfile='/Volumes/t2ries/projects/SMLMChallenge2018/T2_MT0.N1.LD/activations.csv';
-
-dat = csvread(GTfile,1,0);
-excessnoise=2;
-phot=dat(:,6)*.9/excessnoise;
-bg=90; 
-
-PSF0=100; a=100; 
-
-%PSF(z)
-lambda=600;
-w0=2*PSF0;
-z=dat(:,5);
-zR=pi*w0^2/lambda;
-wz=w0*sqrt(1+(z/zR).^2);
-PSF=wz/2;
-
-locprecnm=sqrt((PSF.^2+a^2/12)./phot.*(16/9+8*pi*(PSF.^2+a^2/12)*bg./phot/a^2));
-lps=sort(locprecnm);
-norm=(1:length(lps))';
-lpsj=sqrt(cumsum(lps.^2)./norm);
-figure(88);
-subplot(1,2,2)
-hold off
-plot(norm/max(norm),lpsj,'.')
-hold on
-plot([0 1],[1 1]*lpsj(1))
-ax=gca;
-ax.YLim(1)=0;
-ax.YLim(2)=quantile(lpsj,0.99);
-xlabel('Recall')
-ylabel('RMS (nm)')
-title('best possible RMS vs recall')
-
-subplot(1,2,1);
-histogram(locprecnm)
-xlabel('localization precision nm')
-xlim([0 quantile(locprecnm,0.98)])
-title('localization precision Mortenson')
+compare=true; %open compare java
+% %% fit time
+% fn=g.locData.files.file.name;
+% l=load(fn);
+% fitt=l.saveloc.fitparameters.processfittime;
+% disp(['fit time without loading: ' num2str(fitt,3) ' s']);
 %%
 
 ld=g.locData;
@@ -84,7 +48,7 @@ filenumber =1;
 [~,filename]=fileparts(ld.files.file(filenumber).name);
 
 
-group_dX=2*median(ld.loc.locprecnm);
+group_dX=min(50,2*median(ld.loc.locprecnm));
 
 % determine HD, LD, bright, dark
 %regroup with smaller dx, dt (depending on brightness, density)
@@ -150,11 +114,6 @@ indcluster=ld.loc.clusterdensity>densitycutoff;
 disp(['density filter: ' num2str(1-sum(indcluster)/length(indcluster))])
 indgood=indgood & indcluster;
 
-copygroupfields={'xnm','ynm','znm'};
-
-
-
-
 
 %  edges: z min, z max: remove or leave?
 if isfield(ld.loc,'znm')
@@ -166,10 +125,8 @@ g.locData.setloc('challengefiltered',single(indgood));
 g.locData.regroup(group_dX,group_dT);
 
 
-
-% dcal=plugin('Analyze','cluster','density_calculator',fdcal,g.P);
-
 % write x,y,z from grouped to ungrouped
+copygroupfields={'xnm','ynm','znm'};
 ldc=ld.copy; %dont overwrite in SMaP
 [gi,sorti]=sort(ldc.loc.groupindex);
 [gig,sortg]=sort(ldc.grouploc.groupindex);
@@ -213,6 +170,7 @@ p=cs.getGuiParameters;
 p.onlyfiltered=0;
 p.offsetxyz=[dx dy dz];
 p.photonfactor=photonfactor;
+p.shiftframe=0;
 cs.setGuiParameters(p);
 cs.processgo;
 end
@@ -220,3 +178,44 @@ disp('done')
 
 % write  dx, dy, dz from bead fit into challenge compare plugin
 
+%% create best J vs RMS plot
+GTfile='/Volumes/t2ries/projects/SMLMChallenge2018/T1_MT0.N1.LD/activations.csv';
+% GTfile='/Volumes/t2ries/projects/SMLMChallenge2018/T2_MT0.N1.LD/activations.csv';
+
+dat = csvread(GTfile,1,0);
+excessnoise=2;
+phot=dat(:,6)*.9/excessnoise;
+bg=90; 
+
+PSF0=100; a=100; 
+
+%PSF(z)
+lambda=600;
+w0=2*PSF0;
+z=dat(:,5);
+zR=pi*w0^2/lambda;
+wz=w0*sqrt(1+(z/zR).^2);
+PSF=wz/2;
+
+locprecnm=sqrt((PSF.^2+a^2/12)./phot.*(16/9+8*pi*(PSF.^2+a^2/12)*bg./phot/a^2));
+lps=sort(locprecnm);
+norm=(1:length(lps))';
+lpsj=sqrt(cumsum(lps.^2)./norm);
+figure(88);
+subplot(1,2,2)
+hold off
+plot(norm/max(norm),lpsj,'.')
+hold on
+plot([0 1],[1 1]*lpsj(1))
+ax=gca;
+ax.YLim(1)=0;
+ax.YLim(2)=quantile(lpsj,0.99);
+xlabel('Recall')
+ylabel('RMS (nm)')
+title('best possible RMS vs recall')
+
+subplot(1,2,1);
+histogram(locprecnm)
+xlabel('localization precision nm')
+xlim([0 quantile(locprecnm,0.98)])
+title('localization precision Mortenson')

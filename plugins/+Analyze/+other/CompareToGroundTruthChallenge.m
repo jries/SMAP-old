@@ -18,7 +18,7 @@ classdef CompareToGroundTruthChallenge<interfaces.DialogProcessor
             end
             
             % fit time
-            fn=g.locData.files.file.name;
+            fn=obj.locData.files.file.name;
             l=load(fn);
             fitt=l.saveloc.fitparameters.processfittime;
 %             disp(['fit time without loading: ' num2str(fitt,3) ' s']);
