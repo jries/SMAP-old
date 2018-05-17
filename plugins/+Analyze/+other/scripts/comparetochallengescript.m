@@ -128,6 +128,8 @@ g.locData.regroup(group_dX,group_dT);
 % write x,y,z from grouped to ungrouped
 copygroupfields={'xnm','ynm','znm'};
 ldc=ld.copy; %dont overwrite in SMaP
+ldc.removelocs(~indgood)
+ldc.regroup(group_dX,group_dT);
 [gi,sorti]=sort(ldc.loc.groupindex);
 [gig,sortg]=sort(ldc.grouploc.groupindex);
 inds=1;indg=1;
