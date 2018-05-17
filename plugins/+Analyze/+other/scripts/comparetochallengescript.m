@@ -11,13 +11,13 @@ photonfactor=0.662;
 
 %% filter used
 
-groupfilter = 0;
-LLfilter = 0;
-iterationfilter = 0;
-filterint=0;
-boarderfilter = 0;
+groupfilter = 1;
+LLfilter = 1;
+iterationfilter = 1;
+filterint=1;
+boarderfilter = 1;
 clusterfilter = 1;
-zfilter = 0;
+zfilter = 1;
 %% MT1.N1.LD optimized
 
 %density

@@ -42,8 +42,8 @@ P=[];CRLB=[];LogL=[]; %in case the function exits early
 narginh=nargin;
 %determine of it runs on GPU, otherwise use CPU as default
 persistent fitter
-allfitters={@GPUmleFit_LM,@CPUmleFit_LM};
-allfittersnames={'GPUmleFit_LM','CPUmleFit_LM'};
+allfitters={@GPUmleFit_LM_NoRestrict,@CPUmleFit_LM};
+allfittersnames={'GPUmleFit_LM_NoRestrict','CPUmleFit_LM'};
 if isempty(fitter)
     testim=single(varargin{1}(:,:,1));
     for k=1:length(allfitters)
