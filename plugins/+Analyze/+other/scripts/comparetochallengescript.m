@@ -9,20 +9,30 @@ dy=45.166;
 dz=9.744;
 photonfactor=0.662;
 
+%% filter used
+
+groupfilter = 0;
+LLfilter = 0;
+iterationfilter = 0;
+filterint=0;
+boarderfilter = 0;
+clusterfilter = 1;
+zfilter = 0;
 %% MT1.N1.LD optimized
 
 %density
-densitysize_xy=25;
-densitysize_z=45;
-densitycutoff=3;
-zmin=-700;zmax=700;
-bgmin=85; bgmax=105; %background filter
-locprec_cutoff=30;
-locprecz_cutoff=50;
-phot_cutoff=1200;
-LLrel_cutoff=-1.5;
+densitysize_xy=50;
+densitysize_z=100;
+densitycutoff=5;
+zmin=-800;zmax=800;
+bgmin=75; bgmax=125; %background filter
+locprec_cutoff=50;
+locprecz_cutoff=80;
+phot_cutoff=900;
+LLrel_cutoff=-2.5;
 group_dT=0;
-border=10; %distance from min/max: if fit did converge to border
+border=5; %distance from min/max: if fit did converge to border
+
 
 
 
@@ -57,42 +67,70 @@ ld.regroup(group_dX,group_dT)
 %filter
 indgood=true(size(ld.loc.xnm));
 %  combined PSF grouping filter. PSF not relevant?
-indgroupfilter=((...
-    ld.loc.locprecnm<locprec_cutoff...
-    & ld.loc.locprecznm<locprecz_cutoff...
-    & ld.loc.PSFxnm>PSF_cutoff_min & ld.loc.PSFxnm<PSF_cutoff_max ...
-    & ld.loc.bg>bgmin & ld.loc.bg<bgmax  ...
-    & ld.loc.phot>phot_cutoff ...
-    )| ld.loc.numberInGroup>1);
-
-disp(['groupfilter: ' num2str(1-sum(indgroupfilter)/length(indgroupfilter))])
-indgood=indgood & indgroupfilter;
+if groupfilter
+    indgroupfilter=((...
+        ld.loc.locprecnm<locprec_cutoff...
+        & ld.loc.locprecznm<locprecz_cutoff...
+        & ld.loc.PSFxnm>PSF_cutoff_min & ld.loc.PSFxnm<PSF_cutoff_max ...
+        & ld.loc.bg>bgmin & ld.loc.bg<bgmax  ...
+        & ld.loc.phot>phot_cutoff ...
+        )| ld.loc.numberInGroup>1);
+    indgood=indgood & indgroupfilter;
+    disp(['groupfilter: ' num2str(sum(~indgroupfilter)/length(indgroupfilter)*100) ' rem: ' num2str(sum(indgood))])
+end
 
 
 %  LL filtering
-if isfield(ld.loc,'LLrel') %do this filtr before regrouping?
-    indgood=indgood & ld.loc.LLrel>LLrel_cutoff;
+if LLfilter
+    if isfield(ld.loc,'LLrel') %do this filtr before regrouping?
+        indll=ld.loc.LLrel>LLrel_cutoff;
+    end
+    outnold=sum(~indgood);
+    indgood=indgood & indll;
+    out=sum(~indgood)-outnold;
+    disp(['LLrel: ' num2str(out/length(indgroupfilter)*100) ' rem: ' num2str(sum(indgood))])
+end
+% disp(['groupfilter: ' num2str(1-sum(indgroupfilter)/length(indgroupfilter))])
+%iterations
+if iterationfilter
+    inditer=ld.loc.iterations<maxiter;
+    
+    outnold=sum(~indgood);
+    indgood=indgood & inditer;
+    out=sum(~indgood)-outnold;
+    disp(['iter: ' num2str(out/length(indgroupfilter)*100) ' rem: ' num2str(sum(indgood))])
 end
 
-%iterations
-indgood=indgood&ld.loc.iterations<maxiter;
 
+if filterint
 %stripe artifacts: can be reduced if integer numbers are removed
 indint=round(ld.loc.xnm)-ld.loc.xnm == 0 | ...
     round(ld.loc.ynm)-ld.loc.ynm == 0 | ...
     round(ld.loc.znm)-ld.loc.znm == 0;
-indgood=indgood & ~indint;
+indround= ~indint;
 
+
+outnold=sum(~indgood);
+indgood=indgood & indround;
+out=sum(~indgood)-outnold;
+disp(['round: ' num2str(out/length(indgroupfilter)*100) ' rem: ' num2str(sum(indgood))])
+end
 %border filtering
+
+if boarderfilter
 indborder=ld.loc.xnm>min(ld.loc.xnm)+border & ...
     ld.loc.xnm<max(ld.loc.xnm)-border & ...
     ld.loc.ynm>min(ld.loc.ynm)+border & ...
     ld.loc.ynm<max(ld.loc.ynm)-border & ...
     ld.loc.znm>min(ld.loc.znm)+border & ...
     ld.loc.znm<max(ld.loc.znm)-border;
-indgood=indgood&indborder;
+% indborder=indborder;
 
-
+outnold=sum(~indgood);
+% indgood=indgood & indborder;
+out=sum(~indgood)-outnold;
+disp(['border: ' num2str(out/length(indgroupfilter)*100) ' rem: ' num2str(sum(indgood))])
+end
 % only current filenumber:
 indgood =indgood &ld.loc.filenumber==filenumber;
 
@@ -109,27 +147,37 @@ p.countingsize_z=densitysize_z;
 dcal.setGuiParameters(p);
 dcal.useind=indgood;
 dcal.processgo;
-indcluster=ld.loc.clusterdensity>densitycutoff;
+indcluster=ld.loc.clusterdensity>=densitycutoff;
 
-disp(['density filter: ' num2str(1-sum(indcluster)/length(indcluster))])
-indgood=indgood & indcluster;
-
-
-%  edges: z min, z max: remove or leave?
-if isfield(ld.loc,'znm')
-indgood = indgood & (ld.loc.znm>zmin & ld.loc.znm < zmax);
+if clusterfilter
+    outnold=sum(~indgood);
+    indgood=indgood & indcluster;
+    out=sum(~indgood)-outnold;
+    disp(['cluster: ' num2str(out/length(indgroupfilter)*100) ' rem: ' num2str(sum(indgood))])
 end
 
 
+if zfilter
+    %  edges: z min, z max: remove or leave?
+    if isfield(ld.loc,'znm')
+        indz = (ld.loc.znm>zmin & ld.loc.znm < zmax);
+    end
+    outnold=sum(~indgood);
+    indgood=indgood & indz;
+    out=sum(~indgood)-outnold;
+    disp(['z: ' num2str(out/length(indgroupfilter))])
+end
+
 g.locData.setloc('challengefiltered',single(indgood));
 g.locData.regroup(group_dX,group_dT);
-
 
 % write x,y,z from grouped to ungrouped
 copygroupfields={'xnm','ynm','znm'};
 ldc=ld.copy; %dont overwrite in SMaP
 ldc.removelocs(~indgood)
 ldc.regroup(group_dX,group_dT);
+
+if 1
 [gi,sorti]=sort(ldc.loc.groupindex);
 [gig,sortg]=sort(ldc.grouploc.groupindex);
 inds=1;indg=1;
@@ -162,6 +210,7 @@ for k=1:gi(end)
         end
     end
 end
+end
 
 if compare
 fchallege=figure(234);
@@ -181,43 +230,43 @@ disp('done')
 % write  dx, dy, dz from bead fit into challenge compare plugin
 
 %% create best J vs RMS plot
-GTfile='/Volumes/t2ries/projects/SMLMChallenge2018/T1_MT0.N1.LD/activations.csv';
-% GTfile='/Volumes/t2ries/projects/SMLMChallenge2018/T2_MT0.N1.LD/activations.csv';
-
-dat = csvread(GTfile,1,0);
-excessnoise=2;
-phot=dat(:,6)*.9/excessnoise;
-bg=90; 
-
-PSF0=100; a=100; 
-
-%PSF(z)
-lambda=600;
-w0=2*PSF0;
-z=dat(:,5);
-zR=pi*w0^2/lambda;
-wz=w0*sqrt(1+(z/zR).^2);
-PSF=wz/2;
-
-locprecnm=sqrt((PSF.^2+a^2/12)./phot.*(16/9+8*pi*(PSF.^2+a^2/12)*bg./phot/a^2));
-lps=sort(locprecnm);
-norm=(1:length(lps))';
-lpsj=sqrt(cumsum(lps.^2)./norm);
-figure(88);
-subplot(1,2,2)
-hold off
-plot(norm/max(norm),lpsj,'.')
-hold on
-plot([0 1],[1 1]*lpsj(1))
-ax=gca;
-ax.YLim(1)=0;
-ax.YLim(2)=quantile(lpsj,0.99);
-xlabel('Recall')
-ylabel('RMS (nm)')
-title('best possible RMS vs recall')
-
-subplot(1,2,1);
-histogram(locprecnm)
-xlabel('localization precision nm')
-xlim([0 quantile(locprecnm,0.98)])
-title('localization precision Mortenson')
+% GTfile='/Volumes/t2ries/projects/SMLMChallenge2018/T1_MT0.N1.LD/activations.csv';
+% % GTfile='/Volumes/t2ries/projects/SMLMChallenge2018/T2_MT0.N1.LD/activations.csv';
+% GTfile='Z:\projects\SMLMChallenge2018\T1_MT0.N1.LD\activations.csv';
+% dat = csvread(GTfile,1,0);
+% excessnoise=2;
+% phot=dat(:,6)*.9/excessnoise;
+% bg=90; 
+% 
+% PSF0=100; a=100; 
+% 
+% %PSF(z)
+% lambda=600;
+% w0=2*PSF0;
+% z=dat(:,5);
+% zR=pi*w0^2/lambda;
+% wz=w0*sqrt(1+(z/zR).^2);
+% PSF=wz/2;
+% 
+% locprecnm=sqrt((PSF.^2+a^2/12)./phot.*(16/9+8*pi*(PSF.^2+a^2/12)*bg./phot/a^2));
+% lps=sort(locprecnm);
+% norm=(1:length(lps))';
+% lpsj=sqrt(cumsum(lps.^2)./norm);
+% figure(88);
+% subplot(1,2,2)
+% hold off
+% plot(norm/max(norm),lpsj,'.')
+% hold on
+% plot([0 1],[1 1]*lpsj(1))
+% ax=gca;
+% ax.YLim(1)=0;
+% ax.YLim(2)=quantile(lpsj,0.99);
+% xlabel('Recall')
+% ylabel('RMS (nm)')
+% title('best possible RMS vs recall')
+% 
+% subplot(1,2,1);
+% histogram(locprecnm)
+% xlabel('localization precision nm')
+% xlim([0 quantile(locprecnm,0.98)])
+% title('localization precision Mortenson')

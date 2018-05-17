@@ -131,8 +131,8 @@ gt = unique(gtAll,'rows');
 cam_pixelsize_nm=obj.getPar('cam_pixelsize_nm');
 p=obj.getGuiParameters;
 if p.shiftpix
-shiftx=-0.5*cam_pixelsize_nm;
-shifty=-0.5*cam_pixelsize_nm;
+shiftx=-0.5*cam_pixelsize_nm(1);
+shifty=-0.5*cam_pixelsize_nm(end);
 else
     shiftx=0;
     shifty=0;
