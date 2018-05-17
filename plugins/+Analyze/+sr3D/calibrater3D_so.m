@@ -13,7 +13,7 @@ classdef calibrater3D_so<interfaces.DialogProcessor
         
         function initGui(obj)
             obj.run;
-            close(obj.handle)
+%             close(obj.handle)
         end
         function out=run(obj,p)
             
