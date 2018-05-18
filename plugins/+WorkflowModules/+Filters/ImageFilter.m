@@ -58,12 +58,15 @@ classdef ImageFilter<interfaces.WorkflowModule
             end
             imf=filter2(obj.filterkernel,data.data-offset);
             if obj.preview&&obj.getPar('loc_previewmode').Value==3&&~isempty(imf)
-               f=obj.getPar('loc_outputfig');
-               if isempty(f)||~isvalid(f)
-                   f=figure;
-                   obj.setPar('loc_outputfig',f);
-               end
-                figure(f)
+                outputfig=obj.getPar('loc_outputfig');
+                if ~isvalid(outputfig)
+                    outputfig=figure(209);
+                    obj.setPar('loc_outputfig',outputfig);
+                end
+                outputfig.Visible='on';
+
+
+                figure(outputfig)
                 hold off
                 imagesc(imf);
                 colorbar;

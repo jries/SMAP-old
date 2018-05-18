@@ -78,24 +78,41 @@ classdef RoiCutterWF<interfaces.WorkflowModule
             
             
             
-            if obj.preview && ~isempty(maxima.x)
+            if obj.preview 
 %                 figure(obj.globpar.parameters.outputfig)
 %                 ax=gca;
-                
-                try
-                    col=[0.3 0.3 0.3];
-                figure(obj.getPar('loc_outputfig'))
-                ax=findobj(obj.getPar('loc_outputfig').Children,'Type','Axes');
-                ax.NextPlot='add';
-                catch
-                    figure(207);
-                    ax=gca;
-                    ax.NextPlot='replace';
-                    imagesc(ax,image);
-                     ax.NextPlot='add';
-                    col=[1 0 1];
+                outputfig=obj.getPar('loc_outputfig');
+                if ~isvalid(outputfig)
+                    outputfig=figure(209);
+                    obj.setPar('loc_outputfig',outputfig);
                 end
+                outputfig.Visible='on';
+
+
+                figure(outputfig)
+                hold off
+                imagesc(image);
+                colorbar;
+                axis equal
+                hold on
+                
+                
+%                 try
+                    col=[0.3 0.3 0.3];
+%                 figure(obj.getPar('loc_outputfig'))
+%                 ax=findobj(obj.getPar('loc_outputfig').Children,'Type','Axes');
+%                 ax.NextPlot='add';
+%                 catch
+%                     figure(207);
+%                     ax=gca;
+%                     ax.NextPlot='replace';
+%                     imagesc(ax,image);
+%                      ax.NextPlot='add';
+%                     col=[1 0 1];
+                    ax=gca;
+%                 end
 %                 hold on
+
                 for k=1:length(maxima.x)
                     pos=[maxima.x(k)-dn maxima.y(k)-dn maxima.x(k)+dn maxima.y(k)+dn ];
                     
