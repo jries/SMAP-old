@@ -110,10 +110,10 @@ switch state
         obj.dynamicfactor=p.cutoffvalue;
     case 2 %p       
         obj.probability=p.cutoffvalue;
-        obj.absolutecutoff=prob2photon(p.cutoffvalue,PSFx0,p.loc_loc_filter_sigma,excess);
+        obj.absolutecutoff=prob2photon(p.cutoffvalue,PSFx0,p.loc_loc_filter_sigma(1),excess);
     case 3 %abs      
         obj.absolutecutoff=p.cutoffvalue;
-        obj.probability=photon2prob(p.cutoffvalue,PSFx0,p.loc_loc_filter_sigma,excess);
+        obj.probability=photon2prob(p.cutoffvalue,PSFx0,p.loc_loc_filter_sigma(1),excess);
 end
 end
 
