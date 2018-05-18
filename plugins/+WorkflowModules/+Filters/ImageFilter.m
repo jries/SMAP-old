@@ -3,6 +3,7 @@ classdef ImageFilter<interfaces.WorkflowModule
         filterkernel
         preview
         filterkernelPSF
+        offset=0;
     end
     methods
         function obj=ImageFilter(varargin)
@@ -19,7 +20,10 @@ classdef ImageFilter<interfaces.WorkflowModule
 %         end
         function prerun(obj,p)
             p=obj.getAllParameters;
-            fs=p.loc_loc_filter_sigma;
+            fs=p.loc_loc_filter_sigma(1);
+            if length(p.loc_loc_filter_sigma)>1
+                obj.offset=p.loc_loc_filter_sigma(2);
+            end
             if fs>0
                 h=fspecial('gaussian', max(5,ceil(3.5/2*fs)*2+1), fs);
             else
@@ -47,10 +51,10 @@ classdef ImageFilter<interfaces.WorkflowModule
         end
         function dato=run(obj,data,p)
             dato=data;%.copy;
-            if p.filtermode.Value==3&&~isempty(data.data)
+            if p.filtermode.Value==3&&~isempty(data.data)&&obj.offset==0
                 offset=min(data.data(:,1));
             else 
-                offset=0;
+                offset=obj.offset;
             end
             imf=filter2(obj.filterkernel,data.data-offset);
             if obj.preview&&obj.getPar('loc_previewmode').Value==3&&~isempty(imf)
