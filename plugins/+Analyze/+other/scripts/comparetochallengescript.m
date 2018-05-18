@@ -3,7 +3,7 @@
 %% DHNPC 10nm
 
 % 44.453 45.166 9.744
-if 1
+if 0
     dx=44.453; %corrections from bead fit.
     dy=45.166;
     dz=9.744;
@@ -68,6 +68,111 @@ if 0
     border=5; %distance from min/max: if fit did converge to border
 end
 
+%% MT1.N1.LD optimized BP 10nm
+
+% -54.864 45.095 12.802
+
+if 1
+    dx=-54.864; %corrections from bead fit.
+    dy=45.095;
+    dz=12.802;
+    photonfactor=1.6732;
+    
+    %% filter used
+    
+    groupfilter = 0;
+    LLfilter = 0;
+    iterationfilter = 0;
+    filterint=0;
+    boarderfilter = 0;
+    clusterfilter =1;
+    zfilter = 0;
+    %% MT1.N1.LD optimized BP 10nm
+    
+    %density
+    densitysize_xy=50;
+    densitysize_z=200;
+    densitycutoff=10;
+    zmin=-800;zmax=800;
+    bgmin=75; bgmax=125; %background filter
+    locprec_cutoff=100;
+    locprecz_cutoff=200;
+    phot_cutoff=700;
+    LLrel_cutoff=-4.5;
+    group_dT=0;
+    border=5; %distance from min/max: if fit did converge to border
+end
+
+
+%% MT3.N1.LD optimized BP 10nm
+
+% -54.864 45.095 12.802
+
+if 0
+    dx=-54.864; %corrections from bead fit.
+    dy=45.095;
+    dz=12.802;
+    photonfactor=1.6732;
+    
+    %% filter used
+    
+    groupfilter = 0;
+    LLfilter = 0;
+    iterationfilter = 0;
+    filterint=0;
+    boarderfilter = 0;
+    clusterfilter =1;
+    zfilter = 0;
+    %% MT1.N1.LD optimized BP 10nm
+    
+    %density
+    densitysize_xy=50;
+    densitysize_z=200;
+    densitycutoff=10;
+    zmin=-800;zmax=800;
+    bgmin=75; bgmax=125; %background filter
+    locprec_cutoff=100;
+    locprecz_cutoff=200;
+    phot_cutoff=700;
+    LLrel_cutoff=-4.5;
+    group_dT=0;
+    border=5; %distance from min/max: if fit did converge to border
+end
+
+%% MT3.N1.LD optimized BP 10nm
+
+% -54.864 45.095 12.802
+
+if 0
+   dx=44.453; %corrections from bead fit.
+    dy=45.166;
+    dz=9.744;
+    photonfactor=0.662;
+    
+    %% filter used
+    
+    groupfilter = 0;
+    LLfilter = 0;
+    iterationfilter = 0;
+    filterint=0;
+    boarderfilter = 0;
+    clusterfilter =1;
+    zfilter = 0;
+    %% MT1.N1.LD optimized BP 10nm
+    
+    %density
+    densitysize_xy=50;
+    densitysize_z=200;
+    densitycutoff=10;
+    zmin=-800;zmax=800;
+    bgmin=75; bgmax=125; %background filter
+    locprec_cutoff=100;
+    locprecz_cutoff=200;
+    phot_cutoff=700;
+    LLrel_cutoff=-4.5;
+    group_dT=0;
+    border=5; %distance from min/max: if fit did converge to border
+end
 
 %%
 compare=true; %open compare java
@@ -122,7 +227,7 @@ if LLfilter
     outnold=sum(~indgood);
     indgood=indgood & indll;
     out=sum(~indgood)-outnold;
-    disp(['LLrel: ' num2str(out/length(indgroupfilter)*100) ' rem: ' num2str(sum(indgood))])
+    disp(['LLrel: ' num2str(out/length(indgood)*100) ' rem: ' num2str(sum(indgood))])
 end
 % disp(['groupfilter: ' num2str(1-sum(indgroupfilter)/length(indgroupfilter))])
 %iterations
@@ -132,7 +237,7 @@ if iterationfilter
     outnold=sum(~indgood);
     indgood=indgood & inditer;
     out=sum(~indgood)-outnold;
-    disp(['iter: ' num2str(out/length(indgroupfilter)*100) ' rem: ' num2str(sum(indgood))])
+    disp(['iter: ' num2str(out/length(indgood)*100) ' rem: ' num2str(sum(indgood))])
 end
 
 
@@ -147,7 +252,7 @@ indround= ~indint;
 outnold=sum(~indgood);
 indgood=indgood & indround;
 out=sum(~indgood)-outnold;
-disp(['round: ' num2str(out/length(indgroupfilter)*100) ' rem: ' num2str(sum(indgood))])
+disp(['round: ' num2str(out/length(indgood)*100) ' rem: ' num2str(sum(indgood))])
 end
 %border filtering
 
@@ -163,7 +268,7 @@ indborder=ld.loc.xnm>min(ld.loc.xnm)+border & ...
 outnold=sum(~indgood);
 % indgood=indgood & indborder;
 out=sum(~indgood)-outnold;
-disp(['border: ' num2str(out/length(indgroupfilter)*100) ' rem: ' num2str(sum(indgood))])
+disp(['border: ' num2str(out/length(indgood)*100) ' rem: ' num2str(sum(indgood))])
 end
 % only current filenumber:
 indgood =indgood &ld.loc.filenumber==filenumber;
@@ -187,7 +292,7 @@ if clusterfilter
     outnold=sum(~indgood);
     indgood=indgood & indcluster;
     out=sum(~indgood)-outnold;
-    disp(['cluster: ' num2str(out/length(indgroupfilter)*100) ' rem: ' num2str(sum(indgood))])
+    disp(['cluster: ' num2str(out/length(indgood)*100) ' rem: ' num2str(sum(indgood))])
 end
 
 
