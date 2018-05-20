@@ -166,6 +166,7 @@ classdef LocSaver<interfaces.WorkflowModule
                 fitpar.fittime=toc(obj.timer);
                 fitpar.loadtifftime=obj.getPar('tiffloader_loadingtime');
                 fitpar.processfittime=obj.getPar('tiffloader_fittime');
+                fitpar.loc_globaltransform=obj.getPar('loc_globaltransform');
                 try
                 disp([num2str(length(obj.locDatatemp.loc.xnm)) ' localizations in ' num2str(fitpar.fittime) ' seconds.']);
                 catch err

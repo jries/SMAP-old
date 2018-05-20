@@ -186,38 +186,46 @@ pard.labeling_efficiency.object=struct('String','.5','Style','edit');
 pard.labeling_efficiency.Width=.5;
 pard.labeling_efficiency.position=[3,2.5];
 
-pard.t2.object=struct('String','mean re-activations','Style','text');
-pard.t2.position=[4,1];
-pard.t2.Width=1.5;
+pard.modelt.object=struct('String','Model:','Style','text');
+pard.modelt.Width=.5;
+pard.modelt.position=[4,1];
+
+pard.model.object=struct('String',{{'simple','PAFP','Dye'}},'Style','popupmenu');
+pard.model.Width=.75;
+pard.model.position=[4,1.5];
+
+pard.t2.object=struct('String','re-activations','Style','text');
+pard.t2.position=[4,2.25];
+pard.t2.Width=.75;
 
 pard.blinks.object=struct('String','1','Style','edit');
 pard.blinks.Width=.5;
-pard.blinks.position=[4,2.5];
+pard.blinks.position=[4,3];
 
 
-pard.t3.object=struct('String','lifetime (frames)','Style','text');
-pard.t3.position=[4,3];
-pard.t3.Width=1.5;
+pard.t3.object=struct('String','lifetime (fr)','Style','text');
+pard.t3.position=[5,3.75];
+pard.t3.Width=0.75;
 
 pard.lifetime.object=struct('String','1','Style','edit');
 pard.lifetime.Width=.5;
-pard.lifetime.position=[4,4.5];
+pard.lifetime.position=[5,4.5];
 
-pard.t4.object=struct('String','mean number photons','Style','text');
+pard.t4.object=struct('String','mean photons','Style','text');
 pard.t4.position=[5,1];
-pard.t4.Width=1.5;
+pard.t4.Width=.75;
 
 pard.photons.object=struct('String','2000','Style','edit');
 pard.photons.Width=.5;
-pard.photons.position=[5,2.5];
+pard.photons.position=[5,1.75];
 
-pard.t5.object=struct('String','BG per pixel (photons)','Style','text');
-pard.t5.position=[5,3];
-pard.t5.Width=1.5;
+pard.t5.object=struct('String','BG/pixel','Style','text');
+pard.t5.position=[5,2.5];
+pard.t5.Width=0.75;
 
 pard.background.object=struct('String','20','Style','edit');
 pard.background.Width=.5;
-pard.background.position=[5,4.5];
+pard.background.position=[5,3.];
 
 
 pard.t6.object=struct('String','Number of sites','Style','text');

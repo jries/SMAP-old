@@ -53,10 +53,12 @@ classdef VersatileRenderer<interfaces.DialogProcessor
             phere.mingaussnm=0;
             
             phere.sr_axes=[];
+            phere.addscalebar=false;
             for k=1:length(pall)
                 pall{k}=copyfields(pall{k},p);
                 pall{k}=copyfields(pall{k},phere);
             end
+            
             img=TotalRender(lochere,pall,{'xnm','ynm'});
             imagesc(ax, [p.min1 p.max1],[p.min2 p.max2],img.image)
             axis(ax,'xy')
