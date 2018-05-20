@@ -1,6 +1,14 @@
-function v=getFieldAsVectorInd(p,fieldnames, ind)
+function v=getFieldAsVectorInd(p,varargin)
 % ls=length(p);
 isarray=false;
+ind=varargin{end};
+if ~isnumeric(ind)
+    ind=[];
+    fieldnames=varargin(1:end);
+else
+    fieldnames=varargin(1:end-1);
+end
+
 fieldnames=takeapart(fieldnames);
 for k=length(p):-1:1
     try
@@ -20,12 +28,15 @@ for k=length(p):-1:1
             vh=nv;
 %         end
     end
-    if nargin>2 %index passed
+    if ~isempty(ind) %index passed
         vh=vh(ind);
     end
     
-    if isarray||(numel(vh)==1 && (isnumeric(vh)||islogical(vh)))
-        v(k)=vh;
+%     if isarray||(numel(vh)==1 && (isnumeric(vh)||islogical(vh)))
+%         v(k)=vh;
+%         isarray=true;
+    if isarray||((isnumeric(vh)||islogical(vh)))
+        v(k,:)=vh;
         isarray=true;
     else
         v{k}=vh;

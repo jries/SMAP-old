@@ -50,13 +50,36 @@ numbercornerassigneddirect=getFieldAsVector(se.sites,fields{:},'numbercornerassi
 filenumber=getFieldAsVector(se.sites,'info','filenumber');
 psf=getFieldAsVector(se.sites,fields2{:},'PSFlayers');
 
-use=getFieldAsVector(se.sites,'annotation','use');
-numfoundint=numfoundint(use);
-numfoundrat=numfoundrat(use);
-numbercornerassinged=numbercornerassinged(use);
-psf=psf(use);
 
-filefile=se.sites(find(use,1,'first')).info.filenumber
+fields3={'evaluation','NPCLabelingQuantify','timing'};
+timepoints=getFieldAsVectorInd(se.sites,fields3{:},'timepoints');
+nstart=getFieldAsVectorInd(se.sites,fields3{:},'nstart');
+nend=getFieldAsVectorInd(se.sites,fields3{:},'nend');
+
+fields3gt={'evaluation','NPCLabelingQuantify','timing_gt'};
+timepoints_gt=getFieldAsVectorInd(se.sites,fields3gt{:},'timepoints');
+nstart_gt=getFieldAsVectorInd(se.sites,fields3gt{:},'nstart');
+nend_gt=getFieldAsVectorInd(se.sites,fields3gt{:},'nend');
+
+frames=getFieldAsVectorInd(se.sites,fields{:},'coordinates','frame');
+
+% numfoundint=numfoundint(use);
+% numfoundrat=numfoundrat(use);
+% numbercornerassinged=numbercornerassinged(use);
+% psf=psf(use);
+% 
+% 
+% 
+% timepoints=timepoints(use,:);
+% nstart=nstart(use,:);
+% nend=nend(use,:);
+% 
+% timepoints_gt=timepoints_gt(use,:);
+% nstart_gt=nstart_gt(use,:);
+% nend_gt=nend_gt(use,:);
+
+use=getFieldAsVector(se.sites,'annotation','use');
+filefile=se.sites(find(use,1,'first')).info.filenumber;
 
 ax0=obj.initaxis('Summary');
 axpsf=obj.initaxis('PSF');
@@ -77,12 +100,24 @@ end
 indgood=indgood&indf;
 end
 
+
+indgood=indgood&use;
+
 nb=0:p.corners;
 
 numfoundint=numfoundint(indgood);
 numfoundrat=numfoundrat(indgood);
 numbercornerassinged=numbercornerassinged(indgood);
 numbercornerassigneddirect=numbercornerassigneddirect(indgood);
+
+timepoints=timepoints(indgood,:);
+nstart=nstart(indgood,:);
+nend=nend(indgood,:);
+frames=frames(indgood,:);
+
+timepoints_gt=timepoints_gt(indgood,:);
+nstart_gt=nstart_gt(indgood,:);
+nend_gt=nend_gt(indgood,:);
 
 ax1=obj.initaxis('from gap');
 ax2=axes(ax1.Parent);
@@ -115,17 +150,9 @@ subplot(1,2,2,ax2);
     results(1).gapfractional=pf ; 
     results(2).gapfractional=berr_numfoundrat;
     
- ax3=obj.initaxis('assigned + all');
-%  ax3b=axes(ax3.Parent);
+ ax3=obj.initaxis('ass.+all');
+
 ax4=axes(ax3.Parent);
-% subplot(1,3,1,ax3);
-%     ha=hist(numbercornerassinged,nb);
-%     bar(nb,ha)
-%     hold on
-%     pf=fitNPClabeling(ha,p);
-%     title(['assigned: ' num2str(pf,2)])
-%    axis tight
-%    results.assigned=pf; 
 
    subplot(1,2,1,ax3);
     ha=hist(numbercornerassigneddirect,nb);
@@ -152,15 +179,35 @@ subplot(1,2,2,ax4);
     title(['all: ' num2str(100*pf,'%2.1f')])
     axis tight 
     results(1).all=pf; 
-    
 
     
+% analyze time dependence
+    %at some time we have to rescale frames. Already do so in Quantify? Or
+    %only here? Time axis should be localizations, not frames, to get rid
+    %of activation history
+    frames=frames(frames>0);
+    qq=timepoints(1,:)/timepoints(1,end);
+    timepoints=myquantile(frames,qq);
+    
+    ax6b=obj.initaxis('time');
+    hold(ax6b,'off')
+    ls=evaluatetime(timepoints,nstart,nb,p);
+    hold(ax6b,'on')
+    le=evaluatetime(timepoints,nend,nb,p);
+    lsgt=evaluatetime(timepoints,nstart_gt,nb,p);
+    legt=evaluatetime(timepoints,nend_gt,nb,p);
+    title(ax6b,num2str([ls le lsgt legt]*100,'%4.0f'));
+    
+    legend('data start',['lin fit: ' num2str(ls(1)*100,'%2.0f')],...
+       ['exp fit: ' num2str(ls(2)*100,'%2.0f')],'data end',...
+       ['lin fit: ' num2str(le(1)*100,'%2.0f')],['exp fit: ' num2str(le(2)*100,'%2.0f')],...
+       'gt start',['lin fit: ' num2str(lsgt(1)*100,'%2.0f')],['exp fit: ' num2str(lsgt(2)*100,'%2.0f')], ...
+       'gt end',['lin fit: ' num2str(legt(1)*100,'%2.0f')],['exp fit: ' num2str(legt(2)*100,'%2.0f')])
     
 if isfield(se.sites(1).evaluation.NPCLabelingQuantify,'numcornersfiltered_gt') %not from simulation
     numcorners=getFieldAsVector(se.sites,fields{:},'numcornersfiltered_gt');
     numcornersa=getFieldAsVector(se.sites,fields{:},'numcornersall_gt');
-    
-    
+       
 ax6=obj.initaxis('ground truth');
     p.ploton=false;
     bs_gtf=bootstrp(20,@fitNPClabeling,numcorners(indgood),p);
@@ -177,7 +224,7 @@ ax6=obj.initaxis('ground truth');
     title(['true: ' num2str(100*pf,'%2.1f') '\pm' num2str(100*berr_gtf,'%2.1f')])
     axis tight
 
-    ax6b=obj.initaxis('ground truth all');
+    ax6b=obj.initaxis('GT all');
         p.ploton=false;
     bs_gtfa=bootstrp(20,@fitNPClabeling,numcornersa(indgood),p);
     berr_gtfa=std(bs_gtfa);
@@ -192,19 +239,14 @@ ax6=obj.initaxis('ground truth');
     results(2).groundtruthall=berr_gtfa;
     title(['true: ' num2str(100*pf,'%2.1f') '\pm' num2str(100*berr_gtfa,'%2.1f')])
     axis tight
-    
+    numcorners=numcorners(indgood);
     rd=(0:length(numcorners)-1)/length(numcorners)/2;
 ax7=obj.initaxis('comparison');
     plot(numcorners+rd,numfoundint-numcorners,'+')
     hold on
     plot(numcorners+rd,numfoundrat-numcorners,'x')
-%     plot(numcorners+rd,numbercornerassinged-numcorners,'o')
     plot(numcorners+rd,numbercornerassigneddirect -numcorners,'d')
-%     plot(numcorners+rd,numbercornerassigneddirect -numcorners,'d')
-%     plot(numcorners-p.corners);
-    
     hold off
-
     legend('integer','prob','assigned d','all')
 
     numfoundintm=mean(numfoundint-numcorners);
@@ -214,27 +256,6 @@ numbercornerassineddm=mean(numbercornerassigneddirect-numcorners);
     title(['int: ' num2str(numfoundintm,2),', rat: ' num2str(numfoundratm,2), ' ,asssigned d: ' num2str(numbercornerassineddm,2)])
     
     
-% ax8=obj.initaxis('comparison h');
-% 
-% range=-8:8;
-% rangep=range(1:end-1)-0.5;
-% h1=histcounts(numfoundint-numcorners,range);
-% h2=histcounts(numfoundrat-numcorners,range);
-% h3= histcounts(numbercornerassinged-numcorners,range);
-% stairs(ax8,rangep,h1)
-% hold on;
-% stairs(rangep,h2);
-% stairs(rangep,h3);
-% hold off
-%   
-% 
-% axis tight
-% xlim(ax8,[-8 8])
-% t8={['I:' num2str(mean(numfoundint-numcorners),2) '\pm' num2str(std(numfoundint-numcorners),2)],[ 'p:' num2str(mean(numfoundrat-numcorners),2) '\pm' num2str(std(numfoundrat-numcorners),2)],[ 'a:' num2str(mean(numbercornerassinged-numcorners),2) '\pm' num2str(std(numbercornerassinged-numcorners),2)]};
-% % title(ax8,t8)
-% %   ax8l=legend(ax8,'integer','prob','assigned');
-%    ax8l=legend(ax8,t8);
-
 
 sp=obj.locData.files.file(filefile).info.simulationParameters;
 results(3).gapinteger=sp.labeling_efficiency;
@@ -297,6 +318,40 @@ if p.copy2page
 end
 
 end
+
+
+function out=evaluatetime(timepoints,n,nb,p)
+p.ploton=false;
+
+for k=1:size(n,2)
+    h=hist(n(:,k),nb);
+    if sum(h(2:end))>5 %minium for fitting)
+    pf(k)=fitNPClabeling(h,p);
+    else
+        pf(k)=0;
+    end
+end
+tp=timepoints(1,:);
+plot(tp,pf,'*');
+
+fitrange=pf>.05 &pf<0.95;
+fr=fit(tp(fitrange)',pf(fitrange)','poly1');
+
+fx=fit(tp(fitrange)',pf(fitrange)','a-1*exp(-b*x)+1','StartPoint',[0 1/tp(end)]);
+if pf(end)-pf(1) < 0 
+    le=fr(0);
+    lex=fx(0);
+else
+    le=fr(tp(end));
+    lex=fx(tp(end));
+end
+
+hold on
+plot(tp,fr(tp));
+plot(tp,fx(tp));
+out=[le;lex];
+end
+
 
 function pard=guidef(obj)
 pard.t1.object=struct('String','Corners:','Style','text');

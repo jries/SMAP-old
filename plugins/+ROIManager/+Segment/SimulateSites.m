@@ -27,7 +27,7 @@ classdef SimulateSites<interfaces.DialogProcessor&interfaces.SEProcessor
                labels=num2str(p.labeling_efficiency*100,'%2.0f');
                 phots=num2str(p.photons,'%3.0f');
                 blinks=num2str(p.blinks,'%3.0f');
-                filename=['L' labels 'P' phots 'B' blinks];
+                filename=[p.model.selection '_L' labels 'P' phots 'B' blinks];
            
            
            obj.locData.addfile(['simulated_' num2str(obj.locData.files.filenumberEnd) '_' filename]);
