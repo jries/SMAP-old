@@ -337,7 +337,7 @@ plot(tp,pf,'*');
 fitrange=pf>.05 &pf<0.95;
 fr=fit(tp(fitrange)',pf(fitrange)','poly1');
 
-fx=fit(tp(fitrange)',pf(fitrange)','a-1*exp(-b*x)+1','StartPoint',[0 1/tp(end)]);
+fx=fit(tp(fitrange)',pf(fitrange)','1-a-c*exp(-b*x)','StartPoint',[pf(end) 1/tp(end) pf(end)]);
 if pf(end)-pf(1) < 0 
     le=fr(0);
     lex=fx(0);
