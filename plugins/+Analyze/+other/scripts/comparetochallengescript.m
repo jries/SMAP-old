@@ -1,6 +1,6 @@
 % challengescript
 % parameters
-%% DHNPC 10nm
+%% DHNPC 10nm  C1_MT1.N1.LD\DHNPC
 
 % 44.453 45.166 9.744
 if 0
@@ -18,133 +18,27 @@ if 0
     boarderfilter = 1;
     clusterfilter = 1;
     zfilter = 0;
-    %% MT1.N1.LD optimized DHNPC10nm
+    
     
     %density
     densitysize_xy=50;
-    densitysize_z=100;
-    densitycutoff=6;
+    densitysize_z=200;
+    densitycutoff=25;
     zmin=-800;zmax=800;
     bgmin=75; bgmax=125; %background filter
-    locprec_cutoff=50;
-    locprecz_cutoff=80;
+    locprec_cutoff=60;
+    locprecz_cutoff=100;
     phot_cutoff=900;
-    LLrel_cutoff=-3.5;
+    LLrel_cutoff=-2;
     group_dT=0;
     border=5; %distance from min/max: if fit did converge to border
 end
 
-%% MT3.N1.LD optimized DHNPC10nm
+%% DHNPC10nm c3_MT3.N2.LD\DHNPC
 
 % 44.453 45.166 9.744
-if 0
-    dx=44.453; %corrections from bead fit.
-    dy=45.166;
-    dz=9.744;
-    photonfactor=0.662;
-    
-    %% filter used
-    
-    groupfilter = 0;
-    LLfilter = 1;
-    iterationfilter = 1;
-    filterint=1;
-    boarderfilter = 1;
-    clusterfilter = 1;
-    zfilter = 0;
-    %% MT3.N1.LD optimized DHNPC10nm
-    
-    %density
-    densitysize_xy=50;
-    densitysize_z=100;
-    densitycutoff=6;
-    zmin=-800;zmax=800;
-    bgmin=75; bgmax=125; %background filter
-    locprec_cutoff=50;
-    locprecz_cutoff=80;
-    phot_cutoff=900;
-    LLrel_cutoff=-2.5;
-    group_dT=0;
-    border=5; %distance from min/max: if fit did converge to border
-end
-
-%% MT1.N1.LD optimized BP 10nm
-
-% -54.864 45.095 12.802
-
 if 1
-    dx=-54.864; %corrections from bead fit.
-    dy=45.095;
-    dz=12.802;
-    photonfactor=1.6732;
-    
-    %% filter used
-    
-    groupfilter = 0;
-    LLfilter = 0;
-    iterationfilter = 0;
-    filterint=0;
-    boarderfilter = 0;
-    clusterfilter =1;
-    zfilter = 0;
-    %% MT1.N1.LD optimized BP 10nm
-    
-    %density
-    densitysize_xy=50;
-    densitysize_z=200;
-    densitycutoff=10;
-    zmin=-800;zmax=800;
-    bgmin=75; bgmax=125; %background filter
-    locprec_cutoff=100;
-    locprecz_cutoff=200;
-    phot_cutoff=700;
-    LLrel_cutoff=-4.5;
-    group_dT=0;
-    border=5; %distance from min/max: if fit did converge to border
-end
-
-
-%% MT3.N1.LD optimized BP 10nm
-
-% -54.864 45.095 12.802
-
-if 0
-    dx=-54.864; %corrections from bead fit.
-    dy=45.095;
-    dz=12.802;
-    photonfactor=1.6732;
-    
-    %% filter used
-    
-    groupfilter = 0;
-    LLfilter = 0;
-    iterationfilter = 0;
-    filterint=0;
-    boarderfilter = 0;
-    clusterfilter =1;
-    zfilter = 0;
-    %% MT1.N1.LD optimized BP 10nm
-    
-    %density
-    densitysize_xy=50;
-    densitysize_z=200;
-    densitycutoff=10;
-    zmin=-800;zmax=800;
-    bgmin=75; bgmax=125; %background filter
-    locprec_cutoff=100;
-    locprecz_cutoff=200;
-    phot_cutoff=700;
-    LLrel_cutoff=-4.5;
-    group_dT=0;
-    border=5; %distance from min/max: if fit did converge to border
-end
-
-%% MT3.N1.LD optimized BP 10nm
-
-% -54.864 45.095 12.802
-
-if 0
-   dx=44.453; %corrections from bead fit.
+    dx=44.453; %corrections from bead fit.
     dy=45.166;
     dz=9.744;
     photonfactor=0.662;
@@ -152,13 +46,46 @@ if 0
     %% filter used
     
     groupfilter = 0;
-    LLfilter = 0;
-    iterationfilter = 0;
-    filterint=0;
+    LLfilter = 1;
+    iterationfilter = 1;
+    filterint=1;
     boarderfilter = 0;
+    clusterfilter = 1;
+    zfilter = 0;
+    
+    %density
+    densitysize_xy=50;
+    densitysize_z=200;
+    densitycutoff=15;
+    zmin=-800;zmax=800;
+    bgmin=75; bgmax=125; %background filter
+    locprec_cutoff=50;
+    locprecz_cutoff=80;
+    phot_cutoff=900;
+    LLrel_cutoff=-1.25;
+    group_dT=0;
+    border=5; %distance from min/max: if fit did converge to border
+end
+
+%% BP 10nm C1_MT1.N1.LD
+
+% -54.864 45.095 12.802
+
+if 0
+    dx=-54.864; %corrections from bead fit.
+    dy=45.095;
+    dz=12.802;
+    photonfactor=1.6732;
+    
+    %% filter used
+    
+    groupfilter = 0;
+    LLfilter = 0;
+    iterationfilter = 1;
+    filterint=1;
+    boarderfilter = 1;
     clusterfilter =1;
     zfilter = 0;
-    %% MT1.N1.LD optimized BP 10nm
     
     %density
     densitysize_xy=50;
@@ -166,13 +93,84 @@ if 0
     densitycutoff=10;
     zmin=-800;zmax=800;
     bgmin=75; bgmax=125; %background filter
-    locprec_cutoff=100;
-    locprecz_cutoff=200;
+    locprec_cutoff=50;
+    locprecz_cutoff=100;
     phot_cutoff=700;
+    LLrel_cutoff=-3;
+    group_dT=0;
+    border=5; %distance from min/max: if fit did converge to border
+end
+
+
+%% BP 10nm c3_MT3.N2.LD
+
+% -54.864 45.095 12.802
+
+if 0
+    dx=-54.864; %corrections from bead fit.
+    dy=45.095;
+    dz=12.802;
+    photonfactor=1.6732;
+    
+    %% filter used
+    
+    groupfilter = 0;
+    LLfilter = 0;
+    iterationfilter = 1;
+    filterint=1;
+    boarderfilter = 1;
+    clusterfilter =1;
+    zfilter = 0;
+  
+    
+    %density
+    densitysize_xy=50;
+    densitysize_z=200;
+    densitycutoff=10;
+    zmin=-800;zmax=800;
+    bgmin=7; bgmax=10; %background filter
+    locprec_cutoff=40;
+    locprecz_cutoff=100;
+    phot_cutoff=150;
     LLrel_cutoff=-4.5;
     group_dT=0;
     border=5; %distance from min/max: if fit did converge to border
 end
+
+% %% MT3.N1.LD optimized BP 10nm
+% 
+% % -54.864 45.095 12.802
+% 
+% if 0
+%    dx=44.453; %corrections from bead fit.
+%     dy=45.166;
+%     dz=9.744;
+%     photonfactor=0.662;
+%     
+%     %% filter used
+%     
+%     groupfilter = 0;
+%     LLfilter = 0;
+%     iterationfilter = 0;
+%     filterint=0;
+%     boarderfilter = 0;
+%     clusterfilter =1;
+%     zfilter = 0;
+%     %% MT1.N1.LD optimized BP 10nm
+%     
+%     %density
+%     densitysize_xy=50;
+%     densitysize_z=200;
+%     densitycutoff=10;
+%     zmin=-800;zmax=800;
+%     bgmin=75; bgmax=125; %background filter
+%     locprec_cutoff=100;
+%     locprecz_cutoff=200;
+%     phot_cutoff=700;
+%     LLrel_cutoff=-4.5;
+%     group_dT=0;
+%     border=5; %distance from min/max: if fit did converge to border
+% end
 
 %%
 compare=true; %open compare java
