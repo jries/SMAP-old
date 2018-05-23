@@ -2,7 +2,6 @@ classdef RoiCutterWF<interfaces.WorkflowModule
     properties
         loc_ROIsize
         preview
-
     end
     methods
         function obj=RoiCutterWF(varargin)
@@ -85,15 +84,16 @@ classdef RoiCutterWF<interfaces.WorkflowModule
                 if ~isvalid(outputfig)
                     outputfig=figure(209);
                     obj.setPar('loc_outputfig',outputfig);
+                    
                 end
                 outputfig.Visible='on';
 
 
                 figure(outputfig)
-                hold off
-                imagesc(image);
-                colorbar;
-                axis equal
+%                 hold off
+%                 imagesc(image);
+%                 colorbar;
+%                 axis equal
                 hold on
                 
                 

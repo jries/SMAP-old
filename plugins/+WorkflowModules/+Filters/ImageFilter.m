@@ -57,25 +57,76 @@ classdef ImageFilter<interfaces.WorkflowModule
                 offset=obj.offset;
             end
             imf=filter2(obj.filterkernel,data.data-offset);
-            if obj.preview&&obj.getPar('loc_previewmode').Value==3&&~isempty(imf)
-                outputfig=obj.getPar('loc_outputfig');
-                if ~isvalid(outputfig)
-                    outputfig=figure(209);
-                    obj.setPar('loc_outputfig',outputfig);
-                end
-                outputfig.Visible='on';
-
-
-                figure(outputfig)
-                hold off
-                imagesc(imf);
-                colorbar;
-                axis equal
+            
+            if obj.preview
+                drawimage(obj,data.data-offset,imf)
+                
             end
+            
+%             if obj.preview&&obj.getPar('loc_previewmode').Value==3&&~isempty(imf)
+%                 outputfig=obj.getPar('loc_outputfig');
+%                 if ~isvalid(outputfig)
+%                     outputfig=figure(209);
+%                     obj.setPar('loc_outputfig',outputfig);
+%                 end
+%                 outputfig.Visible='on';
+% 
+% 
+%                 figure(outputfig)
+%                 hold off
+%                 imagesc(imf);
+%                 colorbar;
+%                 axis equal
+%             end
             dato.data=(imf);
         end
     end
 end
+
+
+function drawimage(obj,imnorm,imf)
+
+img=(imnorm/2).^2-0.375;
+imgbg=(imf/2).^2-0.375;
+
+imbg=((imnorm-imf)/2).^2-0.375;
+
+outputfig=obj.getPar('loc_outputfig');
+if ~isvalid(outputfig)
+    outputfig=figure(209);
+    obj.setPar('loc_outputfig',outputfig);
+end
+
+outputfig.Visible='on';
+draw=~isempty(imnorm);
+switch obj.getPar('loc_previewmode').Value
+    case 1 %image-bg
+        imd=imbg;
+    case 2%image
+        imd=img;
+    case 3 %norm
+        imd=imf;
+    case 4 %bg
+        imd=imgbg;
+%         draw=false;
+%           imd=img*0;
+%         imd=bg;
+    otherwise 
+        draw=false;
+end
+        
+if draw
+figure(outputfig)
+hold off
+imagesc(imd);
+colormap jet
+colorbar;
+axis equal
+hold on
+end
+end
+
+
 
 function filtermode_callback(object,b,obj)
 gauss={};
