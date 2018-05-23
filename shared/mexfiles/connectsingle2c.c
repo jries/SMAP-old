@@ -90,7 +90,8 @@ void  cs(double *list, double *x, double *y, double *frames,double dX,long dT,mw
         }
         if (particlefound==0) 
             {
-            frh=frames[testentry];
+//             frh=frames[testentry];  //this already went to the next frame...
+            frh=frtest; //current frame
             numdark++; //no particle found: add up numdark
             }
 
