@@ -65,8 +65,72 @@ if 0
     border=5; %distance from min/max: if fit did converge to border; boarderfilter
 end
 
+%% C2_MT2.N1.HD_version1_sig1_roi7
+% if 0
+%     dx=-4.604; %corrections from bead fit.
+%     dy=95.165;
+%     dz=3.150;
+%     photonfactor=0.872;
+%     
+%     %% filter used
+%     
+%     groupfilter = 1;
+%     LLfilter = 1;
+%     iterationfilter = 1;
+%     filterint=0;
+%     boarderfilter = 0;
+%     clusterfilter = 1;
+%     zfilter = 0;
+%     
+%     
+%     %density
+%     densitysize_xy=60;
+%     densitysize_z=150;
+%     densitycutoff=10;
+%     zmin=-800;zmax=800;
+%     bgmin=80; bgmax=160; %background filter
+%     locprec_cutoff=40;
+%     locprecz_cutoff=100;
+%     phot_cutoff=100;
+%     LLrel_cutoff=-1.8;
+%     group_dT=0;
+%     border=5; %distance from min/max: if fit did converge to border
+% end
+
+%% C2_MT2.N1.HD_version2_sig1.5_roi5_
+if 0
+    dx=-4.604; %corrections from bead fit.
+    dy=95.165;
+    dz=3.150;
+    photonfactor=0.872;
+    
+    %% filter used
+    
+    groupfilter = 1;
+    LLfilter = 1;
+    iterationfilter = 1;
+    filterint=0;
+    boarderfilter = 0;
+    clusterfilter = 1;
+    zfilter = 0;
+    
+    
+    %density
+    densitysize_xy=70;
+    densitysize_z=130;
+    densitycutoff=20;
+    zmin=-800;zmax=800;
+    bgmin=65; bgmax=175; %background filter
+    locprec_cutoff=50;
+    locprecz_cutoff=100;
+    phot_cutoff=100;
+    LLrel_cutoff=-1.8;
+    group_dT=0;
+    border=5; %distance from min/max: if fit did converge to border
+end
+
 %% 2D (Not yet finished)
-if 1
+if 0
     dx=7.688; %corrections from bead fit.
     dy=-15.484;
     dz=-0.443+25;
@@ -74,12 +138,12 @@ if 1
     
     %% filter used
     
-    groupfilter = 1;
+    groupfilter = 0;
     LLfilter = 0;
     iterationfilter = 0;
     filterint=0;
     boarderfilter = 0;
-    clusterfilter = 1;
+    clusterfilter = 0;
     zfilter = 0;
     
     
