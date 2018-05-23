@@ -282,11 +282,19 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             switch hin.Style
                 case {'edit','file'} %file:own creation for global settings
                     if isnumeric(v)
-                        if abs(v)>100
+                        if length(v)>1
+                            fs='%g,';
+                        elseif abs(v)>100
                             fs='%6.0f';
                         else
                             fs=3;
                         end
+                            
+%                         if abs(v)>100
+%                             fs='%6.0f';
+%                         else
+%                             fs=3;
+%                         end
                         handle.String=num2str(v,fs);
                     else
                         handle.String=v;

@@ -55,17 +55,19 @@ end
 
 if isfield(locs,'xpix2')
 locdat.xnm2=(locs.xpix2(indin)+roi(1))*pixelsize(1);
-locdat.xnm1=locdat.xnm;
-w1=1./locdat.xpixerr; w2=1./locdat.xpix2err;
+locdat.xnm1=(locs.xpix1(indin)+roi(1))*pixelsize(1);
+% locdat.xnm1=locdat.xnm;
+% w1=1./locdat.xpixerr; w2=1./locdat.xpix2err;
 % locdat.xnm=(locdat.xnm1.*locdat.phot+locdat.xnm2.*locdat.phot2)./(locdat.phot+locdat.phot2);
-locdat.xnm=(locdat.xnm1.*w1+locdat.xnm2.*w2)./(w1+w2);
+% locdat.xnm=(locdat.xnm1.*w1+locdat.xnm2.*w2)./(w1+w2);
 end
 if isfield(locs,'ypix2')
 locdat.ynm2=(locs.ypix2(indin)+roi(2))*pixelsize(end);
-locdat.ynm1=locdat.ynm;
-w1=1./locdat.ypixerr; w2=1./locdat.ypix2err;
+locdat.ynm1=(locs.ypix1(indin)+roi(2))*pixelsize(end);
+% locdat.ynm1=locdat.ynm;
+% w1=1./locdat.ypixerr; w2=1./locdat.ypix2err;
 % locdat.ynm=(locdat.ynm1.*locdat.phot+locdat.ynm2.*locdat.phot2)./(locdat.phot+locdat.phot2);
-locdat.ynm=(locdat.ynm1.*w1+locdat.ynm2.*w2)./(w1+w2);
+% locdat.ynm=(locdat.ynm1.*w1+locdat.ynm2.*w2)./(w1+w2);
 end
 
 
