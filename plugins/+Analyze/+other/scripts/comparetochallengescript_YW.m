@@ -66,7 +66,7 @@ if 0
 end
 
 %% 2D (Not yet finished)
-if 0
+if 1
     dx=7.688; %corrections from bead fit.
     dy=-15.484;
     dz=-0.443+25;
@@ -74,23 +74,23 @@ if 0
     
     %% filter used
     
-    groupfilter = 0;
+    groupfilter = 1;
     LLfilter = 0;
     iterationfilter = 0;
     filterint=0;
     boarderfilter = 0;
-    clusterfilter = 0;
+    clusterfilter = 1;
     zfilter = 0;
     
     
     %density
     densitysize_xy=50;
-    densitysize_z=1000;
-    densitycutoff=5;
+    densitysize_z=100;
+    densitycutoff=3;
     zmin=-800;zmax=800;
     bgmin=-inf; bgmax=inf; %background filter
-    locprec_cutoff=60;
-    locprecz_cutoff=1000;
+    locprec_cutoff=50;
+    locprecz_cutoff=150;
     phot_cutoff=0.1;
     LLrel_cutoff=-4;
     group_dT=0;
@@ -98,7 +98,7 @@ if 0
 end
 
 %% 2D Gauss (Not yet finished)
-if 1
+if 0
     dx=7.688-20.135; %corrections from bead fit.
     dy=-15.484+24.752;
     dz=-0.443+25+57.468;
