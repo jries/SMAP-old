@@ -1,7 +1,23 @@
 classdef MathParser<interfaces.DialogProcessor
+    properties
+        equationhistory
+        historyfile='settings/temp/MathParser.txt';
+    end
     methods
         function obj=MathParser(varargin)      
             obj@interfaces.DialogProcessor(varargin{:}) ;  
+        end
+        function initGui(obj)
+            if exist(obj.historyfile,'file')
+                obj.equationhistory=readtable(obj.historyfile);
+                p=obj.getGuiParameters;
+                p.resultfieldh.String=obj.equationhistory.resultfield;
+                p.equationh.String=obj.equationhistory.equation;
+                obj.setGuiParameters(p);
+            else
+                tt=struct('resultfield',{{''}},'equation',{{''}});
+                obj.equationhistory=struct2table(tt);
+            end
         end
         
         function out=run(obj,p)
@@ -55,6 +71,32 @@ classdef MathParser<interfaces.DialogProcessor
                  obj.locData.filter(p.resultfield)
                  obj.locData.regroup;
                  obj.setPar('locFields',fieldnames(obj.locData.loc))
+               
+                 exe=(contains(obj.equationhistory.equation,p.equation));
+%                  exr=find(obj.equationhistory.resultfield,p.resultfield);
+                 if sum(exe)==0
+                     l=length(obj.equationhistory.equation);
+                     obj.equationhistory.resultfield(2:min(l,9)+1)=obj.equationhistory.resultfield(1:min(l,9));
+                     obj.equationhistory.equation(2:min(l,9)+1)=obj.equationhistory.equation(1:min(l,9));
+                     obj.equationhistory.resultfield{1}=p.resultfield;
+                     obj.equationhistory.equation{1}=p.equation;
+                 else
+                     
+                     obj.equationhistory.resultfield(2:sum(~exe)+1)=obj.equationhistory.resultfield(~exe);
+                     obj.equationhistory.equation(2:sum(~exe)+1)=obj.equationhistory.equation(~exe);
+                     obj.equationhistory.resultfield{1}=p.resultfield;
+                     obj.equationhistory.equation{1}=p.equation;
+                     
+%                      obj.equationhistory.resultfield(exe)=p.resultfield;
+                 end
+                 
+                 writetable(obj.equationhistory,obj.historyfile);
+                 p.resultfieldh.String=obj.equationhistory.resultfield;
+                 p.equationh.String=obj.equationhistory.equation;
+                 p.resultfieldh.Value=1;
+                 p.equationh.Value=1;
+                 obj.setGuiParameters(p);
+                 
              catch
                  disp('could not evaluate equation')
              end
@@ -68,8 +110,18 @@ classdef MathParser<interfaces.DialogProcessor
            x= obj.locData.loc.xnm;
            mean(x)
         end
+        function history_callback(obj,a,b)
+            neval=a.Value;
+            p=obj.getGuiParameters;
+            p.resultfield=p.resultfieldh.String{neval};
+            p.equation=p.equationh.String{neval};
+            obj.setGuiParameters(p);
+        end
     end
 end
+
+
+        
 
 function pard=guidef(obj)
 pard.t1.object=struct('String','result field','Style','text');
@@ -93,6 +145,16 @@ pard.equation.position=[3,2];
 pard.equation.Width=3;
 
 
+pard.resultfieldh.object=struct('String',{{''}},'Style','popupmenu','Callback',@obj.history_callback);
+pard.resultfieldh.position=[4,1];
+pard.resultfieldh.Width=0.8;
+
+
+pard.equationh.object = struct('String',{{''}},'Style','popupmenu','Callback',@obj.history_callback);
+pard.equationh.position=[4,2];
+pard.equationh.Width=3;
+
+
 pard.dataselect.object=struct('Style','popupmenu','String','File');
 pard.dataselect.position=[1,1];
 pard.dataselect.object.TooltipString='choose localization file data set';
@@ -101,7 +163,7 @@ pard.dataselect_all.object=struct('Style','checkbox','String','all');
 pard.dataselect_all.position=[1,2];
 pard.dataselect_all.object.TooltipString='choose localization file data set';
 
-pard.syncParameters={{'filelist_short','dataselect',{'String'}}};
+pard.syncParameters={{'filelist_short','dataselect',{'String'}},{'MathParserHistory','resultfieldh',{'Value'}},{'MathParserHistory','equationh',{'Value'}}};
 
 pard.plugininfo.type='ProcessorPlugin';
 end

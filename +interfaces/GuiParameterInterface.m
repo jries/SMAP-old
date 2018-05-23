@@ -82,6 +82,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
 %                 hh=obj.value2handle(v,handle);
 %                 obj.setfields(field,hh);
 %             end
+        
         end
         function setPar(obj,field,varargin)
             %writes global parameter. If synchronized: update uicontrols

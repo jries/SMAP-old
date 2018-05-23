@@ -686,15 +686,33 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                end
            end 
            
+           pg=obj.getGuiParameters;
            ps=obj.syncParameters;
            for k=1:length(ps)
                hn=ps{k}{2};
+               
+               v=obj.getPar(ps{k}{1});
+               if isfield(pg,ps{k}{2})
+                   ph=pg.(ps{k}{2}); 
+                   
+                   if isstruct(ph)
+                       syncv=ps{k}{3};
+                       for s=1:length(syncv)
+                            ph=copyfields(ph,v,syncv{s});
+                       end
+
+                   end
+               else
+                    ph=v;
+               end
+                 
+                 
                if ishandle(hn)
-                   v=obj.getPar(ps{k}{1});
-                   obj.setGuiParameters({hn,v})                   
+                   
+                   obj.setGuiParameters({hn,ph})                   
                elseif isfield(obj.guihandles,hn)
-                   v=obj.getPar(ps{k}{1});
-                   obj.setGuiParameters(struct(ps{k}{2},v))
+%                    v=obj.getPar(ps{k}{1});
+                   obj.setGuiParameters(struct(ps{k}{2},ph))
                end
            end 
        end
