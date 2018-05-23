@@ -86,7 +86,9 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             end
             
             locfields=fieldnames(obj.loc);
+            if ~isempty(obj.P)
             obj.setPar('locFields',locfields,'String');
+            end
         end
         function addloc(obj,name,value)
             %addloc(field, value) Appends localizations to exisiting field, sets localizations
