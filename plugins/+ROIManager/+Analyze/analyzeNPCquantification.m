@@ -56,10 +56,12 @@ timepoints=getFieldAsVectorInd(se.sites,fields3{:},'timepoints');
 nstart=getFieldAsVectorInd(se.sites,fields3{:},'nstart');
 nend=getFieldAsVectorInd(se.sites,fields3{:},'nend');
 
-fields3gt={'evaluation','NPCLabelingQuantify','timing_gt'};
-timepoints_gt=getFieldAsVectorInd(se.sites,fields3gt{:},'timepoints');
-nstart_gt=getFieldAsVectorInd(se.sites,fields3gt{:},'nstart');
-nend_gt=getFieldAsVectorInd(se.sites,fields3gt{:},'nend');
+
+if isfield(se.sites(1).evaluation.NPCLabelingQuantify,'numcornersfiltered_gt')
+    gtexist=true;
+else
+    gtexist=false;
+end
 
 frames=getFieldAsVectorInd(se.sites,fields{:},'coordinates','frame');
 
@@ -115,9 +117,7 @@ nstart=nstart(indgood,:);
 nend=nend(indgood,:);
 frames=frames(indgood,:);
 
-timepoints_gt=timepoints_gt(indgood,:);
-nstart_gt=nstart_gt(indgood,:);
-nend_gt=nend_gt(indgood,:);
+
 
 ax1=obj.initaxis('from gap');
 ax2=axes(ax1.Parent);
@@ -194,20 +194,36 @@ subplot(1,2,2,ax4);
     ls=evaluatetime(timepoints,nstart,nb,p);
     hold(ax6b,'on')
     le=evaluatetime(timepoints,nend,nb,p);
-    lsgt=evaluatetime(timepoints,nstart_gt,nb,p);
-    legt=evaluatetime(timepoints,nend_gt,nb,p);
-    title(ax6b,num2str([ls le lsgt legt]*100,'%4.0f'));
-    
-    legend('data start',['lin fit: ' num2str(ls(1)*100,'%2.0f')],...
+    if gtexist
+        lsgt=evaluatetime(timepoints,nstart_gt,nb,p);
+        legt=evaluatetime(timepoints,nend_gt,nb,p);
+        title(ax6b,num2str([ls le lsgt legt]*100,'%4.0f'));
+            legend('data start',['lin fit: ' num2str(ls(1)*100,'%2.0f')],...
        ['exp fit: ' num2str(ls(2)*100,'%2.0f')],'data end',...
        ['lin fit: ' num2str(le(1)*100,'%2.0f')],['exp fit: ' num2str(le(2)*100,'%2.0f')],...
        'gt start',['lin fit: ' num2str(lsgt(1)*100,'%2.0f')],['exp fit: ' num2str(lsgt(2)*100,'%2.0f')], ...
        'gt end',['lin fit: ' num2str(legt(1)*100,'%2.0f')],['exp fit: ' num2str(legt(2)*100,'%2.0f')])
     
-if isfield(se.sites(1).evaluation.NPCLabelingQuantify,'numcornersfiltered_gt') %not from simulation
+    else
+        title(ax6b,num2str([ls le]*100,'%4.0f'));
+            legend('data start',['lin fit: ' num2str(ls(1)*100,'%2.0f')],...
+       ['exp fit: ' num2str(ls(2)*100,'%2.0f')],'data end',...
+       ['lin fit: ' num2str(le(1)*100,'%2.0f')],['exp fit: ' num2str(le(2)*100,'%2.0f')])
+    
+    end
+    
+    
+if gtexist %not from simulation
     numcorners=getFieldAsVector(se.sites,fields{:},'numcornersfiltered_gt');
     numcornersa=getFieldAsVector(se.sites,fields{:},'numcornersall_gt');
-       
+    fields3gt={'evaluation','NPCLabelingQuantify','timing_gt'};
+    timepoints_gt=getFieldAsVectorInd(se.sites,fields3gt{:},'timepoints');
+    nstart_gt=getFieldAsVectorInd(se.sites,fields3gt{:},'nstart');
+    nend_gt=getFieldAsVectorInd(se.sites,fields3gt{:},'nend');
+    timepoints_gt=timepoints_gt(indgood,:);
+    nstart_gt=nstart_gt(indgood,:);
+    nend_gt=nend_gt(indgood,:);
+
 ax6=obj.initaxis('ground truth');
     p.ploton=false;
     bs_gtf=bootstrp(20,@fitNPClabeling,numcorners(indgood),p);
