@@ -223,7 +223,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                         if iscell(st)|| (~((st(1)>='0'&&st(1)<='9') || st(1)=='-' || st(1)=='I' || st(1)=='i' || st(1)=='.'))
                             par=hfn.String;
                         else
-                            if contains(st,',') || contains(st,' ')
+                            if contains(st,',') || contains(st,' ') || contains(st,':')
                                 v=str2num(st);
                             else
                                 v=str2double(st);

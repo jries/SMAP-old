@@ -49,7 +49,7 @@ numbercornerassinged=getFieldAsVector(se.sites,fields{:},'numbercornerassigned')
 numbercornerassigneddirect=getFieldAsVector(se.sites,fields{:},'numbercornerassigneddirect');
 filenumber=getFieldAsVector(se.sites,'info','filenumber');
 psf=getFieldAsVector(se.sites,fields2{:},'PSFlayers');
-
+% psf=ones(1,length(psf)); %XXXXX
 
 fields3={'evaluation','NPCLabelingQuantify','timing'};
 timepoints=getFieldAsVectorInd(se.sites,fields3{:},'timepoints');
