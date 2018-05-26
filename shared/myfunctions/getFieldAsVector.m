@@ -3,36 +3,40 @@ function v=getFieldAsVector(p,varargin)
 isarray=false;
 fieldnames=takeapart(varargin);
 for k=length(p):-1:1
-    try
+%     try
     if iscell(p)
-%         if isfield(p{k},varargin{1})
-            vh=p{k}.(fieldnames{1});
-%         end
-%         isarray=true;
+            ph=p{k};
     else
-%         if isfield(p(k),varargin{1})
-            vh=p(k).(fieldnames{1});
-%         end
+            ph=p(k);
     end
-    for f=2:length(fieldnames)
-%         if ~isempty(vh)
+%     ph=struct(ph);
+    if isfield(ph,fieldnames{1}) || isprop(ph,fieldnames{1})
+       vh=ph.(fieldnames{1});
+       for f=2:length(fieldnames)
+           if isempty(vh) || ~(isfield(vh,fieldnames{f}) || isprop(vh,fieldnames{f}))
+               vh=NaN;
+               break 
+           end
             nv=vh.(fieldnames{f});
             vh=nv;
-%         end
+        end     
+    else
+        vh=NaN;
     end
+
     if isarray||(numel(vh)==1 && (isnumeric(vh)||islogical(vh)))
         v(k)=vh;
         isarray=true;
     else
         v{k}=vh;
     end
-    catch err
-    if isarray
-        v(k)=NaN;
-    else
-        v{k}=NaN;
-    end
-    end
+%     catch err
+%     if isarray
+%         v(k)=NaN;
+%     else
+%         v{k}=NaN;
+%     end
+end
 
 end
 
@@ -54,4 +58,5 @@ for k=1:length(fnin)
             ind=ind+1;
         end
     end
+end
 end

@@ -9,11 +9,15 @@ else
     end
 end
 tab=struct2table(s);
+% tab.names=tab.Properties.VariableNames;
 
-
-if flip
-    htable.Data=table2cell(tab)';
-    htable.RowName=tab.Properties.VariableNames;
+if fliph
+    data=table2cell(tab)';
+    data=[tab.Properties.VariableNames' data];
+%     horzcat(tab.Properties.VariableNames, data)
+    htable.Data=data;
+    
+    htable.RowName={};
 else
     htable.Data=table2cell(tab);
     htable.ColumnName=tab.Properties.VariableNames;

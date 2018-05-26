@@ -277,6 +277,7 @@ switch model
         
         if contains(model,'simple')
             locso.frame=double(ceil(rand(length(indout),1)*maxframe));
+%             locso.fluorophore=indout;
         else % 'PAFP'
             frames=locs.frame(1:numlocs);
             for k=numlocs+1:length(indout)
@@ -285,7 +286,7 @@ switch model
                 frames(indout(k))=frames(indout(k))+df;
                 locso.frame(k)=frames(indout(k));
             end
-            locso.fluorophore=indout;
+%             locso.fluorophore=indout;
             
         end
         
@@ -312,7 +313,7 @@ switch model
         for k=1:length(fn)
             locso.(fn{k})=locs.(fn{k})(indout);
         end
-        locso.fluorophore=indout;
+%         locso.fluorophore=indout;
         
         %distribute equal, stretch to maxframes
         [~,sortind]=sort(frame);
@@ -320,6 +321,7 @@ switch model
     otherwise 
         disp('model not implemented')
 end
+locso.fluorophore=indout;
 % end
 end
 

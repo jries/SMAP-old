@@ -39,6 +39,7 @@ end
 % end
 
 function out=runintern(obj,p)
+% p.bootstrap=1;
 se=obj.SE;
 fields={'evaluation','NPCLabelingQuantify'};
 fields2={'evaluation','generalStatistics'};
@@ -55,15 +56,9 @@ fields3={'evaluation','NPCLabelingQuantify','timing'};
 timepoints=getFieldAsVectorInd(se.sites,fields3{:},'timepoints');
 nstart=getFieldAsVectorInd(se.sites,fields3{:},'nstart');
 nend=getFieldAsVectorInd(se.sites,fields3{:},'nend');
-
-
-if isfield(se.sites(1).evaluation.NPCLabelingQuantify,'numcornersfiltered_gt')
-    gtexist=true;
-else
-    gtexist=false;
-end
-
 frames=getFieldAsVectorInd(se.sites,fields{:},'coordinates','frame');
+
+
 
 % numfoundint=numfoundint(use);
 % numfoundrat=numfoundrat(use);
@@ -83,11 +78,7 @@ frames=getFieldAsVectorInd(se.sites,fields{:},'coordinates','frame');
 use=getFieldAsVector(se.sites,'annotation','use');
 filefile=se.sites(find(use,1,'first')).info.filenumber;
 
-ax0=obj.initaxis('Summary');
-axpsf=obj.initaxis('PSF');
-histogram(axpsf,psf);
-title(axpsf,['PSF range: ' num2str(p.PSFrange)])
-xlabel('average PSF (nm)')
+
 if p.psfcheck
 indgood=psf>=p.PSFrange(1)&psf<=p.PSFrange(2);
 else
@@ -104,6 +95,7 @@ end
 
 
 indgood=indgood&use;
+indgood=indgood&~isnan(numbercornerassinged);
 
 nb=0:p.corners;
 
@@ -117,7 +109,32 @@ nstart=nstart(indgood,:);
 nend=nend(indgood,:);
 frames=frames(indgood,:);
 
+if isempty(numbercornerassinged) || length(numbercornerassinged)<=5
+    warndlg('Not sufficient (>5) number of evaluations found. Make sure right evaluator used. Try redraw all.')
+    return
+end
+if isfield(se.sites(1).evaluation.NPCLabelingQuantify,'numcornersfiltered_gt')
+    gtexist=true;
+    numcorners=getFieldAsVector(se.sites,fields{:},'numcornersfiltered_gt');
+    numcornersa=getFieldAsVector(se.sites,fields{:},'numcornersall_gt');
+    fields3gt={'evaluation','NPCLabelingQuantify','timing_gt'};
+    timepoints_gt=getFieldAsVectorInd(se.sites,fields3gt{:},'timepoints');
+    nstart_gt=getFieldAsVectorInd(se.sites,fields3gt{:},'nstart');
+    nend_gt=getFieldAsVectorInd(se.sites,fields3gt{:},'nend');
+    timepoints_gt=timepoints_gt(indgood,:);
+    nstart_gt=nstart_gt(indgood,:);
+    nend_gt=nend_gt(indgood,:);
+else
+    gtexist=false;
+end
 
+ax0=obj.initaxis('Summary');
+if any(psf>0)
+axpsf=obj.initaxis('PSF');
+histogram(axpsf,psf);
+title(axpsf,['PSF range: ' num2str(p.PSFrange)])
+xlabel('average PSF (nm)')
+end
 
 ax1=obj.initaxis('from gap');
 ax2=axes(ax1.Parent);
@@ -130,10 +147,10 @@ hi=hist(numfoundint,nb);
     bar(nb,hi)
     hold on
     pf=fitNPClabeling(hi,p);
-    title(['gap integer: ' num2str(100*pf,'%2.1f') '\pm' num2str(100*berr_numfoundint,'%2.1f')])
+    title(['gap int: ' num2str(100*pf,'%2.1f') '\pm' num2str(100*berr_numfoundint,'%2.1f')])
     axis tight
-    results.gapinteger=pf;   
-    results(2).gapinteger=berr_numfoundint;
+    results.gapint=pf*100;   
+    results(2).gapint=berr_numfoundint*100;
 subplot(1,2,2,ax2);
     p.ploton=false;
     bs_numfoundrat=bootstrp(20,@fitNPClabeling,numfoundrat,p);
@@ -145,10 +162,10 @@ subplot(1,2,2,ax2);
     bar(nb,hr)
     hold on
     pf=fitNPClabeling(hr,p);
-    title(['gap fractional: ' num2str(100*pf,'%2.1f')  '\pm' num2str(100*berr_numfoundrat,'%2.1f')])
+    title(['gap frac: ' num2str(100*pf,'%2.1f')  '\pm' num2str(100*berr_numfoundrat,'%2.1f')])
     axis tight
-    results(1).gapfractional=pf ; 
-    results(2).gapfractional=berr_numfoundrat;
+    results(1).gapf=pf*100 ; 
+    results(2).gapf=berr_numfoundrat*100;
     
  ax3=obj.initaxis('ass.+all');
 
@@ -166,10 +183,10 @@ ax4=axes(ax3.Parent);
     hold on
     p.ploton=true;
     pf=fitNPClabeling(ha,p);
-    title(['assigned direct: ' num2str(100*pf,'%2.1f') '\pm' num2str(100*berr_assigned,'%2.1f')])
+    title(['assigned: ' num2str(100*pf,'%2.1f') '\pm' num2str(100*berr_assigned,'%2.1f')])
    axis tight
-   results(1).assigned=pf; 
-   results(2).assigned=berr_assigned;
+   results(1).assigned=pf*100; 
+   results(2).assigned=berr_assigned*100;
    
 subplot(1,2,2,ax4);
     hall=hi+hr+ha;
@@ -178,7 +195,7 @@ subplot(1,2,2,ax4);
     pf=fitNPClabeling(hall,p);
     title(['all: ' num2str(100*pf,'%2.1f')])
     axis tight 
-    results(1).all=pf; 
+    results(1).all=pf*100; 
 
     
 % analyze time dependence
@@ -189,15 +206,16 @@ subplot(1,2,2,ax4);
     qq=timepoints(1,:)/timepoints(1,end);
     timepoints=myquantile(frames,qq);
     
-    ax6b=obj.initaxis('time');
-    hold(ax6b,'off')
+    axtt=obj.initaxis('time');
+    hold(axtt,'off')
     ls=evaluatetime(timepoints,nstart,nb,p);
-    hold(ax6b,'on')
+    hold(axtt,'on')
     le=evaluatetime(timepoints,nend,nb,p);
+    lbs=['lin:';'exp:'];
     if gtexist
         lsgt=evaluatetime(timepoints,nstart_gt,nb,p);
         legt=evaluatetime(timepoints,nend_gt,nb,p);
-        title(ax6b,num2str([ls le lsgt legt]*100,'%4.0f'));
+        title(axtt,[lbs num2str([ls le lsgt legt]*100,'%4.0f')]);
             legend('data start',['lin fit: ' num2str(ls(1)*100,'%2.0f')],...
        ['exp fit: ' num2str(ls(2)*100,'%2.0f')],'data end',...
        ['lin fit: ' num2str(le(1)*100,'%2.0f')],['exp fit: ' num2str(le(2)*100,'%2.0f')],...
@@ -205,7 +223,7 @@ subplot(1,2,2,ax4);
        'gt end',['lin fit: ' num2str(legt(1)*100,'%2.0f')],['exp fit: ' num2str(legt(2)*100,'%2.0f')])
     
     else
-        title(ax6b,num2str([ls le]*100,'%4.0f'));
+        title(axtt,[lbs num2str([ls le]*100,'%4.0f')]);
             legend('data start',['lin fit: ' num2str(ls(1)*100,'%2.0f')],...
        ['exp fit: ' num2str(ls(2)*100,'%2.0f')],'data end',...
        ['lin fit: ' num2str(le(1)*100,'%2.0f')],['exp fit: ' num2str(le(2)*100,'%2.0f')])
@@ -213,18 +231,9 @@ subplot(1,2,2,ax4);
     end
     
     
-if gtexist %not from simulation
-    numcorners=getFieldAsVector(se.sites,fields{:},'numcornersfiltered_gt');
-    numcornersa=getFieldAsVector(se.sites,fields{:},'numcornersall_gt');
-    fields3gt={'evaluation','NPCLabelingQuantify','timing_gt'};
-    timepoints_gt=getFieldAsVectorInd(se.sites,fields3gt{:},'timepoints');
-    nstart_gt=getFieldAsVectorInd(se.sites,fields3gt{:},'nstart');
-    nend_gt=getFieldAsVectorInd(se.sites,fields3gt{:},'nend');
-    timepoints_gt=timepoints_gt(indgood,:);
-    nstart_gt=nstart_gt(indgood,:);
-    nend_gt=nend_gt(indgood,:);
 
-ax6=obj.initaxis('ground truth');
+if gtexist %not from simulation
+ax6=obj.initaxis('GT filtered');
     p.ploton=false;
     bs_gtf=bootstrp(20,@fitNPClabeling,numcorners(indgood),p);
     berr_gtf=std(bs_gtf);
@@ -235,9 +244,9 @@ ax6=obj.initaxis('ground truth');
     bar(nb,hnc)
     hold on
     pf=fitNPClabeling(hnc,p);
-    results(1).groundtruth=pf;
-    results(2).groundtruth=berr_gtf;
-    title(['true: ' num2str(100*pf,'%2.1f') '\pm' num2str(100*berr_gtf,'%2.1f')])
+    results(1).gtfilt=pf*100;
+    results(2).gtfilt=berr_gtf*100;
+    title(['GT filt: ' num2str(100*pf,'%2.1f') '\pm' num2str(100*berr_gtf,'%2.1f')])
     axis tight
 
     ax6b=obj.initaxis('GT all');
@@ -251,9 +260,9 @@ ax6=obj.initaxis('ground truth');
     bar(nb,hnc)
     hold on
     pf=fitNPClabeling(hnc,p);
-    results(1).groundtruthall=pf; 
-    results(2).groundtruthall=berr_gtfa;
-    title(['true: ' num2str(100*pf,'%2.1f') '\pm' num2str(100*berr_gtfa,'%2.1f')])
+    results(1).gtall=pf*100; 
+    results(2).gtall=berr_gtfa*100;
+    title(['GT all: ' num2str(100*pf,'%2.1f') '\pm' num2str(100*berr_gtfa,'%2.1f')])
     axis tight
     numcorners=numcorners(indgood);
     rd=(0:length(numcorners)-1)/length(numcorners)/2;
@@ -274,13 +283,13 @@ numbercornerassineddm=mean(numbercornerassigneddirect-numcorners);
     
 
 sp=obj.locData.files.file(filefile).info.simulationParameters;
-results(3).gapinteger=sp.labeling_efficiency;
-results(3).gapfractional=sp.blinks;
+results(3).gapint=sp.labeling_efficiency;
+results(3).gapf=sp.blinks;
 results(3).assigned=sp.photons;
 results(3).all=sp.lifetime;
-results(3).groundtruth=sp.background;
+results(3).gtfilt=sp.background;
 
-results(3).groundtruthall=0;
+results(3).gtall=0;
 end
 results(2).all=-1;
 % dat=struct2table(results);
@@ -290,44 +299,55 @@ ht=uitable('Parent',axp);
 struct2uitable(ht, results,'flip')
 % A=cell2mat(ht.Data);
 copytoexcel(results,'flip');
-
+ht.ColumnWidth={50,40,30,40};
+ht.ColumnName={};
+ht.ColumnFormat={}
 out=[];
 
 if p.copy2page
+    sm=3;
+    sn=4;
     f=figure;
     ht2=ht.copy;
     ht2.Parent=f;
-    axtemp= subplot(3,3,[1 2]);
+    axtemp= subplot(sm,sn,[1 2]);
     ht2.Units='normalized';
     ht2.Position=axtemp.Position;
     delete(axtemp)
 %     subplot(2,3,1,axpsf2)
-    axpsf2=axpsf.copy;
-    axpsf2.Parent=f;
-    subplot(3,3,3,axpsf2)
-    axis tight
+    if exist('axpsf','var')
+        axpsf2=axpsf.copy;
+        axpsf2.Parent=f;
+        subplot(sm,sn,3,axpsf2)
+%     axis tight
+    end
     axt=ax1.copy;
     axt.Parent=f;
-    subplot(3,3,4,axt)
+    subplot(sm,sn,4,axt)
     axt=ax2.copy;
     axt.Parent=f;
-    subplot(3,3,5,axt)
+    subplot(sm,sn,8,axt)
         axt=ax3.copy;
     axt.Parent=f;
-    subplot(3,3,6,axt)
-        axt=ax4.copy;
+    subplot(sm,sn,7,axt)
+    
+    axt=axtt.copy;
     axt.Parent=f;
-    subplot(3,3,7,axt)
+    subplot(sm,sn,[5 6 9 10],axt)   
+    
+%         axt=ax4.copy;
+%     axt.Parent=f;
+%     subplot(sm,sn,10,axt)
     
     if exist('ax6','var')
         axt=ax6.copy;
     axt.Parent=f;
-    subplot(3,3,8,axt) 
+    subplot(sm,sn,11,axt) 
     end
     if exist('ax6b','var')
         axt=ax6b.copy;
     axt.Parent=f;
-    subplot(3,3,9,axt) 
+    subplot(sm,sn,12,axt) 
 %      ax7l=legend(axt,t7,'Location','northoutside');
 %     legend(axt,'integer','prob','assigned','Location','northwestoutside');
     end
@@ -339,30 +359,46 @@ end
 function out=evaluatetime(timepoints,n,nb,p)
 p.ploton=false;
 
+nerr=zeros(1,size(n,2));
+pf=zeros(1,size(n,2));
 for k=1:size(n,2)
-    h=hist(n(:,k),nb);
-    if sum(h(2:end))>5 %minium for fitting)
-    pf(k)=fitNPClabeling(h,p);
+%     h=hist(n(:,k),nb);
+    nh=n(:,k);
+    if sum(nh>0)>5 %minium for fitting)
+        pf(k)=fitNPClabeling(nh,p);
+        if p.bootstrap
+            bs_numfoundint=bootstrp(10,@fitNPClabeling,nh,p);
+            nerr(k)=std(bs_numfoundint);
+        end
     else
         pf(k)=0;
     end
 end
 tp=timepoints(1,:);
-plot(tp,pf,'*');
-
-fitrange=pf>.05 &pf<0.95;
+% plot(tp,pf,'*');
+% hold on
+errorbar(tp,pf,nerr,'*')
+% fitrange=pf>.05 &pf<0.95;
+fitrange=pf<0.95;
+% fitrange=true(size(pf));
 fr=fit(tp(fitrange)',pf(fitrange)','poly1');
-
+if p.bootstrap
+    delta=min(nerr(nerr>0))*.1;
+    w=1./(nerr+delta);
+    w=w(fitrange);
+else
+    w=[];
+end
 
 if pf(end)-pf(1) < 0 
     le=fr(0);
     o=tp(end);
     g = fittype( @(a,b,c,x) 1-a-c*exp(-b*(o-x)));
-    fx=fit(tp(fitrange)',pf(fitrange)',g,'StartPoint',[pf(1) 1/tp(end) pf(1)]);
+    fx=fit(tp(fitrange)',pf(fitrange)',g,'StartPoint',[pf(1) 1/tp(end) pf(1)],'Weights',w');
     lex=fx(0);
     
 else
-    fx=fit(tp(fitrange)',pf(fitrange)','1-a-c*exp(-b*x)','StartPoint',[pf(end) 1/tp(end) pf(end)]);
+    fx=fit(tp(fitrange)',pf(fitrange)','1-a-c*exp(-b*x)','StartPoint',[pf(end) 1/tp(end) pf(end)],'Weights',w');
     le=fr(tp(end));
     lex=fx(tp(end));
 end
@@ -383,33 +419,37 @@ pard.corners.position=[1,2];
 pard.corners.Width=0.5;
 
 pard.t2.object=struct('String','Proteins/Corner','Style','text');
-pard.t2.position=[2,1];
+pard.t2.position=[1,3];
 
 pard.rings.object=struct('String','4','Style','edit');
-pard.rings.position=[2,2];
+pard.rings.position=[1,4];
 pard.rings.Width=0.5;
 
 
 pard.psfcheck.object=struct('String','PSF range','Style','checkbox');
-pard.psfcheck.position=[3,1];
+pard.psfcheck.position=[2,1];
 
 pard.PSFrange.object=struct('String','80 150','Style','edit');
-pard.PSFrange.position=[3,2];
+pard.PSFrange.position=[2,2];
 pard.PSFrange.Width=1;
 
 pard.t3.object=struct('String','fit range histogram','Style','text');
-pard.t3.position=[4,1];
+pard.t3.position=[2,3];
 
 pard.fitrange.object=struct('String','3 8','Style','edit');
-pard.fitrange.position=[4,2];
+pard.fitrange.position=[2,4];
 pard.fitrange.Width=1;
 
 pard.filecheck.object=struct('String','filenumbers','Style','checkbox');
-pard.filecheck.position=[5,1];
+pard.filecheck.position=[3,1];
 
 pard.filenumbers.object=struct('String','1:100','Style','edit');
-pard.filenumbers.position=[5,2];
+pard.filenumbers.position=[3,2];
 pard.filenumbers.Width=1;
+
+pard.bootstrap.object=struct('String','Bootstrap error bars for time analysis','Style','checkbox');
+pard.bootstrap.position=[4,1];
+pard.bootstrap.Width=2;
 
 pard.plugininfo.type='ROI_Analyze';
   
