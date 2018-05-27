@@ -148,7 +148,7 @@ if ~isempty(locs.xnm_gt)
     ymgt=locs.ynm_gt-y0gt;
     [thagt,rhoagt]=cart2pol(xmgt,ymgt);
     coordinates_gt=struct('rho',rhoagt,'theta',thagt,'drho',locs.locprecnm*0+5, 'dtheta',locs.locprecnm*0+pi/64,'x',locs.xnm_gt,'y',locs.ynm_gt,'frame',locs.frame);
-    [numbercornerassigned_gt,~,direct_gt,timing_gt]=assigntocornersdirect(coordinates_gt,inr,8,ax3,timepoints,ax3b);
+    [numbercornerassigned_gt,~,direct_gt]=assigntocornersdirect(coordinates_gt,inr,8,ax3,timepoints);
     [numgap_gt, numgapf_gt]=countspacing(coordinates_gt,inr,8,ax4);
 
     locsall=obj.getLocs({'xnm','ynm','xnm_gt','ynm_gt','locprecnm','frame'},'size',p.se_siteroi);
@@ -157,7 +157,7 @@ if ~isempty(locs.xnm_gt)
     [thagta,rhoagta]=cart2pol(xmgta,ymgta);
     inrgt=rhoagta>R-dR&rhoagta<R+dR;
     coordinates_gta=struct('rho',rhoagta,'theta',thagta,'drho',rhoagta*0+5, 'dtheta',rhoagta*0+pi/64,'x',locsall.xnm_gt,'y',locsall.ynm_gt,'frame',locsall.frame);
-    [numbercornerassigned_gta,~,direct_gta]=assigntocornersdirect(coordinates_gta,inrgt,8,[],timepoints);
+    [numbercornerassigned_gta,~,direct_gta,timing_gt]=assigntocornersdirect(coordinates_gta,inrgt,8,[],timepoints,ax3b);
     [numgap_gta, numgapf_gta]=countspacing(coordinates_gta,inrgt,8,ax4);
 %     [th_gt,rho_gt]=cart2pol(locsall.xnm_gt(:)-x0,locsall.ynm_gt(:)-y0);
 %     [th_gtf,rho_gtf]=cart2pol(locs.xnm_gt(inr)-x0,locs.ynm_gt(inr)-y0);

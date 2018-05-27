@@ -259,7 +259,7 @@ pard.t7.object=struct('String','number of frames','Style','text');
 pard.t7.position=[8,3];
 pard.t7.Width=1.5;
 
-pard.maxframes.object=struct('String','3000','Style','edit');
+pard.maxframes.object=struct('String','100000','Style','edit');
 pard.maxframes.Width=.5;
 pard.maxframes.position=[8,4.5];
 

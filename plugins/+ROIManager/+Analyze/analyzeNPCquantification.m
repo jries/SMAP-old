@@ -208,17 +208,24 @@ subplot(1,2,2,ax4);
     
     axtt=obj.initaxis('time');
     hold(axtt,'off')
-    ls=evaluatetime(timepoints,nstart,nb,p);
+    [ls,lts]=evaluatetime(timepoints,nstart,nb,p,'r');
     hold(axtt,'on')
-    le=evaluatetime(timepoints,nend,nb,p);
+    [le,lte]=evaluatetime(timepoints,nend,nb,p,'b');
+    plot(timepoints, lts+lte,'o')
+    
+    
     lbs=['lin:';'exp:'];
     if gtexist
-        lsgt=evaluatetime(timepoints,nstart_gt,nb,p);
-        legt=evaluatetime(timepoints,nend_gt,nb,p);
+        [lsgt,ltsgt]=evaluatetime(timepoints,nstart_gt,nb,p,'m');
+        [legt,ltegt]=evaluatetime(timepoints,nend_gt,nb,p,'g');
+        
+          plot(timepoints, ltsgt+ltegt,'d')
+          
         title(axtt,[lbs num2str([ls le lsgt legt]*100,'%4.0f')]);
             legend('data start',['lin fit: ' num2str(ls(1)*100,'%2.0f')],...
        ['exp fit: ' num2str(ls(2)*100,'%2.0f')],'data end',...
        ['lin fit: ' num2str(le(1)*100,'%2.0f')],['exp fit: ' num2str(le(2)*100,'%2.0f')],...
+       'sum',...
        'gt start',['lin fit: ' num2str(lsgt(1)*100,'%2.0f')],['exp fit: ' num2str(lsgt(2)*100,'%2.0f')], ...
        'gt end',['lin fit: ' num2str(legt(1)*100,'%2.0f')],['exp fit: ' num2str(legt(2)*100,'%2.0f')])
     
@@ -301,7 +308,6 @@ struct2uitable(ht, results,'flip')
 copytoexcel(results,'flip');
 ht.ColumnWidth={50,40,30,40};
 ht.ColumnName={};
-ht.ColumnFormat={}
 out=[];
 
 if p.copy2page
@@ -356,9 +362,13 @@ end
 end
 
 
-function out=evaluatetime(timepoints,n,nb,p)
+function [out,pf]=evaluatetime(timepoints,n,nb,p,col)
+if nargin <5
+    col='k';
+end
+    
 p.ploton=false;
-
+p.fitrange=[1 8];
 nerr=zeros(1,size(n,2));
 pf=zeros(1,size(n,2));
 for k=1:size(n,2)
@@ -377,18 +387,21 @@ end
 tp=timepoints(1,:);
 % plot(tp,pf,'*');
 % hold on
-errorbar(tp,pf,nerr,'*')
+errorbar(tp,pf,nerr,[col '*'])
 % fitrange=pf>.05 &pf<0.95;
 fitrange=pf<0.95;
 % fitrange=true(size(pf));
-fr=fit(tp(fitrange)',pf(fitrange)','poly1');
+
 if p.bootstrap
-    delta=min(nerr(nerr>0))*.1;
+    delta=min(nerr(nerr>0));
     w=1./(nerr+delta);
     w=w(fitrange);
+    w=w/max(w);
 else
     w=[];
 end
+
+fr=fit(tp(fitrange)',pf(fitrange)','poly1','Weights',w');
 
 if pf(end)-pf(1) < 0 
     le=fr(0);
@@ -404,8 +417,8 @@ else
 end
 
 hold on
-plot(tp,fr(tp));
-plot(tp,fx(tp));
+plot(tp,fr(tp),col);
+plot(tp,fx(tp),[col '--']);
 out=[le;lex];
 end
 
