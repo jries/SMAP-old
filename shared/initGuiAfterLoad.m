@@ -3,7 +3,9 @@ if isempty(obj.locData.loc)||isempty(obj.locData.loc.frame)
     return
 end
 if nargin<2
-    resetview=true;
+    loc=obj.locData.getloc({'xnm','ynm'},'layer',find(obj.getPar('sr_layerson')),'Position','fov');
+    resetview=isempty(loc.xnm);
+
 end
 % disp('init gui after load')
 obj.status('grouping');drawnow;
@@ -34,7 +36,10 @@ if resetview
     sr_size=roi(3:4).*info.cam_pixelsize_um*1000/2;
     obj.setPar('sr_pos',sr_pos);
     obj.setPar('sr_size',sr_size);
-
+    pixrec=sr_size./obj.getPar('sr_imagesize')*2;
+    if resetview
+        obj.setPar('sr_pixrec',pixrec(1));
+    end
 % obj.setPar('mainfile',fl{1});
 end
 
@@ -47,7 +52,7 @@ obj.setPar('locFields',locfields,'String');
 obj.setPar('filelist_short',fls,'String');
 obj.status('filter');drawnow;
 obj.locData.filter;
-obj.setPar('currentfileinfo',obj.locData.files.file(1).info)
+obj.setPar('currentfileinfo',obj.locData.files.file(1).info) %triggers format to update stuff. and redraw.
 
 %set logLikelyhood? or in channel?
 %         sf={fn,s{data.Indices(1),2},s{data.Indices(1),6},s{data.Indices(1),7},true,true};
@@ -61,5 +66,8 @@ if ~isempty(strfind(obj.getPar('mainfile'),'_sml'))
    tg.SelectedTab=tg.Children(3);
 end
 
+
+
 obj.status('loading done');drawnow;
 end
+
