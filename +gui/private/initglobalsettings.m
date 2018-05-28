@@ -16,6 +16,7 @@ obj.createGlobalSetting('DataDirectory','Directories','Default data directory:',
 
 obj.createGlobalSetting('MMpath','Directories','The directory of Micro-Manager in which ij.jar is found:',struct('Style','dir','String','MMpath'))   
 obj.createGlobalSetting('fijipath','Directories','The directory of /Fiji/scripts:',struct('Style','dir','String',fijipath))
+obj.createGlobalSetting('bioformatspath','Directories','The directory of bioformats_package.jar :',struct('Style','dir','String','https://www.openmicroscopy.org/bio-formats/downloads/'))
 
 structure=struct('Style','checkbox','String','Ask for Auto Check on','Value',1);
 obj.createGlobalSetting('SE_autosavecheck','ROIManager','Ask for autosave on when starting ROI manager',structure);
