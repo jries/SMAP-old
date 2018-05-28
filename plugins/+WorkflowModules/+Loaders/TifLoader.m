@@ -82,6 +82,9 @@ classdef TifLoader<interfaces.WorkflowModule
         end
         function run(obj,data,p)
             global SMAP_stopnow
+            if SMAP_stopnow
+                disp('STOP button pressed. To localize, unpress')
+            end
             
             if nargin>1&& ~isempty(data)&&~isempty(data.data) %optional input channel
                 file=data.data;
@@ -102,14 +105,14 @@ classdef TifLoader<interfaces.WorkflowModule
             while ~isempty(image)&&imloader.currentImageNumber<=obj.framestop&&~SMAP_stopnow
                 
                 datout=interfaces.WorkflowData;
-                if p.padedges
-                    dr=obj.edgesize;
-                    imgo=zeros(size(image)+2*dr,'like',image);
-                    bg=myquantilefast(image(:),0.2,1000);
-                    imgo=imgo+bg;
-                    imgo(dr+1:end-dr,dr+1:end-dr)=image;
-                    image=imgo;
-                end
+%                 if p.padedges
+%                     dr=obj.edgesize;
+%                     imgo=zeros(size(image)+2*dr,'like',image);
+%                     bg=myquantilefast(image(:),0.2,1000);
+%                     imgo=imgo+bg;
+%                     imgo(dr+1:end-dr,dr+1:end-dr)=image;
+%                     image=imgo;
+%                 end
 
                 if obj.mirrorem
                     image=image(:,end:-1:1);
@@ -195,17 +198,17 @@ classdef TifLoader<interfaces.WorkflowModule
                 fileinf.EMmirror=false;
             end
             obj.mirrorem=fileinf.EMmirror;
-            if p.padedges
-%                 locsettings=obj.getPar('loc_cameraSettings');
-                dr=p.padedgesdr;
-                %dr=ceil((roisize-1)/2);
-                fileinf.roi(1:2)=fileinf.roi(1:2)-dr;
-                fileinf.roi(3:4)=fileinf.roi(3:4)+2*dr;
-%                 fileinf.Width=fileinf.Width+2*dr;
-%                 fileinf.Height=fileinf.Height+2*dr;
-%                 obj.setPar('loc_cameraSettings',locsettings);
-                obj.edgesize=dr;
-            end
+%             if p.padedges
+% %                 locsettings=obj.getPar('loc_cameraSettings');
+%                 dr=p.padedgesdr;
+%                 %dr=ceil((roisize-1)/2);
+%                 fileinf.roi(1:2)=fileinf.roi(1:2)-dr;
+%                 fileinf.roi(3:4)=fileinf.roi(3:4)+2*dr;
+% %                 fileinf.Width=fileinf.Width+2*dr;
+% %                 fileinf.Height=fileinf.Height+2*dr;
+% %                 obj.setPar('loc_cameraSettings',locsettings);
+%                 obj.edgesize=dr;
+%             end
             obj.setPar('loc_fileinfo',fileinf);
             obj.setPar('loc_filename',file);
             
@@ -354,17 +357,17 @@ pard.framestop.position=[4.2,2.5];
 pard.framestop.Width=0.5;
 pard.framestop.Optional=true;
 
-pard.padedges.object=struct('Style','checkbox','String','Pad edges','Value',0,'Callback',@obj.loadedges);
-pard.padedges.position=[4.2,3];
-pard.padedges.Width=1;
-pard.padedges.Optional=true;
-pard.padedges.TooltipString='Pad edges with minimum values to allow detection of localizations close to edges. Usually not necessary.';
-
-pard.padedgesdr.object=struct('Style','edit','String','9','Callback',@obj.loadedges);
-pard.padedgesdr.position=[4.2,3.9];
-pard.padedgesdr.Width=.3;
-pard.padedgesdr.Optional=true;
-pard.padedgesdr.TooltipString='Pad edges with minimum values to allow detection of localizations close to edges. Usually not necessary.';
+% pard.padedges.object=struct('Style','checkbox','String','Pad edges','Value',0,'Callback',@obj.loadedges,'Visible','off');
+% pard.padedges.position=[4.2,3];
+% pard.padedges.Width=1;
+% pard.padedges.Optional=true;
+% pard.padedges.TooltipString='Pad edges with minimum values to allow detection of localizations close to edges. Usually not necessary.';
+% 
+% pard.padedgesdr.object=struct('Style','edit','String','9','Callback',@obj.loadedges,'Visible','off');
+% pard.padedgesdr.position=[4.2,3.9];
+% pard.padedgesdr.Width=.3;
+% pard.padedgesdr.Optional=true;
+% pard.padedgesdr.TooltipString='Pad edges with minimum values to allow detection of localizations close to edges. Usually not necessary.';
 
 pard.mirrorem.object=struct('Style','checkbox','String','EM mirror','Value',1,'Callback',{{@mirrorem_callback,obj}});
 pard.mirrorem.position=[4.2,4.2];

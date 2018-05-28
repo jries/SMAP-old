@@ -509,8 +509,11 @@ switch p.render_colormode.selection
 end
 % obj.setPar([obj.layerprefix 'colorfield_min'],num2str(cmin),'String')
 % obj.setPar([obj.layerprefix 'colorfield_max'],num2str(cmax),'String')
+if obj.getSingleGuiParameter('colorauto')
 obj.guihandles.colorfield_min.String=num2str(cmin);
 obj.guihandles.colorfield_max.String=num2str(cmax);
+end
+
 obj.updateLayerField('render_colormode');
 obj.updateLayerField('colorfield_min');
 obj.updateLayerField('colorfield_max');
@@ -525,15 +528,15 @@ end
 p=obj.getSingleGuiParameter('renderfield');
 field=p.selection;
 v=obj.locData.getloc(field,'layer',obj.layer).(field);
-if ~isempty(v)
+if ~isempty(v) && obj.getSingleGuiParameter('colorauto')
 obj.locData.loc.colorfield=single(obj.locData.loc.(field));
 obj.locData.grouploc.colorfield=single(obj.locData.grouploc.(field));
-q=myquantilefast(v,[0.01,0.99]);
+q=myquantilefast(v,[0.02,0.98]);
 dx=10^floor(log10(abs(q(2))/100));
 minv=round(q(1)/dx)*dx;
 maxv=round(q(2)/dx)*dx;            
-obj.colorrange.mincall(p.Value)=minv;
-obj.colorrange.maxcall(p.Value)=maxv;
+obj.colorrange.mincall(p.Value)=minv-dx;
+obj.colorrange.maxcall(p.Value)=maxv+dx;
 obj.guihandles.colorfield_min.String=num2str(minv);
 obj.guihandles.colorfield_max.String=num2str(maxv);
 % render_colormode_callback(object,0,obj)      
@@ -852,6 +855,8 @@ pard.renderfield.position=[4,p3];
 pard.renderfield.Width=w3;
 pard.renderfield.TooltipString='field to color code';
 
+
+
 pard.luttxt.object=struct('Style','text','String','LUT:');
 pard.luttxt.position=[5,p1];
 pard.luttxt.Width=w1;  
@@ -884,15 +889,21 @@ pard.colorfieldb.Optional=true;
 
 pard.colorfield_min.object=struct('Style','edit','String','0');
 pard.colorfield_min.position=[6,1.6];
-pard.colorfield_min.Width=.6;
+pard.colorfield_min.Width=.5;
 pard.colorfield_min.TooltipString=pard.colorfieldb.TooltipString;
 pard.colorfield_min.Optional=true;
 
 pard.colorfield_max.object=struct('Style','edit','String','1');
-pard.colorfield_max.position=[6,2.2];
-pard.colorfield_max.Width=.6;
+pard.colorfield_max.position=[6,2.1];
+pard.colorfield_max.Width=.5;
 pard.colorfield_max.TooltipString=pard.colorfieldb.TooltipString;
 pard.colorfield_max.Optional=true;
+
+pard.colorauto.object=struct('Style','checkbox','String','auto','Value',1);            
+pard.colorauto.position=[6,2.6];
+pard.colorauto.Width=0.6;
+pard.colorauto.TooltipString='automatically set color range';
+pard.colorauto.Optional=true;
 
 pard.imaxb.object=struct('Style','pushbutton','String','contrast');
 pard.imaxb.position=[7,1];
@@ -902,13 +913,13 @@ pard.imaxb.TooltipString=sprintf('Contrast');
 
 pard.imaxtoggle.object=struct('Style','togglebutton','String','quantile','Value',1);
 pard.imaxtoggle.position=[7,1.6];
-pard.imaxtoggle.Width=.6;
+pard.imaxtoggle.Width=.5;
 pard.imaxtoggle.TooltipString='toggle absolute intensity maximum (Imax) or quantile';
 pard.imaxtoggle.Optional=true;
 
 pard.imax_min.object=struct('Style','edit','String','-3.5');
-pard.imax_min.position=[7,2.2];
-pard.imax_min.Width=.6;
+pard.imax_min.position=[7,2.1];
+pard.imax_min.Width=.5;
 pard.imax_min.TooltipString=sprintf('absolut intensity or \n quantile of the pixels that are not saturated (0<q<1, typically 0.999) or  \n v for q=1-10^(v), v<0, typically -3.5');
 
 pard.imax_max.object=struct('Style','edit','String','-3.5','Visible','off');

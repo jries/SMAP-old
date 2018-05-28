@@ -83,8 +83,11 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                 end
                 obj.loc.(name)=real(v);
                 obj.regroup;    
-                locfields=fieldnames(obj.loc);
-                obj.setPar('locFields',locfields,'String');
+            end
+            
+            locfields=fieldnames(obj.loc);
+            if ~isempty(obj.P)
+            obj.setPar('locFields',locfields,'String');
             end
         end
         function addloc(obj,name,value)
@@ -331,12 +334,15 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             
         end
         
-        function saveloc=savelocs(obj,filename,goodind,additionalsave,grouping)
+        function saveloc=savelocs(obj,filename,goodind,additionalsave,grouping,excludesavefields,filenumber)
             %saves localization data to specific filename.  Returns saved structure:
             %saveloc=savelocs(filename,goodind)
             %goodind (optional): indices which to save (applies to all
             %fields). Default: save all localizations.
             %grouping: if true, saves grouped data.
+            %excludesavefields: those fields not to save
+            %filenumber: only save specific filenumber
+            
             if nargin<5||isempty(grouping)
                 grouping=false;
             end
@@ -350,7 +356,22 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             saveloc.history=obj.history;
             
             fieldsremove={'original_channel','groupindex','numberInGroup','colorfield'};
+            if nargin>5 && ~isempty(fieldsremove)
+                fieldsremove=union(fieldsremove,excludesavefields);
+            end
             saveloc.loc=myrmfield(saveloc.loc,fieldsremove);
+            
+            if nargin>6 && ~isempty(filenumber)%filenumber
+                    saveloc.file=saveloc.file(filenumber);
+                    saveloc.history=saveloc.history(filenumber);
+                    saveloc.loc.filenumber=ones(size(locData.loc.filenumber));
+                    if isempty(goodind)
+                        goodind=obj.loc.filenumber==filenumber;
+                    else
+                        goodind=goodind&obj.loc.filenumber==filenumber;
+                    end       
+            end
+            
             if nargin>2&&~isempty(goodind)
                 fields=fieldnames(saveloc.loc);
                 for k=1:length(fields)
@@ -364,13 +385,38 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                 saveloc.siteexplorer=obj.SE.save;
             end
             saveloc=concentratefilelist(saveloc);
+            try
+                rg=obj.getPar('mainGui');
+                parameters=rg.saveParameters;
+            catch err
+                err
+                parameters=[];
+            end
+            fileformat.name='sml';
+            out=struct('saveloc',saveloc,'fileformat',fileformat,'parameters',parameters);
+            if isfield(obj.files.file(1),'transformation')
+                for k=length(obj.files.file):-1:1
+                    if ~isempty(obj.files.file(k).transformation)
+                        out.transformation=obj.files.file(k).transformation;
+                        break
+                    end
+                end
+            end
+            
             if nargin>1&&~isempty(filename)
-                if isempty(strfind(filename,'_sml.mat'))
+                if ~contains(filename,'_sml.mat')
                     [path,file]=fileparts(filename);
                     filename=[path filesep file '_sml.mat'];
                 end
-                out=struct('saveloc',saveloc);
-                saverightversion(filename,out);
+
+                if obj.getGlobalSetting('saveas73') %now I use this to save with the old saver: large files are saved as v7.3, not as small parts.
+                    v=saverightversion(filename,out,'-v7');
+                    disp(['saved as version ' v])
+                else
+                    savematparts(filename,out,{'saveloc','loc'});
+                end
+%                 out=struct('saveloc',saveloc);
+%                 saverightversion(filename,out);
 %                 save(filename,'saveloc','-v7.3')
             end
         end

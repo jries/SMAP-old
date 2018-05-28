@@ -25,13 +25,13 @@ classdef ImageNormalize_noBG<interfaces.WorkflowModule
                 imnorm=poissonNormalize(image);
                 dato=data;%{1}.copy;
                 dato.data=imnorm;%set(imnorm);
-                if obj.preview
-                    if data.frame==obj.getPar('loc_previewframe')
-                        drawimage(obj,imnorm,image,0)
-                    else
-                        dato=[];
-                    end
-                end
+%                 if obj.preview
+%                     if data.frame==obj.getPar('loc_previewframe')
+%                         drawimage(obj,imnorm,image,0)
+%                     else
+%                         dato=[];
+%                     end
+%                 end
 
             else 
                 dato=data;
@@ -43,38 +43,38 @@ classdef ImageNormalize_noBG<interfaces.WorkflowModule
 end
 
 
-
-function drawimage(obj,imnorm,img,bg)
-outputfig=obj.getPar('loc_outputfig');
-if ~isvalid(outputfig)
-    outputfig=figure(209);
-    obj.setPar('loc_outputfig',outputfig);
-end
-
-outputfig.Visible='on';
-draw=true;
-switch obj.getPar('loc_previewmode').Value
-    case 1 %image-bg
-        imd=img-bg;
-    case 2%image
-        imd=img;
-%     case 3 %norm
-%         imd=imnorm;
-    case 4 %bg
-        imd=bg;
-    otherwise 
-        draw=false;
-end
-        
-if draw
-figure(outputfig)
-hold off
-imagesc(imd);
-colormap jet
-colorbar;
-axis equal
-end
-end
+% 
+% function drawimage(obj,imnorm,img,bg)
+% outputfig=obj.getPar('loc_outputfig');
+% if ~isvalid(outputfig)
+%     outputfig=figure(209);
+%     obj.setPar('loc_outputfig',outputfig);
+% end
+% 
+% outputfig.Visible='on';
+% draw=true;
+% switch obj.getPar('loc_previewmode').Value
+%     case 1 %image-bg
+%         imd=img-bg;
+%     case 2%image
+%         imd=img;
+% %     case 3 %norm
+% %         imd=imnorm;
+%     case 4 %bg
+%         imd=bg;
+%     otherwise 
+%         draw=false;
+% end
+%         
+% if draw
+% figure(outputfig)
+% hold off
+% imagesc(imd);
+% colormap jet
+% colorbar;
+% axis equal
+% end
+% end
 
 function out=poissonNormalize(in)
 % out=real(2*sqrt(in+3/8));

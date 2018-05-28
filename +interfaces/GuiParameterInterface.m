@@ -82,6 +82,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
 %                 hh=obj.value2handle(v,handle);
 %                 obj.setfields(field,hh);
 %             end
+        
         end
         function setPar(obj,field,varargin)
             %writes global parameter. If synchronized: update uicontrols
@@ -222,10 +223,16 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                         if iscell(st)|| (~((st(1)>='0'&&st(1)<='9') || st(1)=='-' || st(1)=='I' || st(1)=='i' || st(1)=='.'))
                             par=hfn.String;
                         else
-                            v=str2double(st);
-                            if isnan(v)
-                                v=str2num(st); 
+                            if contains(st,',') || contains(st,' ') || contains(st,':') || contains(st,';')
+                                v=str2num(st);
+                            else
+                                v=str2double(st);
+%                                 if isnan(v)
+%                                     st
+%                                     v=str2num(st); 
+%                                 end
                             end
+  
                             if isempty(v)
                                  par=hfn.String;
                             else     
@@ -281,12 +288,18 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             switch hin.Style
                 case {'edit','file'} %file:own creation for global settings
                     if isnumeric(v)
-                        if abs(v)>100
+                        if length(v)>1
+                            fs='%g,';
+                        elseif abs(v)>100
                             fs='%6.0f';
                         else
                             fs=3;
                         end
-                        handle.String=num2str(v,fs);
+                        strg=num2str(v,fs);
+                        if length(v)>1
+                            strg(end)=[];
+                        end
+                        handle.String=strg;
                     else
                         handle.String=v;
                     end

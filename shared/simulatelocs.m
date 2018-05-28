@@ -1,7 +1,7 @@
 function [locsout,possites]=simulatelocs(p, colour)
            [poslabels,possites]=getlabels(p, colour);
-%            p.maxframe=100000;
-           posreappear=reappear(poslabels,p.blinks,p.maxframes);
+           
+           posreappear=getblinks(poslabels,p.model.selection,p.blinks,p.maxframes);
            
 %            p.lifetime=2;
            photonsperframe=p.photons/p.lifetime;
@@ -65,6 +65,12 @@ photons=timeonall*photonsperframe;
 photonsr=poissrnd(photons);
 locso.phot=photonsr;
 locso.frame=[locs.frame; frame];
+%remove double locs in one frame coming from same fluorophore
+A=horzcat(locso.fluorophore, locso.frame);
+[~,ia,ic]=unique(A,'rows');
+ind=false(length(ia),1);
+ind(ia)=true;
+locso=copystructReduce(locso,ind);
 
 end
 
@@ -237,30 +243,85 @@ indin=rand(numl,1)<=p;
 locs=copystructReduce(locin,indin);
 end
 
-function locso=reappear(locs,numblinks,maxframe)
+function locso=getblinks(locs,model,numblinks,maxframe)
+lo=0;
+ln=0;
 for k=length(locs):-1:1
-    locso(k)=reappeari(locs(k),numblinks,maxframe);
+    locso(k)=getblinksi(locs(k),model,numblinks,maxframe);
+    lo=lo+length(locs(k).x);
+    ln=ln+length(locso(k).x);
 end
+
+ disp(['occurance per fluorophore: ' num2str(ln/lo)])
 end
 
 
-function locso=reappeari(locs,numblinks,maxframe)
+function locso=getblinksi(locs,model,numblinks,maxframe)
 fn=fieldnames(locs);
 numlocs=length(locs.(fn{1}));
-numn=round(exprnd(numblinks,numlocs,1));
-indextra=zeros(sum(numn),1);
-idx=1;
-for k=1:length(numn)
-    indextra(idx:idx+numn(k)-1)=k;
-    idx=idx+numn(k);
-end
-indout=[(1:numlocs)'; indextra];
-for k=1:length(fn)
-    locso.(fn{k})=locs.(fn{k})(indout);
-end
+switch model
+    case {'simple','PAFP'}
+        locs.frame=double(ceil(rand(numlocs,1)*maxframe));
+        fn=fieldnames(locs);
+        numn=round(exprnd(numblinks,numlocs,1));
+        indextra=zeros(sum(numn),1);
+        idx=1;
+        for k=1:length(numn)
+            indextra(idx:idx+numn(k)-1)=k;
+            idx=idx+numn(k);
+        end
+        indout=[(1:numlocs)'; indextra];
+        for k=1:length(fn)
+            locso.(fn{k})=locs.(fn{k})(indout);
+        end
+        
+        if contains(model,'simple')
+            locso.frame=double(ceil(rand(length(indout),1)*maxframe));
+%             locso.fluorophore=indout;
+        else % 'PAFP'
+            frames=locs.frame(1:numlocs);
+            for k=numlocs+1:length(indout)
+                timescale=10;
+                df=ceil(exprnd(timescale));
+                frames(indout(k))=frames(indout(k))+df;
+                locso.frame(k)=frames(indout(k));
+            end
+%             locso.fluorophore=indout;
+            
+        end
+        
+    case 'Dye'
+        timescale=maxframe/numblinks/2;
+        frame=(exprnd(timescale,numlocs,1));
+        on=true(size(frame));
+        onind=find(on);
+        indout=(1:numlocs)';
+        pbl=1/(numblinks+1);
+        framenow=frame;
+        numon=sum(on);
+        while numon>length(on)/1000 %.1% left
+            %bleach
+            indbl=rand(numon,1)<pbl;
+            on(onind(indbl))=false;
+            onind=find(on);
+            numon=sum(on);
+            indout=[indout;onind];
+            framenow(on)=framenow(on)+(exprnd(timescale,numon,1));
+            frame=[frame; framenow(on)];   
 
-% if nargin>2
-locso.frame=double(ceil(rand(length(indout),1)*maxframe));
+        end
+        for k=1:length(fn)
+            locso.(fn{k})=locs.(fn{k})(indout);
+        end
+%         locso.fluorophore=indout;
+        
+        %distribute equal, stretch to maxframes
+        [~,sortind]=sort(frame);
+        locso.frame=round(sortind/length(sortind)*maxframe);   
+    otherwise 
+        disp('model not implemented')
+end
+locso.fluorophore=indout;
 % end
 end
 

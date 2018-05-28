@@ -37,7 +37,9 @@ classdef RoiAdder<interfaces.WorkflowModule
             else
                 obj.maskrun=obj.mask; 
             end
+            if p.excluderim
             obj.setrim;
+            end
  
         end
         function resetmask(obj,a,b)
@@ -151,6 +153,10 @@ pard.clearroi.TooltipString=sprintf('Clear all ROIs');
 pard.roistyle.object=struct('Style','popupmenu','String','rectangle|ellipse');
 pard.roistyle.position=[4,1];
 pard.roistyle.TooltipString=sprintf('Use rectangular or elliptical ROI.');
+
+pard.excluderim.object=struct('Style','checkbox','String','exclude rim','Value',1);
+pard.excluderim.position=[5,1];
+pard.excluderim.TooltipString=sprintf('Use only localizations sufficiently far rom edge of FoV.');
 % pard.mask_store.object=struct('Style','text','String','');
 pard.plugininfo.type='WorkflowModule'; 
 pard.plugininfo.description='Allows the user to select regions of interest on the preview image which to use for fitting, or which to exclude from fitting.';

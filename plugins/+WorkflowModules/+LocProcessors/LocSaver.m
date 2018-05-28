@@ -65,6 +65,7 @@ classdef LocSaver<interfaces.WorkflowModule
 %             obj.frames=struct('image',[],'frame',[]);
             obj.frames=[];
             obj.locDatatemp=interfaces.LocalizationData;
+            obj.locDatatemp.attachPar(obj.P);
             obj.locDatatemp.addfile;
             obj.filenumber=1;
              obj.locDatatemp.files.file=locsaveFileinfo(obj);  
@@ -166,6 +167,7 @@ classdef LocSaver<interfaces.WorkflowModule
                 fitpar.fittime=toc(obj.timer);
                 fitpar.loadtifftime=obj.getPar('tiffloader_loadingtime');
                 fitpar.processfittime=obj.getPar('tiffloader_fittime');
+                fitpar.loc_globaltransform=obj.getPar('loc_globaltransform');
                 try
                 disp([num2str(length(obj.locDatatemp.loc.xnm)) ' localizations in ' num2str(fitpar.fittime) ' seconds.']);
                 catch err
@@ -174,6 +176,10 @@ classdef LocSaver<interfaces.WorkflowModule
                 nosave=intersect(fieldnames(obj.locDatatemp.loc),obj.savefields.notsave);
                 obj.locDatatemp.loc=rmfield(obj.locDatatemp.loc,nosave);
                 obj.locDatatemp.files.file.raw=obj.frames;
+                transformation=obj.getPar('loc_globaltransform');
+                if ~isempty(transformation)
+                    obj.locDatatemp.files.file.transformation=transformation;
+                end
                 try
                      obj.locDatatemp.savelocs(filename,[],struct('fitparameters',fitpar));
                 catch err

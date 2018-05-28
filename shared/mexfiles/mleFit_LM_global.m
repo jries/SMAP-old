@@ -38,8 +38,8 @@ P=[];CRLB=[];LogL=[]; %
 
 %determine of it runs on GPU, otherwise use CPU as default
 persistent fitter
-allfitters={@GPUmleFit_LM_MultiChannel,@CPUmleFit_LM_MultiChannel};
-allfittersnames={'GPUmleFit_LM_MultiChannel','CPUmleFit_LM_MultiChannel'};
+allfitters={@GPUmleFit_LM_MultiChannel_noRestrict,@CPUmleFit_LM_MultiChannel};
+allfittersnames={'GPUmleFit_LM_MultiChannel_noRestrict','CPUmleFit_LM_MultiChannel'};
 if isempty(fitter)
     for k=1:length(allfitters)
         try
@@ -59,13 +59,13 @@ end
 splinecoeff=single(varargin{4});
 coeffsize=size(splinecoeff);
 
+% if nargin<7||isempty(varargin{7})
+%     varmap=0; %emccd
+% end 
 if nargin<7||isempty(varargin{7})
-    varmap=0; %emccd
-end 
-if nargin<8||isempty(varargin{8})
     zstart=single(coeffsize(3)/2); %emccd
 else
-    zstart=single(coeffsize(3)/2+varargin{8});
+    zstart=single(coeffsize(3)/2+varargin{7});
 end
 
 if nargin<6 || isempty(varargin{6})

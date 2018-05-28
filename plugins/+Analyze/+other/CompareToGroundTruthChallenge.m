@@ -16,7 +16,14 @@ classdef CompareToGroundTruthChallenge<interfaces.DialogProcessor
             if ~exist(path,'dir')
                 path='settings';
             end
-            filenew=fullfile(path,['F_' file '_temp.csv']);
+            
+            % fit time
+            fn=obj.locData.files.file.name;
+            l=load(fn);
+            fitt=l.saveloc.fitparameters.processfittime;
+%             disp(['fit time without loading: ' num2str(fitt,3) ' s']);
+
+            filenew=fullfile(path,['F_' file '_T' num2str(fitt,'%3.0f') '_temp.csv']);
             
             lochere=obj.locData.copy;
             if p.shiftpix
@@ -124,8 +131,8 @@ gt = unique(gtAll,'rows');
 cam_pixelsize_nm=obj.getPar('cam_pixelsize_nm');
 p=obj.getGuiParameters;
 if p.shiftpix
-shiftx=-0.5*cam_pixelsize_nm;
-shifty=-0.5*cam_pixelsize_nm;
+shiftx=-0.5*cam_pixelsize_nm(1);
+shifty=-0.5*cam_pixelsize_nm(end);
 else
     shiftx=0;
     shifty=0;

@@ -78,13 +78,10 @@ function out=runintern(obj,p)
 R=p.R;
 dR=p.dR;
 
-locs=obj.getLocs({'xnm','ynm','xnm_gt','ynm_gt','locprecnm'},'layer',1,'size',p.se_siteroi(1)/2);
+locs=obj.getLocs({'xnm','ynm','xnm_gt','ynm_gt','locprecnm','frame'},'layer',1,'size',p.se_siteroi(1)/2);
 [x0,y0]=fitposring(locs.xnm,locs.ynm,R);
 xm=locs.xnm-x0;
 ym=locs.ynm-y0;
-
-
-
 
 step=2*pi/8;
 [tha,rhoa]=cart2pol(xm,ym);
@@ -94,21 +91,36 @@ inr=rhoa>R-dR&rhoa<R+dR;
 
 inr=inr&locs.locprecnm<minlp;
 % th=tha(inr);rho=rhoa(inr);
-out.coordinates=struct('rho',rhoa,'theta',tha,'drho',locs.locprecnm, 'dtheta',locs.locprecnm./rhoa,'x',locs.xnm,'y',locs.ynm);
+out.coordinates=struct('rho',rhoa,'theta',tha,'drho',locs.locprecnm, 'dtheta',locs.locprecnm./rhoa,'x',locs.xnm,'y',locs.ynm,'frame',locs.frame);
 
 
 if obj.display
-   ax1= obj.setoutput('assigned');
-   ax2= obj.setoutput('spacing');
+   axdat=obj.setoutput('Data');
+   tabdat=uitabgroup(axdat.Parent);
+   ax1=axes(uitab(tabdat,'Title','assigned'));
+   ax1b=axes(uitab(tabdat,'Title','a_t'));
+   ax2=axes(uitab(tabdat,'Title','spacing'));
+%    ax1= obj.setoutput('assigned');
+%    ax1b= obj.setoutput('a_t');
+%    ax2= obj.setoutput('spacing');
    if ~isempty(locs.xnm_gt)
-   ax3= obj.setoutput('gt_assigned');
-   ax4= obj.setoutput('gt_spacing');
+        axgt=obj.setoutput('Ground_truth');
+       tabdat=uitabgroup(axgt.Parent);
+       ax3=axes(uitab(tabdat,'Title','assigned'));
+       ax3b=axes(uitab(tabdat,'Title','a_t'));
+       ax4=axes(uitab(tabdat,'Title','spacing'));
+      
    end
 else
-    ax1=[];ax2=[]; ax3=[];ax4=[];
+    ax1=[];ax2=[]; ax3=[];ax4=[]; ax3b=[]; ax1b=[];
 end
-   
-[numbercornerassigned,mdt,assigneddirect]=assigntocorners(out.coordinates,inr,8,ax1);
+  
+locsall=obj.locData.getloc({'frame','filenumber'},'layer',1,'removefilter','filenumber','position','all');
+
+maxf=max(locsall.frame(locsall.filenumber==obj.site.info.filenumber));
+numpoints=10;
+timepoints=linspace(0,maxf,numpoints+1);
+[numbercornerassigned,mdt,assigneddirect,timing]=assigntocornersdirect(out.coordinates,inr,8,ax1,timepoints,ax1b);
 [numfound, numfound2]=countspacing(out.coordinates,inr,8,ax2);
 
 
@@ -127,6 +139,7 @@ out.numfoundint=numfound;
 out.numfoundrat=numfound2;
 out.numbercornerassigned=numbercornerassigned;
 out.numbercornerassigneddirect=assigneddirect;
+out.timing=timing;
 out.rotation=(mdt);
 
 if ~isempty(locs.xnm_gt)
@@ -134,17 +147,17 @@ if ~isempty(locs.xnm_gt)
     xmgt=locs.xnm_gt-x0gt;
     ymgt=locs.ynm_gt-y0gt;
     [thagt,rhoagt]=cart2pol(xmgt,ymgt);
-    coordinates_gt=struct('rho',rhoagt,'theta',thagt,'drho',locs.locprecnm*0+5, 'dtheta',locs.locprecnm*0+pi/64,'x',locs.xnm_gt,'y',locs.ynm_gt);
-    [numbercornerassigned_gt,~,direct_gt]=assigntocorners(coordinates_gt,inr,8,ax3,0.1);
+    coordinates_gt=struct('rho',rhoagt,'theta',thagt,'drho',locs.locprecnm*0+5, 'dtheta',locs.locprecnm*0+pi/64,'x',locs.xnm_gt,'y',locs.ynm_gt,'frame',locs.frame);
+    [numbercornerassigned_gt,~,direct_gt]=assigntocornersdirect(coordinates_gt,inr,8,ax3,timepoints);
     [numgap_gt, numgapf_gt]=countspacing(coordinates_gt,inr,8,ax4);
 
-    locsall=obj.getLocs({'xnm','ynm','xnm_gt','ynm_gt','locprecnm'},'size',p.se_siteroi);
+    locsall=obj.getLocs({'xnm','ynm','xnm_gt','ynm_gt','locprecnm','frame'},'size',p.se_siteroi);
     xmgta=locsall.xnm_gt-x0gt;
     ymgta=locsall.ynm_gt-y0gt;
     [thagta,rhoagta]=cart2pol(xmgta,ymgta);
     inrgt=rhoagta>R-dR&rhoagta<R+dR;
-    coordinates_gta=struct('rho',rhoagta,'theta',thagta,'drho',rhoagta*0+5, 'dtheta',rhoagta*0+pi/64,'x',locsall.xnm_gt,'y',locsall.ynm_gt);
-    [numbercornerassigned_gta,~,direct_gta]=assigntocorners(coordinates_gta,inrgt,8,ax3,0.1);
+    coordinates_gta=struct('rho',rhoagta,'theta',thagta,'drho',rhoagta*0+5, 'dtheta',rhoagta*0+pi/64,'x',locsall.xnm_gt,'y',locsall.ynm_gt,'frame',locsall.frame);
+    [numbercornerassigned_gta,~,direct_gta,timing_gt]=assigntocornersdirect(coordinates_gta,inrgt,8,[],timepoints,ax3b);
     [numgap_gta, numgapf_gta]=countspacing(coordinates_gta,inrgt,8,ax4);
 %     [th_gt,rho_gt]=cart2pol(locsall.xnm_gt(:)-x0,locsall.ynm_gt(:)-y0);
 %     [th_gtf,rho_gtf]=cart2pol(locs.xnm_gt(inr)-x0,locs.ynm_gt(inr)-y0);
@@ -157,6 +170,7 @@ if ~isempty(locs.xnm_gt)
 
     out.numcornersfiltered_gt=direct_gt;
     out.numcornersall_gt=direct_gta;
+    out.timing_gt=timing_gt;
 
     strt_gt=[', gt filtered (m/d): ' num2str(mean([numgap_gt, numbercornerassigned_gt],'omitnan')) ', ' num2str(direct_gt)];
     strt_gt=[strt_gt ', gt all (m/d): ' num2str(mean([numgap_gta, numbercornerassigned_gta],'omitnan')) ', ' num2str(direct_gta)];
@@ -284,6 +298,65 @@ title(ax,tstr)
 end
 end
 
+
+function [numbercornerassigned,mdt,direct,timing]=assigntocornersdirect(locs,inr,corners,ax,timepoints,axtp)
+% if nargin <5 || isempty(co)
+%     co=0.5;
+% end
+%assign to corneres
+% find rotation
+step=2*pi/corners;
+% locptheta=locs.drho(inr)./locs.rho(inr);
+
+mdt=cyclicaverage(locs.theta(inr),step,1./locs.dtheta(inr).^2);
+if mdt>pi/16
+    mdt=mdt-step;
+end
+frameh=locs.frame(inr);
+throt=locs.theta(inr)-mdt; %rotate with respect to template.
+throt=mod(throt-step/2,2*pi);
+cornerposd=0:step:2*pi;
+cornerposdf=0:step/8:2*pi;
+h=histcounts(throt,cornerposd);
+hf=histcounts(throt,cornerposdf);
+direct=sum(h>=1);
+
+
+numbercornerassigned=direct;
+if nargin>3 &&~isempty(ax)
+     hold(ax,'off')
+    bar(ax,(cornerposd(1:end-1)+step/2)/step,h)
+     hold(ax,'on')
+     bar(ax,(cornerposdf(1:end-1)+step/2/8)/step,hf)
+%      histogram(ax,throt/step,64)
+% bar(ax,numberincorners);
+xlabel(ax,'number of locs per corner assigned');
+tstr={['assigned direct: ' int2str(direct)]};
+title(ax,tstr)
+end
+
+
+%temporal dependence
+if nargin>4 && ~isempty(timepoints)
+    nstart=zeros(length(timepoints),1);
+    nend=zeros(length(timepoints),1);
+    for k=1:length(timepoints)
+        indin=frameh<timepoints(k);
+        nstart(k)=sum(histcounts(throt(indin),cornerposd)>=1);
+        nend(k)=sum(histcounts(throt(~indin),cornerposd)>=1);
+    end
+    if nargin>5 &&~isempty(axtp)
+        plot(axtp,timepoints,nstart,'-*',timepoints,nend,'-o')
+    end
+    timing.timepoints=timepoints;
+    timing.nstart=nstart;
+    timing.nend=nend;
+else
+    timing=[];
+end
+
+end
+
 function [numfound, numfound2]=countspacing(locs,inr,corners,ax)
 step=2*pi/corners;
 th=locs.theta(inr);
@@ -311,5 +384,7 @@ if nargin>3 && ~isempty(ax)
    xlabel(ax,'length of gap (in units of 2pi/8)');
     tstr={[ 'from gaps: ' int2str(numfound) ', fractional: ' num2str(numfound2,3) ]};
  title(ax,tstr)
+%  hold(ax,'on')
+ 
 end
 end

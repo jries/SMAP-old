@@ -124,7 +124,12 @@ if layersnext
      end
 end
 
+if isfield(p,'addscalebar') && ~ p.addscalebar
+     lennm=0;
+else
     [imfinal,lennm]=addscalebar(imfinal,p.sr_pixrec(1));
+   
+end
     
 
     

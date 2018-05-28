@@ -5,14 +5,15 @@ classdef calibrater3D_so<interfaces.DialogProcessor
     methods
         function obj=calibrater3D_so(varargin)   
             obj@interfaces.DialogProcessor(varargin{:}) ;
-            obj.run;
+            
             
 %              obj.showresults=true;
 %              obj.guiPar.FieldHeight=obj.guiPar.FieldHeight-1;obj.guiPar.Vrim=obj.guiPar.Vrim-20;
         end
         
         function initGui(obj)
-            close(obj.handle)
+            obj.run;
+%             close(obj.handle)
         end
         function out=run(obj,p)
             
@@ -147,30 +148,30 @@ end
 
 function pard=guidef(obj)
 
-pard.dzt.object=struct('String','dz (nm)','Style','text');
-pard.dzt.position=[1,1];
-pard.dz.object=struct('String','10','Style','edit');
-pard.dz.position=[1,2];
-pard.global.object=struct('String',{{'single channel', 'global','4pi'}},'Style','popupmenu');
-pard.global.position=[1,3];
-pard.global.Width=2;
-
-pard.setrange.object=struct('Style','checkbox','String','set range (empty = auto)');
-pard.setrange.position=[2,1];
-pard.setrange.Width=1.5;
-
-pard.xrange.object=struct('String','','Style','edit');
-pard.xrange.position=[2,3];
-pard.yrange.object=struct('String','','Style','edit');
-pard.yrange.position=[2,4];
-
-pard.setframerange.object=struct('Style','checkbox','String','set frame range ');
-pard.setframerange.position=[3,1];
-pard.setframerange.Width=1.5;
-
-
-pard.framerangeuse.object=struct('String','','Style','edit');
-pard.framerangeuse.position=[3,3];
+% pard.dzt.object=struct('String','dz (nm)','Style','text');
+% pard.dzt.position=[1,1];
+% pard.dz.object=struct('String','10','Style','edit');
+% pard.dz.position=[1,2];
+% pard.global.object=struct('String',{{'single channel', 'global','4pi'}},'Style','popupmenu');
+% pard.global.position=[1,3];
+% pard.global.Width=2;
+% 
+% pard.setrange.object=struct('Style','checkbox','String','set range (empty = auto)');
+% pard.setrange.position=[2,1];
+% pard.setrange.Width=1.5;
+% 
+% pard.xrange.object=struct('String','','Style','edit');
+% pard.xrange.position=[2,3];
+% pard.yrange.object=struct('String','','Style','edit');
+% pard.yrange.position=[2,4];
+% 
+% pard.setframerange.object=struct('Style','checkbox','String','set frame range ');
+% pard.setframerange.position=[3,1];
+% pard.setframerange.Width=1.5;
+% 
+% 
+% pard.framerangeuse.object=struct('String','','Style','edit');
+% pard.framerangeuse.position=[3,3];
 
 pard.inputParameters={'cam_pixelsize_um'};
 pard.plugininfo.type='ProcessorPlugin';

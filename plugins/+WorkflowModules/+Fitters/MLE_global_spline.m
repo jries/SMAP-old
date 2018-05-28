@@ -221,6 +221,7 @@ off{3}=-fitpar.z0*fitpar.dz*fitpar.refractive_index_mismatch;
 faccrlb{3}=fitpar.dz*fitpar.refractive_index_mismatch;
 
 names={'ypix','xpix','znm','phot','bg'};
+namesav={'ypix','xpix','znm'};
 linked=fitpar.link;
 ind=1;
 for k=1:length(names)
@@ -229,20 +230,34 @@ for k=1:length(names)
         locs.([names{k} 'err'])=sqrt(CRLB(:,ind)).*faccrlb{k};
         ind=ind+1;
     else
+        v=zeros(numl,numchannels,'single');
+        ve=zeros(numl,numchannels,'single');
         for c=1:numchannels
-            if c==1
-                ch='';
-            else
+%             if c==1
+%                 ch='';
+%             else
                 ch=num2str(c);
-            end
+%             end
             locs.([names{k} ch])=P(:,ind).*fac{k}+off{k};
             locs.([names{k} ch 'err'])=sqrt(CRLB(:,ind)).*faccrlb{k};
+            v(:,c)=locs.([names{k} ch]);
+            ve(:,c)=locs.([names{k} ch 'err']);
             ind=ind+1;
+        end
+        if any(contains(namesav,names{k}))
+            switch fitpar.mainchannel
+                case 1
+                    locs.(names{k})=sum(v./ve,2)./sum(1./ve,2);
+                case 2
+                    locs.(names{k})=v(:,1);
+                case 3
+                    locs.(names{k})=v(:,2);
+            end
         end
     end
 end
 locs.iterations=P(:,end);
-locs.locpthompson=sqrt((locs.PSFxpix.*locs.PSFypix+1/12*v1)./( locs.phot/EMexcess)+8*pi*(locs.PSFxpix.*locs.PSFypix).^2.* locs.bg./( locs.phot/EMexcess).^2);
+% locs.locpthompson=sqrt((locs.PSFxpix.*locs.PSFypix+1/12*v1)./( locs.phot/EMexcess)+8*pi*(locs.PSFxpix.*locs.PSFypix).^2.* locs.bg./( locs.phot/EMexcess).^2);
 end
 
 function out=fitwrapper_global(imstack,fitpar,stackinfo,varstack)
@@ -438,6 +453,7 @@ fitpar.iterations=p.iterations;
 fitpar.fitmode=p.fitmode.Value;
 fitpar.roisperfit=p.roisperfit;
 fitpar.issCMOS=false;
+fitpar.mainchannel=p.mainchannel.Value;
 for k=1:size(p.globaltable.Data,1)
     fitpar.factor{k}=str2num(p.globaltable.Data{k,2});
 end
@@ -703,6 +719,18 @@ pard.isglobal.object=struct('Style','checkbox','String','Global fit','Callback',
 pard.isglobal.position=[3,3.5];
 pard.isglobal.Width=.75;
 pard.isglobal.Optional=true;
+
+
+pard.mainchannelt.object=struct('Style','text','String','main x,y:');
+pard.mainchannelt.position=[4,3.5];
+pard.mainchannelt.Width=.75;
+pard.mainchannelt.Optional=true;
+
+pard.mainchannel.object=struct('Style','popupmenu','String',{{'mean','ch1','ch2'}});
+pard.mainchannel.position=[5,3.5];
+pard.mainchannel.Width=.75;
+pard.mainchannel.Optional=true;
+
 
 pard.globaltable.object=struct('Style','listbox','String','x');
 pard.globaltable.position=[6.5,4.25];

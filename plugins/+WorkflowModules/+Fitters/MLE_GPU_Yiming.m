@@ -206,8 +206,8 @@ switch fitpar.fitmode
         
         %         locs.znm=(P(:,5)*1000+fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
         locs.znm=((P(:,5)-fitpar.z0)*fitpar.dz)*fitpar.refractive_index_mismatch;
-        notconverged=P(:,5)<2|P(:,5)>fitpar.coeffsize(3)-2;
-        locs.znm(notconverged)=NaN;
+%         notconverged=P(:,5)<2|P(:,5)>fitpar.coeffsize(3)-2;
+%         locs.znm(notconverged)=NaN;
         
         locs.zerr=sqrt(CRLB(:,5))*fitpar.dz*fitpar.refractive_index_mismatch;
 %         [locs.PSFxpix,locs.PSFypix]=zpar2sigma(locs.znm/1000,fitpar.zparhere);
