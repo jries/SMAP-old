@@ -79,6 +79,11 @@ R=p.R;
 dR=p.dR;
 
 locs=obj.getLocs({'xnm','ynm','xnm_gt','ynm_gt','locprecnm','frame'},'layer',1,'size',p.se_siteroi(1)/2);
+if isempty(locs.xnm)
+    out=[];
+    return
+end
+
 [x0,y0]=fitposring(locs.xnm,locs.ynm,R);
 xm=locs.xnm-x0;
 ym=locs.ynm-y0;
