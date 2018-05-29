@@ -367,6 +367,10 @@ step=2*pi/corners;
 th=locs.theta(inr);
 locptheta=locs.dtheta(inr);
 %number of locs from spacing
+if isempty(locptheta)
+    numfound=0;numfound2=0;
+    return
+end
 
 [ths,inds]=sort(th);
 ths(end+1)=ths(1)+2*pi;
