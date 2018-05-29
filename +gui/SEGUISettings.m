@@ -142,6 +142,7 @@ pard.se_drawsideview.position=[8,3];
 
 pard.redrawall.object=struct('Style','pushbutton','String','redraw all','Value',0);
 pard.redrawall.position=[10.5,4];
+pard.redrawall.TooltipString='redraw all sites (inclusive files and cells) or selected sites if more than one site seltected';
 
 pard.clearall.object=struct('Style','pushbutton','String','clear all','Value',0);
 pard.clearall.position=[4,4];

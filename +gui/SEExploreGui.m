@@ -115,10 +115,19 @@ classdef SEExploreGui<interfaces.SEProcessor
             if SMAP_stopnow
                 disp('STOP button is activated. Function not executed')
             end
-            if nargin<2
+            if nargin<2|| isempty(onlysites)
                 onlysites=false;
             end
+            
+            sites=obj.SE.sites;
+            
             indselected=obj.getSingleGuiParameter('sitelist').Value;
+            if length(indselected)>1 %selected sites
+                onlysites=true; %only redraw sites
+                disp('redrawing only selected sites')
+            else
+                         indselected=1:length(sites);
+            end
             se_keeptempimages=obj.getPar('se_keeptempimages');
             if ~onlysites
                 files=obj.SE.files;
@@ -153,13 +162,13 @@ classdef SEExploreGui<interfaces.SEProcessor
                 end
                 obj.SE.currentcell=cells(k);
             end
-        sites=obj.SE.sites;
         
-        if length(indselected)>1 %only redraw selected
-            disp('redrawing only selected sites')
-        else
-            indselected=1:length(sites);
-        end
+        
+%         if length(indselected)>1 %only redraw selected
+%             disp('redrawing only selected sites')
+%         else
+%             indselected=1:length(sites);
+%         end
         for k=indselected
             
             obj.guihandles.sitelist.Value=k;   

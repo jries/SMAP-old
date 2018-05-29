@@ -202,6 +202,7 @@ pard.preview.position=[11,1];
 
 pard.redrawall.object=struct('Style','pushbutton','String','redraw all','Callback',@obj.redrawall);
 pard.redrawall.position=[10,1.5];
+pard.redrawall.TooltipString='redraw all sites (inclusive files and cells) or selected sites if more than one site seltected';
 
 pard.evaluateon.object=struct('Style','checkbox','String','evaluate on','Value',1);
 pard.evaluateon.position=[7,1];
