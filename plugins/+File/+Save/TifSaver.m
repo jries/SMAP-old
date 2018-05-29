@@ -22,17 +22,18 @@ classdef TifSaver<interfaces.DialogProcessor
             [f,path]=uiputfile(serchstr,'select output file for image', of);
             if f
                 img=obj.getPar('sr_image');
-                res=ones(2,1)/p.sr_pixrec*2.5e7;  
+                res=ones(2,1)/p.sr_pixrec*2.5e7/1e6;%rescale to macroscopic values, otherwise size in PPT is zero  
                 p.scalebarnm=img.scalebarnm;
                 txt=filterpar(obj,p);
                 description=sprintf(txt);
                 [~,~,ext]=fileparts(f);
-                switch ext
-                    case '.tif'
-                        imwrite(img.image,[path f],'Description',description,'Resolution',res);
-                    case '.png'
-                        imwrite(img.image,[path f],'Description',description,'XResolution',res(1),'YResolution',res(2),'ResolutionUnit','inch');
-                end
+%                 switch ext
+%                     case '.tif'
+                        imwrite(img.image,[path f],'Description',description);
+%                     case '.png'
+%                          imwrite(img.image,[path f],'Description',description,'XResolution',res(1),'YResolution',res(2),'ResolutionUnit','inch');
+%                         imwrite(img.image,[path f],'Description',description,'XResolution',res(1),'YResolution',res(2),'ResolutionUnit','inch');
+%                 end
             end
             obj.status('save done')
           
