@@ -27,7 +27,7 @@ classdef imageloaderMM<interfaces.imageloaderSMAP
             image=readstack(obj,frame);
         end
         
-        function close(obj)
+        function closei(obj)
             obj.reader.close
 %             clear(obj.reader)
         end

@@ -29,7 +29,7 @@ classdef imageloaderTifSimple<interfaces.imageloaderSMAP
            
         end
         
-        function close(obj)
+        function closei(obj)
 %             obj.reader.close
 %             clear(obj.reader)
         end

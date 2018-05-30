@@ -3,6 +3,9 @@ function io=imageloaderAll(varargin)
 % metadata.
 %file, metadata, P
 file=varargin{1};
+if iscell(file) %multiple channales
+    file=file{1};
+end
    [path,~,ext]=fileparts(file);
 %    info=imfinfo(file);Tiff
    switch ext

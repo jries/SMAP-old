@@ -47,29 +47,60 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
                 for k=length(obj.multiloader):-1:1
                     image{k}=obj.multiloader{k}.getimagei(frame);
                 end
+                image=combineimages(image);
             else
                 image=obj.getimagei(frame);
             end
         end
         function image=readNext(obj)
-            obj.currentImageNumber=obj.currentImageNumber+1;
-            image=obj.getimageonline(obj.currentImageNumber);
+           obj.currentImageNumber=obj.currentImageNumber+1;
+           if obj.ismultichannel
+                for k=length(obj.multiloader):-1:1
+                    image{k}=obj.multiloader{k}.getimageonline(obj.currentImageNumber);
+                end
+                image=combineimages(image);
+           else
+                image=obj.getimageonline(obj.currentImageNumber);
+           end
         end
         
         function image=getimageonline(obj,number)
-            image=obj.getimage(number);
-            if isempty(image)&&obj.onlineAnalysis 
-                    disp('wait')
-                    pause(obj.waittime*2)
-                    image=obj.getimage(number);
-            end
-       
+            
+           if obj.ismultichannel
+                for k=length(obj.multiloader):-1:1
+                    image{k}=obj.getimage(number);
+                    if isempty(image{k})&&obj.onlineAnalysis 
+                            disp('wait')
+                            pause(obj.waittime*2)
+                            image{k}=obj.getimage(number);
+                    end                       
+                end
+                image=combineimages(image);
+           else
+                image=obj.getimage(number);
+                if isempty(image)&&obj.onlineAnalysis 
+                        disp('wait')
+                        pause(obj.waittime*2)
+                        image=obj.getimage(number);
+                end
+           end
         end
         
         function setImageNumber(obj,number)
             obj.currentImageNumber=number;
         end
-        function images=getmanyimages(obj,numbers,format)
+        function images=getmanyimages(obj,varargin)
+            if obj.ismultichannel
+                for k=length(obj.multiloader):-1:1
+                    images{k}=obj.multiloader{k}.getmanyimagesi(varargin{:});
+                end
+                images=combineimages(images);
+            else
+                images=obj.getmanyimagesi(varargin{:});
+            end
+                
+        end
+        function images=getmanyimagesi(obj,numbers,format)
             loadfun=@obj.getimageonline;
             if nargin<3
                 format='cell';
@@ -119,9 +150,7 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
                 if ~isempty(ind)
                     val=obj.allmetadatatags{ind,2};
                 end
-                
             end
-          
         end
         
         function metao=getmetadata(obj)
@@ -135,8 +164,6 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
             catch err
                 camfile=obj.calibrationFile;
                 display('could not find camera file in global settings. Using default file.')
-%               ererwe
-              
             end
             try
                 usedef=obj.getPar('useDefaultCam');
@@ -169,12 +196,22 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
                     obj.multiloader{k}= obj.newimageloader(file{k});
                 end
                 obj.metadata=obj.multiloader{1}.metadata; %copy metadata and infor from first
+                obj.file=file;
             else
                 obj.openi(file)
             end
             
         end
         function close(obj)
+            if obj.ismultichannel
+                for k=1:length(obj.multiloader)
+                    obj.multiloader{k}.closei;
+                end
+            else
+                obj.closei;
+            end
+        end
+        function closei(obj)
             display(['close not implemented in ' class(obj)])
         end
         function allmd=getmetadatatags(obj)
@@ -203,3 +240,25 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
     
 end
 
+
+function imout=combineimages(imin) %later with switch? now put side-by-side
+samesize=true;
+for k=length(imin):-1:1
+    s(k,:)=size(imin{k});
+    samesize=samesize & all(s(k,:)==s(end,:));
+end
+
+if samesize %all same size
+    sall=s(1,:);
+    sall(2)=sum(s(:,2));
+    imout=zeros(sall,'like',imin{1});
+    ind=0;
+    for k=1:length(imin)
+        imout(:,ind+1:ind+s(k,2),:,:)=imin{k};
+        ind=ind+s(k,2);
+    end
+else
+    disp('channels of different sizes not yet implemented im imageloaderSMAP')
+end
+%     imout=imin;
+end

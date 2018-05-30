@@ -27,7 +27,11 @@ classdef TifLoader<interfaces.WorkflowModule
             obj.guihandles.loaderclass.String=obj.loaders(:,1);
         end
         function prerun(obj,p)
-            if ~exist(p.tiffile,'file')
+            tf=p.tiffile;
+            if iscell(tf)
+                tf=tf{1};
+            end
+            if ~exist(tf,'file')
                 obj.status('TifLoader: localization file not found')
                  error('TifLoader: localization file not found')
             end
@@ -180,6 +184,9 @@ classdef TifLoader<interfaces.WorkflowModule
             obj.setPar('loc_fileinfo',fileinf);
             obj.setPar('loc_filename',file);
             
+            if iscell(obj.imloader.file)
+                obj.guihandles.tiffile.Max=100;
+            end
             obj.guihandles.tiffile.String=obj.imloader.file;
 
              p=obj.getAllParameters;
@@ -215,10 +222,26 @@ end
 
 function loadtif_callback(a,b,obj)
 p=obj.getGuiParameters;
-fe=bfGetFileExtensions;
-[f,path]=uigetfile(fe,'select camera images',[fileparts(p.tiffile) filesep '*.tif']);
-if f
-    obj.addFile([path f]);
+
+if p.ismultifile %later: check filename (e.g. _q1 _q2 etc). Also make sure quadrants are not mixed /rearranged
+    if iscell(p.tiffile)
+        p.tiffile=p.tiffile{1};
+    end
+    sf=selectManyFiles(fileparts(p.tiffile));
+    sf.guihandles.filelist.String=(obj.guihandles.tiffile.String);
+    waitfor(sf.handle);
+    f=sf.filelist;
+else
+    fe=bfGetFileExtensions;
+    [f,path]=uigetfile(fe,'select camera images',[fileparts(p.tiffile) filesep '*.tif']);
+    if f
+        f=[path f];
+    else 
+        f=[];
+    end
+end
+if ~isempty(f)
+    obj.addFile(f);
 end  
 %set output filename
 outfile=[obj.getPar('loc_fileinfo').basefile];
@@ -280,47 +303,55 @@ pard.text.position=[1,1];
 pard.text.Width=1.5;
 pard.text.Optional=true;
 
+pard.tiffile.object=struct('Style','edit','String',' ','HorizontalAlignment','right');
+pard.tiffile.position=[2,1];
+pard.tiffile.Width=4;
+
 pard.loadtifbutton.object=struct('Style','pushbutton','String','load images','Visible','on');
 pard.loadtifbutton.position=[3,1];
 pard.loadtifbutton.TooltipString=sprintf('Open raw camera image tif files. \n Either single images in directory. \n Or multi-image Tiff stacks');
 
-pard.tiffile.object=struct('Style','edit','String',' ','HorizontalAlignment','right');
-pard.tiffile.position=[2,1];
-pard.tiffile.Width=3;
+
 
 pard.loaderclass.object=struct('Style','popupmenu','String','auto','Callback',{{@changeloader,obj}});
-pard.loaderclass.position=[2,4];
+pard.loaderclass.position=[3,4];
 pard.loaderclass.Width=1;
 pard.loaderclass.Optional=true;
 
+pard.ismultifile.object=struct('Style','checkbox','String','channels in different files','Value',0);
+pard.ismultifile.position=[3,2];
+pard.ismultifile.Width=2;
+pard.ismultifile.Optional=true;
+
+
 pard.onlineanalysis.object=struct('Style','checkbox','String','Online analysis. Waittime (s):','Value',0);
-pard.onlineanalysis.position=[3,2];
+pard.onlineanalysis.position=[4,2];
 pard.onlineanalysis.Width=1.75;
 pard.onlineanalysis.TooltipString='Fit during acquisition. If checked, max frames is ignored. Waits until no more images are written to file.';
 pard.onlineanalysis.Optional=true;
 pard.onlineanalysiswaittime.object=struct('Style','edit','String','5');
-pard.onlineanalysiswaittime.position=[3,3.75];
+pard.onlineanalysiswaittime.position=[4,3.75];
 pard.onlineanalysiswaittime.Width=0.5;
 pard.onlineanalysiswaittime.TooltipString='Waiting time for online analysis.';
 pard.onlineanalysiswaittime.Optional=true;
 
 pard.parallelload.object=struct('Style','checkbox','String','parallel','Value',0);
-pard.parallelload.position=[3,4.25];
+pard.parallelload.position=[4,4.25];
 pard.parallelload.Width=0.75;
 pard.parallelload.TooltipString='Parallel load and process. Makes sense only for very slow loading process.';
 pard.parallelload.Optional=true;
 
 
 pard.textf.object=struct('Style','text','String','Frame range');
-pard.textf.position=[4.2,1.25];
+pard.textf.position=[5.2,1.25];
 pard.textf.Width=0.75;
 pard.textf.Optional=true;
 pard.framestart.object=struct('Style','edit','String','1');
-pard.framestart.position=[4.2,2];
+pard.framestart.position=[5.2,2];
 pard.framestart.Width=0.5;
 pard.framestart.Optional=true;
 pard.framestop.object=struct('Style','edit','String','1000000');
-pard.framestop.position=[4.2,2.5];
+pard.framestop.position=[5.2,2.5];
 pard.framestop.Width=0.5;
 pard.framestop.Optional=true;
 
@@ -337,7 +368,7 @@ pard.framestop.Optional=true;
 % pard.padedgesdr.TooltipString='Pad edges with minimum values to allow detection of localizations close to edges. Usually not necessary.';
 
 pard.mirrorem.object=struct('Style','checkbox','String','EM mirror','Value',1,'Callback',{{@mirrorem_callback,obj}});
-pard.mirrorem.position=[4.2,4.2];
+pard.mirrorem.position=[5.2,5.2];
 pard.mirrorem.TooltipString=sprintf('calibrate gain and offset from images');
 pard.mirrorem.Optional=true;
 pard.mirrorem.Width=0.8;

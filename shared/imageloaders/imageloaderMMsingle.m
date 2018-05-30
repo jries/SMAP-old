@@ -38,7 +38,7 @@ classdef imageloaderMMsingle<interfaces.imageloaderSMAP
         function image=getimagei(obj,frame)
             image=readseparate(obj,frame);
         end
-        function close(obj)
+        function closei(obj)
             %not needed, as single files are read
         end
         function file= getbasefile(obj)

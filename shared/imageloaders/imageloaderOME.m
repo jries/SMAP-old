@@ -19,7 +19,7 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
             md=obj.getmetadata;
             
         end
-        function close(obj)
+        function closei(obj)
             obj.reader.close;
         end
 %         function mdo=getmetadata(obj)
