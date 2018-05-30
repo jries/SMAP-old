@@ -65,20 +65,13 @@ classdef TifLoader<interfaces.WorkflowModule
                 frameload=max(1,previewframe-floor(dt/2));
                 obj.framestart=frameload;
                 obj.imloader.setImageNumber(frameload-1);
-%                 obj.imloader.currentImageNumber=frameload-1;
                 obj.framestop=frameload+dt-1;
                 else
                     obj.imloader.setImageNumber(previewframe-1);
-%                     obj.imloader.currentImageNumber=previewframe-1;
                     obj.framestop=previewframe;
                 end               
             end
-           
-            
-            obj.timerfitstart=tic;   
-            
-            
-            
+            obj.timerfitstart=tic;     
         end
         function run(obj,data,p)
             global SMAP_stopnow
@@ -102,17 +95,8 @@ classdef TifLoader<interfaces.WorkflowModule
             if p.parallelload
                 parp=gcp;
             end
-            while ~isempty(image)&&imloader.currentImageNumber<=obj.framestop&&~SMAP_stopnow
-                
+            while ~isempty(image)&&imloader.currentImageNumber<=obj.framestop&&~SMAP_stopnow                
                 datout=interfaces.WorkflowData;
-%                 if p.padedges
-%                     dr=obj.edgesize;
-%                     imgo=zeros(size(image)+2*dr,'like',image);
-%                     bg=myquantilefast(image(:),0.2,1000);
-%                     imgo=imgo+bg;
-%                     imgo(dr+1:end-dr,dr+1:end-dr)=image;
-%                     image=imgo;
-%                 end
 
                 if obj.mirrorem
                     image=image(:,end:-1:1);
@@ -163,32 +147,26 @@ classdef TifLoader<interfaces.WorkflowModule
             obj.output(dateof)
             if ~obj.getPar('loc_preview') %if real fitting: close
                 obj.imloader.close;
-%                 obj.imloader=[];
                 disp('close imloader')
             end
             disp('fitting done')
         end
         function addFile(obj,file)
-%         if 1
-%         else
             try
                 obj.imloader.close;
             catch err
-%                 err
+                
             end
              lc=obj.getSingleGuiParameter('loaderclass');
             loader=obj.loaders{lc.Value,2};
             obj.imloader=loader(file,obj.getPar('loc_fileinfo'),obj.P);
             
-%             obj.imloader=imageloaderAll(file,obj.getPar('loc_fileinfo'),obj.P);
-%             if ~isempty(obj.imloader.info.metafile)
             if ~isempty(obj.imloader.metadata.allmetadata)&&isfield(obj.imloader.metadata.allmetadata,'metafile')
              obj.setPar('loc_metadatafile',obj.imloader.metadata.allmetadata.metafile);
             end
             allmd=obj.imloader.metadata;
             warnmissingmeta(allmd);
-%             end
-% obj.imloader.metadata
+
             p=obj.getGuiParameters;
             fileinf=obj.imloader.metadata;
             if fileinf.EMon && p.mirrorem  %if em gain on and mirrorem on: switch roi
@@ -198,22 +176,12 @@ classdef TifLoader<interfaces.WorkflowModule
                 fileinf.EMmirror=false;
             end
             obj.mirrorem=fileinf.EMmirror;
-%             if p.padedges
-% %                 locsettings=obj.getPar('loc_cameraSettings');
-%                 dr=p.padedgesdr;
-%                 %dr=ceil((roisize-1)/2);
-%                 fileinf.roi(1:2)=fileinf.roi(1:2)-dr;
-%                 fileinf.roi(3:4)=fileinf.roi(3:4)+2*dr;
-% %                 fileinf.Width=fileinf.Width+2*dr;
-% %                 fileinf.Height=fileinf.Height+2*dr;
-% %                 obj.setPar('loc_cameraSettings',locsettings);
-%                 obj.edgesize=dr;
-%             end
+
             obj.setPar('loc_fileinfo',fileinf);
             obj.setPar('loc_filename',file);
             
             obj.guihandles.tiffile.String=obj.imloader.file;
-%              obj.setPar('loc_newfile',true);
+
              p=obj.getAllParameters;
              if p.onlineanalysis
                  obj.guihandles.framestop.String='inf';
@@ -224,8 +192,7 @@ classdef TifLoader<interfaces.WorkflowModule
                 end
                 obj.guihandles.framestop.String=int2str(numf);
              end
-%         end
-% 
+
         end
         function loadtif_ext(obj)
             p=obj.getAllParameters;
