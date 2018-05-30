@@ -10,7 +10,7 @@ classdef imageloaderMM<interfaces.imageloaderSMAP
         function obj=imageloaderMM(varargin)
             obj@interfaces.imageloaderSMAP(varargin{:});
         end
-        function open(obj,file)
+        function openi(obj,file)
             initMM(obj);
             try
                 obj.reader.close;
@@ -23,7 +23,7 @@ classdef imageloaderMM<interfaces.imageloaderSMAP
             obj.metadata.basefile=[p ];
             
         end
-        function image=getimage(obj,frame)
+        function image=getimagei(obj,frame)
             image=readstack(obj,frame);
         end
         
@@ -44,7 +44,7 @@ classdef imageloaderMM<interfaces.imageloaderSMAP
             end
         end
         
-        function allmd=getmetadatatags(obj)
+        function allmd=getmetadatatagsi(obj)
             img=obj.reader;
             imgmetadata=img.getImageTags(0,0,0,0);
             summarymetadata=img.getSummaryMetadata;

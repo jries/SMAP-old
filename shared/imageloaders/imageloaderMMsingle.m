@@ -12,7 +12,7 @@ classdef imageloaderMMsingle<interfaces.imageloaderSMAP
         function obj=imageloaderMMsingle(varargin)
             obj@interfaces.imageloaderSMAP(varargin{:});
         end
-        function open(obj,file)
+        function openi(obj,file)
             obj.file=file;
             info=getimageinfo(file);
             obj.getmetadata;
@@ -31,11 +31,11 @@ classdef imageloaderMMsingle<interfaces.imageloaderSMAP
 %             
 %             
 %         end
-        function allmd=getmetadatatags(obj)
+        function allmd=getmetadatatagsi(obj)
 %             metafile=[fileparts(obj.file) filesep 'metadata.txt'];
             allmd=getmetadataMMnew(obj.file);
         end
-        function image=getimage(obj,frame)
+        function image=getimagei(obj,frame)
             image=readseparate(obj,frame);
         end
         function close(obj)

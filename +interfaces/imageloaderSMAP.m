@@ -9,11 +9,15 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
         currentImageNumber;
         allmetadatatags;
         calibrationFile='settings/cameras.mat';
+        
+        ismultichannel=false;
+        multiloader={};
+        multiloadermetadata;
     end
     methods
        function obj=imageloaderSMAP(varargin)
            obj.metadata=interfaces.metadataSMAP;
-           if nargin>2
+           if nargin>2 && ~isempty(varargin{3})
                if isa(varargin{3},'interfaces.ParameterData')
                     obj.P=varargin{3};
                     obj.calibrationFile=obj.getGlobalSetting('cameraSettingsFile');
@@ -21,25 +25,32 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
                    obj.calibrationFile=varargin{3};
                end
            end
-           if nargin>1
-               if ~isempty(varargin{2})
+           if nargin>1 && ~isempty(varargin{2})
                 obj.updatemetadata(varargin{2});
-               end
+                obj.multiloadermetadata=varargin{2};
            end
-%            obj.getPar
-            if nargin>0
+
+            if nargin>0 && ~isempty(varargin{1})
                 obj.open(varargin{1});
             end
 
         end
     end
     methods (Abstract=true)
-        open(obj,filename);
-%         md=getmetadata(obj);
-        image=getimage(obj,frame);
-        allmd=getmetadatatags(obj)
+        openi(obj,filename);
+        image=getimagei(obj,frame);
+        allmd=getmetadatatagsi(obj)
     end
     methods
+        function image=getimage(obj,frame)
+            if obj.ismultichannel
+                for k=length(obj.multiloader):-1:1
+                    image{k}=obj.multiloader{k}.getimagei(frame);
+                end
+            else
+                image=obj.getimagei(frame);
+            end
+        end
         function image=readNext(obj)
             obj.currentImageNumber=obj.currentImageNumber+1;
             image=obj.getimageonline(obj.currentImageNumber);
@@ -151,9 +162,42 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
 %             end
         metao=obj.metadata;
         end
+        function open(obj,file)
+            if iscell(file) %multiple channels in multiple files
+                obj.ismultichannel=true;
+                for k=1:length(file)
+                    obj.multiloader{k}= obj.newimageloader(file{k});
+                end
+                obj.metadata=obj.multiloader{1}.metadata; %copy metadata and infor from first
+            else
+                obj.openi(file)
+            end
+            
+        end
         function close(obj)
             display(['close not implemented in ' class(obj)])
-%             obj.reader.close;
+        end
+        function allmd=getmetadatatags(obj)
+            if obj.ismultichannel
+                for k=1:length(obj.multiloader)
+                    allmd=obj.multiloader{k}.getmetadatatags;
+                end
+                obj.metadata=obj.multiloader{1}.metadata;
+            else
+                allmd=obj.getmetadatatagsi;
+            end
+        end
+        
+        function il=newimageloader(obj,file)
+            il=eval(class(obj));
+            il.P=obj.P;
+            il.calibrationFile=obj.calibrationFile;
+            il.onlineAnalysis=obj.onlineAnalysis;
+            il.waittime=obj.waittime;
+            if ~isempty(obj.multiloadermetadata) 
+                il.updatemetadata(obj.multiloadermetadata)
+            end
+            il.open(file);
         end
     end
     

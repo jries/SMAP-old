@@ -10,7 +10,7 @@ classdef imageloaderTifSimple<interfaces.imageloaderSMAP
         function obj=imageloaderTifSimple(varargin)
             obj@interfaces.imageloaderSMAP(varargin{:});
         end
-        function open(obj,file)
+        function openi(obj,file)
         
 %             obj.reader = javaObjectEDT('org.micromanager.acquisition.TaggedImageStorageMultipageTiff',fileparts(file), false, [], false, false, true);
             obj.file=file;
@@ -20,7 +20,7 @@ classdef imageloaderTifSimple<interfaces.imageloaderSMAP
             obj.metadata.basefile=file;
             
         end
-        function image=getimage(obj,frame)
+        function image=getimagei(obj,frame)
             try
             image=imread(obj.file,'Index',frame);
             catch
@@ -46,7 +46,7 @@ classdef imageloaderTifSimple<interfaces.imageloaderSMAP
             end
         end
         
-        function allmd=getmetadatatags(obj)
+        function allmd=getmetadatatagsi(obj)
             allmd={'Format','SimpleTif'};
             imtest=imread(obj.file,'Index',1);
             allmd(end+1,:)={'Width info',size(imtest,2)};
