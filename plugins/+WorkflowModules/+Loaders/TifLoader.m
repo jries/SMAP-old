@@ -228,11 +228,19 @@ if p.ismultifile %later: check filename (e.g. _q1 _q2 etc). Also make sure quadr
         p.tiffile=p.tiffile{1};
     end
     sf=selectManyFiles(fileparts(p.tiffile));
-    sf.guihandles.filelist.String=(obj.guihandles.tiffile.String);
+    filelisth=obj.guihandles.tiffile.String;
+    if ~iscell(filelisth)
+        filelisth={filelisth};
+    end
+    sf.guihandles.filelist.String=filelisth;
     waitfor(sf.handle);
     f=sf.filelist;
 else
-    fe=bfGetFileExtensions;
+    try
+        fe=bfGetFileExtensions;
+    catch
+        fe='*.*';
+    end
     [f,path]=uigetfile(fe,'select camera images',[fileparts(p.tiffile) filesep '*.tif']);
     if f
         f=[path f];

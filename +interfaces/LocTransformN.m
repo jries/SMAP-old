@@ -23,7 +23,8 @@ classdef LocTransformN<handle
         end
         function setTransform(obj,channel,varargin)
             % type: any of matlab transformations
-            % mirror:  dimension along which to mirror: 0, 1, 2 , [1 2]
+            % mirror:  dimension along which to mirror: 0, 1, 2 , [1 2] or
+            % 3
             %unit: nm pixel
             % also possibility to pass on structure
             if isempty(channel)

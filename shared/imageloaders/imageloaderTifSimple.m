@@ -54,10 +54,24 @@ classdef imageloaderTifSimple<interfaces.imageloaderSMAP
             allmd(end+1,:)={'FileName',obj.file};
             
             ttt=Tiff(obj.file);
+            numf=1;
+            try
             desc=ttt.getTag('ImageDescription');
+            catch err
+                disp('no description found')
+                desc='';
+                %manually find frames
+                
+                ttt.setDirectory(numf)
+                while ~ttt.lastDirectory
+                    numf=numf+1;
+                    ttt.setDirectory(numf);
+                end
+                    
+            end
             ttt.close;
             ind=strfind(desc,'images=');
-            numf=1;
+            
             if ~isempty(ind)
                 numf=sscanf(desc(ind:end),'images=%f');
             else
