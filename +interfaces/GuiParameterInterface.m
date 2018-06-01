@@ -49,7 +49,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                     if ~isvalid(phx.obj)
                         outind=k;
                     end
-                    if phx.obj==hstruc.obj &&((isempty(handle) && isempty(phx.handle) )|| phx.handle==handle)
+                    if phx.obj==hstruc.obj &&((isempty(handle) && isempty(phx.handle) )|| (~isempty(handle) && phx.handle==handle))
                         posnew=k;
                         break
                     end

@@ -4,12 +4,13 @@ classdef LocSaver<interfaces.WorkflowModule
         filenumber
         fileinfo
         locDatatemp;
-         deltaframes;
-         index;
+        deltaframes;
+        index;
         numsaved
         frames;
         saveframes=20;
         savefields=struct('fieldnames',{{''}},'tosave',{{''}},'notsave',{{'PSFxerr','PSFyerr','bgerr','locpthompson','peakfindx','peakfindy'}});
+        savefit
         
     end
     methods
@@ -18,7 +19,18 @@ classdef LocSaver<interfaces.WorkflowModule
             obj.inputChannels=1; 
             obj.inputParameters={'loc_ROIsize'};
 %             obj.propertiesToSave={'savefields'};
-        end
+       end
+       function savefit_callback(obj)
+           savepar=obj.getPar('savefit');
+           if isstruct(savepar)
+               obj.savefit=copyfields(obj.savefit,savepar);
+           elseif isnumeric(savepar) && savepar==0 %delete
+               obj.savefit=[];
+           end
+           %delete command: 0: delete all.
+           %otherwise: only structures are accepted and copied.
+           
+       end
         function pard=guidef(obj)
             pard.plugininfo.type='WorkflowModule'; 
             pard.plugininfo.description='Saves the fitted localizations as a SMAP *.sml file. When fitting via a network, fitting a local copy which is then moved to the destination can be faster.';
@@ -47,7 +59,7 @@ classdef LocSaver<interfaces.WorkflowModule
             pard.outputfile.Width=1.5;
             pard.outputfile.Optional=true;
             
-            pard.syncParameters={{'loc_outputfilename','outputfile',{'String','Value'}}};
+            pard.syncParameters={{'loc_outputfilename','outputfile',{'String','Value'}},{'savefit',[],{'String','Value'},@obj.savefit_callback}};
             
             
         end
@@ -168,6 +180,7 @@ classdef LocSaver<interfaces.WorkflowModule
                 fitpar.loadtifftime=obj.getPar('tiffloader_loadingtime');
                 fitpar.processfittime=obj.getPar('tiffloader_fittime');
                 fitpar.loc_globaltransform=obj.getPar('loc_globaltransform');
+                obj.setPar('savefit',struct('fitparameters',fitpar)); obj.savefit_callback;
                 try
                 disp([num2str(length(obj.locDatatemp.loc.xnm)) ' localizations in ' num2str(fitpar.fittime) ' seconds.']);
                 catch err
@@ -180,6 +193,8 @@ classdef LocSaver<interfaces.WorkflowModule
                 if ~isempty(transformation)
                     obj.locDatatemp.files.file.transformation=transformation;
                 end
+                obj.locDatatemp.files.file.savefit=obj.savefit;
+  
                 try
                      obj.locDatatemp.savelocs(filename,[],struct('fitparameters',fitpar));
                 catch err

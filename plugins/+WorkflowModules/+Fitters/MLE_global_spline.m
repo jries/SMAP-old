@@ -677,6 +677,11 @@ if fitpar.fitmode==3||fitpar.fitmode==5
         fitpar.EMon=cal.EMon;
         fitpar.dz=cal.cal4pi.dz;
         fitpar.z0=cal.cal4pi.z0;
+        
+        savefit=copyfields([],cal.cal4pi,{'dz','z0','x0','transformation'});
+        savefit=copyfields(savefit,cal.cal4pi.coeff,{'frequency','phaseshifts'});
+        savefit.cal_3Dfile=p.cal_3Dfile;
+        obj.setPar('savefit',struct('cal3D',savefit));
     else
         disp('no calibration found')
 

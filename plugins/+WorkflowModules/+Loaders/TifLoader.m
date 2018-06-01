@@ -75,7 +75,8 @@ classdef TifLoader<interfaces.WorkflowModule
                     obj.framestop=previewframe;
                 end               
             end
-            obj.timerfitstart=tic;     
+            obj.timerfitstart=tic;   
+            obj.setPar('savefit',0) %delete, reset
         end
         function run(obj,data,p)
             global SMAP_stopnow
