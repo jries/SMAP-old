@@ -18,7 +18,10 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
             obj.fitpar=getfitpar(obj);
             switch obj.fitpar.mode
                 case '4pi'
-                    obj.fitpar.fitfunction=@CPUmleFit_LM_MultiChannel;
+                    fitterpath=[fileparts(obj.getPar('maindirectory')) filesep 'ries-private' filesep 'PSF4Pi'];
+                    addpath(fitterpath)
+
+                    obj.fitpar.fitfunction=@CPUmleFit_LM_MultiChannel_4pi;
                 otherwise
                     obj.fitpar.fitfunction=@mleFit_LM_global; %later: include single channel, decide here
             end
@@ -274,9 +277,9 @@ off{1}=-dn+posy;
 % locs.phot=P(:,4)*EMexcess;
 % locs.bg=P(:,5)*EMexcess;
 fac{4}=EMexcess;
-fac{5}=EMexcess;
+fac{3}=EMexcess;
 faccrlb{4}=EMexcess;
-faccrlb{5}=EMexcess;
+faccrlb{3}=EMexcess;
 locs.frame=frame;
 
 locs.logLikelihood=LogL;
@@ -288,9 +291,9 @@ locs.peakfindy=posy;
         locs.PSFxpix=sx;
         locs.PSFypix=sx;
 % end
-fac{3}=fitpar.dz*fitpar.refractive_index_mismatch;
-off{3}=-fitpar.z0*fitpar.dz*fitpar.refractive_index_mismatch;
-faccrlb{3}=fitpar.dz*fitpar.refractive_index_mismatch;
+fac{5}=fitpar.dz*fitpar.refractive_index_mismatch;
+off{5}=-fitpar.z0*fitpar.dz*fitpar.refractive_index_mismatch;
+faccrlb{5}=fitpar.dz*fitpar.refractive_index_mismatch;
 
 names={'ypix','xpix','phot','bg','znm','phase'};
 namesav={'ypix','xpix','znm'};

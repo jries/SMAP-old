@@ -119,8 +119,8 @@ classdef PeakCombiner<interfaces.WorkflowModule
                     disp('calibration should be in pixel units for 4pi');
                     %set pixelsize in transform here
                 end
-                ypix=(maxima.x+roi(1)); %still x,y inconsistency! solve
-                xpix=(maxima.y+roi(2));
+                xpix=(maxima.x+roi(1)); %still x,y inconsistency! solve
+                ypix=(maxima.y+roi(2));
                 cpix=[xpix,ypix];
                 indref=transform.getPart(1,cpix);
                 
@@ -146,7 +146,7 @@ classdef PeakCombiner<interfaces.WorkflowModule
                 %test dc XXXXX
                 ctt=ct;
                 offsettest=ones(size(cr,1),1);
-                ctt(:,1,2)=ctt(:,1,2)+offsettest*3;
+                ctt(:,1,2)=ctt(:,1,2)+offsettest*0;
             
             
                 ctr=round(ctt);
@@ -172,16 +172,16 @@ classdef PeakCombiner<interfaces.WorkflowModule
                 dcout=permute(dc,[2 3 1]);
                 indout=repmat((1:size(ctr,1)),1,transform.channels);
                 
-                maxout.x=squeeze(cout(2,:));
-                maxout.y=squeeze(cout(1,:));
+                maxout.x=squeeze(cout(1,:));
+                maxout.y=squeeze(cout(2,:));
 %                 maxout.xref=cref(:,2);
 %                 maxout.yref=cref(:,1);
                 maxout.xfound=maxima.x;
                 maxout.yfound=maxima.y;
                 maxout.intensityfound=maxima.intensity;
                 maxout.ID=indout(:);
-                maxout.dx=squeeze(dcout(2,:));
-                maxout.dy=squeeze(dcout(1,:));
+                maxout.dx=squeeze(dcout(1,:));
+                maxout.dy=squeeze(dcout(2,:));
                 dato=data;
                 dato.data=maxout;
             else

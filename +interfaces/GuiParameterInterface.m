@@ -359,13 +359,14 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
         end
         function saveGlobalSettings(obj)
             global SMAP_globalsettings
-            file=obj.P.globalSettingsFile;
+            file=[obj.getPar('maindirectory') filesep obj.P.globalSettingsFile];
             writestruct(file,obj.P.globalSettings);
             SMAP_globalsettings=obj.P.globalSettings;
         end
         function loadGlobalSettings(obj)
             global SMAP_globalsettings
-            obj.P.loadGlobalSettings;
+            file=[obj.getPar('maindirectory') filesep obj.P.globalSettingsFile];
+            obj.P.loadGlobalSettings(file);
             SMAP_globalsettings=obj.P.globalSettings;
         end
 

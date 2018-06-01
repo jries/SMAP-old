@@ -241,7 +241,11 @@ else
     catch
         fe='*.*';
     end
-    [f,path]=uigetfile(fe,'select camera images',[fileparts(p.tiffile) filesep '*.tif']);
+    filelisth=p.tiffile;
+    if iscell(filelisth)
+        filelisth=filelisth{1};
+    end
+    [f,path]=uigetfile(fe,'select camera images',[fileparts(filelisth) filesep '*.tif']);
     if f
         f=[path f];
     else 
@@ -376,7 +380,7 @@ pard.framestop.Optional=true;
 % pard.padedgesdr.TooltipString='Pad edges with minimum values to allow detection of localizations close to edges. Usually not necessary.';
 
 pard.mirrorem.object=struct('Style','checkbox','String','EM mirror','Value',1,'Callback',{{@mirrorem_callback,obj}});
-pard.mirrorem.position=[5.2,5.2];
+pard.mirrorem.position=[5.2,4.2];
 pard.mirrorem.TooltipString=sprintf('calibrate gain and offset from images');
 pard.mirrorem.Optional=true;
 pard.mirrorem.Width=0.8;
