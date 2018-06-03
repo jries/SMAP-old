@@ -24,7 +24,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                 changecallback={changecallback};
             end
             hstruc.changecallback=changecallback;
-            if ~isempty(handle)
+            if ~isempty(handle) %|| ~isempty(changecallback)
                 hstruc.isGuiPar=true;
             else
                 hstruc.isGuiPar=false;
@@ -33,7 +33,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             hstruc.handle=handle;
             hstruc.syncmode=syncmode;
             hstruc.obj=obj;
-            if hstruc.isGuiPar
+            if ~isempty(handle) %hstruc.isGuiPar
                 handle.Callback={@obj.field_callback,field,handle.Callback};
             end
             

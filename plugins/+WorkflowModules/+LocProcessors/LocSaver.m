@@ -216,7 +216,7 @@ classdef LocSaver<interfaces.WorkflowModule
                 obj.setPar('mainfile',mainfile);
                 [path,file]=fileparts(filename);
                 try
-                imageout=makeSRimge(obj.locDatatemp);
+                imageout=makeSRimge(obj,obj.locDatatemp);
                 options.comp='jpeg';
                 options.color=true;
                 s=size(imageout);
@@ -257,8 +257,8 @@ if ~isempty(save)
 end
 end
 
-function imout=makeSRimge(locDatatemp)
-channelfile='settings/workflows/FitTif_Channelsettings.mat';
+function imout=makeSRimge(obj,locDatatemp)
+channelfile=[obj.getPar('maindirectory')  '/settings/workflows/FitTif_Channelsettings.mat'];
 pall=load(channelfile);
 p=pall.globalParameters;
 p.lutinv=false;

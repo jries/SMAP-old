@@ -219,7 +219,7 @@ module.attachLocData(obj.locData);
 % module.setGuiAppearence(p)
 module.makeGui;
 wffile=obj.mainworkflow.pluginpath;
- module.load(wffile,false);
+ module.load(wffile,[],false);
 % obj.status('edit workflow *.txt file');
 % drawnow
 % settingsfile=obj.getGlobalSetting('mainLocalizeWFFile');

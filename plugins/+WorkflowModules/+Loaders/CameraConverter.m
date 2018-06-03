@@ -171,10 +171,12 @@ fn=fieldnames(obj.loc_cameraSettingsStructure);
 %     obj.loc_cameraSettings.comment='no comments';
 % end
 %XXX
+
 fi=obj.getPar('loc_fileinfo');
+obj.loc_cameraSettings=copyfields(obj.loc_cameraSettings,fi);
 for k=length(fn):-1:1
     fields{k}=fn{k};
-    if isfield(fi,fn{k})
+    if myisfield(fi,fn{k})
         defAns{k}=num2str(fi.(fn{k}));
     else
         defAns{k}=num2str(obj.loc_cameraSettings.(fn{k}));

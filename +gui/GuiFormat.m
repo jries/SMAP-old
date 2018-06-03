@@ -102,9 +102,7 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             h.overview_select=uicontrol('Style','togglebutton','Parent',obj.handle,'String','OV -> filter','Position',[1,1,widtht,fieldheight*1.8],...
                 'FontSize',fontsize*1.2,'Callback',{@viewselect_callback,obj});            
             obj.guihandles=h;
-            callobj=obj;
-            obj.addSynchronization('currentfileinfo',[],[],{@callobj.loaded_notify})
-            obj.addSynchronization('sr_figurenumber',[],[],{@callobj.makesrfigure})
+
 %             %menu to detach Format Gui
             f=getParentFigure(obj.handle);
             c2=uicontextmenu(f); 
@@ -134,6 +132,9 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
         end
         
         function initGui(obj)
+            callobj=obj;
+            obj.addSynchronization('currentfileinfo',[],[],{@callobj.loaded_notify})
+            obj.addSynchronization('sr_figurenumber',[],[],{@callobj.makesrfigure})
             obj.setPar('sr_pos',[0 0]);
             obj.setPar('sr_imsizecheck',false);
             obj.setPar('sr_pixfactor',1);
@@ -185,6 +186,12 @@ classdef GuiFormat<interfaces.GuiModuleInterface & interfaces.LocDataInterface
         function sr_axes=makesrfigure(obj,fignumber)
             if nargin<2           
                 fignumber=obj.getPar('sr_figurenumber');
+                if isempty(fignumber)
+                    ff=figure;
+                    fignumber=ff.Number;
+                    obj.setPar('sr_figurenumber',fignumber)
+                end
+                    
             end
             clf(fignumber);
             hf=figure(fignumber);

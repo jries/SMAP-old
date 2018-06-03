@@ -58,6 +58,9 @@ classdef GuiFilterTable< interfaces.LayerInterface
         function selectedField_callback(obj)
             
             sfield=obj.getPar('selectedField','layer',obj.layer);
+            if isempty(sfield)
+                return
+            end
             field=sfield{1};
 
             fmin=sfield{2};

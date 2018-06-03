@@ -187,6 +187,8 @@ classdef TifLoader<interfaces.WorkflowModule
             
             if iscell(obj.imloader.file)
                 obj.guihandles.tiffile.Max=100;
+            else
+                obj.guihandles.tiffile.Max=1;
             end
             obj.guihandles.tiffile.String=obj.imloader.file;
 
