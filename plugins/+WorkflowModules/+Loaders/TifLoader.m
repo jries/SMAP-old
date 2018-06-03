@@ -316,7 +316,7 @@ pard.text.position=[1,1];
 pard.text.Width=1.5;
 pard.text.Optional=true;
 
-pard.tiffile.object=struct('Style','edit','String',' ','HorizontalAlignment','right');
+pard.tiffile.object=struct('Style','edit','String',' ','HorizontalAlignment','right','Max',100);
 pard.tiffile.position=[2,1];
 pard.tiffile.Width=4;
 

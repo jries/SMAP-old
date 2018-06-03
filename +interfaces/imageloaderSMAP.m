@@ -9,7 +9,7 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
         currentImageNumber;
         allmetadatatags;
         calibrationFile='settings/cameras.mat';
-        
+        allowmultiplefiles=true;
         ismultichannel=false;
         multiloader={};
         multiloadermetadata;
@@ -198,7 +198,20 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
                 obj.metadata=obj.multiloader{1}.metadata; %copy metadata and infor from first
                 obj.file=file;
             else
-                obj.openi(file)
+                %if '_q'
+                [path,f,ext]=fileparts(file);
+                indq=strfind(f,'_q');
+                if ~isempty(indq)&&obj.allowmultiplefiles
+                    allfiles=dir([path filesep f(1:indq+1)  '*' ext]);
+                    for k=1:length(allfiles)
+                        files{k}=[path filesep allfiles(k).name];
+%                         disp(allfiles(k).name(indq:end))
+                    end
+                    files=sort(files);
+                    obj.open(files);
+                else
+                    obj.openi(file)
+                end
             end
             
         end
@@ -234,6 +247,7 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
             if ~isempty(obj.multiloadermetadata) 
                 il.updatemetadata(obj.multiloadermetadata)
             end
+            il.allowmultiplefiles=false;
             il.open(file);
         end
     end

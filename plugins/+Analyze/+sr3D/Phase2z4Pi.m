@@ -8,6 +8,8 @@ classdef Phase2z4Pi<interfaces.DialogProcessor
         end
         
         function out=run(obj,p)
+            fitterpath=[fileparts(obj.getPar('maindirectory')) filesep 'ries-private' filesep 'PSF4Pi'];
+            addpath(fitterpath)
             locsall=obj.locData.getloc({'znm','phase','znmerr','phaseerr','frame'});
             locs=obj.locData.getloc({'znm','phase','znmerr','phaseerr','frame','filenumber'},'layer',find(obj.getPar('sr_layerson')),'position','fov');
             zastig=locs.znm;
