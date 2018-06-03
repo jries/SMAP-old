@@ -32,9 +32,12 @@ classdef ParameterData<handle
             global SMAPparameters
             SMAPparameters=[];
         end
-        function loadGlobalSettings(obj)
-            if exist(obj.globalSettingsFile,'file')
-            obj.globalSettings=readstruct(obj.globalSettingsFile,{},false);
+        function loadGlobalSettings(obj,filename)
+            if nargin<2
+                filename=obj.globalSettingsFile;
+            end
+            if exist(filename,'file')
+                obj.globalSettings=readstruct(filename,{},false);
             end
         end
         

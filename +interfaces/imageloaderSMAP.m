@@ -9,11 +9,15 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
         currentImageNumber;
         allmetadatatags;
         calibrationFile='settings/cameras.mat';
+        allowmultiplefiles=true;
+        ismultichannel=false;
+        multiloader={};
+        multiloadermetadata;
     end
     methods
        function obj=imageloaderSMAP(varargin)
            obj.metadata=interfaces.metadataSMAP;
-           if nargin>2
+           if nargin>2 && ~isempty(varargin{3})
                if isa(varargin{3},'interfaces.ParameterData')
                     obj.P=varargin{3};
                     obj.calibrationFile=obj.getGlobalSetting('cameraSettingsFile');
@@ -21,44 +25,82 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
                    obj.calibrationFile=varargin{3};
                end
            end
-           if nargin>1
-               if ~isempty(varargin{2})
+           if nargin>1 && ~isempty(varargin{2})
                 obj.updatemetadata(varargin{2});
-               end
+                obj.multiloadermetadata=varargin{2};
            end
-%            obj.getPar
-            if nargin>0
+
+            if nargin>0 && ~isempty(varargin{1})
                 obj.open(varargin{1});
             end
 
         end
     end
     methods (Abstract=true)
-        open(obj,filename);
-%         md=getmetadata(obj);
-        image=getimage(obj,frame);
-        allmd=getmetadatatags(obj)
+        openi(obj,filename);
+        image=getimagei(obj,frame);
+        allmd=getmetadatatagsi(obj)
     end
     methods
+        function image=getimage(obj,frame)
+            if obj.ismultichannel
+                for k=length(obj.multiloader):-1:1
+                    image{k}=obj.multiloader{k}.getimagei(frame);
+                end
+                image=combineimages(image);
+            else
+                image=obj.getimagei(frame);
+            end
+        end
         function image=readNext(obj)
-            obj.currentImageNumber=obj.currentImageNumber+1;
-            image=obj.getimageonline(obj.currentImageNumber);
+           obj.currentImageNumber=obj.currentImageNumber+1;
+           if obj.ismultichannel
+                for k=length(obj.multiloader):-1:1
+                    image{k}=obj.multiloader{k}.getimageonline(obj.currentImageNumber);
+                end
+                image=combineimages(image);
+           else
+                image=obj.getimageonline(obj.currentImageNumber);
+           end
         end
         
         function image=getimageonline(obj,number)
-            image=obj.getimage(number);
-            if isempty(image)&&obj.onlineAnalysis 
-                    disp('wait')
-                    pause(obj.waittime*2)
-                    image=obj.getimage(number);
-            end
-       
+            
+           if obj.ismultichannel
+                for k=length(obj.multiloader):-1:1
+                    image{k}=obj.getimage(number);
+                    if isempty(image{k})&&obj.onlineAnalysis 
+                            disp('wait')
+                            pause(obj.waittime*2)
+                            image{k}=obj.getimage(number);
+                    end                       
+                end
+                image=combineimages(image);
+           else
+                image=obj.getimage(number);
+                if isempty(image)&&obj.onlineAnalysis 
+                        disp('wait')
+                        pause(obj.waittime*2)
+                        image=obj.getimage(number);
+                end
+           end
         end
         
         function setImageNumber(obj,number)
             obj.currentImageNumber=number;
         end
-        function images=getmanyimages(obj,numbers,format)
+        function images=getmanyimages(obj,varargin)
+            if obj.ismultichannel
+                for k=length(obj.multiloader):-1:1
+                    images{k}=obj.multiloader{k}.getmanyimagesi(varargin{:});
+                end
+                images=combineimages(images);
+            else
+                images=obj.getmanyimagesi(varargin{:});
+            end
+                
+        end
+        function images=getmanyimagesi(obj,numbers,format)
             loadfun=@obj.getimageonline;
             if nargin<3
                 format='cell';
@@ -108,9 +150,7 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
                 if ~isempty(ind)
                     val=obj.allmetadatatags{ind,2};
                 end
-                
             end
-          
         end
         
         function metao=getmetadata(obj)
@@ -124,8 +164,6 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
             catch err
                 camfile=obj.calibrationFile;
                 display('could not find camera file in global settings. Using default file.')
-%               ererwe
-              
             end
             try
                 usedef=obj.getPar('useDefaultCam');
@@ -151,11 +189,90 @@ classdef imageloaderSMAP<interfaces.GuiParameterInterface
 %             end
         metao=obj.metadata;
         end
+        function open(obj,file)
+            if iscell(file) %multiple channels in multiple files
+                obj.ismultichannel=true;
+                for k=1:length(file)
+                    obj.multiloader{k}= obj.newimageloader(file{k});
+                end
+                obj.metadata=obj.multiloader{1}.metadata; %copy metadata and infor from first
+                obj.file=file;
+            else
+                %if '_q'
+                [path,f,ext]=fileparts(file);
+                indq=strfind(f,'_q');
+                if ~isempty(indq)&&obj.allowmultiplefiles
+                    allfiles=dir([path filesep f(1:indq+1)  '*' ext]);
+                    for k=1:length(allfiles)
+                        files{k}=[path filesep allfiles(k).name];
+%                         disp(allfiles(k).name(indq:end))
+                    end
+                    files=sort(files);
+                    obj.open(files);
+                else
+                    obj.openi(file)
+                end
+            end
+            
+        end
         function close(obj)
+            if obj.ismultichannel
+                for k=1:length(obj.multiloader)
+                    obj.multiloader{k}.closei;
+                end
+            else
+                obj.closei;
+            end
+        end
+        function closei(obj)
             display(['close not implemented in ' class(obj)])
-%             obj.reader.close;
+        end
+        function allmd=getmetadatatags(obj)
+            if obj.ismultichannel
+                for k=1:length(obj.multiloader)
+                    allmd=obj.multiloader{k}.getmetadatatags;
+                end
+                obj.metadata=obj.multiloader{1}.metadata;
+            else
+                allmd=obj.getmetadatatagsi;
+            end
+        end
+        
+        function il=newimageloader(obj,file)
+            il=eval(class(obj));
+            il.P=obj.P;
+            il.calibrationFile=obj.calibrationFile;
+            il.onlineAnalysis=obj.onlineAnalysis;
+            il.waittime=obj.waittime;
+            if ~isempty(obj.multiloadermetadata) 
+                il.updatemetadata(obj.multiloadermetadata)
+            end
+            il.allowmultiplefiles=false;
+            il.open(file);
         end
     end
     
 end
 
+
+function imout=combineimages(imin) %later with switch? now put side-by-side
+samesize=true;
+for k=length(imin):-1:1
+    s(k,:)=size(imin{k});
+    samesize=samesize & all(s(k,:)==s(end,:));
+end
+
+if samesize %all same size
+    sall=s(1,:);
+    sall(2)=sum(s(:,2));
+    imout=zeros(sall,'like',imin{1});
+    ind=0;
+    for k=1:length(imin)
+        imout(:,ind+1:ind+s(k,2),:,:)=imin{k};
+        ind=ind+s(k,2);
+    end
+else
+    disp('channels of different sizes not yet implemented im imageloaderSMAP')
+end
+%     imout=imin;
+end

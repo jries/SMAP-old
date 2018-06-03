@@ -20,6 +20,7 @@ classdef GuiMainSMAP<interfaces.GuiModuleInterface & interfaces.LocDataInterface
             if ~exist(['settings' filesep 'temp'],'dir')
                 mkdir(['settings' filesep 'temp'])
             end
+            obj.setPar('maindirectory',pwd);
             
              %global settings
             initglobalsettings(obj);

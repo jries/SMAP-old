@@ -24,7 +24,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                 changecallback={changecallback};
             end
             hstruc.changecallback=changecallback;
-            if ~isempty(handle)
+            if ~isempty(handle) %|| ~isempty(changecallback)
                 hstruc.isGuiPar=true;
             else
                 hstruc.isGuiPar=false;
@@ -33,7 +33,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             hstruc.handle=handle;
             hstruc.syncmode=syncmode;
             hstruc.obj=obj;
-            if hstruc.isGuiPar
+            if ~isempty(handle) %hstruc.isGuiPar
                 handle.Callback={@obj.field_callback,field,handle.Callback};
             end
             
@@ -49,7 +49,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                     if ~isvalid(phx.obj)
                         outind=k;
                     end
-                    if phx.obj==hstruc.obj &&((isempty(handle) && isempty(phx.handle) )|| phx.handle==handle)
+                    if phx.obj==hstruc.obj &&((isempty(handle) && isempty(phx.handle) )|| (~isempty(handle) && phx.handle==handle))
                         posnew=k;
                         break
                     end
@@ -359,13 +359,14 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
         end
         function saveGlobalSettings(obj)
             global SMAP_globalsettings
-            file=obj.P.globalSettingsFile;
+            file=[obj.getPar('maindirectory') filesep obj.P.globalSettingsFile];
             writestruct(file,obj.P.globalSettings);
             SMAP_globalsettings=obj.P.globalSettings;
         end
         function loadGlobalSettings(obj)
             global SMAP_globalsettings
-            obj.P.loadGlobalSettings;
+            file=[obj.getPar('maindirectory') filesep obj.P.globalSettingsFile];
+            obj.P.loadGlobalSettings(file);
             SMAP_globalsettings=obj.P.globalSettings;
         end
 

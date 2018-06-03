@@ -93,6 +93,9 @@ classdef selectManyFiles<handle
   
             vo=obj.guihandles.filelist.Value;
             str=obj.guihandles.filelist.String;
+            if isempty(str)
+                return
+            end
             str(vo)=[];
             obj.guihandles.filelist.String=str;
             obj.guihandles.filelist.Value=max(1,min(vo,length(str)));

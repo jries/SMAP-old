@@ -13,13 +13,13 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
         function obj=imageloaderOME(varargin)
             obj@interfaces.imageloaderSMAP(varargin{:});
         end
-        function open(obj,file)
+        function openi(obj,file)
             obj.file=file;
             obj.reader=bfGetReader(file);
             md=obj.getmetadata;
             
         end
-        function close(obj)
+        function closei(obj)
             obj.reader.close;
         end
 %         function mdo=getmetadata(obj)
@@ -27,11 +27,11 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
 %             mdo=getmetadatacam(obj);
 %              
 %         end
-        function image=getimage(obj,frame)
+        function image=getimagei(obj,frame)
             image=readstack(obj,frame);
         end
         
-        function allmd=getmetadatatags(obj)
+        function allmd=getmetadatatagsi(obj)
         [ph,fh,ext]=fileparts(obj.file);
         exclude={};
         switch ext

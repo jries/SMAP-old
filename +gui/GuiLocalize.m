@@ -59,6 +59,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             h.wfcontext=uicontextmenu(getParentFigure(obj.handle));
             uimenu(h.wfcontext,'label','Info on workflow','Callback',{@wfinfo_callback,obj});
             uimenu(h.wfcontext,'label','Change workflow','Callback',{@wfload_callback,obj});
+             uimenu(h.wfcontext,'label','Edit workflow','Callback',{@wfedit_callback,obj});
             uimenu(h.wfcontext,'label','Save workflow settings','Callback',{@savepar_callback,obj});
             uimenu(h.wfcontext,'label','Save workflow as...','Callback',{@wsave_callback,obj});
             h.wfname=uicontrol(obj.handle,'Style','text','String','x','Position',[10+10, l2, 350 h2],...
@@ -202,6 +203,34 @@ if f
 else
     obj.status('no workflow *.txt selected');
 end
+
+end
+
+function wfedit_callback(~,~,obj)
+ module=interfaces.Workflow;
+module.processorgui=false;
+module.handle=figure;
+module.attachPar(obj.P);
+module.attachLocData(obj.locData);
+
+% p.Vrim=3;
+% p.Xrim=4;
+% p.FieldHeight=obj.guiPar.FieldHeight-4;
+% module.setGuiAppearence(p)
+module.makeGui;
+wffile=obj.mainworkflow.pluginpath;
+ module.load(wffile,[],false);
+% obj.status('edit workflow *.txt file');
+% drawnow
+% settingsfile=obj.getGlobalSetting('mainLocalizeWFFile');
+% [f,p]=uigetfile(settingsfile,'Select workflow *.txt file');
+% if f
+%     settingsfilen=[p filesep f];
+%     loadwf(obj,settingsfilen)
+%     obj.status('new workflow loaded');
+% else
+%     obj.status('no workflow *.txt selected');
+% end
 
 end
 

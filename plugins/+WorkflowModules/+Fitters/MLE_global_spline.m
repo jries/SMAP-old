@@ -16,26 +16,28 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
         function fitinit(obj)
             obj.infofields={'x','y','ID','dx','dy'};
             obj.fitpar=getfitpar(obj);
-            obj.fitpar.fitfunction=@mleFit_LM_global; %later: include single channel, decide here
-            
+            switch obj.fitpar.mode
+                case '4pi'
+                    fitterpath=[fileparts(obj.getPar('maindirectory')) filesep 'ries-private' filesep 'PSF4Pi'];
+                    addpath(fitterpath)
+
+                    obj.fitpar.fitfunction=@CPUmleFit_LM_MultiChannel_4pi;
+                otherwise
+                    obj.fitpar.fitfunction=@mleFit_LM_global; %later: include single channel, decide here
+            end
              transform=obj.getPar('loc_globaltransform');
              
-             obj.fitpar.mirrorud=contains(transform.tinfo.mirror.targetmirror,'up');
-             obj.fitpar.mirrorrl=contains(transform.tinfo.mirror.targetmirror,'right');
-            % check if x,y, then initialize range etc
-%             obj.fitpar.fitfunction = @obj.nofound;
-%             disp('checking cuda fit')
-%             reporttext='GPU fit function did not run. Possibly the wrong CUDA version is installed.';
-%             img=zeros(11,'single');img(5,5)=1;
-
-
-%             try
-% %                 fitp=callYimingFitter(img,single(1),single(10),single(2),single(0),0);
-%                 fitp=mleFit_LM(img,1);
-%                 obj.fitpar.fitfunction=@mleFit_LM;
-% %                 obj.fitpar.fitfunction=@callYimingFitter;
-%                 reporttext='mleFit_LM works';
-%             end
+             if isa(transform,'interfaces.LocTransform')
+                 obj.fitpar.mirrorud=contains(transform.tinfo.mirror.targetmirror,'up');
+                 obj.fitpar.mirrorrl=contains(transform.tinfo.mirror.targetmirror,'right');
+             elseif isa(transform,'interfaces.LocTransformN')
+                 tinfo=transform.tinfo;
+                 for k=1:length(tinfo)
+                     obj.fitpar.mirror{k}=tinfo{k}.mirror;
+                 end
+             else
+                 disp('transform not recognized');
+             end
             roisize=obj.getPar('loc_ROIsize');
             obj.numberInBlock=round(obj.fitpar.roisperfit*100/roisize^2/12)*12;
             
@@ -73,8 +75,14 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
             else
                 varstack=0;
             end
+            switch obj.fitpar.mode
+                case '4pi'
+                     out=fitwrapper_4pi(imstack,obj.fitpar,stackinfo,varstack);
+                     locs=fit2locs_4pi(out,stackinfo,obj.fitpar,imstack);
+                otherwise
             out=fitwrapper_global(imstack,obj.fitpar,stackinfo,varstack);
             locs=fit2locs_global(out,stackinfo,obj.fitpar,imstack);
+            end
         end
 
         function initGui(obj)
@@ -171,47 +179,11 @@ faccrlb{4}=EMexcess;
 faccrlb{5}=EMexcess;
 locs.frame=frame;
 
-% locs.xerrpix=sqrt(CRLB(:,2));
-% locs.yerrpix=sqrt(CRLB(:,1));
-% locs.photerr=sqrt(CRLB(:,4))*EMexcess;
-% locs.bgerr=sqrt(CRLB(:,5))*EMexcess;
 locs.logLikelihood=LogL;
 
 locs.peakfindx=posx;
 locs.peakfindy=posy;
-
-% switch fitpar.fitmode
-%     case 1 %sx not fitted
-%         sx=fitpar.PSFx0*v1;
-%         locs.PSFxpix=0*locs.xpix+sx;
-%         locs.PSFypix=locs.PSFxpix;
-%     case 2 % sx free
-%         locs.PSFxpix=P(:,5);
-%         locs.PSFxerr=sqrt(CRLB(:,5));
-% %                     sx=locs.PSFx;
-%         locs.PSFypix=locs.PSFxpix;
-%     case 3
-%         locs.znm=(P(:,5)*1000+fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
-%         locs.zerr=sqrt(CRLB(:,5))*1000*fitpar.refractive_index_mismatch;
-%         [locs.PSFxpix,locs.PSFypix]=zpar2sigma(locs.znm/1000,fitpar.zparhere);
-% 
-% 
-%     case 4  %sx,sy
-% 
-%         locs.PSFxpix=P(:,5);
-%         locs.PSFxerr=sqrt(CRLB(:,5));
-%         locs.PSFypix=P(:,6);
-%         locs.PSFyerr=sqrt(CRLB(:,6));  
-%     case {5,6}
-%         
-%         %         locs.znm=(P(:,5)*1000+fitpar.objPos*v1)*fitpar.refractive_index_mismatch;
-%         locs.znm=((P(:,3)-fitpar.z0)*fitpar.dz)*fitpar.refractive_index_mismatch;
-%         notconverged=P(:,3)<2|P(:,3)>size(fitpar.splinefit{1}.cspline.coeff,3)-2;
-%         locs.znm(notconverged)=NaN;
-%         
-%         locs.zerr=sqrt(CRLB(:,3))*fitpar.dz*fitpar.refractive_index_mismatch;
-% %         [locs.PSFxpix,locs.PSFypix]=zpar2sigma(locs.znm/1000,fitpar.zparhere);
-%         
+   
          sx=1*v1;
         locs.PSFxpix=sx;
         locs.PSFypix=sx;
@@ -259,10 +231,113 @@ end
 locs.iterations=P(:,end);
 % locs.locpthompson=sqrt((locs.PSFxpix.*locs.PSFypix+1/12*v1)./( locs.phot/EMexcess)+8*pi*(locs.PSFxpix.*locs.PSFypix).^2.* locs.bg./( locs.phot/EMexcess).^2);
 end
+function locs=fit2locs_4pi(results,stackinfo,fitpar,image)
+if isempty(results)
+    locs=[];
+    return
+end
+numl=size(results.P,1);
+numpar=6;
+numchannels=4;
 
+v1=ones(numl,1,'single');
+s=size(image);          
+dn=ceil((s(1)-1)/2)*v1;
+
+shiftx=0;%-0.5; %deviation from ground truth
+shifty=0;%-0.5;
+posx=stackinfo.x(results.indused)+shiftx;
+posy=stackinfo.y(results.indused)+shifty;
+frame=stackinfo.frame(results.indused);
+P=results.P;
+EMexcess=fitpar.EMexcessNoise;
+CRLB=results.CRLB;
+LogL=results.LogL;
+           CRLB(isnan(CRLB))= 0; %XXXXXXXXX
+           LogL(isnan(LogL))= 0; %XXXXXXXXX
+           CRLB((CRLB)<0)= 0; %XXXXXXXXX
+          % LogL((LogL)<0)= 0; %XXXXXXXXX
+           
+o=ones( numpar,1);fac=num2cell(o);z=zeros( numpar,1);off=num2cell(z);
+faccrlb=fac;
+% locs.xpix=P(:,2)-dn+posx;
+if (fitpar.fitmode==5||fitpar.fitmode==6) && fitpar.mirrorstack
+    fac{2}=-1;
+    off{2}=dn+posx;
+%     locs.xpix=dn-P(:,2)+posx;
+else
+    fac{2}=1;
+    off{2}=-dn+posx;
+%     locs.xpix=P(:,2)-dn+posx;
+end
+% locs.ypix=P(:,1)-dn+posy;
+off{1}=-dn+posy;
+
+
+% locs.phot=P(:,4)*EMexcess;
+% locs.bg=P(:,5)*EMexcess;
+fac{4}=EMexcess;
+fac{3}=EMexcess;
+faccrlb{4}=EMexcess;
+faccrlb{3}=EMexcess;
+locs.frame=frame;
+
+locs.logLikelihood=LogL;
+
+locs.peakfindx=posx;
+locs.peakfindy=posy;
+   
+         sx=1*v1;
+        locs.PSFxpix=sx;
+        locs.PSFypix=sx;
+% end
+fac{5}=fitpar.dz*fitpar.refractive_index_mismatch;
+off{5}=-fitpar.z0*fitpar.dz*fitpar.refractive_index_mismatch;
+faccrlb{5}=fitpar.dz*fitpar.refractive_index_mismatch;
+
+names={'ypix','xpix','phot','bg','zastsig','phase'};
+namesav={'ypix','xpix','zastsig'};
+linked=fitpar.link;
+linked(end+1)=1; %XXXXX phase. Later include in gui
+ind=1;
+for k=1:length(names)
+    if linked(k)
+        locs.(names{k})=P(:,ind).*fac{k}+off{k};
+        locs.([names{k} 'err'])=sqrt(CRLB(:,ind)).*faccrlb{k};
+        ind=ind+1;
+    else
+        v=zeros(numl,numchannels,'single');
+        ve=zeros(numl,numchannels,'single');
+        for c=1:numchannels
+%             if c==1
+%                 ch='';
+%             else
+                ch=num2str(c);
+%             end
+            locs.([names{k} ch])=P(:,ind).*fac{k}+off{k};
+            locs.([names{k} ch 'err'])=sqrt(CRLB(:,ind)).*faccrlb{k};
+            v(:,c)=locs.([names{k} ch]);
+            ve(:,c)=locs.([names{k} ch 'err']);
+            ind=ind+1;
+        end
+        if any(contains(namesav,names{k}))
+            switch fitpar.mainchannel
+                case 1
+                    locs.(names{k})=sum(v./ve,2)./sum(1./ve,2);
+                case 2
+                    locs.(names{k})=v(:,1);
+                case 3
+                    locs.(names{k})=v(:,2);
+            end
+        end
+    end
+end
+locs.iterations=P(:,end);
+% locs.locpthompson=sqrt((locs.PSFxpix.*locs.PSFypix+1/12*v1)./( locs.phot/EMexcess)+8*pi*(locs.PSFxpix.*locs.PSFypix).^2.* locs.bg./( locs.phot/EMexcess).^2);
+end
 function out=fitwrapper_global(imstack,fitpar,stackinfo,varstack)
 numberOfChannels=2;
-nfits=size(imstack,3);
+nfits=ceil(size(imstack,3)/numberOfChannels);
 npar=5;
 numframes=size(imstack,3); 
 
@@ -282,7 +357,7 @@ end
 
 
         
-dT=zeros(npar,2,ceil(nfits/2));
+dT=zeros(npar,2,(nfits));
 dT(1,2,:)=stackinfo.dy(2:numberOfChannels:end);
 dT(2,2,:)=stackinfo.dx(2:numberOfChannels:end);
 
@@ -299,8 +374,9 @@ sharedA = repmat(int32(fitpar.link'),[1 numframes]);
 %for testing: change order
 
 
-out.indused=1:numberOfChannels:numframes;   
-
+out.indused=1:numberOfChannels:numframes;   %XXXXXXX check. Wrong? results shoud be only displayed in one channel
+disp('check MLE_globalspline')
+% out.indused=1:nfits; 
 % [~,ind]=sort(rand(length(out.indused),1));
 
 
@@ -365,6 +441,65 @@ arguments{7}=fitpar.zstart/fitpar.dz;
 %     else
 %         [P CRLB LogL]=fitpar.fitfunction(arguments{:});
 %     end
+
+out.P=P;
+out.CRLB=CRLB;
+ out.LogL=LogL;
+end
+ 
+function out=fitwrapper_4pi(imstack,fitpar,stackinfo,varstack)
+numberOfChannels=size(fitpar.splinefithere.coeff.phaseshifts,2);
+nfits=ceil(size(imstack,3)/numberOfChannels);
+npar=6;
+numframes=size(imstack,3); 
+
+s=size(imstack);
+if length(s)==2 
+ s(3)=1;
+end
+if s(3)<numberOfChannels  %sorting: needs at least two 
+    out=[];
+ return
+end
+EMexcess=fitpar.EMexcessNoise;
+if isempty(EMexcess)
+    EMexcess=1;
+end
+
+        
+dT=zeros(npar,numberOfChannels,(nfits),'single');
+imfit=zeros(s(1),s(2),ceil(s(3)/numberOfChannels),numberOfChannels,'single');
+for k=1:numberOfChannels
+    dT(1,k,:)=stackinfo.dy(k:numberOfChannels:end);
+    dT(2,k,:)=stackinfo.dx(k:numberOfChannels:end);
+    if fitpar.mirror{k}==1 || fitpar.mirror{k}==3  %mirror x or xy
+        imfit(:,:,:,k)=imstack(end:-1:1,:,k:numberOfChannels:end);
+        dT(1,k,:)=-dT(1,k,:);
+    else
+        imfit(:,:,:,k)=imstack(:,:,k:numberOfChannels:end);
+    end
+    
+end
+sharedA = int32(fitpar.link);
+sharedA(end+1)=1; %link phase. Not part of GUI
+
+out.indused=1:numberOfChannels:numframes;
+
+% [P,CRLB1 LL] = CPUmleFit_LM_MultiChannel(single(imstack(:, :, :, :)),uint32(shared),iterations,single(PSF.Ispline), single(PSF.Aspline),single(PSF.Bspline),single(dTAll),single(phi0),z0);
+% imageslicer(residual)
+
+arguments{1}=single(imfit/EMexcess);
+arguments{2}=uint32(sharedA);
+arguments{3}=fitpar.iterations;
+arguments{4}=single(fitpar.splinefithere.coeff.Ispline);
+arguments{5}=single(fitpar.splinefithere.coeff.Aspline);
+arguments{6}=single(fitpar.splinefithere.coeff.Bspline);
+arguments{7}=single(dT); %XXXXXXXXXX
+%imstack, sharedflag, iterations, spline coefficients, channelshift,
+%fitmode, varmap
+arguments{8}=single(fitpar.splinefithere.coeff.phaseshifts);
+arguments{9}=fitpar.zstart/fitpar.splinefithere.dz+fitpar.splinefithere.z0;
+[P CRLB LogL]=fitpar.fitfunction(arguments{:});
 
 out.P=P;
 out.CRLB=CRLB;
@@ -440,6 +575,7 @@ if f
         msgbox('no 3D data recognized. Select other file.');
     end
     obj.setGuiParameters(struct('cal_3Dfile',[p f]));
+     obj.setPar('cal_3Dfile',[p f]);
     if isfield(l,'transformation')
         obj.setPar('transformationfile',[p f]);
     end
@@ -472,6 +608,7 @@ if fitpar.fitmode==3||fitpar.fitmode==5
     fitpar.objPos=0;
     if isfield(cal,'outforfit')
         fitpar.zpar{1,1}=cal.outforfit;
+        fitpar.mode='zcal';
     elseif isfield(cal,'SXY')
         if p.isglobal 
             SS=cal.SXY_g;
@@ -524,6 +661,7 @@ if fitpar.fitmode==3||fitpar.fitmode==5
         obj.spatialXrange=xr;
         obj.spatialYrange=yr;
         fitpar.EMon=SS(1).EMon;
+        fitpar.mode='cspline';
     elseif isfield(cal,'cspline')
         fitpar.zpar{1}=cal.gauss_zfit;
         fitpar.dz=cal.cspline.dz;
@@ -533,7 +671,18 @@ if fitpar.fitmode==3||fitpar.fitmode==5
             fitpar.splinefit{1}.cspline.isEM=false;
         end
         fitpar.EMon=false;
-
+        fitpar.mode='csplineold';
+    elseif isfield(cal,'cal4pi')
+        fitpar.mode='4pi';
+        fitpar.splinefit{1}=cal.cal4pi;
+        fitpar.EMon=cal.EMon;
+        fitpar.dz=cal.cal4pi.dz;
+        fitpar.z0=cal.cal4pi.z0;
+        
+        savefit=copyfields([],cal.cal4pi,{'dz','z0','x0','transformation'});
+        savefit=copyfields(savefit,cal.cal4pi.coeff,{'frequency','phaseshifts'});
+        savefit.cal_3Dfile=p.cal_3Dfile;
+        obj.setPar('savefit',struct('cal3D',savefit));
     else
         disp('no calibration found')
 
@@ -797,6 +946,10 @@ pard.asymmetry.object=struct('Style','checkbox','String','get asymmetry');
 pard.asymmetry.position=[5,1];
 pard.asymmetry.Optional=true;
     
+
+
+pard.syncParameters={{'cal_3Dfile','cal_3Dfile',{'String'}}};
+
 pard.plugininfo.type='WorkflowFitter';
 pard.plugininfo.description='Maximum likelyhood estimater, optimized for GPU processing. According to: C. S. Smith, N. Joseph, B. Rieger, and K. A. Lidke, ?Fast, single-molecule localization that achieves theoretically minimum uncertainty.,? Nat Methods, vol. 7, no. 5, pp. 373?375, May 2010.';
 end

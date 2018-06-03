@@ -10,7 +10,7 @@ classdef imageloaderTifSimple<interfaces.imageloaderSMAP
         function obj=imageloaderTifSimple(varargin)
             obj@interfaces.imageloaderSMAP(varargin{:});
         end
-        function open(obj,file)
+        function openi(obj,file)
         
 %             obj.reader = javaObjectEDT('org.micromanager.acquisition.TaggedImageStorageMultipageTiff',fileparts(file), false, [], false, false, true);
             obj.file=file;
@@ -20,7 +20,7 @@ classdef imageloaderTifSimple<interfaces.imageloaderSMAP
             obj.metadata.basefile=file;
             
         end
-        function image=getimage(obj,frame)
+        function image=getimagei(obj,frame)
             try
             image=imread(obj.file,'Index',frame);
             catch
@@ -29,7 +29,7 @@ classdef imageloaderTifSimple<interfaces.imageloaderSMAP
            
         end
         
-        function close(obj)
+        function closei(obj)
 %             obj.reader.close
 %             clear(obj.reader)
         end
@@ -46,7 +46,7 @@ classdef imageloaderTifSimple<interfaces.imageloaderSMAP
             end
         end
         
-        function allmd=getmetadatatags(obj)
+        function allmd=getmetadatatagsi(obj)
             allmd={'Format','SimpleTif'};
             imtest=imread(obj.file,'Index',1);
             allmd(end+1,:)={'Width info',size(imtest,2)};
@@ -54,10 +54,24 @@ classdef imageloaderTifSimple<interfaces.imageloaderSMAP
             allmd(end+1,:)={'FileName',obj.file};
             
             ttt=Tiff(obj.file);
+            numf=1;
+            try
             desc=ttt.getTag('ImageDescription');
+            catch err
+                disp('no description found')
+                desc='';
+                %manually find frames
+                
+                ttt.setDirectory(numf)
+                while ~ttt.lastDirectory
+                    numf=numf+1;
+                    ttt.setDirectory(numf);
+                end
+                    
+            end
             ttt.close;
             ind=strfind(desc,'images=');
-            numf=1;
+            
             if ~isempty(ind)
                 numf=sscanf(desc(ind:end),'images=%f');
             else

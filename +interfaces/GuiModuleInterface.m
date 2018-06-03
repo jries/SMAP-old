@@ -655,8 +655,11 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                    sp=obj.syncParameters{k};
                    if ~isempty(sp{2})&&ischar(sp{2})
                    h=obj.guihandles.(sp{2});
-                   obj.addSynchronization(sp{1},h,sp{3:end});
+                   else 
+                       h=[];
                    end
+                   obj.addSynchronization(sp{1},h,sp{3:end});
+                   
                end
 
                for k=1:length(obj.outputParameters)
