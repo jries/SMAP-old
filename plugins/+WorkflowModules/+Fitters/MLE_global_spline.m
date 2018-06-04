@@ -220,10 +220,13 @@ for k=1:length(names)
             switch fitpar.mainchannel
                 case 1
                     locs.(names{k})=sum(v./ve,2)./sum(1./ve,2);
+                    locs.([names{k} 'err'])=1./sqrt(1./ve(:,1).^2+1./ve(:,2).^2);
                 case 2
                     locs.(names{k})=v(:,1);
+                    locs.([names{k} 'err'])=ve(:,1);
                 case 3
                     locs.(names{k})=v(:,2);
+                    locs.([names{k} 'err'])=ve(:,2);
             end
         end
     end
