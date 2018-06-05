@@ -233,6 +233,9 @@ switch lower(p.rendermode.selection)
         frender=@histrender;
     case {'constgauss'}
         frender=@constgaussrender;
+        if isfield(p,'renderparameter') && ~isempty(p.renderparameter) && isnumeric(p.renderparameter) && ~isnan(p.renderparameter) %value set
+            pos.gaussset=p.renderparameter;
+        end
     case 'tiff'
     
 

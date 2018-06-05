@@ -620,7 +620,7 @@ p=obj.getAllParameters;
 % z data?
 fh={'PSFxnmb','PSFxnm_min','PSFxnm_max','znmb','znm_min','znm_max','locprecznmb','locprecznm_min','locprecznm_max',...
     'channels','text1','renderfield','groupcheck','frameb','frame_min','frame_max'...
-    'locprecnmb','locprecnm_min','locprecnm_max','intensitycoding','intensitytxt','colortxt'};
+    'locprecnmb','locprecnm_min','locprecnm_max','intensitycoding','intensitytxt','colortxt','renderparameter'};
 %tiff
 if strcmp(p.rendermode.selection,'tiff')||strcmp(p.rendermode.selection,'raw') %obj.fileinfo(fileselect).istiff
     obj.fieldvisibility('off',fh);
@@ -720,6 +720,13 @@ case {'tiff','raw'}
     end
 end
 
+if contains(p.rendermode.selection,'constGauss')
+    hgui.renderparameter.Visible='on';
+else
+    hgui.renderparameter.Visible='off';
+end
+
+
 if nargin>3
     updateLayerField(obj,field)
 end
@@ -809,6 +816,12 @@ pard.rendermode.object=struct('Style','popupmenu','String',{{'hist','Gauss','con
 pard.rendermode.position=[2,p2];
 pard.rendermode.Width=w2;  
 pard.rendermode.TooltipString='how to render image. DL is diffraction limited';
+
+pard.renderparameter.object=struct('Style','edit','String','','Visible','off');
+pard.renderparameter.position=[2,p3];
+pard.renderparameter.Width=w3;
+pard.renderparameter.TooltipString='numeric parameter for renderer. constGauss: size of Gauss (nm). Leave empty for automatic size determination';
+% pard.renderparameter.Optional=true;
 
 pard.externalrender.object=struct('Style','popupmenu','String','empty');
 pard.externalrender.position=[2,p3];

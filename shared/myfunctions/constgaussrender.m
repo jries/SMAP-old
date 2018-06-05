@@ -1,6 +1,9 @@
 function [srim,nlocs,template]=constgaussrender(pos,rangex, rangey, pixelsx, pixelsy, lut,rangec,template)
 [srim,nlocs,template]=histrender(pos,rangex, rangey, pixelsx, pixelsy, lut,rangec,template);
-if isfield(pos,'s')
+if isfield(pos,'gaussset')
+    s(1)=pos.gaussset/pixelsx;
+    s(2)=pos.gaussset/pixelsy;
+elseif isfield(pos,'s')
     s=myquantilefast(pos.s,0.5,1000)/pixelsx*ones(1,2);
     
 elseif isfield(pos,'sx')

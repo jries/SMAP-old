@@ -160,6 +160,16 @@ while length(fn)==1
         break
     end
 end
+% remove other entries
+fn=fieldnames(tab);
+tabo=[];
+for k=1:length(fn)
+    vh=tab.(fn{k});
+    if isnumeric(vh) && length(vh)>10 && sum(size(vh)>1)==1
+        tabo.(fn{k})=tab.(fn{k});
+    end
+end
+tab=tabo;
 end
 
 if isnumeric(tab)
