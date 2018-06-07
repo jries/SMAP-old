@@ -700,7 +700,7 @@ case {'tiff','raw'}
         for k=1:length(obj.locData.files.file(file).(form))
             if strcmp(form,'tif')
                if ~isempty(obj.locData.files.file(file).tif(k).info)
-                    [p,f,ext]=fileparts(obj.locData.files.file(file).tif(k).info.name);
+                    [path,f,ext]=fileparts(obj.locData.files.file(file).tif(k).info.name);
                     s{sind}=f;
                     sind=sind+1;
                end

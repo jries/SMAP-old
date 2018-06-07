@@ -134,12 +134,12 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
                     end
                     obj.status(['load: ' f{k}])
                     drawnow
-                    try
+%                     try
                     loadfiles(obj,loader,f{k},pfad)
-                    catch err
-                        err
-                        disp([f{k} ' could not be loaded'])
-                    end
+%                     catch err
+%                         err
+%                         disp([f{k} ' could not be loaded'])
+%                     end
                 end
 
                 obj.status('file loaded')
