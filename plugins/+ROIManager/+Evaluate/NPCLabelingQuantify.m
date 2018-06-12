@@ -84,9 +84,13 @@ if isempty(locs.xnm)
     return
 end
 
+
 [x0,y0]=fitposring(locs.xnm,locs.ynm,R);
 xm=locs.xnm-x0;
 ym=locs.ynm-y0;
+
+[xfr,yfr,Rfr]=fitposring(locs.xnm,locs.ynm,[],[x0,y0,R]);
+out.radius=Rfr;
 
 step=2*pi/8;
 [tha,rhoa]=cart2pol(xm,ym);
@@ -96,6 +100,8 @@ inr=rhoa>R-dR&rhoa<R+dR;
 
 inr=inr&locs.locprecnm<minlp;
 % th=tha(inr);rho=rhoa(inr);
+out.numlocsf=sum(inr);
+out.numlocsR=sum(rhoa<R+dR);
 out.coordinates=struct('rho',rhoa,'theta',tha,'drho',locs.locprecnm, 'dtheta',locs.locprecnm./rhoa,'x',locs.xnm,'y',locs.ynm,'frame',locs.frame);
 
 
@@ -207,6 +213,8 @@ hold(ax,'off')
    circle(x0,y0,R,'Parent',ax);
    circle(x0,y0,R-dR,'Parent',ax,'LineStyle',':');     
    circle(x0,y0,R+dR,'Parent',ax,'LineStyle',':');
+   
+   circle(xfr,yfr,Rfr,'Parent',ax,'LineStyle','--');
    
    angles=mdt+[0:pi/4:pi];
    xt=[x0-R*1.5 x0+R*1.5]';
