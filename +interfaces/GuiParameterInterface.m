@@ -73,7 +73,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                 end
             end
             if ~found
-                obj.syncParameters{end+1}={field,handle,syncmode};
+                obj.syncParameters{end+1}={field,handle,syncmode,changecallback};
             end
             
             %initialize: not neeede, done before?
