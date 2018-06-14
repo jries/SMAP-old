@@ -3,6 +3,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
         mainworkflow
         customworkflows
         batchfile
+        loadpar=true;
     end
     methods
         function obj=GuiLocalize(varargin)
@@ -59,6 +60,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
             h.wfcontext=uicontextmenu(getParentFigure(obj.handle));
             uimenu(h.wfcontext,'label','Info on workflow','Callback',{@wfinfo_callback,obj});
             uimenu(h.wfcontext,'label','Change workflow','Callback',{@wfload_callback,obj});
+            uimenu(h.wfcontext,'label','Load raw WF','Callback',{@wfload_callback,obj});
              uimenu(h.wfcontext,'label','Edit workflow','Callback',{@wfedit_callback,obj});
             uimenu(h.wfcontext,'label','Save workflow settings','Callback',{@savepar_callback,obj});
             uimenu(h.wfcontext,'label','Save workflow as...','Callback',{@wsave_callback,obj});
@@ -128,7 +130,7 @@ classdef GuiLocalize<interfaces.GuiModuleInterface&interfaces.LocDataInterface
 
 %             mainworkflow.pluginpath=wffile;
             mainworkflow.makeGui;
-            mainworkflow.load(wffile,par);
+            mainworkflow.load(wffile,par,obj.loadpar);
             if ~isempty(wfinfo)
                 mainworkflow.description=wfinfo;
             end
@@ -191,7 +193,13 @@ obj.mainworkflow.showinfo(true);
 % end
 end
 
-function wfload_callback(~,~,obj)
+function wfload_callback(a,b,obj)
+if isprop(a,'Text') && contains(a.Text,'Load raw')
+    obj.loadpar=false;
+else
+    obj.loadpar=true;
+end
+
 obj.status('load workflow *.txt file');
 drawnow
 settingsfile=obj.getGlobalSetting('mainLocalizeWFFile');

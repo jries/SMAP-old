@@ -96,13 +96,13 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
             hold=obj.guihandles.globaltable;
             gt=uitable(hold.Parent,'Position',hold.Position);
             
-            gt.RowName={'x','y','z','N','Bg'};
+            gt.RowName={'x','y','z','N','Bg','ph'};
             gt.ColumnName={'l','x'};
             
             hh=obj.guiPar.fontsize+5;
             wh=hold.Position(3)-hh-50;
             gt.ColumnWidth={hh,wh};
-            gt.Data={true,'1';true,'1';true,'1';false,'1';false,'1'};
+            gt.Data={true,'1';true,'1';true,'1';false,'1';false,'1';true,'1'};
             gt.ColumnEditable=true;
             obj.guihandles.globaltable=gt;
             hold.Visible='off';
@@ -300,8 +300,8 @@ faccrlb{5}=fitpar.dz*fitpar.refractive_index_mismatch;
 
 names={'ypix','xpix','phot','bg','zastsig','phase'};
 namesav={'ypix','xpix','zastsig'};
-linked=fitpar.link;
-linked(end+1)=1; %XXXXX phase. Later include in gui
+linked=fitpar.link(1:6);
+% linked(end+1)=1; %XXXXX phase. Later include in gui
 ind=1;
 for k=1:length(names)
     if linked(k)
@@ -318,6 +318,9 @@ for k=1:length(names)
                 ch=num2str(c);
 %             end
             locs.([names{k} ch])=P(:,ind).*fac{k}+off{k};
+            if strcmp(names{k},'phase')
+                locs.([names{k} ch])=mod(locs.([names{k} ch]),2*pi);
+            end
             locs.([names{k} ch 'err'])=sqrt(CRLB(:,ind)).*faccrlb{k};
             v(:,c)=locs.([names{k} ch]);
             ve(:,c)=locs.([names{k} ch 'err']);
@@ -372,7 +375,7 @@ dT(2,2,:)=stackinfo.dx(2:numberOfChannels:end);
 % dT(1,2,:)=stackinfo.dx;
 % dT(2,2,:)=-stackinfo.dy;
 
-sharedA = repmat(int32(fitpar.link'),[1 numframes]);
+sharedA = repmat(int32(fitpar.link(1:5)'),[1 numframes]);
  
 %for testing: change order
 
