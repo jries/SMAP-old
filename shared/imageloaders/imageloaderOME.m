@@ -47,6 +47,7 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
                 parselist=true;
             case '.tif'
                 parselist=true;
+                   sm=obj.reader.getGlobalMetadata;
             otherwise 
                 parselist=true;
                 sm=obj.reader.getGlobalMetadata;
