@@ -73,7 +73,7 @@ locdat.yerr=locdat.xerr;
 fn=fieldnames(locs);
 for k=1:length(fn)
     if contains(fn{k},'xpix')
-        if contains(fn{k},'err')
+        if contains(fn{k},'err')|| ~strcmp(fn{k}(1),'x')
             offs=0;
         else
             offs=roi(1);
