@@ -128,9 +128,21 @@ end
   
 locsall=obj.locData.getloc({'frame','filenumber'},'layer',1,'removefilter','filenumber','position','all');
 
-maxf=max(locsall.frame(locsall.filenumber==obj.site.info.filenumber));
+frames=locsall.frame(locsall.filenumber==obj.site.info.filenumber);
+frames0=frames(frames>0);
 numpoints=10;
-timepoints=linspace(0,maxf,numpoints+1);
+qq=linspace(0,1,numpoints+1);
+timepoints=myquantile(frames0,qq);  % now edges are defined: think about time windows
+% maxf=max();
+% minf=min(locsall.frame(locsall.filenumber==obj.site.info.filenumber));
+% 
+% 
+% 
+% qq=timepoints(1,:)/timepoints(1,end);
+
+    
+
+% timepoints=linspace(minf,maxf,numpoints+1);
 [numbercornerassigned,mdt,assigneddirect,timing]=assigntocornersdirect(out.coordinates,inr,8,ax1,timepoints,ax1b);
 [numfound, numfound2]=countspacing(out.coordinates,inr,8,ax2);
 

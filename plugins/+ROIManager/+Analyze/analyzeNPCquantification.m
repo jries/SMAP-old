@@ -58,8 +58,9 @@ nstart=getFieldAsVectorInd(se.sites,fields3{:},'nstart');
 nend=getFieldAsVectorInd(se.sites,fields3{:},'nend');
 frames=getFieldAsVectorInd(se.sites,fields{:},'coordinates','frame');
 
-
-
+radius=getFieldAsVector(se.sites,fields{:},'radius');
+siteid=getFieldAsVector(se.sites,'ID');
+numlocs=getFieldAsVector(se.sites,fields{:},'numlocsf');
 % numfoundint=numfoundint(use);
 % numfoundrat=numfoundrat(use);
 % numbercornerassinged=numbercornerassinged(use);
@@ -103,6 +104,9 @@ numfoundint=numfoundint(indgood);
 numfoundrat=numfoundrat(indgood);
 numbercornerassinged=numbercornerassinged(indgood);
 numbercornerassigneddirect=numbercornerassigneddirect(indgood);
+radius=radius(indgood);
+siteid=siteid(indgood);
+numlocs=numlocs(indgood);
 
 timepoints=timepoints(indgood,:);
 nstart=nstart(indgood,:);
@@ -202,22 +206,33 @@ subplot(1,2,2,ax4);
     %at some time we have to rescale frames. Already do so in Quantify? Or
     %only here? Time axis should be localizations, not frames, to get rid
     %of activation history
-    frames=frames(frames>0);
-    qq=timepoints(1,:)/timepoints(1,end);
-    timepoints=myquantile(frames,qq);
+%     frames=frames(frames>0);
+%     qq=timepoints(1,:)/timepoints(1,end);
+%     timepointsq=myquantile(frames,qq);
     
     axtt=obj.initaxis('time');
     hold(axtt,'off')
-    [ls,lts]=evaluatetime(timepoints,nstart,nb,p,'r');
+    [ls,lts,nerrs,rank]=evaluatetime(nstart,p,'r');
     hold(axtt,'on')
-    [le,lte]=evaluatetime(timepoints,nend,nb,p,'b');
-    plot(timepoints, lts+lte,'o')
+    [le,lte,nerre,rank]=evaluatetime(nend,p,'b');
     
+    nerra=sqrt(nerrs.^2+nerre.^2);
+    nerra(nerra==0)=min(nerra(nerra>0));
+    lta=lts+lte;
+    mlta=sum(lta./nerra)/sum(1./nerra);
     
-    lbs=['lin:';'exp:'];
+    plot(rank, lts+lte,'x')
+    
+    plot(rank,0*rank+mlta);
+    errorbar(rank,lta,nerra,'o')
+    
+    lbs=['lin: ';'exp: ';'sum: '];
+    ls(end+1)=mlta;
+    le(end+1)=0;
+    
     if gtexist
-        [lsgt,ltsgt]=evaluatetime(timepoints,nstart_gt,nb,p,'m');
-        [legt,ltegt]=evaluatetime(timepoints,nend_gt,nb,p,'g');
+        [lsgt,ltsgt]=evaluatetime(nstart_gt,p,'m');
+        [legt,ltegt]=evaluatetime(nend_gt,p,'g');
         
           plot(timepoints, ltsgt+ltegt,'d')
           
@@ -230,14 +245,19 @@ subplot(1,2,2,ax4);
        'gt end',['lin fit: ' num2str(legt(1)*100,'%2.0f')],['exp fit: ' num2str(legt(2)*100,'%2.0f')])
     
     else
-        title(axtt,[lbs num2str([ls le]*100,'%4.0f')]);
-            legend('data start',['lin fit: ' num2str(ls(1)*100,'%2.0f')],...
-       ['exp fit: ' num2str(ls(2)*100,'%2.0f')],'data end',...
-       ['lin fit: ' num2str(le(1)*100,'%2.0f')],['exp fit: ' num2str(le(2)*100,'%2.0f')])
+        title(axtt,[lbs num2str([ls le]*100,'%4.1f, ')]);
+            legend('data start',['lin fit: ' num2str(ls(1)*100,'%2.1f')],...
+       ['exp fit: ' num2str(ls(2)*100,'%2.1f')],'data end',...
+       ['lin fit: ' num2str(le(1)*100,'%2.1f')],['exp fit: ' num2str(le(2)*100,'%2.0f')])
     
     end
+    ylabel('labeling efficiency')
     
-    
+%radii
+axtt=obj.initaxis('size');
+plotSElink(radius,numlocs,siteid,se,'o')
+xlabel('radius (nm)')
+ylabel('number of localizations')
 
 if gtexist %not from simulation
 ax6=obj.initaxis('GT filtered');
@@ -362,14 +382,14 @@ end
 end
 
 
-function [out,pf]=evaluatetime(timepoints,n,nb,p,col)
-if nargin <5
+function [out,pf,nerr,tp]=evaluatetime(n,p,col)
+if nargin <3
     col='k';
 end
     
 p.ploton=false;
 p.fitrange=[1 8];
-nerr=zeros(1,size(n,2));
+nerr=ones(1,size(n,2));
 pf=zeros(1,size(n,2));
 for k=1:size(n,2)
 %     h=hist(n(:,k),nb);
@@ -382,9 +402,11 @@ for k=1:size(n,2)
         end
     else
         pf(k)=0;
+        nerr(k)=0;
     end
 end
-tp=timepoints(1,:);
+% tp=timepoints(1,:);
+tp=linspace(0,1,size(n,2)); %rank
 % plot(tp,pf,'*');
 % hold on
 errorbar(tp,pf,nerr,[col '*'])
@@ -419,6 +441,7 @@ end
 hold on
 plot(tp,fr(tp),col);
 plot(tp,fx(tp),[col '--']);
+xlabel('rank');
 out=[le;lex];
 end
 

@@ -20,7 +20,13 @@ SE=varargin{startind+3};
 plotpar=varargin{startind+4};
 plothandle=plot(ax,xdat,ydat,plotpar);
 
-dc=datacursormode(ax.Parent);
+parent=ax.Parent;
+while ~isa(parent,'matlab.ui.Figure')
+    parent=parent.Parent;
+end
+    
+
+dc=datacursormode(parent);
 dc.Enable='on';
 fndat=dc.UpdateFcn;
 % oldupdate=@dc.UpdateFcn;
