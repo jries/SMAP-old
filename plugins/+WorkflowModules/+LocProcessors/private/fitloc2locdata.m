@@ -1,10 +1,16 @@
 function locdat=fitloc2locdata(obj,locs,indin)
 fieldsremove={'xerrpix','yerrpix','PSFxpix','PSFypix','xpix','ypix'};
-fieldsremove={};
+fieldsremove={'xerrpix','yerrpix'};
 keeptype={'frame','filenumber'};
+
+if isfield(locs,'xerrpix') 
+    locs.xpixerr=locs.xerrpix;
+end
+if isfield(locs,'yerrpix') 
+    locs.ypixerr=locs.yerrpix;
+end
 fn=fieldnames(locs);
 keepfields=setdiff(fn,fieldsremove);
-
 for k=1:length(keepfields)
     if any(strcmp(keepfields{k},keeptype))
     locdat.(keepfields{k})=locs.(keepfields{k})(indin);
@@ -27,7 +33,7 @@ end
 locdat.xnm=(locs.xpix(indin)+roi(1))*pixelsize(1);
 locdat.ynm=(locs.ypix(indin)+roi(2))*pixelsize(end);
 
-locdat.xerr=locdat.xnm*0+1;
+locdat.xerrpix=locdat.xnm*0+1;
 % if isfield(locs,'xerrpix')
 % locdat.xerr=locs.xerrpix(indin)*pixelsize(1);
 % end
@@ -40,7 +46,7 @@ locdat.xerr=locdat.xnm*0+1;
 % locdat.xerr=min(locdat.xerr1,locdat.xerr2);
 % end
 
-locdat.yerr=locdat.xerr;
+locdat.yerrpix=locdat.xerrpix;
 % if isfield(locs,'yerrpix')
 % locdat.yerr=locs.yerrpix(indin)*pixelsize(end);
 % end
@@ -102,7 +108,7 @@ if isfield(locs,'PSFypix')
 else
     locdat.PSFynm=locdat.PSFxnm;
 end
-locdat.locprecnm=sqrt((locdat.xerr.^2+locdat.yerr.^2)/2);
+locdat.locprecnm=sqrt((locdat.xnmerr.^2+locdat.ynmerr.^2)/2);
 if isfield(locs,'zerr')
     locdat.locprecznm=locs.zerr(indin);
 end

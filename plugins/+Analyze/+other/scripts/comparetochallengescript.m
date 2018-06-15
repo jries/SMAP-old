@@ -366,7 +366,7 @@ end
 
 
 %% AS 10nm C2_MT2.N1.HD_version2_sig1.5_roi5_
-if 1
+if 0
     dx=-4.604; %corrections from bead fit.
     dy=95.165;
     dz=3.150;
@@ -395,6 +395,38 @@ if 1
     LLrel_cutoff=-1.8;
     group_dT=0;
     border=5; %distance from min/max: if fit did converge to border
+end
+
+%% AS 10nm C4_MT4.N2.HD_version2_sig1_roi5_
+if 0
+    dx=-4.604; %corrections from bead fit.
+    dy=95.165;
+    dz=3.150;
+    photonfactor=0.872;
+    
+    %% filter used
+    
+    groupfilter = 1;
+    LLfilter = 1;
+    iterationfilter = 1;
+    filterint=1;
+    boarderfilter = 1;
+    clusterfilter = 1;
+    zfilter = 0;
+    
+    
+    %density
+    densitysize_xy=80;% for clusterfilter
+    densitysize_z=160;% for clusterfilter
+    densitycutoff=2;% for clusterfilter
+    zmin=-800;zmax=800;% for zfilter
+    bgmin=-inf; bgmax=inf; %background filter
+    locprec_cutoff=80; %groupfilter
+    locprecz_cutoff=160; %groupfilter
+    phot_cutoff=.100; %groupfilter
+    LLrel_cutoff=-2; %LLfilter
+    group_dT=0; %regroup
+    border=5; %distance from min/max: if fit did converge to border; boarderfilter
 end
 
 
@@ -460,6 +492,70 @@ if 0
     locprecz_cutoff=160;
     phot_cutoff=0.1;
     LLrel_cutoff=-1.4;
+    group_dT=0;
+    border=5; %distance from min/max: if fit did converge to border
+end
+
+%% 2D \C4_MT4.N2.HD\2D Smooth4
+if 1
+    dx=7.688; %corrections from bead fit.
+    dy=-15.484;
+    dz=-0.443+25;
+    photonfactor=0.896;
+    
+    %% filter used
+    
+    groupfilter = 0;
+    LLfilter = 1;
+    iterationfilter = 1;
+    filterint=1;
+    boarderfilter = 0;
+    clusterfilter = 1;
+    zfilter = 0;
+    
+    
+    %density
+    densitysize_xy=100;
+    densitysize_z=1000;
+    densitycutoff=100;
+    zmin=-800;zmax=800;
+    bgmin=-inf; bgmax=inf; %background filter
+    locprec_cutoff=100;
+    locprecz_cutoff=400;
+    phot_cutoff=0.1;
+    LLrel_cutoff=-2;
+    group_dT=0;
+    border=5; %distance from min/max: if fit did converge to border
+end
+
+%% 2D \C6_ER2.N3.HD\2D Smooth4
+if 1
+    dx=7.688; %corrections from bead fit.
+    dy=-15.484;
+    dz=-0.443+25;
+    photonfactor=0.896;
+    
+    %% filter used
+    
+    groupfilter = 1;
+    LLfilter = 1;
+    iterationfilter = 1;
+    filterint=1;
+    boarderfilter = 0;
+    clusterfilter = 1;
+    zfilter = 0;
+    
+    
+    %density
+    densitysize_xy=100;
+    densitysize_z=1000;
+    densitycutoff=50;
+    zmin=-800;zmax=800;
+    bgmin=-inf; bgmax=inf; %background filter
+    locprec_cutoff=100;
+    locprecz_cutoff=500;
+    phot_cutoff=0.1;
+    LLrel_cutoff=-2;
     group_dT=0;
     border=5; %distance from min/max: if fit did converge to border
 end
