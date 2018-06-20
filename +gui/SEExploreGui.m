@@ -29,25 +29,27 @@ classdef SEExploreGui<interfaces.SEProcessor
              h.celllist=uicontrol(obj.handle,'Position',[600+20,360,190-20,180],'Style','listbox',...
                  'String',' empty','Units','normalized','FontSize',fontsize-2,'max',100,...
                  'Callback',{@celllist_callback,obj});
-             h.redrawsite=uicontrol(obj.handle,'Position',[30,925,100,40],'Style','pushbutton','String','redraw','Units','normalized','FontSize',fontsize,'Callback',{@redrawsite_callback,obj});
+             h.redrawsite=uicontrol(obj.handle,'Position',[30,925,80,40],'Style','pushbutton','String','redraw','Units','normalized','FontSize',fontsize,'Callback',{@redrawsite_callback,obj});
+             h.redrawsiteall=uicontrol(obj.handle,'Position',[110,925,40,40],'Style','pushbutton','String','all','Units','normalized','FontSize',fontsize,'Callback',{@redrawsiteall_callback,obj});
+              
              h.addsite=uicontrol(obj.handle,'Position',[290,925,60,40],'Style','pushbutton','String','Add','Units','normalized','FontSize',fontsize,'Callback',{@addsite,obj});
              h.removesite=uicontrol(obj.handle,'Position',[400-10,540,90,30],'Style','pushbutton','String','Remove','Units','normalized','FontSize',fontsize,'Callback',{@removesite_callback,obj});
              h.toggleuse=uicontrol(obj.handle,'Position',[510+20,540,70,30],'Style','pushbutton','String','Use','Units','normalized','FontSize',fontsize,'Callback',{@toggleuse_callback,obj});
              
              
-             h.redrawcell=uicontrol(obj.handle,'Position',[430,925,100,40],'Style','pushbutton','String','redraw','Units','normalized','FontSize',fontsize,'Callback',{@redrawcell_callback,obj});
+             h.redrawcell=uicontrol(obj.handle,'Position',[430,925,80,40],'Style','pushbutton','String','redraw','Units','normalized','FontSize',fontsize,'Callback',{@redrawcell_callback,obj});
              h.addcell=uicontrol(obj.handle,'Position',[650,925,60,40],'Style','pushbutton','String','Add','Units','normalized','FontSize',fontsize,'Callback',{@addcell,obj});
              h.removecell=uicontrol(obj.handle,'Position',[600+20,540,90,30],'Style','pushbutton','String','Remove','Units','normalized','FontSize',fontsize,'Callback',{@removecell_callback,obj});
              
-             h.redrawfile=uicontrol(obj.handle,'Position',[30,525,100,40],'Style','pushbutton','String','redraw','Units','normalized','FontSize',fontsize,'Callback',{@redrawfile_callback,obj});
+             h.redrawfile=uicontrol(obj.handle,'Position',[30,525,80,40],'Style','pushbutton','String','redraw','Units','normalized','FontSize',fontsize,'Callback',{@redrawfile_callback,obj});
              h.fileax.ButtonDownFcn={@fileaxclick,obj};
              h.cellax.ButtonDownFcn={@cellaxclick,obj};
              h.siteax.ButtonDownFcn={@siteaxclick,obj};
              
              h.info=uicontrol(obj.handle,'Position',[600+20,10,190-20,340],'Style','listbox','String','info','FontSize',fontsize-2,'Max',10,'Units','normalized');
              
-             h.anglebutton=uicontrol(obj.handle,'Position',[150,925,60,40],'Style','pushbutton','String','Angle','Units','normalized','FontSize',fontsize,'Callback',{@anglebutton_callback,obj});
-             h.angle=uicontrol(obj.handle,'Position',[210,925,60,40],'Style','edit','String','0','Units','normalized','FontSize',fontsize,'Callback',{@angle_callback,obj});
+             h.anglebutton=uicontrol(obj.handle,'Position',[160,925,60,40],'Style','pushbutton','String','Angle','Units','normalized','FontSize',fontsize,'Callback',{@anglebutton_callback,obj});
+             h.angle=uicontrol(obj.handle,'Position',[220,925,50,40],'Style','edit','String','0','Units','normalized','FontSize',fontsize,'Callback',{@angle_callback,obj});
              
              
              h.revealsmap=uicontrol(obj.handle,'Position',[30,600,30,30],'Style','pushbutton','String','<-','Units','normalized','FontSize',fontsize,'Callback',{@revealsmap_callback,obj});
@@ -763,4 +765,8 @@ obj.setPar('sr_pos',pos);
 notify(obj.P,'sr_render')
 obj.setPar('filenumber',obj.SE.currentsite.info.filenumber)
 
+end
+
+function redrawsiteall_callback(a,b,obj)
+obj.redrawall(true);
 end
