@@ -61,6 +61,7 @@ frames=getFieldAsVectorInd(se.sites,fields{:},'coordinates','frame');
 radius=getFieldAsVector(se.sites,fields{:},'radius');
 siteid=getFieldAsVector(se.sites,'ID');
 numlocs=getFieldAsVector(se.sites,fields{:},'numlocsf');
+numlocsR=getFieldAsVector(se.sites,fields{:},'numlocsR');
 % numfoundint=numfoundint(use);
 % numfoundrat=numfoundrat(use);
 % numbercornerassinged=numbercornerassinged(use);
@@ -107,6 +108,7 @@ numbercornerassigneddirect=numbercornerassigneddirect(indgood);
 radius=radius(indgood);
 siteid=siteid(indgood);
 numlocs=numlocs(indgood);
+numlocsR=numlocsR(indgood);
 
 timepoints=timepoints(indgood,:);
 nstart=nstart(indgood,:);
@@ -252,8 +254,22 @@ subplot(1,2,2,ax4);
     
     end
     ylabel('labeling efficiency')
-    
-%radii
+ 
+    %number of localizations
+    %aware of bias for not segmenting npcs with low number of localizations
+axtt=obj.initaxis('localizations');
+hold off
+hlocs=histogram(axtt,numlocs,0:1:max(numlocs));
+
+
+ns=floor(mean(numlocs)-std(numlocs));
+fp=fit(hlocs.BinEdges(ns:end-1)',hlocs.Values(ns:end)','gauss1');
+hold on
+plot(hlocs.BinEdges+hlocs.BinWidth/2,fp(hlocs.BinEdges),'r')
+plot(hlocs.BinEdges(ns:end-1)+hlocs.BinWidth/2,fp(hlocs.BinEdges(ns:end-1)),'r*')
+
+title(axtt,['mean: ' num2str(mean(numlocs),'%2.1f') ', LE:' num2str(mean(numlocs)/32*100,'%2.1f') ,' fit:' num2str(fp.b1,'%2.1f') ', LE:' num2str(fp.b1/32*100,'%2.1f')]);
+    %radii
 axtt=obj.initaxis('size');
 plotSElink(radius,numlocs,siteid,se,'o')
 xlabel('radius (nm)')
@@ -389,7 +405,7 @@ end
     
 p.ploton=false;
 p.fitrange=[1 8];
-nerr=ones(1,size(n,2));
+nerr=ones(1,size(n,2))/100;
 pf=zeros(1,size(n,2));
 for k=1:size(n,2)
 %     h=hist(n(:,k),nb);
