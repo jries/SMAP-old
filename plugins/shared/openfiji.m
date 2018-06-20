@@ -1,9 +1,6 @@
-function mij=openfiji(obj)
-
-
-
-mij=obj.getPar('MIJ');
-if isempty(mij) %open fiji
+function ijm=openfiji(obj)
+ijm=obj.getPar('IJM');
+if isempty(ijm) %open fiji
     
     fijipath=obj.getGlobalSetting('fijipath');  
     if ~exist(fijipath,'dir')
@@ -15,9 +12,13 @@ if isempty(mij) %open fiji
     dir=pwd;
     obj.setPar('status','open Fiji');
     addpath(fijipath)
-    Miji();
-    mij=MIJ;
+    ImageJ
+    ijm=evalin('base','IJM');
+%     Miji();
+%     mij=MIJ;
     cd(dir);
-    obj.setPar('MIJ',mij);
+    obj.setPar('IJM',ijm);
+    obj.setPar('IJ',ij.IJ);
+%     obj.setPar('MIJ',mij);
 end
 end

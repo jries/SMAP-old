@@ -7,7 +7,10 @@ drawnow
     if length(s)>3  
         imout=permute(imout,[1,2,4,3]);
     end
-    mij=openfiji(obj);
-    mij.createColor(title,imout,true);
+    ijm=openfiji(obj);
+    img=copytoImagePlus(imout);
+    img.show;
+%     ijm.show('imout');
+%     mij.createColor(title,imout,true);
     obj.status('done opening stack in fiji.');
 end
