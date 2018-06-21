@@ -9,9 +9,9 @@ if isfield(s,'x4pi') %this is a 4pi data set
 %         rangeh=(k-1)*s.height4pi+1:k*s.height4pi;
         rangeh=(k-1)*s.width4pi+1:k*s.width4pi;
         imh=imstack(s.y4pi(k)+1:s.y4pi(k)+s.height4pi,s.x4pi(k)+1:s.x4pi(k)+s.width4pi,:);
-        if s.mirror4pi(k)==1 %along x
+        if s.mirror4pi(k)==2 %along x
             imh=imh(end:-1:1,:,:);
-        elseif s.mirror4pi(k)==2 %along y
+        elseif s.mirror4pi(k)==1 %along y
             imh=imh(:,end:-1:1,:);
         end
         imout(:,rangeh,:)=imh;
