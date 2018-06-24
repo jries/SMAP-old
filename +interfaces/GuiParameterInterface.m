@@ -55,6 +55,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                     end
                 end
                 obj.P.par.(field)(posnew)=copyfields(obj.P.par.(field)(1),hstruc);
+%                 obj.P.par.(field)(posnew).content=obj.P.par.(field)(1).content; %xxx 
 %                 obj.P.par.(field)(posnew)=hstruc;
                 obj.P.par.(field)(outind)=[];
             end
@@ -158,16 +159,18 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                         %find valid handle
                         %notempty
                         hhere=[];
+                        content=[];
                         for k=1:length(par.(field))
                             if ~isempty(par.(field)(k).handle)&&isvalid(par.(field)(k).handle)
                                 hhere=par.(field)(k);
                                 break
                             end
+                            content=par.(field)(k).content;
                         end
                         if ~isempty(hhere)
-                        value=obj.handle2value(hhere.handle);
+                            value=obj.handle2value(hhere.handle);
                         else
-                            value=[];
+                            value=content;
                         end
                     end
                 else

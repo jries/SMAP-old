@@ -51,6 +51,9 @@ obj.setPar('locFields',locfields,'String');
 % end
 
 obj.setPar('filelist_short',fls,'String');
+fsx=[{'layer','all'} fls];
+obj.setPar('filelist_short_ext',fsx,'String');
+            
 obj.status('filter');drawnow;
 obj.locData.filter;
 obj.setPar('currentfileinfo',obj.locData.files.file(1).info) %triggers format to update stuff. and redraw.

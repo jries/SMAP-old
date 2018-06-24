@@ -121,7 +121,12 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             %'layer': double number of layer. overrides channel and grouping. Onyl one layer possible
             %(due to grouping)
             %'removeFilter': cell array of filter names to remove 
-            [locsout,indout,hroi]=getlocs(obj,fields,varargin{:});
+            if any(strcmp(varargin,'locselector'))
+                [locsout,indout,hroi]=getlocs2(obj,fields,varargin{:});
+            else
+                [locsout,indout,hroi]=getlocs(obj,fields,varargin{:});
+%                 [locsout,indout,hroi]=getlocs2(obj,fields,varargin{:});
+            end
         end
         
         function im=getimage(obj,layer)
@@ -159,7 +164,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             %get filter structure from layer, 
             %optional: specify grouping=true or false, if not specified, take from layer
             %filter=obj.getFilter(layer, grouping)
-            if nargin<3
+            if nargin<3||isempty(grouping)
                 grouping=obj.isgrouped(layer);
             end
             
@@ -178,7 +183,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
         function setFilter(obj,filter,layer,grouping) 
             %set filter structure for specific layer (from getFilter)
             %obj.setFilter(filter,layer,grouping)
-            if nargin<4
+            if nargin<4||isempty(grouping)
                 grouping=obj.isgrouped(layer);
             end
             if grouping
@@ -205,11 +210,11 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             %returns indices of filtered localizations in specific layer.
             %Grouping (t/f) can be specified or is taken from layer
             %indices=inFilter(layer,grouping)
-            if nargin<3
+            if nargin<3||isempty(grouping)
                 grouping=obj.isgrouped(layer);
             end
             
-            if grouping
+            if grouping && ~isempty(obj.grouploc)
                 fn=fieldnames(obj.grouploc);
                 indin=true(length(obj.grouploc.(fn{1})),1);
             else

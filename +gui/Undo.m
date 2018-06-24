@@ -41,6 +41,8 @@ classdef Undo< interfaces.GuiModuleInterface & interfaces.LocDataInterface
 
             obj.setPar('filelist_long',fl);
             obj.setPar('filelist_short',fls);
+            fsx=[{'layer','all'} fls];
+            obj.setPar('filelist_short_ext',fsx,'String');
             obj.locDataOld=temp;
             
             obj.status(['undo performed: ' obj.undoModule])

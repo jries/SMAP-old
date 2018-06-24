@@ -466,9 +466,32 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                 obj.guiPar.FieldWidth=(hpos(3)-3*obj.guiPar.Xsep-2*obj.guiPar.Xrim)/4;
             end
             if isstruct(guidef)
-                allFields=fieldnames(guidef);
+                
                 guiPar=obj.guiPar;
-
+                if isfield(guidef,'locselector') && any(guidef.locselector)
+                    guidef=copyfields(guidef,locselectordefault);
+                    if isfield(guidef,'syncParameters')
+                        guidef.syncParameters{end+1}={'filelist_short_ext','selector_filelist','String'};
+                    else
+                        guidef.syncParameters={{'filelist_short_ext','selector_filelist',{'String'}}};
+                    end
+                    fl=obj.getPar('filelist_short_ext');
+                    if ~isempty(fl)
+                        if isfield(fl,'String')
+                            guidef.selector_filelist.object.String=fl.String;
+                        else
+                            guidef.selector_filelist.object.String=fl;
+                        end
+                    end
+                    offstr={'off','on'};
+                    if length(guidef.locselector)==3
+                        guidef.selector_filelist.object.Visible=offstr{guidef.locselector(1)+1};
+                        guidef.selector_filter.object.Visible=offstr{guidef.locselector(2)+1};
+                        guidef.selector_pos.object.Visible=offstr{guidef.locselector(3)+1};
+                    end
+%                     guidef.syncParameters %extend 
+                end
+                allFields=fieldnames(guidef);
                 anyoptional=false;
                 for k=1:length(allFields) 
                     thisField=guidef.(allFields{k});
@@ -480,6 +503,8 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                         obj.outputParameters=thisField;
                     elseif strcmp(allFields{k},'plugininfo')
                         obj.plugininfo=thisField;
+                    elseif strcmp(allFields{k},'locselector')
+                        %do nothing here
                     elseif isstruct(thisField) && ~isempty(obj.handle) %results name
                         if ~isfield(thisField,'object') || ~isfield(thisField.object,'Style')
                             allFields{k}
@@ -768,4 +793,20 @@ addParameter(p,'on',{});
 parse(p,args{:});
 pres=p.Results;
 
+end
+
+function pard=locselectordefault
+pard.selector_filelist.object=struct('String','all','Style','popupmenu');
+pard.selector_filelist.position=[1,1];
+pard.selector_filelist.Width=.7;
+
+pard.selector_filter.object=struct('String',{{'layers','all u','all g','layer1','layer2','layer3'}},'Style','popupmenu'); 
+pard.selector_filter.position=[1,1.7];
+pard.selector_filter.Width=.7;
+
+pard.selector_pos.object=struct('String',{{'Roi','FoV','all'}},'Style','popupmenu');
+pard.selector_pos.position=[1,2.4];
+pard.selector_pos.Width=.6;
+% pard.filelist_ext.TooltipString=sprintf('you can define a tooltip string. \n This tip is displayed when you hover the mouse on the control');
+           
 end
