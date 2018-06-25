@@ -20,19 +20,19 @@ classdef cfithist<interfaces.DialogProcessor
             ticked = [];
             collection = [];
             if p.N0_fit
-                ticked = [ticked "N0_v"];
+                ticked = [ticked string('N0_v')];
             end
             if p.pblink_fit
-                ticked = [ticked "pblink_v"];
+                ticked = [ticked string('pblink_v')];
             end
             if p.pmature_fit
-                ticked = [ticked "pmature_v"];
+                ticked = [ticked string('pmature_v')];
             end
             if p.monomer_fit
-                ticked = [ticked "monomer_v"];
+                ticked = [ticked string('monomer_v')];
             end
             if p.ncluster_fit
-                ticked = [ticked "ncluster_v"];
+                ticked = [ticked string('ncluster_v')];
             end
             nTicked = length(ticked);
             
@@ -59,7 +59,7 @@ classdef cfithist<interfaces.DialogProcessor
                 meanlocs(i) = str2double(pout.meanlocs);
                 for ii = 1:nTicked
                     tickedFlag = ticked(ii);
-                    collection(i,ii) = pout_ref.(tickedFlag);
+                    collection(i,ii) = pout_ref.(char(tickedFlag));
                 end
 %               locs=obj.locData.getloc({'frame','xnm','ynm','phot','bg','PSFxnm','locprecnm'},'layer',1,'position','roi');
 
@@ -73,7 +73,7 @@ classdef cfithist<interfaces.DialogProcessor
                 outCollection = mat2cell(outCollection, repelem(1, sOutCollection(1)), repelem(1, sOutCollection(2)));
                 outCollection = [{'Mean';'Std'}, outCollection];
                 obj.guihandles.bsResult = figure;
-                t = uitable(obj.guihandles.bsResult, 'data', outCollection, 'columnName', ["Type", "MeanLocs", ticked]);
+                t = uitable(obj.guihandles.bsResult, 'data', outCollection, 'columnName', [string('Type'), string('MeanLocs'), ticked]);
             end
             obj.setGuiParameters(pout);
             out.histogram=histogram;
