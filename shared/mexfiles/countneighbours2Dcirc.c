@@ -25,9 +25,9 @@ dx2=dx*dx;
 indx=0;
 for(this=0;this<lenx;this++) 
 {
-    if (this%10000==0)
+    if (this%50000==49999)
         {
-        mexPrintf(" %i of %i k\n",this/1000,lenx/1000);
+        mexPrintf(" %i of %i k\n",(this+1)/1000,lenx/1000);
         mexEvalString("drawnow");
         }    
     while((x[indx]<x[this]-dx)&&(indx<lenx-1))

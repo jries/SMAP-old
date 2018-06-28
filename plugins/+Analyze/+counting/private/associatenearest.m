@@ -1,4 +1,4 @@
-function [beadnum,numlocs,dist,numlocsred]=associatenearest(mx,my,pos,maxd)
+function [beadnum,numlocs,dist,numlocsred,inreduced]=associatenearest(mx,my,pos,maxd)
 %associate only to nearest position
 if nargin==3
     maxd2=inf;
@@ -13,7 +13,7 @@ else
     posh=pos;
 end
 
-
+inreduced=false(length(posh.x),1);
 beadnum=zeros(length(posh.x),1);
 dist=beadnum;
 numlocs=zeros(length(mx),1);
@@ -25,6 +25,7 @@ for k=1:length(posh.x)
     numlocs(minind)=numlocs(minind)+1;
     if d2<maxd2
     numlocsred(minind)=numlocsred(minind)+1;
+    inreduced(k)=true;
     end
     dist(k)=sqrt(d2);
 end

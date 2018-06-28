@@ -66,7 +66,7 @@ pard.c_stdymax.Width=0.5;
 
 % pard.N0_v.object=struct('String','10','Style','edit');
 % pard.N0_v.position=[2,3];
-pard.c_groupfield.object=struct('String',{{'ungrouped','grouped','blink remove'}},'Style','popupmenu');
+pard.c_groupfield.object=struct('String',{{'ungrouped','grouped','grouped max dist','blink remove'}},'Style','popupmenu');
 pard.c_groupfield.position=[3,1];
 pard.c_groupfield.Width=2;
 

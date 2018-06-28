@@ -7,7 +7,7 @@ lengthscale=par.lengthscale;
 ploton=par.showresults;
 psfsigmafocus=par.segment_maxPSF;
 
-locs=locData.getloc({'frame','xnm','ynm','phot','bg','PSFxnm','locprecnm'},'layer',1,'position','roi','grouping','ungrouped');
+locs=locData.getloc({'frame','xnm','ynm','phot','bg','PSFxnm','locprecnm','groupindex'},'layer',1,'position','roi','grouping','ungrouped');
 
 
 
@@ -15,6 +15,7 @@ locs=locData.getloc({'frame','xnm','ynm','phot','bg','PSFxnm','locprecnm'},'laye
 pixrec=5;
 gaussfac=1;
 gaussmin=5; %clusters are starting points for meanshiftpeakfind
+gaussmin=lengthscale/2;
 locprecmax=20;
 inlp=locs.locprecnm<locprecmax;
 indInFocus=locs.PSFxnm<psfsigmafocus;
@@ -22,9 +23,11 @@ xmin=min(locs.xnm);ymin=min(locs.ynm);
 
 
 badind=removesingles(struct('x',locs.xnm,'y',locs.ynm),lengthscale, 3,3);
+%min neighbours, iterations
+%maybe that is too much already? Although removing 
 incluster=~badind;
 indInFocus=indInFocus&inlp&(incluster);
-scale=median(locs.locprecnm);
+% scale=median(locs.locprecnm);
 
 posa.x=locs.xnm(incluster)-xmin;
 posa.y=locs.ynm(incluster)-ymin;
@@ -37,7 +40,7 @@ posrem.y=locs.ynm(indInFocus)-ymin;
 posrem.s=max(locs.locprecnm(indInFocus)*gaussfac,10);
 imsrrem=gaussrender(posrem,[0 xmax],[0 ymax],pixrec, pixrec);
 
-imsr=gaussrender(posa,[0 xmax],[0 ymax],pixrec, pixrec);
+% imsr=gaussrender(posa,[0 xmax],[0 ymax],pixrec, pixrec);
 %spatial scale from locprec
 maxima=maximumfindcall(single(imsrrem));
 maxima(maxima(:,3)<0.00001,:)=[];
@@ -66,7 +69,22 @@ maximanm=maxima*pixrec; %in nanometers
 
 
 % [beadnum,numlocs,dist,numlocsred]=associatenearest(maximanm(:,2),maximanm(:,1),posa,scale*5);
-[beadnum,numlocs,dist,numlocsred]=associatenearest(maximanm(:,1),maximanm(:,2),posa,lengthscale);
+[beadnum,numlocs,dist,numlocsred,inreduced]=associatenearest(maximanm(:,1),maximanm(:,2),posa,lengthscale);
+mindistance2=lengthscale^2;
+goodclusters=true(size(maximanm,1),1);
+for k=1:size(maximanm,1)
+    d=(maximanm(k,1)-maximanm(k+1:end,1)).^2+(maximanm(k,2)-maximanm(k+1:end,2)).^2;
+    badind=find(d<mindistance2);
+    if ~isempty(badind)
+        goodclusters(k)=false;
+        goodclusters(badind+k)=false;
+    end
+    
+end
+
+%identify clusters that are not close to ohter clusters, only use those
+%values
+
 if ploton
     initaxis(par.resultstabgroup,'peaks on SR');
 %     par.resultstabs(1).Title='peaks on SR';
@@ -115,13 +133,20 @@ for k=1:max(beadnum)
     cluster(k).y=locs.ynm(inclusterf(indbead));
     cluster(k).bg=locs.bg(inclusterf(indbead));
     cluster(k).phot=locs.phot(inclusterf(indbead));
+    cluster(k).inreduced=inreduced((indbead));
   
     
     cluster(k).frame=locs.frame(inclusterf(indbead));
     cluster(k).psf=locs.PSFxnm(inclusterf(indbead));
+    cluster(k).groupindex=locs.groupindex(inclusterf(indbead));
+    
     cluster(k).locprec=locs.locprecnm(inclusterf(indbead));
     
     cluster(k).locs=numlocsred(k);
+    cluster(k).glocs=numel(unique(cluster(k).groupindex));
+    cluster(k).glocsreduced=numel(unique(cluster(k).groupindex(cluster(k).inreduced)));
+    
+    cluster(k).issinglecluster=goodclusters(k);
     plot(cluster(k).x,cluster(k).y,'.')
     hold on
    

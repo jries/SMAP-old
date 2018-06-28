@@ -16,7 +16,9 @@ nums=1:length(x);
 [~,ind2]=sort(nums(ind));
 
 
-neighbours=countneighboursc(double(x),double(y),double(dx));
+ neighbours=countneighbours2Dcirc(double(x),double(y),double(dx));
+%neighbours=evalc('countneighbours2Dcirc(double(x),double(y),double(dx))');
+
 neighboursout=neighbours(ind2);
 %c: n=f(x,y,dx). x already sorted
 

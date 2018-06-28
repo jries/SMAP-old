@@ -12,8 +12,10 @@ for k=1:numcluster
     cluster(k).stdx=std(cluster(k).x(incluster));
     cluster(k).stdy=std(cluster(k).y(incluster));
     cluster(k).locsdf=min(sum(diff(cluster(k).frame(incluster))>par.dftime)+1,sum(incluster));
-    cluster(k).glocs=min(sum(diff(cluster(k).frame(incluster))>1)+1,sum(incluster));
+%     cluster(k).glocs=min(sum(diff(cluster(k).frame(incluster))>1)+1,sum(incluster));
     cluster(k).locsdfv=cluster(k).locsdf+0*cluster(k).x;
+%     cluster(k).glocs=cluster(k).glocsreduced; %XXXXXXX
+%     cluster(k).issinglecluster;
 end
 
 
@@ -24,6 +26,8 @@ switch par.c_groupfield.Value
     case 2
         gfield='glocs';
     case 3
+        gfield='glocsreduced';
+    case 4
         gfield='locsdf';
 end
 sigmapsf=[cluster(:).meansigmapsf]';
@@ -31,6 +35,7 @@ sigmapsf=[cluster(:).meansigmapsf]';
 clocs=[cluster(:).(gfield)]';
 ig=clocs>0&sigmapsf>0;
 
+ig=ig&[cluster(:).issinglecluster]';
 %Manuel: remove
 % ig=ig&sigmapsf>120&sigmapsf<140;
 
