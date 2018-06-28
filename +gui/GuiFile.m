@@ -179,6 +179,8 @@ classdef GuiFile< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.locData.filter;
             obj.setPar('filelist_long',fl,'String');
             obj.setPar('filelist_short',fs,'String');
+            fsx=[{'layer','all'} fs];
+            obj.setPar('filelist_short_ext',fsx,'String');
         end     
         
         function setGuiParameters(obj,p,varargin)
@@ -342,6 +344,8 @@ switch menuobj.Label
         fl={''};
         obj.setPar('filelist_long',fl,'String');
         obj.setPar('filelist_short',fl,'String');
+        fsx=[{'layer','all'} fl];
+        obj.setPar('filelist_short_ext',fsx,'String');
 
 end
 end

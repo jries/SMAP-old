@@ -15,7 +15,8 @@ end
 
 lh=subsref(ld.lds,ld.S);
 for k=1:length(ld.partnames)
-    [~,fileh,ext]=fileparts(ld.partnames{k});
+    filenameloc=strrep(strrep(ld.partnames{k},'\',filesep),'/',filesep);
+    [~,fileh,ext]=fileparts(filenameloc);
     lk=load([path filesep fileh ext]);
     lh=copyfields(lh,lk.ltemp);
 end

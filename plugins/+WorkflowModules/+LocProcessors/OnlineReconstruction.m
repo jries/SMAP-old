@@ -48,6 +48,9 @@ classdef OnlineReconstruction<interfaces.WorkflowModule
             obj.setPar('currentfileinfo',obj.fileinfo);
             obj.setPar('filelist_long',filelist,'String')
             obj.setPar('filelist_short',filelists,'String')
+            fsx=[{'layer','all'} filelists];
+            obj.setPar('filelist_short_ext',fsx,'String');
+            
             pos=(obj.fileinfo.roi(1:2)+obj.fileinfo.roi(3:4)/2).*obj.fileinfo.cam_pixelsize_um*1000;
             srs=obj.fileinfo.roi(3:4).*obj.fileinfo.cam_pixelsize_um*1000;
             pixels=max(srs./obj.getPar('sr_sizeRecPix'));
