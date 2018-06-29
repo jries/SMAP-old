@@ -53,7 +53,7 @@ end
 
 function makeGui(obj)
 width=800;
-height=600;
+height=700;
 lineheight=25;
 posbutton=width*.8;
 buttonwidth=width*.15;
@@ -74,7 +74,7 @@ hp=uicontrol('Style','pushbutton','String','test','Position',[posbutton height-1
 hp=uicontrol('Style','pushbutton','String','Add camera','Position',[posbutton height-140,buttonwidth,lineheight],'Callback',{@menu_callback,obj,'add'});
 
 
-tcam=uitable(obj.handle,'Position',[10 height-lineheight*4-50 width-200,lineheight*3.5]);
+tcam=uitable(obj.handle,'Position',[10 height-lineheight*8-50 width-200,lineheight*7.5]);
 tcam.ColumnName={'Camera Name','ID field','ID'};
 tcam.Data={'Default','select Cam_ID','001'};
 wh=tcam.Position(3);
@@ -89,7 +89,7 @@ hui=uimenu('Parent',hc,'Label','move up','Callback',{@menu_callback,obj});
 hui=uimenu('Parent',hc,'Label','move down','Callback',{@menu_callback,obj});
 
 tcam.UIContextMenu=hc;
-tpar=uitable(obj.handle,'Position',[10 height-lineheight*13-80 width-40,lineheight*9.5]);
+tpar=uitable(obj.handle,'Position',[10 height-lineheight*17-80 width-40,lineheight*9.5]);
 tpar.ColumnName={'Parameter','mode','fixvalue','metafield','Value','conversion','Converted'};
 
 % parnames={'EMon','pixelsize','conversion','emgain','offset','roi','exposure','timediff','comment'};
