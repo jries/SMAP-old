@@ -33,6 +33,8 @@ end
            fns=dir([file filesep '*.tif']);
            varargin{1}=[file filesep fns(1).name];
            imloader=@imageloaderMMsingle;
+       case '.dcimg'
+           imloader=@imageloaderDCIMG;
        otherwise
            imloader=@imageloaderOME;
    end    
