@@ -41,7 +41,7 @@ classdef imageloaderDCIMG<interfaces.imageloaderSMAP
                  'CURRENT_SESSION', 'CURRENT_VIEW', 'CURRENT_REGIONRECT', 'FILEFORMAT_VERSION'};
               for k=length(parameters):-1:1
                   allmd{k,1}=parameters{k};
-                  allmd{k,2}=dcimgmex('getparam',obj.reader,parameters{k});
+                  allmd{k,2}=num2str((dcimgmex('getparam',obj.reader,parameters{k})));
               end
               allmd{k+1,1}='numberOfFrames';
               allmd{k+1,2}=obj.blocksize*obj.separate.numfiles;
@@ -131,11 +131,11 @@ image=[];
 %     end
 % end
 try
-    image=dcimgmex( 'readframe', obj.reader, frame);   
+    image=transpose(dcimgmex( 'readframe', obj.reader, frame));   
 catch err
     pause(obj.waittime*2)
     disp('error encountered rading image, try again');
-    image=dcimgmex( 'readframe', obj.reader, frame);    
+    image=transpose(dcimgmex( 'readframe', obj.reader, frame));    
 end
 end
 
