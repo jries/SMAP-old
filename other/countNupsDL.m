@@ -1,47 +1,86 @@
-global path
+% function countNupsDL
+global path 
 [f,path]=uigetfile([path filesep '*.tif']);
 %%
+zlen=16;
 imgr=imageloaderAll([path f]);
-imga=double(imgr.getmanyimages(1:100,'mat'));
-%
-offset=10000;
-cutoffmin=200;
+imgnum=12
+figure(32);
+ax0=gca;
+figure(33);
+for k=1:25
+    imgnum=k
+imga=double(imgr.getmanyimages((imgnum-1)*zlen+1:imgnum*zlen,'mat'));
+offset=0;
 img=imga-offset;
+
+
+ax1=[];
+ax2=subplot(5,5,k);
+maximaf=getmaxima(img,ax0,ax1,ax2);
+end
+%
+
 quantile(img(:),0.02)
+
+% end
 %%
-imghr=imresize(img,1);
+function maximaf=getmaxima(img,ax0,ax1,ax2)
+cutoffmin=200;
+mask=1;
+imghr=imresize(img,2);
 
 mimgr=max(imghr,[],3);
-
+%%
+if 0
 figure(39);imagesc(mimgr);
 h=imfreehand;
 mask=createMask(h);
+end
+%%
 mimg=double(mimgr).*double(mask);
-figure(39)
-imagesc(mimg);
+if ~isempty(ax0)
+imagesc(ax0,mimg);
+end
 mmmm=mimg(mimg~=0);
-background=quantile(mmmm(:),0.2);
-mimg=mimg-background;
+background=quantile(mmmm(:),0.05);
+mimg=mimg-background*0;%for now:now bg subtraction
 %%
 numbins=100; 
 maxima=maximumfindcall(mimg);
 mint=maxima(:,3);
+indgood=mint>cutoffmin;
 % cutoffmin=600;
-mintc=mint(mint>cutoffmin);
-figure(33);
-hold off
-h=histogram(mintc,numbins);
+mintc=mint(indgood);
+
+if ~isempty(ax1)
+hold(ax1,'off')
+h=histogram(ax1,mintc,numbins);
 % cftool(h.BinEdges(1:end-1)+h.BinWidth/2,h.Values)
 xfit=h.BinEdges(1:end-1)+h.BinWidth/2;
 yfit=h.Values;
 fitp=fit(xfit',yfit','gauss1','Robust','LAR');
-hold on
-plot(xfit,fitp(xfit))
-title(['maximum at ' num2str(fitp.b1,4) ', bg ' num2str(background)])
+hold(ax1,'on')
+plot(ax1,xfit,fitp(xfit))
+title(ax1,['maximum at ' num2str(fitp.b1,4) ', bg ' num2str(background) ', std ' num2str(fitp.c1/sqrt(2),3)])
 % cftool(h.BinEdges(1:end-1),h.Values)
+end
+%%
+maximaf=maxima(indgood,:);
+
+if ~isempty(ax2)
+scatter(ax2,maximaf(:,1),maximaf(:,2),2,maximaf(:,3),'filled')
+colormap(ax2,'jet')
+axis(ax2,'equal')
+axis(ax2,'off')
+% ax.CLim=fitp.b1+fitp.c1/sqrt(2)*[-1 1]*2;
+ax2.CLim=[500 900];
+% colorbar(ax2)
+end
+end
 
 %%
-
+function statistics
 maximac=maxima(mint>cutoffmin,:);
 roih=3;
 [X,Y]=meshgrid(-roih:roih);
@@ -103,3 +142,4 @@ fitp=fit(xfit',yfit','gauss1','Robust','LAR');
 hold on
 plot(xfit,fitp(xfit))
 title(['Filtered. Maximum at ' num2str(fitp.b1,5) ', bg ' num2str(background)])
+end
