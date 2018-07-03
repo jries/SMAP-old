@@ -105,9 +105,9 @@ if length(dx)>9
 %     indgx=sdx<5*sdxm;
 %     indgy=sdy<5*sdym;
 end
-if length(dx)<=9
+if length(dx)<=9 || any(sdx==0) || any(sdy==0)
     sdx=std(ddxplot,0,2); %std for each time point, used for interpolation
-    sdy=std(ddyplot,1,2);
+    sdy=std(ddyplot,0,2);
 %     indgx=true(size(dx));
 %     indgy=true(size(dy));
 end
