@@ -69,7 +69,7 @@ classdef SEEvaluationProcessor<interfaces.GuiModuleInterface & interfaces.LocDat
             site.evaluation.(obj.name).GuiParameters=gp; 
         end
         
-        function [locsout,indroi]=getLocs(obj,varargin) 
+        function [locsout,indloc]=getLocs(obj,varargin) 
             %uses locData.getloc
             %size: size of ROI. Otherwise it takes the whole FoV, not ROI
             %(from image rangex, rangey)
@@ -99,7 +99,7 @@ classdef SEEvaluationProcessor<interfaces.GuiModuleInterface & interfaces.LocDat
             else
                 pos=p.position;
             end
-            locsh=obj.locData.getloc(fields,parameters{:},'removeFilter',{'filenumber'});
+            [locsh, indloc]=obj.locData.getloc(fields,parameters{:},'removeFilter',{'filenumber'});
             
             locsh.xnmr=locsh.xnm-pos(1);
             locsh.ynmr=locsh.ynm-pos(2);
@@ -118,6 +118,7 @@ classdef SEEvaluationProcessor<interfaces.GuiModuleInterface & interfaces.LocDat
             end
             indfile=locsh.filenumber==obj.site.info.filenumber;
             indgood=indfile&indroi;
+            indloc(indloc)=indgood;
             
             fn=fieldnames(locsh);
              for k=1:length(fn)
