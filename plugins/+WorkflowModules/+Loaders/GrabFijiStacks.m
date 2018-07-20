@@ -95,8 +95,11 @@ classdef GrabFijiStacks<interfaces.WorkflowModule
             obj.status('import images in fiji as (virtual) stack');
         end
         function refreshfilelist_callback(obj,a,b)
-            mij=openfiji(obj);
-            ij=mij.imagej;
+%             mij=openfiji(obj);
+%             ij=mij.imagej;
+            ijh=obj.getPar('IJ');
+            ij=ijh.getInstance();
+            
             frames=ij.getFrames;
 %             obj.windows.name='empty';
 %             obj.windows.stack=[];
@@ -120,15 +123,17 @@ classdef GrabFijiStacks<interfaces.WorkflowModule
         function info=makefilestruct(obj,window)
             ip=window.imagePlus;
             of=ip.getOriginalFileInfo;
-            
+            fdir=char(of.directory);
+            totalfile=[fdir char(of.fileName)];
+            finf=obj.getPar('loc_fileinfo');
+            il=imageloaderAll(totalfile,finf,obj.P);
+            info=il.metadata;
             info.numberOfFrames=obj.framestop;
             info.Width=window.size(1);
             info.Height=window.size(2);
-            fdir=char(of.directory);
-            
-            totalfile=[fdir char(of.fileName)];
-            info=copyfields(info,getimageinfo(totalfile));
-            obj.setPar('loc_metadatafile',info.metafile);
+
+%             info=copyfields(info,getimageinfo(totalfile));
+%             obj.setPar('loc_metadatafile',info.metafile);
             obj.setPar('loc_fileinfo',info);
             
         end
@@ -151,6 +156,7 @@ classdef GrabFijiStacks<interfaces.WorkflowModule
         end
     end
 end
+
 
 
 function image=readstack(stack,number,ss)

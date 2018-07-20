@@ -1,4 +1,7 @@
 function ijm=openfiji(obj)
+ijclass='IJM';
+ijclass='MIJ';
+
 ijm=obj.getPar('IJM');
 if isempty(ijm) %open fiji
     

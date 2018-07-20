@@ -227,7 +227,7 @@ switch ext
 %         obj.updateGui;       
 %         metadata=getmetadataMMtxt([p f]); 
     otherwise
-        imloader=imageloaderAll([p f],finf);
+        imloader=imageloaderAll([p f],finf,obj.P);
         metadata=imloader.getmetadata;
         metadata.allmetadata=metadata;
 end
