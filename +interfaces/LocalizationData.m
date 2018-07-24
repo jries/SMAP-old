@@ -369,7 +369,7 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             if nargin>6 && ~isempty(filenumber)%filenumber
                     saveloc.file=saveloc.file(filenumber);
                     saveloc.history=saveloc.history(filenumber);
-                    saveloc.loc.filenumber=ones(size(locData.loc.filenumber));
+                    saveloc.loc.filenumber=ones(size(obj.loc.filenumber)); % yu-le mod
                     if isempty(goodind)
                         goodind=obj.loc.filenumber==filenumber;
                     else
