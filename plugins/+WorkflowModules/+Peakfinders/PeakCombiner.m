@@ -133,7 +133,11 @@ classdef PeakCombiner<interfaces.WorkflowModule
                     Nt=Nall(indch);
                     ctarget=transform.transformToReference(k,cpix(indch,:));
                     [iA,iB,uiA,uiB]=matchlocs(ccombined(:,1),ccombined(:,2),ctarget(:,1),ctarget(:,2),[0 0],6);
-                    cnew=(ccombined(iA,:).*Nc(iA)+ctarget(iB,:).*Nt(iB))./(Nc(iA)+Nt(iB));
+                    if isempty(iA)
+                        cnew=[];
+                    else
+                        cnew=(ccombined(iA,:).*Nc(iA)+ctarget(iB,:).*Nt(iB))./(Nc(iA)+Nt(iB));
+                    end
                     ccombined=vertcat(ccombined(uiA,:),ctarget(uiB,:),cnew);
                     Nc=vertcat(Nc(uiA),Nt(uiB),(Nc(iA)+Nt(iB)));
                 end
