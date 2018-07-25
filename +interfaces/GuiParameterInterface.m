@@ -236,7 +236,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
 %                                 end
                             end
   
-                            if isempty(v) || isnan(v)
+                            if isempty(v) || any(isnan(v))
                                  par=hfn.String;
                             else     
                                 par=1*v;
