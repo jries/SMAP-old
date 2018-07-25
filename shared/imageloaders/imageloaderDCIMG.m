@@ -19,6 +19,13 @@ classdef imageloaderDCIMG<interfaces.imageloaderSMAP
             obj.blocksize=double(dcimgmex('getparam',r,'NUMBEROF_FRAME'));
             [path,filen,ext]=fileparts(file);
             allfiles=dir([path filesep filen(1:end-3) '*' ext]);
+            if length(allfiles)==1 %test of previous block is incremental
+                ind=strfind(filen,'_');
+                if length(ind)>1
+                    allfiles=dir([path filesep filen(1:ind(end-1)) '*' filen(ind(end):end) ext]);
+                end
+            end
+            
             obj.separate.numfiles=length(allfiles);
             [~,ind]=sort({allfiles(:).name});
             firstfile=allfiles(ind(1)).name;
