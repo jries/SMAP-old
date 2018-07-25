@@ -48,7 +48,7 @@ classdef Phase2z4Pi<interfaces.DialogProcessor
             ax=obj.initaxis('z0');
             plot(ax,frameposc,z0all,frameposc,z0int(frameposc))
             z0=z0int(locsall.frame);
-            zph=z_from_phi_JR(locsall.znm,mod(locsall.phase,2*pi),frequency,z0);
+            zph=z_from_phi_JR(zastigall,mod(locsall.phase,2*pi),frequency,z0);
             obj.locData.setloc('zphase',zph);
             obj.locData.setloc('zastig',zastigall);
             obj.locData.setloc('zastigerr',zastigerrall);

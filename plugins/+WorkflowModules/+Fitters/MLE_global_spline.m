@@ -298,8 +298,8 @@ fac{5}=fitpar.dz*fitpar.refractive_index_mismatch;
 off{5}=-fitpar.z0*fitpar.dz*fitpar.refractive_index_mismatch;
 faccrlb{5}=fitpar.dz*fitpar.refractive_index_mismatch;
 
-names={'ypix','xpix','phot','bg','zastsig','phase'};
-namesav={'ypix','xpix','zastsig'};
+names={'ypix','xpix','phot','bg','zastig','phase'};
+namesav={'ypix','xpix','zastig'};
 linked=fitpar.link(1:6);
 % linked(end+1)=1; %XXXXX phase. Later include in gui
 ind=1;
