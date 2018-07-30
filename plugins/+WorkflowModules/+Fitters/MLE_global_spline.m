@@ -472,6 +472,11 @@ if isempty(EMexcess)
     EMexcess=1;
 end
 
+if isfield(fitpar.splinefithere.coeff,'normf')
+    normf=fitpar.splinefithere.coeff.normf;
+else
+    normf=ones(4,1);
+end
         
 dT=zeros(npar,numberOfChannels,(nfits),'single');
 imfit=zeros(s(1),s(2),ceil(s(3)/numberOfChannels),numberOfChannels,'single');
@@ -479,10 +484,10 @@ for k=1:numberOfChannels
     dT(1,k,:)=stackinfo.dy(k:numberOfChannels:end);
     dT(2,k,:)=stackinfo.dx(k:numberOfChannels:end);
     if fitpar.mirror{k}==1 || fitpar.mirror{k}==3  %mirror x or xy
-        imfit(:,:,:,k)=imstack(end:-1:1,:,k:numberOfChannels:end);
+        imfit(:,:,:,k)=imstack(end:-1:1,:,k:numberOfChannels:end)/normf(k);
         dT(1,k,:)=-dT(1,k,:);
     else
-        imfit(:,:,:,k)=imstack(:,:,k:numberOfChannels:end);
+        imfit(:,:,:,k)=imstack(:,:,k:numberOfChannels:end)/normf(k);
     end
     
 end
