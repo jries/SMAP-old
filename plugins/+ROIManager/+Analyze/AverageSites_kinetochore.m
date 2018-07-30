@@ -85,6 +85,7 @@ classdef AverageSites_kinetochore<interfaces.DialogProcessor&interfaces.SEProces
                 end
             end
             prof=squeeze(sum(imc,2));
+            profc=squeeze(sum(imcenters,2));
             
             if p.filterc
             imc=imfilter(imc,h);
@@ -92,9 +93,26 @@ classdef AverageSites_kinetochore<interfaces.DialogProcessor&interfaces.SEProces
             end
             ax=obj.initaxis('localizations');
             imagesc(ax,range,range,imc/max(imc(:)));
-            ax=obj.initaxis('profile');
-            plot(ax,range(1:end-1),prof)
+            ax=obj.initaxis('profile_loc');
+            
+            rs=range(1:end-1);
+            plot(ax,rs,prof)
+               hold(ax,'off');
+            fitp1=fit(rs',prof(:,1),'gauss1');
+            fitp2=fit(rs',prof(:,2),'gauss1');
+            hold(ax,'on');
+            plot(rs,fitp1(rs));
+            plot(rs,fitp2(rs));
+            
+            c1=confint(fitp1);
+            c2=confint(fitp2);
+            de=sqrt(diff(c1(:,2)).^2+diff(c2(:,2)).^2);
+            
+            d=fitp1.b1-fitp2.b1;
+            title(ax,['d = ' num2str(d,3) ' +/- ' num2str(de,3) ' nm (95% CE)'])
+            
             ax=obj.initaxis('centers');
+            
             
             switch p.referencepoint.selection
                case 'ch1'
@@ -107,72 +125,31 @@ classdef AverageSites_kinetochore<interfaces.DialogProcessor&interfaces.SEProces
             
            
             imagesc(ax,range,range,imcenterss/max(imcenterss(:)))
+            
+                        
+           ax=obj.initaxis('profile_c');
+            
+%             rs=range(1:end-1);
+            plot(ax,rs,profc)
+               hold(ax,'off');
+            fitp1=fit(rs',profc(:,1),'gauss1');
+            fitp2=fit(rs',profc(:,2),'gauss1');
+            hold(ax,'on');
+            plot(rs,fitp1(rs));
+            plot(rs,fitp2(rs));
+            
+            c1=confint(fitp1);
+            c2=confint(fitp2);
+            de=sqrt(diff(c1(:,2)).^2+diff(c2(:,2)).^2);
+            
+            d=fitp1.b1-fitp2.b1;
+            title(ax,['d = ' num2str(d,3) ' +/- ' num2str(de,3) ' nm (95% CE)'])
+            
+            
             obj.imloc=imc/max(imc(:));
             obj.impos=imcenterss/max(imcenterss(:));
-            
-%             afsd
-%             used=used& ~( isnan(locnew.xnm) | isnan(locnew.ynm) | isnan(locnew.class));
-%             
-%             fn=fieldnames(locnew);
-%               for k=1:length(fn)
-%                    locnew.(fn{k})=locnew.(fn{k})(used);
-%               end
-%              
-%              locc=obj.locData.copy;
-%              locc.loc=locnew;
-%              locc.regroup;
-%              locc.filter;
-% 
-%             if p.addfile
-%                 locnew.xnm=locnew.xnm+x0;
-%                 locnew.ynm=locnew.ynm+y0;
-%             
-%                 for k=1:length(fn)
-%                     obj.locData.addloc(fn{k},locnew.(fn{k}))
-%                 end
-%                 obj.locData.regroup;
-%                 obj.locData.filter;
-%             end
-%            
-%             
-%             
-%             %try: add empty file, there put averaged sites
-%             %for every site: loc.xnm-site.pos(1)+xpossite
-%             
-%             loc1=locc.getloc({'xnm','ynm'},'layer',1,'position','all','filenumber',newfile);
-%             loc2=locc.getloc({'xnm','ynm'},'layer',2,'position','all','filenumber',newfile);
-%             %do some statistics:
-%            
-%             
-%             
-%             ax=obj.initaxis('scatter');
-%             plot(loc1.xnm,loc1.ynm,'.')
-%             hold on
-%             plot(loc2.xnm,loc2.ynm,'.')
-%             hold off
-%             
-%              [phi1,r1]=cart2pol(loc1.xnm,loc1.ynm);
-%              [phi2,r2]=cart2pol(loc2.xnm,loc2.ynm);
-%             ax=obj.initaxis('radial distribution');
-%             dr=5;
-% %             rr=dr/2:dr:max(max(r1),max(r2));
-%             %proper concentration: dA=pi*(ro^2-ri^2)
-%             rr=0:dr:max(max(r1),max(r2))+dr;
-%             
-%             dA=pi*(rr(2:end)+rr(1:end-1)).*(rr(2:end)-rr(1:end-1));
-%             h1=histcounts(r1,[rr]) ;
-%              h2=histcounts(r2,[rr]) ;
-%               rrp=rr(1:end-1)+dr/2;
-%             plot(rrp,h1,rrp,h2)
-%             xlabel('r')
-%             ylabel('counts')
-%             
-%             ax=obj.initaxis('radial concentration');
-% %             plot(rr,h1./rr/2/pi,rr,h2./rr/2/pi)
-%            
-%              plot(rrp,h1./dA,rrp,h2./dA)
-%             xlabel('r')
-%             ylabel('concentration')
+    
+
         end
         function pard=guidef(obj)
             pard=guidef(obj);
