@@ -50,15 +50,15 @@ end
 
 function out=runintern(obj,p)
 locs=obj.getLocs({'xnm','ynm','znm','locprecznm','locprecnm'},'layer',1,'size',p.se_siteroi);
-dz=5;
-z=-200:dz:200;
+dz=8;
+z=-200:dz:150;
 hz=hist(locs.znm-obj.site.pos(3),z);
 % hz=hz-mean(hz);
 ac=myxcorr(hz,hz);
 % if obj.display
 ax1=obj.setoutput('profile');
 
-fitresult=createFit(z, hz,ax1)
+fitresult=createFit(z, hz,ax1);
 title(ax1,fitresult.d)
 % plot(ax1,z,hz)
 ax2=obj.setoutput('correlation');
@@ -70,7 +70,7 @@ out.ac=ac;
 out.dz=dz;
 out.hist=hz;
 out.z=z;
-out.Gaussfit=fitresult;
+out.Gaussfit=copyfields([],fitresult,{'a1','a2','b','c','d'});
 end
 
 
@@ -79,20 +79,23 @@ function [fitresult, gof] = createFit(z, hz,ax)
 [xData, yData] = prepareCurveData( z, hz );
 
 % Set up fittype and options.
-ft = fittype( 'a1*exp(-((x-b)/c)^2) + a2*exp(-((x-b-d)/c)^2)', 'independent', 'x', 'dependent', 'y' );
+ft = fittype( 'a1*exp(-((x-b)/c)^2/2) + a2*exp(-((x-b+d)/c)^2/2)', 'independent', 'x', 'dependent', 'y' );
 opts = fitoptions( 'Method', 'NonlinearLeastSquares' );
 opts.Display = 'Off';
 opts.Lower = [0 0 -Inf 0 -Inf];
-opts.StartPoint = [max(hz) max(hz) -50 20 100 ];
-
+mv= sum(hz.*z)/sum(hz);
+dh=30;
+sp=[max(hz) max(hz) mv+dh 8 dh*2 ];
+opts.StartPoint = sp;
+fstart=ft(sp(1),sp(2),sp(3),sp(4),sp(5),xData);
 % Fit model to data.
 [fitresult, gof] = fit( xData, yData, ft, opts );
 
 axes(ax)
-h = plot(fitresult, xData, yData);
+h = plot(xData,fitresult(xData),'r', xData, yData,'b-',xData,fstart,'g');
 
 
-legend( h, 'hz vs. z', 'untitled fit 1', 'Location', 'NorthEast' );
+% legend( h, 'hz vs. z', 'untitled fit 1', 'Location', 'NorthEast' );
 % Label axes
 xlabel z
 ylabel hz
