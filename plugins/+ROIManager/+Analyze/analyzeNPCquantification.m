@@ -353,6 +353,7 @@ if p.copy2page
     sm=3;
     sn=4;
     f=figure;
+    f.Renderer='painters';
     ht2=ht.copy;
     ht2.Parent=f;
     axtemp= subplot(sm,sn,[1 2]);
@@ -376,9 +377,9 @@ if p.copy2page
     axt.Parent=f;
     subplot(sm,sn,7,axt)
     
-    axt=axtt.copy;
-    axt.Parent=f;
-    subplot(sm,sn,[5 6 9 10],axt)   
+    axttime=axtt.copy;
+    axttime.Parent=f;
+    subplot(sm,sn,[5 6 9 10],axttime)   
     
     axt=axle.copy;
     axt.Parent=f;
@@ -400,6 +401,11 @@ if p.copy2page
 %      ax7l=legend(axt,t7,'Location','northoutside');
 %     legend(axt,'integer','prob','assigned','Location','northwestoutside');
     end
+    fn=se.files(p.filenumbers(1)).name;
+    t=textwrap({fn},50);
+    th=text(axttime,0.15,0.05,t,'FontSize',9,'Interpreter','none');
+    
+    
 end
 
 end

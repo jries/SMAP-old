@@ -4,7 +4,7 @@ if nargin<3
 end
 
 if p.filter
-    modetxt=p.layernames;
+    modetxt=p.layernames(logical(p.sr_layerson));
 %     modetxt={'layer','layer','layer','layer','layer','layer','layer','layer','layer','layer','layer','layer','layer','layer'};
 else
     modetxt={'ungroup','group'};

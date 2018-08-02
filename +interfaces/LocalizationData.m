@@ -235,10 +235,10 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                             indin=indin&filters.(fields{k});
                         else
                             disp('size of filters does not match. Call interfaces.LocData.filter before. Tried to fix it')
-                            obj.filter(fields{k},layer)
-                            indin=inFilter(obj,layer,grouping);
-                            filters
-                            break       
+%                             obj.filter(fields{k},layer)
+%                             indin=inFilter(obj,layer,grouping);
+%                             filters
+%                             break       
                         end
                     end
                 end
