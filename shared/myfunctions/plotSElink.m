@@ -30,13 +30,16 @@ dc=datacursormode(parent);
 dc.Enable='on';
 fndat=dc.UpdateFcn;
 % oldupdate=@dc.UpdateFcn;
+try
 if length(fndat)>1
 xdat=[fndat{2}(:),xdat(:)];
 ydat=[fndat{3}(:),ydat(:)];
 sitenumber=[fndat{4}(:),sitenumber(:)];
 end
 dc.UpdateFcn={@updatecursor,xdat(:),ydat(:),sitenumber(:),SE};
-
+catch err
+    err
+end
 
 % bo=brush(ax.Parent);
 % bo.ActionPostCallback={@updatebrush,xdat(:),ydat(:),sitenumber(:),SE};

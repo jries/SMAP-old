@@ -257,9 +257,9 @@ subplot(1,2,2,ax4);
  
     %number of localizations
     %aware of bias for not segmenting npcs with low number of localizations
-axtt=obj.initaxis('localizations');
+axle=obj.initaxis('localizations');
 hold off
-hlocs=histogram(axtt,numlocs,0:1:max(numlocs));
+hlocs=histogram(axle,numlocs,0:1:max(numlocs));
 
 
 ns=floor(mean(numlocs)-std(numlocs));
@@ -268,9 +268,9 @@ hold on
 plot(hlocs.BinEdges+hlocs.BinWidth/2,fp(hlocs.BinEdges),'r')
 plot(hlocs.BinEdges(ns:end-1)+hlocs.BinWidth/2,fp(hlocs.BinEdges(ns:end-1)),'r*')
 
-title(axtt,['mean: ' num2str(mean(numlocs),'%2.1f') ', LE:' num2str(mean(numlocs)/32*100,'%2.1f') ,' fit:' num2str(fp.b1,'%2.1f') ', LE:' num2str(fp.b1/32*100,'%2.1f')]);
+title(axle,['mean: ' num2str(mean(numlocs),'%2.1f') ', LE:' num2str(mean(numlocs)/32*100,'%2.1f') ,' fit:' num2str(fp.b1,'%2.1f') ', LE:' num2str(fp.b1/32*100,'%2.1f')]);
     %radii
-axtt=obj.initaxis('size');
+axsize=obj.initaxis('size');
 plotSElink(radius,numlocs,siteid,se,'o')
 xlabel('radius (nm)')
 ylabel('number of localizations')
@@ -335,11 +335,14 @@ results(3).gtfilt=sp.background;
 results(3).gtall=0;
 end
 results(2).all=-1;
+
+results(2).file=0;
+results(1).file=p.filecheck*(p.filenumbers);
 % dat=struct2table(results);
 axp=ax0.Parent;
 delete(ax0);
 ht=uitable('Parent',axp);
-struct2uitable(ht, results,'flip')
+struct2uitable(ht, results,'flip','%2.1f')
 % A=cell2mat(ht.Data);
 copytoexcel(results,'flip');
 ht.ColumnWidth={50,40,30,40};
@@ -350,6 +353,7 @@ if p.copy2page
     sm=3;
     sn=4;
     f=figure;
+    f.Renderer='painters';
     ht2=ht.copy;
     ht2.Parent=f;
     axtemp= subplot(sm,sn,[1 2]);
@@ -373,9 +377,13 @@ if p.copy2page
     axt.Parent=f;
     subplot(sm,sn,7,axt)
     
-    axt=axtt.copy;
+    axttime=axtt.copy;
+    axttime.Parent=f;
+    subplot(sm,sn,[5 6 9 10],axttime)   
+    
+    axt=axle.copy;
     axt.Parent=f;
-    subplot(sm,sn,[5 6 9 10],axt)   
+    subplot(sm,sn,11,axt)   
     
 %         axt=ax4.copy;
 %     axt.Parent=f;
@@ -393,6 +401,11 @@ if p.copy2page
 %      ax7l=legend(axt,t7,'Location','northoutside');
 %     legend(axt,'integer','prob','assigned','Location','northwestoutside');
     end
+    fn=se.files(p.filenumbers(1)).name;
+    t=textwrap({fn},50);
+    th=text(axttime,0.15,0.05,t,'FontSize',9,'Interpreter','none');
+    
+    
 end
 
 end
