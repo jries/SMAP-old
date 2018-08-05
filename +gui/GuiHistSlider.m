@@ -15,7 +15,7 @@ classdef GuiHistSlider< interfaces.LayerInterface
             fontsize=obj.guiPar.fontsize;
             height=0.1;
             h.histax=axes('Parent',obj.handle,'Position',[0.1,0.34,0.68,0.58],'FontSize',fontsize*0.75);
-            h.smin=uicontrol('Parent',obj.handle,'Units','normalized','Style','slider','Position',[0.05,0.16,0.8,height*0.7]);
+            h.smin=uicontrol('Parent',obj.handle,'Units','normalized','Style','slider','Position',[0.05,0.13,0.8,height*0.7]);
             h.smax=uicontrol('Parent',obj.handle,'Units','normalized','Style','slider','Position',[0.05,0.03,0.8,height*0.7]);
             h.field=uicontrol('Parent',obj.handle,'Units','normalized','Style','text','Position',[0.8,0.85,0.2,height],'FontSize',fontsize);
             h.filteron=uicontrol('Parent',obj.handle,'Units','normalized','Style','checkbox','Position',[0.8,0.7,0.2,height],'String','filter','FontSize',fontsize*0.7,'Callback',{@showchanged_callback,obj});
@@ -191,7 +191,9 @@ if min(v)==mv
     q=[0.9 1.1 ]*double(mv);
 else
     try
-         q=myquantilefast(v,[0.015,0.985],10000);
+%          q=myquantilefast(v,[0.015,0.985],10000);
+         q=myquantilefast(v,[0.05,0.95],10000);
+         q=q+abs(q(2)-q(1))*[-1 1]*.05;
     catch
     end
     if isempty(q)||any(isnan(q))

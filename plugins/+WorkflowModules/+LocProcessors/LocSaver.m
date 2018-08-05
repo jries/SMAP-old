@@ -8,7 +8,7 @@ classdef LocSaver<interfaces.WorkflowModule
         index;
         numsaved
         frames;
-        saveframes=20;
+        saveframes=100;
         savefields=struct('fieldnames',{{''}},'tosave',{{''}},'notsave',{{'PSFxerr','PSFyerr','bgerr','locpthompson','peakfindx','peakfindy'}});
         savefit
         
