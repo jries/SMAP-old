@@ -13,18 +13,41 @@ fg=figure(127);
 fg.Position(3)=1700; fg.Position(1)=10;
 ax=axes(fg);
 ax.Position=[0.05, 0.15,0.9,.8];
+h.fo=figure;
+
 h.ax=ax;
-h.findmax=uicontrol('Style','checkbox','String','center max','Units','normalized','Position',[0.8,0.05,0.05,0.05],'Value',1);
-h.slider=uicontrol('Style','slider','Units','normalized','Position',[0.05,0.05,0.7,0.05],'Callback',{@slider_callback,images,h},'Max',numf,'Value',1,'Min',1);
-h.roisize=uicontrol('Style','edit','String','5','Units','normalized','Position',[0.85,0.05,0.05,0.05]);
-h.plot=uicontrol('Style','pushbutton','String','plot','Units','normalized','Position',[0.9,0.05,0.05,0.05],'Callback',{@plot_callback,images,h});
+h.findmax=uicontrol('Style','checkbox','String','center max','Units','normalized','Position',[0.825,0.05,0.05,0.05],'Value',1,'Parent',fg);
+h.slider=uicontrol('Style','slider','Units','normalized','Position',[0.05,0.05,0.6,0.05],'Max',numf,'Value',1,'Min',1,'Parent',fg);
+h.framenum=uicontrol('Style','edit','Units','normalized','Position',[0.65,0.05,0.025,0.05],'String','1','Parent',fg);
+
+
+h.roisize=uicontrol('Style','edit','String','5','Units','normalized','Position',[0.875,0.05,0.025,0.05],'Parent',fg);
+
+
+h.plotfft=uicontrol('Style','checkbox','Units','normalized','Position',[0.675,0.05,0.05,0.05],'String','FFT','Value',0,'Parent',fg);
+h.globalc=uicontrol('Style','checkbox','Units','normalized','Position',[0.725,0.05,0.05,0.05],'String','Glob contr','Parent',fg);
+h.trendline=uicontrol('Style','checkbox','Units','normalized','Position',[0.775,0.05,0.05,0.05],'String','trend','Parent',fg);
+h.plot=uicontrol('Style','pushbutton','String','plot','Units','normalized','Position',[0.9,0.05,0.05,0.05],'Callback',{@plot_callback,images,h},'Parent',fg);
+h.slider.Callback={@slider_callback,images,h};
+h.framenum.Callback={@slider_callback,images,h};
+
 slider_callback(h.slider,0,images,h)
 end
 
 function slider_callback(a,b,images,h)
-fr=ceil(a.Value);
-imagesc(h.ax,images(:,:,fr))
+if strcmp(a.Style,'slider')
+    fr=ceil(a.Value);
+else
+    fr=ceil(str2double(a.String));
+end
+implot=images(:,:,fr);
+if h.globalc.Value
+    implot(1,1)=max(images(:));
+end
+imagesc(h.ax,implot)
 axis(h.ax,'equal')
+h.framenum.String=num2str(fr);
+h.slider.Value=fr;
 end
 
 function plot_callback(a,b,images,h)
@@ -40,33 +63,40 @@ if h.findmax.Value
     pp(1)=pp(1)-6+y;
 end
 
-f=figure(128);
+f=figure(h.fo);
 rois=round(str2double(h.roisize.String));
 dr=round(rois/2);
 r=-dr:-dr+rois;
-inttensity=squeeze(sum(sum(images(pp(2)+r,pp(1)+r,:),1),2));
-
-plot(inttensity)
+intensity=squeeze(sum(sum(images(pp(2)+r,pp(1)+r,:),1),2));
+ x=(1:length(intensity))';
+plot(x,intensity)
 hold on
 plot(0,0,'.')
+if h.trendline.Value
+    fp=fit(x,intensity,'smoothingspline');
+    plot(x,fp(x));
+    
+end
 
-pwSpec=figure(129);
-Fs = 20;
-t = 0:1/Fs:(length(inttensity)-1)*(1/Fs);
 
-N = length(inttensity);
+if h.plotfft.Value
+    pwSpec=figure(129);
+    Fs = 20;
+    t = 0:1/Fs:(length(intensity)-1)*(1/Fs);
 
-xdft = fft(inttensity);
-xdft = xdft(1:N/2+1);
-psdx = (1/(Fs*N)) * abs(xdft).^2;
-psdx(2:end-1) = 2*psdx(2:end-1);
-freq = 0:Fs/length(inttensity):Fs/2;
-plot(freq,10*log10(psdx))
-grid on
-title('Periodogram Using FFT')
-xlabel('Frequency (Hz)')
-ylabel('Power/Frequency (dB/Hz)')
+    N = length(intensity);
 
+    xdft = fft(intensity);
+    xdft = xdft(1:N/2+1);
+    psdx = (1/(Fs*N)) * abs(xdft).^2;
+    psdx(2:end-1) = 2*psdx(2:end-1);
+    freq = 0:Fs/length(intensity):Fs/2;
+    plot(freq,10*log10(psdx))
+    grid on
+    title('Periodogram Using FFT')
+    xlabel('Frequency (Hz)')
+    ylabel('Power/Frequency (dB/Hz)')
+end
 % ax=gca;
 % ax.YLim(1)=0;
 end
