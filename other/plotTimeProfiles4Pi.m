@@ -5,6 +5,8 @@ if ~f
     return
 end
 
+plotfig=[];
+
 il=imageloaderAll([pathh f]);
 images=il.getmanyimages([],'mat');
 images=images-myquantilefast(images(:),0.05,1000000);
@@ -28,6 +30,8 @@ h.plotfft=uicontrol('Style','checkbox','Units','normalized','Position',[0.675,0.
 h.fftrate=uicontrol('Style','edit','Units','normalized','Position',[0.7,0.05,0.025,0.05],'String','20','Parent',fg);
 h.globalc=uicontrol('Style','checkbox','Units','normalized','Position',[0.725,0.05,0.05,0.05],'String','Glob contr','Parent',fg);
 h.trendline=uicontrol('Style','checkbox','Units','normalized','Position',[0.775,0.05,0.05,0.05],'String','trend','Parent',fg);
+h.trendlinep=uicontrol('Style','edit','Units','normalized','Position',[0.805,0.05,0.02,0.05],'String','1','Parent',fg);
+
 h.plot=uicontrol('Style','pushbutton','String','plot','Units','normalized','Position',[0.9,0.05,0.05,0.05],'Callback',{@plot_callback,images,h},'Parent',fg);
 h.slider.Callback={@slider_callback,images,h};
 h.framenum.Callback={@slider_callback,images,h};
@@ -77,7 +81,10 @@ plot(x,intensity)
 hold on
 plot(0,0,'.')
 if h.trendline.Value
-    fp=fit(x,intensity,'smoothingspline');
+    [pp,p]=csaps(x,intensity);
+    
+    pint=p*str2double(h.trendlinep.String);
+    fp=fit(x,intensity,'smoothingspline','SmoothingParam',pint);
     plot(x,fp(x));
     
 end
