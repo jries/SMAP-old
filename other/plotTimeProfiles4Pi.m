@@ -44,11 +44,29 @@ f=figure(128);
 rois=round(str2double(h.roisize.String));
 dr=round(rois/2);
 r=-dr:-dr+rois;
-int=squeeze(sum(sum(images(pp(2)+r,pp(1)+r,:),1),2));
+inttensity=squeeze(sum(sum(images(pp(2)+r,pp(1)+r,:),1),2));
 
-plot(int)
+plot(inttensity)
 hold on
 plot(0,0,'.')
+
+pwSpec=figure(129);
+Fs = 20;
+t = 0:1/Fs:(length(inttensity)-1)*(1/Fs);
+
+N = length(inttensity);
+
+xdft = fft(inttensity);
+xdft = xdft(1:N/2+1);
+psdx = (1/(Fs*N)) * abs(xdft).^2;
+psdx(2:end-1) = 2*psdx(2:end-1);
+freq = 0:Fs/length(inttensity):Fs/2;
+plot(freq,10*log10(psdx))
+grid on
+title('Periodogram Using FFT')
+xlabel('Frequency (Hz)')
+ylabel('Power/Frequency (dB/Hz)')
+
 % ax=gca;
 % ax.YLim(1)=0;
 end
