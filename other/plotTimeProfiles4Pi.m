@@ -1,11 +1,13 @@
 function plotTimeProfiles4Pi
-global pathh plotfig
+global pathh plotfig plotfft plotGaussfit
+
+addSMAPpath;
 [f,pathh]=uigetfile([pathh '*.dcimg']);
 if ~f
     return
 end
 
-plotfig=[];
+plotfig=[];plotfft=[];plotGaussfit=[];
 
 il=imageloaderAll([pathh f]);
 images=il.getmanyimages([],'mat');
@@ -19,8 +21,9 @@ ax.Position=[0.05, 0.15,0.9,.8];
 
 h.ax=ax;
 h.findmax=uicontrol('Style','checkbox','String','center max','Units','normalized','Position',[0.825,0.05,0.05,0.05],'Value',1,'Parent',fg);
-h.slider=uicontrol('Style','slider','Units','normalized','Position',[0.05,0.05,0.6,0.05],'Max',numf,'Value',1,'Min',1,'Parent',fg);
-h.framenum=uicontrol('Style','edit','Units','normalized','Position',[0.65,0.05,0.025,0.05],'String','1','Parent',fg);
+h.slider=uicontrol('Style','slider','Units','normalized','Position',[0.05,0.05,0.5,0.05],'Max',numf,'Value',1,'Min',1,'Parent',fg);
+h.framenum=uicontrol('Style','edit','Units','normalized','Position',[0.55,0.05,0.025,0.05],'String','1','Parent',fg);
+h.fitmodel=uicontrol('Style','popupmenu','String',{'none','SxSy','Sx'},'Units','normalized','Position',[0.6,0.05,0.05,0.05],'Parent',fg);
 
 
 h.roisize=uicontrol('Style','edit','String','5','Units','normalized','Position',[0.875,0.05,0.025,0.05],'Parent',fg);
@@ -56,7 +59,7 @@ h.slider.Value=fr;
 end
 
 function plot_callback(a,b,images,h)
-global plotfig
+global plotfig  plotfft plotGaussfit
 sigma=2;
 pp=round(h.ax.CurrentPoint(1,1:2));
 fr=ceil(h.slider.Value);
@@ -80,8 +83,10 @@ intensity=squeeze(sum(sum(images(pp(2)+r,pp(1)+r,:),1),2));
 plot(x,intensity)
 hold on
 plot(0,0,'.')
+xlabel('frame')
+ylabel('intensity')
 if h.trendline.Value
-    [pp,p]=csaps(x,intensity);
+    [ptrndl,p]=csaps(x,intensity);
     
     pint=p*str2double(h.trendlinep.String);
     fp=fit(x,intensity,'smoothingspline','SmoothingParam',pint);
@@ -91,7 +96,11 @@ end
 
 
 if h.plotfft.Value
-    pwSpec=figure(129);
+    if isempty(plotfft) || ~isvalid(plotfft)
+        plotfft=figure; hold on
+    end
+   
+    pwSpec=figure(plotfft);
     Fs = str2double(h.fftrate.String);
     t = 0:1/Fs:(length(intensity)-1)*(1/Fs);
 
@@ -107,6 +116,43 @@ if h.plotfft.Value
     title('Periodogram Using FFT')
     xlabel('Frequency (Hz)')
     ylabel('Power/Frequency (dB/Hz)')
+end
+
+%Gaussian fit:
+switch h.fitmodel.Value
+    case 1 % none
+    case 2 %SXSY
+            if isempty(plotGaussfit) || ~isvalid(plotGaussfit)
+                plotGaussfit=figure;
+            end
+        roisize2=4; %effecgive 9
+        r=-roisize2:roisize2;
+        imagesfit=single(images(pp(2)+r,pp(1)+r,:));
+        P=mleFit_LM(imagesfit,4,30,1.5);
+        sx=P(:,5);
+        sy=P(:,6);
+        figure(plotGaussfit);
+        w=sx.^2-sy.^2;
+        plot(x,w)
+        xlabel('frame')
+        ylabel('sx^2-sy^2');
+        hold on
+    case 3 %Sx only
+        if isempty(plotGaussfit) || ~isvalid(plotGaussfit)
+            plotGaussfit=figure;
+        end
+        roisize2=4; 
+        r=-roisize2:roisize2;
+        imagesfit=single(images(pp(2)+r,pp(1)+r,:));
+        P=mleFit_LM(imagesfit,2,30,1.5);
+        sx=P(:,5);
+     
+        figure(plotGaussfit);
+        w=sx;
+        plot(x,w)  
+         xlabel('frame')
+        ylabel('sx');
+        hold on
 end
 % ax=gca;
 % ax.YLim(1)=0;
