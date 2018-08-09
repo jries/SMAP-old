@@ -175,7 +175,9 @@ classdef TifLoader<interfaces.WorkflowModule
             p=obj.getGuiParameters;
             fileinf=obj.imloader.metadata;
             if fileinf.EMon && p.mirrorem  %if em gain on and mirrorem on: switch roi
-                fileinf.roi(1)=512-fileinf.roi(1)-fileinf.roi(3);
+                if any(fileinf.roi(1:2)>0) %if roi(1:2)=[0 0] it is likely that roi was not read out and set to default.
+                    fileinf.roi(1)=512-fileinf.roi(1)-fileinf.roi(3);
+                end
                 fileinf.EMmirror=true;
             else 
                 fileinf.EMmirror=false;

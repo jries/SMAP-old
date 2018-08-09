@@ -54,11 +54,11 @@ classdef imageloaderOME<interfaces.imageloaderSMAP
                 
         end
                 
-        if parselist       
+        if parselist  &&      ~isempty(sm) 
                 k=sm.keys;
                 ind=1;
-                
-                while k.hasNext
+                allmd=[];
+                while (ismethod(k,'hasNext') && k.hasNext) || (ismethod(k,'hasMoreElements') && k.hasMoreElements) 
                     kh=k.nextElement;
                     if ~any(strncmp(exclude,kh,10))
                         try
@@ -250,12 +250,17 @@ end
 
 
 function allmd=getmetadatatagsome(obj)
+allmd=[];
+try
     omemeta=obj.reader.getMetadataStore;
     allmd(1,:)={'getPixelsPhysicalSizeX',double(omemeta.getPixelsPhysicalSizeX(obj.seriesnumber).value())};
     allmd(2,:)={'getPixelsSizeX',double(omemeta.getPixelsSizeX(obj.seriesnumber).getValue())};
     allmd(3,:)={'getPixelsSizeY',double(omemeta.getPixelsSizeY(obj.seriesnumber).getValue())};
     allmd(4,:)={'getPixelsSizeT',double(omemeta.getPixelsSizeT(obj.seriesnumber).getValue())};
-    allmd(5,:)={'getPixelsSizeZ',double(omemeta.getPixelsSizeZ(obj.seriesnumber).getValue())};   
+    allmd(5,:)={'getPixelsSizeZ',double(omemeta.getPixelsSizeZ(obj.seriesnumber).getValue())};  
+catch
+    disp('could not get core metadata')
+end
 end
 
 function meta=getMetaNd2(reader)
