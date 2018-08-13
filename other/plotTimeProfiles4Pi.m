@@ -111,7 +111,9 @@ if h.plotfft.Value
     psdx = (1/(Fs*N)) * abs(xdft).^2;
     psdx(2:end-1) = 2*psdx(2:end-1);
     freq = 0:Fs/length(intensity):Fs/2;
-    plot(freq,10*log10(psdx))
+    [~,freqb]=bintrace(freq,10);
+    [~,psdxb]=bintrace(psdx,10);
+    plot(freqb,10*log10(psdxb))
     grid on
     title('Periodogram Using FFT')
     xlabel('Frequency (Hz)')
