@@ -1,4 +1,5 @@
 function getPI(g)
+% getPI(g), g is the GuiMainSMAP
 % This is a function that Yu-Le created for extracting and ploting PIZStage-Position from SMLM files loaded
 
 nFiles = g.locData.SE.numberOfFiles;
@@ -7,9 +8,9 @@ for j = 1: nFiles
     path = g.locData.files.file(j).name;
     breakMark =regexp(path,'\\.');
     fileName = path(breakMark(end):end);
-    fileName = regexprep(fileName, '\_time\_','\_bfp\_');
+    fileName = regexprep(fileName, '\_Localization\_','\_bfp\_');
     fileName = regexprep(fileName, '\_sml\.mat','\_MMStack\_Pos0\.ome\.tif');
-    path = regexprep(path, '\_time\_','\_bfp\_');
+    path = regexprep(path, '\_Localization\_','\_bfp\_');
     path = regexprep(path, '\_sml\.mat','');
     path = [path fileName];
 
