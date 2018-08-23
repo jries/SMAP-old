@@ -63,7 +63,7 @@ obj.setPar('currentfileinfo',obj.locData.files.file(1).info) %triggers format to
 %         obj.setPar('selectedField',sf,'layer',obj.layer)
         
         
-obj.locData.SE.addFile(obj.locData.files.file(k).name,obj.locData.files.file(k).number,obj.locData.files.file(k).info)
+%obj.locData.SE.addFile(obj.locData.files.file(k).name,obj.locData.files.file(k).number,obj.locData.files.file(k).info)
 
 if ~isempty(strfind(obj.getPar('mainfile'),'_sml'))
    tg=obj.getPar('mainGui').guihandles.maintab;
