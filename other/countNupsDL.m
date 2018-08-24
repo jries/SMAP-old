@@ -2,14 +2,15 @@
 addSMAPpath
 global path 
 [f,path]=uigetfile([path filesep '*.tif']);
-%%
-zlen=16;
 imgr=imageloaderAll([path f]);
+%%
+zlen=6;
+
 imgnum=12
 figure(32);
 ax0=gca;
 figure(33);
-for k=1:2
+for k=1:1
     imgnum=k
 imga=double(imgr.getmanyimages((imgnum-1)*zlen+1:imgnum*zlen,'mat'));
 offset=0;
@@ -24,7 +25,7 @@ end
 
 quantile(img(:),0.02)
 %%
-imgnum=13;
+imgnum=1;
 imga=double(imgr.getmanyimages((imgnum-1)*zlen+1:imgnum*zlen,'mat'));
 img=imga-offset;
 figure(89)
@@ -46,7 +47,7 @@ imghr=imresize(img,2);
 
 mimgr=max(imghr,[],3);
 %%
-if 0
+if 1
 figure(39);imagesc(mimgr);
 h=imfreehand;
 mask=createMask(h);
