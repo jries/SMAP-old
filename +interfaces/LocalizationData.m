@@ -95,6 +95,10 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             %if not exisitng. 
             %FIX: can result in field vecotrs of different length. Pad with
             %zeros?
+            if isempty(obj.loc)
+                obj.setloc(name, value)
+                return
+            end
             if nargin<3
                 fn=fieldnames(obj.loc);
                 
