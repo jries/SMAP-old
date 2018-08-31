@@ -230,7 +230,7 @@ end
 % sdat=size(dat);
 % filedat=load(file);
 % filedat.filename=file;
-try
+% try
 filenumber=obj.locData.files.filenumberEnd+1;
 
 locData=interfaces.LocalizationData;
@@ -241,9 +241,9 @@ for k=1:length(fn)
     fnsmap=fn{k};
     fnimport=pfile.(fnsmap);
     if strcmp(fnsmap,'frame')
-        locData.addloc(fnsmap,double(tab.(fnimport)));
+        locData.setloc(fnsmap,double(tab.(fnimport)));
     elseif isfield(tab,fnimport)
-        locData.addloc(fnsmap,single(tab.(fnimport)));
+        locData.setloc(fnsmap,single(tab.(fnimport)));
     end
 end
 
@@ -269,7 +269,7 @@ if ~isfield(locData.loc,'xnm')||~isfield(locData.loc,'ynm')
 end
 zd=zeros(size(tab.(pfile.(fn{1}))),'single');
 if ~isfield(locData.loc,'frame')
-    locData.addloc('frame',double(zd+1));
+    locData.setloc('frame',double(zd+1));
 end
 % locData.addloc('frame',dat(:,pfile.frame));
 % locData.addloc('xnm',single(dat(:,pfile.xnm)));
@@ -288,32 +288,32 @@ end
 psfnm=150;psfznm=500;
 
 if ~isfield(locData.loc,'locprecznm')&&isfield(locData.loc,'znm')
-    locData.addloc('locprecznm',psfznm./sqrt(phot));
+    locData.setloc('locprecznm',psfznm./sqrt(phot));
 end
 
 if ~isfield(locData.loc,'locprecnm')
-    locData.addloc('locprecnm',psfnm./sqrt(phot));
+    locData.setloc('locprecnm',psfnm./sqrt(phot));
 end
 
 if ~isfield(locData.loc,'bg')
-    locData.addloc('bg',zd);
+    locData.setloc('bg',zd);
 end
 
 if ~isfield(locData.loc,'PSFxnm')
-    locData.addloc('PSFxnm',zd+psfnm);
+    locData.setloc('PSFxnm',zd+psfnm);
 end
 
 if ~isfield(locData.loc,'channel')
-    locData.addloc('channel',zd);
+    locData.setloc('channel',zd);
 end
 
-locData.addloc('filenumber',zd+filenumber);
-catch err
-    err
-    warndlg('import did not work. Select a different import format file or define new file')
-    return
-%     rethrow(err);
-end
+locData.setloc('filenumber',zd+filenumber);
+% catch err
+%     err
+%     warndlg('import did not work. Select a different import format file or define new file')
+%     return
+% %     rethrow(err);
+% end
 
 
 
