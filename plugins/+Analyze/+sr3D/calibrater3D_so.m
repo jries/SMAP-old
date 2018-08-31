@@ -12,7 +12,7 @@ classdef calibrater3D_so<interfaces.DialogProcessor
         end
         
         function initGui(obj)
-            obj.run;
+%             obj.run;
 %             close(obj.handle)
         end
         function out=run(obj,p)
@@ -175,5 +175,6 @@ function pard=guidef(obj)
 
 pard.inputParameters={'cam_pixelsize_um'};
 pard.plugininfo.type='ProcessorPlugin';
+pard.plugininfo.name='calibrate3DsplinePSF';
 pard.plugininfo.description=sprintf('Plugin to calibrate 3D PSF. \n According to Li et al, 2017');
 end
