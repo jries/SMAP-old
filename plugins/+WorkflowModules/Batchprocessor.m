@@ -368,14 +368,14 @@ pard.adddironline_button.position=[5,4];
 pard.adddironline_button.Width=1;
 
 
-pard.adddir_mask.object=struct('Style','edit','String','*_time_*');
+pard.adddir_mask.object=struct('Style','edit','String','*_Localization_*');
 pard.adddir_mask.position=[6,4];
 pard.adddir_mask.Width=1;
 
 pard.adddir_t.object=struct('Style','text','String','> #images');
 pard.adddir_t.position=[7,4];
 pard.adddir_t.Width=.5;
-pard.adddir_minimages.object=struct('Style','edit','String','10');
+pard.adddir_minimages.object=struct('Style','edit','String','0');
 pard.adddir_minimages.position=[7,4.5];
 pard.adddir_minimages.Width=.5;
 

@@ -78,7 +78,7 @@ numlocsR=getFieldAsVector(se.sites,fields{:},'numlocsR');
 % nend_gt=nend_gt(use,:);
 
 use=getFieldAsVector(se.sites,'annotation','use');
-filefile=se.sites(find(use,1,'first')).info.filenumber;
+
 
 
 if p.psfcheck
@@ -88,11 +88,14 @@ else
 end
 
 if p.filecheck
-indf=false(size(filenumber));
-for k=1:length(p.filenumbers)
-    indf=indf | filenumber==p.filenumbers(k);
-end
-indgood=indgood&indf;
+    indf=false(size(filenumber));
+    for k=1:length(p.filenumbers)
+        indf=indf | filenumber==p.filenumbers(k);
+    end
+    indgood=indgood&indf;
+    filefile=p.filenumbers(1);
+else
+    filefile=se.sites(find(use,1,'first')).info.filenumber;
 end
 
 
@@ -235,7 +238,9 @@ subplot(1,2,2,ax4);
     if gtexist
         [lsgt,ltsgt]=evaluatetime(nstart_gt,p,'m');
         [legt,ltegt]=evaluatetime(nend_gt,p,'g');
-        
+        lsgt(end+1)=0;
+        legt(end+1)=0;
+    
           plot(timepoints, ltsgt+ltegt,'d')
           
         title(axtt,[lbs num2str([ls le lsgt legt]*100,'%4.0f')]);
@@ -337,6 +342,7 @@ end
 results(2).all=-1;
 
 results(2).file=0;
+results(3).file=0;
 results(1).file=p.filecheck*(p.filenumbers);
 % dat=struct2table(results);
 axp=ax0.Parent;

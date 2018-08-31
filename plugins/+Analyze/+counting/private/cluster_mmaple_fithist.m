@@ -13,6 +13,7 @@ if nargin==0
     par.pblink_fit=1;
     par.monomer_fit=0;
     par.ncluster_fit=0;
+    par.bin=1;
     
 end
 % %evaluate cluster mmaple
@@ -87,9 +88,29 @@ fitp=fitSome(fitfun,x(minfit:maxfit)',y(minfit:maxfit)',allpar,fitind,[0 0.01 0.
 
 
 %plot histogram
-plot(histogram.c,histogram.h,'b',histogram.c,histforfit(fitp,histogram.c',addpar),'r',histogram.c,histforfit(allpar,histogram.c',addpar),'k--','Parent',axhist);
-plot(histogram.c,sqrt(histogram.h),'b',histogram.c,whistforfit(fitp,histogram.c',addpar),'r',histogram.c,whistforfit(allpar,histogram.c',addpar),'k--','Parent',axwhist);
-plot(histogram.cumx,histogram.cum,'b',histogram.cumx,cumforfit(fitp,histogram.cumx',addpar),'r',histogram.cumx,cumforfit(allpar,histogram.cumx',addpar),'k--','Parent',axcum);
+binning=par.bin;
+hold(axhist,'off')
+plothist(axhist,histogram.c,histogram.h, binning, @stairs,'b');
+hold(axhist,'on')
+plothist(axhist,histogram.c,histforfit(fitp,histogram.c',addpar), binning,[], 'r');
+plothist(axhist,histogram.c,histforfit(allpar,histogram.c',addpar), binning, [], 'k--');
+
+hold(axwhist,'off')
+plothist(axwhist,histogram.c,sqrt(histogram.h), binning, @stairs,'b');
+hold(axwhist,'on')
+plothist(axwhist,histogram.c,whistforfit(fitp,histogram.c',addpar), binning, [],'r');
+plothist(axwhist,histogram.c,whistforfit(allpar,histogram.c',addpar), binning, [], 'k--');
+
+hold(axcum,'off')
+plothist(axcum,histogram.cumx,histogram.cum, binning,@stairs, 'b');
+hold(axcum,'on')
+plothist(axcum,histogram.cumx,cumforfit(fitp,histogram.cumx',addpar), binning, [],'r');
+plothist(axcum,histogram.cumx,cumforfit(allpar,histogram.cumx',addpar), binning,[],  'k--');
+
+% 
+% plot(histogram.c,histogram.h,'b',histogram.c,histforfit(fitp,histogram.c',addpar),'r',histogram.c,histforfit(allpar,histogram.c',addpar),'k--','Parent',axhist);
+% plot(histogram.c,sqrt(histogram.h),'b',histogram.c,whistforfit(fitp,histogram.c',addpar),'r',histogram.c,whistforfit(allpar,histogram.c',addpar),'k--','Parent',axwhist);
+% plot(histogram.cumx,histogram.cum,'b',histogram.cumx,cumforfit(fitp,histogram.cumx',addpar),'r',histogram.cumx,cumforfit(allpar,histogram.cumx',addpar),'k--','Parent',axcum);
 % 
 % fitax.NextPlot='add';
 % plot(x,fitfun(allpar,x',addpar),'k--','Parent',fitax);
@@ -201,6 +222,15 @@ parout.N0_v=N0range(ind);
 end
 % axes(axcum);
 
+function plothist(axhist,x,h, binning, plotfun,varargin)
+if isempty(plotfun)
+    plotfun=@plot;
+end
+
+    xb=x(1:binning:end);
+    hb=bindata(x,h,xb);
+     
+    plotfun(xb,hb,varargin{:},'Parent',axhist);
 
 % profile viewer
 

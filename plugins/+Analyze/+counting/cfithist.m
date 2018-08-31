@@ -138,7 +138,7 @@ pard.ncluster_v.object=struct('String','0','Style','edit');
 pard.ncluster_v.position=[6,2];
 pard.ncluster_v.isnumeric=1;
 
-pard.blinkmode.object=struct('Style','popupmenu','String','Poisson|Exponential|Noblink');
+pard.blinkmode.object=struct('Style','popupmenu','String','Poisson|Exponential|Noblink','Value',2);
 pard.blinkmode.position=[7,1];
 pard.blinkmode.Width=2;
 
@@ -163,6 +163,13 @@ pard.fitselection.Width=1.75;
 pard.bootstrap.object=struct('String','Bootstrap','Style','checkbox', 'Value', 0);
 pard.bootstrap.position=[5,3];
 pard.bootstrap.Width=1;
+
+pard.bint.object=struct('String','binning','Style','text');
+pard.bint.position=[6,3];
+pard.bint.Width=1;
+pard.bin.object=struct('String','1','Style','edit');
+pard.bin.position=[6,4];
+pard.bin.Width=1;
 
 pard.plugininfo.name='fit brightness histogram';
 pard.plugininfo.type='ProcessorPlugin';

@@ -10,31 +10,31 @@ infox=filedat.infox;
 %     locData.info=infox;
     locData.addloc('frame',fitpos(:,1));
     pixsizenm=infox.pixsize*1000;
-    locData.addloc('xnm',fitpos(:,3)*pixsizenm);
-    locData.addloc('ynm',fitpos(:,2)*pixsizenm);
-    locData.addloc('phot',fitpos(:,4));
-    locData.addloc('bg',fitpos(:,5));
+    locData.setloc('xnm',fitpos(:,3)*pixsizenm);
+    locData.setloc('ynm',fitpos(:,2)*pixsizenm);
+    locData.setloc('phot',fitpos(:,4));
+    locData.setloc('bg',fitpos(:,5));
     if min(fitpos(:,6))<0 %z-loc, test better in the future
-        locData.addloc('znm',fitpos(:,6)*1000/factorRefractiveMismatch);
-        locData.addloc('PSFxnm',fitpos(:,6)*0+150);
-        locData.addloc('locprecznm',fitpos(:,13)*1000/factorRefractiveMismatch)
+        locData.setloc('znm',fitpos(:,6)*1000/factorRefractiveMismatch);
+        locData.setloc('PSFxnm',fitpos(:,6)*0+150);
+        locData.setloc('locprecznm',fitpos(:,13)*1000/factorRefractiveMismatch)
     else
-        locData.addloc('PSFxnm',fitpos(:,6)*pixsizenm);
-        locData.addloc('PSFynm',fitpos(:,7)*pixsizenm);
+        locData.setloc('PSFxnm',fitpos(:,6)*pixsizenm);
+        locData.setloc('PSFynm',fitpos(:,7)*pixsizenm);
     end
-    locData.addloc('locprecnm',fitpos(:,19)*pixsizenm);
+    locData.setloc('locprecnm',fitpos(:,19)*pixsizenm);
     if s(2)>24
-    locData.addloc('channel',fitpos(:,25));
+    locData.setloc('channel',fitpos(:,25));
 %     locData.addloc('original_channel',fitpos(:,25));
     else
-        locData.addloc('channel',zeros(s(1),1,'single'));
+        locData.setloc('channel',zeros(s(1),1,'single'));
     end
-    locData.addloc('filenumber',zeros(s(1),1,'uint8')+1);
-    locData.addloc('logLikelihood',fitpos(:,16));
+    locData.setloc('filenumber',zeros(s(1),1,'uint8')+1);
+    locData.setloc('logLikelihood',fitpos(:,16));
     
     if s(2)>30
-        locData.addloc('int1',fitpos(:,31));
-        locData.addloc('int2',fitpos(:,33));
+        locData.setloc('int1',fitpos(:,31));
+        locData.setloc('int2',fitpos(:,33));
     end
     
     infox.roi=[0 0 infox.Width infox.Height];
