@@ -131,6 +131,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             end
         end
         function value=getPar(obj,field,varargin)
+            global SMAPparameters
             %returns global parameter. 
             %value=getPar(parameter,'Property','Value')
             %parameter: name of global parameter
@@ -145,8 +146,9 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                 varargin(ind:ind+1)=[];
                 field=[prefix field];
             end
-            po=obj.P;
-            par=po.par;
+%             po=obj.P;
+%             par=po.par;
+            par=SMAPparameters;
 %             par=obj.P.par;
             if isfield(par,field)
 %                 tested=true;
@@ -207,7 +209,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                 onlyedit=false;
             end
             par=[];
-            if (isa(hfn,'matlab.ui.control.UIControl')&&isvalid(hfn)) || (isstruct(hfn)&&(isfield(hfn,'String')||isfield(hfn,'Value'))&&isfield(hfn,'Style'))
+            if (isa(hfn,'matlab.ui.control.UIControl')&&isvalid(hfn)) || (isstruct(hfn)&&isfield(hfn,'Style')&&(isfield(hfn,'String')||isfield(hfn,'Value')))
                 style=hfn.Style;
                 switch style
                     case {'edit','text','file','dir'}
@@ -274,6 +276,8 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                 end
             elseif isa(hfn,'matlab.ui.control.Table')
                 par.Data=hfn.Data;
+            else
+% %                 hfn
             end
         end
         function handle=value2handle(obj,v,hin)
@@ -287,7 +291,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             %.selection=h.String{h.Value}
             %Table: Data
             handle=[];
-            if (isa(hin,'matlab.ui.control.UIControl')&&isvalid(hin))|| (isstruct(hin)&&(isfield(hin,'String')||isfield(hin,'Value'))&&isfield(hin,'Style'))
+            if (isa(hin,'matlab.ui.control.UIControl')&&isvalid(hin))|| (isstruct(hin)&&isfield(hin,'Style')&&(isfield(hin,'String')||isfield(hin,'Value')))
             switch hin.Style
                 case {'edit','file'} %file:own creation for global settings
                     if isnumeric(v)
