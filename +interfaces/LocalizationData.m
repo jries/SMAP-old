@@ -114,8 +114,13 @@ classdef LocalizationData<interfaces.GuiParameterInterface
                 fn=fieldnames(obj.loc);
                 l1=length(obj.loc.(fn{1}));
                 l2=length(value);
-                obj.loc.(name)(1:l1,1)=0;
-                obj.loc.(name)(l1+1:l1+l2,1)=value;
+                if l1==l2
+                    obj.loc.(name)=value;
+                else
+                
+                    obj.loc.(name)(1:l1,1)=0;
+                    obj.loc.(name)(l1+1:l1+l2,1)=value;
+                end
 %                 obj.setloc(name,value)
             end
         end
