@@ -1,10 +1,10 @@
 % function countNupsDL
 addSMAPpath
 global path 
-[f,path]=uigetfile([path filesep '*.tif']);
+[f,path]=uigetfile([path filesep '*.*']);
 imgr=imageloaderAll([path f]);
 %%
-zlen=6;
+zlen=5;
 
 imgnum=12
 figure(32);
@@ -43,11 +43,12 @@ colormap(ax0,'gray')
 function maximaf=getmaxima(img,ax0,ax1,ax2)
 cutoffmin=200;
 mask=1;
-imghr=imresize(img,2);
-
+h=fspecial('gauss',5,0.7);
+imgf=imfilter(img,h);
+imghr=imresize(imgf,2);
 mimgr=max(imghr,[],3);
 %%
-if 1
+if 0
 figure(39);imagesc(mimgr);
 h=imfreehand;
 mask=createMask(h);

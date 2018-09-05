@@ -117,26 +117,26 @@ for kc=rangec
     locs=locData.getloc({'xnm','ynm'},'layer',layer,'position',[cell.pos(1:2) p.se_cellfov/2 ],'filenumber',cell.info.filenumber);
     rangex=[cell.pos(1)-p.se_cellfov/2 , cell.pos(1)+p.se_cellfov/2 ];
     rangey=[cell.pos(2)-p.se_cellfov/2 , cell.pos(2)+p.se_cellfov/2 ];
-    imh=(myhist2(locs.xnm,locs.ynm,pr,pr, rangex,rangey))';
-    imfs=imfilter(sqrt(imh),hgauss);
-    imf=imfilter(imh,hgauss3);
-    imbw=imfs>hgmax*cutoffmax;
-    imbw=imclose(bwareafilt(imbw,1),struce);
+    imh=(myhist2(locs.xnm,locs.ynm,pr,pr, rangex,rangey))'; %make image from localizations
+    imfs=imfilter(sqrt(imh),hgauss); %filter sqrt image (image is histogram: this normalizes the variance)
+    imf=imfilter(imh,hgauss3); %normal fitler
+    imbw=imfs>hgmax*cutoffmax; % threshold to get binary image
+    imbw=imclose(bwareafilt(imbw,1),struce); %morphological operations to smooth and extend
     
     xrel=(locs.xnm-rangex(1))/pr;
     yrel=(locs.ynm-rangey(1))/pr;
 %     indin=withinmask(imbw,yrel,xrel);
     che=imbw;
     emptycell=false;
-    for k=1:p.iterations
-        indin=withinmask(che,yrel,xrel);
+    for k=1:p.iterations %iteratively remove single localizations that are on the convex hull. This removes noise / background and only keeps the cell shape defined by dense localizations
+        indin=withinmask(che,yrel,xrel); %only get localizations in the large cell
         if sum(indin)==0
             emptycell=true;
             break
         end
-        ims=(myhist2(locs.xnm(indin),locs.ynm(indin),pr,pr, rangex,rangey))';
-        ch=bwconvhull(ims>0);
-        che=imerode(ch,struce2);
+        ims=(myhist2(locs.xnm(indin),locs.ynm(indin),pr,pr, rangex,rangey))'; %make new image
+        ch=bwconvhull(ims>0); %get convex hull
+        che=imerode(ch,struce2); %make smaller to exclude rim
     end
     if emptycell
         continue
@@ -147,10 +147,10 @@ for kc=rangec
     radiusch=sqrt(areach/pi);
     rim=radiusch*rimrel;
     struce3= strel('disk',round(rim));
-    che=imerode(ch,struce3);
+    che=imerode(ch,struce3); %make the mask even smaller to exclude localizations in the periphery
     imh2=imh;imh2(~che)=0;
     imincell=imfilter(imh2,hgauss2);
-     maxima=maximumfindcall(imincell);
+     maxima=maximumfindcall(imincell);  %filter and find maxima as possible sites
      
       indco=maxima(:,3)>cutoff*max(hgauss2(:));
     
