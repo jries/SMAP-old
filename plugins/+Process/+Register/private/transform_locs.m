@@ -124,6 +124,10 @@ else %all initial estimation:
             cutout=true;
            
     end
+    if isfield(p.register_parameters,'initial_mag') && p.register_parameters.initial_mag~=1
+        loctT.x=loctT.x*p.register_parameters.initial_mag;
+        loctT.y=loctT.y*p.register_parameters.initial_mag;
+    end
 
 end
 

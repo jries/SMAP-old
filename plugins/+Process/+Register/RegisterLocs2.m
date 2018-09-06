@@ -85,6 +85,7 @@ classdef RegisterLocs2<interfaces.DialogProcessor
                 par.maxshift_corr=5000;
                 par.maxlocsused=50000;
                 par.maxshift_match=250;
+                par.initial_mag=1;
             else 
                 par=obj.register_parameters;
             end
@@ -96,6 +97,7 @@ classdef RegisterLocs2<interfaces.DialogProcessor
                     {'Pixelsize (nm) for correlation';'pixelsizenm'}, par.pixelsizenm,...
                     {'Max shift for correlation (nm)';'maxshift_corr'}, par.maxshift_corr,...
                     {'Max locs for matching';'maxlocsused'}, par.maxlocsused,...
+                    {'Initial magnification';'initial_mag'}, par.initial_mag,...
                     {'Max shift matching (nm)';'maxshift_match'}, par.maxshift_match);
 
                 if strcmpi(button,'ok')

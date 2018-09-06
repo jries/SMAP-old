@@ -29,35 +29,9 @@ classdef Get2CIntImages2<interfaces.DialogProcessor
                 out.error='selected transformation file does not have a valid transformation';
                 return
             end
-            obj.locData.files.file(p.dataselect.Value).transformation=transformation;
-            file=obj.locData.files.file(p.dataselect.Value);
-            fo=strrep(file.name,'_sml.mat','_dc_sml.mat');
 
-            path=fileparts(file.name); %rather in top class, pass on
-            %search for tiff images
-            try
-                if isfield(obj.locData.files.file(1).info,'imagefile')
-                tiffile=obj.locData.files.file(1).info.imagefile;
-                else
-                    tiffile=obj.locData.files.file(1).info.basefile;
-                end
-                if ~exist(tiffile,'file')
-                    disp('Get2CIntImagesWF ine 40: check if it works')
-                    tiffile=strrep(tiffile,'\','/');
-                    ind=strfind(tiffile,'/');
-                    for k=1:length(ind)
-                        tiffileh=[tiffile(1:ind(k)) '_b_' tiffile(ind(k)+1:end)];
-                        if exist(tiffileh,'file')
-                            tiffile=tiffileh;
-                        end
-                    end
-                end
-                if ~exist(tiffile,'file')
-                    tiffile=[];
-                end
-            catch err
-                tiffile=[];
-            end
+        fo=strrep(file.name,'_sml.mat','_dc_sml.mat');
+
             
             if isempty(tiffile)
                 [filen, path]=uigetfile([path filesep '*.tif'],file.name);
@@ -87,20 +61,31 @@ classdef Get2CIntImages2<interfaces.DialogProcessor
 
         end
         function pard=guidef(obj)
-            pard=guidef;
+            pard=guidef(obj);
         end
         function initGui(obj)
             par.Vpos=3;
             par.Xpos=3;
             obj.children.evaluate=makeplugin(obj,{'WorkflowModules','IntensityCalculator','EvaluateIntensity'},obj.handle,par);
-            obj.guihandles.loadbutton.Callback=@obj.loadbutton;
+%             obj.guihandles.loadbutton.Callback=@obj.loadbutton;
 
         end
-        function loadbutton(obj,a,b)
+        function loadbutton_T(obj,a,b)
             fn=obj.guihandles.Tfile.String;
             [f,path]=uigetfile(fn,'Select transformation file _T.mat');
             if f
                 obj.guihandles.Tfile.String=[path f];
+            end      
+        end
+        function loadbutton_tif(obj,a,b)
+            fn= obj.guihandles.tiffile.String;
+            if isempty(fn)
+                fn=getrawtifpath(obj.locData);
+            end
+            
+            [f,path]=uigetfile(fn,'Select raw tiff file');
+            if f
+                obj.guihandles.tiffile.String=[path f];
             end      
         end
     end
@@ -109,47 +94,32 @@ end
 
 
 
-function pard=guidef
+function pard=guidef(obj)
+% 
+pard.tiffile.object=struct('Style','edit','String','');
+pard.tiffile.position=[1,1];
+pard.tiffile.Width=3.3;
+% pard.tiffile.TooltipString=sprintf('transformation file. Created e.g. with RegisterLocs');
+pard.loadbuttontif.object=struct('Style','pushbutton','String','load tif','Callback',@obj.loadbutton_tif);
+pard.loadbuttontif.position=[1,4.3];
+pard.loadbuttontif.Width=0.7;
 
-pard.dataselect.object=struct('Style','popupmenu','String','File');
-pard.dataselect.position=[1,1];
-pard.dataselect.TooltipString=sprintf('Data set to be used');
+pard.Tmode.object=struct('Style','popupmenu','String',{{'target','reference','both'}});
+pard.Tmode.position=[2,1];
+pard.Tmode.Width=.7;
+% pard.Tmode.TooltipString=sprintf('transformation file. Created e.g. with RegisterLocs');
 
-pard.t1.object=struct('Style','text','String','Background filter');
-pard.t1.position=[3,1];
-pard.t1.Width=1;
-pard.t1.TooltipString=sprintf('Median background filter. Select spatial and temporal step size');
-
-pard.t2.object=struct('Style','text','String','dx');
-pard.t2.position=[4,1];
-pard.t2.Width=0.5;
-pard.t2.TooltipString=sprintf('spatial step size (1-10, typical 3)');
-
-pard.filterx.object=struct('Style','edit','String','3');
-pard.filterx.position=[4,1.5];
-pard.filterx.Width=0.5;
-pard.filterx.TooltipString=pard.t2.TooltipString;
-
-pard.t3.object=struct('Style','text','String','dt');
-pard.t3.position=[5,1];
-pard.t3.Width=0.5;
-pard.t3.TooltipString=sprintf('temporal step size (e.g. 100)');
-
-pard.filtert.object=struct('Style','edit','String','100');
-pard.filtert.position=[5,1.5];
-pard.filtert.Width=0.5;
-pard.filtert.TooltipString=pard.t3.TooltipString;
-
-pard.Tfile.object=struct('Style','edit','String','settings/temp/temp_T.mat');
-pard.Tfile.position=[8,1];
-pard.Tfile.Width=3;
+pard.Tfile.object=struct('Style','edit','String','');
+pard.Tfile.position=[2,1.7];
+pard.Tfile.Width=2.6;
 pard.Tfile.TooltipString=sprintf('transformation file. Created e.g. with RegisterLocs');
 
-pard.loadbutton.object=struct('Style','pushbutton','String','load');
-pard.loadbutton.position=[8,4];
-pard.loadbutton.TooltipString=pard.Tfile.TooltipString;
+pard.loadbuttonT.object=struct('Style','pushbutton','String','load T','Callback',@obj.loadbutton_T);
+pard.loadbuttonT.position=[2,4.3];
+pard.loadbuttonT.Width=0.7;
+pard.loadbuttonT.TooltipString=pard.Tfile.TooltipString;
 
-pard.syncParameters={{'filelist_short','dataselect',{'String'}},{'transformationfile','Tfile',{'String'}}};
+pard.syncParameters={{'transformationfile','Tfile',{'String'}}};
 pard.plugininfo.type='ProcessorPlugin';
 pard.plugininfo.description=sprintf(['This plugin gets intensities from camera images at positions of localizations and at transformed positions \n',...
     'This plugin uses a transformation to find for every localization the position in the other channel and then determines the intensity in both channels.\n',...
@@ -164,6 +134,28 @@ pard.plugininfo.name='2C intensities from images 2';
 end
 
 
+
+function tiffile=getrawtifpath(locData)
+    if isfield(locData.files.file(1).info,'imagefile')
+        tiffile=locData.files.file(1).info.imagefile;
+    else
+        tiffile=locData.files.file(1).info.basefile;
+    end
+    if ~exist(tiffile,'file')
+        disp('Get2CIntImagesWF ine 40: check if it works')
+        tiffile=strrep(tiffile,'\','/');
+        ind=strfind(tiffile,'/');
+        for k=1:length(ind)
+            tiffileh=[tiffile(1:ind(k)) '_b_' tiffile(ind(k)+1:end)];
+            if exist(tiffileh,'file')
+                tiffile=tiffileh;
+            end
+        end
+    end
+    if ~exist(tiffile,'file')
+        tiffile=strrep(locData.files.file(1).name,'_sml.mat','.tif');
+    end
+end
 
 function plugino=makeplugin(obj,pluginpath,handle,pgui)
 plugino=plugin(pluginpath{:});

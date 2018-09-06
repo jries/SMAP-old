@@ -30,10 +30,10 @@ classdef TransformLocsManually<interfaces.DialogProcessor
                 cx=p.sr_pos(1);cy=p.sr_pos(2);
             end
             
-            xh=loc.xnm(indfile)-cx;
-            yh=(loc.ynm(indfile)-cy);
-            xhg=gloc.xnm(indfileg)-cx;
-            yhg=(gloc.ynm(indfileg)-cy);
+            xh=(loc.xnm(indfile)-cx)*p.mag(1);
+            yh=(loc.ynm(indfile)-cy)*p.mag(end);
+            xhg=(gloc.xnm(indfileg)-cx)*p.mag(1);
+            yhg=(gloc.ynm(indfileg)-cy)*p.mag(end);
             loc.xnm(indfile)=cosd(p.rot)*(xh)+sind(p.rot)*yh+cx;
             loc.ynm(indfile)=-sind(p.rot)*(xh)+cosd(p.rot)*yh+cy;
             gloc.xnm(indfileg)=cosd(p.rot)*(xhg)+sind(p.rot)*yhg+cx;
@@ -42,10 +42,13 @@ classdef TransformLocsManually<interfaces.DialogProcessor
             
             obj.locData.loc.xnm=loc.xnm;
             obj.locData.loc.ynm=loc.ynm;
-            obj.locData.loc.znm=loc.znm;
+            
             obj.locData.grouploc.xnm=gloc.xnm;
             obj.locData.grouploc.ynm=gloc.ynm;
-            obj.locData.grouploc.znm=gloc.znm;
+            if isfield(obj.locData.loc,'znm')
+                obj.locData.grouploc.znm=gloc.znm;
+                obj.locData.loc.znm=loc.znm;
+            end
 %             
         end
         function pard=guidef(obj)
@@ -106,6 +109,13 @@ pard.rott.Width=1;
 pard.rot.object=struct('String','0','Style','edit');
 pard.rot.position=[4,2];
 pard.rot.Width=0.5;
+
+pard.magt.object=struct('String','magnification','Style','text');
+pard.magt.position=[4,3];
+pard.magt.Width=1;
+pard.mag.object=struct('String','1','Style','edit');
+pard.mag.position=[4,4];
+pard.mag.Width=0.5;
 
 
 pard.rotcset.object=struct('String','rotation center x,y (otherwise FoV)','Style','checkbox');
