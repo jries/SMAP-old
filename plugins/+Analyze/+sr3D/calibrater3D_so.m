@@ -20,12 +20,13 @@ classdef calibrater3D_so<interfaces.DialogProcessor
             fit3ddir=strrep(pwd,'SMAP','fit3D');
             if exist(fit3ddir,'file')
             addpath(fit3ddir);
-            else
+            end
+            
             fit3ddir=strrep(pwd,'SMAP','fit3Dcspline');
             if exist(fit3ddir,'file')
             addpath(fit3ddir);
             end
-            end
+            
             smapdir=pwd;
            
                        
