@@ -79,6 +79,7 @@ function [locs,possites]=getlabels(p, colour)
 % fields p. :
 % coordinatefile, se_sitefov, numberofsites(x,y), labeling_efficiency, randomxy,
 % randomxyd
+if isstr(p.coordinatefile)
 paths =  strsplit(p.coordinatefile, '|');
 switch colour
     case 1
@@ -136,6 +137,14 @@ switch ext
         display('file not identified selected')
         return
 end % after this block, you will get either image or locsall, depending on the type of your input
+else %pass on matlab variable
+    if isstruct(p.coordinatefile)
+        locsall=copyfields([],p.coordinatefile,{'x','y','z','channel'});
+    else
+        image=p.coordinatefile;
+    end
+        
+end
 if ~isfield(locsall,'z')
     locsall.z=0*locsall.x;
 end
