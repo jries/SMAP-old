@@ -101,6 +101,7 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
                 evaluators=obj.evaluators;
                 loccounter=obj.loccounter;
                 s=size(obj.intensities);
+                s=size(EvaluateIntensity_intensity);
                 if loccounter>s(1)-memincrease/4
                     EvaluateIntensity_intensity(loccounter+memincrease,length(obj.fields))=single(0);
                 end
