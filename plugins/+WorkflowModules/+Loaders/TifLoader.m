@@ -156,7 +156,10 @@ classdef TifLoader<interfaces.WorkflowModule
             end
             disp('fitting done')
         end
-        function addFile(obj,file)
+        function addFile(obj,file,setinfo)
+            if nargin<3
+                setinfo=false;
+            end
             try
                 obj.imloader.close;
             catch err
@@ -204,12 +207,15 @@ classdef TifLoader<interfaces.WorkflowModule
                 end
                 obj.guihandles.framestop.String=int2str(numf);
              end
+             if setinfo
+                 obj.setPar('loc_fileinfo_set',obj.getPar('loc_fileinfo'));
+             end
 
         end
         function loadtif_ext(obj)
             p=obj.getAllParameters;
-            obj.addFile(p.tiffile)
-            obj.setPar('loc_fileinfo_set',obj.getPar('loc_fileinfo'));
+            obj.addFile(p.tiffile,true)
+            
         end
         function loadedges(obj,a,b)
             tiffile=obj.getSingleGuiParameter('tiffile');

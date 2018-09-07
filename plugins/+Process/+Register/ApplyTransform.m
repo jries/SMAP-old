@@ -43,7 +43,9 @@ classdef ApplyTransform<interfaces.DialogProcessor
                     end
                 end
                  if p.transformwhat.Value==1||p.transformwhat.Value==2
-                    if isfield(transformation.tinfo,'units')&& strcmp(transformation.tinfo.units,'pixels')
+                    if isa(transformation, 'interfaces.LocTransformN')
+                        loc=apply_transform_locsN(obj.locData.loc,transformation,file,p);
+                    elseif isfield(transformation.tinfo,'units')&& strcmp(transformation.tinfo.units,'pixels')
                         loch.xnm=obj.locData.loc.xnm/p.cam_pixelsize_nm(1);loch.ynm=obj.locData.loc.ynm/p.cam_pixelsize_nm(end);
                         loch.frame=obj.locData.loc.frame;loch.channel=obj.locData.loc.channel;loch.filenumber=obj.locData.loc.filenumber;
                         loch2=apply_transform_locs(loch,transformation,file,p);

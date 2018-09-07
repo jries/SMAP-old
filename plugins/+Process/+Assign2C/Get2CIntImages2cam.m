@@ -1,11 +1,11 @@
-classdef Get2CIntImages2<interfaces.DialogProcessor
+classdef Get2CIntImages2cam<interfaces.DialogProcessor
     % gets intensities from camera images at positions of localizations and
     % at transformed positions
     properties (Access=private)
         figure
     end
     methods
-        function obj=Get2CIntImages2(varargin)   
+        function obj=Get2CIntImages2cam(varargin)   
             obj@interfaces.DialogProcessor(varargin{:}) ;
             obj.history=true;
             obj.showresults=false;
@@ -13,48 +13,56 @@ classdef Get2CIntImages2<interfaces.DialogProcessor
         
         function out=run(obj,p)
             out=[];
-            if isempty(obj.figure)
+            if isempty(obj.figure)||~isvalid(obj.figure)
                 obj.figure=figure;
             end
             f=obj.figure;
-            f.Visible='off';
+            f.Visible='on';
             wffile='settings/workflows/get2CIntensityImagesWF2.mat';
             wf=interfaces.Workflow(f,obj.P);
             wf.attachLocData(obj.locData);
             wf.makeGui;
             wf.load(wffile);
             
-            transformation=loadtransformation(obj,p.Tfile,p.dataselect.Value);
-            if isempty(transformation)
-                out.error='selected transformation file does not have a valid transformation';
-                return
-            end
-
-        fo=strrep(file.name,'_sml.mat','_dc_sml.mat');
+%             transformation=loadtransformation(obj,p.Tfile,1);
+%             if isempty(transformation)
+%                 out.error='selected transformation file does not have a valid transformation';
+%                 return
+%             end
+%             obj.locData.files.file.transformation=transformation;
 
             
-            if isempty(tiffile)
-                [filen, path]=uigetfile([path filesep '*.tif'],file.name);
-                tiffile=[path filen];
-            end
+%             if isempty(p.tiffile)
+%                 [filen, path]=uigetfile([path filesep '*.tif'],file.name);
+%                 tiffile=[path filen];
+%             end
 %             tiffile='/Users/ries/Documents/Data/3Ddc/MTActin/02_MT680_phalloidin647_1/img_000039971_Default_000.tif';
-            wf.module('TifLoader').addFile(tiffile);
-            p.framestop=max(obj.locData.loc.frame)-1;
+          
+            
+      
+            p.loaderclass=wf.module('TifLoader').getSingleGuiParameter('loaderclass'); 
+            p.loaderclass.Value=1;%single MM
+            p.mirrorem=0;
              wf.module('TifLoader').setGuiParameters(p);
-             
-            p.loc_blocksize_frames=p.filtert;
-            p.loc_bg_dx=p.filterx;
-            p.loc_subtractbg=true;
-            wf.module('MedianBGcalculator').setGuiParameters(p);
-
-            wf.module('IntLoc2pos').filestruc=file;
-            wf.module('IntLoc2pos').setGuiParameters(p);
+               wf.module('TifLoader').addFile(p.tiffile,true);      
+               p.framestop=max(obj.locData.loc.frame);
+%             p.loc_blocksize_frames=p.filtert;
+%             p.loc_bg_dx=p.filterx;
+%             p.loc_subtractbg=true;
+%             wf.module('MedianBGcalculator').setGuiParameters(p);
+            file=obj.locData.files.file;
+            wf.module('IntLoc2posN').filestruc=file;
+            wf.module('IntLoc2posN').setGuiParameters(p);
+            
+            p.loc_ROIsize=11;
+            wf.module('RoiCutterWF').setGuiParameters(p);
 
             pe=obj.children.evaluate.getGuiParameters(true);
             wf.module('EvaluateIntensity_s').setGuiParameters(pe,true);
             obj.setPar('loc_preview',false);
             wf.run;
-
+            delete(f);
+            fo=strrep(obj.locData.files.file(1).name,'_sml.mat','_dc_sml.mat');
             obj.locData.savelocs(fo);
             obj.locData.regroup;
             obj.setPar('locFields',fieldnames(obj.locData.loc))
@@ -104,7 +112,7 @@ pard.loadbuttontif.object=struct('Style','pushbutton','String','load tif','Callb
 pard.loadbuttontif.position=[1,4.3];
 pard.loadbuttontif.Width=0.7;
 
-pard.Tmode.object=struct('Style','popupmenu','String',{{'target','reference','both'}});
+pard.Tmode.object=struct('Style','popupmenu','String',{{'target','reference'}});
 pard.Tmode.position=[2,1];
 pard.Tmode.Width=.7;
 % pard.Tmode.TooltipString=sprintf('transformation file. Created e.g. with RegisterLocs');
@@ -129,7 +137,7 @@ pard.plugininfo.description=sprintf(['This plugin gets intensities from camera i
     '\t a.	Roi2int_sum: uses a ROI (set size) to determine intensity, and a larger ROI for the background.\n',...
     '\t b.	Roi2int_fit: Uses a Gaussian fit to determine intensity and background. The position is fixed to the fitted position. You can use the fitted PSF size or fix it. If fit on BG is checked, the background is subtracted prior to fitting and the fit is performed with background set to zero. Otherwise the background is a fitting parameter.\n',...
     '4.	Press Run and when asked select the original raw camera images. The results are automatically saved with the _dc in the file name.\n']);
-pard.plugininfo.name='2C intensities from images 2';
+pard.plugininfo.name='2C intensities from images 2 cam';
 % pard.plugininfo.description
 end
 

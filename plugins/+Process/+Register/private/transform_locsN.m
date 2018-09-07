@@ -1,4 +1,4 @@
-function transform=transform_locs(locData,p)
+function transform=transform_locsN(locData,p)
 
 %get fields
 if p.uselayers
@@ -92,11 +92,15 @@ end
 cutout=false;
 if p.useT
     Tinitial=loadtransformation(locData,p.Tfile,p.dataselect.Value);
-    
+    if isa(Tinitial,'interfaces.LocTransformN')
+        pos=Tinitial.transformToReference(2,horzcat(loctarget.xnm,loctarget.ynm),'nm');
+        loctT.x=pos(:,1);loctT.y=pos(:,2);
+    else
     [loctT.x,loctT.y]=Tinitial.transformCoordinatesInv(loctarget.xnm,loctarget.ynm);
     mirrorinfo=Tinitial.tinfo.mirror;
     if contains(mirrorinfo.targetmirror,'no')
     cutout=true;
+    end
     end
     %     pos=Tinitial.pos;
 %     size=Tinitial.size;
@@ -207,19 +211,46 @@ loctT.y=loctT.y+dycorr;
 
 [iAa,iBa,na,nb,nseen]=matchlocsall(locref,loctT,0,0,p.register_parameters.maxshift_match,p.register_parameters.maxlocsused);
 
+
+% x,y now in pixels!
+roitarget=locData.files.file(loctarget.filenumber(1)).info.roi;
+roiref=locData.files.file(locref.filenumber(1)).info.roi;
+pixtarget=locData.files.file(loctarget.filenumber(1)).info.cam_pixelsize_um*1000;
+pixref=locData.files.file(locref.filenumber(1)).info.cam_pixelsize_um*1000;
+
+% locref.x=locref.xnm/pixref(1)-roiref(1);
+% locref.y=locref.ynm/pixref(2)-roiref(2);
+% loctarget.x=loctarget.xnm/pixtarget(1)-roitarget(1);
+% loctarget.y=loctarget.ynm/pixtarget(2)-roitarget(2);
+
+%still use camera chip as reference, not ROI
+locref.x=locref.xnm/pixref(1);
+locref.y=locref.ynm/pixref(end);
+loctarget.x=loctarget.xnm/pixtarget(1);
+loctarget.y=loctarget.ynm/pixtarget(end);
+
 % transform.findTransform(locref.x(iAa),locref.y(iAa),loctarget.x(iBa),loctarget.y(iBa))
-transform=interfaces.LocTransform;
-t.type=p.transform.selection;
-t.parameter=p.transformparam;
-transform.findTransform(locref.x(iAa),locref.y(iAa),loctarget.x(iBa),loctarget.y(iBa),t)
+transform=interfaces.LocTransformN;
+transform.setTransform(1,'type',p.transform.selection,'unit','pixel','parameter',p.transformparam,'cam_pixnm',pixref);
+transform.setTransform(2,'type',p.transform.selection,'unit','pixel','parameter',p.transformparam,'cam_pixnm',pixtarget);
+%XXXXXXX still need to include mirroring...XXXXXX
+% t.parameter=p.transformparam;
+
+
+
 
 ztransform=isfield(locref,'znm')&&~isempty(locref.znm);
 if ztransform
-    transform.findTransformZ(locref.x(iAa),locref.y(iAa),locref.znm(iAa),loctarget.x(iBa),loctarget.y(iBa),loctarget.znm(iBa),t)
-     [xa, ya, za]=transform.transformCoordinatesInv((loctarget.x(iBa)),(loctarget.y(iBa)),(loctarget.znm(iBa)));
+    lref=horzcat(locref.x(iAa),locref.y(iAa),locref.znm(iAa));
+    lt=horzcat(loctarget.x(iBa),loctarget.y(iBa),loctarget.znm(iBa));
 else
-    [xa, ya]=transform.transformCoordinatesInv((loctarget.x(iBa)),(loctarget.y(iBa)));
+    lref=horzcat(locref.x(iAa),locref.y(iAa));
+    lt=horzcat(loctarget.x(iBa),loctarget.y(iBa));
 end
+
+transform.findTransform(2,lref,lt)
+
+ltr=transform.transformToReference(2,lt);
 % transform.findTransform(locref.x(iAa),locref.y(iAa),loctT.x(iBa),loctT.y(iBa),t)
 % if p.showresults
     
@@ -228,11 +259,11 @@ end
 %      [xa, ya]=transform.transformCoordinatesInv((loctT.x(iBa)),(loctT.y(iBa)));
 %  [xa, ya]=transform.transformCoordinates((loc.x(indr(iBa))),(loc.y(indt(iBa))),'target');
  
-   dx=xa-locref.x(iAa);
-   dy=ya-locref.y(iAa);
+   dx=ltr(:,1)-locref.x(iAa);
+   dy=ltr(:,2)-locref.y(iAa);
    
    if ztransform
-       dz=za-locref.znm(iAa);
+       dz=ltr(:,3)-locref.znm(iAa);
        dzb=loctarget.znm(iBa)-locref.znm(iAa);
        initaxis(p.resultstabgroup,'zcalib')
        histogram(dz);hold on ; histogram(dzb);hold off
@@ -256,8 +287,8 @@ initaxis(p.resultstabgroup,'scatter')
  ax4=initaxis(p.resultstabgroup,'locs');
  plot(loctarget.x(iBa(ra)),loctarget.y(iBa(ra)),'+',loctarget.x(nb(rb)),loctarget.y(nb(rb)),'ro')
  
-transform.tinfo.targetpos=p.targetpos.selection;
-transform.tinfo.separator=separator;
-transform.tinfo.mirror=mirrorinfo;
-transform.tinfo.cam_pixelsize_nm=p.currentfileinfo.cam_pixelsize_um*1000;
+% transform.tinfo.targetpos=p.targetpos.selection;
+% transform.tinfo.separator=separator;
+% transform.tinfo.mirror=mirrorinfo;
+% transform.tinfo.cam_pixelsize_nm=p.currentfileinfo.cam_pixelsize_um*1000;
 

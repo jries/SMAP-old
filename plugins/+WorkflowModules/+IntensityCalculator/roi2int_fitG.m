@@ -53,7 +53,7 @@ if ~roi2int_fitG_parameters.fitonbg%nargin<7||isempty(bgroi)
         p(k,:)=Xmat\roih(:);
         if 0%p(k,1)>2500~
             p(k,:)
-            figure(66)
+            figure(67)
             subplot(2,2,1)
             imagesc(-dn:dn,-dn:dn,roih);
             hold on

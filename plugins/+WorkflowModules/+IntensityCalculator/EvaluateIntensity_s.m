@@ -72,9 +72,9 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
                     for l=1:length(fields)
                     obj.fields={obj.fields{:} [fields{l} '1'] };
                     end
-                    for l=1:length(fields)
-                    obj.fields={obj.fields{:} [fields{l} '2'] };
-                    end
+%                     for l=1:length(fields)
+%                     obj.fields={obj.fields{:} [fields{l} '2'] };
+%                     end
                     
                 end
     
@@ -89,19 +89,19 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
             so2=2;
             if ~isempty(data{1}.data)
                 img=data{1}.data.img;
-                bg=data{2}.data.img;
+%                 bg=data{2}.data.img;
 %                 img=d1.img;
 %                 bg=d2.img;
-                loc=data{3}.data;
+                loc=data{2}.data;
                 s=size(img);
-                numl=s(3)/2;
+                numl=s(3);
                 memincrease=1e5;  
                 useevaluators=obj.useevaluators;
 %                 intensities=obj.intensities;
                 evaluators=obj.evaluators;
                 loccounter=obj.loccounter;
                 s=size(obj.intensities);
-                if loccounter>s(1)-memincrease/4;
+                if loccounter>s(1)-memincrease/4
                     EvaluateIntensity_intensity(loccounter+memincrease,length(obj.fields))=single(0);
                 end
                 
@@ -122,11 +122,11 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
                         inds=inds+so1;
                     end
                     if useevaluators(2)
-                        out2=evaluators{2}.evaluate(img,bg,loc.dx,loc.dy,loc.PSFxpix,loc.PSFypix);
+                        out2=evaluators{2}.evaluate(img,0,loc.dx,loc.dy,loc.PSFxpix,loc.PSFypix);
                         EvaluateIntensity_intensity(loccounter+1:loccounter+numl,inds:inds+so2-1)=out2(1:numl,:);
                         inds=inds+so2;
-                      EvaluateIntensity_intensity(loccounter+1:loccounter+numl,inds:inds+so2-1)=out2(numl+1:end,:);
-                        inds=inds+so2;
+%                       EvaluateIntensity_intensity(loccounter+1:loccounter+numl,inds:inds+so2-1)=out2(numl+1:end,:);
+%                         inds=inds+so2;
                         
 %                         intensities(loccounter+k,inds:inds+length(out)-1)=out;
 %                         inds=inds+length(out);

@@ -93,6 +93,8 @@ classdef LocTransform<handle
                     ind=x>separator(1);
                 case 'right'
                     ind=x<separator(1);
+                case 'center'
+                    ind=true(size(x));
             end  
         end
         function makeAffine2d(obj,A)

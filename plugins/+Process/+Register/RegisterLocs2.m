@@ -22,7 +22,7 @@ classdef RegisterLocs2<interfaces.DialogProcessor
             p.isz=obj.isz;
             p.register_parameters=obj.register_parameters;
             
-            obj.transformation=transform_locs(obj.locData,p);
+            obj.transformation=transform_locsN(obj.locData,p);
             
             fv=p.dataselect.Value;
             obj.locData.files.file(fv).transform=obj.transformation;
@@ -86,6 +86,8 @@ classdef RegisterLocs2<interfaces.DialogProcessor
                 par.maxlocsused=50000;
                 par.maxshift_match=250;
                 par.initial_mag=1;
+                par.initialshiftx=0;
+                 par.initialshifty=0;
             else 
                 par=obj.register_parameters;
             end
@@ -98,6 +100,8 @@ classdef RegisterLocs2<interfaces.DialogProcessor
                     {'Max shift for correlation (nm)';'maxshift_corr'}, par.maxshift_corr,...
                     {'Max locs for matching';'maxlocsused'}, par.maxlocsused,...
                     {'Initial magnification';'initial_mag'}, par.initial_mag,...
+                    {'Initial shift X (nm)';'initialshiftx'}, par.initialshiftx,...
+                    {'Initial shift Y (nm)';'initialshifty'}, par.initialshifty,...
                     {'Max shift matching (nm)';'maxshift_match'}, par.maxshift_match);
 
                 if strcmpi(button,'ok')
