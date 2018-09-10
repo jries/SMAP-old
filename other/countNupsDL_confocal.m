@@ -57,7 +57,7 @@ background=quantile(imghr(:),0.05);
 imghr=imghr-background;
 mimgr=max(imghr,[],3);
 %%
-if 0
+if 1
 figure(39);imagesc(mimgr);
 h=imfreehand;
 mask=createMask(h);
