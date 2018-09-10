@@ -55,14 +55,18 @@ pos.y=locs1.ynm;
 pos.sx=locs1.locprecnm;
 pos.sy=locs1.locprecnm;
 
-rangex=[p.posRoi(1) p.posRoi(2)];
-rangey=[p.posRoi(3) p.posRoi(4)];
+   midp(2)=(p.posRoi(3)+p.posRoi(4))/2;
+   midp(1)=(p.posRoi(1)+p.posRoi(2))/2;
+    
+rangex=sort([p.posRoi(1) p.posRoi(2)]);
+rangey=sort([p.posRoi(3) p.posRoi(4)]);
+
 
 syim=gaussrender_ellipt(pos,rangex, rangey, p.sr_pixrec, p.sr_pixrec);
 syimfit=imresize(syim,[sim(1),NaN]);
 syimfit=syimfit/myquantile(syimfit(:),0.995)*max(srall(:))/p.numberOfThetas*p.numoverlap*2;
 sxy=size(syimfit);
-allimages=zeros(sim(1),sim(2)+sxy(2),length(thetas)-2);
+allimages=zeros(sim(1),sim(2)+sxy(2)+1,p.numberOfThetas);
 
 
 
@@ -76,12 +80,12 @@ for k=1:p.numberOfThetas
     srimxz=sideview_reconstruct(locs1f,p);
 
     
-    syimfitl=addthetaline(syimfit,thetas(k));
+    syimfitl=addthetaline(syimfit,thetas(k+round(p.numoverlap/2)));
 %     figure(33)
 %     imagesc(syimfitl)
 %     waitforbuttonpress
     
-    collage=horzcat(syimfitl,srimxz);
+    collage=horzcat(syimfitl,ones(size(srimxz,1),1,'single'),srimxz);
     allimages(:,:,k)=collage;
     axes(ax1)
     imagesc(collage);
@@ -90,7 +94,7 @@ for k=1:p.numberOfThetas
     drawnow
 end
 
- if 0%p.d3_color
+    if 0%p.d3_color
         options.color=true;
     else
         options.color=false;

@@ -274,7 +274,7 @@ ltr=transform.transformToReference(2,lt);
 %    figure(88)
 initaxis(p.resultstabgroup,'scatter')
    dscatter(dx,dy)
-   title({['number of anchor points: ' num2str(length(iBa)) ' of ' num2str(nseen)],['dx= ' num2str(std(dx),3) ' nm, dy= ' num2str(std(dy),3) ' nm']});
+   title({['number of anchor points: ' num2str(length(iBa)) ' of ' num2str(nseen)],['dx= ' num2str(std(dx),3) ' pix, dy= ' num2str(std(dy),3) ' pix']});
  ax3=initaxis(p.resultstabgroup,'hist');
  hist(dx,50)
 
@@ -286,6 +286,7 @@ initaxis(p.resultstabgroup,'scatter')
   end
  ax4=initaxis(p.resultstabgroup,'locs');
  plot(loctarget.x(iBa(ra)),loctarget.y(iBa(ra)),'+',loctarget.x(nb(rb)),loctarget.y(nb(rb)),'ro')
+ legend('paired','unpaired');
  
 % transform.tinfo.targetpos=p.targetpos.selection;
 % transform.tinfo.separator=separator;

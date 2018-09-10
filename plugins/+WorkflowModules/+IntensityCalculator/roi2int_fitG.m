@@ -57,12 +57,12 @@ if ~roi2int_fitG_parameters.fitonbg%nargin<7||isempty(bgroi)
             subplot(2,2,1)
             imagesc(-dn:dn,-dn:dn,roih);
             hold on
-            plot(x(k),y(k),'+')
+            plot(dx(k),dy(k),'+')
             hold off
             subplot(2,2,2);
             imagesc(-dn:dn,-dn:dn,gauss*p(k,1)+p(k,2))
             hold on
-            plot(x(k),y(k),'+')
+            plot(dx(k),dy(k),'+')
             hold off
             subplot(2,2,3);
             imagesc(-dn:dn,-dn:dn,gauss*p(k,1)+p(k,2)-roih)
