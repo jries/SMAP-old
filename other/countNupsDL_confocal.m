@@ -1,5 +1,5 @@
 % function countNupsDL
-addSMAPpath
+% addSMAPpath
 global path 
 [f,path]=uigetfile([path filesep '*.*']);
 imgr=imageloaderAll([path f]);
@@ -25,8 +25,10 @@ imgr=imageloaderAll([path f]);
 % 
 % quantile(img(:),0.02)
 %%
+zlen=3;
 imgnum=1;
 imga=double(imgr.getmanyimages((imgnum-1)*zlen+1:imgnum*zlen,'mat'));
+offset=quantile(imga(:),0.02)
 img=imga-offset;
 figure
 subplot(2,2,1)
@@ -41,10 +43,10 @@ colormap(ax0,'gray')
 % end
 %%
 function maximafi=getmaxima(img,ax0,ax1,ax2)
-cutoffmin=300;
+cutoffmin=500;
 Rnear=5;
 mask=1;
-sigmaf=0.7;
+sigmaf=0.5;
 h2=fspecial('disk',3);h1=fspecial('gauss',size(h2,1),sigmaf);
 % h=h1-h2/5;%h=h/sum(h(:));
 h=h1;
@@ -69,7 +71,9 @@ end
 % 
 % mimg=mimg-background;
 %%
+
 numbins=100; 
+if 0
 maxima=zeros(0,3);
 for k=1:size(imghr,3)
     maxima=vertcat(maxima,maximumfindcall(imghr(:,:,k).*mask));
@@ -78,9 +82,14 @@ indg=brightestinregion(maxima(:,1),maxima(:,2),maxima(:,3),Rnear);
 sum(indg(:))/length(indg)
 maxima=maxima(indg,:);
 % maxima=maximumfindcall(mimg);
+else
+    
+    maxima=maximumfindcall(mimgr.*mask);
+end
 
 mint=maxima(:,3);
 indgood=mint>cutoffmin;
+
 
 %%
 maximafi=maxima(indgood,:);
@@ -91,7 +100,8 @@ maximafi=maxima(indgood,:);
 indlin=sub2ind(size(indmax),maximafi(:,1),maximafi(:,2));
 indmaxx=indmax(indlin);
 mp=size(imghr,3)/2;
-indgood=abs(indmaxx-mp)<=mp-2;
+% indgood=abs(indmaxx-mp)<=mp-2;
+indgood=true(size(indmaxx));
 maximaf=maximafi(indgood,:);
 if ~isempty(ax2)
 scatter(ax2,maximaf(:,1),maximaf(:,2),4,maximaf(:,3),'filled')
@@ -99,7 +109,7 @@ colormap(ax2,'jet')
 axis(ax2,'equal')
 axis(ax2,'off')
 % ax.CLim=fitp.b1+fitp.c1/sqrt(2)*[-1 1]*2;
-ax2.CLim=[500 1500];
+ax2.CLim=[500 2500];
 % colorbar(ax2)
 end
 % zinterp(imghr,maximaf(:,1),maximaf(:,2))
@@ -115,14 +125,14 @@ h=histogram(ax1,mintc,numbins);
 xfit=h.BinEdges(1:end-1)+h.BinWidth/2;
 yfit=(h.Values);
 fitp=fit(xfit',yfit','gauss2','Robust','LAR');
-
+fitp1=fit(xfit',yfit','gauss1','Robust','LAR');
 fitp2=fit(xfit',sqrt(yfit)','gauss3','StartPoint',[fitp.a1,fitp.b1,fitp.c1,fitp.a2*.8,fitp.b2,fitp.c2,fitp.a2*.2,fitp.b1*3,fitp.c2]);
 hold(ax1,'on')
 plot(ax1,xfit,fitp(xfit))
 plot(ax1,xfit,fitp2(xfit).^2)
 
 mv=sort([fitp2.b1 fitp2.b2 fitp2.b3]);
-title(ax1,['maximum at ' num2str(fitp.b2,4) ','  num2str(mv(2),4) ', bg ' num2str(background) ', std ' num2str(fitp.c2/sqrt(2),3)])
+title(ax1,['maximum at ' num2str(fitp1.b1,4) ','  num2str(mv(2),4) ', bg ' num2str(background) ', std ' num2str(fitp.c2/sqrt(2),3)])
 % cftool(h.BinEdges(1:end-1),h.Values)
 end
 
