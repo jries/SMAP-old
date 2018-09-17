@@ -4,26 +4,13 @@ global path
 [f,path]=uigetfile([path filesep '*.*']);
 imgr=imageloaderAll([path f]);
 % %%
-% zlen=5;
-% 
-% imgnum=12
-% figure(32);
-% ax0=gca;
-% figure(33);
-% for k=1:1
-%     imgnum=k
-% imga=double(imgr.getmanyimages((imgnum-1)*zlen+1:imgnum*zlen,'mat'));
-% offset=0;
-% img=imga-offset;
-% 
-% 
-% ax1=[];
-% ax2=subplot(5,5,k);
-% maximaf=getmaxima(img,ax0,ax1,ax2);
-% end
-% %
-% 
-% quantile(img(:),0.02)
+
+%%
+par.cutoffmin=800;
+par.mask=0;
+par.Rnear=5;
+par.sigmaf=0.5;
+par.file=f;
 %%
 zlen=3;
 imgnum=1;
@@ -31,22 +18,23 @@ imga=double(imgr.getmanyimages((imgnum-1)*zlen+1:imgnum*zlen,'mat'));
 offset=quantile(imga(:),0.02)
 img=imga-offset;
 figure
-subplot(2,2,1)
+% subplot(2,2,1)
 ax1=gca;
-subplot(2,2,2)
-ax2=gca;
-subplot(2,2,3)
-ax0=gca;
-maximaf=getmaxima(img,ax0,ax1,ax2);
-colormap(ax0,'gray')
+% subplot(2,2,2)
+% ax2=gca;
+% subplot(2,2,3)
+% ax0=gca;
+ax0=[];ax2=[];
+maximaf=getmaxima(img,ax0,ax1,ax2,par);
+% colormap(ax0,'gray')
 
 % end
 %%
-function maximafi=getmaxima(img,ax0,ax1,ax2)
-cutoffmin=500;
-Rnear=5;
-mask=1;
-sigmaf=0.5;
+function maximafi=getmaxima(img,ax0,ax1,ax2,par)
+cutoffmin=par.cutoffmin;
+Rnear=par.Rnear;
+
+sigmaf=par.sigmaf;
 h2=fspecial('disk',3);h1=fspecial('gauss',size(h2,1),sigmaf);
 % h=h1-h2/5;%h=h/sum(h(:));
 h=h1;
@@ -57,10 +45,12 @@ background=quantile(imghr(:),0.05);
 imghr=imghr-background;
 mimgr=max(imghr,[],3);
 %%
-if 1
+if par.mask
 figure(39);imagesc(mimgr);
 h=imfreehand;
 mask=createMask(h);
+else
+    mask=1;
 end
 %%
 mimg=double(mimgr).*double(mask);
@@ -124,15 +114,18 @@ h=histogram(ax1,mintc,numbins);
 % cftool(h.BinEdges(1:end-1)+h.BinWidth/2,h.Values)
 xfit=h.BinEdges(1:end-1)+h.BinWidth/2;
 yfit=(h.Values);
-fitp=fit(xfit',yfit','gauss2','Robust','LAR');
-fitp1=fit(xfit',yfit','gauss1','Robust','LAR');
-fitp2=fit(xfit',sqrt(yfit)','gauss3','StartPoint',[fitp.a1,fitp.b1,fitp.c1,fitp.a2*.8,fitp.b2,fitp.c2,fitp.a2*.2,fitp.b1*3,fitp.c2]);
-hold(ax1,'on')
-plot(ax1,xfit,fitp(xfit))
-plot(ax1,xfit,fitp2(xfit).^2)
 
-mv=sort([fitp2.b1 fitp2.b2 fitp2.b3]);
-title(ax1,['maximum at ' num2str(fitp1.b1,4) ','  num2str(mv(2),4) ', bg ' num2str(background) ', std ' num2str(fitp.c2/sqrt(2),3)])
+fitp1=fit(xfit',yfit','gauss1','Robust','LAR');
+fitp2=fit(xfit',yfit','gauss2','Robust','LAR','StartPoint',[fitp1.a1,fitp1.b1,fitp1.c1,0,fitp1.b1,fitp1.c1]);
+% fitp3=fit(xfit',sqrt(yfit)','gauss3','StartPoint',[fitp.a1,fitp.b1,fitp.c1,fitp.a2*.8,fitp.b2,fitp.c2,fitp.a2*.2,fitp.b1*3,fitp.c2]);
+hold(ax1,'on')
+plot(ax1,xfit,fitp1(xfit))
+plot(ax1,xfit,fitp2(xfit))
+legend('hist','single G','double G')
+
+mv=sort([fitp2.b1 fitp2.b2]);
+title(ax1,{['maximum at ' num2str(fitp1.b1,4) ', 2G:'  num2str(mv(1),4) ', '  num2str(mv(2),4) ', bg ' num2str(background) ', std ' num2str(fitp1.c1/sqrt(2),3)],par.file},...
+    'Interpreter','none')
 % cftool(h.BinEdges(1:end-1),h.Values)
 end
 
