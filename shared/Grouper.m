@@ -198,8 +198,11 @@ classdef Grouper< interfaces.LocDataInterface
                     combinemode='mean';
                 end
             end
-            
+           
             vtype=obj.locData.getloc(field).(field)(1);
+            if iscell(vtype)
+                return
+            end
             v=double(obj.locData.getloc(field).(field));
           
             list=obj.locData.getloc('groupindex').groupindex;

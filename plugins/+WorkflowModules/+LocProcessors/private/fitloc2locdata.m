@@ -1,7 +1,7 @@
 function locdat=fitloc2locdata(obj,locs,indin)
 fieldsremove={'xerrpix','yerrpix','PSFxpix','PSFypix','xpix','ypix'};
 fieldsremove={'xerrpix','yerrpix'};
-keeptype={'frame','filenumber'};
+keeptype={'frame','filenumber','inframes'};
 
 if isfield(locs,'xerrpix') 
     locs.xpixerr=locs.xerrpix;

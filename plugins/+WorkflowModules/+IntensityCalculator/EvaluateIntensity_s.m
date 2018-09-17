@@ -6,12 +6,13 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
         loccounter
         fields
         useevaluators
+        extension
 %         outputfilename
     end
     methods
         function obj=EvaluateIntensity_s(varargin)
             obj@interfaces.WorkflowModule(varargin{:});
-            obj.inputChannels=2;
+            obj.inputChannels=1;
         end
         function pard=guidef(obj)
              pard.plugininfo.type='WorkflowModule'; 
@@ -56,7 +57,7 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
             
         function initGui(obj)
             initGui@interfaces.WorkflowModule(obj);
-            obj.setInputChannels(2,'frame');  
+            obj.setInputChannels(1,'frame');  
         end
         function prerun(obj,data1,data2,data3)
             global EvaluateIntensity_intensity
@@ -79,7 +80,7 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
                 end
     
             end
-               obj.fields={obj.fields{:} 'int_xpix', 'int_ypix', 'int_frame' };
+               obj.fields={obj.fields{:} 'int_xpix', 'int_ypix', 'int_frame' ,'phot','bg'};
             obj.intensities=single(0);
             EvaluateIntensity_intensity=single(0);
         end
@@ -87,15 +88,19 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
             global EvaluateIntensity_intensity
             so1=2; %number of fields per evaluator
             so2=2;
-            if ~isempty(data{1}.data)
-                img=data{1}.data.img;
+            if ~isempty(data.data)
+                img=data.data.img;
 %                 bg=data{2}.data.img;
 %                 img=d1.img;
 %                 bg=d2.img;
-                loc=data{2}.data;
-                s=size(img);
+                loc=data.data.info;
+                s=size(img); 
+                if length(s)==2
+                    s(3)=1;
+                end
+                    
                 numl=s(3);
-                memincrease=1e5;  
+                memincrease=1e4;  
                 useevaluators=obj.useevaluators;
 %                 intensities=obj.intensities;
                 evaluators=obj.evaluators;
@@ -123,7 +128,7 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
                         inds=inds+so1;
                     end
                     if useevaluators(2)
-                        out2=evaluators{2}.evaluate(img,0,loc.dx,loc.dy,loc.PSFxpix,loc.PSFypix);
+                        out2=evaluators{2}.evaluate(img,loc.bg,loc.dx,loc.dy,loc.PSFxpix,loc.PSFypix);
                         EvaluateIntensity_intensity(loccounter+1:loccounter+numl,inds:inds+so2-1)=out2(1:numl,:);
                         inds=inds+so2;
 %                       EvaluateIntensity_intensity(loccounter+1:loccounter+numl,inds:inds+so2-1)=out2(numl+1:end,:);
@@ -134,7 +139,10 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
 %                         out=evaluators{2}.evaluate(im2,bg2,loc.dx(k+numl),loc.dy(k+numl),loc.PSFxpix(k+numl),loc.PSFypix(k+numl));
 %                         intensities(loccounter+k,inds:inds+length(out)-1)=out;
                     end
-                    EvaluateIntensity_intensity(loccounter+1:loccounter+numl,inds:inds+2)=horzcat(loc.x(1:numl),loc.y(1:numl),loc.frame(1:numl));
+                    EvaluateIntensity_intensity(loccounter+1:loccounter+numl,inds:inds+4)=horzcat(loc.x(1:numl),loc.y(1:numl),loc.frame(1:numl),loc.phot(1:numl),loc.bg(1:numl));
+                    if isfield(loc,'groupindex')
+                        EvaluateIntensity_intensity(loccounter+1:loccounter+numl,inds+5)=loc.groupindex(1:numl);
+                    end
 %                 end
                 loccounter=loccounter+numl;
                 
@@ -145,73 +153,26 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
                 dato=[];
                 
             else
-                dato=data{1};
+                dato=data;
 %                 obj.output(data{1})
-                if data{1}.eof
+                if data.eof
+                    groupindex=EvaluateIntensity_intensity(1:obj.loccounter,end);
+                    [~,indsortg]=sort(groupindex);
+                    Evis=single(EvaluateIntensity_intensity(indsortg,:));
                     for k=1:length(obj.fields)
-                        obj.locData.setloc(obj.fields{k},single(EvaluateIntensity_intensity(1:obj.loccounter,k)));
-                    end
-                    
-                end
-            end
-        end
-
-        function runold(obj,data)
-%             disp(data{1}.frame)
-            if ~isempty(data{1}.data)
-                d1=data{1}.data;
-                d2=data{2}.data;
-                img=d1.img;
-                bg=d2.img;
-                loc=data{3}.data;
-                s=size(img);
-                numl=s(3)/2;
-                memincrease=1e4;
-                
-                useevaluators=obj.useevaluators;
-                intensities=obj.intensities;
-                evaluators=obj.evaluators;
-                loccounter=obj.loccounter;
-                s=size(intensities);
-                if loccounter>s(1)-memincrease/4;
-                    intensities(loccounter+memincrease,length(obj.fields))=0;
-                end
-                
-                for k=numl:-1:1
-                    inds=1;
-                    im1=img(:,:,k);
-                    im2=img(:,:,k+numl);
-                    bg1=bg(:,:,k);
-                    bg2=bg(:,:,k+numl);
-                    
-                    if useevaluators(1)
-                        out=evaluators{1}.evaluate(im1,bg1);
-                        intensities(loccounter+k,inds:inds+length(out)-1)=out;
-                        inds=inds+length(out);
-                        out=evaluators{1}.evaluate(im2,bg2);
-                        intensities(loccounter+k,inds:inds+length(out)-1)=out;
-                        inds=inds+length(out);
-                    end
-                    if useevaluators(2)
-                        out=evaluators{2}.evaluate(im1,bg1,loc.dx(k),loc.dy(k),loc.PSFxpix(k),loc.PSFypix(k));
-                        intensities(loccounter+k,inds:inds+length(out)-1)=out;
-                        inds=inds+length(out);
-                        out=evaluators{2}.evaluate(im2,bg2,loc.dx(k+numl),loc.dy(k+numl),loc.PSFxpix(k+numl),loc.PSFypix(k+numl));
-                        intensities(loccounter+k,inds:inds+length(out)-1)=out;
-                    end
-                end
-                loccounter=loccounter+numl;
-                
-                obj.useevaluators=useevaluators;
-                obj.intensities=intensities;
-                obj.evaluators=evaluators;
-                obj.loccounter=loccounter;
-                
-            else
-                obj.output(data{1})
-                if data{1}.eof
-                    for k=1:length(obj.fields)
-                        obj.locData.setloc(obj.fields{k},single(obj.intensities(1:obj.loccounter,k)));
+                        % if grouped localizations: convert to ungrouped
+                        % ones
+                        if length(obj.locData.loc.xnm)>obj.loccounter
+                            
+                            %sort EvI by group index
+                            %Evi(:,loc.gropuindex)
+                            vh=Evis(obj.locData.loc.groupindex,k);
+%                             ind=groupindex(obj.locData.loc.groupindex);
+                        else
+                            vh=single(EvaluateIntensity_intensity(1:obj.loccounter,k));
+                        end
+                        
+                        obj.locData.setloc([obj.fields{k} obj.extension],vh);
                     end
                     
                 end

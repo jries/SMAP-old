@@ -98,7 +98,7 @@ classdef OnlineReconstruction<interfaces.WorkflowModule
                     if numlocs+newlocs>length(templocs.(fn{1}))
                         newlen=max(1000,2*(numlocs+length(locs.(fn{1}))));
                         for k=1:length(fn)
-                            templocs.(fn{k})(newlen)=0;
+                            templocs.(fn{k})(newlen)=templocs.(fn{k})(end);
                         end
                     end
                     sindin=sum(indin);

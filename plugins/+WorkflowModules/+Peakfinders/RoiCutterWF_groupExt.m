@@ -1,15 +1,13 @@
-classdef RoiCutterWF_group<interfaces.WorkflowModule
+classdef RoiCutterWF_groupExt<interfaces.WorkflowModule
     properties
         loc_ROIsize
         preview
         temprois
         tempinfo
-        dX
-        dT
         dn
     end
     methods
-        function obj=RoiCutterWF_group(varargin)
+        function obj=RoiCutterWF_groupExt(varargin)
             obj@interfaces.WorkflowModule(varargin{:})
             obj.inputChannels=2; 
         end
@@ -28,36 +26,26 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
             obj.loc_ROIsize=p.loc_ROIsize;
             obj.preview=obj.getPar('loc_preview');
             obj.setPar('loc_ROIsize',p.loc_ROIsize);
-            obj.dX=p.loc_dTdx(2);
-            obj.dT=p.loc_dTdx(1);
+
             kernelSize=obj.loc_ROIsize;
             obj.dn=ceil((kernelSize-1)/2);
             ninit=1000;
             init=zeros(ninit,1);
-            tempinfo=struct('inuse',false(size(init)),'x',init,'y',init,'dT',init,'numrois',init,'inframes',{{}});
+            tempinfo=struct('inuse',false(size(init)),'x',init,'y',init,'dT',init,'numrois',init,'groupindex',init,'numberInGroup',init,'phot',init,'bg',init);
             temprois=zeros(obj.loc_ROIsize,obj.loc_ROIsize,ninit,'single');
            
         end
         function outputdat=run(obj,data,p)
-            %for challange: fit two times (with/wo this) or include info
-            %about frames 'on' and then resdistribute.
-            %this is anyways needed e.g. for color assignment
             outputdat=[];
             image=data{1}.data;%get;
-            frameh=data{1}.frame;
             if ~isempty(image)     
             maxima=data{2}.data;%get;
             if isempty(maxima.x)
                 return;
             end
-            
-
-            
             for k=1:length(maxima.x)
-                obj.addroi(image,maxima.x(k),maxima.y(k),frameh)
+                obj.addroi(image,copystructReduce(maxima,k))
             end 
-            
-          
             
             if obj.preview 
                 outputfig=obj.getPar('loc_outputfig');
@@ -79,7 +67,7 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
                 [cutoutimages,maximap]=obj.purgerois;
             end 
              info=maximap;
-            
+            frameh=data{1}.frame;
             info.frame=maximap.x*0+frameh;
             if ~isempty(cutoutimages)
                 outs.info=info;
@@ -93,33 +81,41 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
                 outputdat=data{1};
             end
         end
-        function addroi(obj,image,x,y,frame)
+        function addroi(obj,image,maxima)
+            %   use groupnumber and numberingroup
+%   if same groupnumber: add. If numrois>=numberingroup: purge
+% maxima: needs fields: .groupindex, .numberInGroup
+
             global tempinfo temprois
-%             tempinfo=obj.tempinfo;
-%             temprois=obj.temprois;
             inuse=tempinfo.inuse;
+            x=maxima.x;y=maxima.y;
             %later: keep x0 as cut out position (has to be same), but
             %update xsearch
-            inxy=find((tempinfo.x(inuse)-x).^2+(tempinfo.y(inuse)-y).^2<obj.dX^2);
+            inxy=find(tempinfo.groupindex(inuse)==maxima.groupindex);
             if ~isempty(inxy) %already there
                 finuse=find(inuse);
                 indtemp=finuse(inxy(1)); %later: choose closest
                 temprois(:,:,indtemp)=temprois(:,:,indtemp)+cutoutimage(image,tempinfo.x(indtemp),tempinfo.y(indtemp),obj.dn);
                 %fill info
-                tempinfo.dT(indtemp)=obj.dT; %reset
                 tempinfo.numrois(indtemp)=tempinfo.numrois(indtemp)+1;
-                tempinfo.inframes{indtemp}(end+1)=frame;
+                tempinfo.phot(indtemp)=tempinfo.phot(indtemp)+maxima.phot;
+                tempinfo.bg(indtemp)=tempinfo.bg(indtemp)+maxima.bg;
             else %new ROI, this would be standard
                 newind=find(tempinfo.inuse==false,1,'first');
                 if isempty(newind)
                     newind=length(tempinfo.inuse)+1;
                 end
                 temprois(:,:,newind)=cutoutimage(image,x,y,obj.dn);
-                tempinfo.dT(newind)=obj.dT; %reset
                 tempinfo.numrois(newind)=1;
-                tempinfo.x(newind)=x;tempinfo.y(newind)=y;  
+%                 tempinfo.x(newind)=x;tempinfo.y(newind)=y;  
                 tempinfo.inuse(newind)=true;
-                tempinfo.inframes{newind}=frame;
+                fn=fieldnames(maxima);
+                for k=1:length(fn)
+                    tempinfo.(fn{k})(newind)=maxima.(fn{k});
+                end
+                
+%                 tempinfo.numberInGroup(newind)=maxima.numberInGroup;
+%                 tempinfo.groupindex(newind)=maxima.groupindex;
             end
         end
 
@@ -127,15 +123,15 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
               global tempinfo temprois
 
             finuse=find(tempinfo.inuse);
-            indout=tempinfo.dT(finuse)<0;
+            indout=tempinfo.numrois(finuse)>=tempinfo.numberInGroup(finuse);
             fout=finuse(indout);
             
             cutoutimages=temprois(:,:,fout);
-            maximap.x=tempinfo.x(fout);
-            maximap.y=tempinfo.y(fout);
-            maximap.inframes=tempinfo.inframes(fout);
+            maximap=copystructReduce(tempinfo,fout);
+%             maximap.x=tempinfo.x(fout);
+%             maximap.y=tempinfo.y(fout);
+            
             tempinfo.inuse(fout)=false;
-            tempinfo.dT(finuse)=tempinfo.dT(finuse)-1;% count down dark frames
         end
          function [cutoutimages,maximap]=purgeall(obj)
              global tempinfo temprois
@@ -144,7 +140,6 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
             cutoutimages=temprois(:,:,fout);
             maximap.x=tempinfo.x(fout);
             maximap.y=tempinfo.y(fout);
-            maximap.inframes=tempinfo.inframes(fout);
             
             tempinfo.inuse(fout)=false;
 %             tempinfo.dT(finuse)=tempinfo.dT(finuse)-1;% count down dark frames
@@ -171,10 +166,10 @@ pard.loc_ROIsize.position=[2,1];
 pard.loc_ROIsize.Width=0.7;
 pard.loc_ROIsize.TooltipString=sprintf('Size (pixels) of regions around each peak candidate which are used for fitting. \n Depends on fitter. Use larger ROIs for 3D data.');
 
-pard.loc_dTdx.object=struct('Style','edit','String','1 1.5');
-pard.loc_dTdx.position=[2,1.7];
-pard.loc_dTdx.TooltipString=sprintf('Groupping parameters. dT (frames), dX (pixels)');
-pard.loc_dTdx.Width=0.3;
+pard.loc_fitgrouped.object=struct('Style','checkbox','String','group');
+pard.loc_fitgrouped.position=[2,1];
+pard.loc_fitgrouped.TooltipString=sprintf('Fit on combined images based on pre-calculated grouping');
+pard.loc_fitgrouped.Width=1;
 
 pard.syncParameters={{'loc_ROIsize','loc_ROIsize',{'String'}}};
 

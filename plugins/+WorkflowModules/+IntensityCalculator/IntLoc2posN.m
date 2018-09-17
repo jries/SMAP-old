@@ -21,36 +21,31 @@ classdef IntLoc2posN<interfaces.WorkflowModule
             p=obj.getAllParameters;
           
             transform=loadtransformation(obj,p.Tfile);
-            obj.locs=obj.locData.getloc({'frame','xnm','ynm','znm','PSFxnm','bg'});
+            obj.locs=obj.locData.getloc({'frame','xnm','ynm','znm','PSFxnm','phot','bg','groupindex','numberInGroup'});
             cpix=obj.locData.files.file(1).info.cam_pixelsize_um*1000;
             x=double(obj.locs.xnm)/cpix(1);  %in pixels
             y=double(obj.locs.ynm)/cpix(end);
             
-%             obj.locs.xA=zeros(size(x));obj.locs.xB=zeros(size(x));obj.locs.yA=zeros(size(x));obj.locs.yB=zeros(size(x));
-            
-
-            switch p.Tmode.selection
-                case 'target'
+            if p.transformtotarget
                     pos=transform.transformToTarget(2,horzcat(x,y));
                     obj.locs.xA=pos(:,1);obj.locs.yA=pos(:,2);
-                case 'reference'
+            else
                      obj.locs.xA=x;obj.locs.yA=y;
-                case 'both'
-                    disp('not implemented')
-
             end
 
             
             if ~isempty(obj.locs.znm)
-          
                     d=0.42;
                     g=-0.2;
                     sx0=1.1;
                     obj.locs.PSFxpix=sigmafromz_simple(obj.locs.znm/1000,[d -g sx0]);
                     obj.locs.PSFypix=sigmafromz_simple(obj.locs.znm/1000,[d g sx0]);
-     
             else
-                obj.locs.PSFxpix=double(obj.locs.PSFxnm/transform.cam_pixnm{1}(1));
+                if  p.transformtotarget
+%                     cpix=transform.cam_pixnm{1}(1); %nor target cam pix???
+                    cpix=transform.cam_pixnm{2}(1);
+                end
+                obj.locs.PSFxpix=double(obj.locs.PSFxnm/cpix(1));
                 obj.locs.PSFypix=obj.locs.PSFxpix;
             end
             intLoc2pos_locframes=obj.locs.frame;
@@ -94,6 +89,10 @@ classdef IntLoc2posN<interfaces.WorkflowModule
                maxout.dy=yrel-round(yrel);
                maxout.PSFxpix=obj.locs.PSFxpix(ind1:intLoc2pos_ind2);
                maxout.PSFypix=(obj.locs.PSFypix(ind1:intLoc2pos_ind2));
+               maxout.groupindex=obj.locs.groupindex(ind1:intLoc2pos_ind2);
+               maxout.numberInGroup=obj.locs.numberInGroup(ind1:intLoc2pos_ind2);
+               maxout.phot=obj.locs.phot(ind1:intLoc2pos_ind2);
+               maxout.bg=obj.locs.bg(ind1:intLoc2pos_ind2);
                datout=data;%.copy;
                datout.data=maxout;%.set(maxout);
 %                obj.output(datout); 
@@ -121,9 +120,9 @@ function pard=guidef
 pard.Tfile.object=struct('Style','edit','String','Tfile');
 pard.Tfile.position=[1,1];
 pard.Tfile.Width=1.3;
-pard.Tmode.object=struct('Style','popupmenu','String',{{'target','reference','both'}});
-pard.Tmode.position=[1,1.3];
-pard.Tmode.Width=.7;
+pard.transformtotarget.object=struct('Style','checkbox','String','transform');
+pard.transformtotarget.position=[1,2.3];
+pard.transformtotarget.Width=.7;
 % pard.pixcam.object=struct('Style','edit','String','138');
 % pard.pixcam.position=[2,1];
 % pard.PSFxnm.object=struct('Style','edit','String','138');

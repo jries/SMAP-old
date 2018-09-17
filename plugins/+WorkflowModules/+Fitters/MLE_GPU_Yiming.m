@@ -76,7 +76,7 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             end
             if obj.fitpar.issCMOS
                 varstack=getvarmap(obj.fitpar.varmap,stackinfo,size(imstack,1));
-                imstackraw=imstack; %XXXXXXXXXXXXXXXXXXXX
+%                 imstackraw=imstack; %XXXXXXXXXXXXXXXXXXXX
                 if ~isempty(obj.fitpar.offsetmap)
                     offsetstack=getvarmap(obj.fitpar.offsetmap,stackinfo,size(imstack,1));
                     imstack=imstack-offsetstack;
@@ -94,6 +94,10 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             if obj.fitpar.asymmetry
             [locs.asymmetry,locs.asymmdiag,locs.asymangle]=asymmetry(imgstack,true);
             end
+            
+            fn=fieldnames(stackinfo);
+            infonames=setdiff(setdiff(fn,fieldnames(locs)), {'x','y','frame','Y','X'});
+            locs=copyfields(locs,stackinfo,infonames);
         end
 
         function initGui(obj)

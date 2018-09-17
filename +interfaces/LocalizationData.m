@@ -470,15 +470,21 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             if ~isempty(obj.loc)
                 fn1=fieldnames(obj.loc);
                 lenold=length(obj.loc.(fn1{1}));
+                
             else
                 fn1={};
                 lenold=0;
             end           
-            %fill missing channels with 0
+            if lenold>0 %fill missing channels with 0
             fd=setdiff(fn2,fn1);
             for k=1:length(fd)
-                obj.loc.(fd{k})=zeros(lenold,1,'like',loch.(fd{k}));
+                if iscell(loch.(fd{k})) 
+                    obj.loc.(fd{k}){lenold}=[];
+                else
+                    obj.loc.(fd{k})=zeros(lenold,1,'like',loch.(fd{k}));
+                end
             end  
+            end
             %add new data
             for k=1:length(fn2)
                 obj.addloc(fn2{k},loch.(fn2{k}))

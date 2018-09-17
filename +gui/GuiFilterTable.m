@@ -10,7 +10,7 @@ classdef GuiFilterTable< interfaces.LayerInterface
             obj.propertiesToSave={'filter'};
         end
         function makeGui(obj)
-           obj.excludefields={'peakfindxnm','peakfindynm','groupindex','photerr'};
+           obj.excludefields={'peakfindxnm','peakfindynm','groupindex','photerr','inframes'};
            columnname = {'Name','min set','min','mean','max','max set','filt','inv'};
            columnformat = {'char','short g','short g','short g','short g','short g','logical','logical'};
            columnedit=[false, true, false, false, false, true, true, true];
@@ -112,6 +112,11 @@ classdef GuiFilterTable< interfaces.LayerInterface
            locs=obj.locData.loc;
            if ~isempty(locs)
                fnall=fieldnames(locs);
+               for k=1:length(fnall)
+                   if ~isnumeric(locs.(fnall{k})) && ~islogical(locs.(fnall{k})) %filtering only possible on numeric vectors
+                       obj.excludefields=union(obj.excludefields,fnall{k});
+                   end
+               end
                fn=setdiff(fnall,obj.excludefields);
                for k=1:length(fn)
                    if ~isfield(obj.filter,fn{k})||~isfield(obj.filter.(fn{k}),'auto')||~isfield(obj.filter.(fn{k}),'minmax')||~isfield(obj.filter.(fn{k}),'invert')||...

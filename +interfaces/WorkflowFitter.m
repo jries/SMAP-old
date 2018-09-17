@@ -79,7 +79,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
             global fitterimagestack fitterstackinfo fitterbgstack 
             
             if isempty(fitterstackinfo)
-                initstacks(obj)
+                initstacks(obj,data.data.info)
             end
             
             persistent reporttimer
@@ -242,7 +242,7 @@ classdef WorkflowFitter<interfaces.WorkflowModule
     end
 end
 
-function initstacks(obj)
+function initstacks(obj,info)
 global fitterstackinfo fitterimagestack fitterbgstack
 
  roisize=obj.getPar('loc_ROIsize');
@@ -254,12 +254,20 @@ global fitterstackinfo fitterimagestack fitterbgstack
             obj.fittedlocs=0;
 %             if obj.spatial3Dcal
             fitterstackinfo=[];
+            addfields=setdiff(fieldnames(info),[obj.infofields,{'frame'}]);
                 for X=numx:-1:1
                     for Y=numy:-1:1
                         fitterimagestack{X,Y}=zeros(roisize,roisize,obj.numberInBlock,'single');
                         fitterstackinfo{X,Y}.frame=zeros(obj.numberInBlock,1,'double');
                         for k=1:length(obj.infofields)
                             fitterstackinfo{X,Y}.(obj.infofields{k})=zeros(obj.numberInBlock,1,'single');
+                        end
+                        for k=1:length(addfields)
+                            if iscell(info.(addfields{k}))
+                                fitterstackinfo{X,Y}.(addfields{k})={};
+                            else
+                            fitterstackinfo{X,Y}.(addfields{k})=zeros(obj.numberInBlock,1,'single');
+                            end
                         end
          
                     end

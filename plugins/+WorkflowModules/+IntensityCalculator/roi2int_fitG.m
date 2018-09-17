@@ -70,18 +70,20 @@ if ~roi2int_fitG_parameters.fitonbg%nargin<7||isempty(bgroi)
         end
     end
 else %fit bg
-    bgnorm=(2*dn+1)^2;
+%     bgnorm=(2*dn+1)^2;
     nrange=-dn:dn;
     for k=1:sim(3)
+        bgh=bg(k);
 %         exponent=(-(dx(k)-X).^2)/2/PSFxpix(k)^2-((dy(k)-Y).^2)/2/PSFypix(k)^2;
 %         gauss=exp(exponent)/pi/PSFxpix(k)/PSFypix(k)/2;
         gauss=make2DGaussfast(dx(k),dy(k),PSFxpix(k),PSFypix(k),nrange);
 %         weights=sqrt(gauss);
         Xmat=horzcat(gauss(:));
-        bgh=bg(mp(1)-dn:mp(1)+dn,mp(2)-dn:mp(2)+dn,k);
+%         bgh=bg(mp(1)-dn:mp(1)+dn,mp(2)-dn:mp(2)+dn,k);
         roih=roi(mp(1)-dn:mp(1)+dn,mp(2)-dn:mp(2)+dn,k)-bgh;
         p(k,1)=Xmat\roih(:);
-        p(k,2)=(sum(bgh(:)))/bgnorm;
+        p(k,2)=bgh;
+%         p(k,2)=(sum(bgh(:)))/bgnorm;
     end
 end
 end
