@@ -49,28 +49,56 @@ end
 
 
 function out=runintern(obj,p)
-locs=obj.getLocs({'xnm','ynm','znm','locprecznm','locprecnm'},'layer',1,'size',p.se_siteroi);
-dz=8;
-z=-200:dz:150;
-hz=hist(locs.znm-obj.site.pos(3),z);
-% hz=hz-mean(hz);
-ac=myxcorr(hz,hz);
-% if obj.display
-ax1=obj.setoutput('profile');
+R=p.R;
+dR=p.dR;
 
-fitresult=createFit(z, hz,ax1);
-title(ax1,fitresult.d)
-% plot(ax1,z,hz)
-ax2=obj.setoutput('correlation');
-plot(ax2,z,ac)
+locs=obj.getLocs({'xnm','ynm','znm','locprecnm','locprecznm','frame'},'layer',1,'size',p.se_siteroi(1)/2);
+if isempty(locs.xnm)
+    out=[];
+    return
+end
 
 
-% end
-out.ac=ac;
-out.dz=dz;
-out.hist=hz;
-out.z=z;
-out.Gaussfit=copyfields([],fitresult,{'a1','a2','b','c','d'});
+[x0,y0]=fitposring(locs.xnm,locs.ynm,R);
+xm=locs.xnm-x0;
+ym=locs.ynm-y0;
+
+if ~isempty(locs.znm) % evaluate z distance
+    dz=8;
+    z=-200:dz:150;
+    hz=hist(locs.znm-obj.site.pos(3),z);
+    % hz=hz-mean(hz);
+    ac=myxcorr(hz,hz);
+    % if obj.display
+    ax1=obj.setoutput('profile');
+
+    fitresult=createFit(z, hz,ax1);
+    title(ax1,fitresult.d)
+    % plot(ax1,z,hz)
+    ax2=obj.setoutput('correlation');
+    plot(ax2,z,ac)
+
+
+    % end
+    out.ac=ac;
+    out.dz=dz;
+    out.hist=hz;
+    out.z=z;
+    out.Gaussfit=copyfields([],fitresult,{'a1','a2','b','c','d'});
+end
+
+%radial analysis
+thetan=-pi:pi/128:pi;
+[theta,rhoa]=cart2pol(xm,ym);
+histtheta11=hist(theta,thetan);
+histtheta12=hist(theta+pi,thetan+pi);
+tac=myxcorr(histtheta11,histtheta11);
+tac1=tac+myxcorr(histtheta12,histtheta12);
+   ax1=obj.setoutput('corrtheta');
+   plot(ax1,thetan-thetan(1),tac1);
+
+out.actheta=tac1;
+out.thetan=thetan-thetan(1);
 end
 
 

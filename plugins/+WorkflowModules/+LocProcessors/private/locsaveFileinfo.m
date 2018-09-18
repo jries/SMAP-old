@@ -43,7 +43,7 @@ if ~myisfield(filestruct.info,'roi')||isempty(filestruct.info.roi)
     filestruct.info.roi=obj.fileinfo.roi;
 end
 globT=obj.getPar('loc_globaltransform');
-if ~isempty(globT) && myisfield(globT,'tinfo')
+if isa(globT,'interfaces.LocTransformN') && ~isempty(globT) && myisfield(globT,'tinfo')
     tinfoh=globT.tinfo{1};
     filestruct.info.roi(3)=tinfoh.xrange(2);filestruct.info.roi(4)=tinfoh.yrange(2);
 end

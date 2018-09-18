@@ -105,9 +105,9 @@ classdef PeakCombiner<interfaces.WorkflowModule
 
                 maxout.x=xout(:);
                 maxout.y=yout(:);
-                maxout.xfound=maxima.x;
-                maxout.yfound=maxima.y;
-                maxout.intensityfound=maxima.intensity;
+%                 maxout.xfound=maxima.x;
+%                 maxout.yfound=maxima.y;
+%                 maxout.intensityfound=maxima.intensity;
                 maxout.ID=idout(:);
                 maxout.dx=dxout(:);
                 maxout.dy=dyout(:);
