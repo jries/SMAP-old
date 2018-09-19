@@ -264,7 +264,7 @@ global fitterstackinfo fitterimagestack fitterbgstack
                         end
                         for k=1:length(addfields)
                             if iscell(info.(addfields{k}))
-                                fitterstackinfo{X,Y}.(addfields{k})={};
+                                fitterstackinfo{X,Y}.(addfields{k}){obj.numberInBlock,1}=[];
                             else
                             fitterstackinfo{X,Y}.(addfields{k})=zeros(obj.numberInBlock,1,'single');
                             end

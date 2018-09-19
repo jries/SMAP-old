@@ -32,13 +32,20 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
             obj.dT=p.loc_dTdx(1);
             kernelSize=obj.loc_ROIsize;
             obj.dn=ceil((kernelSize-1)/2);
-            ninit=1000;
+            ninit=100;
             init=zeros(ninit,1);
             tempinfo=struct('inuse',false(size(init)),'x',init,'y',init,'dT',init,'numrois',init,'inframes',{{}});
             temprois=zeros(obj.loc_ROIsize,obj.loc_ROIsize,ninit,'single');
            
         end
         function outputdat=run(obj,data,p)
+            persistent tempinfo temprois
+            if isempty(tempinfo)
+                 ninit=100;
+                 init=zeros(ninit,1);
+                tempinfo=struct('inuse',false(size(init)),'x',init,'y',init,'dT',init,'numrois',init,'inframes',{{}});
+                temprois=zeros(obj.loc_ROIsize,obj.loc_ROIsize,ninit,'single');
+            end
             %for challange: fit two times (with/wo this) or include info
             %about frames 'on' and then resdistribute.
             %this is anyways needed e.g. for color assignment
@@ -52,9 +59,9 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
             end
             
 
-            
+            dX=obj.dX;dT=obj.dT;dn=obj.dn;
             for k=1:length(maxima.x)
-                obj.addroi(image,maxima.x(k),maxima.y(k),frameh)
+                addroi(image,maxima.x(k),maxima.y(k),frameh,dX,dT,dn)
             end 
             
           
@@ -74,9 +81,9 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
                     pos=[maxima.x(k)-obj.dn maxima.y(k)-obj.dn maxima.x(k)+obj.dn maxima.y(k)+obj.dn ];
                     plotrect(ax,pos,col);
                 end
-                [cutoutimages,maximap]=obj.purgeall;
+                [cutoutimages,maximap]=purgeall();
             else
-                [cutoutimages,maximap]=obj.purgerois;
+                [cutoutimages,maximap]=purgerois();
             end 
              info=maximap;
             
@@ -92,21 +99,25 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
             else
                 outputdat=data{1};
             end
-        end
-        function addroi(obj,image,x,y,frame)
-            global tempinfo temprois
+        
+        function addroi(image,x,y,frame,dX,dT,dn)
+%             global tempinfo temprois
 %             tempinfo=obj.tempinfo;
 %             temprois=obj.temprois;
             inuse=tempinfo.inuse;
             %later: keep x0 as cut out position (has to be same), but
             %update xsearch
-            inxy=find((tempinfo.x(inuse)-x).^2+(tempinfo.y(inuse)-y).^2<obj.dX^2);
-            if ~isempty(inxy) %already there
-                finuse=find(inuse);
-                indtemp=finuse(inxy(1)); %later: choose closest
-                temprois(:,:,indtemp)=temprois(:,:,indtemp)+cutoutimage(image,tempinfo.x(indtemp),tempinfo.y(indtemp),obj.dn);
+%             dX=obj.dX;
+%             inxy=find((tempinfo.x(inuse)-x).^2+(tempinfo.y(inuse)-y).^2<dX^2);
+            
+            indtemp= find(inuse & tempinfo.x>x-dX & tempinfo.x<x+dX & tempinfo.y>y-dX & tempinfo.y<y+dX,1,'first');
+            if ~isempty(indtemp) %already there
+%                 finuse=find(inuse);
+%                 indtemp=finuse(inxy(1)); %later: choose closest
+                tim=cutoutimage(image,tempinfo.x(indtemp),tempinfo.y(indtemp),dn);
+                temprois(:,:,indtemp)=temprois(:,:,indtemp)+tim;
                 %fill info
-                tempinfo.dT(indtemp)=obj.dT; %reset
+                tempinfo.dT(indtemp)=dT; %reset
                 tempinfo.numrois(indtemp)=tempinfo.numrois(indtemp)+1;
                 tempinfo.inframes{indtemp}(end+1)=frame;
             else %new ROI, this would be standard
@@ -114,8 +125,8 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
                 if isempty(newind)
                     newind=length(tempinfo.inuse)+1;
                 end
-                temprois(:,:,newind)=cutoutimage(image,x,y,obj.dn);
-                tempinfo.dT(newind)=obj.dT; %reset
+                temprois(:,:,newind)=cutoutimage(image,x,y,dn);
+                tempinfo.dT(newind)=dT; %reset
                 tempinfo.numrois(newind)=1;
                 tempinfo.x(newind)=x;tempinfo.y(newind)=y;  
                 tempinfo.inuse(newind)=true;
@@ -123,8 +134,8 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
             end
         end
 
-        function [cutoutimages,maximap]=purgerois(obj)
-              global tempinfo temprois
+        function [cutoutimages,maximap]=purgerois()
+%               global tempinfo temprois
 
             finuse=find(tempinfo.inuse);
             indout=tempinfo.dT(finuse)<0;
@@ -137,8 +148,8 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
             tempinfo.inuse(fout)=false;
             tempinfo.dT(finuse)=tempinfo.dT(finuse)-1;% count down dark frames
         end
-         function [cutoutimages,maximap]=purgeall(obj)
-             global tempinfo temprois
+         function [cutoutimages,maximap]=purgeall()
+%              global tempinfo temprois
             finuse=find(tempinfo.inuse);
             fout=finuse;
             cutoutimages=temprois(:,:,fout);
@@ -148,6 +159,7 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
             
             tempinfo.inuse(fout)=false;
 %             tempinfo.dT(finuse)=tempinfo.dT(finuse)-1;% count down dark frames
+         end
         end
     end
 end

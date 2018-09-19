@@ -492,7 +492,11 @@ classdef LocalizationData<interfaces.GuiParameterInterface
             %add zeros for the missing data
             fd=setdiff(fn1,fn2);
             for k=1:length(fd)
+                if iscell(obj.loc.(fd{k})) 
+                    obj.loc.(fd{k}){lennew}=[];
+                else
                 obj.addloc(fd{k},zeros(lennew,1,'like',obj.loc.(fd{k})));
+                end
             end                     
         end
         

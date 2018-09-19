@@ -47,7 +47,7 @@ classdef Grouper< interfaces.LocDataInterface
             for k=1:length(fn)
                 if length(obj.locData.loc.(fn{k}))<lm
                     disp([fn{k} ' too short, padded with zeros']);
-                    obj.locData.loc.(fn{k})(lm)=0;
+                    obj.locData.loc.(fn{k})(lm)=obj.locData.loc.(fn{k})(end);
                 end
             end
 %             obj.status('group localizations')
