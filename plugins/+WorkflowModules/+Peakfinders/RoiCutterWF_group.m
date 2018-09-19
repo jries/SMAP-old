@@ -23,7 +23,7 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
 
         end
         function prerun(obj,p) 
-             global tempinfo temprois
+%              global tempinfo temprois
             p=obj.getAllParameters;
             obj.loc_ROIsize=p.loc_ROIsize;
             obj.preview=obj.getPar('loc_preview');
@@ -32,13 +32,17 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
             obj.dT=p.loc_dTdx(1);
             kernelSize=obj.loc_ROIsize;
             obj.dn=ceil((kernelSize-1)/2);
-            ninit=100;
-            init=zeros(ninit,1);
-            tempinfo=struct('inuse',false(size(init)),'x',init,'y',init,'dT',init,'numrois',init,'inframes',{{}});
-            temprois=zeros(obj.loc_ROIsize,obj.loc_ROIsize,ninit,'single');
+%             ninit=100;
+%             init=zeros(ninit,1);
+%             tempinfo=struct('inuse',false(size(init)),'x',init,'y',init,'dT',init,'numrois',init,'inframes',{{}});
+%             temprois=zeros(obj.loc_ROIsize,obj.loc_ROIsize,ninit,'single');
            
         end
         function outputdat=run(obj,data,p)
+            if ~p.loc_group
+                outputdat=run_nogroup(obj,data,p);
+                return
+            end
             persistent tempinfo temprois
             if isempty(tempinfo)
                  ninit=100;
@@ -172,21 +176,100 @@ end
                 end  
                 out=image(y-dn:y+dn,x-dn:x+dn);
         end
+        
+        
+        
+function outputdat=run_nogroup(obj,data,p) %from RoiCutterWF
+            outputdat=[];
+            image=data{1}.data;
+            if ~isempty(image)     
+            maxima=data{2}.data;
+            if isempty(maxima.x)
+                return;
+            end
+            
+            kernelSize=obj.loc_ROIsize;
+            dn=ceil((kernelSize-1)/2);
+            sim=size(image);
+            
+            if p.loc_filterforfit>0 && length(p.loc_filterforfit)==1
+                %test: filter image befor fitting for z from 2D
+                %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+                h=fspecial('gaussian',3,p.loc_filterforfit);
+                image=filter2(h,image);
+            %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+            end
+            
+            cutoutimages=zeros(kernelSize,kernelSize,length(maxima.x),'single');
+            ind=0;
+            goodind=~(maxima.y<=dn|maxima.y>sim(1)-dn|maxima.x<=dn|maxima.x>sim(2)-dn);
 
+            for k=1:length(maxima.x)
+                 ind=ind+1;
+                if goodind(k)
+                    cutoutimages(:,:,ind)=image(maxima.y(k)-dn:maxima.y(k)+dn,maxima.x(k)-dn:maxima.x(k)+dn); %coordinates exchanged.
+                else
+                    maxima.y(k)=max(dn+1,min(maxima.y(k),sim(1)-dn));
+                    maxima.x(k)=max(dn+1,min(maxima.x(k),sim(2)-dn));
+                    cutoutimages(:,:,ind)=image(maxima.y(k)-dn:maxima.y(k)+dn,maxima.x(k)-dn:maxima.x(k)+dn); %coordinates exchanged.
+                end  
+            end 
+            info=maxima;
+            frameh=data{1}.frame;
+            info.frame=maxima.x*0+frameh;
+            outs.info=info;
+            outs.img=cutoutimages(:,:,1:ind);
+            dato=data{1};%.copy;
+            dato.data=outs;%set(outs);
+%             obj.output(dato)
+            outputdat=dato;
+
+            
+            
+            
+            if obj.preview 
+                outputfig=obj.getPar('loc_outputfig');
+                if ~isvalid(outputfig)
+                    outputfig=figure(209);
+                    obj.setPar('loc_outputfig',outputfig);
+                end
+                outputfig.Visible='on';
+                figure(outputfig)
+                hold on
+                    col=[0.3 0.3 0.3];
+                    ax=gca;
+                for k=1:length(maxima.x)
+                    pos=[maxima.x(k)-dn maxima.y(k)-dn maxima.x(k)+dn maxima.y(k)+dn ];
+                    
+                    plotrect(ax,pos,col);
+                end
+            end 
+            else
+                outputdat=data{1};
+            end
+end
+            
 function pard=guidef
-pard.text.object=struct('Style','text','String','Size ROI (pix)');
+pard.text.object=struct('Style','text','String','ROI (pix):');
 pard.text.position=[1,1];
-
+pard.text.Width=0.7;
 
 pard.loc_ROIsize.object=struct('Style','edit','String','7');
-pard.loc_ROIsize.position=[2,1];
-pard.loc_ROIsize.Width=0.7;
+pard.loc_ROIsize.position=[1,1.5];
+pard.loc_ROIsize.Width=0.5;
 pard.loc_ROIsize.TooltipString=sprintf('Size (pixels) of regions around each peak candidate which are used for fitting. \n Depends on fitter. Use larger ROIs for 3D data.');
 
+
+
+pard.loc_group.object=struct('Style','checkbox','String','group');
+pard.loc_group.position=[2,1];
+pard.loc_group.TooltipString=sprintf('Groupping parameters. dT (frames), dX (pixels)');
+pard.loc_group.Width=0.7;
+
 pard.loc_dTdx.object=struct('Style','edit','String','1 1.5');
-pard.loc_dTdx.position=[2,1.7];
+pard.loc_dTdx.position=[2,1.5];
 pard.loc_dTdx.TooltipString=sprintf('Groupping parameters. dT (frames), dX (pixels)');
-pard.loc_dTdx.Width=0.3;
+pard.loc_dTdx.Width=0.5;
 
 pard.syncParameters={{'loc_ROIsize','loc_ROIsize',{'String'}}};
 
