@@ -32,6 +32,7 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
             obj.dT=p.loc_dTdx(1);
             kernelSize=obj.loc_ROIsize;
             obj.dn=ceil((kernelSize-1)/2);
+            obj.run; %initialize
 %             ninit=100;
 %             init=zeros(ninit,1);
 %             tempinfo=struct('inuse',false(size(init)),'x',init,'y',init,'dT',init,'numrois',init,'inframes',{{}});
@@ -39,17 +40,23 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
            
         end
         function outputdat=run(obj,data,p)
+            persistent tempinfo temprois tempdT numrois tempx tempy inuse inframes
+            if nargin==1 %reset
+                ninit=100;
+                init=zeros(ninit,1);
+%                 tempinfo=struct('inuse',false(size(init)),'x',init,'y',init,'dT',init,'numrois',init,'inframes',{{}});
+                temprois=zeros(obj.loc_ROIsize,obj.loc_ROIsize,ninit,'single');
+                inframes=zeros(ninit,3);
+                tempdT=init;
+                numrois=init; tempx=init; tempy=init; inuse=false(size(init));
+                return
+            end
             if ~p.loc_group
                 outputdat=run_nogroup(obj,data,p);
                 return
             end
-            persistent tempinfo temprois
-            if isempty(tempinfo)
-                 ninit=100;
-                 init=zeros(ninit,1);
-                tempinfo=struct('inuse',false(size(init)),'x',init,'y',init,'dT',init,'numrois',init,'inframes',{{}});
-                temprois=zeros(obj.loc_ROIsize,obj.loc_ROIsize,ninit,'single');
-            end
+        
+
             %for challange: fit two times (with/wo this) or include info
             %about frames 'on' and then resdistribute.
             %this is anyways needed e.g. for color assignment
@@ -89,10 +96,10 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
             else
                 [cutoutimages,maximap]=purgerois();
             end 
-             info=maximap;
-            
-            info.frame=maximap.x*0+frameh;
+
             if ~isempty(cutoutimages)
+                info=maximap;
+                info.frame=maximap.x*0+frameh;
                 outs.info=info;
                 outs.img=cutoutimages;
                 dato=data{1};%.copy;
@@ -105,67 +112,91 @@ classdef RoiCutterWF_group<interfaces.WorkflowModule
             end
         
         function addroi(image,x,y,frame,dX,dT,dn)
+            maxgroup=100;
 %             global tempinfo temprois
 %             tempinfo=obj.tempinfo;
-%             temprois=obj.temprois;
-            inuse=tempinfo.inuse;
             %later: keep x0 as cut out position (has to be same), but
             %update xsearch
 %             dX=obj.dX;
 %             inxy=find((tempinfo.x(inuse)-x).^2+(tempinfo.y(inuse)-y).^2<dX^2);
             
-            indtemp= find(inuse & tempinfo.x>x-dX & tempinfo.x<x+dX & tempinfo.y>y-dX & tempinfo.y<y+dX,1,'first');
-            if ~isempty(indtemp) %already there
+            indtemp= find(inuse & tempx>x-dX & tempx<x+dX & tempy>y-dX & tempy<y+dX,1,'first');
+            if ~isempty(indtemp) && numrois(indtemp)<maxgroup %already there
 %                 finuse=find(inuse);
 %                 indtemp=finuse(inxy(1)); %later: choose closest
-                tim=cutoutimage(image,tempinfo.x(indtemp),tempinfo.y(indtemp),dn);
-                temprois(:,:,indtemp)=temprois(:,:,indtemp)+tim;
+
+                temprois(:,:,indtemp)=temprois(:,:,indtemp)+cutoutimage(image,tempx(indtemp),tempy(indtemp),dn);
                 %fill info
-                tempinfo.dT(indtemp)=dT; %reset
-                tempinfo.numrois(indtemp)=tempinfo.numrois(indtemp)+1;
-                tempinfo.inframes{indtemp}(end+1)=frame;
+%                 tempinfo.dT(indtemp)=dT; %reset
+               
+                numrois(indtemp)=numrois(indtemp)+1;
+%                 tempinfo.inframes{indtemp}(end+1)=frame;
+                inframes(indtemp,numrois(indtemp))=frame; 
+                tempdT(indtemp)=dT;
+              
             else %new ROI, this would be standard
-                newind=find(tempinfo.inuse==false,1,'first');
+                newind=find(inuse==false,1,'first');
                 if isempty(newind)
-                    newind=length(tempinfo.inuse)+1;
+                    newind=length(inuse)+1;
                 end
                 temprois(:,:,newind)=cutoutimage(image,x,y,dn);
-                tempinfo.dT(newind)=dT; %reset
-                tempinfo.numrois(newind)=1;
-                tempinfo.x(newind)=x;tempinfo.y(newind)=y;  
-                tempinfo.inuse(newind)=true;
-                tempinfo.inframes{newind}=frame;
+%                 tempinfo.dT(newind)=dT; %reset
+                numrois(newind)=1;
+                tempx(newind)=x;tempy(newind)=y;  
+                inuse(newind)=true;
+%                 tempinfo.inframes{newind}=frame;
+                inframes(newind,1)=frame;
+                tempdT(newind)=dT;
             end
         end
 
         function [cutoutimages,maximap]=purgerois()
+            
 %               global tempinfo temprois
 
-            finuse=find(tempinfo.inuse);
-            indout=tempinfo.dT(finuse)<0;
+            finuse=find(inuse);
+            indout=tempdT(finuse)<0;
+            tempdT(finuse)=tempdT(finuse)-1;
             fout=finuse(indout);
+            if isempty(fout)
+                cutoutimages=[];maximap=[];
+                return
+            end
             
             cutoutimages=temprois(:,:,fout);
-            maximap.x=tempinfo.x(fout);
-            maximap.y=tempinfo.y(fout);
-            maximap.inframes=tempinfo.inframes(fout);
-            tempinfo.inuse(fout)=false;
-            tempinfo.dT(finuse)=tempinfo.dT(finuse)-1;% count down dark frames
+            maximap.x=tempx(fout);
+            maximap.y=tempy(fout);
+            maximap.inframes=mat2arrayhere(inframes,numrois,fout);
+%             maximap.inframes=inframes(fout,:); %XXX
+            inuse(fout)=false;
+%             tempinfo.dT(finuse)=tempinfo.dT(finuse)-1;% count down dark frames
+            
         end
          function [cutoutimages,maximap]=purgeall()
 %              global tempinfo temprois
-            finuse=find(tempinfo.inuse);
+            finuse=find(inuse);
             fout=finuse;
+            if isempty(fout)
+                cutoutimages=[];maximap=[];
+                return
+            end
             cutoutimages=temprois(:,:,fout);
-            maximap.x=tempinfo.x(fout);
-            maximap.y=tempinfo.y(fout);
-            maximap.inframes=tempinfo.inframes(fout);
+            maximap.x=tempx(fout);
+            maximap.y=tempy(fout);
+            maximap.inframes=mat2arrayhere(inframes,numrois,fout);
+%             maximap.inframes=tempinfo.inframes(fout);
             
-            tempinfo.inuse(fout)=false;
+            inuse(fout)=false;
 %             tempinfo.dT(finuse)=tempinfo.dT(finuse)-1;% count down dark frames
          end
         end
     end
+end
+function out=mat2arrayhere(inframes,numrois,fout)
+out={};
+for k=length(fout):-1:1
+    out{k}=inframes(fout(k),1:numrois(k));
+end
 end
 
         function out=cutoutimage(image, x,y,dn)
@@ -192,13 +223,13 @@ function outputdat=run_nogroup(obj,data,p) %from RoiCutterWF
             dn=ceil((kernelSize-1)/2);
             sim=size(image);
             
-            if p.loc_filterforfit>0 && length(p.loc_filterforfit)==1
-                %test: filter image befor fitting for z from 2D
-                %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-                h=fspecial('gaussian',3,p.loc_filterforfit);
-                image=filter2(h,image);
-            %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-            end
+%             if p.loc_filterforfit>0 && length(p.loc_filterforfit)==1
+%                 %test: filter image befor fitting for z from 2D
+%                 %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+%                 h=fspecial('gaussian',3,p.loc_filterforfit);
+%                 image=filter2(h,image);
+%             %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+%             end
             
             cutoutimages=zeros(kernelSize,kernelSize,length(maxima.x),'single');
             ind=0;

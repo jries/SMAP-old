@@ -20,11 +20,11 @@ infost.git.head=head;
 else
     infost.git.head=[];
 end
-[gitstatus,branch]=system('git branch');
+[gitstatus,branch]=system('git status');
 if gitstatus== 0
-ind=strfind(branch,'*');
+ind=strfind(branch,'On branch');
 le=find(branch(ind+1:end)==10,1,'first')+ind;
-infost.git.branch=branch(ind+2:le-1);
+infost.git.branch=branch(ind+10:le-1);
 else
 infost.git.branch='not found';
 end
