@@ -6,13 +6,15 @@ imgr=imageloaderAll([path f]);
 % %%
 
 %%
-par.cutoffmin=800;
+par.cutoffmin=900;
 par.mask=0;
 par.Rnear=5;
 par.sigmaf=0.5;
 par.file=f;
-%%
+kbl=0;
 zlen=3;
+%%
+
 imgnum=1;
 imga=double(imgr.getmanyimages((imgnum-1)*zlen+1:imgnum*zlen,'mat'));
 offset=quantile(imga(:),0.02);
@@ -20,7 +22,7 @@ img=imga-offset;
 %from intensity vs frame fit:
 %I(f)=I0*exp(-kbl*f)
 
-kbl=0;
+
 
 for k=1:size(img,3)
     img(:,:,k)=img(:,:,k)/exp(-kbl*(k-1)); %first frame: no bleaching
@@ -135,6 +137,8 @@ legend('hist','single G','double G')
 mv=sort([fitp2.b1 fitp2.b2]);
 title(ax1,{['maximum at ' num2str(fitp1.b1,4) ', 2G:'  num2str(mv(1),4) ', '  num2str(mv(2),4) ', bg ' num2str(background,2) ', std ' num2str(fitp1.c1/sqrt(2),3)],par.file},...
     'Interpreter','none')
+xlabel('intensity at maximum')
+ylabel('frequency')
 % cftool(h.BinEdges(1:end-1),h.Values)
 end
 
