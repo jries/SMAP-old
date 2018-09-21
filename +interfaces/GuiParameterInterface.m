@@ -131,7 +131,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             end
         end
         function value=getPar(obj,field,varargin)
-            global SMAPparameters
+%             global SMAPparameters
             %returns global parameter. 
             %value=getPar(parameter,'Property','Value')
             %parameter: name of global parameter
@@ -148,8 +148,8 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
             end
 %             po=obj.P;
 %             par=po.par;
-            par=SMAPparameters;
-%             par=obj.P.par;
+%             par=SMAPparameters;
+            par=obj.P.par;
             if isfield(par,field)
 %                 tested=true;
                 if par.(field)(1).isGuiPar
@@ -381,7 +381,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
     
     methods (Access=private)      
         function setfields(obj,field,handle)
-            global SMAPparameters 
+%             global SMAPparameters 
             hstruc=obj.P.par.(field);
             if hstruc(1).isGuiPar
                 for k=1:length(hstruc)
@@ -407,8 +407,8 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                     hstruc(k).content=handle;
                 end
 
-            SMAPparameters.(field)=hstruc; %Hack to improve performance. its the same as:
-%                 obj.P.par.(field)=hstruc;
+%             SMAPparameters.(field)=hstruc; %Hack to improve performance. its the same as:
+                obj.P.par.(field)=hstruc;
             end
         end
         
