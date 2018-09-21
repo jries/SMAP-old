@@ -13,7 +13,7 @@ classdef Grouper< interfaces.LocDataInterface
 %                 obj.attachPar(varargin{2});
 %             end
 %             obj.inputParameters={'group_dx','group_dt'};
-            obj.combinemodes.frame='first';
+          
             obj.combinemodes.xnm='mean';
             obj.combinemodes.ynm='mean';
             obj.combinemodes.znm='mean';
@@ -26,7 +26,7 @@ classdef Grouper< interfaces.LocDataInterface
             obj.combinemodes.locprecynm='locp';
             obj.combinemodes.locprecznm='locp';
             obj.combinemodes.CRLBphot='min';
-            obj.combinemodes.frame='first';
+            obj.combinemodes.frame='min';
             obj.combinemodes.channel='first';
             obj.combinemodes.logLikelihood='max';
             obj.combinemodes.loglikelihood='max';
