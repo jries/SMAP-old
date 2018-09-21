@@ -193,7 +193,7 @@ off{3}=-fitpar.z0*fitpar.dz*fitpar.refractive_index_mismatch;
 faccrlb{3}=fitpar.dz*fitpar.refractive_index_mismatch;
 
 names={'ypix','xpix','znm','phot','bg'};
-namesav={'ypix','xpix','znm'};
+namesav={'ypix','xpix','znm','phot'};
 linked=fitpar.link;
 ind=1;
 for k=1:length(names)
