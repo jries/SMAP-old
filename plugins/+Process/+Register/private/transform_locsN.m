@@ -51,7 +51,8 @@ chipsizenm=p.currentfileinfo.cam_pixelsize_um*1000.*[p.currentfileinfo.Width p.c
 facsize=ones(2,1);
 % separator=chipsizenm;
 separator=roinm(1:2)+roinm(3:4);
-
+spix=separator/(p.currentfileinfo.cam_pixelsize_um(1)*1000)/2;
+mirroradd=zeros(2,1);
 switch p.targetpos.selection
     case 'top'
         dy=-chipsizenm(2)/2;
@@ -60,6 +61,9 @@ switch p.targetpos.selection
         separator(2)=roinm(2)+roinm(4)/2;
         indtarget=indtarget&loctarget.ynm<separator(2);
         indref=indref&locref.ynm>=separator(2);
+        xrangecamr=[0 spix(1)*2];yrangecamr=[spix(2) 2*spix(2)];
+        xrangecamt=[0 spix(1)*2];yrangecamt=[0 spix(2)];
+        mirroradd(2)=chipsizenm(2);
     case 'bottom'
         dy=chipsizenm(2)/2;
         dx=0;
@@ -67,7 +71,8 @@ switch p.targetpos.selection
         separator(2)=roinm(2)+roinm(4)/2;
         indtarget=indtarget&loctarget.ynm>separator(2);
         indref=indref&locref.ynm<=separator(2);
-        
+        xrangecamr=[0 spix(1)*2];yrangecamr=[0 spix(2)];
+        xrangecamt=[0 spix(1)*2];yrangecamt=[spix(2) 2*spix(2)];
     case 'left'
         dx=-chipsizenm(1)/2;
         dy=0;
@@ -75,6 +80,9 @@ switch p.targetpos.selection
         separator(1)=roinm(1)+roinm(3)/2;
         indtarget=indtarget&loctarget.xnm<separator(1);
         indref=indref&locref.xnm>=separator(1);
+        xrangecamr=[spix(1) spix(1)*2];yrangecamr=[0 spix(2)];
+        xrangecamt=[0 spix(1)];yrangecamt=[0 spix(2)];
+         mirroradd(1)=chipsizenm(2);
     case 'right'
         dx=chipsizenm(1)/2;
         dy=0;
@@ -83,6 +91,8 @@ switch p.targetpos.selection
         indtarget=loctarget.xnm>separator(1);
         indtarget=indtarget&loctarget.xnm>separator(1);
         indref=indref&locref.xnm<=separator(1);
+        xrangecamr=[0 spix(1)];yrangecamr=[0 spix(2)];
+        xrangecamt=[spix(1) spix(1)*2];yrangecamt=[0 spix(2)];
     otherwise
         dx=0;
         dy=0;
@@ -116,14 +126,14 @@ else %all initial estimation:
     
     switch p.targetmirror.selection
         case 'left-right'
-            loctT.x=2*midmirror(1)-loctT.x;
+            loctT.x=2*midmirror(1)-loctT.x+mirroradd(1);
             
         case 'up-down' 
-            loctT.y=2*midmirror(2)-loctT.y;
+            loctT.y=2*midmirror(2)-loctT.y+mirroradd(2);
             
         case 'both'  
-            loctT.x=2*midmirror(1)-loctT.x;
-            loctT.y=2*midmirror(2)-loctT.y;
+            loctT.x=2*midmirror(1)-loctT.x+mirroradd(1);
+            loctT.y=2*midmirror(2)-loctT.y+mirroradd(2);
             
         otherwise
             cutout=true;
@@ -231,8 +241,8 @@ loctarget.y=loctarget.ynm/pixtarget(end);
 
 % transform.findTransform(locref.x(iAa),locref.y(iAa),loctarget.x(iBa),loctarget.y(iBa))
 transform=interfaces.LocTransformN;
-transform.setTransform(1,'type',p.transform.selection,'unit','pixel','parameter',p.transformparam,'cam_pixnm',pixref);
-transform.setTransform(2,'type',p.transform.selection,'unit','pixel','parameter',p.transformparam,'cam_pixnm',pixtarget);
+transform.setTransform(1,'type',p.transform.selection,'unit','pixel','parameter',p.transformparam,'cam_pixnm',pixref,'xrange',xrangecamr,'yrange',yrangecamr);
+transform.setTransform(2,'type',p.transform.selection,'unit','pixel','parameter',p.transformparam,'cam_pixnm',pixtarget,'xrange',xrangecamt,'yrange',yrangecamt);
 %XXXXXXX still need to include mirroring...XXXXXX
 % t.parameter=p.transformparam;
 

@@ -22,8 +22,11 @@ classdef RegisterLocs2<interfaces.DialogProcessor
             p.isz=obj.isz;
             p.register_parameters=obj.register_parameters;
             
+%             if p.saveoldformat
+%                 obj.transformation=transform_locs(obj.locData,p);
+%             else
             obj.transformation=transform_locsN(obj.locData,p);
-            
+%             end
             fv=p.dataselect.Value;
             obj.locData.files.file(fv).transform=obj.transformation;
             if obj.processorgui==false %run from WF
@@ -199,6 +202,11 @@ pard.useT.object=struct('Style','checkbox','String','use inital T');
 pard.useT.position=[4,4];
 pard.useT.object.TooltipString='';
 pard.Width=2;
+
+% pard.saveoldformat.object=struct('Style','checkbox','String','old  format');
+% pard.saveoldformat.position=[6,3];
+% pard.saveoldformat.object.TooltipString='';
+
 
 pard.save.object=struct('Style','pushbutton','String','save T');
 pard.save.position=[6.5,4];

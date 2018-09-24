@@ -317,7 +317,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                         handle.String=(v);
                     end
                 case {'pushbutton','checkbox','togglebutton'}
-                    if isnumeric(v)
+                    if isnumeric(v)||islogical(v)
                         handle.Value=v;
                     elseif isstruct(v)
                         handle=v;

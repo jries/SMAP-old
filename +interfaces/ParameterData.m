@@ -6,8 +6,8 @@ classdef ParameterData<handle
         par %dummy, taken out for performance and replaced by global variable. Now put in again, 2018b seems to be fast enough
         globalSettings
         globalSettingsFile='settings/temp/globalsettings.txt';
-%         results
-%         autoresults
+        results
+        autoresults
     end
     events
         sr_render %tells GuiRender to render again: update the image

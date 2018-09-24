@@ -19,6 +19,7 @@ classdef Get2CIntImages2cam<interfaces.DialogProcessor
             f=obj.figure;
             f.Visible='on';
             wffile='settings/workflows/get2CIntensityImagesWF_group.mat';
+            wffile='settings/workflows/get2CIntensityImagesWF2';
             wf=interfaces.Workflow(f,obj.P);
             wf.attachLocData(obj.locData);
             wf.makeGui;
@@ -38,7 +39,8 @@ classdef Get2CIntImages2cam<interfaces.DialogProcessor
             
             p.loc_ROIsize=11;
             p.loc.fitgrouped=true;
-            wf.module('RoiCutterWF_groupExt').setGuiParameters(p);
+%             wf.module('RoiCutterWF_groupExt').setGuiParameters(p);
+            wf.module('RoiCutterWF').setGuiParameters(p);
 
             pe=obj.children.evaluate.getGuiParameters(true);
             wf.module('EvaluateIntensity_s').setGuiParameters(pe,true);
