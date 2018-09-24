@@ -159,7 +159,9 @@ classdef GuiModuleInterface<interfaces.GuiParameterInterface
                     for l=1:length(on)
                         if isfield(obj.guihandles,on{l})
                             hh=obj.guihandles.(on{l});
+                            if ~(myisfield(obj.guidef.(on{l}),'Optional') && obj.guidef.(on{l}).Optional &&obj.simplegui)
                             hh.Visible='on';
+                            end
                             if isprop(hh,'Callback') && ~isempty(hh.Callback) &&contains(func2str(hh.Callback{1}),'switchvisible')
 
                             %call switchvisible for all children to nest
