@@ -19,6 +19,7 @@ if exist(pm,'file')
    roi=str2num(txt1); 
    if isempty(roi)
         txt2=getval(minfo,ind+length(searchstr),'[',']');
+        txt2=strrep(txt2,'-',' ');
          roi=str2num(txt2);
    end
 
