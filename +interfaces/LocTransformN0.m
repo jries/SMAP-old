@@ -10,6 +10,7 @@ classdef LocTransformN0<handle
         unit='nm'; %or pixel
         cam_pixnm={[100 100],[100 100]};  %In future: allow pixel size for every channel? e.g. for multi-camera setup
         channels=2;
+%         mirror
     end
     
     methods
@@ -213,8 +214,58 @@ classdef LocTransformN0<handle
             obj.transform2Target=tform;
             obj.transform2Reference=invert(tform);
         end
+        
+        function out=mirror(obj,channel,format)
+            %out= logical (x y vs channels), channel specified only xy.
+            %Format: return string
+
+            if nargin <2 || isempty(channel)
+                out=false(obj.channels,2);
+                for k=2:obj.channels
+                    out(k,:)=mirrorchannel(obj, k);
+                end
+            else
+                out=mirrorchannel(obj, channel);
+            end
+            if nargin>2 && strcmp(format,'str')
+                out=convert2str(out);
+            end
+          
+  
+        end
+        function out=mirrorchannel(obj, channel)
+             ci=[0,0;1,1];
+            
+            co=obj.transformToTarget(channel,ci);
+            dc=sign(co(2,:)-co(1,:));
+            out=[false false];
+            if dc(1)<0
+                out(1)=true;
+            end
+            if dc(2)<0
+                out(2)=true;
+            end
+        end
+        
     end
 end
 
 
-
+function out=convert2str(in)
+s=size(in);
+for k=1:s(1)
+    out{k}='none';
+    if in(k,1)
+        out{k}='left-right';
+    end
+    if in(k,2)
+        out{k}='up-down';
+    end
+    if in(k,1) && in(k,2)
+        out{k}='both';
+    end
+end
+if s(1)==1
+    out=out{1};
+end
+end

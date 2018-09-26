@@ -31,20 +31,6 @@ classdef LocTransformN<interfaces.LocTransformN0
             ci=horzcat(x,y);
             ind=obj.getPart(1,ci,'nm');
         end
-        function mstr=mirror(obj)
-            ci=[0,0;1,1];
-            co=obj.transformToTarget(2,ci);
-            dc=sign(co(2,:)-co(1,:));
-            if dc(1)<0
-                mstr='left-right';
-            end
-            if dc(2)<0
-                mstr='up-down';
-            end
-            if dc(1)<0 && dc(2)<0
-                mstr='both';
-            end
-        end
         function tinfo=get.tinfo(obj)
             tinfo.mirror.targetmirror=obj.mirror;
             tinfo.separator=[obj.info{1}.xrange(end)*obj.info{1}.cam_pixnm(1) obj.info{1}.yrange(end)*obj.info{1}.cam_pixnm(end)];

@@ -26,7 +26,7 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
             huitable.ColumnEditable=[true false];
             huitable.RowName=[];
             huitable.ColumnName=[];
-            huitable.ColumnWidth={fs,'auto'};
+            huitable.ColumnWidth={fs,fw-fs-5};
             huitable.CellSelectionCallback={@evalselect_callback,obj};
             huitable.Units='normalized';
             huitable.TooltipString='Select (check) evaluators to determine intensities';
@@ -35,6 +35,8 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
              obj.evaluators=ev1;
              ev2={plugin('WorkflowModules','IntensityCalculator','roi2int_fitG')};%roi2int_fitG;
              obj.evaluators(2)=ev2;
+            ev3={plugin('WorkflowModules','IntensityCalculator','roi2int_expPSF')};%roi2int_fitG;
+             obj.evaluators(3)=ev3;
             p=obj.guiPar;
             p.Xpos=1;p.Vpos=1;p.Vrim=0;
             for k=1:length(obj.evaluators)
@@ -46,6 +48,7 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
                 obj.guihandles.(['panel_' num2str(k)])=hpanel;
                 ev.setGuiAppearence(p)
                 ev.handle=hpanel;
+                ev.attachPar(obj.P);
                 ev.makeGui;
                 ev.handle.Units='normalized';
             end
@@ -88,6 +91,7 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
             global EvaluateIntensity_intensity
             so1=2; %number of fields per evaluator
             so2=2;
+            so3=2;
             if ~isempty(data.data)
                 img=data.data.img;
 %                 bg=data{2}.data.img;
@@ -138,6 +142,11 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
 %                         inds=inds+length(out);
 %                         out=evaluators{2}.evaluate(im2,bg2,loc.dx(k+numl),loc.dy(k+numl),loc.PSFxpix(k+numl),loc.PSFypix(k+numl));
 %                         intensities(loccounter+k,inds:inds+length(out)-1)=out;
+                    end
+                    if useevaluators(3)
+                        out3=evaluators{3}.evaluate(img,loc);
+                        EvaluateIntensity_intensity(loccounter+1:loccounter+numl,inds:inds+so3-1)=out3(1:numl,:);
+                        inds=inds+so3;
                     end
                     EvaluateIntensity_intensity(loccounter+1:loccounter+numl,inds:inds+4)=horzcat(loc.x(1:numl),loc.y(1:numl),loc.frame(1:numl),loc.phot(1:numl),loc.bg(1:numl));
                     if isfield(loc,'groupindex')

@@ -31,7 +31,7 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
                  obj.fitpar.mirrorud=contains(transform.tinfo.mirror.targetmirror,'up');
                  obj.fitpar.mirrorrl=contains(transform.tinfo.mirror.targetmirror,'right');
              elseif isa(transform,'interfaces.LocTransformN')
-                 tinfo=transform.tinfo;
+                 tinfo=transform.info;
                  for k=1:length(tinfo)
                      obj.fitpar.mirror{k}=tinfo{k}.mirror;
                  end

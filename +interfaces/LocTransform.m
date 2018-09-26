@@ -3,6 +3,7 @@ classdef LocTransform<handle
         transform %forward .inversie
         tinfo
         transformz;
+        cam_pixnm;
     end
     methods
 
@@ -47,7 +48,7 @@ classdef LocTransform<handle
             x=x/1000;y=y/1000;
             [xo,yo]=transformPointsInverse(obj.transform.inverse,x,y); %inverse of inverse is forward
            
-            if nargin>3&&~isemtpy(z) %z coordinates present
+            if nargin>3&&~isempty(z) %z coordinates present
                 z=z/1000;
                  X=transformPointsInverse(obj.transformz.inverse,[xo,yo,z]);
                  xo=X(:,1);yo=X(:,2);zo=X(:,3);
@@ -103,6 +104,15 @@ classdef LocTransform<handle
             obj.transform.inverse=invert(tform);
             mirror=struct('midmirror',17664,'targetmirror','no mirror');
             obj.tinfo=struct('targetpos','all','separator',[70656 35328],'mirror',mirror);
+        end
+        
+        function co=transformToTarget(obj,channel,ci,unit) %compatibilty to new version
+            if channel ~=2
+                disp('channel needs to be 2 for compatibility')
+            end
+            x=ci(:,1);y=ci(:,2);
+            [xo,yo]=transformCoordinatesFwd(obj,x,y);
+            co=horzcat(xo,yo);
         end
     end
 end

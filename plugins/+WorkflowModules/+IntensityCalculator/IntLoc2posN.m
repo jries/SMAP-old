@@ -43,7 +43,11 @@ classdef IntLoc2posN<interfaces.WorkflowModule
             else
                 if  p.transformtotarget
 %                     cpix=transform.cam_pixnm{1}(1); %nor target cam pix???
+                    try
                     cpix=transform.cam_pixnm{2}(1);
+                    catch error
+                        cpix=obj.locData.files.file(1).info.cam_pixelsize_um;
+                    end
                 end
                 obj.locs.PSFxpix=double(obj.locs.PSFxnm/cpix(1));
                 obj.locs.PSFypix=obj.locs.PSFxpix;
@@ -85,8 +89,8 @@ classdef IntLoc2posN<interfaces.WorkflowModule
                maxout.x=round(xrel);
                maxout.y=round(yrel);
                maxout.frame=frame+0*maxout.y;
-               maxout.dx=xrel-round(xrel);
-               maxout.dy=yrel-round(yrel);
+               maxout.dx=xrel-maxout.x;
+               maxout.dy=yrel-maxout.y;
                maxout.PSFxpix=obj.locs.PSFxpix(ind1:intLoc2pos_ind2);
                maxout.PSFypix=(obj.locs.PSFypix(ind1:intLoc2pos_ind2));
                maxout.groupindex=obj.locs.groupindex(ind1:intLoc2pos_ind2);
