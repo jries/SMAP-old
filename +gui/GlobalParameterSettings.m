@@ -112,13 +112,16 @@ if strcmp(style,'file')
     end
     [f,p]=uigetfile(strstart);
     if p
+        p=makerelativetopwr(p);
         hedit.String=[p f];
     end
 else
     strstart=hedit.String;
     p=uigetdir(strstart);
     if p
+        p=makerelativetopwr(p);
         hedit.String=p;
     end
 end
+
 end
