@@ -171,7 +171,7 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
                     for k=1:length(obj.fields)
                         % if grouped localizations: convert to ungrouped
                         % ones
-                        if length(obj.locData.loc.xnm)>obj.loccounter
+                        if 0 %length(obj.locData.loc.xnm)>obj.loccounter
                             
                             %sort EvI by group index
                             %Evi(:,loc.gropuindex)

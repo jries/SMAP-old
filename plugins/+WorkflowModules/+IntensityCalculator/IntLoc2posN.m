@@ -17,20 +17,25 @@ classdef IntLoc2posN<interfaces.WorkflowModule
         function prerun(obj,data,p)
             global intLoc2pos_ind2 intLoc2pos_locframes;
             intLoc2pos_ind2=1;
-            
+            obj.locData.sort('frame');
             p=obj.getAllParameters;
           
             transform=loadtransformation(obj,p.Tfile);
             obj.locs=obj.locData.getloc({'frame','xnm','ynm','znm','PSFxnm','phot','bg','groupindex','numberInGroup'});
             cpix=obj.locData.files.file(1).info.cam_pixelsize_um*1000;
+
             x=double(obj.locs.xnm)/cpix(1);  %in pixels
             y=double(obj.locs.ynm)/cpix(end);
             
-            if p.transformtotarget
+            indref=transform.getPart(1,horzcat(x,y));
+            indtarget=transform.getPart(2,horzcat(x,y));
+             obj.locs.xA=x;obj.locs.yA=y;
+            if p.transformtotarget    
                     pos=transform.transformToTarget(2,horzcat(x,y));
-                    obj.locs.xA=pos(:,1);obj.locs.yA=pos(:,2);
+                    obj.locs.xA(indref)=pos(indref,1);obj.locs.yA(indref)=pos(indref,2);
             else
-                     obj.locs.xA=x;obj.locs.yA=y;
+                    pos=transform.transformToReference(2,horzcat(x,y));
+                    obj.locs.xA(indtarget)=pos(indtarget,1);obj.locs.yA(indtarget)=pos(indtarget,2);
             end
 
             
@@ -78,7 +83,7 @@ classdef IntLoc2posN<interfaces.WorkflowModule
                     intLoc2pos_ind2=intLoc2pos_ind2+1;
                 end
                 intLoc2pos_ind2=intLoc2pos_ind2-1;
-                if 0% (intLoc2pos_ind2-ind1+1)~=(sum(obj.locs.frame==frame))
+                if  (intLoc2pos_ind2-ind1+1)~=(sum(obj.locs.frame==frame))
                     disp((intLoc2pos_ind2-ind1+1)-(sum(obj.locs.frame==frame)))
                     disp(frame)
                 end
@@ -97,6 +102,9 @@ classdef IntLoc2posN<interfaces.WorkflowModule
                maxout.numberInGroup=obj.locs.numberInGroup(ind1:intLoc2pos_ind2);
                maxout.phot=obj.locs.phot(ind1:intLoc2pos_ind2);
                maxout.bg=obj.locs.bg(ind1:intLoc2pos_ind2);
+               if ~isempty(obj.locs.znm)
+                   maxout.z=obj.locs.znm(ind1:intLoc2pos_ind2);
+               end
                datout=data;%.copy;
                datout.data=maxout;%.set(maxout);
 %                obj.output(datout); 

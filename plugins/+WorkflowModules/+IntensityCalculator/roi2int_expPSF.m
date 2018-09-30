@@ -38,8 +38,8 @@ classdef roi2int_expPSF<interfaces.GuiModuleInterface
             end
             obj.spline=load(f);
             sppos=obj.guihandles.splinefields.Value;
-            sppos=min(length(obj.spline.SXY(sppos).cspline.coeff),sppos); %did not fix calibrator yet..
-            obj.splinecoeff=obj.spline.SXY(sppos).cspline.coeff{sppos};
+            sind=min(length(obj.spline.SXY(sppos).cspline.coeff),sppos); %did not fix calibrator yet..
+            obj.splinecoeff=obj.spline.SXY(sppos).cspline.coeff{sind};
             
         end
         function prerun(obj,p)
@@ -54,21 +54,21 @@ classdef roi2int_expPSF<interfaces.GuiModuleInterface
             end
             obj.p=obj.getGuiParameters;
             obj.load_spline;
-            sppos=obj.guihandles.splinefields.Value;
-            transform=obj.spline.transformation;
-            if isa(transform,'interfaces.LocTransformN')
-                obj.mirror=transformation.mirror(sppos);
-            else
+%             sppos=obj.guihandles.splinefields.Value;
+%             transform=obj.spline.transformation;
+%             if isa(transform,'interfaces.LocTransformN')
+%                 obj.mirror=transformation.mirror(sppos);
+%             else
                 
-                obj.mirror=false(1,2);
-                 mm=transform.tinfo.mirror.targetmirror;
-                 if contains(mm,'up') && sppos==2
-                     obj.mirror(2)=true;
-                 end
-                 if contains(mm,'right') && sppos==2
-                      obj.mirror(1)=true;
-                 end
-            end
+%                 obj.mirror=false(1,2);
+%                  mm=transform.tinfo.mirror.targetmirror;
+%                  if contains(mm,'up') && sppos==2
+%                      obj.mirror(2)=true;
+%                  end
+%                  if contains(mm,'right') && sppos==2
+%                       obj.mirror(1)=true;
+%                  end
+%             end
 %             roi2int_fit_e();
             %TODO include PSF fit
 %             global roi2int_fitG_parameters;
@@ -96,14 +96,14 @@ if length(sim)==2
     sim(3)=1;
 end
 
-if obj.mirror(2)
-    roi(:,:,:)=roi(end:-1:1,:,:);
-    loc.dy=-loc.dy;
-end
-if obj.mirror(1)
-    roi(:,:,:)=roi(:,end:-1:1,:);
-    loc.dx=-loc.dx;
-end
+% if obj.mirror(2)
+%     roi(:,:,:)=roi(end:-1:1,:,:);
+%     loc.dy=-loc.dy;
+% end
+% if obj.mirror(1)
+%     roi(:,:,:)=roi(:,end:-1:1,:);
+%     loc.dx=-loc.dx;
+% end
 mp=round(sim+1)/2;
 dn=round((obj.p.roisize_fit-1)/2);
 p=zeros(sim(3),2,'single');
@@ -113,10 +113,11 @@ p=zeros(sim(3),2,'single');
 % sppos=obj.guihandles.splinefields.Value;
 % splinecoeff=obj.spline.SXY(sppos).cspline.coeff{sppos};
 zmp=obj.spline.SXY(1).cspline.z0;
+dz=obj.spline.SXY(1).cspline.dz;
     if obj.p.fixz0
         z=zeros(sim(3),1)+obj.p.z0;
     else
-        z=loc.z;
+        z=loc.z/dz;
     end
     cor=horzcat(loc.dy+dn,loc.dx+dn,z+zmp);
     template = evalSpline(obj.p.roisize_fit,obj.splinecoeff,1,0,cor);

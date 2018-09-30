@@ -114,8 +114,7 @@ classdef TifLoader<interfaces.WorkflowModule
                 th=tic;
                 obj.output(datout)
                 tfitall=tfitall+toc(th);
-                th=tic;
-                image=imloader.readNext;
+
       
 
                 
@@ -140,6 +139,8 @@ classdef TifLoader<interfaces.WorkflowModule
                         separatethousands(numlocs,sep) ' locs, ' separatethousands(numlocs/elapsed,sep,0) ' locs/s.'];
                     obj.status(statuss);
                 end
+                th=tic;
+                image=imloader.readNext;
                 tall=tall+toc(th);
             end
             

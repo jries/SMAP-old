@@ -31,10 +31,10 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             obj.numberInBlock=round(obj.fitpar.roisperfit*100/roisize^2);
             p=obj.getAllParameters;
             if obj.fitpar.fitmode==5 ||obj.fitpar.fitmode==6
-                EMfile=obj.getPar('loc_fileinfo').EMon;
-                EMcal=obj.fitpar.EMon;
+%                 EMfile=obj.getPar('loc_fileinfo').EMon;
+%                 EMcal=obj.fitpar.EMon;
 %                 EMcal=obj.fitpar.splinefit{1}.isEM;
-                mirrorstack=obj.getSingleGuiParameter('automirror');
+%                 mirrorstack=obj.getSingleGuiParameter('automirror');
 %                 switch mirrorstack.selection
 %                     case 'auto'
 %                         obj.fitpar.mirrorstack=~(EMfile==EMcal);

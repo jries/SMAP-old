@@ -114,6 +114,26 @@ classdef LocTransform<handle
             [xo,yo]=transformCoordinatesFwd(obj,x,y);
             co=horzcat(xo,yo);
         end
+        function co=transformToReference(obj,channel,ci,unit) %compatibilty to new version
+            if channel ~=2
+                disp('channel needs to be 2 for compatibility')
+            end
+            x=ci(:,1);y=ci(:,2);
+            [xo,yo]=transformCoordinatesInv(obj,x,y);
+            co=horzcat(xo,yo);
+        end        
+        function ind=getPart(obj,channel,ci,unit)
+            x=ci(:,1);y=ci(:,2);
+            indref=obj.getRef(x,y);
+            switch channel
+                case 1
+                    ind=indref;
+                case 2
+                    ind=~indref;
+                otherwise
+                    disp('channel for getPart needs to be 1 or 2 for compatibility');
+            end
+        end
     end
 end
 
