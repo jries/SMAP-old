@@ -5,6 +5,17 @@ if ~exist(pm,'file')
     mf=dir([p filesep '*metadata.txt']);
     if isempty(mf)
         roi=[0 0 512 512];
+        try
+        il=imageloaderAll(file);
+        ad=il.metadata.allmetadata;
+        ri=find(contains(ad(:,1),'ROI'));
+        str=ad{ri(1),2};
+        str=strrep(str,'-',' ');
+        roi=str2num(str);
+ 
+        catch err
+            err
+        end
         return
     end
     pm=[p filesep mf(1).name];
