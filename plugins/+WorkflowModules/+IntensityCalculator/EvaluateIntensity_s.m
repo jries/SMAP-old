@@ -64,6 +64,7 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
         end
         function prerun(obj,data1,data2,data3)
             global EvaluateIntensity_intensity
+            obj.extension=obj.getPar('intensity_channel');
             p=obj.getAllParameters;
             obj.useevaluators=[p.evalmodules.Data{:,1}];
             

@@ -37,7 +37,14 @@ classdef roi2int_expPSF<interfaces.GuiModuleInterface
                 return
             end
             obj.spline=load(f);
-            sppos=obj.guihandles.splinefields.Value;
+%             sppos=min(obj.guihandles.splinefields.Value,length(obj.spline.SXY));
+            switch obj.getPar('intensity_channel')
+                case 'r' 
+                    sppos=1;
+                case 't'
+                    sppos=2;
+            end
+               sppos        
             sind=min(length(obj.spline.SXY(sppos).cspline.coeff),sppos); %did not fix calibrator yet..
             obj.splinecoeff=obj.spline.SXY(sppos).cspline.coeff{sind};
             
@@ -148,13 +155,13 @@ pard.t1.TooltipString='Roi size around localizations for fitting';
 pard.roisize_fit.object=struct('Style','edit','String','9');
 pard.roisize_fit.position=[1,2];
 pard.roisize_fit.TooltipString=pard.t1.TooltipString;
-
-pard.t2.object=struct('Style','text','String','spline cal. SXY index:');
-pard.t2.position=[2,1];
-pard.t2.Width=2;
+% 
+% pard.t2.object=struct('Style','text','String','spline cal. SXY index:');
+% pard.t2.position=[2,1];
+% pard.t2.Width=2;
 % pard.t2.TooltipString='Roi size around localizations for fitting';
-pard.splinefields.object=struct('Style','popupmenu','String',{{1,2}});
-pard.splinefields.position=[2,3];
+% pard.splinefields.object=struct('Style','popupmenu','String',{{1,2}});
+% pard.splinefields.position=[2,3];
 
 
 pard.loadcal_3Dfile.object=struct('Style','pushbutton','String','load','Callback',@obj.load3Dfile);

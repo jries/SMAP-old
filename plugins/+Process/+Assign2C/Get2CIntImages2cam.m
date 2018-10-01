@@ -16,6 +16,7 @@ classdef Get2CIntImages2cam<interfaces.DialogProcessor
             if isempty(obj.figure)||~isvalid(obj.figure)
                 obj.figure=figure;
             end
+            
             f=obj.figure;
             f.Visible='on';
             wffile='settings/workflows/get2CIntensityImagesWF_group.mat';
@@ -51,14 +52,16 @@ classdef Get2CIntImages2cam<interfaces.DialogProcessor
             % now first to ref, then do target. Later: if files are same:
             % do at the same time to save time...
             if p.evaltarget
+                obj.setPar('intensity_channel','t')
                 wf.module('TifLoader').addFile(p.tiffiletarget,true);   
-                wf.module('EvaluateIntensity_s').extension='t';
+%                 wf.module('EvaluateIntensity_s').extension='t';
                 wf.module('IntLoc2posN').setGuiParameters(struct('transformtotarget',true));
                 wf.run;
             end
             if p.evalref
+                obj.setPar('intensity_channel','r')
                 wf.module('TifLoader').addFile(p.tiffileref,true);   
-                wf.module('EvaluateIntensity_s').extension='r';
+%                 wf.module('EvaluateIntensity_s').extension='r';
                 
                 wf.module('IntLoc2posN').setGuiParameters(struct('transformtotarget',false));
                 wf.run;
@@ -82,10 +85,17 @@ classdef Get2CIntImages2cam<interfaces.DialogProcessor
         end
         function loadbutton_T(obj,a,b)
             fn=obj.guihandles.Tfile.String;
+            if isempty(fn)
+                fn=getrawtifpath(obj.locData);
+                fn=[fileparts(fn) filesep '*.mat'];
+            end
             [f,path]=uigetfile(fn,'Select transformation file _T.mat');
             if f
                 obj.guihandles.Tfile.String=[path f];
             end      
+            if contains(f,'3dcal')
+                obj.children.evaluate.evaluators{3}.setGuiParameters(struct('cal_3Dfile',[path f]));
+            end
         end
         function loadbutton_tif(obj,a,b,field)
             fn= obj.guihandles.(field).String;

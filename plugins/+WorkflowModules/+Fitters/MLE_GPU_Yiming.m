@@ -95,9 +95,12 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             [locs.asymmetry,locs.asymmdiag,locs.asymangle]=asymmetry(imgstack,true);
             end
             
+            if ~isempty(locs)
+                
             fn=fieldnames(stackinfo);
             infonames=setdiff(setdiff(fn,fieldnames(locs)), {'x','y','frame','Y','X'});
             locs=copyfields(locs,stackinfo,infonames);
+            end
         end
 
         function initGui(obj)
