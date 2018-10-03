@@ -153,26 +153,12 @@ LogL=results.LogL;
            CRLB(isnan(CRLB))= 0; %XXXXXXXXX
            LogL(isnan(LogL))= 0; %XXXXXXXXX
            CRLB((CRLB)<0)= 0; %XXXXXXXXX
-          % LogL((LogL)<0)= 0; %XXXXXXXXX
-           
-           
-% locs.xpix=P(:,2)-dn+posx;
 if (fitpar.fitmode==5||fitpar.fitmode==6) && fitpar.mirrorstack
     locs.xpix=dn-P(:,2)+posx;
 else
     locs.xpix=P(:,2)-dn+posx;
 end
 locs.ypix=P(:,1)-dn+posy;
-
-
-% if (fitpar.fitmode==5||fitpar.fitmode==6) && fitpar.mirrorstack
-%     
-%     locs.ypix=dn-P(:,1)+1+posy;
-% else
-%     locs.ypix=P(:,1)-dn+posy;
-% end
-
-% locs.xpix=P(:,2)-dn+posx;
 
 locs.phot=P(:,3)*EMexcess;
 locs.bg=P(:,4)*EMexcess;
@@ -223,6 +209,28 @@ switch fitpar.fitmode
         locs.PSFxpix=sx;
         locs.PSFypix=sx;
 end
+if fitpar.addgaussfit
+    if fitpar.mirrorstack %now taken care of during loading
+        xpixGauss=dn-results.P2(:,2)+posx;
+    else
+        xpixGauss=results.P2(:,2)-dn+posx;
+    end
+     ypixGauss=results.P2(:,1)-dn+posy;
+     switch fitpar.addgaussfit_xyfrom.Value
+         case 1 %spline
+             locs.xpixGauss=xpixGauss;
+             locs.ypixGauss=ypixGauss;
+         case 2 %Gauss
+             locs.xpixspline=locs.xpix;
+             locs.ypixspline=locs.ypix;
+             locs.xpix=xpixGauss;
+             locs.ypix=ypixGauss;
+             locs.xerrpix=sqrt(results.CRLB2(:,2));
+             locs.yerrpix=sqrt(results.CRLB2(:,1)); 
+     end
+         
+         
+end
 locs.locpthompson=sqrt((locs.PSFxpix.*locs.PSFypix+1/12*v1)./( locs.phot/EMexcess)+8*pi*(locs.PSFxpix.*locs.PSFypix).^2.* locs.bg./( locs.phot/EMexcess).^2);
 locs.iterations=results.P(:,end);
 end
@@ -247,7 +255,7 @@ arguments{3}=fitpar.iterations;
 
 arguments{5}=varstack;
 arguments{6}=1;
-if isfield(fitpar,'zstart')
+if isfield(fitpar,'dz')
     arguments{7}=fitpar.zstart/fitpar.dz;
 end
     switch fitpar.fitmode
@@ -283,11 +291,21 @@ end
 
 
         [P CRLB LogL]=fitpar.fitfunction(arguments{:});
+        if fitpar.addgaussfit && fitpar.fitmode==5
+            val2mode=[1 2 4];
+            arguments{2}=val2mode(fitpar.addgaussfit_mode.Value);
+            arguments{4}=1;
+            [P2 CRLB2 LogL2]=fitpar.fitfunction(arguments{:});
+        else
+            P2=[];CRLB2=[];
+        end
 %     end
 
 out.P=P;
 out.CRLB=CRLB;
 out.LogL=LogL;
+out.P2=P2;
+out.CRLB2=CRLB2;
 end
         
         
@@ -306,11 +324,13 @@ end
 
 function fitpar=getfitpar(obj)
 p=obj.getAllParameters;
-fitpar.iterations=p.iterations;
+fitpar=p;
+fitpar.addgaussfit=fitpar.addgaussfit & (fitpar.fitmode.Value ==5);
+% fitpar.iterations=p.iterations;
 fitpar.fitmode=p.fitmode.Value;
-fitpar.roisperfit=p.roisperfit;
+% fitpar.roisperfit=p.roisperfit;
 fitpar.issCMOS=p.isscmos;
-fitpar.asymmetry=p.asymmetry;
+% fitpar.asymmetry=p.asymmetry;
 
 if fitpar.fitmode==3||fitpar.fitmode==5
     fitpar.zstart=p.zstart;
@@ -496,12 +516,18 @@ end
 function pard=guidef(obj)
 p1(1).value=1; p1(1).on={'PSFx0','tPSFx0'}; 
 p1(1).off={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize',...
-    'automirror','fit2D','pixelsizex','pixelsizey'};%,'isscmos','selectscmos','scmosfile'};
+    'automirror','fit2D','pixelsizex','pixelsizey','addgaussfit','addgaussfit_mode','addgaussfit_t',...
+    'addgaussfit_xyfrom'};%,'isscmos','selectscmos','scmosfile'};
 p1(2)=p1(1);p1(2).value=2;
-p1(3).value=3;p1(3).off={'PSFx0','tPSFx0'};p1(3).on={'loadcal','cal_3Dfile','trefractive_index_mismatch','refractive_index_mismatch','overwritePixelsize','automirror','fit2D'};%,'isscmos'};
+p1(3).value=3;p1(3).off={'PSFx0','tPSFx0'};p1(3).on={'loadcal','cal_3Dfile',...
+    'trefractive_index_mismatch','refractive_index_mismatch',...
+    'overwritePixelsize','automirror','fit2D'};%,'isscmos'};
 p1(4)=p1(1);p1(4).value=4;
 p1(5)=p1(3);p1(5).value=5;
 p1(6)=p1(5);p1(6).value=6;
+p1(5).on=[p1(5).on {'addgaussfit'}];
+
+
 
 pard.fitmode.object=struct('Style','popupmenu','String',{{'PSF fix','PSF free','3D z','ellipt: PSFx PSFy','Spline'}},'Value',2,'Callback',{{@obj.switchvisible,p1,{@fitmode_callback,0,0,obj}}});
 pard.fitmode.position=[1,1];
@@ -528,6 +554,26 @@ pard.roisperfit.TooltipString=sprintf('Number of 10 x 10 pixel ROIs passed to GP
 pard.roisperfit.Optional=true;
 pard.roisperfitt.TooltipString=pard.roisperfit.TooltipString;
 pard.roisperfit.Width=0.5;
+
+
+p(1).value=0; p(1).on={}; p(1).off={'addgaussfit_mode','addgaussfit_t','addgaussfit_xyfrom'};
+p(2).value=1; p(2).on=p(1).off; p(2).off={};
+pard.addgaussfit.object=struct('Style','checkbox','String','additional Gauss fit','Callback',{{@obj.switchvisible,p}});
+pard.addgaussfit.position=[3,1];
+pard.addgaussfit.Optional=true;
+pard.addgaussfit.Width=1.3;
+pard.addgaussfit_mode.object=struct('Style','popupmenu','String',{{'fix','free','elliptical'}},'Value',2);
+pard.addgaussfit_mode.position=[3,2.3];
+pard.addgaussfit_mode.Width=0.7;
+pard.addgaussfit_mode.Optional=true;
+pard.addgaussfit_t.object=struct('Style','text','String','x,y coordinates from');
+pard.addgaussfit_t.position=[3,3];
+pard.addgaussfit_t.Width=1.3;
+pard.addgaussfit_t.Optional=true;
+pard.addgaussfit_xyfrom.object=struct('Style','popupmenu','String',{{'spline','Gauss'}});
+pard.addgaussfit_xyfrom.position=[3,4.1];
+pard.addgaussfit_xyfrom.Optional=true;
+pard.addgaussfit_xyfrom.Width=.9;
 
 pard.tPSFx0.object=struct('Style','text','String','PSFx start (pix)');
 pard.tPSFx0.position=[2,1];

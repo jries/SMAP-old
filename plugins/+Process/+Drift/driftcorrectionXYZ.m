@@ -21,50 +21,56 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                 %save copy
             obj.setPar('undoModule','driftfeature');
             notify(obj.P,'backup4undo');
-%             groupcheck=obj.locData.isgrouped(1);
             numberOfFiles=obj.locData.files.filenumberEnd;
             layers=find(obj.getPar('sr_layerson'));
-            
             
             %determine which files to correct
             if contains(p.drift_whatfiles.selection,'all')
                 files=1:numberOfFiles;
                 region='all';
-            else %use file from layer 1
+                rmfilter={'filenumber'};
+                driftall=true;
+            else %visible
                 files=p.layer1_.ch_filelist.Value;
+                rmfilter={};
                 region='roi';
+                driftall=false;
             end
             
-%             if p.drift_individual&&numberOfFiles>1
                 for k=files
                     lochere=obj.locData.copy;
                     lochere.files.fileNumberEnd=1;
                     lochere.files.file=lochere.files.file(k);
-                    badind=lochere.loc.filenumber~=k;
-                    lochere.removelocs(badind);
+                    if driftall
+                        badind=lochere.loc.filenumber~=k;
+                        lochere.removelocs(badind);
+                    else
+                        badind=false(size(lochere.loc.filenumber));
+                    end
                     lochere.regroup;
                     lochere.loc.filenumber=lochere.loc.filenumber*0+1;
                     
 %                     locs=lochere.getloc({'frame','xnm','ynm','znm'},'position','all','grouping',groupcheck);
 %                      locs=lochere.getloc({'frame','xnm','ynm','znm'},'position','all','grouping',groupcheck,'layer',1,'removeFilter',{'filenumber'});
-                    locs=lochere.getloc({'frame','xnm','ynm','znm'},'position',region,'layer',layers,'removeFilter',{'filenumber'});
+                    locs=lochere.getloc({'frame','xnm','ynm','znm'},'position',region,'layer',layers,'removeFilter',rmfilter);
+                    if length(locs.xnm)/p.drift_timepoints<500
+                        answ=questdlg(['Only ' num2str(length(locs.xnm)/p.drift_timepoints) ' localizations per time window. Abort drift correction?']); %htis is modal: no way to see output.
+                        if ~contains(answ,'No') %not use this
+                            return
+                        end
+                    end
+                        
                     p.maxframeall=max(lochere.loc.frame);
                     p.framestart=min(locs.frame);
                     p.framestop=max(locs.frame);
                     p.roi=obj.locData.files.file(k).info.roi;
                     [drift,driftinfo,fieldc]=getxyzdrift(locs,p);
                     
-%                     [drift,driftinfo]=finddriftfeature(locs,p);
-%                     locsall=copyfields([],lochere.loc,{'xnm','ynm','frame','filenumber'});
                     locsall=copyfields([],lochere.loc,{fieldc{:},'frame','filenumber'});
                     
                     if p.drift_ask %check if to apply drift correction
 %                         answ=questdlg('apply drift correction?'); %htis is modal: no way to see output.
                           answ=nonmodaldialog('apply drift correction?','YES, apply', 'NO');
-                          
-
-%                         t=uicontrol('Parent',h,'
-%                         h=inputdlg('apply drift correction?');
                         if ~contains(answ,'YES') %not use this
                             continue
                         end
@@ -100,51 +106,6 @@ classdef driftcorrectionXYZ<interfaces.DialogProcessor
                     obj.locData.loc.ynm(~badind)=lochere.loc.ynm;
                 end
                 obj.locData.regroup;
-%             else
-%                 locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','roi','layer',1);
-% %                  locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','fov','grouping',groupcheck);
-%                 if length(locs.xnm)<100
-%                     locs=obj.locData.getloc({'frame','xnm','ynm','znm'},'position','all','grouping',groupcheck);
-%                 end
-% 
-%             
-%                 p.maxframeall=max(obj.locData.loc.frame);
-% %                 p.framestart=p.layer1_.frame_min;
-%                 p.framestart=(min(locs.frame));
-%                 p.framestop=max(locs.frame);
-%                 p.roi=obj.locData.files.file(1).info.roi;  
-%                 [drift,driftinfo,fieldc]=getxyzdrift(locs,p);
-%                 locsall=copyfields([],obj.locData.loc,{fieldc{:},'frame','filenumber'});
-%                 locsnew=applydriftcorrection(drift,locsall);
-%                 
-%                 
-%                 
-%                 obj.locData.loc=copyfields(obj.locData.loc,locsnew,fieldc);
-%                 if length(unique(locsall.filenumber))>1
-%                     locsnew.channel=locsall.filenumber;
-%                     obj.locData.loc=copyfields(obj.locData.loc,locsnew,{'channel'});
-%                 end
-%                 if isfield( obj.locData.files(obj.locData.loc.filenumber(1)).file,'driftinfo')
-%                         driftinfoh=copyfields( obj.locData.files(obj.locData.loc.filenumber(1)).file.driftinfo,driftinfo);
-%                 else
-%                         driftinfoh=driftinfo;
-%                 end
-%                obj.locData.files(obj.locData.loc.filenumber(1)).file.driftinfo=driftinfoh;
-%                 fn=obj.locData.files(obj.locData.loc.filenumber(1)).file.name;
-%                             
-%                 if contains(fn,'_sml')
-%                     fnn=strrep(fn,'_sml','_driftc_sml');
-%                 else
-%                     fnn=strrep(fn,'fitpos','driftc_sml');
-%                 end
-% %                 fnn=strrep(fn,'_sml','_driftc_sml');
-%                 if p.save_dc
-%                     obj.addhistory;
-%                     obj.locData.savelocs(fnn); 
-%                 end
-%                 obj.locData.regroup;
-%                 
-%             end
         end
         function pard=guidef(obj)
             pard=guidef;
@@ -364,7 +325,7 @@ pard.drift_mirror2c.Optional=true;
 % pard.drift_individual.position=[8,1];
 % pard.drift_individual.Width=2;
 % pard.drift_individual.Optional=true;
-pard.drift_whatfiles.object=struct('String',{{'all files','currrent file layer1'}},'Style','popupmenu','Value',1);
+pard.drift_whatfiles.object=struct('String',{{'visible','all files'}},'Style','popupmenu','Value',1);
 pard.drift_whatfiles.position=[8,1];
 pard.drift_whatfiles.Width=1.5;
 pard.drift_whatfiles.Optional=true;
