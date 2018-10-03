@@ -2,8 +2,8 @@ function transform=transform_locsN(locData,p)
 
 %get fields
 if p.uselayers
-    [locref,xx]=locData.getloc({'xnm','ynm','frame','filenumber','znm','PSFxnm'},'layer',p.reflayer.Value,'position','roi');
-    [loctarget,yy]=locData.getloc({'xnm','ynm','frame','filenumber','znm','PSFxnm'},'layer',p.targetlayer.Value,'position','roi');
+    [locref,xx]=locData.getloc({'xnm','ynm','frame','filenumber','znm','PSFxnm'},'layer',p.reflayer.Value,'position','roi','grouping','ungrouped');
+    [loctarget,yy]=locData.getloc({'xnm','ynm','frame','filenumber','znm','PSFxnm'},'layer',p.targetlayer.Value,'position','roi','grouping','ungrouped');
     
 else
     locref=locData.getloc({'xnm','ynm','frame','filenumber','inungrouped','znm','PSFxnm'},'position','roi');

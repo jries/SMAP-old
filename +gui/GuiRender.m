@@ -274,8 +274,9 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
 end
 
 function selectLayer_callback(tabgroup,eventdata,obj)
-layer=(eventdata.NewValue.Title);
-if strcmp(layer,'+')
+layer=(eventdata.NewValue.Tag);
+layertitle=(eventdata.NewValue.Title);
+if strcmp(layertitle,'+')
     newlayernumber=obj.numberOfLayers+1;
     tag=['Layer' num2str(newlayernumber)];
       h.(['tab_layer' num2str(newlayernumber)])=uitab(obj.guihandles.layertab,'Title',tag,'Tag',tag);
@@ -326,7 +327,8 @@ switch callobj.Label
         delete(tab);
         obj.numberOfLayers=obj.numberOfLayers-1;
         obj.setPar('numberOfLayers',obj.numberOfLayers);
-        tab=findobj(obj.guihandles.layertab,'Title','Layer1');
+%         tab=findobj(obj.guihandles.layertab,'Title','Layer1');
+        tab=obj.guihandles.layertab.Children(1);
         obj.guihandles.layertab.SelectedTab=tab;
     case 'rename layer'
         currentname=obj.guihandles.layertab.SelectedTab.Title;
@@ -350,8 +352,10 @@ function updatelayernames(obj)
 k=1;
 names={};
 while isfield(obj.children,['Layer' num2str(k)])
-    names{k}=obj.children.(['Layer' num2str(k)]).name;
-    k=k+1;
+    if isvalid(obj.children.(['Layer' num2str(k)]))
+        names{k}=obj.children.(['Layer' num2str(k)]).name;
+    end
+            k=k+1;
 end
 obj.setPar('layernames',names);
 end        

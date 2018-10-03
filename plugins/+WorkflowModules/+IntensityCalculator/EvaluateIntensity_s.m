@@ -156,10 +156,12 @@ classdef EvaluateIntensity_s<interfaces.WorkflowModule
 %                 end
                 loccounter=loccounter+numl;
                 
+                
                 obj.useevaluators=useevaluators;
 %                 obj.intensities=intensities;
                 obj.evaluators=evaluators;
                 obj.loccounter=loccounter;
+                 obj.setPar('fittedLocs',loccounter);
                 dato=[];
                 
             else
