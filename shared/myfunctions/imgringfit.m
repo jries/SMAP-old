@@ -54,19 +54,7 @@ hold on
    end
 end
 
-% function err=gaussringerr(par,img1,img2,X,Y,s1,s2,exponent)
-% %a1 a2 x y r1 r2 dr1 dr2
-% p1=par([1 3 4 5 7]);
-% p2=par([2 3 4 6 8]);
-% 
-% g1=gaussring(p1,X,Y,s1,exponent);
-% g2=gaussring(p2,X,Y,s2,exponent);
-% % err1=(g1-img1).*(sqrt(img1)+mean(img1(:)));
-% % err2=(g2-img2).*(sqrt(img2)+mean(img2(:)));
-% err1=(g1-img1)*sum(img1(:));
-% err2=(g2-img2)*sum(img2(:));
-% err=vertcat(err1(:),err2(:));
-% end
+
 
 function im=gaussring(par,X,Y,sigma,exponent)
 
