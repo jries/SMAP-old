@@ -38,12 +38,12 @@ classdef PeakCombiner<interfaces.WorkflowModule
             transform=obj.transform;
             
             if isa(transform,'interfaces.LocTransform')
-                if isfield(transform.tinfo,'cam_pixelsize_nm')
-                    pixelsize=transform.tinfo.cam_pixelsize_nm;
+                if isfield(transform.info,'cam_pixelsize_nm')
+                    pixelsize=transform.info.cam_pixelsize_nm;
                 else
                     pixelsize=p.loc_fileinfo.cam_pixelsize_um*1000;
                 end
-                if isfield(transform.tinfo,'units')&&strcmp(transform.tinfo.units,'pixels')
+                if isfield(transform.info,'units')&&strcmp(transform.info.units,'pixels')
                     pixelsize=[1 1];
                 end
                 xnm=(maxima.x+roi(1))*pixelsize(1);
@@ -114,7 +114,7 @@ classdef PeakCombiner<interfaces.WorkflowModule
                 dato=data;
                 dato.data=maxout;
             elseif isa(transform,'interfaces.LocTransformN')
-                if isfield(transform.tinfo{1},'unit')&&strcmp(transform.tinfo{1}.unit,'pixel')
+                if isfield(transform.info{1},'unit')&&strcmp(transform.info{1}.unit,'pixel')
                 else
                     disp('calibration should be in pixel units for 4pi');
                     %set pixelsize in transform here
@@ -127,6 +127,7 @@ classdef PeakCombiner<interfaces.WorkflowModule
                 cref=cpix(indref,:);
                 Nall=sqrt(maxima.intensity);
                 Nc=sqrt(maxima.intensity(indref));
+%                 xf=cpix(indref,1);yf=cpix(indref,2);intf=maxima.intensity(indref);
                 ccombined=cref;
                 for k=2:transform.channels
                     indch=transform.getPart(k,cpix);
@@ -140,6 +141,11 @@ classdef PeakCombiner<interfaces.WorkflowModule
                     end
                     ccombined=vertcat(ccombined(uiA,:),ctarget(uiB,:),cnew);
                     Nc=vertcat(Nc(uiA),Nt(uiB),(Nc(iA)+Nt(iB)));
+                    
+%                     indchf=find(indch);
+%                     xf=vertcat(xf,cpix(indchf(uiB),1),cpix(indchf(iA),1));
+%                     yf=vertcat(yf,cpix(indchf(uiB),2),cpix(indchf(iA),2));
+%                     intf=vertcat(intf,(maxima.intensity(indchf(uiB),1)),(maxima.intensity(indchf(iA),1)));
                 end
             
                 cr=round(ccombined);
@@ -180,9 +186,9 @@ classdef PeakCombiner<interfaces.WorkflowModule
                 maxout.y=squeeze(cout(2,:));
 %                 maxout.xref=cref(:,2);
 %                 maxout.yref=cref(:,1);
-                maxout.xfound=maxima.x;
-                maxout.yfound=maxima.y;
-                maxout.intensityfound=maxima.intensity;
+%                 maxout.xfound=maxima.x;
+%                 maxout.yfound=maxima.y;
+%                 maxout.intensityfound=maxima.intensity;
                 maxout.ID=indout(:);
                 maxout.dx=squeeze(dcout(1,:));
                 maxout.dy=squeeze(dcout(2,:));

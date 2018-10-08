@@ -33,7 +33,12 @@ classdef LocTransformN<interfaces.LocTransformN0
         end
         function tinfo=get.tinfo(obj)
             tinfo.mirror.targetmirror=obj.mirror;
+%             if isfeild(obj.info{1},'cam_pixnm')
             tinfo.separator=[obj.info{1}.xrange(end)*obj.info{1}.cam_pixnm(1) obj.info{1}.yrange(end)*obj.info{1}.cam_pixnm(end)];
+%             else
+%                 cam_pixnm=[100 100];
+%                 tinfo.separator=[obj.info{1}.xrange(end)*cam_pixnm(1) obj.info{1}.yrange(end)*cam_pixnm(end)];
+%             end
         end
     end
 end
