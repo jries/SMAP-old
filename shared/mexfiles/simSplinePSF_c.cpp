@@ -59,14 +59,14 @@ void kernel_computeDelta3D(float x_delta, float y_delta, float z_delta, float *d
 	
 	//for (i=0;i<NV_PSP;i++) dudt[i]=0;
 	
-	xc = max(xc,0);
-	xc = min(xc,xsize-1);
+	xc = fmax(xc,0);
+	xc = fmin(xc,xsize-1);
 
-	yc = max(yc,0);
-	yc = min(yc,ysize-1);
+	yc = fmax(yc,0);
+	yc = fmin(yc,ysize-1);
 
-	zc = max(zc,0);
-	zc = min(zc,zsize-1);
+	zc = fmax(zc,0);
+	zc = fmin(zc,zsize-1);
 	
 	
 
