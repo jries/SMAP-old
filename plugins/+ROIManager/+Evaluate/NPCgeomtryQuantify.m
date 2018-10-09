@@ -90,10 +90,11 @@ end
 %radial analysis
 thetan=-pi:pi/128:pi;
 [theta,rhoa]=cart2pol(xm,ym);
-histtheta11=hist(theta,thetan);
-histtheta12=hist(theta+pi,thetan+pi);
-tac=myxcorr(histtheta11,histtheta11);
-tac1=tac+myxcorr(histtheta12,histtheta12);
+histtheta=hist(theta,thetan);
+% histtheta12=hist(theta+pi,thetan+pi);
+% tac=myxcorr(histtheta11,histtheta11);
+% tac1=tac+myxcorr(histtheta12,histtheta12);
+tac1=xcorrangle(histtheta);
    ax1=obj.setoutput('corrtheta');
    plot(ax1,thetan-thetan(1),tac1);
 
