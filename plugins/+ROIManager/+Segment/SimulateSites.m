@@ -234,17 +234,21 @@ pard.t6.object=struct('String','Number of sites','Style','text');
 pard.t6.position=[8,1];
 pard.t6.Width=1.5;
 
-pard.randomrot.object=struct('String','Random rotation','Style','checkbox');
-pard.randomrot.Width=1;
+pard.randomrot.object=struct('String','Random rot theta (deg):','Style','checkbox');
+pard.randomrot.Width=1.75;
 pard.randomrot.position=[7,1];
+
+pard.randomrotangle.object=struct('String','15','Style','edit');
+pard.randomrotangle.Width=.5;
+pard.randomrotangle.position=[7,2.5];
 
 pard.randomxy.object=struct('String','Random position (nm):','Style','checkbox');
 pard.randomxy.Width=1.5;
-pard.randomxy.position=[7,2];
+pard.randomxy.position=[7,3];
 
 pard.randomxyd.object=struct('String','20','Style','edit');
 pard.randomxyd.Width=.5;
-pard.randomxyd.position=[7,3.5];
+pard.randomxyd.position=[7,4.5];
 
 pard.savez.object=struct('String','save z','Style','checkbox','Value',1);
 pard.savez.Width=1;

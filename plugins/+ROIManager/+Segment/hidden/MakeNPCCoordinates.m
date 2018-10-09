@@ -31,15 +31,19 @@ a=a/2/180*pi;
 
 r(3)=r(1);r(4)=r(2);
 a(3)=-a(1);a(4)=-a(2);
+z(1)=0;z(2)=50;z(3)=50;z(4)=0;
 
 rall=zeros(length(r),corners);
 angall=zeros(length(r),corners);
+zall=zeros(length(r),corners);
 
 dphi=0:2*pi/corners:2*pi-pi/1000;
 
 for k=1:length(r)
     rall(k,:)=r(k);
     angall(k,:)=a(k)+dphi;
+    zall(k,:)=z(k);
 end
 [l.x,l.y]=pol2cart(angall(:),rall(:));
+l.z=zall(:);
 l.channel=ones(size(l.x));

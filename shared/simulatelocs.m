@@ -180,6 +180,13 @@ for k=numberofsites:-1:1
     if p.randomrot
         angle=2*pi*rand(1);
         [locsh.x,locsh.y]=rotcoord(locsh.x,locsh.y,angle);
+        if isfield(locsh,'z')
+            dtheta=p.randomrotangle/360*2*pi;
+            thetas=dtheta*rand(1);
+            [locsh.x,locsh.z]=rotcoord(locsh.x,locsh.z,thetas);
+            angle=2*pi*rand(1);
+            [locsh.x,locsh.y]=rotcoord(locsh.x,locsh.y,angle);
+        end
     else
         angle=0;
     end
