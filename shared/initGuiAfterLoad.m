@@ -70,7 +70,12 @@ if ~isempty(strfind(obj.getPar('mainfile'),'_sml'))
    tg.SelectedTab=tg.Children(3);
 end
 
-
+se=obj.locData.SE;
+if isempty(se.files) %later: test if sites were added already, otherwise run to updata
+    for k=1:length(obj.locData.files.file)
+        se.addFile(obj.locData.files.file(k).name,obj.locData.files.file(k).number,obj.locData.files.file(k).info)
+    end
+end
 
 obj.status('loading done');drawnow;
 end
