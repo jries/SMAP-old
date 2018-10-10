@@ -10,6 +10,6 @@ aca=aca/length(sites);
 tn=sites(1).evaluation.NPCgeomtryQuantify.thetan;
 figure(88);hold on;
 % norm=length(tn)-(1:length(tn));
-plot(tn(2:end)*50,aca(2:end));
+plot(tn(2:end)*50,aca(2:end)/5);
 xlabel('distance (theta*r) (nm)')
 ylabel('auto correlation')

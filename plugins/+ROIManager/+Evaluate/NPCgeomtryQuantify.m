@@ -70,13 +70,18 @@ if ~isempty(locs.znm) % evaluate z distance
     % hz=hz-mean(hz);
     ac=myxcorr(hz,hz);
     % if obj.display
+    if obj.display
     ax1=obj.setoutput('profile');
-
-    fitresult=createFit(z, hz,ax1);
+       fitresult=createFit(z, hz,ax1);
     title(ax1,fitresult.d)
-    % plot(ax1,z,hz)
-    ax2=obj.setoutput('correlation');
+     ax2=obj.setoutput('correlation');
     plot(ax2,z,ac)
+    else
+    fitresult=createFit(z, hz,[]);
+    end
+    
+    % plot(ax1,z,hz)
+  
 
 
     % end
@@ -94,9 +99,11 @@ histtheta=hist(theta,thetan);
 % histtheta12=hist(theta+pi,thetan+pi);
 % tac=myxcorr(histtheta11,histtheta11);
 % tac1=tac+myxcorr(histtheta12,histtheta12);
-tac1=xcorrangle(histtheta);
+tac1=xcorrangle(histtheta-mean(histtheta));
+if obj.display
    ax1=obj.setoutput('corrtheta');
    plot(ax1,thetan-thetan(1),tac1);
+end
 
 out.actheta=tac1;
 out.thetan=thetan-thetan(1);
@@ -119,7 +126,7 @@ opts.StartPoint = sp;
 fstart=ft(sp(1),sp(2),sp(3),sp(4),sp(5),xData);
 % Fit model to data.
 [fitresult, gof] = fit( xData, yData, ft, opts );
-
+if ~isempty(ax)
 axes(ax)
 h = plot(xData,fitresult(xData),'r', xData, yData,'b-',xData,fstart,'g');
 
@@ -129,5 +136,6 @@ h = plot(xData,fitresult(xData),'r', xData, yData,'b-',xData,fstart,'g');
 xlabel z
 ylabel hz
 grid on
+end
 
 end
