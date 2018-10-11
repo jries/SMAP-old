@@ -14,9 +14,28 @@ finind=strfind(fin,'/');finind=[finind];
 fileref=(fref(frefind(end)+1:end));
 filetar=(ftar(ftarind(end)+1:end));
 filein=(fin(finind(end)+1:end));
+fileout=replacename(filein,fileref,filetar);
 
-if ~strcmp(fileref,filetar)
+
+% look at path
+pathout=fin(1:finind(end));
+    for k=0:min([length(frefind) length(ftarind) length(finind)])-2
+        pr=fref(frefind(end-k-1)+1:frefind(end-k)-1);
+        pt=ftar(ftarind(end-k-1)+1:ftarind(end-k)-1);
+        if ~strcmp(pr,pt)
+            ph=pathout(finind(end-k-1)+1:finind(end-k)-1);
+            pht=replacename(ph,pr,pt);
+            pathout=[pathout(1:finind(end-k-1)) pht pathout(finind(end-k):end)];
+%             pathout(finind(end-k-1)+1:finind(end-k)-1)=pt;
+        end
+    end
+fout=[pathout fileout];
+% fout=pathout;
+end
+
+function fileout=replacename(filein,fileref,filetar)
     fileout=filein;
+if ~strcmp(fileref,filetar)
     % search for _ and .
     frr=['_' strrep(fileref,'.','_') '_'];frt=['_' strrep(filetar,'.','_') '_'];fri=['_' strrep(filein,'.','_') '_'];
     frri=strfind(frr,'_');frti=strfind(frt,'_');frii=strfind(fri,'_');
@@ -28,18 +47,5 @@ if ~strcmp(fileref,filetar)
 %             fileout(frii(end-k-1):frii(end-k)-2)=pt;
         end
     end
-    
 end
-
-% look at path
-pathout=fin(1:finind(end));
-    for k=0:min([length(frefind) length(ftarind) length(finind)])-2
-        pr=fref(frefind(end-k-1)+1:frefind(end-k)-1);
-        pt=ftar(ftarind(end-k-1)+1:ftarind(end-k)-1);
-        if ~strcmp(pr,pt)
-            pathout=[pathout(1:finind(end-k-1)) pt pathout(finind(end-k):end)];
-%             pathout(finind(end-k-1)+1:finind(end-k)-1)=pt;
-        end
-    end
-fout=[pathout fileout];
-% fout=pathout;
+end

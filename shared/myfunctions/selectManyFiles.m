@@ -23,8 +23,59 @@ classdef selectManyFiles<handle
             uicontrol('Style','pushbutton','String','add','Callback',@obj.addb_callback,'Parent',obj.handle,'Position',[700 270 100 30])
             uicontrol('Style','pushbutton','String','add dir','Callback',@obj.adddirb_callback,'Parent',obj.handle,'Position',[800 270 100 30])
             uicontrol('Style','pushbutton','String','remove','Callback',@obj.removeb_callback,'Parent',obj.handle,'Position',[750 230 100 30])
+            obj.guihandles.ch2check=uicontrol('Style','checkbox','String','Ch2 in 2nd file','Callback',@obj.ch2check_callback,'Parent',obj.handle,'Position',[700 185 200 30]);
+            obj.guihandles.selectch2=uicontrol('Style','pushbutton','String','select Ch2','Callback',@obj.selectch2_callback,'Parent',obj.handle,'Position',[700 160 100 30],'Visible','off');
+            obj.guihandles.findall=uicontrol('Style','pushbutton','String','find all','Callback',@obj.findall_callback,'Parent',obj.handle,'Position',[800 160 100 30],'Visible','off')       ;      
+             
             uicontrol('Style','pushbutton','String','Done','Callback',@obj.done_callback,'Parent',obj.handle,'Position',[750 10 100 50])
             obj.guihandles.freepos=uicontrol('Style','text','String','','Position',[700 60 200 30]);
+        end
+        function ch2check_callback(obj,a,b)
+            if a.Value
+                obj.guihandles.selectch2.Visible='on';
+                obj.guihandles.findall.Visible='on';
+            else
+                obj.guihandles.selectch2.Visible='off';
+                obj.guihandles.findall.Visible='off';
+            end
+        end
+        function selectch2_callback(obj,a,b)
+            filenumber=obj.guihandles.filelist.Value;
+            filech1=obj.guihandles.filelist.String{filenumber};
+            ind=strfind(filech1,';');
+            if ~isempty(ind)
+                filech1=filech1(1:ind-1);
+            end
+            [path1,file1,ext1]=fileparts(filech1);
+            [f,p]=uigetfile(['*' ext1],'select Ch2 for selected file',filech1)
+            if ~f
+                return
+            end
+            filech2=[p  f];
+            filecombined=[filech1 ';' filech2];
+            obj.guihandles.filelist.String{filenumber}=filecombined;
+        end
+        function findall_callback(obj,a,b)
+            filelist=obj.guihandles.filelist.String; 
+            assigned=find(contains(filelist,';'));
+            if isempty(assigned)
+                warndlg('please select second channel file for at least one file');
+                return
+            end
+            filenumber=assigned(1);
+            filenames=filelist{filenumber};
+            ind1= strfind(filenames,';');
+            f1=filenames(1:ind1-1);f2=filenames(ind1+1:end);
+            for k=1:length(filelist)
+                fileh=filelist{k};
+                ind=strfind(fileh,';');
+                if ~isempty(ind)
+                    fileh=fileh(1:ind-1);
+                end
+                fileh2=filenamereplace(fileh,f1,f2);
+                obj.guihandles.filelist.String{k}=[fileh ';' fileh2];
+            end
+
         end
         function done_callback(obj,a,b)
             obj.filelist=obj.guihandles.filelist.String;
@@ -203,6 +254,7 @@ classdef selectManyFiles<handle
             obj.processtiff(tiffile);
             delete(wf)
         end
+
         
     end
 
