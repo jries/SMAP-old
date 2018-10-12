@@ -30,6 +30,10 @@ classdef IntLoc2posN<interfaces.WorkflowModule
             indref=transform.getPart(1,horzcat(x,y));
             indtarget=transform.getPart(2,horzcat(x,y));
              obj.locs.xA=x;obj.locs.yA=y;
+             %XXXXXXXXXXXX
+             %if in two separate files: only consider correct file. Now:
+             %only load reference file. Make sure that then target
+             %positions are not put back.
             if p.transformtotarget    
                     pos=transform.transformToTarget(2,horzcat(x,y));
                     obj.locs.xA(indref)=pos(indref,1);obj.locs.yA(indref)=pos(indref,2);

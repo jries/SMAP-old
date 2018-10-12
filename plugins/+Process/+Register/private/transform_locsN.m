@@ -96,6 +96,11 @@ switch p.targetpos.selection
     otherwise
         dx=0;
         dy=0;
+        fileref=locData.files.file(locref.filenumber(1));filetar=locData.files.file(loctarget.filenumber(1));
+        xrangecamr=[0 fileref.info.roi(3)+fileref.info.roi(1)];
+        yrangecamr=[0 fileref.info.roi(4)+fileref.info.roi(2)];
+        xrangecamt=[0 filetar.info.roi(3)+filetar.info.roi(1)];
+        yrangecamt=[0 filetar.info.roi(4)+filetar.info.roi(2)];
 %         indtarget=true(size(loctarget.xnm));
 end
 

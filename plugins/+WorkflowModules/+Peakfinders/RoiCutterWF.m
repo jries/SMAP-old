@@ -50,11 +50,16 @@ classdef RoiCutterWF<interfaces.WorkflowModule
             cutoutimages=zeros(kernelSize,kernelSize,length(maxima.x),'single');
             ind=0;
             goodind=~(maxima.y<=dn|maxima.y>sim(1)-dn|maxima.x<=dn|maxima.x>sim(2)-dn);
+            outside=(maxima.y<=1|maxima.y>sim(1)-1|maxima.x<=1|maxima.x>sim(2)-1);
 
             for k=1:length(maxima.x)
                  ind=ind+1;
                 if goodind(k)
                     cutoutimages(:,:,ind)=image(maxima.y(k)-dn:maxima.y(k)+dn,maxima.x(k)-dn:maxima.x(k)+dn); %coordinates exchanged.
+                elseif outside(k)
+                    maxima.y(k)=max(dn+1,min(maxima.y(k),sim(1)-dn));
+                    maxima.x(k)=max(dn+1,min(maxima.x(k),sim(2)-dn));  
+                    cutoutimages(:,:,ind)=zeros(2*dn+1,'single');
                 else
                     maxima.y(k)=max(dn+1,min(maxima.y(k),sim(1)-dn));
                     maxima.x(k)=max(dn+1,min(maxima.x(k),sim(2)-dn));
