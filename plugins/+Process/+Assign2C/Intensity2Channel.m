@@ -12,8 +12,9 @@ classdef Intensity2Channel<interfaces.DialogProcessor
                 p.assignfield1.selection='fit_n2';
                 p.assignfield2.selection='fit_n1';
             end
-            ll=obj.locData.getloc({'xnm','inungrouped'},'Position','roi','layer',find(obj.getPar('sr_layerson')),'removeFilter','channel');
-            loc=get_intensity2ch(obj.locData.loc,p,ll.inungrouped);
+            [ll,ind]=obj.locData.getloc({'xnm','inungrouped'},'Position','roi','layer',find(obj.getPar('sr_layerson')),'removeFilter','channel','grouping','ungrouped');
+%             loc=get_intensity2ch(obj.locData.loc,p,ll.inungrouped);
+            loc=get_intensity2ch(obj.locData.loc,p,ind);
             if p.combineunassigned
                 loc.channel(loc.channel==3)=1;
                 loc.channel(loc.channel==4)=2;
@@ -107,6 +108,10 @@ pard.assignfield1.object=struct('Style','popupmenu','String','n1|n2');
 pard.assignfield1.position=[5,1];
 pard.assignfield2.object=struct('Style','popupmenu','String','n1|n2');
 pard.assignfield2.position=[5,2];
+
+pard.logscale.object=struct('Style','checkbox','String','log scale','Value',1);
+pard.logscale.position=[5,4];
+
 
 
 pard.assignfield1.object.TooltipString='choose which field to use for splitting';

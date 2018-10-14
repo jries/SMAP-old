@@ -166,9 +166,10 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
 %             obj.status('draw')
             lp=obj.locData;
 %             drawer=Drawer(obj.locData);
+            layerson=obj.getPar('sr_layerson');
             for k=1:obj.numberOfLayers
                 pk=obj.getLayerParameters(k,drawerSMAP);
-                if pk.layercheck
+                if layerson(k)
                     lp.layer(k).images.finalImages=drawerSMAP(lp.layer(k).images.srimage,pk); 
 %                     drawer.setParameters(pk);
 %                     lp.layer(k).images.finalImages=drawer.drawImage(lp.layer(k).images.srimage);            
@@ -178,6 +179,12 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
 %             obj.status('draw done')
         end
         function render_callback(obj,object,eventdata)
+            hfig=obj.getPar('sr_figurehandle');
+            if ~isvalid(hfig)
+                f=obj.getPar('sr_figurenumber');
+                figure(f);
+                obj.setPar('sr_figurenumber',f);
+            end
             hfig=obj.getPar('sr_figurehandle');
              figure(hfig);
             obj.render_notify;
@@ -200,11 +207,11 @@ classdef GuiRender< interfaces.GuiModuleInterface & interfaces.LocDataInterface
             obj.status('render') 
             drawnow
             end
-            
+            layeron=obj.getPar('sr_layerson');
             for k=1:obj.numberOfLayers
                 pk=obj.getLayerParameters(k,renderSMAP);
 %                 pk=obj.getLayerParameters(k,renderer.inputParameters);
-                if pk.layercheck
+                if layeron(k)
 %                     indin=[];
                     if isfast
                         pk.groupcheck=false;

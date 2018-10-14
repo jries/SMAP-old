@@ -46,8 +46,8 @@ xf=double(loc.xnm);
 yf=double(loc.ynm);
 switch p.datapart.selection
     case {'all (T->R)','all'}
-        asf
-        [x,y,z]=transform.transformCoordinatesInv(xf(indf),yf(indf),zf(indfz));
+        pos=transform.transformToReference(2,horzcat(xf(indf),yf(indf),zf(indfz)),'nm');
+%         [x,y,z]=transform.transformCoordinatesInv(xf(indf),yf(indf),zf(indfz));
         indt=true(size(xf));
     case 'all (R->T)'
         adsf

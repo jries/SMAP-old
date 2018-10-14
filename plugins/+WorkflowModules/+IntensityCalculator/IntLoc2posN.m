@@ -18,11 +18,15 @@ classdef IntLoc2posN<interfaces.WorkflowModule
             global intLoc2pos_ind2 intLoc2pos_locframes;
             intLoc2pos_ind2=1;
             obj.locData.sort('frame');
+            % filter again?
             p=obj.getAllParameters;
           
             transform=loadtransformation(obj,p.Tfile);
-            obj.locs=obj.locData.getloc({'frame','xnm','ynm','znm','PSFxnm','phot','bg','groupindex','numberInGroup'});
-            cpix=obj.locData.files.file(1).info.cam_pixelsize_um*1000;
+            obj.locs=obj.locData.getloc({'frame','xnm','ynm','znm','PSFxnm','phot','bg','groupindex','numberInGroup','filenumber'});
+            %XXXXX
+%             obj.locs=obj.locData.getloc({'frame','xnm','ynm','znm','PSFxnm','phot','bg','groupindex','numberInGroup','filenumber'},'layer',1,'grouping','ungrouped');
+            %XXXXXX
+            cpix=obj.locData.files.file(obj.locs.filenumber(1)).info.cam_pixelsize_um*1000;
 
             x=double(obj.locs.xnm)/cpix(1);  %in pixels
             y=double(obj.locs.ynm)/cpix(end);
