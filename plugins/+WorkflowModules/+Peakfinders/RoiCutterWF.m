@@ -2,6 +2,7 @@ classdef RoiCutterWF<interfaces.WorkflowModule
     properties
         loc_ROIsize
         preview
+        disppreview
     end
     methods
         function obj=RoiCutterWF(varargin)
@@ -23,6 +24,7 @@ classdef RoiCutterWF<interfaces.WorkflowModule
             obj.loc_ROIsize=p.loc_ROIsize;
             obj.preview=obj.getPar('loc_preview');
             obj.setPar('loc_ROIsize',p.loc_ROIsize);
+            obj.disppreview=false;
            
         end
         function outputdat=run(obj,data,p)
@@ -31,6 +33,11 @@ classdef RoiCutterWF<interfaces.WorkflowModule
             if ~isempty(image)     
             maxima=data{2}.data;%get;
             if isempty(maxima.x)
+                if obj.preview
+                    obj.status('no localizations found');drawnow
+                    error ('no localizations found')
+
+                end
                 return;
             end
             
@@ -85,6 +92,7 @@ classdef RoiCutterWF<interfaces.WorkflowModule
             if obj.preview 
 %                 figure(obj.globpar.parameters.outputfig)
 %                 ax=gca;
+                obj.disppreview=true;
                 outputfig=obj.getPar('loc_outputfig');
                 if ~isvalid(outputfig)
                     outputfig=figure(209);
@@ -128,6 +136,11 @@ classdef RoiCutterWF<interfaces.WorkflowModule
             
             end 
             else
+                if obj.preview && ~obj.disppreview
+%                     disp('no localizations found')
+                    obj.status('image could not be loaded');drawnow
+                    error('no image loaded')
+                end
 %                 obj.output(data{1});
                 outputdat=data{1};
             end

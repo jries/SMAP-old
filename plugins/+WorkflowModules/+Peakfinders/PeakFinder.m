@@ -3,6 +3,7 @@ classdef PeakFinder<interfaces.WorkflowModule
         probability=0.05;
         dynamicfactor=1;
         absolutecutoff=1;
+%         preview
     end
     methods
         function obj=PeakFinder(varargin)
@@ -21,6 +22,7 @@ classdef PeakFinder<interfaces.WorkflowModule
         end
         function prerun(obj,p)
             cutoffvalue_callback(0,0,obj)
+%             obj.preview=obj.getPar('loc_preview');
         end
         function dato=run(obj,data,p)
             image=data.data;%get;
@@ -48,6 +50,7 @@ classdef PeakFinder<interfaces.WorkflowModule
             dato=data;         
             dato.data=(maxout); 
             else
+
                 dato=data;
                 dato.data=[];
             end

@@ -33,6 +33,7 @@ classdef PlotLocsPreview<interfaces.WorkflowModule;
                         plotrect(ax,pos,col);
 %                         plotrect(ax,pos,{'Color',col,'LineWidth',3});
                     end
+      
                 end
             end 
 

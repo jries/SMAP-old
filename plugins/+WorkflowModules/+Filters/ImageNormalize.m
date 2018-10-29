@@ -51,6 +51,9 @@ classdef ImageNormalize<interfaces.WorkflowModule
     %             imagesc(poissonNormalize(image)-poissonNormalize(bg))
     %             drawnow
             else 
+%                 if obj.preview &&~dat{1}.eof
+%                     error('image empty')
+%                 end
                 dato=data{1};
 %                 obj.output(data{1});
             end

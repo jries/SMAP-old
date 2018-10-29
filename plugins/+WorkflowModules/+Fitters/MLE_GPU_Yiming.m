@@ -16,17 +16,17 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
             obj.fitpar=getfitpar(obj);
             % check if x,y, then initialize range etc
             obj.fitpar.fitfunction = @obj.nofound;
-            disp('checking cuda fit')
-            reporttext='GPU fit function did not run. Possibly the wrong CUDA version is installed.';
+%             disp('checking cuda fit')
+%             reporttext='GPU fit function did not run. Possibly the wrong CUDA version is installed.';
             img=zeros(11,'single');img(5,5)=1;
             
-            try
+%             try
 %                 fitp=callYimingFitter(img,single(1),single(10),single(2),single(0),0);
                 fitp=mleFit_LM(img,1);
                 obj.fitpar.fitfunction=@mleFit_LM;
 %                 obj.fitpar.fitfunction=@callYimingFitter;
-                reporttext='mleFit_LM works';
-            end
+%                 reporttext='mleFit_LM works';
+%             end
             roisize=obj.getPar('loc_ROIsize');
             obj.numberInBlock=round(obj.fitpar.roisperfit*100/roisize^2);
             p=obj.getAllParameters;
@@ -60,7 +60,7 @@ classdef MLE_GPU_Yiming<interfaces.WorkflowFitter
                 
             end   
             obj.setPar('loc_iterations',p.iterations);
-            disp(reporttext)
+%             disp(reporttext)
         end
         function nofound(obj,varargin)
             disp('fit function not working. Wrong Cuda version?')

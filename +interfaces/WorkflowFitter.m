@@ -79,7 +79,14 @@ classdef WorkflowFitter<interfaces.WorkflowModule
             global fitterimagestack fitterstackinfo fitterbgstack 
             
             if isempty(fitterstackinfo)
+                if isempty(data.data)
+%                     obj.status('error: image empty');drawnow
+%                     error ('image empty')
+                    out=[];
+                    return
+                else
                 initstacks(obj,data.data.info)
+                end
             end
             
             persistent reporttimer
