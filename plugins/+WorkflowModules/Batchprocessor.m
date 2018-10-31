@@ -170,9 +170,9 @@ classdef Batchprocessor<interfaces.GuiModuleInterface&interfaces.LocDataInterfac
                  obj.guihandles.status.String=status;drawnow;
                  disp(status);
 
-                if ~isempty(strfind(filen,'.tif'))
+                if contains(filen,'.tif') || contains(filen,'.dcimg')
                     obj.processtiff(filen);
-                elseif ~isempty(strfind(filen,'.mat')) 
+                elseif contains(filen,'.mat') 
                     if p.useforall
                         obj.processtiffromWF(filen);
                     else
