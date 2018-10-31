@@ -51,7 +51,7 @@ if ~roi2int_fitG_parameters.fitonbg%nargin<7||isempty(bgroi)
         Xmat=horzcat(gauss(:), gauss(:)*0+1);
         roih=roi(mp(1)-dn:mp(1)+dn,mp(2)-dn:mp(2)+dn,k);
         p(k,:)=Xmat\roih(:);
-        if %p(k,1)>2500 %any(roih(:))%p(k,1)>2500~
+        if 0 %p(k,1)>2500 %any(roih(:))%p(k,1)>2500~
             p(k,:)
             figure(67)
             subplot(2,2,1)
