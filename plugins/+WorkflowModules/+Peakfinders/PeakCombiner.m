@@ -38,12 +38,12 @@ classdef PeakCombiner<interfaces.WorkflowModule
             transform=obj.transform;
             
             if isa(transform,'interfaces.LocTransform')
-                if isfield(transform.info,'cam_pixelsize_nm')
-                    pixelsize=transform.info.cam_pixelsize_nm;
+                if isfield(transform.tinfo,'cam_pixelsize_nm')
+                    pixelsize=transform.tinfo.cam_pixelsize_nm;
                 else
                     pixelsize=p.loc_fileinfo.cam_pixelsize_um*1000;
                 end
-                if isfield(transform.info,'units')&&strcmp(transform.info.units,'pixels')
+                if isfield(transform.tinfo,'units')&&strcmp(transform.tinfo.units,'pixels')
                     pixelsize=[1 1];
                 end
                 xnm=(maxima.x+roi(1))*pixelsize(1);
