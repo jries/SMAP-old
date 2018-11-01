@@ -21,7 +21,7 @@ classdef MLE_global_spline<interfaces.WorkflowFitter
                     fitterpath=[fileparts(obj.getPar('maindirectory')) filesep 'ries-private' filesep 'PSF4Pi'];
                     addpath(fitterpath)
                     obj.fitpar.link=obj.fitpar.link([2 1 4 5 3 6]);
-                    obj.fitpar.fitfunction=@CPUmleFit_LM_MultiChannel_4pi;
+                    obj.fitpar.fitfunction=@mleFit_LM_4Pi;
                 otherwise
                     obj.fitpar.fitfunction=@mleFit_LM_global; %later: include single channel, decide here
             end
