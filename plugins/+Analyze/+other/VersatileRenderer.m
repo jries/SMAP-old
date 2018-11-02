@@ -61,6 +61,8 @@ classdef VersatileRenderer<interfaces.DialogProcessor
             
             img=TotalRender(lochere,pall,{'xnm','ynm'});
             imagesc(ax, [p.min1 p.max1],[p.min2 p.max2],img.image)
+            xlabel(ax,p.assignfield1.selection)
+            ylabel(ax,p.assignfield2.selection)
             axis(ax,'xy')
         end
         function pard=guidef(obj)

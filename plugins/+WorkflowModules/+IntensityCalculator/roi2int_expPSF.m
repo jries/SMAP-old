@@ -38,7 +38,11 @@ classdef roi2int_expPSF<interfaces.GuiModuleInterface
             end
             obj.spline=load(f);
 %             sppos=min(obj.guihandles.splinefields.Value,length(obj.spline.SXY));
-            switch obj.getPar('intensity_channel')
+            ic=obj.getPar('intensity_channel');
+            if isempty(ic)
+                return;
+            end
+            switch ic
                 case 'r' 
                     sppos=1;
                 case 't'
@@ -61,6 +65,9 @@ classdef roi2int_expPSF<interfaces.GuiModuleInterface
             end
             obj.p=obj.getGuiParameters;
             obj.load_spline;
+%             dn=round((obj.p.roisize_fit-1)/2);
+%             zmp=obj.spline.SXY(1).cspline.z0;
+%             norm=evalSpline(obj.p.roisize_fit,obj.splinecoeff,1,0,[dn dn zmp]);
 %             sppos=obj.guihandles.splinefields.Value;
 %             transform=obj.spline.transformation;
 %             if isa(transform,'interfaces.LocTransformN')
@@ -127,6 +134,7 @@ dz=obj.spline.SXY(1).cspline.dz;
         z=loc.z/dz;
     end
     cor=horzcat(loc.dy+dn,loc.dx+dn,z+zmp);
+   
     template = evalSpline(obj.p.roisize_fit,obj.splinecoeff,1,0,cor);
     
 for k=1:sim(3)

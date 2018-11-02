@@ -37,17 +37,18 @@ classdef Get2CIntImages2cam<interfaces.DialogProcessor
             file=obj.locData.files.file;
             wf.module('IntLoc2posN').filestruc=file;
             wf.module('IntLoc2posN').setGuiParameters(p);
-            
-            p.loc_ROIsize=11;
-            p.loc.fitgrouped=true;
-%             wf.module('RoiCutterWF_groupExt').setGuiParameters(p);
-            wf.module('RoiCutterWF').setGuiParameters(p);
+          
 
             pe=obj.children.evaluate.getGuiParameters(true);
             wf.module('EvaluateIntensity_s').setGuiParameters(pe,true);
             obj.setPar('loc_preview',false);
 
-
+            rsfit=wf.module('EvaluateIntensity_s').children.panel_3.getSingleGuiParameter('roisize_fit');
+            p.loc_ROIsize=rsfit+2;
+            p.loc.fitgrouped=true;
+%             wf.module('RoiCutterWF_groupExt').setGuiParameters(p);
+            wf.module('RoiCutterWF').setGuiParameters(p);
+            
             
             % now first to ref, then do target. Later: if files are same:
             % do at the same time to save time...
