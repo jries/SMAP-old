@@ -300,7 +300,7 @@ classdef GuiParameterInterface<interfaces.ParameterInterface
                         elseif abs(v)>100
                             fs='%6.0f';
                         else
-                            fs=3;
+                            fs=5;
                         end
                         strg=num2str(v,fs);
                         if length(v)>1
