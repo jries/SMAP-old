@@ -1,5 +1,7 @@
 classdef boundaryFinder<interfaces.SEEvaluationProcessor
     % This plug-in depends on the BALM_fibril_growth.
+    % Green line is the original boundary
+    % White line is the refined boundary
 
     properties
         boundary
@@ -21,7 +23,7 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
             % extend the kimo on x to compensate the sliding window
             oriSize = size(kimo);
             expand = zeros(oriSize(1),gridRange*slideStep);
-            kimo = [kimo, expand];
+%             kimo = [kimo, expand];
 
             % Binarize the kimograph
             % X means time, Y means space
@@ -43,29 +45,64 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
             
             %% Get a rough boundary based on density
             % Get cordinates of the kimograph
+                        
             Size = size(kimo);
-            [kimoFZx, kimoFZy]=find(kimo);
-
-            KDM = getKernelMatrix(Size,[kimoFZx, kimoFZy]);
+            kimo = [kimo kimo(:,Size(2):-1:1)];                     % generate the mirrored kimograph
+%             kimo = [kimo(Size(2):-1:1,:); kimo];
+%             kimo(1:Size(1),Size(2)+1:end) = 0;
+%             figure; imagesc(kimo)
             
-            [~,ct] = contour(KDM, 50);
+            bwKimo = kimo>0;
+            h = fspecial('gaussian', inp.std*2,inp.std);
+            KDM = filter2(h, bwKimo);
+%             allVal = KDM(:);
+%             allVal(allVal==0)=[];
+%             maxVal = prctile(allVal,80);
+%             KDM(KDM>maxVal)=maxVal;
+            KDM = KDM(:,end:-1:1)';
+%             KDM = getKernelMatrix(Size*2,[kimoFZx, kimoFZy]);
             
-            tl = ct.LevelList(15);
-            %figure(999)
-            %cla
-            %imagesc(kimo)
             
-            %figure(1000)
-            %cla
-            %contour(KDM, 200);
-            %hold on
+%             figure; imagesc(KDM)                                  % show the gaussian-filtered kimograph
+            tempPlot = figure('Name','Temp');
+            ax1 = axes(tempPlot);
+            
+            [~,ct] = contour(ax1, KDM, 100);
+            
+            tl = ct.LevelList(inp.contourLevel);
+            close(tempPlot)
+%             tl2 = ct.LevelList(27);
+%             tl3 = ct.LevelList(18);
+%             figure(999)
+%             cla
+%             imagesc(kimo)
+%             
+%             figure(1000)
+%             cla
+%             contour(KDM, 200);
+%             hold on
             [theLevel,~] = contour(KDM, [tl tl],'LineWidth',2);
+%             [theLevel2,~] = contour(KDM, [tl2 tl2],'LineWidth',2);
+%             [theLevel3,~] = contour(KDM, [tl3 tl3],'LineWidth',2);
             rBoundary = round(theLevel)';
+            rBoundary(rBoundary(:,2)>Size(2),:)=[];
+%             rBoundary(rBoundary(:,1)<=Size(1),:)=[];
+%             rBoundary(:,1)=rBoundary(:,1)-Size(1)+1;
+%             rBoundary2 = round(theLevel2)';
+%             rBoundary3 = round(theLevel3)';
+%             ulimX = prctile(rBoundary(:,2), 99);
+%             rmRBoundary2 = rBoundary2(:,2) <= ulimX;
+%             rBoundary2(rmRBoundary2,:)=[];
+%             rBoundary = [rBoundary;rBoundary2];
+%             ulimX = prctile(rBoundary(:,2), 99);
+%             rmRBoundary3 = rBoundary3(:,2) <= ulimX;
+%             rBoundary3(rmRBoundary3,:)=[];
+%             rBoundary = [rBoundary;rBoundary3];
             %scatter(kimoRefx, kimoRefy)
             %hold off
             boundary = zeros(Size(1),1);
             CxFParent = 1:Size(1);
-            for i=CxFParent
+            for i=CxFParent                                         % for each x
                 idx = rBoundary(:,1)==i;
                 if sum(idx)>0
                     boundary(i) = max(rBoundary(idx,2));
@@ -73,6 +110,8 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
             end
             CyFParent = cummax(boundary);
             CxFParent = CxFParent';
+%             figure(893); plot(CxFParent, CyFParent) 
+%             figure(894); plot(rBoundary(:,1), rBoundary(:,2),' o') 
             %% refinement of the boundary
             Mref = calMeasurement(CxFParent,CyFParent,kimoNZx,kimoNZy,Size);
             MrefO = Mref;
@@ -174,7 +213,7 @@ classdef boundaryFinder<interfaces.SEEvaluationProcessor
             out.growthTime = calGrowthTime(out.boundary);
             out.avgRate = calAvgRate(out.boundary);
             
-            
+            % Visualize the boundary
             h=obj.setoutput('kimograph');
             imagesc(h,(fig))
             hold(h,'on')
@@ -264,9 +303,28 @@ pard.minWidth.object = struct('Style','edit','String',2);
 pard.minWidth.position=[6,3];
 pard.minWidth.TooltipString = 'minimum width of a step (arbitrary unit)';
 
+pard.t_std.object = struct('Style','text','String','Std.');
+pard.t_std.position=[7,1];
+pard.t_std.Width = 0.5;
+
+pard.std.object = struct('Style','edit','String',100);
+pard.std.position=[7,1.5];
+pard.std.TooltipString = 'minimum width of a step (arbitrary unit)';
+pard.std.Width = 0.5;
+
+pard.t_contourLevel.object = struct('Style','text','String','Level');
+pard.t_contourLevel.position=[7,2];
+pard.t_contourLevel.Width = 0.5;
+
+pard.contourLevel.object = struct('Style','edit','String',90);
+pard.contourLevel.position=[7,2.5];
+pard.contourLevel.TooltipString = 'The level (out of 100) chosen as the outline of the rough boundary';
+pard.contourLevel.Width = 0.5;
+
 % pard.dxt.Width=3;
 pard.inputParameters={'numberOfLayers','sr_layerson','se_cellfov','se_sitefov','se_siteroi'};
 pard.plugininfo.type='ROI_Evaluate';
+
 end
 
 function M = calMeasurement(x,y,qx,qy,Size)
